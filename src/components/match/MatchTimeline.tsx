@@ -96,7 +96,7 @@ const TYPE_LABELS: Record<string, string> = {
   // Hockey. Sin estas dos entradas el fallback prettifica el tipo y escribe
   // "Penalty Corner" sobre una pantalla en castellano.
   penalty_corner: 'Corner corto',
-  penalty_stroke: 'Penal stroke',
+  penalty_stroke: 'Penal',
   free_throw: 'Tiro libre',
   two_pointer: 'Doble',
   three_pointer: 'Triple',
@@ -226,6 +226,8 @@ function sortTimelineEvents(events: TimelineEvent[]) {
 function cleanDescription(desc: string, type: string): string {
   let cleaned = String(desc || '')
     .replace(/\[palos:(ok|miss)\]/gi, '')
+    // Desenlace de un corner corto / penal stroke: el rotulo ya viene al lado.
+    .replace(/\[res:[a-z0-9_-]+\]\s*/gi, '')
     .replace(/\[temporal\]\s*/gi, '')
     .replace(/^Dist:\s*/i, '')
     .trim();

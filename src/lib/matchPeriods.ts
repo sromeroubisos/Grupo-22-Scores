@@ -138,6 +138,27 @@ function secondHalfOpener(sequence: readonly string[]) {
   return sequence[Math.floor(sequence.length / 2)] ?? DEFAULT_PERIOD_SEQUENCE[1];
 }
 
+/**
+ * Lo que el operador puede elegir a mano en el reloj: los periodos jugables
+ * del deporte con los estados intercalados donde ocurren (previa, entretiempo
+ * a la mitad, suplementario, final). Rugby y futbol siguen dando exactamente
+ * PRE/1T/HT/2T/ET/FT; el hockey intercala el entretiempo entre Q2 y Q3.
+ *
+ * Existe porque los dos selectores del match center tenian la lista escrita a
+ * mano con vocabulario de mitades: en un partido de hockey se veia el cuarto
+ * actual pero no se podia elegir ningun otro.
+ */
+export function getClockPeriodOptions(sportId?: string | null): string[] {
+  const sequence = getPeriodSequence(sportId);
+  const half = Math.floor(sequence.length / 2);
+  return ['PRE', ...sequence.slice(0, half), 'HT', ...sequence.slice(half), 'ET', 'FT'];
+}
+
+/** Periodos en los que puede vivir un evento: los jugables, el suplementario y el cierre. */
+export function getEventPeriodOptions(sportId?: string | null): string[] {
+  return [...getPeriodSequence(sportId), 'ET', 'FT'];
+}
+
 function stripAccents(value: string) {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }

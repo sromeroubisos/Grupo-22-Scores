@@ -747,7 +747,7 @@ function buildHockeyStatTabs(
                         { key: 'points', label: 'Goles', home: stats.points.home, away: stats.points.away, accent: true },
                         { key: 'openPlayGoals', label: 'De jugada', home: openPlayGoals('home'), away: openPlayGoals('away') },
                         { key: 'penaltyCornerGoals', label: 'De corner corto', home: stats.penaltyCornerGoals.home, away: stats.penaltyCornerGoals.away },
-                        { key: 'penaltyStrokeGoalsScore', label: 'De penal stroke', home: stats.penaltyStrokeGoals.home, away: stats.penaltyStrokeGoals.away },
+                        { key: 'penaltyStrokeGoalsScore', label: 'De penal', home: stats.penaltyStrokeGoals.home, away: stats.penaltyStrokeGoals.away },
                         { key: 'assists', label: 'Asistencias', home: stats.assists.home, away: stats.assists.away },
                     ],
                 },
@@ -779,7 +779,7 @@ function buildHockeyStatTabs(
                     ],
                 },
                 {
-                    title: 'Penal stroke',
+                    title: 'Penal',
                     rows: [
                         { key: 'penaltyStrokes', label: 'Ejecutados', home: stats.penaltyStrokes.home, away: stats.penaltyStrokes.away },
                         { key: 'penaltyStrokeGoals', label: 'Convertidos', home: stats.penaltyStrokeGoals.home, away: stats.penaltyStrokeGoals.away },

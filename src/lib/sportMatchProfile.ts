@@ -130,6 +130,11 @@ export type OffensiveBonusPreset = {
 
 const GOAL_BUCKETS = new Set(['hockey', 'football', 'handball']);
 
+/** El marcador de estos deportes cuenta goles: un evento que suma vale "1 gol", no "1 punto". */
+export function isGoalCountingSport(sportId?: string | null): boolean {
+  return GOAL_BUCKETS.has(normalizeSportBucket(sportId));
+}
+
 export function getOffensiveBonusPreset(sportId?: string | null): OffensiveBonusPreset {
   const bucket = normalizeSportBucket(sportId);
   const metric = getSecondaryScoreMetric(sportId);

@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  getClockPeriodOptions,
   getEventPeriodForType,
+  getEventPeriodOptions,
   getMatchPeriodLabel,
   getNextActivePeriodAfterEvent,
   getPeriodSequence,
@@ -83,4 +85,20 @@ test('los cuartos se leen escritos de varias formas', () => {
 
 test("'hockey' y 'field-hockey' son el mismo deporte para los periodos", () => {
   assert.deepEqual(getPeriodSequence('hockey'), getPeriodSequence('field-hockey'));
+});
+
+/*
+ * Los selectores del match center arman sus listas desde aca. La mitad de los
+ * casos existe para probar que rugby y futbol siguen mostrando lo mismo.
+ */
+test('el reloj de hockey ofrece los cuatro cuartos con el entretiempo en el medio', () => {
+  assert.deepEqual(getClockPeriodOptions(HOCKEY), ['PRE', 'Q1', 'Q2', 'HT', 'Q3', 'Q4', 'ET', 'FT']);
+  assert.deepEqual(getEventPeriodOptions(HOCKEY), ['Q1', 'Q2', 'Q3', 'Q4', 'ET', 'FT']);
+});
+
+test('rugby y futbol siguen con la lista de mitades de siempre', () => {
+  for (const sport of ['rugby', 'football', null, undefined]) {
+    assert.deepEqual(getClockPeriodOptions(sport), ['PRE', '1T', 'HT', '2T', 'ET', 'FT'], String(sport));
+    assert.deepEqual(getEventPeriodOptions(sport), ['1T', '2T', 'ET', 'FT'], String(sport));
+  }
 });

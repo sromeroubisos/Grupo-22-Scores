@@ -1110,60 +1110,6 @@
     border-color: #262626;
 }
 
-.live-event-header-note {
-    display: block;
-    margin-top: 6px;
-    color: #777;
-    font-size: 0.78rem;
-    font-weight: 700;
-    text-transform: none;
-    letter-spacing: 0;
-}
-
-.live-event-console-header {
-    align-items: flex-start;
-    gap: 18px;
-}
-
-.live-event-heading {
-    min-width: 0;
-}
-
-.live-match-clock {
-    display: grid;
-    justify-items: end;
-    gap: 9px;
-    min-width: 360px;
-}
-
-.live-match-clock-readout {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 38px;
-    padding: 8px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(0, 0, 0, 0.36);
-    color: #f8fafc;
-    font-size: 1.2rem;
-    font-weight: 1000;
-    line-height: 1;
-    letter-spacing: 0;
-}
-
-.live-match-clock[data-running="true"] .live-match-clock-readout {
-    border-color: rgba(0, 208, 132, 0.5);
-    background: rgba(0, 93, 58, 0.28);
-    color: #ecfff7;
-}
-
-.live-match-clock-actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 6px;
-}
-
 .live-match-clock-btn {
     min-height: 30px;
     padding: 7px 9px;
@@ -2613,35 +2559,6 @@
         letter-spacing: 0;
     }
 
-    .live-event-console-header {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .live-event-header-note {
-        display: none;
-    }
-
-    .live-match-clock {
-        min-width: 0;
-        width: 100%;
-        justify-items: stretch;
-        gap: 8px;
-    }
-
-    .live-match-clock-readout {
-        justify-content: center;
-        min-height: 42px;
-        font-size: 1.35rem;
-        padding: 9px 10px;
-    }
-
-    .live-match-clock-actions {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 6px;
-    }
-
     .live-match-clock-btn {
         min-width: 0;
         justify-content: center;
@@ -3015,5 +2932,672 @@
 
     .live-event-label {
         font-size: 0.56rem;
+    }
+}
+
+/* ─── Deshacer último evento ───
+ * Vive en la cabecera de la consola, al lado del reloj, porque en un partido
+ * en vivo el error se corrige en el acto: no puede estar dos pantallas abajo. */
+.live-undo-btn {
+    margin-top: 10px;
+    min-height: 36px;
+    padding: 8px 14px;
+    gap: 7px;
+    border-color: rgba(251, 191, 36, 0.45);
+    background: rgba(120, 53, 15, 0.22);
+    color: #fde68a;
+    font-size: 0.7rem;
+    font-weight: 950;
+    text-transform: uppercase;
+}
+
+.live-undo-btn:hover:not(:disabled) {
+    border-color: #fbbf24;
+    background: rgba(120, 53, 15, 0.4);
+}
+
+.live-undo-btn:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.undo-event-where {
+    margin: 0 0 14px;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.undo-event-list {
+    margin: 0;
+    padding: 0 0 0 18px;
+    display: grid;
+    gap: 6px;
+    color: #e5e7eb;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.undo-event-list strong {
+    color: #fff;
+}
+
+.undo-event-confirm {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: #111;
+}
+
+.undo-event-confirm:hover {
+    background: #fbbf24;
+    border-color: #fbbf24;
+}
+
+/* ─── Tira de periodos del reloj ───
+ * Todos los periodos del deporte, el activo encendido. Es lo que hace
+ * imposible confundirse de cuarto en hockey. */
+.live-match-period-strip {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.live-match-period-strip button {
+    min-width: 40px;
+    min-height: 28px;
+    padding: 5px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.3);
+    color: #9ca3af;
+    font-size: 0.66rem;
+    font-weight: 950;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.live-match-period-strip button:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+}
+
+.live-match-period-strip button.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #050505;
+}
+
+.live-match-clock[data-running="true"] .live-match-period-strip button.active {
+    border-color: #00d084;
+    background: #00d084;
+}
+
+/* ─── Desenlace de un evento (corner corto, penal stroke) ───
+ * Los que suman van marcados: el operador elige "Gol" y el punto se suma
+ * solo; nunca tiene que cargar un gol aparte. */
+.guided-outcome-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+}
+
+.guided-outcome-grid button {
+    display: grid;
+    gap: 4px;
+    min-height: 58px;
+    padding: 10px 12px;
+    border: 1px solid #303030;
+    background: #161616;
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.guided-outcome-grid button strong {
+    font-size: 0.86rem;
+    font-weight: 950;
+    text-transform: uppercase;
+}
+
+.guided-outcome-grid button small {
+    color: #888;
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+
+.guided-outcome-grid button[data-scores="true"] {
+    border-color: rgba(0, 208, 132, 0.45);
+}
+
+.guided-outcome-grid button[data-scores="true"] small {
+    color: #6ee7b7;
+}
+
+.guided-outcome-grid button:hover {
+    border-color: var(--accent);
+    background: #1f1f1f;
+}
+
+.guided-outcome-grid button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #050505;
+}
+
+.guided-outcome-grid button.active small {
+    color: rgba(5, 5, 5, 0.7);
+}
+
+.guided-outcome-grid button[data-scores="true"].active {
+    background: #00d084;
+    border-color: #00d084;
+}
+
+@media (max-width: 720px) {
+    .live-undo-btn {
+        width: 100%;
+        justify-content: center;
+        margin-top: 8px;
+    }
+
+    .live-match-period-strip {
+        justify-content: stretch;
+    }
+
+    .live-match-period-strip button {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 5px 4px;
+    }
+
+    .guided-outcome-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* ─── Consola de partido: reloj y acciones ───
+ * El marcador y los clubes viven en la cabecera y no se repiten. Aca hay una
+ * pregunta por zona: arriba en que momento del partido estamos, despues los
+ * dos botones (reloj y deshacer), y abajo que paso. Pensado para una tablet o
+ * un telefono al costado de la cancha: 44px de alto minimo en todo lo que se
+ * toca y sin scroll horizontal en 375px. */
+.live-clock-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+    padding: 14px 22px;
+    border-bottom: 1px solid #1f1f1f;
+}
+
+.live-clock-readout {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 8px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.36);
+    color: #e5e7eb;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+.live-clock-time {
+    font-size: 1.35rem;
+    line-height: 1;
+    color: #fff;
+}
+
+.live-clock-period {
+    padding-left: 10px;
+    border-left: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.live-clock-state {
+    color: #9ca3af;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.live-clock-bar[data-running="true"] .live-clock-readout {
+    border-color: rgba(0, 208, 132, 0.5);
+    background: rgba(0, 93, 58, 0.28);
+}
+
+.live-clock-bar[data-running="true"] .live-clock-state {
+    color: #6ee7b7;
+}
+
+.live-clock-bar .live-match-period-strip {
+    justify-content: flex-end;
+}
+
+.live-clock-bar .live-match-period-strip button {
+    min-height: 36px;
+}
+
+.live-console-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 10px;
+    padding: 14px 22px;
+    border-bottom: 1px solid #1f1f1f;
+}
+
+.live-clock-toggle {
+    min-height: 52px;
+    padding: 10px 20px;
+    gap: 8px;
+    justify-content: center;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #050505;
+    font-size: 0.8rem;
+    font-weight: 1000;
+    text-transform: uppercase;
+}
+
+.live-clock-toggle:hover {
+    background: #00b871;
+    border-color: #00b871;
+}
+
+.live-clock-toggle[data-running="true"] {
+    background: #1b1b1b;
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #fff;
+}
+
+.live-clock-toggle[data-running="true"]:hover {
+    border-color: #fff;
+    background: #242424;
+}
+
+.live-console-actions .live-undo-btn {
+    margin-top: 0;
+    min-height: 52px;
+    justify-content: center;
+}
+
+.live-clock-manual,
+.live-more-actions {
+    border-bottom: 1px solid #1f1f1f;
+}
+
+.live-clock-manual summary,
+.live-more-actions summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 10px 22px;
+    color: #8b8b8b;
+    font-size: 0.7rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    user-select: none;
+    transition: var(--transition);
+}
+
+.live-clock-manual summary:hover,
+.live-more-actions summary:hover {
+    color: #fff;
+}
+
+.live-clock-manual summary::marker,
+.live-more-actions summary::marker {
+    color: #555;
+}
+
+.live-more-actions summary small {
+    color: #555;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0;
+}
+
+.live-clock-manual .live-match-clock-editor {
+    grid-template-columns: minmax(150px, 1.2fr) minmax(82px, 0.65fr) minmax(82px, 0.65fr) auto auto;
+    padding: 0 22px 14px;
+}
+
+.live-quick-actions {
+    display: grid;
+    gap: 12px;
+    padding: 18px 22px;
+}
+
+.live-quick-actions .live-event-group-title small {
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.live-quick-subtitle {
+    margin-top: 8px;
+}
+
+.live-quick-subtitle small {
+    color: #9ca3af;
+}
+
+.live-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.live-quick-grid-clock {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.live-quick-button {
+    min-height: 88px;
+    grid-template-columns: 46px minmax(0, 1fr);
+}
+
+.live-quick-button .live-event-glyph {
+    width: 46px;
+    height: 46px;
+}
+
+.live-quick-button .live-event-label {
+    font-size: 0.95rem;
+}
+
+/* Las tarjetas se reconocen por el color antes que por el texto. */
+.live-quick-button[data-event-type="green_card"] {
+    border-color: rgba(34, 197, 94, 0.55);
+}
+
+.live-quick-button[data-event-type="green_card"] .live-event-glyph {
+    background: #16a34a;
+    color: #052e16;
+}
+
+.live-quick-button[data-event-type="yellow_card"] {
+    border-color: rgba(234, 179, 8, 0.55);
+}
+
+.live-quick-button[data-event-type="yellow_card"] .live-event-glyph {
+    background: #eab308;
+    color: #1c1917;
+}
+
+.live-quick-button[data-event-type="red_card"] {
+    border-color: rgba(239, 68, 68, 0.55);
+}
+
+.live-quick-button[data-event-type="red_card"] .live-event-glyph {
+    background: #dc2626;
+    color: #fff;
+}
+
+/* El evento de reloj que toca ahora se enciende; los demas siguen a un toque. */
+.live-quick-button[data-suggested="true"] {
+    border-color: var(--accent);
+    background: linear-gradient(180deg, rgba(0, 163, 101, 0.16), #151515 70%);
+    box-shadow: inset 0 0 0 1px rgba(0, 208, 132, 0.35);
+}
+
+.live-quick-button[data-suggested="true"] .live-event-meta {
+    color: #6ee7b7;
+}
+
+.live-more-actions .live-event-panel {
+    padding-top: 6px;
+}
+
+.guided-clock-effect {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(30, 41, 59, 0.35);
+    color: #e2e8f0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.live-clock-toggle:focus-visible,
+.live-undo-btn:focus-visible,
+.live-quick-button:focus-visible,
+.live-event-button:focus-visible,
+.live-match-period-strip button:focus-visible,
+.guided-outcome-grid button:focus-visible,
+.live-clock-manual summary:focus-visible,
+.live-more-actions summary:focus-visible,
+.header-actions .mc-btn:focus-visible {
+    outline: 2px solid #00d084;
+    outline-offset: 2px;
+}
+
+/* Feedback al toque: el boton se hunde, no se mueve el layout. */
+.live-quick-button:active,
+.live-event-button:active,
+.live-clock-toggle:active,
+.live-undo-btn:active {
+    transform: scale(0.985);
+    transition-duration: 80ms;
+}
+
+@media (max-width: 1024px) {
+    .live-quick-grid-clock {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .live-clock-bar {
+        padding: 12px 14px;
+    }
+
+    .live-clock-readout {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .live-clock-bar .live-match-period-strip {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .live-clock-bar .live-match-period-strip button {
+        flex: 1 1 0;
+        min-width: 0;
+        min-height: 40px;
+        padding: 5px 2px;
+    }
+
+    .live-console-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 12px 14px;
+    }
+
+    .live-clock-toggle,
+    .live-console-actions .live-undo-btn {
+        min-height: 56px;
+    }
+
+    .live-clock-manual summary,
+    .live-more-actions summary {
+        padding: 10px 14px;
+    }
+
+    .live-clock-manual .live-match-clock-editor {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: 0 14px 14px;
+    }
+
+    .live-clock-manual .live-match-clock-editor label:first-child {
+        grid-column: 1 / -1;
+    }
+
+    .live-clock-manual .live-match-clock-editor select,
+    .live-clock-manual .live-match-clock-editor input,
+    .live-clock-manual .live-match-clock-btn {
+        min-height: 44px;
+        font-size: 16px; /* iOS no hace zoom al enfocar a partir de 16px */
+    }
+
+    .live-quick-actions {
+        padding: 14px;
+    }
+
+    .live-quick-grid,
+    .live-quick-grid-clock {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .live-quick-button {
+        min-height: 72px;
+        padding: 10px 12px;
+    }
+
+    .live-more-actions .live-event-panel {
+        padding: 6px 14px 14px;
+    }
+
+    /* Cronologia: cada control es tocable y no dispara zoom en iOS. */
+    .event-list-row input,
+    .event-list-row select {
+        min-height: 44px;
+        padding: 8px 10px !important;
+        font-size: 16px !important;
+    }
+
+    .event-list-actions .mc-btn {
+        min-height: 44px;
+    }
+
+    /* Carga guiada: mismos minimos para el pulgar. */
+    .guided-details-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .guided-details-grid input,
+    .guided-details-grid select,
+    .guided-secondary-select select,
+    .guided-detail-text select,
+    .guided-detail-text textarea {
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    .guided-outcome-grid button {
+        min-height: 64px;
+    }
+
+    .guided-toggle-row button,
+    .guided-player-option,
+    .guided-skip-player {
+        min-height: 48px;
+    }
+}
+
+@media (max-width: 600px) {
+    /* Con la cabecera apilada los botones son anchos: la etiqueta entra. */
+    .header-actions .btn-label {
+        display: inline;
+    }
+}
+
+@media (max-width: 400px) {
+    .live-clock-time {
+        font-size: 1.2rem;
+    }
+
+    .live-clock-readout {
+        gap: 8px;
+        padding: 8px 10px;
+    }
+
+    .live-clock-period {
+        font-size: 0.72rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .live-event-button:hover,
+    .live-quick-button:hover,
+    .live-quick-button:active,
+    .live-event-button:active,
+    .live-clock-toggle:active,
+    .live-undo-btn:active {
+        transform: none;
+    }
+
+    .live-clock-toggle,
+    .live-undo-btn,
+    .live-quick-button,
+    .live-match-period-strip button,
+    .guided-outcome-grid button {
+        transition: none;
+    }
+}
+
+/* ─── Tiles rapidas en telefono ───
+ * Las reglas de <=600px esconden el glifo y dejan la tile en una columna; la
+ * tile rapida conservaba su columna de 46px y la etiqueta caia ahi, partida
+ * en silabas (CORN/ER/CORT/O). Aca vuelve a UNA columna, la palabra no se
+ * corta por dentro y la leyenda se ve. La tarjeta verde es verde. */
+@media (max-width: 720px) {
+    .live-quick-button {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        row-gap: 4px;
+        place-items: center;
+        align-content: center;
+        text-align: center;
+        min-height: 76px;
+        padding: 10px 8px;
+    }
+
+    .live-quick-button .live-event-glyph {
+        display: none;
+    }
+
+    .live-quick-button .live-event-label {
+        grid-column: 1;
+        font-size: 0.88rem;
+        line-height: 1.15;
+        overflow-wrap: normal;
+        word-break: normal;
+        hyphens: manual;
+        text-wrap: balance;
+    }
+
+    .live-quick-button .live-event-meta {
+        display: block;
+        grid-column: 1;
+        color: rgba(255, 255, 255, 0.74);
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+
+    .live-quick-button[data-event-type="green_card"] {
+        background: linear-gradient(180deg, rgba(34, 197, 94, 0.56), rgba(20, 83, 45, 0.94));
+        border-color: rgba(74, 222, 128, 0.7);
+        color: #ecfdf5;
+    }
+
+    .live-quick-button[data-suggested="true"] {
+        box-shadow: inset 0 0 0 2px #00d084;
+    }
+
+    .live-quick-button[data-suggested="true"] .live-event-meta {
+        color: #a7f3d0;
     }
 }
