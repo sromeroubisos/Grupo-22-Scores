@@ -66,6 +66,32 @@ export type CompleteMatchStats = {
     /** Definicion por shoot-out. NO entra en el marcador ni en `points`. */
     shootoutScored: TeamMetricPair;
     shootoutMissed: TeamMetricPair;
+    /* ── Handball ──
+     * El gol es uno solo (`points`); estos son su reparto por origen, que
+     * sale del desenlace del evento. Los 7 metros se cuentan EJECUTADOS y el
+     * desenlace dice si convirtieron: la efectividad es la resta. */
+    goalsFastBreak: TeamMetricPair;
+    goalsWing: TeamMetricPair;
+    goalsPivot: TeamMetricPair;
+    goalsBackcourt: TeamMetricPair;
+    goalsEmptyNet: TeamMetricPair;
+    sevenMeters: TeamMetricPair;
+    sevenMeterGoals: TeamMetricPair;
+    sevenMetersSaved: TeamMetricPair;
+    /** Lanzamientos que NO fueron gol, del equipo que lanza, por desenlace. */
+    shotsSaved: TeamMetricPair;
+    shotsMissed: TeamMetricPair;
+    shotsBlocked: TeamMetricPair;
+    /** De las atajadas (`saves`), las que fueron a un 7 metros. */
+    savesSevenMeter: TeamMetricPair;
+    steals: TeamMetricPair;
+    /** Reparto de `turnoversLost` por motivo. */
+    turnoversBadPass: TeamMetricPair;
+    turnoversOffensiveFoul: TeamMetricPair;
+    turnoversTechnicalFault: TeamMetricPair;
+    turnoversPassivePlay: TeamMetricPair;
+    twoMinSuspensions: TeamMetricPair;
+    blueCards: TeamMetricPair;
     /* ── Futbol americano ──
      * `touchdowns`, `fieldGoals`, `extraPoints` y `twoPointConversions` son los
      * CONVERTIDOS; los intentos van aparte y los fallados son la resta, igual
@@ -287,6 +313,25 @@ function createEmptyCompleteMatchStats(): CompleteMatchStats {
         clearances: createTeamMetricPair(),
         shootoutScored: createTeamMetricPair(),
         shootoutMissed: createTeamMetricPair(),
+        goalsFastBreak: createTeamMetricPair(),
+        goalsWing: createTeamMetricPair(),
+        goalsPivot: createTeamMetricPair(),
+        goalsBackcourt: createTeamMetricPair(),
+        goalsEmptyNet: createTeamMetricPair(),
+        sevenMeters: createTeamMetricPair(),
+        sevenMeterGoals: createTeamMetricPair(),
+        sevenMetersSaved: createTeamMetricPair(),
+        shotsSaved: createTeamMetricPair(),
+        shotsMissed: createTeamMetricPair(),
+        shotsBlocked: createTeamMetricPair(),
+        savesSevenMeter: createTeamMetricPair(),
+        steals: createTeamMetricPair(),
+        turnoversBadPass: createTeamMetricPair(),
+        turnoversOffensiveFoul: createTeamMetricPair(),
+        turnoversTechnicalFault: createTeamMetricPair(),
+        turnoversPassivePlay: createTeamMetricPair(),
+        twoMinSuspensions: createTeamMetricPair(),
+        blueCards: createTeamMetricPair(),
         touchdowns: createTeamMetricPair(),
         touchdownsRushing: createTeamMetricPair(),
         touchdownsPassing: createTeamMetricPair(),
@@ -533,9 +578,59 @@ export function buildCompleteMatchStats(
                 break;
             case 'save':
                 bumpTeamMetric(stats.saves, team);
+                // Handball: el desenlace es el origen del lanzamiento atajado.
+                if (readOutcomeId(event.detail) === 'seven_meter') bumpTeamMetric(stats.savesSevenMeter, team);
                 break;
             case 'clearance':
                 bumpTeamMetric(stats.clearances, team);
+                break;
+            /* ── Handball ──
+             * El gol ya sumo arriba; aca solo se reparte por origen. Los 7 metros
+             * se cuentan SIEMPRE como ejecutados y el desenlace dice si ademas
+             * convirtieron, igual que el corner corto. Los dos tipos viejos
+             * (`seven_meter_goal`, `seven_meter_miss`) entran en la misma cuenta
+             * para que un partido cargado antes no pierda sus 7 metros. */
+            case 'goal': {
+                const origin = resolveOutcomeId(definition, event.detail);
+                if (origin === 'fast_break') bumpTeamMetric(stats.goalsFastBreak, scoringTeam);
+                else if (origin === 'wing') bumpTeamMetric(stats.goalsWing, scoringTeam);
+                else if (origin === 'pivot') bumpTeamMetric(stats.goalsPivot, scoringTeam);
+                else if (origin === 'backcourt') bumpTeamMetric(stats.goalsBackcourt, scoringTeam);
+                else if (origin === 'empty_net') bumpTeamMetric(stats.goalsEmptyNet, scoringTeam);
+                break;
+            }
+            case 'seven_meter':
+                bumpTeamMetric(stats.sevenMeters, team);
+                if (outcomeScores(definition, event.detail)) {
+                    bumpTeamMetric(stats.sevenMeterGoals, scoringTeam);
+                } else if (readOutcomeId(event.detail) === 'saved') {
+                    bumpTeamMetric(stats.sevenMetersSaved, team);
+                }
+                break;
+            case 'seven_meter_goal':
+                bumpTeamMetric(stats.sevenMeters, team);
+                bumpTeamMetric(stats.sevenMeterGoals, scoringTeam);
+                break;
+            case 'seven_meter_miss':
+                bumpTeamMetric(stats.sevenMeters, team);
+                break;
+            case 'shot': {
+                const result = readOutcomeId(event.detail);
+                if (result === 'saved') bumpTeamMetric(stats.shotsSaved, team);
+                else if (result === 'blocked') bumpTeamMetric(stats.shotsBlocked, team);
+                else bumpTeamMetric(stats.shotsMissed, team);
+                break;
+            }
+            case 'steal':
+                // Se carga al que la recupera; la perdida ya la carga el rival
+                // por su lado, asi que aca NO se suma un turnover.
+                bumpTeamMetric(stats.steals, team);
+                break;
+            case 'two_min_suspension':
+                bumpTeamMetric(stats.twoMinSuspensions, team);
+                break;
+            case 'blue_card':
+                bumpTeamMetric(stats.blueCards, team);
                 break;
             /* ── Futbol americano ──
              * Lo pateado se cuenta SIEMPRE como intento y el desenlace dice si
@@ -679,9 +774,17 @@ export function buildCompleteMatchStats(
                 bumpTeamMetric(stats.turnoversWon, team);
                 bumpTeamMetric(stats.recoveries, team);
                 break;
-            case 'turnover_lost':
+            case 'turnover_lost': {
                 bumpTeamMetric(stats.turnoversLost, team);
+                // Handball: la perdida lleva el motivo como desenlace. En rugby
+                // y hockey no hay marca y el reparto queda en cero.
+                const reason = readOutcomeId(event.detail);
+                if (reason === 'bad_pass') bumpTeamMetric(stats.turnoversBadPass, team);
+                else if (reason === 'offensive_foul') bumpTeamMetric(stats.turnoversOffensiveFoul, team);
+                else if (reason === 'technical_fault') bumpTeamMetric(stats.turnoversTechnicalFault, team);
+                else if (reason === 'passive_play') bumpTeamMetric(stats.turnoversPassivePlay, team);
                 break;
+            }
             case 'penalty_won':
                 bumpTeamMetric(stats.penaltiesWon, team);
                 break;
@@ -1355,6 +1458,200 @@ function buildFlagFootballStatTabs(
     return tabs.filter((tab) => tab.sections.length > 0);
 }
 
+/**
+ * Handball. Sin proveedor externo, asi que todo lo que hay aca lo cargo alguien
+ * a mano: las pestanas tienen que devolverle al operador lo que cargo, en el
+ * idioma del deporte (lanzamientos, 7 metros, exclusiones), y no las de rugby
+ * en cero, que era lo que veia hasta ahora.
+ *
+ * Las efectividades son DERIVADAS: el lanzamiento sin gol y el gol se cargan
+ * cada uno por su lado, y el porcentaje sale de la suma. Los 7 metros se
+ * cargan cuando se ejecutan y su desenlace dice si convirtieron.
+ */
+function buildHandballStatTabs(
+    stats: CompleteMatchStats,
+    homeName: string,
+    awayName: string,
+    options: CompleteStatTabsOptions = {},
+): CompleteStatTab[] {
+    const tipRatio = (hMade: number, hTotal: number, aMade: number, aTotal: number, note: string) => (
+        `${homeName}: ${hMade}/${hTotal} · ${awayName}: ${aMade}/${aTotal} — ${note}`
+    );
+
+    // Lanzamientos totales: los que entraron (goles, 7m incluidos) mas los que no.
+    const shotsNoGoal = (side: 'home' | 'away') => stats.shotsSaved[side] + stats.shotsMissed[side] + stats.shotsBlocked[side];
+    const sevenMetersNoGoal = (side: 'home' | 'away') => stats.sevenMeters[side] - stats.sevenMeterGoals[side];
+    const sevenMetersMissed = (side: 'home' | 'away') => sevenMetersNoGoal(side) - stats.sevenMetersSaved[side];
+    const shotsTotal = (side: 'home' | 'away') => stats.points[side] + shotsNoGoal(side) + sevenMetersNoGoal(side);
+    const openPlayGoals = (side: 'home' | 'away') => Math.max(
+        0,
+        stats.points[side]
+            - stats.sevenMeterGoals[side]
+            - stats.goalsFastBreak[side]
+            - stats.goalsWing[side]
+            - stats.goalsPivot[side]
+            - stats.goalsBackcourt[side]
+            - stats.goalsEmptyNet[side],
+    );
+
+    const tabs: CompleteStatTab[] = [
+        {
+            id: 'marcador',
+            label: 'Marcador',
+            sections: filterStatSections([
+                {
+                    // Un gol es un gol: el reparto por origen es estadistica, no
+                    // marcador. Las filas de abajo suman el total de arriba.
+                    title: 'Goles',
+                    rows: [
+                        { key: 'points', label: 'Goles', home: stats.points.home, away: stats.points.away, accent: true },
+                        { key: 'openPlayGoals', label: 'De jugada', home: openPlayGoals('home'), away: openPlayGoals('away') },
+                        { key: 'goalsBackcourt', label: 'Lanzamiento exterior', home: stats.goalsBackcourt.home, away: stats.goalsBackcourt.away },
+                        { key: 'goalsWing', label: 'Desde el extremo', home: stats.goalsWing.home, away: stats.goalsWing.away },
+                        { key: 'goalsPivot', label: 'De pivote', home: stats.goalsPivot.home, away: stats.goalsPivot.away },
+                        { key: 'goalsFastBreak', label: 'De contraataque', home: stats.goalsFastBreak.home, away: stats.goalsFastBreak.away },
+                        { key: 'sevenMeterGoalsScore', label: 'De 7 metros', home: stats.sevenMeterGoals.home, away: stats.sevenMeterGoals.away },
+                        { key: 'goalsEmptyNet', label: 'Arco vacío', home: stats.goalsEmptyNet.home, away: stats.goalsEmptyNet.away },
+                        { key: 'assists', label: 'Asistencias', home: stats.assists.home, away: stats.assists.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'lanzamientos',
+            label: 'Lanzamientos',
+            sections: filterStatSections([
+                {
+                    title: 'Lanzamientos',
+                    rows: [
+                        { key: 'shotsTotal', label: 'Lanzamientos', home: shotsTotal('home'), away: shotsTotal('away') },
+                        { key: 'shotsGoals', label: 'Convertidos', home: stats.points.home, away: stats.points.away, accent: true },
+                        { key: 'shotsSaved', label: 'Atajados', home: stats.shotsSaved.home + stats.sevenMetersSaved.home, away: stats.shotsSaved.away + stats.sevenMetersSaved.away },
+                        { key: 'shotsBlocked', label: 'Bloqueados', home: stats.shotsBlocked.home, away: stats.shotsBlocked.away },
+                        { key: 'shotsMissed', label: 'Desviados', home: stats.shotsMissed.home + sevenMetersMissed('home'), away: stats.shotsMissed.away + sevenMetersMissed('away') },
+                        {
+                            key: 'shotEffectiveness',
+                            label: 'Efectividad (%)',
+                            home: goalKickEffectivenessPercent(stats.points.home, shotsTotal('home')),
+                            away: goalKickEffectivenessPercent(stats.points.away, shotsTotal('away')),
+                            valueKind: 'percent',
+                            tooltip: tipRatio(stats.points.home, shotsTotal('home'), stats.points.away, shotsTotal('away'), 'goles / lanzamientos'),
+                        },
+                    ],
+                },
+                {
+                    title: '7 metros',
+                    rows: [
+                        { key: 'sevenMeters', label: 'Ejecutados', home: stats.sevenMeters.home, away: stats.sevenMeters.away },
+                        { key: 'sevenMeterGoals', label: 'Convertidos', home: stats.sevenMeterGoals.home, away: stats.sevenMeterGoals.away },
+                        { key: 'sevenMetersSaved', label: 'Atajados', home: stats.sevenMetersSaved.home, away: stats.sevenMetersSaved.away },
+                        {
+                            key: 'sevenMeterEffectiveness',
+                            label: 'Efectividad (%)',
+                            home: goalKickEffectivenessPercent(stats.sevenMeterGoals.home, stats.sevenMeters.home),
+                            away: goalKickEffectivenessPercent(stats.sevenMeterGoals.away, stats.sevenMeters.away),
+                            valueKind: 'percent',
+                            tooltip: tipRatio(
+                                stats.sevenMeterGoals.home,
+                                stats.sevenMeters.home,
+                                stats.sevenMeterGoals.away,
+                                stats.sevenMeters.away,
+                                'convertidos / ejecutados',
+                            ),
+                        },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'defensa',
+            label: 'Defensa',
+            sections: filterStatSections([
+                {
+                    // Las atajadas son del arquero del equipo, contra lanzamientos
+                    // del rival. Van aparte de "Atajados" de la pestana de
+                    // lanzamientos porque se cargan por separado: uno al que lanza
+                    // y otro al arquero, y no hay por que asumir que coinciden.
+                    title: 'Arquero',
+                    rows: [
+                        { key: 'saves', label: 'Atajadas', home: stats.saves.home, away: stats.saves.away, accent: true },
+                        { key: 'savesSevenMeter', label: 'De 7 metros', home: stats.savesSevenMeter.home, away: stats.savesSevenMeter.away },
+                    ],
+                },
+                {
+                    title: 'Recuperación',
+                    rows: [
+                        { key: 'steals', label: 'Robos', home: stats.steals.home, away: stats.steals.away },
+                        { key: 'blocks', label: 'Bloqueos', home: stats.blocks.home, away: stats.blocks.away },
+                        { key: 'fouls', label: 'Faltas', home: stats.fouls.home, away: stats.fouls.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'perdidas',
+            label: 'Pérdidas',
+            sections: filterStatSections([
+                {
+                    title: 'Pérdidas de balón',
+                    rows: [
+                        { key: 'turnoversLost', label: 'Pérdidas', home: stats.turnoversLost.home, away: stats.turnoversLost.away, accent: true },
+                        { key: 'turnoversBadPass', label: 'Mal pase', home: stats.turnoversBadPass.home, away: stats.turnoversBadPass.away },
+                        { key: 'turnoversOffensiveFoul', label: 'Falta en ataque', home: stats.turnoversOffensiveFoul.home, away: stats.turnoversOffensiveFoul.away },
+                        { key: 'turnoversTechnicalFault', label: 'Falta técnica', home: stats.turnoversTechnicalFault.home, away: stats.turnoversTechnicalFault.away },
+                        { key: 'turnoversPassivePlay', label: 'Juego pasivo', home: stats.turnoversPassivePlay.home, away: stats.turnoversPassivePlay.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'disciplina',
+            label: 'Disciplina',
+            sections: filterStatSections([
+                {
+                    title: 'Sanciones',
+                    rows: [
+                        { key: 'yellowCards', label: 'Amarillas', home: stats.yellowCards.home, away: stats.yellowCards.away },
+                        { key: 'twoMinSuspensions', label: 'Exclusiones de 2 min', home: stats.twoMinSuspensions.home, away: stats.twoMinSuspensions.away, accent: true },
+                        { key: 'redCards', label: 'Rojas', home: stats.redCards.home, away: stats.redCards.away },
+                        { key: 'blueCards', label: 'Azules', home: stats.blueCards.home, away: stats.blueCards.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            id: 'plantel',
+            label: 'Plantel',
+            sections: filterStatSections([
+                {
+                    title: 'Banco',
+                    rows: [
+                        { key: 'substitutions', label: 'Cambios', home: stats.substitutions.home, away: stats.substitutions.away },
+                        { key: 'timeouts', label: 'Tiempos muertos', home: stats.timeouts.home, away: stats.timeouts.away },
+                    ],
+                },
+            ], options),
+        },
+        {
+            // Fuera del partido: el marcador reglamentario queda como quedo y la
+            // tanda solo decide quien avanza. Por eso va en su propia pestana.
+            id: 'definicion',
+            label: 'Definición',
+            sections: filterStatSections([
+                {
+                    title: 'Tanda de 7 metros',
+                    rows: [
+                        { key: 'shootoutScored', label: 'Convertidos', home: stats.shootoutScored.home, away: stats.shootoutScored.away, accent: true },
+                        { key: 'shootoutMissed', label: 'Fallados', home: stats.shootoutMissed.home, away: stats.shootoutMissed.away },
+                    ],
+                },
+            ], options),
+        },
+    ];
+
+    return tabs.filter((tab) => tab.sections.length > 0);
+}
+
 export function buildCompleteStatTabs(
     stats: CompleteMatchStats,
     homeName: string,
@@ -1372,6 +1669,8 @@ export function buildCompleteStatTabs(
             return buildBasketballStatTabs(stats, options);
         case 'hockey':
             return buildHockeyStatTabs(stats, homeName, awayName, options);
+        case 'handball':
+            return buildHandballStatTabs(stats, homeName, awayName, options);
         case 'american-football':
             return buildAmericanFootballStatTabs(stats, homeName, awayName, options);
         default:

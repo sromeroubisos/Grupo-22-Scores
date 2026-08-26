@@ -107,6 +107,20 @@ const TYPE_LABELS: Record<string, string> = {
   ace: 'Ace',
   block_point: 'Bloqueo',
   seven_meter_goal: 'Gol de 7m',
+  // Handball. Sin estas el fallback escribe "Seven Meter" y "Two Min
+  // Suspension" sobre una pantalla en castellano.
+  seven_meter: 'Lanzamiento de 7m',
+  seven_meter_miss: '7m errado',
+  shot: 'Lanzamiento sin gol',
+  steal: 'Robo',
+  two_min_suspension: 'Suspensión 2 min',
+  blue_card: 'Tarjeta azul',
+  official_timeout: 'Tiempo muerto del árbitro',
+  // Hockey y handball comparten la definicion fuera del partido.
+  shootout_start: 'Inicio de la definición',
+  shootout_scored: 'Definición: convertido',
+  shootout_missed: 'Definición: fallado',
+  shootout_end: 'Fin de la definición',
   // Hockey. Sin estas dos entradas el fallback prettifica el tipo y escribe
   // "Penalty Corner" sobre una pantalla en castellano.
   penalty_corner: 'Corner corto',
@@ -176,6 +190,17 @@ const EVENT_COLORS: Record<string, string> = {
   pass: '#9ca3af',
   injury: '#f97316',
   timeout: '#9ca3af',
+  // Handball. El 7 metros es jugada fija, como el corner corto: azul. La
+  // exclusion de 2 minutos no es tarjeta pero si sancion: naranja.
+  seven_meter: '#3b82f6',
+  seven_meter_goal: '#3b82f6',
+  shot: '#9ca3af',
+  steal: '#f97316',
+  two_min_suspension: '#f97316',
+  blue_card: '#2563eb',
+  official_timeout: '#9ca3af',
+  shootout_scored: '#22c55e',
+  shootout_missed: '#9ca3af',
   match_start: '#9ca3af',
   match_half: '#9ca3af',
   match_end: '#9ca3af',
@@ -206,14 +231,14 @@ function getEventCategories(type: string): FilterKey[] {
     'try', 'penalty_try', 'conversion', 'penalty', 'penalty_goal', 'drop_goal',
     'goal', 'own_goal', 'touchdown', 'field_goal', 'extra_point',
     'two_point_conversion', 'safety', 'run', 'home_run', 'point', 'ace',
-    'block_point', 'seven_meter_goal', 'free_throw', 'two_pointer', 'three_pointer',
+    'block_point', 'seven_meter_goal', 'seven_meter', 'free_throw', 'two_pointer', 'three_pointer',
   ];
   if (pointTypes.includes(t)) cats.push('points');
 
   const kickTypes = ['kick', 'conversion', 'penalty_goal', 'drop_goal', 'field_goal', 'penalty', 'free_kick'];
   if (kickTypes.includes(t)) cats.push('kicks');
 
-  const cardTypes = ['yellow_card', 'red_card', 'card_yellow', 'card_red', 'green_card'];
+  const cardTypes = ['yellow_card', 'red_card', 'card_yellow', 'card_red', 'green_card', 'blue_card'];
   if (cardTypes.includes(t)) cats.push('cards');
 
   if (t === 'substitution') cats.push('substitutions');

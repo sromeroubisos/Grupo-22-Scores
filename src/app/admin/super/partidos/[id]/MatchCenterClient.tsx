@@ -835,6 +835,18 @@ function getEventButtonGlyph(type: string) {
         kickoff: 'KO',
         touchback: 'TB',
         timeout: 'TM',
+        /* ── Handball ──
+         * `seven_meter` y `seven_meter_goal` caian los dos en SE, `shot` y
+         * `shootout_*` en SH, y `steal` con `save` en SA: el fallback de dos
+         * letras no alcanza para un catalogo con tantos lanzamientos. */
+        seven_meter: '7M',
+        seven_meter_goal: '7G',
+        seven_meter_miss: '7F',
+        shot: 'LZ',
+        steal: 'RB',
+        two_min_suspension: '2M',
+        blue_card: 'TZ',
+        official_timeout: 'TO',
     };
 
     return glyphs[type] || type.slice(0, 2).toUpperCase();
@@ -898,13 +910,37 @@ const AMERICAN_FOOTBALL_BUTTON_LABELS: Record<string, string> = {
     turnover_on_downs: 'Pérdida en downs',
 };
 
+/**
+ * Handball: lo que no entra en el boton, y que NO herede las de rugby
+ * (`turnover_lost` es "Perdida", no "Turnover perdido").
+ */
+const HANDBALL_BUTTON_LABELS: Record<string, string> = {
+    seven_meter: '7 metros',
+    shot: 'Lanzamiento sin gol',
+    turnover_lost: 'Pérdida',
+    two_min_suspension: '2 minutos',
+    yellow_card: 'Amarilla',
+    red_card: 'Roja',
+    blue_card: 'Azul',
+    timeout: 'Tiempo muerto',
+    official_timeout: 'T.M. del árbitro',
+    match_start: 'Inicio partido',
+    match_end: 'Final partido',
+    shootout_start: 'Inicio tanda 7m',
+    shootout_scored: 'Convertido',
+    shootout_missed: 'Fallado',
+    shootout_end: 'Fin tanda 7m',
+};
+
 function getEventButtonLabel(definition: MatchEventDefinition, sportId?: string | null) {
     const bucket = normalizeSportBucket(sportId);
     const labels = bucket === 'hockey'
         ? HOCKEY_BUTTON_LABELS
         : bucket === 'american-football'
             ? AMERICAN_FOOTBALL_BUTTON_LABELS
-            : RUGBY_BUTTON_LABELS;
+            : bucket === 'handball'
+                ? HANDBALL_BUTTON_LABELS
+                : RUGBY_BUTTON_LABELS;
 
     return labels[definition.type] || definition.label;
 }
@@ -917,6 +953,10 @@ function getEventButtonLabel(definition: MatchEventDefinition, sportId?: string 
  */
 const QUICK_ACTIONS_BY_SPORT: Record<string, readonly string[]> = {
     hockey: ['goal', 'penalty_corner', 'penalty_stroke', 'shot_on_goal', 'green_card', 'yellow_card', 'red_card', 'foul'],
+    // Un partido de handball son 50 o 60 goles y otros tantos lanzamientos
+    // que no entran: eso y la exclusion de 2 minutos es lo que se carga sin
+    // parar. El resto (robos, faltas, tarjetas, cambios) queda plegado.
+    handball: ['goal', 'seven_meter', 'shot', 'save', 'two_min_suspension', 'turnover_lost', 'steal', 'timeout'],
     // Futbol americano no tiene fila: sus acciones salen del reglamento del
     // torneo (tackle o flag), ver getAmericanFootballQuickActions.
 };
@@ -935,6 +975,9 @@ const QUICK_PLAY_ACTIONS_BY_SPORT: Record<string, readonly string[]> = {};
  */
 const QUICK_CLOCK_ACTIONS_BY_SPORT: Record<string, readonly string[]> = {
     hockey: ['match_start', 'end_period', 'start_period', 'match_half', 'match_end'],
+    // Dos tiempos: inicio, entretiempo, reanudacion y final. `end_period` no
+    // va porque con mitades el panel lo esconde detras de `match_half`.
+    handball: ['match_start', 'match_half', 'start_period', 'match_end'],
 };
 
 function getQuickActionTypes(sportId: string | null | undefined, rules: AmericanFootballRuleset | null): readonly string[] {
@@ -982,6 +1025,25 @@ function getSportKpis(stats: CompleteMatchStats, sportId?: string | null): { lab
             { label: 'Touchdowns', value: pair(stats.touchdowns) },
             { label: 'Primeros downs', value: pair(stats.firstDowns) },
             { label: 'Turnovers', value: pair(stats.turnovers) },
+        ];
+    }
+
+    // Handball: por club, como en futbol americano. Los goles ya estan en el
+    // marcador; lo que el operador quiere ver es cuanto entro de lo que se
+    // lanzo, y cuantas exclusiones lleva cada uno.
+    if (bucket === 'handball') {
+        const pair = (value: { home: number; away: number }) => `${value.home} · ${value.away}`;
+        const shotsNoGoal = (side: 'home' | 'away') => stats.shotsSaved[side] + stats.shotsMissed[side] + stats.shotsBlocked[side]
+            + (stats.sevenMeters[side] - stats.sevenMeterGoals[side]);
+        const effectiveness = (side: 'home' | 'away') => {
+            const total = stats.points[side] + shotsNoGoal(side);
+            return total > 0 ? `${Math.round((stats.points[side] / total) * 100)}%` : '—';
+        };
+        return [
+            { label: 'Goles', value: pair(stats.points) },
+            { label: 'Efectividad de tiro', value: `${effectiveness('home')} · ${effectiveness('away')}` },
+            { label: '7 metros (gol / ejecutados)', value: `${stats.sevenMeterGoals.home}/${stats.sevenMeters.home} · ${stats.sevenMeterGoals.away}/${stats.sevenMeters.away}` },
+            { label: 'Exclusiones de 2 min', value: pair(stats.twoMinSuspensions) },
         ];
     }
 
@@ -3655,6 +3717,8 @@ export default function MatchCenterClient({
         // final y se esconden. Con cuartos son LOS eventos que mueven el reloj.
         const hidesGenericPeriodEvents = hasMatchClockEvents && getPeriodSequence(sportRef).length <= 2;
         const visibleDefinitions = availableEventDefinitions.filter((definition) => {
+            // Sigue resolviendo lo guardado, pero no se ofrece: lo reemplazo otro.
+            if (definition.legacy) return false;
             if (definition.type === 'penalty_goal' && hasPenalty) return false;
             if ((definition.type === 'start_period' || definition.type === 'end_period') && hidesGenericPeriodEvents) return false;
             if ((definition.type === 'yellow_card' || definition.type === 'red_card') && hasClubCards) return false;

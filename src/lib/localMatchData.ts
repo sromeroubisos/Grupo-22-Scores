@@ -226,6 +226,10 @@ function getEventPointsByType(type: string) {
       return 6;
     case 'goal':
     case 'own_goal':
+    // Handball: el 7 metros suma solo si su desenlace convierte, y eso ya lo
+    // decidio getEventPoints antes de llegar a esta tabla.
+    case 'seven_meter':
+    case 'seven_meter_goal':
     case 'free_throw':
     case 'point':
     case 'ace':
@@ -260,10 +264,13 @@ export function buildLocalPlayerStatsRows(args: {
   const bucket = normalizeSportBucket(args.sportId);
   const sportScoresInGoals = bucket === 'hockey' || bucket === 'football' || bucket === 'handball';
   const definitionMap = buildMatchEventDefinitionMap(getDefaultMatchEventDefinitions(args.sportId));
-  const countsAsGoal = (type: string) => {
+  const countsAsGoal = (type: string, description: string | null | undefined) => {
     if (!sportScoresInGoals) return false;
     const definition = definitionMap[type];
     if (!definition || definition.category !== 'score') return false;
+    // Un 7 metros atajado es `category: 'score'` y no es gol: lo dice el
+    // desenlace, igual que en el marcador.
+    if (definition.outcomes?.length && !outcomeScores(definition, description)) return false;
     return !definition.kickAtGoal && !definition.creditsOpponent;
   };
 
@@ -353,7 +360,7 @@ export function buildLocalPlayerStatsRows(args: {
     if (event.type === 'tackle') row.tackles += 1;
     // El gol de penal es un gol: entra en las dos cuentas, igual que en las
     // estadisticas de equipo (`penaltyGoals` es un subconjunto de los goles).
-    if (countsAsGoal(event.type)) {
+    if (countsAsGoal(event.type, event.description)) {
       row.goals += 1;
       if (event.type === 'penalty_goal') row.penaltyGoals += 1;
     }
@@ -423,6 +430,8 @@ const STAT_LABEL_OVERRIDES: Record<string, string> = {
   run: 'Carreras',
   home_run: 'Home runs',
   seven_meter_goal: 'Goles de 7m',
+  seven_meter: 'Lanzamientos de 7m',
+  blue_card: 'Tarjetas azules',
   card_yellow: 'Tarjetas amarillas',
   card_red: 'Tarjetas rojas',
   yellow_card: 'Tarjetas amarillas',
