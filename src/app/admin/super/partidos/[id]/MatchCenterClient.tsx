@@ -3461,6 +3461,8 @@ export default function MatchCenterClient({
     const notesDirty = !areTextValuesEqual(match.notes, persistedMatchRef.current.notes);
     const dateTimeDirty = dateTimeDraft !== toDateTimeLocalInput(persistedMatchRef.current.date_time);
     const hasUnsavedMatchParameters = scoreDirty || statusDirty || venueDirty || notesDirty || dateTimeDirty;
+    // La cabecera muestra el reloj junto al estado EN VIVO.
+    const liveClockLabel = clock.label;
     const canPauseClock = clock.isRunning;
     const canResumeClock = !clock.isRunning && clock.hasProgress;
     // El reloj ya no tiene estado "sin guardar": cada transicion se persiste sola
