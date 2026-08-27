@@ -114,14 +114,12 @@ async function clearStaleClientCaches() {
         );
     }
 
-    if ('serviceWorker' in navigator) {
-        tasks.push(
-            navigator.serviceWorker.getRegistrations().then((registrations) => (
-                Promise.all(registrations.map((registration) => registration.unregister()))
-            )),
-        );
-    }
-
+    // A proposito NO se desregistra el service worker. El SW no cachea chunks
+    // de JS (solo escudos, icono y manifest), asi que sacarlo no arregla un
+    // ChunkLoadError; y desregistrarlo mata la suscripcion Web Push del
+    // dispositivo: el servidor sigue teniendo el endpoint, el push service
+    // contesta 410 y el cron la apaga. Como esto se dispara despues de cada
+    // deploy, los avisos del celular se "desactivaban solos".
     await Promise.allSettled(tasks);
 }
 

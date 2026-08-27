@@ -1,5 +1,7 @@
 import 'server-only';
-import { createPrivateKey, sign } from 'node:crypto';
+// web-push es CommonJS: los exports nombrados no existen para un import ESM
+// (fallo al probarlo en Node puro), asi que se entra por el default.
+import webPush from 'web-push';
 
 export type StoredPushSubscription = {
     id: string;
@@ -7,6 +9,22 @@ export type StoredPushSubscription = {
     endpoint: string;
     p256dh: string;
     auth: string;
+};
+
+/**
+ * Lo que viaja adentro del push, cifrado (RFC 8291). Es lo que el service
+ * worker muestra en la bandeja SIN volver a preguntarle nada al servidor.
+ * Antes el push iba vacio y el SW salia a buscar el detalle a
+ * `/api/notifications` con la cookie de sesion; con la app cerrada varias
+ * horas esa sesion suele estar vencida y el aviso salia generico o no salia.
+ */
+export type SystemPushPayload = {
+    id: string;
+    title: string;
+    body: string;
+    entity_type?: string | null;
+    entity_id?: string | null;
+    match_id?: string | null;
 };
 
 export type PushSendResult = {
@@ -22,59 +40,14 @@ type VapidConfig = {
     subject: string;
 };
 
-function base64UrlEncode(input: Buffer | string) {
-    return Buffer.from(input)
-        .toString('base64')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/g, '');
-}
-
-function base64UrlDecode(input: string) {
-    const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
-    return Buffer.from(padded, 'base64');
-}
-
-function derToJoseSignature(derSignature: Buffer) {
-    let offset = 0;
-
-    if (derSignature[offset++] !== 0x30) {
-        throw new Error('Invalid ECDSA signature sequence.');
-    }
-
-    const sequenceLength = derSignature[offset++];
-    if (sequenceLength + offset !== derSignature.length) {
-        throw new Error('Invalid ECDSA signature length.');
-    }
-
-    if (derSignature[offset++] !== 0x02) {
-        throw new Error('Invalid ECDSA signature integer.');
-    }
-    const rLength = derSignature[offset++];
-    const r = derSignature.subarray(offset, offset + rLength);
-    offset += rLength;
-
-    if (derSignature[offset++] !== 0x02) {
-        throw new Error('Invalid ECDSA signature integer.');
-    }
-    const sLength = derSignature[offset++];
-    const s = derSignature.subarray(offset, offset + sLength);
-
-    const normalize = (value: Buffer) => {
-        let trimmed = value;
-        while (trimmed.length > 32 && trimmed[0] === 0) {
-            trimmed = trimmed.subarray(1);
-        }
-        if (trimmed.length > 32) {
-            throw new Error('Invalid ECDSA signature integer length.');
-        }
-
-        return Buffer.concat([Buffer.alloc(32 - trimmed.length), trimmed]);
-    };
-
-    return Buffer.concat([normalize(r), normalize(s)]);
-}
+/**
+ * Cuanto tiempo retiene el push service el mensaje si el celular no responde.
+ * Con 180 segundos, un telefono bloqueado en modo ahorro (Doze en Android,
+ * background app refresh en iOS) se despertaba tarde y el push ya no existia:
+ * "no me llegan cuando tengo el celular bloqueado" era literalmente esto.
+ * Seis horas cubren una noche entera; un resultado sigue valiendo a la manana.
+ */
+export const PUSH_TTL_SECONDS = 6 * 60 * 60;
 
 const FALLBACK_VAPID_SUBJECT = 'mailto:hola@g22scores.com';
 
@@ -93,6 +66,8 @@ function normalizeVapidSubject(candidate: string | undefined): string | null {
 
 function getVapidConfig(): VapidConfig | null {
     const publicKey = process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY || process.env.WEB_PUSH_PUBLIC_KEY;
+    // La privada es el campo `d` del JWK (32 bytes en base64url), no un PEM.
+    // Es exactamente el formato que web-push espera como privateKey.
     const privateKey = process.env.WEB_PUSH_PRIVATE_KEY;
     const subject = normalizeVapidSubject(process.env.WEB_PUSH_SUBJECT)
         ?? normalizeVapidSubject(process.env.NEXT_PUBLIC_SITE_URL)
@@ -105,35 +80,6 @@ function getVapidConfig(): VapidConfig | null {
     return { publicKey, privateKey, subject };
 }
 
-function createVapidToken(subscriptionEndpoint: string, config: VapidConfig) {
-    const publicKeyBytes = base64UrlDecode(config.publicKey);
-    if (publicKeyBytes.length !== 65 || publicKeyBytes[0] !== 0x04) {
-        throw new Error('WEB_PUSH_PUBLIC_KEY must be an uncompressed P-256 public key.');
-    }
-
-    const privateKey = createPrivateKey({
-        key: {
-            kty: 'EC',
-            crv: 'P-256',
-            x: base64UrlEncode(publicKeyBytes.subarray(1, 33)),
-            y: base64UrlEncode(publicKeyBytes.subarray(33, 65)),
-            d: config.privateKey,
-        },
-        format: 'jwk',
-    });
-
-    const tokenHeader = base64UrlEncode(JSON.stringify({ typ: 'JWT', alg: 'ES256' }));
-    const tokenPayload = base64UrlEncode(JSON.stringify({
-        aud: new URL(subscriptionEndpoint).origin,
-        exp: Math.floor(Date.now() / 1000) + 12 * 60 * 60,
-        sub: config.subject,
-    }));
-    const unsignedToken = `${tokenHeader}.${tokenPayload}`;
-    const signature = derToJoseSignature(sign('sha256', Buffer.from(unsignedToken), privateKey));
-
-    return `${unsignedToken}.${base64UrlEncode(signature)}`;
-}
-
 export function getPublicVapidKey() {
     return process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY || process.env.WEB_PUSH_PUBLIC_KEY || null;
 }
@@ -142,7 +88,23 @@ export function isSystemPushConfigured() {
     return Boolean(getVapidConfig());
 }
 
-export async function sendSystemPush(subscription: StoredPushSubscription): Promise<PushSendResult> {
+function serializePayload(payload: SystemPushPayload | null | undefined) {
+    if (!payload) return null;
+
+    return JSON.stringify({
+        id: payload.id,
+        title: payload.title,
+        body: payload.body,
+        entity_type: payload.entity_type ?? null,
+        entity_id: payload.entity_id ?? null,
+        match_id: payload.match_id ?? null,
+    });
+}
+
+export async function sendSystemPush(
+    subscription: StoredPushSubscription,
+    payload?: SystemPushPayload | null,
+): Promise<PushSendResult> {
     const config = getVapidConfig();
     if (!config) {
         return {
@@ -154,39 +116,47 @@ export async function sendSystemPush(subscription: StoredPushSubscription): Prom
     }
 
     try {
-        const token = createVapidToken(subscription.endpoint, config);
-        const response = await fetch(subscription.endpoint, {
-            method: 'POST',
-            headers: {
-                TTL: '180',
-                Urgency: 'high',
-                Authorization: `vapid t=${token}, k=${config.publicKey}`,
+        const response = await webPush.sendNotification(
+            {
+                endpoint: subscription.endpoint,
+                keys: { p256dh: subscription.p256dh, auth: subscription.auth },
             },
-        });
+            serializePayload(payload),
+            {
+                vapidDetails: {
+                    subject: config.subject,
+                    publicKey: config.publicKey,
+                    privateKey: config.privateKey,
+                },
+                TTL: PUSH_TTL_SECONDS,
+                urgency: 'high',
+                contentEncoding: 'aes128gcm',
+            },
+        );
 
-        if (response.ok || response.status === 201 || response.status === 202 || response.status === 204) {
+        return {
+            ok: true,
+            status: response.statusCode,
+            expired: false,
+        };
+    } catch (error) {
+        if (error instanceof webPush.WebPushError) {
+            const body = typeof error.body === 'string' ? error.body : '';
+
+            // Una suscripcion creada con otro par VAPID rebota para siempre: Apple lo
+            // dice con VapidPkHashMismatch y otros push services con un 403. No se
+            // arregla reintentando, asi que se marca para que el cron la apague en
+            // vez de fallar con cada notificacion hasta el fin de los tiempos.
+            const keyMismatch = error.statusCode === 403 || body.includes('VapidPkHashMismatch');
+
             return {
-                ok: true,
-                status: response.status,
-                expired: false,
+                ok: false,
+                status: error.statusCode,
+                expired: error.statusCode === 404 || error.statusCode === 410 || keyMismatch,
+                error: body || error.message || 'push_send_failed',
             };
         }
 
-        const body = await response.text().catch(() => '');
-
-        // Una suscripcion creada con otro par VAPID rebota para siempre: Apple lo
-        // dice con VapidPkHashMismatch y otros push services con un 403. No se
-        // arregla reintentando, asi que se marca para que el cron la apague en
-        // vez de fallar con cada notificacion hasta el fin de los tiempos.
-        const keyMismatch = response.status === 403 || body.includes('VapidPkHashMismatch');
-
-        return {
-            ok: false,
-            status: response.status,
-            expired: response.status === 404 || response.status === 410 || keyMismatch,
-            error: body || response.statusText || 'push_send_failed',
-        };
-    } catch (error) {
         return {
             ok: false,
             status: 0,
