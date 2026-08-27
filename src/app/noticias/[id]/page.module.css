@@ -618,6 +618,20 @@
     color: var(--ink);
 }
 
+/* La tanda de penales, al lado del marcador: "1 (4)". */
+.railPenalty {
+    margin-left: 3px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+}
+
+.railTeamWinner .railPenalty {
+    color: var(--ink);
+}
+
 /* Mientras llega el feed, el carril reserva su alto: la nota no salta. */
 .railSkeleton {
     list-style: none;

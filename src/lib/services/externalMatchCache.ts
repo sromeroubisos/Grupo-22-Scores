@@ -33,7 +33,14 @@ export interface CachedExternalMatch {
     country_name: string | null;
     home_team: CachedTeam;
     away_team: CachedTeam;
-    score: { home: number | null; away: number | null };
+    /**
+     * La tanda va acá adentro y no en una columna aparte: la caché guarda
+     * `score` como jsonb y quien lo lee espera el mismo objeto que el resto de
+     * la app (`score.penalties`). Sin esto, un 1-1 definido por penales llegaba
+     * a la pantalla como un empate pelado — el dato lo publica el proveedor y
+     * lo borraba la caché.
+     */
+    score: { home: number | null; away: number | null; penalties?: { home: number; away: number } | null };
     status: 'scheduled' | 'live' | 'final' | 'postponed' | 'cancelled';
     date_time: string;        // ISO string
     round_label: string | null;
@@ -66,6 +73,13 @@ function normalizeCachedTeam(team: CachedTeam): CachedTeam {
             team_url: team.team_url || '',
         }),
     };
+}
+
+/** La tanda solo si vienen los dos números: media tanda no es un resultado. */
+function cachedPenalties(penalties: unknown): { home: number; away: number } | null {
+    const shootout = penalties as { home?: unknown; away?: unknown } | null | undefined;
+    if (typeof shootout?.home !== 'number' || typeof shootout?.away !== 'number') return null;
+    return { home: shootout.home, away: shootout.away };
 }
 
 // ── Mapper: Match → CachedExternalMatch ──────────────────────────────────────
@@ -109,7 +123,8 @@ export function mapFlashScoreMatchToCached(m: Match, sport: string): CachedExter
         }),
         score: {
             home: m.score?.home ?? null,
-            away: m.score?.away ?? null
+            away: m.score?.away ?? null,
+            penalties: cachedPenalties((m.score as { penalties?: unknown } | undefined)?.penalties),
         },
         status,
         date_time: dateTime,
@@ -125,7 +140,7 @@ export function mapExternalMatchToCached(match: {
     countryName?: string | null;
     homeTeam: CachedTeam;
     awayTeam: CachedTeam;
-    score?: { home: number | null; away: number | null } | null;
+    score?: { home: number | null; away: number | null; penalties?: { home: number; away: number } | null } | null;
     status: CachedExternalMatch['status'];
     dateTime: string;
     roundLabel?: string | null;
@@ -141,6 +156,7 @@ export function mapExternalMatchToCached(match: {
         score: {
             home: match.score?.home ?? null,
             away: match.score?.away ?? null,
+            penalties: cachedPenalties(match.score?.penalties),
         },
         status: match.status,
         date_time: match.dateTime,
