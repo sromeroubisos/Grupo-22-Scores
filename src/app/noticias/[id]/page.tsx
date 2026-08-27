@@ -10,7 +10,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
 
 import NewsBody from '@/components/news/NewsBody';
@@ -19,6 +19,7 @@ import ProtectedLink from '@/components/ProtectedLink';
 import { getServerAuthRole } from '@/lib/auth/newsAccess';
 import { hasNewsManagementAccess } from '@/lib/auth/roles';
 import type { MentionRef, ResolvedMention } from '@/lib/news/mentions';
+import { newsIdFromSegment, newsPath, newsSegment } from '@/lib/news/newsUrl';
 import { collectMentions, plainTextOf, wordCountOf } from '@/lib/news/richText';
 import { resolveNewsMentions } from '@/lib/server/newsMentions';
 import { absoluteUrl } from '@/lib/seo/siteUrl';
@@ -29,6 +30,9 @@ export const dynamic = 'force-dynamic';
 
 type NewsPageProps = {
     params: Promise<{
+        // La carpeta es [id] por historia, pero lo que llega es el tramo
+        // entero de la URL: `titular-id`, o el id pelado en los links viejos.
+        // Quien lo traduce es newsIdFromSegment (ver lib/news/newsUrl.ts).
         id: string;
     }>;
 };
@@ -194,8 +198,8 @@ async function loadMentions(refs: MentionRef[]): Promise<Record<string, Resolved
 }
 
 export async function generateMetadata({ params }: NewsPageProps): Promise<Metadata> {
-    const { id } = await params;
-    const { news } = await loadNews(id).catch(() => ({ news: null, canManageNews: false }));
+    const { id: segment } = await params;
+    const { news } = await loadNews(newsIdFromSegment(segment)).catch(() => ({ news: null, canManageNews: false }));
     if (!news) return { title: 'Noticia | G22 Scores' };
 
     const description = descriptionOf(news);
@@ -204,7 +208,9 @@ export async function generateMetadata({ params }: NewsPageProps): Promise<Metad
     const keywords = [...tags, ...(sport ? [sport] : [])];
     const image = publicImageOf(news) ?? FALLBACK_OG_IMAGE;
     const published = news.status === 'published';
-    const canonicalPath = `/noticias/${news.id}`;
+    // Siempre la forma con titular: se entre por donde se entre, la nota se
+    // anuncia en una sola URL.
+    const canonicalPath = newsPath(news);
 
     return {
         title: `${news.title} | Noticias G22 Scores`,
@@ -250,7 +256,7 @@ function RelatedNews({ items }: { items: RelatedNewsRow[] }) {
                     const date = shortDate(item.published_at);
                     return (
                         <li key={item.id}>
-                            <Link href={`/noticias/${item.id}`} className={styles.relatedItem}>
+                            <Link href={newsPath(item)} className={styles.relatedItem}>
                                 <span className={styles.relatedThumb} aria-hidden="true">
                                     {/* eslint-disable-next-line @next/next/no-img-element -- miniatura remota de otra nota, debajo del pliegue. */}
                                     {image ? <img src={image} alt="" loading="lazy" decoding="async" /> : null}
@@ -273,11 +279,37 @@ function RelatedNews({ items }: { items: RelatedNewsRow[] }) {
 }
 
 export default async function NewsPage({ params }: NewsPageProps) {
-    const { id } = await params;
-    const { news, canManageNews } = await loadNews(id);
+    const { id: segment } = await params;
+    const { news, canManageNews } = await loadNews(newsIdFromSegment(segment));
 
     if (!news) {
         notFound();
+    }
+
+    // La URL vieja (el id pelado) y la que quedó con un titular ya corregido
+    // siguen abriendo, pero mandan de una vez a la forma canónica: así el
+    // buscador junta las señales en una sola dirección y ningún link ya
+    // compartido queda muerto. La comparación es contra el tramo entero, así
+    // que una nota cuyo titular no deja slug —canónico = id pelado— no entra
+    // en un bucle.
+    //
+    // Ojo con lo que sale por el cable, que está medido: acá el redirect NO
+    // llega como 308. El layout envuelve a los hijos en un <Suspense>, el
+    // documento ya empezó a viajar cuando esto corre y el 200 quedó firmado,
+    // así que Next lo degrada a un <meta refresh> instantáneo. Al lector lo
+    // deja donde tiene que estar y el buscador lo atiende como redirect, pero
+    // más flojo que un 308. Probado también desde generateMetadata —antes del
+    // primer envío— y sale peor: ahí ni siquiera queda el meta, el redirect se
+    // va entero al payload y solo lo resuelve el cliente al hidratar.
+    //
+    // Es el mismo motivo por el que un notFound() de este proyecto contesta
+    // 200. Se arregla sacando ese <Suspense>, que es una decisión de todo el
+    // sitio y no de esta nota. Mientras tanto lo que sostiene la canonización
+    // es el resto: el sitemap, todos los links internos y el <link canonical>
+    // nombran una sola URL, la que lleva titular.
+    const canonicalSegment = newsSegment(news);
+    if (segment !== canonicalSegment) {
+        permanentRedirect(`/noticias/${canonicalSegment}`);
     }
 
     const mentionRefs = collectMentions(news.content);
@@ -304,7 +336,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
 
     // Solo una nota publicada se anuncia como artículo a los buscadores.
     // El JSON-LD no pasa por metadataBase: acá las URLs van absolutas.
-    const canonicalUrl = absoluteUrl(`/noticias/${news.id}`);
+    const canonicalUrl = absoluteUrl(newsPath(news));
     const jsonLd = news.status === 'published'
         ? {
             '@context': 'https://schema.org',

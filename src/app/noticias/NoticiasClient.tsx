@@ -26,6 +26,7 @@ import {
 import MobileSectionTabs from '@/components/MobileSectionTabs';
 import ProtectedLink from '@/components/ProtectedLink';
 import { plainTextOf } from '@/lib/news/richText';
+import { newsPath } from '@/lib/news/newsUrl';
 import { sessionFetch } from '@/lib/supabase/freshSession';
 import { useSport } from '@/context/SportContext';
 import type { VideoHubSummary } from '@/lib/videoHub/types';
@@ -149,7 +150,7 @@ function NewsCard({ item, canManage, menuOpen, onToggleMenu, onToggleStatus, onD
 
     return (
         <article className={styles.newsCard}>
-            <Link href={`/noticias/${item.id}`} className={styles.newsLink}>
+            <Link href={newsPath(item)} className={styles.newsLink}>
                 <span className={styles.newsMedia}>
                     {image ? (
                         // eslint-disable-next-line @next/next/no-img-element -- imagen remota de la nota; no pasa por el optimizador.

@@ -7,6 +7,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { MetadataRoute } from 'next';
 
+import { newsPath } from '@/lib/news/newsUrl';
 import { publicSiteUrl } from '@/lib/seo/siteUrl';
 
 // PostgREST corta en 1000 filas: el tope va explícito para que nadie crea
@@ -18,6 +19,9 @@ export const revalidate = 3600;
 
 type NewsSitemapRow = {
     id: string;
+    // El titular entra en la URL de la nota (ver lib/news/newsUrl.ts): el
+    // sitemap tiene que declarar la misma dirección que el canonical.
+    title: string | null;
     published_at: string | null;
     updated_at: string | null;
 };
@@ -33,7 +37,7 @@ async function publishedNews(): Promise<NewsSitemapRow[]> {
         });
         const { data, error } = await supabase
             .from('news')
-            .select('id, published_at, updated_at')
+            .select('id, title, published_at, updated_at')
             .eq('status', 'published')
             .order('published_at', { ascending: false })
             .limit(NEWS_LIMIT);
@@ -58,7 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ];
 
     const newsPages: MetadataRoute.Sitemap = (await publishedNews()).map((news) => ({
-        url: `${base}/noticias/${news.id}`,
+        url: `${base}${newsPath(news)}`,
         lastModified: news.updated_at ?? news.published_at ?? undefined,
         changeFrequency: 'weekly',
         priority: 0.8,
