@@ -13,7 +13,12 @@ import {
     parseFihMatchId,
     parseFihPoolsHtml,
     parseFihTournamentId,
+    fihPlayerDisplayName,
+    parseFihPlayerRef,
+    parseFihTeamRef,
     toFihMatchId,
+    toFihPlayerRef,
+    toFihTeamRef,
 } from './fihHockeyParser.ts';
 
 /**
@@ -391,4 +396,47 @@ test('los identificadores van y vuelven', () => {
     assert.equal(parseFihTournamentId(FIH_COMPETITIONS.w.tournamentId), 'w');
     assert.equal(parseFihTournamentId('fih-wc-9999'), null);
     assert.equal(parseFihTournamentId('espn-soccer-league-fifa.world'), null);
+});
+
+// --------------------------------------------------------------------------
+// Los ids de las fichas del Mundial
+// --------------------------------------------------------------------------
+
+test('el id de una seleccion dice la competencia, y se vuelve a leer', () => {
+    const ref = toFihTeamRef('w', 'arg');
+    assert.equal(ref, 'fih-wc-1867-ARG', 'el codigo va en mayusculas');
+    assert.deepEqual(parseFihTeamRef(ref), { key: 'w', code: 'ARG' });
+    assert.deepEqual(parseFihTeamRef(toFihTeamRef('m', 'ARG')), { key: 'm', code: 'ARG' });
+
+    // El id viejo de las filas de partidos no dice el genero: la ficha mira las dos.
+    assert.deepEqual(parseFihTeamRef('fih-team-ned'), { key: null, code: 'NED' });
+
+    // Lo que no es una seleccion no resuelve.
+    assert.equal(parseFihTeamRef('fih-wc-9999-ARG'), null, 'una competencia que no existe');
+    assert.equal(parseFihTeamRef('fih-wc-1867-ARGENTINA'), null, 'el codigo es de tres letras');
+    assert.equal(parseFihTeamRef('los-tilos'), null);
+    assert.equal(parseFihTeamRef(null), null);
+    // Un marcador de posicion del cuadro ("Ganador 47") no es un pais.
+    assert.equal(parseFihTeamRef('fih-team-ganador-47'), null);
+});
+
+test('el id de una jugadora cuelga del de su seleccion', () => {
+    const ref = toFihPlayerRef('w', 'ARG', '3968');
+    assert.equal(ref, 'fih-wc-1867-ARG-3968');
+    assert.deepEqual(parseFihPlayerRef(ref), { key: 'w', code: 'ARG', personId: '3968' });
+
+    // El id de una seleccion NO es el de una jugadora, y al reves tampoco.
+    assert.equal(parseFihPlayerRef('fih-wc-1867-ARG'), null);
+    assert.equal(parseFihTeamRef(ref), null);
+    assert.equal(parseFihPlayerRef('fih-wc-1867-ARG-../../etc'), null, 'no entra una ruta');
+});
+
+test('el feed escribe el apellido adelante y en mayusculas: la ficha lo da vuelta', () => {
+    assert.equal(fihPlayerDisplayName('JANKUNAS Julieta'), 'Julieta Jankunas');
+    assert.equal(fihPlayerDisplayName('DE WAARD Maria'), 'Maria de Waard', 'la particula queda en minuscula');
+    assert.equal(fihPlayerDisplayName('VAN MAASAKKER Caia'), 'Caia van Maasakker');
+    // Sin mayusculas de apellido, o todo en mayusculas, se deja como esta.
+    assert.equal(fihPlayerDisplayName('Julieta Jankunas'), 'Julieta Jankunas');
+    assert.equal(fihPlayerDisplayName('JANKUNAS'), 'JANKUNAS');
+    assert.equal(fihPlayerDisplayName('  '), '');
 });

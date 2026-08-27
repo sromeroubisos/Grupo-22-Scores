@@ -26,6 +26,7 @@ import {
     fihTeamFlagUrl,
     fihTeamId,
     parseFihMatchesHtml,
+    toFihPlayerRef,
     parseFihMatchId,
     parseFihPoolsHtml,
     toFihMatchId,
@@ -47,6 +48,7 @@ import {
     type FihMatchDetail,
     type FihSquadPlayer,
     type FihTour,
+    type FihTourTeam,
 } from '@/lib/services/fihMatchDataParser';
 
 export {
@@ -647,12 +649,13 @@ function positionLabel(isGoalkeeper: boolean) {
     return isGoalkeeper ? 'Arquero' : '';
 }
 
-function toLineupPlayer(player: FihBoxScorePlayer, caps: number | null) {
+function toLineupPlayer(player: FihBoxScorePlayer, caps: number | null, ref: string | null) {
     return {
-        // Sin id: el enlace a `/players/{id}` no resuelve un UUID de
-        // Sportradar, y un nombre que no lleva a ningún lado es peor que un
-        // nombre.
-        id: null,
+        // El id NO es el de Sportradar: es el de la ficha del Mundial
+        // (`fih-wc-1867-ARG-3968`), que `/players/[id]` resuelve contra el
+        // plantel del feed. Null cuando el plantel no trae a esa persona y no
+        // hay ficha que abrir.
+        id: ref,
         name: player.name,
         number: player.number,
         position: positionLabel(player.isGoalkeeper),
@@ -666,6 +669,7 @@ function toLineupPlayer(player: FihBoxScorePlayer, caps: number | null) {
 function buildLineups(
     players: FihBoxScorePlayer[],
     capsByPersonId: Map<string, number>,
+    refByPersonId: Map<string, string>,
     homeName: string,
     awayName: string,
 ) {
@@ -673,7 +677,11 @@ function buildLineups(
 
     const bySide = (side: 'home' | 'away', starter: boolean) => players
         .filter((player) => player.team === side && player.starter === starter)
-        .map((player) => toLineupPlayer(player, player.id ? capsByPersonId.get(player.id) ?? null : null));
+        .map((player) => toLineupPlayer(
+            player,
+            player.id ? capsByPersonId.get(player.id) ?? null : null,
+            player.id ? refByPersonId.get(player.id) ?? null : null,
+        ));
 
     const homeStarting = bySide('home', true);
     const awayStarting = bySide('away', true);
@@ -704,7 +712,9 @@ function buildLineups(
 function buildPlayerStats(
     players: FihBoxScorePlayer[],
     capsByPersonId: Map<string, number>,
+    refByPersonId: Map<string, string>,
     squads: { side: 'home' | 'away'; players: FihSquadPlayer[] }[],
+    refBySquadPlayer: Map<FihSquadPlayer, string>,
     homeName: string,
     awayName: string,
 ) {
@@ -713,9 +723,8 @@ function buildPlayerStats(
     if (players.length > 0) {
         return {
             players: players.map((player) => ({
-                // Sin id, por lo mismo que en las alineaciones: ni el `personId`
-                // de Sportradar ni el de la FIH abren una ficha en esta app.
-                player_id: null,
+                // El id de la ficha del Mundial, no el de Sportradar (ver `toLineupPlayer`).
+                player_id: player.id ? refByPersonId.get(player.id) ?? null : null,
                 player_name: player.name,
                 team_name: teamName(player.team),
                 number: player.number,
@@ -733,7 +742,7 @@ function buildPlayerStats(
     }
 
     const roster = squads.flatMap(({ side, players: squad }) => squad.map((player) => ({
-        player_id: null,
+        player_id: refBySquadPlayer.get(player) ?? null,
         player_name: player.name,
         team_name: teamName(side),
         number: player.number,
@@ -838,20 +847,38 @@ async function loadFihMatchExtras(key: FihCompetitionKey, row: FihMatchRow) {
         if (player.srPersonId && player.caps !== null) capsByPersonId.set(player.srPersonId, player.caps);
     }
 
+    // Y por el mismo cruce sale la FICHA de cada jugadora: el plantel tiene el
+    // id de la FIH (el que va en la URL) y el de Sportradar (el que firma la
+    // planilla), así que uno lleva al otro.
+    const refByPersonId = new Map<string, string>();
+    const refBySquadPlayer = new Map<FihSquadPlayer, string>();
+    for (const [team, squad] of [[homeTeam, homeSquad], [awayTeam, awaySquad]] as const) {
+        if (!team) continue;
+        for (const player of squad) {
+            const ref = toFihPlayerRef(key, team.code, player.id);
+            refBySquadPlayer.set(player, ref);
+            if (player.srPersonId) refByPersonId.set(player.srPersonId, ref);
+        }
+    }
+
     const players = detail?.players ?? [];
     return {
         detail: detail && {
             ...detail,
-            // El `personId` de Sportradar no es un jugador de esta app: la
-            // cronología lo convertiría en un enlace a `/players/{id}` que abre
-            // una ficha vacía. Mismo criterio que en las alineaciones.
-            events: detail.events.map((event) => ({ ...event, playerId: null })),
+            // La cronología enlaza a la ficha del Mundial cuando el plantel
+            // trae a esa persona; si no, queda sin enlace (antes NUNCA tenía).
+            events: detail.events.map((event) => ({
+                ...event,
+                playerId: event.playerId ? refByPersonId.get(event.playerId) ?? null : null,
+            })),
         },
-        lineups: buildLineups(players, capsByPersonId, row.homeName, row.awayName),
+        lineups: buildLineups(players, capsByPersonId, refByPersonId, row.homeName, row.awayName),
         playerStats: buildPlayerStats(
             players,
             capsByPersonId,
+            refByPersonId,
             [{ side: 'home', players: homeSquad }, { side: 'away', players: awaySquad }],
+            refBySquadPlayer,
             row.homeName,
             row.awayName,
         ),
@@ -1000,4 +1027,53 @@ export async function getFihWorldCupSquads(): Promise<FihWorldCupSquad[]> {
         players: await getFihSquad(entry.competition.key, entry.team.teamId),
     })));
     return settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+}
+
+/**
+ * La planilla de un partido del Mundial (`fih-match-w-22431`), sola: sin el
+ * historial, los planteles ni la tabla que arma el bundle completo. La usa la
+ * ficha de una jugadora para contar sus goles partido por partido.
+ *
+ * Devuelve vacío —nunca lanza— si el partido no existe, si Sportradar todavía
+ * no publicó la planilla o si el proveedor no contesta: una ficha sin números
+ * se lee igual, una que revienta no.
+ */
+export async function getFihWorldCupBoxScore(matchId: string): Promise<FihBoxScorePlayer[]> {
+    const parsed = parseFihMatchId(matchId);
+    if (!parsed) return [];
+
+    try {
+        const rows = await getFihCompetitionMatches(parsed.key);
+        const row = rows.find((candidate) => candidate.altiusId === parsed.altiusId);
+        if (!row) return [];
+
+        const joinKey = fihFixtureJoinKey(row.homeCode, row.awayCode, row.startsAtIso);
+        if (!joinKey) return [];
+
+        const fixtureId = (await getSportradarFixtureIndex(parsed.key)).get(joinKey);
+        if (!fixtureId) return [];
+
+        const detail = await getSportradarMatchDetail(fixtureId, row.state === 'live');
+        return detail?.players ?? [];
+    } catch (error) {
+        console.warn('[FIH] planilla no disponible para', matchId, error instanceof Error ? error.message : error);
+        return [];
+    }
+}
+
+/** Una seleccion del Mundial por su codigo de tres letras. null si no juega esa competencia. */
+export async function getFihWorldCupTeam(key: FihCompetitionKey, code: string): Promise<FihTourTeam | null> {
+    try {
+        const tour = await getFihTour(key);
+        const wanted = code.trim().toUpperCase();
+        return tour.teams.find((team) => team.code.toUpperCase() === wanted) ?? null;
+    } catch (error) {
+        console.warn('[FIH] tour no disponible para', key, error instanceof Error ? error.message : error);
+        return null;
+    }
+}
+
+/** El plantel de una seleccion. Lo expone para la ficha; adentro es el mismo `getFihSquad` cacheado. */
+export async function getFihWorldCupSquad(key: FihCompetitionKey, teamId: number): Promise<FihSquadPlayer[]> {
+    return getFihSquad(key, teamId);
 }

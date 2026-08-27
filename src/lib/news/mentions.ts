@@ -121,17 +121,13 @@ export function parseMentionKey(key: string): Pick<MentionRef, 'kind' | 'ref'> |
 }
 
 /**
- * Una selección o una jugadora del Mundial de hockey (feed de la FIH) no
- * tiene ficha propia en la web: su id lleva el torneo adelante
- * (`fih-wc-1867-ARG`, `fih-wc-1867-ARG-<persona>`) y la mención lleva a la
- * página del torneo, que es donde están el fixture y los planteles.
+ * A dónde lleva una mención cuando no hay nada resuelto: la ficha de la
+ * entidad. Una selección o una jugadora del Mundial de hockey no viven en la
+ * base, pero tienen ficha igual: su id lleva el torneo adelante
+ * (`fih-wc-1867-ARG`, `fih-wc-1867-ARG-3968`) y `/clubs/[id]` y
+ * `/players/[id]` lo resuelven contra el feed (ver `server/worldCupProfiles.ts`).
  */
-const FIH_ENTITY_REF = /^(fih-wc-\d+)-/;
-
-/** A dónde lleva una mención cuando no hay nada resuelto: la ficha de la entidad. */
 export function hrefForMention(kind: MentionKind, ref: string): string {
-    const fih = kind === 'club' || kind === 'player' ? FIH_ENTITY_REF.exec(ref) : null;
-    if (fih) return `/tournaments/${fih[1]}`;
     switch (kind) {
         case 'club': return `/clubs/${ref}`;
         case 'player': return `/players/${ref}`;
