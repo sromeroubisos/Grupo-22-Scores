@@ -953,3 +953,51 @@ export async function getFihWorldCupMatchBundle(matchId: string) {
         playerStats: extras.playerStats,
     };
 }
+
+// --------------------------------------------------------------------------
+// Para etiquetar desde una noticia (lib/server/newsMentions.ts)
+// --------------------------------------------------------------------------
+
+/** Una selección del Mundial, con la competencia en la que juega. */
+export interface FihWorldCupTeam {
+    competition: FihCompetition;
+    team: FihTour['teams'][number];
+}
+
+/** El plantel de una selección del Mundial. */
+export interface FihWorldCupSquad extends FihWorldCupTeam {
+    players: FihSquadPlayer[];
+}
+
+/** Todos los partidos del Mundial (M y F), jugados y por jugar, en el modelo de la app. */
+export async function getFihWorldCupAllMatches(): Promise<Match[]> {
+    const competitions = await getAllCompetitionMatches();
+    return competitions.flatMap(({ competition, rows }) =>
+        rows
+            .map((row) => toAppMatch(row, competition))
+            .filter((match): match is Match => match !== null),
+    );
+}
+
+/** Las selecciones de las dos competencias. Una competencia que no responde no tira la otra. */
+export async function getFihWorldCupTeams(): Promise<FihWorldCupTeam[]> {
+    const settled = await Promise.allSettled(FIH_COMPETITION_KEYS.map(async (key) => {
+        const tour = await getFihTour(key);
+        return tour.teams.map((team) => ({ competition: FIH_COMPETITIONS[key], team }));
+    }));
+    return settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
+}
+
+/**
+ * Los planteles de todas las selecciones del Mundial. Son hasta 32 pedidos al
+ * feed la primera vez; después viven en la caché (TTL_SQUAD_SECONDS). Un
+ * plantel que no responde se saltea.
+ */
+export async function getFihWorldCupSquads(): Promise<FihWorldCupSquad[]> {
+    const teams = await getFihWorldCupTeams();
+    const settled = await Promise.allSettled(teams.map(async (entry) => ({
+        ...entry,
+        players: await getFihSquad(entry.competition.key, entry.team.teamId),
+    })));
+    return settled.flatMap((result) => (result.status === 'fulfilled' ? [result.value] : []));
+}

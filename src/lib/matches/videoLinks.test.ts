@@ -148,15 +148,40 @@ test('ESPN sin clip (una nota, ESPN+, un id raro) se reconoce y se abre afuera; 
     assert.equal(parseVideoUrl('https://www.notespn.com/video/clip/_/id/17152408')?.provider, 'other');
 });
 
-test('Instagram, TikTok y X se reconocen y se abren afuera; el resto es otro sitio', () => {
-    assert.deepEqual(
-        [parseVideoUrl('https://www.instagram.com/reel/abc/')?.provider, parseVideoUrl('https://www.tiktok.com/@x/video/1')?.provider, parseVideoUrl('https://x.com/a/status/1')?.provider],
-        ['instagram', 'tiktok', 'x'],
-    );
-    for (const url of ['https://www.instagram.com/reel/abc/', 'https://www.tiktok.com/@x/video/1', 'https://x.com/a/status/1']) {
-        assert.equal(parseVideoUrl(url)?.embedUrl, null, url);
-    }
+test('X: una publicación se embebe como tarjeta; sin id de status, o por t.co, se abre afuera', () => {
+    const tweet = parseVideoUrl('https://x.com/SC_ESPN/status/2093064541085077822?s=20');
+    assert.equal(tweet?.provider, 'x');
+    assert.equal(tweet?.embedUrl, 'https://platform.twitter.com/embed/Tweet.html?id=2093064541085077822&dnt=true&theme=dark&hideThread=true');
+    assert.equal(tweet?.aspect, 'card', 'un tweet es una tarjeta, no un video a proporcion');
+    assert.equal(parseVideoUrl('https://twitter.com/i/web/status/2093064541085077822')?.embedUrl, tweet?.embedUrl, 'twitter.com y /i/web/ dan el mismo embed');
 
+    for (const url of ['https://x.com/SC_ESPN', 'https://t.co/abc123', 'https://x.com/a/status/notanid']) {
+        const parsed = parseVideoUrl(url);
+        assert.equal(parsed?.provider, 'x', url);
+        assert.equal(parsed?.embedUrl, null, url);
+    }
+    // El autoplay no se le pega a una publicacion.
+    assert.equal(withAutoplay('x', tweet!.embedUrl!), tweet!.embedUrl);
+});
+
+test('Instagram: un post es tarjeta, un reel va alto; TikTok se embebe por su id', () => {
+    const post = parseVideoUrl('https://www.instagram.com/p/C1a2B3c4D5e/');
+    assert.equal(post?.embedUrl, 'https://www.instagram.com/p/C1a2B3c4D5e/embed/');
+    assert.equal(post?.aspect, 'card');
+
+    const reel = parseVideoUrl('https://www.instagram.com/reels/C1a2B3c4D5e/?igsh=xyz');
+    assert.equal(reel?.embedUrl, 'https://www.instagram.com/reel/C1a2B3c4D5e/embed/', '/reels/ se normaliza a /reel/');
+    assert.equal(reel?.aspect, 'portrait');
+    assert.equal(parseVideoUrl('https://www.instagram.com/losdrogadictos/')?.embedUrl, null, 'un perfil no se embebe');
+
+    const tiktok = parseVideoUrl('https://www.tiktok.com/@rugbyarg/video/7301234567890123456');
+    assert.equal(tiktok?.provider, 'tiktok');
+    assert.equal(tiktok?.embedUrl, 'https://www.tiktok.com/embed/v2/7301234567890123456');
+    assert.equal(tiktok?.aspect, 'portrait');
+    assert.equal(parseVideoUrl('https://vm.tiktok.com/ZMabc/')?.embedUrl, null, 'el corto redirige: afuera');
+});
+
+test('lo que no es de ninguna plataforma es otro sitio y se abre afuera', () => {
     const other = parseVideoUrl('https://www.rugbypass.com/videos/final-2026');
     assert.equal(other?.provider, 'other');
     assert.equal(other?.embedUrl, null);

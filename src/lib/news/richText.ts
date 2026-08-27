@@ -12,15 +12,22 @@
 //   **negrita**  _cursiva_ / *cursiva*  [texto](https://…)
 //   ![alt](https://…/foto.jpg "epígrafe")   sola en su renglón → figura
 //   > cita             - ítem / 1. ítem     ---   → separador
+//   @[Los Tilos](club:<id>)  → mención: link a la ficha (club, player,
+//                              tournament, match, video). Un partido o un
+//                              video solos en su renglón → tarjeta / reproductor
+//   https://youtu.be/…  sola en su renglón → reproductor (si la plataforma se embebe)
 //
 // Una nota vieja (párrafos separados por una línea en blanco, sin marcas)
 // pasa por acá y se ve exactamente igual que antes.
+
+import { isValidMentionRef, mentionKey, type MentionKind, type MentionRef } from './mentions';
 
 export type InlineNode =
     | { type: 'text'; text: string }
     | { type: 'strong'; children: InlineNode[] }
     | { type: 'em'; children: InlineNode[] }
     | { type: 'link'; href: string; children: InlineNode[] }
+    | { type: 'mention'; kind: MentionKind; ref: string; label: string }
     | { type: 'break' };
 
 export type BlockNode =
@@ -29,6 +36,7 @@ export type BlockNode =
     | { type: 'quote'; paragraphs: InlineNode[][] }
     | { type: 'list'; ordered: boolean; items: InlineNode[][] }
     | { type: 'image'; src: string; alt: string; caption: string | null }
+    | { type: 'embed'; kind: 'match' | 'video'; ref: string; label: string | null }
     | { type: 'rule' };
 
 const HEADING = /^(#{1,3})\s+(.+?)\s*#*\s*$/;
@@ -38,7 +46,12 @@ const QUOTE = /^>\s?(.*)$/;
 const BULLET = /^[-*•]\s+(.+)$/;
 const NUMBERED = /^\d{1,3}[.)]\s+(.+)$/;
 const LINK = /^\[([^\]]+)\]\(\s*(\S+?)(?:\s+"[^"]*")?\s*\)/;
-const ESCAPABLE = '\\*_[]()#>!-';
+const MENTION = /^@\[([^\]]+)\]\(\s*(club|player|tournament|match|video):([^\s)]+)\s*\)/;
+/** Un partido o un video solos en su renglón: tarjeta o reproductor, no un link en medio del texto. */
+const EMBED_LINE = /^@\[([^\]]+)\]\(\s*(match|video):([^\s)]+)\s*\)\s*$/;
+/** Una URL suelta en su renglón: si es de una plataforma de video, se embebe. */
+const URL_LINE = /^https?:\/\/\S+$/i;
+const ESCAPABLE = '\\*_[]()#>!-@';
 
 /** Un link que el navegador puede seguir sin correr nada: http(s), una ruta del sitio, un mail o un ancla. */
 export function isSafeHref(href: string): boolean {
@@ -138,6 +151,17 @@ export function parseInline(text: string): InlineNode[] {
             }
         }
 
+        if (ch === '@' && text[i + 1] === '[') {
+            const match = MENTION.exec(text.slice(i));
+            const kind = match?.[2] as MentionKind | undefined;
+            if (match && kind && isValidMentionRef(kind, match[3])) {
+                flush();
+                nodes.push({ type: 'mention', kind, ref: match[3], label: match[1].trim() });
+                i += match[0].length;
+                continue;
+            }
+        }
+
         buffer += ch;
         i += 1;
     }
@@ -158,8 +182,22 @@ function parseLines(lines: string[]): InlineNode[] {
 
 // ── Bloques ───────────────────────────────────────────────────────────────
 
+/** Un partido o un video solos en su renglón, ya validados; null si el renglón no es eso. */
+function parseEmbedLine(line: string): Extract<BlockNode, { type: 'embed' }> | null {
+    const embed = EMBED_LINE.exec(line);
+    if (embed) {
+        const kind = embed[2] as 'match' | 'video';
+        return isValidMentionRef(kind, embed[3]) ? { type: 'embed', kind, ref: embed[3], label: embed[1].trim() } : null;
+    }
+    if (URL_LINE.test(line) && isSafeHref(line)) {
+        return { type: 'embed', kind: 'video', ref: line, label: null };
+    }
+    return null;
+}
+
 function startsBlock(line: string, next: string): boolean {
     return HEADING.test(line) || RULE.test(line) || IMAGE_LINE.test(line) || QUOTE.test(line) || BULLET.test(line)
+        || parseEmbedLine(line) !== null
         || (NUMBERED.test(line) && NUMBERED.test(next));
 }
 
@@ -196,6 +234,13 @@ export function parseRichText(content: string | null | undefined): BlockNode[] {
                 blocks.push({ type: 'image', src: image[2].trim(), alt, caption });
             }
             // Una imagen con una ruta que nadie puede pedir (file:///…) no se dibuja ni deja rastro.
+            i += 1;
+            continue;
+        }
+
+        const embed = parseEmbedLine(trimmed);
+        if (embed) {
+            blocks.push(embed);
             i += 1;
             continue;
         }
@@ -253,6 +298,7 @@ function inlineText(nodes: InlineNode[]): string {
         switch (node.type) {
             case 'text': return node.text;
             case 'break': return ' ';
+            case 'mention': return node.label;
             default: return inlineText(node.children);
         }
     }).join('');
@@ -260,7 +306,8 @@ function inlineText(nodes: InlineNode[]): string {
 
 /**
  * El cuerpo sin marcas, para la tarjeta, la descripción de los buscadores y
- * el conteo de palabras. Las imágenes y los separadores no dicen nada.
+ * el conteo de palabras. Las imágenes y los separadores no dicen nada; un
+ * partido o un video embebido, solo su etiqueta.
  */
 export function plainTextOf(content: string | null | undefined): string {
     return parseRichText(content)
@@ -273,6 +320,8 @@ export function plainTextOf(content: string | null | undefined): string {
                     return block.paragraphs.map(inlineText).join(' ');
                 case 'list':
                     return block.items.map(inlineText).join(' ');
+                case 'embed':
+                    return block.label ?? '';
                 default:
                     return '';
             }
@@ -291,4 +340,53 @@ export function wordCountOf(content: string | null | undefined): number {
 /** Cuántas imágenes intermedias lleva el cuerpo (para el resumen del editor). */
 export function imageCountOf(content: string | null | undefined): number {
     return parseRichText(content).filter((block) => block.type === 'image').length;
+}
+
+// ── Menciones ─────────────────────────────────────────────────────────────
+
+function collectInlineMentions(nodes: InlineNode[], out: MentionRef[]): void {
+    for (const node of nodes) {
+        if (node.type === 'mention') out.push({ kind: node.kind, ref: node.ref, label: node.label });
+        else if (node.type === 'strong' || node.type === 'em' || node.type === 'link') collectInlineMentions(node.children, out);
+    }
+}
+
+/**
+ * Las menciones del cuerpo, en el orden en que aparecen y sin repetir (la
+ * primera etiqueta gana). Un video pegado como URL suelta cuenta también:
+ * es una mención de video con la URL por id y sin etiqueta.
+ */
+export function collectMentions(content: string | null | undefined): MentionRef[] {
+    const found: MentionRef[] = [];
+    for (const block of parseRichText(content)) {
+        switch (block.type) {
+            case 'paragraph':
+            case 'heading':
+                collectInlineMentions(block.children, found);
+                break;
+            case 'quote':
+                block.paragraphs.forEach((paragraph) => collectInlineMentions(paragraph, found));
+                break;
+            case 'list':
+                block.items.forEach((item) => collectInlineMentions(item, found));
+                break;
+            case 'embed':
+                found.push({ kind: block.kind, ref: block.ref, label: block.label ?? '' });
+                break;
+            default:
+                break;
+        }
+    }
+
+    const seen = new Set<string>();
+    return found.filter((mention) => {
+        const key = mentionKey(mention);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+}
+
+export function mentionCountOf(content: string | null | undefined): number {
+    return collectMentions(content).length;
 }

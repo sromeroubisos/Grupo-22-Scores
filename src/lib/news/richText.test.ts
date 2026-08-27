@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { imageCountOf, parseInline, parseRichText, plainTextOf, wordCountOf } from './richText';
+import { collectMentions, imageCountOf, mentionCountOf, parseInline, parseRichText, plainTextOf, wordCountOf } from './richText';
 
 test('una nota vieja (párrafos con línea en blanco, sin marcas) sale como párrafos, igual que antes', () => {
     const blocks = parseRichText('Primer párrafo de la nota.\n\nSegundo párrafo.\n\n\n\nTercero.');
@@ -70,4 +70,64 @@ test('el texto plano no lleva marcas ni imágenes; las palabras se cuentan sobre
     assert.equal(wordCountOf(content), 6);
     assert.equal(imageCountOf(content), 1);
     assert.equal(plainTextOf(null), '');
+});
+
+test('una mención es un link a la ficha con la etiqueta que se lee; una mal formada queda como texto', () => {
+    const nodes = parseInline('Ganó @[Los Tilos](club:3f0c1e0a-0b2d-4c8e-9a1b-2c3d4e5f6a7b) por @[Juan Pérez](player:abc-123).');
+    assert.deepEqual(nodes, [
+        { type: 'text', text: 'Ganó ' },
+        { type: 'mention', kind: 'club', ref: '3f0c1e0a-0b2d-4c8e-9a1b-2c3d4e5f6a7b', label: 'Los Tilos' },
+        { type: 'text', text: ' por ' },
+        { type: 'mention', kind: 'player', ref: 'abc-123', label: 'Juan Pérez' },
+        { type: 'text', text: '.' },
+    ]);
+    // Un tipo desconocido, un id con caracteres raros o un video con javascript: no son menciones.
+    assert.deepEqual(parseInline('@[x](arbitro:1)'), [{ type: 'text', text: '@[x](arbitro:1)' }]);
+    assert.deepEqual(parseInline('@[x](club:../../etc)'), [{ type: 'text', text: '@[x](club:../../etc)' }]);
+    assert.deepEqual(parseInline('@[x](video:javascript:alert(1))'), [{ type: 'text', text: '@[x](video:javascript:alert(1))' }]);
+    // Un @ suelto (un usuario de X, un mail) sigue siendo texto.
+    assert.deepEqual(parseInline('seguí a @g22scores'), [{ type: 'text', text: 'seguí a @g22scores' }]);
+});
+
+test('un partido o un video solos en su renglón son un bloque embebido; en medio de una frase, un link', () => {
+    const blocks = parseRichText([
+        'Antes del partido.',
+        '',
+        '@[Los Tilos 33–15 CASI](match:3f0c1e0a-0b2d-4c8e-9a1b-2c3d4e5f6a7b)',
+        '',
+        'Lo dijo en @[la ficha](match:3f0c1e0a-0b2d-4c8e-9a1b-2c3d4e5f6a7b) después.',
+        '',
+        '@[Highlights](video:3f0c1e0a-0b2d-4c8e-9a1b-2c3d4e5f6a7b/v-1a2b3c4d)',
+        'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        '',
+        'Un club solo en su renglón sigue siendo un párrafo:',
+        '@[Los Tilos](club:3f0c1e0a-0b2d-4c8e-9a1b-2c3d4e5f6a7b)',
+    ].join('\n'));
+    assert.deepEqual(blocks.map((block) => block.type), ['paragraph', 'embed', 'paragraph', 'embed', 'embed', 'paragraph']);
+    assert.deepEqual(blocks[1], { type: 'embed', kind: 'match', ref: '3f0c1e0a-0b2d-4c8e-9a1b-2c3d4e5f6a7b', label: 'Los Tilos 33–15 CASI' });
+    assert.deepEqual(blocks[3], { type: 'embed', kind: 'video', ref: '3f0c1e0a-0b2d-4c8e-9a1b-2c3d4e5f6a7b/v-1a2b3c4d', label: 'Highlights' });
+    assert.deepEqual(blocks[4], { type: 'embed', kind: 'video', ref: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', label: null });
+    // La URL suelta corta el párrafo aunque venga pegada al renglón anterior.
+    assert.equal((blocks[5] as { children: unknown[] }).children.length, 3, 'texto + <br> + mención');
+});
+
+test('collectMentions junta las del texto y las embebidas, en orden y sin repetir', () => {
+    const content = [
+        '@[CASI](club:c1) le ganó a @[Los Tilos](club:t1) con un try de @[Pérez](player:p1).',
+        '',
+        '@[CASI 20–15 Los Tilos](match:m1)',
+        '',
+        'Otra vez @[CASI](club:c1), y el video:',
+        '',
+        'https://x.com/SC_ESPN/status/2093064541085077822',
+    ].join('\n');
+    assert.deepEqual(collectMentions(content), [
+        { kind: 'club', ref: 'c1', label: 'CASI' },
+        { kind: 'club', ref: 't1', label: 'Los Tilos' },
+        { kind: 'player', ref: 'p1', label: 'Pérez' },
+        { kind: 'match', ref: 'm1', label: 'CASI 20–15 Los Tilos' },
+        { kind: 'video', ref: 'https://x.com/SC_ESPN/status/2093064541085077822', label: '' },
+    ]);
+    assert.equal(mentionCountOf(content), 5);
+    assert.equal(plainTextOf(content), 'CASI le ganó a Los Tilos con un try de Pérez.\n\nCASI 20–15 Los Tilos\n\nOtra vez CASI, y el video:');
 });

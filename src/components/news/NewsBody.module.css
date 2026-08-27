@@ -178,3 +178,184 @@
         padding-inline: 16px;
     }
 }
+
+/* ── Menciones: un club, un jugador, un torneo, un partido o un video en medio del texto ── */
+.mention {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    vertical-align: baseline;
+    padding: 0 6px 0 4px;
+    margin: 0 1px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--news-accent) 12%, transparent);
+    color: var(--news-ink);
+    font-weight: 600;
+    text-decoration: none;
+    line-height: 1.45;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--news-accent) 30%, transparent);
+    transition: background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.mention:hover,
+.mention:focus-visible {
+    background: color-mix(in srgb, var(--news-accent) 22%, transparent);
+    box-shadow: inset 0 0 0 1px var(--news-accent);
+}
+
+.mention:focus-visible {
+    outline: 2px solid var(--news-accent);
+    outline-offset: 2px;
+}
+
+.mentionCrest {
+    width: 1.15em;
+    height: 1.15em;
+    object-fit: contain;
+    border-radius: 50%;
+    background: #fff;
+    flex: none;
+}
+
+/* ── La tarjeta de un partido de la web ─────────────────────────────────── */
+.matchCard {
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 18px;
+    margin: 6px 0;
+    border: 1px solid var(--news-edge);
+    border-radius: 16px;
+    background: var(--news-raised);
+    color: var(--news-ink);
+    text-decoration: none;
+    transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.matchCard:hover,
+.matchCard:focus-visible {
+    border-color: var(--news-accent);
+}
+
+.matchCard:focus-visible {
+    outline: 2px solid var(--news-accent);
+    outline-offset: 2px;
+}
+
+.matchContext {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--news-ink-muted);
+}
+
+.matchRow {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 14px;
+}
+
+.matchTeam {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.matchTeamAway {
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+.matchCrest {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: #fff;
+    flex: none;
+}
+
+.matchTeamName {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.matchScore {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--news-ink) 8%, transparent);
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.matchScoreLive {
+    color: var(--news-accent-ink);
+}
+
+.matchScoreDash {
+    color: var(--news-ink-muted);
+    font-weight: 500;
+}
+
+.matchVs {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--news-ink-muted);
+}
+
+.matchCta {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--news-accent-ink);
+}
+
+/* ── Un video adentro del cuerpo ────────────────────────────────────────── */
+.videoFigure {
+    max-width: none;
+    margin: 8px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.videoFigure figcaption {
+    color: var(--news-ink-muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .matchRow {
+        gap: 10px;
+    }
+
+    .matchTeam {
+        font-size: 0.95rem;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .matchTeamAway {
+        flex-direction: column;
+    }
+
+    .matchScore {
+        font-size: 1.35rem;
+    }
+}

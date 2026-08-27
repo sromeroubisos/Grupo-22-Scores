@@ -69,14 +69,20 @@ interface Props {
 
 export default function MatchVideoPlayer({ video, matchLabel, embedParent, withOpenLink = true, plate = null }: Props) {
     const parsed = useMemo(() => parseVideoUrl(video.url, { embedParent }), [video.url, embedParent]);
-    const [playing, setPlaying] = useState(false);
+    // Una publicación (tweet, post) se muestra directo: el embed es la
+    // publicación misma —texto, autor y el video adentro—, pesa poco y no
+    // arranca solo; taparla con un póster negro sería esconder la nota.
+    const [playing, setPlaying] = useState(() => parsed?.aspect === 'card');
     const [posterBroken, setPosterBroken] = useState(false);
 
     const label = describeVideo(video);
     const providerLabel = providerLabelOf(video, parsed);
     const originalPoster = posterBroken ? null : videoPosterUrl(video, parsed);
     const portrait = parsed?.aspect === 'portrait';
-    const frameClass = `${styles.frame} ${portrait ? styles.framePortrait : ''}`;
+    // Una publicación (tweet, post) es tarjeta solo cuando se reproduce: la
+    // portada, antes de tocarla, se dibuja a 16:9 como cualquier video.
+    const card = parsed?.aspect === 'card' && playing;
+    const frameClass = `${styles.frame} ${portrait ? styles.framePortrait : ''} ${card ? styles.frameCard : ''}`;
 
     // La placa va si la pidieron, o si no hay miniatura original que mostrar.
     const showPlate = plate !== null && (wantsGeneratedPoster(video) || !originalPoster);

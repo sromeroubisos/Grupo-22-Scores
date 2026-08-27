@@ -14,10 +14,13 @@ import { notFound } from 'next/navigation';
 import { cache } from 'react';
 
 import NewsBody from '@/components/news/NewsBody';
+import NewsMentionsStrip from '@/components/news/NewsMentionsStrip';
 import ProtectedLink from '@/components/ProtectedLink';
 import { getServerAuthRole } from '@/lib/auth/newsAccess';
 import { hasNewsManagementAccess } from '@/lib/auth/roles';
-import { plainTextOf, wordCountOf } from '@/lib/news/richText';
+import type { MentionRef, ResolvedMention } from '@/lib/news/mentions';
+import { collectMentions, plainTextOf, wordCountOf } from '@/lib/news/richText';
+import { resolveNewsMentions } from '@/lib/server/newsMentions';
 import { absoluteUrl } from '@/lib/seo/siteUrl';
 import TodayMatchesRail from './TodayMatchesRail';
 import styles from './page.module.css';
@@ -175,6 +178,21 @@ async function loadRelated(current: NewsRow): Promise<RelatedNewsRow[]> {
     }
 }
 
+/**
+ * Lo etiquetado en el cuerpo (clubes, jugadores, torneos, partidos, videos),
+ * con su dato actual para dibujar escudos, tarjetas y reproductores. Es un
+ * extra del lector: si falla, cada mención queda como link con su etiqueta.
+ */
+async function loadMentions(refs: MentionRef[]): Promise<Record<string, ResolvedMention>> {
+    if (refs.length === 0) return {};
+    try {
+        return await resolveNewsMentions(refs);
+    } catch (error) {
+        console.error('[noticias/[id]] mentions resolve failed:', error);
+        return {};
+    }
+}
+
 export async function generateMetadata({ params }: NewsPageProps): Promise<Metadata> {
     const { id } = await params;
     const { news } = await loadNews(id).catch(() => ({ news: null, canManageNews: false }));
@@ -262,7 +280,8 @@ export default async function NewsPage({ params }: NewsPageProps) {
         notFound();
     }
 
-    const related = await loadRelated(news);
+    const mentionRefs = collectMentions(news.content);
+    const [related, mentions] = await Promise.all([loadRelated(news), loadMentions(mentionRefs)]);
 
     const publishedLabel = news.published_at
         ? new Date(news.published_at).toLocaleDateString('es-AR', {
@@ -368,12 +387,16 @@ export default async function NewsPage({ params }: NewsPageProps) {
                     <section className={styles.bodyCard}>
                         <NewsBody
                             content={news.content}
+                            mentions={mentions}
+                            title={news.title}
                             empty={(
                                 <p className={styles.emptyBody}>
                                     Esta noticia todavía no tiene contenido cargado.
                                 </p>
                             )}
                         />
+
+                        <NewsMentionsStrip mentions={mentionRefs} resolved={mentions} newsId={news.id} />
 
                         {tags.length > 0 && (
                             <div className={styles.tagSection}>
