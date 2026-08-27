@@ -32,9 +32,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (!hub) return { title: 'Videos | Noticias' };
 
     const play = playLabelForSport(hub.tournament.sportId);
+    const description = `Highlights, partidos completos y clips de ${hub.tournament.name}, y la votación al mejor ${play.singular}.`;
+    const canonicalPath = `/noticias/videos/${tournamentId}`;
     return {
         title: `Videos de ${hub.tournament.name} | Noticias`,
-        description: `Highlights, partidos completos y clips de ${hub.tournament.name}, y la votación al mejor ${play.singular}.`,
+        description,
+        alternates: {
+            canonical: canonicalPath,
+        },
+        openGraph: {
+            type: 'website',
+            title: `Videos de ${hub.tournament.name} | Noticias G22 Scores`,
+            description,
+            siteName: 'G22 Scores',
+            locale: 'es_AR',
+            url: canonicalPath,
+            images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'G22 Scores' }],
+        },
     };
 }
 

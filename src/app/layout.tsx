@@ -6,6 +6,7 @@ import ConditionalLayout from "@/components/ConditionalLayout";
 // Force rebuild for ChunkLoadError fix
 import { AuthProvider } from "@/context/AuthContext";
 import { appIconHref } from "@/lib/appBranding";
+import { publicSiteUrl } from "@/lib/seo/siteUrl";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -18,21 +19,31 @@ export async function generateMetadata(): Promise<Metadata> {
   const iconHref = appIconHref();
 
   return {
+    // Con metadataBase, todo canonical y og:url relativo sale absoluto.
+    metadataBase: new URL(publicSiteUrl()),
     title: "G22 Scores - Plataforma Oficial de Torneos Deportivos",
-    description: "La plataforma oficial para torneos deportivos. Resultados en tiempo real, estadísticas confiables y experiencia profesional para fans, clubes y federaciones.",
+    description: "La plataforma oficial para torneos deportivos: resultados en tiempo real, estadísticas confiables y experiencia profesional para clubes y federaciones.",
     keywords: ["torneos", "deportes", "resultados", "fixtures", "rugby", "fútbol", "rankings", "estadísticas"],
     authors: [{ name: "G22 Scores" }],
+    // './' se resuelve contra la ruta de cada página: toda página que no
+    // declare su propio canonical se anuncia a sí misma (sin query string).
+    alternates: {
+      canonical: "./",
+    },
     openGraph: {
       title: "G22 Scores - Plataforma Oficial de Torneos Deportivos",
       description: "Resultados en tiempo real, estadísticas confiables y experiencia profesional para fans, clubes y federaciones.",
       type: "website",
       locale: "es_AR",
       siteName: "G22 Scores",
+      url: "./",
+      images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "G22 Scores" }],
     },
     twitter: {
       card: "summary_large_image",
       title: "G22 Scores - Plataforma Oficial de Torneos Deportivos",
       description: "Resultados en tiempo real, estadísticas confiables y experiencia profesional.",
+      images: ["/og-default.png"],
     },
     icons: {
       icon: iconHref,
@@ -88,6 +99,26 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // El JSON-LD de base del sitio: quién publica y cómo se llama. Las notas
+  // suman su propio NewsArticle encima; esto cubre a toda página sin artículo.
+  const siteJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        name: "G22 Scores",
+        url: publicSiteUrl(),
+        logo: `${publicSiteUrl()}/icon.png`,
+      },
+      {
+        "@type": "WebSite",
+        name: "G22 Scores",
+        url: publicSiteUrl(),
+        inLanguage: "es-AR",
+      },
+    ],
+  };
+
   return (
     <html lang="es" data-theme="dark" className="dark" suppressHydrationWarning>
       <head>
@@ -118,6 +149,10 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+        />
         <ChunkLoadRecovery />
         {/*
           Render the boot fallback OUTSIDE the Suspense boundary so it only
