@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 
 import { useMatchesStore } from '@/hooks/useMatchesStore';
-import { getMatchWinnerByScore } from '@/lib/matchUtils';
+import { getMatchPenaltyScore, getMatchWinnerByScore, hasMatchPenaltyShootout } from '@/lib/matchUtils';
 import { getTodayKey, toLocalMatch } from '@/lib/timezone';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { isDualAudienceTournament, resolveTournamentAudience } from '@/lib/utils/tournamentAudience';
@@ -38,6 +38,9 @@ type RailMatch = {
     awayLogo: string;
     homeScore: number | null;
     awayScore: number | null;
+    /** La tanda, cuando la regulación terminó empatada: se lee "1 (4)". */
+    homePenalty: number | null;
+    awayPenalty: number | null;
     winner: 'home' | 'away' | null;
     period: string | null;
     tournament: string;
@@ -82,6 +85,9 @@ function toRailMatch(match: any, timeZone: string): RailMatch | null {
     const at = typeof match.dateTime === 'string' ? Date.parse(match.dateTime) : Number.NaN;
     const period = match.clock?.period;
 
+    // Un 1-1 en una final se define por penales: sin el número, la fila miente.
+    const penalties = hasMatchPenaltyShootout(match) ? getMatchPenaltyScore(match) : null;
+
     return {
         id: String(match.id),
         status,
@@ -93,10 +99,21 @@ function toRailMatch(match: any, timeZone: string): RailMatch | null {
         awayLogo: resolveTeamLogo(match.awayTeam),
         homeScore: status === 'scheduled' ? null : (scoreOf(match.score?.home) ?? 0),
         awayScore: status === 'scheduled' ? null : (scoreOf(match.score?.away) ?? 0),
+        homePenalty: penalties?.home ?? null,
+        awayPenalty: penalties?.away ?? null,
         winner: status === 'finished' ? getMatchWinnerByScore(match) : null,
         period: period === 'HT' || period === 'ET' ? String(period) : null,
         tournament: tournamentLabel(tournament),
     };
+}
+
+/** Lo que escucha un lector de pantalla: el marcador, la tanda si la hubo, y el estado. */
+function railLabel(match: RailMatch): string {
+    const shootout = match.homePenalty != null && match.awayPenalty != null
+        ? `, ${match.homePenalty} a ${match.awayPenalty} por penales`
+        : '';
+    const state = match.status === 'live' ? 'en juego' : match.status === 'finished' ? 'final' : `a las ${match.time}`;
+    return `${match.home} ${match.homeScore ?? ''} - ${match.awayScore ?? ''} ${match.away}${shootout}, ${state}`;
 }
 
 function StatusCell({ match }: { match: RailMatch }) {
@@ -114,7 +131,7 @@ function StatusCell({ match }: { match: RailMatch }) {
     return <span className={styles.railStatus}>{match.time}</span>;
 }
 
-function TeamLine({ name, logo, score, winner }: { name: string; logo: string; score: number | null; winner: boolean }) {
+function TeamLine({ name, logo, score, penalty, winner }: { name: string; logo: string; score: number | null; penalty: number | null; winner: boolean }) {
     return (
         <span className={`${styles.railTeam} ${winner ? styles.railTeamWinner : ''}`}>
             <span className={styles.railCrest} aria-hidden="true">
@@ -123,6 +140,7 @@ function TeamLine({ name, logo, score, winner }: { name: string; logo: string; s
             </span>
             <span className={styles.railTeamName}>{name}</span>
             <span className={styles.railScore}>{score ?? '–'}</span>
+            {penalty != null && <span className={styles.railPenalty} title="Penales">({penalty})</span>}
         </span>
     );
 }
@@ -193,12 +211,12 @@ export default function TodayMatchesRail({ sportId, sportLabel }: TodayMatchesRa
                                         <Link
                                             href={`/matches/${match.id}`}
                                             className={`${styles.railMatch} ${match.status === 'live' ? styles.railMatchLive : ''}`}
-                                            aria-label={`${match.home} ${match.homeScore ?? ''} - ${match.awayScore ?? ''} ${match.away}, ${match.status === 'live' ? 'en juego' : match.status === 'finished' ? 'final' : `a las ${match.time}`}`}
+                                            aria-label={railLabel(match)}
                                         >
                                             <StatusCell match={match} />
                                             <span className={styles.railTeams}>
-                                                <TeamLine name={match.home} logo={match.homeLogo} score={match.homeScore} winner={match.winner === 'home'} />
-                                                <TeamLine name={match.away} logo={match.awayLogo} score={match.awayScore} winner={match.winner === 'away'} />
+                                                <TeamLine name={match.home} logo={match.homeLogo} score={match.homeScore} penalty={match.homePenalty} winner={match.winner === 'home'} />
+                                                <TeamLine name={match.away} logo={match.awayLogo} score={match.awayScore} penalty={match.awayPenalty} winner={match.winner === 'away'} />
                                             </span>
                                         </Link>
                                     </li>
