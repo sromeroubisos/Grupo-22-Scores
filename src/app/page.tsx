@@ -11,6 +11,7 @@ import { buildEspnFootballTournaments, getEspnFootballInternationalTournaments }
 import { findCountryRecord, getCountryById, resolveCountryId } from '@/lib/data/countries';
 import type { Tournament } from '@/lib/types'; // Keep this for existing tournament logic
 import TournamentSeasonTag from '@/components/TournamentSeasonTag';
+import CountryFlag from '@/components/CountryFlag';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
@@ -21,6 +22,7 @@ import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { AUDIENCE_LABELS, isDualAudienceTournament, matchesTournamentAudience, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { compareTournamentsByPriority, getTournamentPriority } from '@/lib/utils/tournamentOrdering';
+import { readCachedLeagueCatalog, writeCachedLeagueCatalog } from '@/lib/utils/leagueCatalogStorage';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { getMatchPenaltyScore, hasMatchPenaltyShootout, getMatchWinnerByScore } from '@/lib/matchUtils';
 
@@ -231,6 +233,7 @@ interface PublicTournamentListItem {
   display_name?: string | null;
   country?: string | null;
   country_id?: string | null;
+  external_country_id?: string | null;
   sport_id?: string | null;
   logo_url?: string | null;
   url?: string | null;
@@ -329,7 +332,8 @@ function dedupeTournamentsById(tournaments: Tournament[]) {
 }
 
 function mapPublicTournamentToTournament(item: PublicTournamentListItem): Tournament {
-  const countryId = String(item.country_id || 'international').trim().toLowerCase() || 'international';
+  // Por el catalogo, no por el texto crudo: 'ARG' y 'Argentina' son el mismo pais.
+  const countryId = resolveCountryId(item.country_id, item.country, 'international');
   const type: Tournament['type'] = item.type === 'cup'
     ? 'cup'
     : countryId === 'international'
@@ -870,17 +874,40 @@ export default function HomePage() {
 
     const merged: Record<string, TournamentCountryGroup> = { ...grouped };
 
-    rugbyCountrySummaries.forEach((summary) => {
-      const existing = merged[summary.id];
-      const state = rugbyCountryGroups[summary.id];
+    // Dos resumenes pueden caer en el mismo pais ('ARG' de base y 'Argentina'
+    // del proveedor): se suman los contadores y se juntan los ids externos, en
+    // vez de pisar uno con el otro.
+    const summariesSeen = new Set<string>();
 
-      merged[summary.id] = {
-        countryName: summary.name,
+    rugbyCountrySummaries.forEach((summary) => {
+      const countryId = resolveCountryId(summary.id, summary.name, summary.id);
+      // "World" del proveedor ya tiene su seccion arriba, y como pais no
+      // cargaria nada: loadRugbyCountryTournaments lo saltea. Sin este corte
+      // aparecia un segundo "Internacional" entre India e Irlanda.
+      if (countryId === 'international') return;
+      const existing = merged[countryId];
+      const state = rugbyCountryGroups[countryId];
+      const alreadyMerged = summariesSeen.has(countryId);
+      summariesSeen.add(countryId);
+
+      const countryRecord = findCountryRecord(countryId, summary.name);
+      const externalCountryIds = Array.from(new Set([
+        ...(existing?.externalCountryIds || []),
+        ...(summary.external_country_ids || []),
+        ...(state?.externalCountryIds || []),
+      ].filter(Boolean)));
+
+      const summaryCount = typeof summary.tournament_count === 'number' ? summary.tournament_count : null;
+      const previousCount = alreadyMerged && typeof existing?.tournamentCount === 'number' ? existing.tournamentCount : 0;
+
+      merged[countryId] = {
+        countryName: countryRecord?.nameEs || countryRecord?.name || existing?.countryName || summary.name,
         flagEmoji: summary.flag || existing?.flagEmoji || '',
         tournaments: existing?.tournaments || state?.tournaments || [],
-        externalCountryId: summary.external_country_id,
-        externalCountryIds: summary.external_country_ids || state?.externalCountryIds || existing?.externalCountryIds || [],
-        tournamentCount: state?.tournamentCount ?? summary.tournament_count ?? existing?.tournamentCount ?? null,
+        externalCountryId: externalCountryIds[0] || summary.external_country_id,
+        externalCountryIds,
+        tournamentCount: state?.tournamentCount
+          ?? (summaryCount === null && !alreadyMerged ? existing?.tournamentCount ?? null : (summaryCount ?? 0) + previousCount),
         loading: state?.loading ?? false,
         loaded: state?.loaded ?? false,
         error: state?.error ?? null,
@@ -1461,6 +1488,76 @@ export default function HomePage() {
     }
   }, [selectedAudience, selectedSport.id]);
 
+  // Catalogo entero de una vez: al llegar el resumen se pide todo el deporte y
+  // se arman los paises antes de que alguien los abra, asi abrir es instantaneo.
+  // Si esto falla, cada pais se pide solo como antes. Sin sidebar en pantalla
+  // (tablet y celular) no vale la pena bajarlo.
+  useEffect(() => {
+    if (!hasRugbyPublicCatalog || rugbyCountrySummaries.length === 0) return;
+    if (typeof window !== 'undefined' && !window.matchMedia('(min-width: 1101px)').matches) return;
+
+    const controller = new AbortController();
+    const audience = selectedAudience;
+
+    const applyCatalog = (items: PublicTournamentListItem[]) => {
+      const tournaments = items.map((item) => mapPublicTournamentToTournament(item));
+      setRugbyCountryGroups((prev) => {
+        const next = { ...prev };
+        rugbyCountrySummaries.forEach((summary) => {
+          const countryId = resolveCountryId(summary.id, summary.name, summary.id);
+          if (countryId === 'international' || next[countryId]?.loaded) return;
+
+          const externalIds = new Set(
+            (summary.external_country_ids?.length ? summary.external_country_ids : [summary.external_country_id])
+              .map((value) => String(value || '').trim())
+              .filter(Boolean),
+          );
+          const matches = tournaments.filter((tournament, index) => {
+            const externalCountryId = String(items[index].external_country_id || '').trim();
+            return (externalCountryId !== '' && externalIds.has(externalCountryId)) || tournament.countryId === countryId;
+          });
+
+          next[countryId] = {
+            externalCountryId: summary.external_country_id,
+            externalCountryIds: [...externalIds],
+            countryName: summary.name,
+            flagEmoji: summary.flag || '',
+            tournaments: matches,
+            tournamentCount: matches.length,
+            loading: false,
+            loaded: true,
+            error: null,
+          };
+        });
+        return next;
+      });
+    };
+
+    const cached = readCachedLeagueCatalog<PublicTournamentListItem>('rugby', audience);
+    if (cached) {
+      applyCatalog(cached);
+      return () => controller.abort();
+    }
+
+    (async () => {
+      try {
+        const searchParams = new URLSearchParams({ sport: 'rugby', scope: 'catalog', audience });
+        const response = await fetch(`/api/public/tournaments?${searchParams.toString()}`, { signal: controller.signal });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !Array.isArray(payload.data)) return;
+
+        const items = payload.data as PublicTournamentListItem[];
+        writeCachedLeagueCatalog('rugby', audience, items);
+        applyCatalog(items);
+      } catch (error) {
+        if ((error as Error).name === 'AbortError') return;
+        console.error('Error precargando el catalogo de ligas:', error instanceof Error ? error.message : 'Unknown error');
+      }
+    })();
+
+    return () => controller.abort();
+  }, [hasRugbyPublicCatalog, rugbyCountrySummaries, selectedAudience]);
+
   useEffect(() => {
     if (!hasRugbyPublicCatalog) {
       return;
@@ -1674,6 +1771,18 @@ export default function HomePage() {
                 className={styles.sidebarSearchInput}
                 suppressHydrationWarning
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  className={styles.sidebarSearchClear}
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Borrar búsqueda"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </div>
 
             {/* Tournament List with Accordion */}
@@ -1684,12 +1793,14 @@ export default function HomePage() {
                   <button
                     onClick={() => toggleCountry('international')}
                     className={`${styles.accordionHeader} ${expandedCountries.has('international') ? styles.active : ''}`}
+                    aria-expanded={expandedCountries.has('international')}
                   >
                     <div className={styles.accordionHeaderContent}>
-                      <span></span>
-                      <span>{`Internacional (${filteredInternational.length})`}</span>
+                      <CountryFlag countryId="international" />
+                      <span className={styles.accordionHeaderName}>Internacional</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className={styles.accordionHeaderTail}>
+                      <span className={styles.accordionCount}>{filteredInternational.length}</span>
                       <svg
                         className={styles.chevron}
                         style={{ transform: expandedCountries.has('international') ? 'rotate(180deg)' : 'rotate(0deg)' }}
@@ -1706,6 +1817,7 @@ export default function HomePage() {
                   </button>
 
                   <div className={`${styles.accordionContent} ${expandedCountries.has('international') ? styles.open : ''}`}>
+                    <div className={styles.accordionContentInner}>
                     {expandedCountries.has('international') && (
                       internationalConfederationGroups.length > 0 ? (
                         internationalConfederationGroups.map((group) => (
@@ -1721,7 +1833,7 @@ export default function HomePage() {
                               alignItems: 'center',
                               gap: 6,
                             }}>
-                              <span>{group.flag}</span>
+                              <CountryFlag countryId={group.key} size={16} />
                               <span>{group.name}</span>
                             </div>
                             {group.tournaments.slice().sort(compareSidebarTournaments).map((tournament) => (
@@ -1753,6 +1865,7 @@ export default function HomePage() {
                         ))
                       )
                     )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -1768,16 +1881,16 @@ export default function HomePage() {
                     <button
                       onClick={() => toggleCountry(countryId)}
                       className={`${styles.accordionHeader} ${isExpanded ? styles.active : ''}`}
+                      aria-expanded={isExpanded}
                     >
                       <div className={styles.accordionHeaderContent}>
-                        <span>{group.flagEmoji}</span>
-                        <span>
-                          {countryTournamentCount === null
-                            ? group.countryName
-                            : `${group.countryName} (${countryTournamentCount})`}
-                        </span>
+                        <CountryFlag countryId={countryId} countryName={group.countryName} />
+                        <span className={styles.accordionHeaderName}>{group.countryName}</span>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div className={styles.accordionHeaderTail}>
+                        {countryTournamentCount !== null && (
+                          <span className={styles.accordionCount}>{countryTournamentCount}</span>
+                        )}
                         <svg
                           className={styles.chevron}
                           style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
@@ -1794,8 +1907,13 @@ export default function HomePage() {
                     </button>
 
                     <div className={`${styles.accordionContent} ${isExpanded ? styles.open : ''}`}>
+                      <div className={styles.accordionContentInner}>
                       {isExpanded && group.loading && group.tournaments.length === 0 && (
-                        <div className={styles.audienceEmptyState}>Cargando ligas...</div>
+                        <div className={styles.accordionSkeleton} role="status" aria-label="Cargando ligas">
+                          <span className={styles.accordionSkeletonRow} />
+                          <span className={styles.accordionSkeletonRow} />
+                          <span className={styles.accordionSkeletonRow} />
+                        </div>
                       )}
                       {isExpanded && !group.loading && group.error && group.tournaments.length === 0 && (
                         <div className={styles.audienceEmptyState}>{group.error}</div>
@@ -1818,7 +1936,8 @@ export default function HomePage() {
                               >
                                 <Link
                                   href={buildTournamentHref(tournament)}
-                                  style={{ flex: 1, padding: '10px 16px', color: 'inherit', textDecoration: 'none', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                  className={styles.leagueRowLink}
+                                  style={{ flex: 1, minHeight: 32, padding: '4px 8px', color: 'inherit', textDecoration: 'none', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '6px' }}
                                 >
                                   {isFavLeague && <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />}
                                   {tournament.name}
@@ -1832,7 +1951,9 @@ export default function HomePage() {
                                   aria-label={`${isLeagueExpanded ? 'Ocultar' : 'Ver'} temporadas de ${tournament.name}`}
                                   aria-expanded={isLeagueExpanded}
                                   style={{
-                                    padding: '10px 16px',
+                                    padding: '0 8px',
+                                    minWidth: 32,
+                                    minHeight: 32,
                                     background: 'transparent',
                                     border: 'none',
                                     cursor: 'pointer',
@@ -1856,6 +1977,7 @@ export default function HomePage() {
                                 </button>
                               </div>
                               <div className={`${styles.accordionItemContent} ${isLeagueExpanded ? styles.open : ''}`}>
+                                <div className={styles.accordionItemContentInner}>
                                 {isLeagueExpanded && tournament.seasons!.map(season => (
                                   <Link
                                     key={season.seasonId}
@@ -1865,6 +1987,7 @@ export default function HomePage() {
                                     Temporada {season.seasonId}
                                   </Link>
                                 ))}
+                                </div>
                               </div>
                             </div>
 
@@ -1884,6 +2007,7 @@ export default function HomePage() {
                           );
                         }
                       })}
+                      </div>
                     </div>
                   </div>
                 );

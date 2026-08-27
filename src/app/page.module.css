@@ -368,47 +368,82 @@
     padding: 0 var(--spacing-xs) var(--spacing-xs);
 }
 
+/* ---------- Sidebar de ligas: búsqueda ---------- */
+/* Pegada arriba mientras la lista scrollea: con 50 ligas abiertas, el filtro
+   tiene que seguir a mano. El fondo tapa lo que pasa por debajo. */
 .sidebarSearchArea {
-    background: transparent;
-    position: relative;
-    border: none;
-    padding: 0;
-    margin-bottom: var(--spacing-xs);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--color-bg-primary);
+    padding: 2px 0 8px;
+    margin: 0;
 }
 
 .sidebarSearchInput {
     width: 100%;
-    padding: 10px 12px 10px 36px;
-    /* Adjusted padding */
-    border-radius: 12px;
+    height: 38px;
+    padding: 0 34px 0 34px;
+    border-radius: 10px;
     border: 1px solid var(--color-border);
     background: var(--color-bg-secondary);
     color: var(--color-text-primary);
     font-size: 0.85rem;
-    transition: all var(--transition-fast);
+    transition: border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.sidebarSearchInput::placeholder {
+    color: var(--color-text-tertiary);
 }
 
 .sidebarSearchIcon {
     position: absolute;
-    left: 12px;
+    left: 11px;
     top: 50%;
     transform: translateY(-50%);
+    margin-top: -3px;
     color: var(--color-text-tertiary);
     pointer-events: none;
-    width: 14px;
-    height: 14px;
+    width: 15px;
+    height: 15px;
 }
 
 .sidebarSearchInput:focus {
     border-color: var(--color-accent);
     background: var(--color-bg-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.18);
     outline: none;
 }
 
+/* Borrar lo escrito sin ir al final del texto con el dedo. */
+.sidebarSearchClear {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.sidebarSearchClear:hover,
+.sidebarSearchClear:focus-visible {
+    color: var(--color-text-primary);
+    background: var(--color-bg-tertiary);
+    outline: none;
+}
+
+/* ---------- Sidebar de ligas: acordeón por país ---------- */
 .accordionList {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 1px;
 }
 
 .accordionItem {
@@ -421,27 +456,48 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 8px;
+    gap: 8px;
+    min-height: 36px;
+    padding: 4px 6px 4px 8px;
     background: transparent;
     border: none;
     cursor: pointer;
     text-align: left;
-    border-radius: 4px;
+    border-radius: 8px;
     transition: background-color var(--transition-fast);
 }
 
-.accordionHeader:hover,
+.accordionHeader:hover {
+    background: var(--color-bg-secondary);
+}
+
 .accordionHeader.active {
     background: var(--color-bg-tertiary);
+}
+
+.accordionHeader:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
 }
 
 .accordionHeaderContent {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 0.9rem;
+    min-width: 0;
+    flex: 1;
+    font-size: 0.86rem;
     font-weight: 500;
     color: var(--color-text-secondary);
+}
+
+/* El nombre corta con puntos: una bandera, un número y un chevron no se mueven
+   porque un país se llame "Emiratos Árabes Unidos". */
+.accordionHeaderName {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .accordionHeader.active .accordionHeaderContent {
@@ -449,19 +505,78 @@
     font-weight: 600;
 }
 
+/* Cantidad de ligas: número, no paréntesis dentro del nombre. Tabular para que
+   todas las columnas de números queden alineadas. */
+.accordionCount {
+    flex: none;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-tertiary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.accordionHeader.active .accordionCount {
+    background: rgba(var(--color-accent-rgb), 0.14);
+    color: var(--color-accent-ink);
+}
+
+.accordionHeaderTail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+}
+
+/* Grid 0fr → 1fr en vez de max-height: un tope en px recortaba a Argentina
+   (51 ligas superan los 1000px) y además animaba a velocidad distinta según
+   cuántas filas hubiera. */
 .accordionContent {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    display: grid;
+    grid-template-rows: 0fr;
     opacity: 0;
+    transition: grid-template-rows 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.18s ease;
+}
+
+.accordionContent > * {
+    min-height: 0;
 }
 
 .accordionContent.open {
-    max-height: 1000px;
+    grid-template-rows: 1fr;
     opacity: 1;
 }
 
-/* Level 2 Accordion Item (League) styling - Nested items */
+/* Riel vertical: las ligas cuelgan del país, y se ve de un vistazo dónde
+   termina un grupo y empieza el siguiente. */
+.accordionContentInner {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin-left: 17px;
+    padding: 2px 0 6px 10px;
+}
+
+.accordionContentInner::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--color-border);
+}
+
+/* Nivel 2: liga con temporadas desplegables */
 .accordionItemLinkWrapper {
     display: flex;
     flex-direction: column;
@@ -469,15 +584,14 @@
 
 .accordionItemHeader {
     display: flex;
-    /* Changed from just link to flex/button container if expandable */
     align-items: center;
     justify-content: space-between;
-    padding: 5px 8px 5px 38px;
+    padding: 0;
     text-decoration: none;
-    color: var(--color-text-tertiary);
-    font-size: 0.85rem;
-    transition: all var(--transition-fast);
-    border-radius: 44px;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+    border-radius: 6px;
     cursor: pointer;
     background: transparent;
     border: none;
@@ -487,80 +601,134 @@
 
 .accordionItemHeader:hover {
     color: var(--color-text-primary);
-    background: var(--color-bg-tertiary);
+    background: var(--color-bg-secondary);
 }
 
 .accordionItemHeader.active {
-    color: var(--color-accent);
+    color: var(--color-accent-ink);
     font-weight: 600;
 }
 
 .accordionItemContent {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.2s ease;
+    display: grid;
+    grid-template-rows: 0fr;
     opacity: 0;
+    transition: grid-template-rows 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.18s ease;
+}
+
+.accordionItemContent > * {
+    min-height: 0;
+}
+
+.accordionItemContent.open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+.accordionItemContentInner {
+    overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
-.accordionItemContent.open {
-    max-height: 500px;
-    opacity: 1;
-}
-
 .accordionSubItemLink {
-    padding: 4px 8px 4px 54px;
-    /* Indented further */
+    display: flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 8px 0 24px;
     text-decoration: none;
-    color: var(--color-text-muted);
-    font-size: 0.8rem;
-    transition: color var(--transition-fast);
+    color: var(--color-text-tertiary);
+    font-size: 0.78rem;
+    border-radius: 6px;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
 }
 
 .accordionSubItemLink:hover {
     color: var(--color-text-primary);
+    background: var(--color-bg-secondary);
 }
 
-/* Replaces old accordionItemLink */
+/* Fila de liga */
 .accordionItemLink {
-    /* Kept for non-expandable items fallback */
     display: flex;
     align-items: center;
-    padding: 5px 8px 5px 38px;
+    gap: 6px;
+    min-height: 32px;
+    padding: 4px 8px;
     text-decoration: none;
-    color: var(--color-text-tertiary);
-    font-size: 0.85rem;
-    transition: all var(--transition-fast);
-    border-radius: 4px;
+    color: var(--color-text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.3;
+    transition: color var(--transition-fast), background-color var(--transition-fast);
+    border-radius: 6px;
 }
 
 .accordionItemLink:hover {
     color: var(--color-text-primary);
-    background: var(--color-bg-tertiary);
+    background: var(--color-bg-secondary);
+}
+
+.accordionItemLink:focus-visible,
+.accordionSubItemLink:focus-visible,
+.leagueRowLink:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
 }
 
 .chevron {
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, color var(--transition-fast);
     color: var(--color-text-muted);
     width: 14px;
     height: 14px;
-    opacity: 0.7;
+    flex: none;
 }
 
 .accordionHeader.active .chevron {
-    transform: rotate(90deg);
-    /* 90deg for caret style */
     color: var(--color-text-primary);
-    opacity: 1;
 }
 
 .accordionItemHeader.active .chevron {
-    transform: rotate(90deg);
-    color: var(--color-accent);
+    color: var(--color-accent-ink);
 }
 
+/* Cargando ligas de un país: tres filas fantasma del alto de una liga, así
+   la lista no salta cuando llega la de verdad. */
+.accordionSkeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 9px 8px;
+}
 
+.accordionSkeletonRow {
+    height: 12px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--color-bg-tertiary) 25%, var(--color-bg-elevated) 50%, var(--color-bg-tertiary) 75%);
+    background-size: 200% 100%;
+    animation: sidebarShimmer 1.4s ease-in-out infinite;
+}
+
+.accordionSkeletonRow:nth-child(1) { width: 78%; }
+.accordionSkeletonRow:nth-child(2) { width: 56%; }
+.accordionSkeletonRow:nth-child(3) { width: 66%; }
+
+@keyframes sidebarShimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .accordionContent,
+    .accordionItemContent,
+    .chevron,
+    .sportSwitchChevron {
+        transition: none;
+    }
+
+    .accordionSkeletonRow {
+        animation: none;
+    }
+}
 
 /* Live Banner */
 .liveBanner {
@@ -1556,37 +1724,54 @@
     color: var(--color-accent);
 }
 
+/* Segmentado: un solo riel con dos partes. Dos pills sueltos recortaban
+   "Juveniles/Reserva" a 250px de ancho. */
 .audienceSwitch {
-    display: flex;
-    gap: 8px;
+    display: grid;
+    /* Por contenido, no en mitades: "Mayores" es corto y "Juveniles/Reserva"
+       necesita el resto del riel para no cortarse a 250px. */
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 2px;
+    padding: 3px;
     margin-bottom: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
 }
 
 .audienceSwitchBtn {
-    flex: 1;
-    height: 34px;
-    border-radius: 999px;
-    border: 1px solid var(--color-border);
-    background: var(--color-bg-secondary);
+    min-width: 0;
+    height: 30px;
+    padding: 0 8px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
     color: var(--color-text-secondary);
-    font-size: 0.76rem;
-    font-weight: 800;
-    letter-spacing: 0.05em;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
     text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
 }
 
 .audienceSwitchBtn:hover {
-    border-color: var(--color-border-light);
     color: var(--color-text-primary);
 }
 
-.audienceSwitchBtnActive {
-    border-color: var(--color-accent);
-    background: rgba(var(--color-accent-rgb), 0.16);
-    color: var(--color-accent);
-    box-shadow: 0 0 0 1px rgba(var(--color-accent-rgb), 0.18) inset;
+.audienceSwitchBtn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+}
+
+.audienceSwitchBtnActive,
+.audienceSwitchBtnActive:hover {
+    background: var(--color-bg-elevated);
+    color: var(--color-accent-ink);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
 }
 
 .audienceEmptyState {
@@ -1637,7 +1822,17 @@
     }
 
     .audienceSwitchBtn {
+        height: 40px;
+    }
+
+    .sidebarSearchInput {
         height: 44px;
+    }
+
+    .sidebarSearchClear {
+        top: 7px;
+        width: 38px;
+        height: 38px;
     }
 }
 

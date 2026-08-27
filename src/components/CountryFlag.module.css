@@ -1,0 +1,29 @@
+.box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    overflow: hidden;
+    border-radius: 3px;
+    background: var(--color-bg-tertiary);
+    /* Anillo interior: separa el blanco de una bandera (Japón) del fondo claro. */
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-text-primary) 14%, transparent) inset;
+}
+
+.img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.globe {
+    color: var(--color-text-tertiary);
+}
+
+.fallback {
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+}

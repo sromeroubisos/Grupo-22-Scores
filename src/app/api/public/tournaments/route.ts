@@ -20,6 +20,7 @@ import {
     getStoredExternalTournamentOverrides,
 } from '@/lib/server/externalTournamentOverrides';
 import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
+import { findCountryRecord } from '@/lib/data/countries';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { isDualAudienceTournament, matchesTournamentAudience, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
@@ -389,11 +390,19 @@ const INTERNATIONAL_COUNTRY_SLUGS = new Set([
     'mundo',
 ]);
 
+// Primero el catalogo (reconoce 'ARG', 'Estados Unidos', 'USA' como el mismo
+// pais) y recien despues el slug del nombre. Sin ese paso, un torneo cargado con
+// country='ARG' armaba un acordeon "ARG (3)" al lado de "Argentina (51)".
 function resolveRugbyCountryId(countryName: string): string {
     const slug = slugifyCountryId(countryName);
 
     if (!slug || INTERNATIONAL_COUNTRY_SLUGS.has(slug)) {
         return 'international';
+    }
+
+    const known = findCountryRecord(slug, countryName);
+    if (known && known.id !== 'international') {
+        return known.id;
     }
 
     return slug;
@@ -744,6 +753,31 @@ async function queryPublicFlashScoreTournaments(args: {
     return sortTournamentsByPriority([...uniqueById.values()]);
 }
 
+// Recorta el catalogo completo a un pais con el MISMO criterio de coincidencia
+// que usa el conteo del resumen: por id externo del proveedor, y si no, por las
+// claves del nombre (asi 'ARG' de base cae en Argentina).
+function sliceExternalCatalogByCountry(
+    catalog: PublicExternalTournament[],
+    countryFilter: PublicTournamentCountryFilter,
+    search: string,
+) {
+    const externalIds = new Set(
+        uniqueNormalizedIdentifiers([
+            ...(countryFilter.externalCountryIds || []),
+            countryFilter.externalCountryId,
+        ]).map((value) => normalizeLookupValue(value)),
+    );
+    const countryKeys = buildCountryFilterLookupValues(countryFilter);
+
+    return catalog.filter((tournament) => {
+        const externalCountryId = normalizeLookupValue(tournament.external_country_id);
+        const byExternalId = externalCountryId !== '' && externalIds.has(externalCountryId);
+        const byCountryKeys = countryKeys ? tournamentMatchesCountryKeys(tournament, countryKeys) : false;
+        if (!byExternalId && !byCountryKeys) return false;
+        return matchesExternalTournamentSearch(tournament, search);
+    });
+}
+
 function matchesExternalTournamentSearch(tournament: PublicExternalTournament, search: string) {
     if (!search) return true;
 
@@ -1087,10 +1121,12 @@ function buildDbCountrySummaries(tournaments: PublicDbTournamentListItem[]) {
             continue;
         }
 
+        const resolvedCountryId = resolveRugbyCountryId(countryName);
         summaries.set(key, {
-            id: resolveRugbyCountryId(countryName),
+            id: resolvedCountryId,
             external_country_id: countryId || key,
-            name: countryName,
+            // El nombre del catalogo, no el de la fila: 'ARG' se muestra 'Argentina'.
+            name: findCountryRecord(resolvedCountryId)?.name || countryName,
             flag: null,
             tournament_count: 1,
             type: 'country',
@@ -1383,7 +1419,7 @@ function normalizeSeasonParam(value: string | null): string | null {
 }
 
 function resolveCacheControl(params: PublicTournamentsRequestParams) {
-    if (params.flashScoreCatalogEnabled && (params.scope === 'summary' || params.scope === 'country')) {
+    if (params.flashScoreCatalogEnabled && (params.scope === 'summary' || params.scope === 'country' || params.scope === 'catalog')) {
         return CATALOG_CACHE_CONTROL;
     }
 
@@ -1408,7 +1444,8 @@ function buildPublicTournamentsCacheKey(params: PublicTournamentsRequestParams) 
         buildCacheKeyPart(params.externalCountryId),
         buildCacheKeyPart(params.externalCountryIds.length > 0 ? params.externalCountryIds.join(',') : null),
         buildCacheKeyPart(params.countryName ? slugifyCountryId(params.countryName) : null),
-        buildCacheKeyPart(params.countryFlag),
+        // La bandera no cambia el payload: en la clave solo fragmentaba el cache
+        // (un snapshot con emoji y otro sin).
         // Sin esto, un `?season=2025` recibiría la respuesta cacheada del listado
         // por defecto: el filtro andaría en la consulta y no en la pantalla.
         buildCacheKeyPart(params.season, 'ultima'),
@@ -1430,6 +1467,10 @@ function getPublicTournamentsCachePolicy(params: PublicTournamentsRequestParams)
 
     if (params.flashScoreCatalogEnabled && params.scope === 'country') {
         return { freshTtlSec: 60, staleTtlSec: 5 * 60 };
+    }
+
+    if (params.flashScoreCatalogEnabled && params.scope === 'catalog') {
+        return { freshTtlSec: 10 * 60, staleTtlSec: 60 * 60 };
     }
 
     if (params.search || params.forceFullCatalog) {
@@ -1693,9 +1734,28 @@ async function computePublicTournamentsPayload(
             dbItemsCount = dbTournaments.length;
             let externalTournaments: PublicExternalTournament[] = [];
             let externalUnavailable = false;
+            let externalSource: 'catalog' | 'provider' = 'provider';
             const externalFetchStartedAt = Date.now();
+
+            // Primero el catalogo ya guardado (memoria o snapshot en Supabase):
+            // abrir un pais eran dos llamadas al proveedor y 2-5 segundos, para
+            // una lista que cambia una vez por temporada. Con `allowStale` no se
+            // espera ningun barrido: si no hay catalogo, se pregunta como antes.
+            const catalogForCountry = await getExternalTournamentCatalog({
+                sportKey: params.flashScoreSportKey,
+                shouldAggregateRugby: params.shouldAggregateRugby,
+                audience: params.audience,
+            }, { allowStale: true });
+
+            if (catalogForCountry) {
+                externalSource = 'catalog';
+                externalTournaments = sliceExternalCatalogByCountry(catalogForCountry, countryFilter, params.search);
+            }
+
             try {
-                externalTournaments = params.shouldAggregateRugby
+                if (externalSource === 'catalog') {
+                    // Ya resuelto arriba; nada que pedir.
+                } else externalTournaments = params.shouldAggregateRugby
                     ? await queryRugbyCountryTournaments({
                         externalCountryId: params.externalCountryId || '',
                         externalCountryIds: params.externalCountryIds,
@@ -1735,6 +1795,7 @@ async function computePublicTournamentsPayload(
                     final_items_count: finalItemsCount,
                     fallback_path: externalItemsCount === 0 && dbItemsCount > 0 ? 'db_country' : undefined,
                     external_unavailable: externalUnavailable,
+                    external_source: externalSource,
                 });
             }
 
@@ -1745,6 +1806,45 @@ async function computePublicTournamentsPayload(
             return externalUnavailable
                 ? { data: tournaments, meta: { externalUnavailable: true } }
                 : { data: tournaments };
+        }
+
+        // Todo el deporte de una vez, para que la UI arme los paises al entrar y
+        // abrirlos sea instantaneo. Sale del mismo catalogo persistido que el
+        // scope por pais; acá sí se espera el barrido si todavia no existe, porque
+        // el que pide esto lo hace en segundo plano y no bloquea nada en pantalla.
+        if (params.flashScoreCatalogEnabled && params.scope === 'catalog') {
+            const { dbTournaments, error } = await queryPublicDbTournamentsForRequest(params, trace);
+            dbItemsCount = dbTournaments.length;
+            const externalFetchStartedAt = Date.now();
+            const catalog = await getExternalTournamentCatalog({
+                sportKey: params.flashScoreSportKey,
+                shouldAggregateRugby: params.shouldAggregateRugby,
+                audience: params.audience,
+            }) || [];
+            externalItemsCount = catalog.length;
+            if (trace) {
+                trackDuration(trace.metrics, 'external_tournaments_fetch_ms', externalFetchStartedAt);
+            }
+
+            const mergeStartedAt = Date.now();
+            const tournaments = mergePublicTournamentLists(dbTournaments, catalog);
+            finalItemsCount = tournaments.length;
+            if (trace) {
+                trackDuration(trace.metrics, 'merge_sources_ms', mergeStartedAt);
+                trace.metrics.compute_total_ms = Date.now() - computeStartedAt;
+                logSlowTournamentsComputeStageWarnings(trace);
+                logTournamentsEvent('info', 'tournaments_compute_summary', trace, {
+                    db_items_count: dbItemsCount,
+                    external_items_count: externalItemsCount,
+                    final_items_count: finalItemsCount,
+                });
+            }
+
+            if (error && finalItemsCount === 0) {
+                throw error;
+            }
+
+            return { data: tournaments };
         }
 
         const { dbTournaments, error } = await queryPublicDbTournamentsForRequest(params, trace);
@@ -1948,6 +2048,15 @@ export async function GET(request: NextRequest) {
     // La validacion NO puede colgar de flashScoreCatalogEnabled: sin `sport` ese
     // flag es false y el pedido se caia al listado plano, devolviendo 200 con un
     // catalogo entero cuando lo que se pidio era un pais.
+    if (params.scope === 'catalog' && !params.sport) {
+        const response = NextResponse.json(
+            { error: 'Falta sport para pedir el catalogo.' },
+            { status: 400 },
+        );
+        attachObservabilityHeaders(response, trace, 'BYPASS');
+        return response;
+    }
+
     if (params.scope === 'country') {
         const missingCountry = (!params.externalCountryId && params.externalCountryIds.length === 0) || !params.countryName;
 

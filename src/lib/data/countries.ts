@@ -744,6 +744,96 @@ const normalizeCountryLookupValue = (value: string | null | undefined): string =
     return String(value || '').trim().toLowerCase();
 };
 
+// Alias que llegan de base y de los proveedores y que no son ni el id, ni el
+// nombre, ni el codigo alpha-2: el trigrama olimpico/World Rugby ('ARG', 'RSA'),
+// y algun nombre corto. Sin esto, un torneo cargado con country='ARG' arma su
+// propio pais al lado de Argentina en el sidebar. Todo en minuscula.
+const COUNTRY_ALIASES: Record<string, string> = {
+    arg: 'argentina',
+    uru: 'uruguay',
+    chi: 'chile',
+    bra: 'brazil',
+    par: 'paraguay',
+    col: 'colombia',
+    per: 'peru',
+    ven: 'venezuela',
+    mex: 'mexico',
+    can: 'canada',
+    eng: 'england',
+    sco: 'scotland',
+    wal: 'wales',
+    irl: 'ireland',
+    fra: 'france',
+    ita: 'italy',
+    esp: 'spain',
+    por: 'portugal',
+    ger: 'germany',
+    deu: 'germany',
+    ned: 'netherlands',
+    nld: 'netherlands',
+    bel: 'belgium',
+    sui: 'switzerland',
+    che: 'switzerland',
+    geo: 'georgia',
+    rou: 'romania',
+    rus: 'russia',
+    pol: 'poland',
+    nzl: 'new-zealand',
+    aus: 'australia',
+    rsa: 'south-africa',
+    zaf: 'south-africa',
+    nam: 'namibia',
+    zim: 'zimbabwe',
+    ken: 'kenya',
+    jpn: 'japan',
+    kor: 'south-korea',
+    hkg: 'hong-kong',
+    fij: 'fiji',
+    sam: 'samoa',
+    ton: 'tonga',
+    'estados unidos': 'usa',
+    'united states': 'usa',
+    'reino unido': 'united-kingdom',
+    // Regiones del proveedor: mismo continente, distinto rotulo.
+    'australia & oceania': 'oceania',
+    'australia-and-oceania': 'oceania',
+    'australia-oceania': 'oceania',
+    'north & central america': 'north-central-america',
+    'north-and-central-america': 'north-central-america',
+    'north america': 'north-central-america',
+    'north-america': 'north-central-america',
+    'central america': 'north-central-america',
+    'south america': 'south-america',
+    'sudamerica': 'south-america',
+    'sudamérica': 'south-america',
+    'áfrica': 'africa',
+    'europa': 'europe',
+    'world': 'international',
+    'mundo': 'international',
+    'mundial': 'international',
+    'internacional': 'international',
+};
+
+/**
+ * Codigo del SVG en `public/flags/{code}.svg` (flagcdn, dominio publico) para
+ * un pais del catalogo, o null si no tiene bandera (regiones, tenis, 'international').
+ * Las naciones britanicas no son alpha-2: van con su sufijo.
+ */
+export const getCountryFlagCode = (country: Country | undefined | null): string | null => {
+    if (!country) return null;
+    const byId: Record<string, string> = {
+        england: 'gb-eng',
+        scotland: 'gb-sct',
+        wales: 'gb-wls',
+        'northern-ireland': 'gb',
+        europe: 'eu',
+        kosovo: 'xk',
+    };
+    if (byId[country.id]) return byId[country.id];
+    const code = String(country.code || '').trim().toLowerCase();
+    return /^[a-z]{2}$/.test(code) ? code : null;
+};
+
 export const getCountryById = (id: string): Country | undefined => {
     return COUNTRIES[id];
 };
@@ -760,9 +850,23 @@ export const findCountryRecord = (
         }
     }
 
+    if (normalizedId && COUNTRY_ALIASES[normalizedId]) {
+        const aliased = getCountryById(COUNTRY_ALIASES[normalizedId]);
+        if (aliased) {
+            return aliased;
+        }
+    }
+
     const normalizedName = normalizeCountryLookupValue(fallbackName);
     if (!normalizedName) {
         return undefined;
+    }
+
+    if (COUNTRY_ALIASES[normalizedName]) {
+        const aliased = getCountryById(COUNTRY_ALIASES[normalizedName]);
+        if (aliased) {
+            return aliased;
+        }
     }
 
     return Object.values(COUNTRIES).find((country) => (
