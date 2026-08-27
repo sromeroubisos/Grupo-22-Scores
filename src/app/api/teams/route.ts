@@ -944,7 +944,7 @@ async function fetchInternalClubSquad(
         if (teamRows.length > 0) {
             const { data: memberships, error: membershipsError } = await db
                 .from('team_memberships')
-                .select('team_id, person_id, role, status, position')
+                .select('team_id, person_id, role, status, position, joined_at, left_at')
                 .eq('club_id', clubId);
 
             if (membershipsError && !isMissingRelationError(membershipsError)) {
@@ -1034,6 +1034,10 @@ async function fetchInternalClubSquad(
                             status: membership.status || 'active',
                             role: membership.role,
                             team_id: String(team.id),
+                            // El plazo del plantel viaja con cada jugador: un refuerzo
+                            // que llega en junio tiene su propia fecha y no la del resto.
+                            joined_at: membership.joined_at ?? null,
+                            left_at: membership.left_at ?? null,
                             team_name: team.name || 'Plantel',
                             tab_name: team.name || 'Plantel',
                         };
@@ -1562,7 +1566,30 @@ export async function GET(request: Request) {
                 .eq('id', rawTeamId)
                 .single() as unknown as typeof internalClubQuery;
         }
-        const internalClub = internalClubQuery.data as InternalClubRow | null;
+        let internalClub = internalClubQuery.data as InternalClubRow | null;
+
+        // Si el id no es de un club de la plataforma, todavia puede haber un club
+        // VINCULADO a ese equipo del proveedor. Es lo que pasa cuando a un
+        // seleccionado externo le cargan el plantel: nace la ficha de club con el
+        // `external_id` del proveedor, y sin este segundo intento la pestana
+        // Plantilla seguia diciendo que no hay plantel con el plantel ya cargado.
+        if (!internalClub) {
+            const externo = stripFsTeamPrefix(rawTeamId);
+            const claves = Array.from(new Set([rawTeamId, externo].filter(Boolean)));
+            if (claves.length > 0) {
+                try {
+                    const { data: porExternalId } = await readClient
+                        .from('clubs')
+                        .select('id, name, short_name, sport, sport_id, external_id, country, city, region, categories, updated_at')
+                        .in('external_id', claves)
+                        .limit(1)
+                        .maybeSingle();
+                    if (porExternalId) internalClub = porExternalId as InternalClubRow;
+                } catch {
+                    // Sin la columna o sin permiso: se sigue por el camino externo.
+                }
+            }
+        }
 
         if (internalClub) {
             const effectiveClub = await resolveInternalClubBySport(readClient, internalClub as InternalClubRow, preferredSport);
@@ -1872,8 +1899,22 @@ export async function GET(request: Request) {
 
     const teamId = stripFsTeamPrefix(rawTeamId);
     const isExternalId = /^[a-zA-Z0-9]+$/.test(teamId) && !teamId.includes('-');
-    // Also treat internal clubs with external_id as having external data
-    const effectiveExternalId = isExternalId ? teamId : (internalExternalId ? stripFsTeamPrefix(internalExternalId) : null);
+    // Un equipo del archivo historico se ancla con su propio id ('ra-team-595'), guion
+    // incluido, asi que la prueba de arriba lo daba por interno: no se buscaba su fila en
+    // `external_teams` y la ficha abria sin nombre y sin un partido, aun teniendo los
+    // partidos cacheados bajo esa misma clave.
+    const isRugbyArchiveId = /^ra-team-\d+$/i.test(teamId);
+    // EL external_id DEL CLUB MANDA. `isExternalId` solo mira la FORMA del id —
+    // alfanumerico y sin guion— y con esa prueba el id de un club de la plataforma
+    // como 'argentina' pasa por id de proveedor. Entonces se le pedian los partidos
+    // de 'argentina' a FlashScore, que no conoce a nadie con ese id, y la ficha del
+    // club quedaba sin un partido teniendo 498.
+    //
+    // Un club que declara su external_id sabe cual es el suyo mejor que una regla
+    // sobre como se escribe su slug.
+    const effectiveExternalId = internalExternalId
+        ? stripFsTeamPrefix(internalExternalId)
+        : ((isExternalId || isRugbyArchiveId) ? teamId : null);
 
     // Look up cached team_url from external_teams table to avoid slug mismatches
     let cachedTeamUrl: string | null = null;
@@ -1903,7 +1944,9 @@ export async function GET(request: Request) {
         let teamUrl = teamUrlParam || cachedTeamUrl || '';
         const extractedName = teamName || internalClubName;
 
-        if (!teamUrl && extractedName && effectiveExternalId) {
+        // El id del archivo no es un id del proveedor vivo: armar una ruta con el da una
+        // direccion que no existe alla, y la lectura vuelve vacia.
+        if (!teamUrl && extractedName && effectiveExternalId && !isRugbyArchiveId) {
             teamUrl = `/team/${slugify(extractedName)}/${effectiveExternalId}/`;
         }
 
@@ -1927,7 +1970,9 @@ export async function GET(request: Request) {
         let fsFixtures: NormalizedInternalMatch[] = [];
         let transfers: unknown[] = [];
 
-        if (resolvedExternalId) {
+        // Al proveedor vivo se le pregunta solo por lo suyo. Un equipo que solo existe en
+        // el archivo se sirve entero desde el cache de mas abajo.
+        if (resolvedExternalId && !isRugbyArchiveId) {
             const needFsResults = internalResults.length === 0;
             const needFsFixtures = internalFixtures.length === 0;
 
@@ -2009,6 +2054,20 @@ export async function GET(request: Request) {
                     ...remoteDetails,
                 };
             }
+        }
+
+        // La identidad minima sale de la fila cacheada. Sin esto, un equipo que no vive en
+        // el proveedor vivo llegaba a la pantalla con `details` en null y la ficha se
+        // dibujaba sin nombre y sin escudo, aunque tuviera partidos para mostrar.
+        if (!details && cachedExternalTeam) {
+            details = {
+                team_id: cachedExternalTeam.id,
+                name: cachedExternalTeam.name || teamName || undefined,
+                sport: cachedExternalTeam.sport ?? null,
+                country: cachedExternalTeam.country ?? null,
+                team_url: cachedExternalTeam.team_url ?? null,
+                logo_url: cachedExternalTeam.logo_url ?? null,
+            };
         }
 
         // ── Historial persistido: write-through + lectura DB-first ───────────
@@ -2112,7 +2171,9 @@ export async function GET(request: Request) {
         const finalResults = enrichMatchesWithExternalTeamCache(baseResults, externalTeamCacheMap);
         const finalFixtures = enrichMatchesWithExternalTeamCache(baseFixtures, externalTeamCacheMap);
         const detailsWithOverride = applyExternalTeamLogoOverride(enrichedDetails);
-        const hasExternalSquadSupport = Boolean(effectiveExternalId || teamUrlParam || cachedTeamUrl);
+        // El archivo guarda partidos, no planteles: ofrecer la pestana la deja vacia.
+        const hasExternalSquadSupport = !isRugbyArchiveId
+            && Boolean(effectiveExternalId || teamUrlParam || cachedTeamUrl);
         const detailsForResponse = isRecord(detailsWithOverride)
             ? {
                 ...detailsWithOverride,

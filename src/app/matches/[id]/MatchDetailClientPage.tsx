@@ -47,6 +47,7 @@ import {
 } from '@/lib/matches/matchTabs';
 import { normalizeMatchVideoLinks, type MatchVideoLink } from '@/lib/matches/videoLinks';
 import PlayerStatsPanel from './PlayerStatsPanel';
+import MyLineupBuilder from './MyLineupBuilder';
 import LineupRatingEditorModal from './LineupRatingEditorModal';
 import MatchVideosPanel from './MatchVideosPanel';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
@@ -2948,6 +2949,21 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                         )}
                                     </div>
                                 )}
+
+                                {/* Armá tu propia formación. Va debajo de la oficial
+                                    y no compite con ella: una es la que sale a la
+                                    cancha y la otra es la del hincha. */}
+                                <MyLineupBuilder
+                                    sport={String(matchData.sportId || '')}
+                                    home={{ key: String(matchData.home?.id || ''), name: matchData.home?.name || 'Local', logo: matchData.home?.logo }}
+                                    away={{ key: String(matchData.away?.id || ''), name: matchData.away?.name || 'Visitante', logo: matchData.away?.logo }}
+                                    tournament={matchData.tournament}
+                                    tournamentLogo={matchData.tournamentLogo}
+                                    dateLabel={new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ })}
+                                    timeLabel={matchTimerText}
+                                    venue={matchData.venue}
+                                    kickoffAt={matchData.date}
+                                />
                             </div>
                         )}
 
