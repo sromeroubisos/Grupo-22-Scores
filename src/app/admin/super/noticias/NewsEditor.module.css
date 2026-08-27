@@ -950,3 +950,187 @@
     text-transform: uppercase;
     color: var(--ink-muted);
 }
+
+
+/* ── La barra de formato del cuerpo ─────────────────────────────────────── */
+/* Botones de ícono de 36px (44 de blanco con el margen), agrupados de a
+   tres; la de la foto lleva palabra porque no es un formato, es una subida.
+   Se apoya sobre el textarea: comparte borde y radio con él. */
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 6px 8px;
+    border: 1px solid var(--edge-strong);
+    border-bottom: 0;
+    border-radius: 12px 12px 0 0;
+    background: var(--raised);
+}
+
+.toolbar + .textarea {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.toolGroup {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.toolGroup + .toolGroup {
+    padding-left: 10px;
+    border-left: 1px solid var(--edge);
+}
+
+.toolBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0 8px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 140ms var(--ease), color 140ms var(--ease), border-color 140ms var(--ease);
+}
+
+.toolBtn:hover:not(:disabled) {
+    background: var(--raised-2);
+    color: var(--ink);
+}
+
+.toolBtn:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+.toolBtn:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 1px;
+}
+
+.toolBtn:disabled {
+    cursor: progress;
+    opacity: 0.6;
+}
+
+.toolBtnLabeled {
+    color: var(--accent-ink);
+    border-color: rgba(var(--accent-rgb), 0.35);
+}
+
+.toolBtnLabeled:hover:not(:disabled) {
+    background: rgba(var(--accent-rgb), 0.12);
+    color: var(--accent-ink);
+}
+
+/* ── La vista previa: tarjeta o nota ────────────────────────────────────── */
+.previewTabs {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    background: var(--slab);
+}
+
+.previewTab {
+    min-height: 30px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-muted);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 140ms var(--ease), color 140ms var(--ease);
+}
+
+.previewTab:hover {
+    color: var(--ink);
+}
+
+.previewTab:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 1px;
+}
+
+.previewTabActive {
+    background: var(--raised-2);
+    color: var(--ink);
+}
+
+/* La nota como se lee, con la tinta del admin: NewsBody toma los `--news-*`
+   de acá, no los del tema del sitio (que en claro serían tinta oscura sobre
+   el fondo oscuro del editor). Si es larga, scrollea adentro. */
+.articlePreview {
+    --news-ink: var(--ink);
+    --news-ink-muted: var(--ink-muted);
+    --news-edge: var(--edge-strong);
+    --news-raised: var(--raised);
+    --news-accent: var(--accent);
+    --news-accent-ink: var(--accent-ink);
+    --news-measure: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: min(72vh, 760px);
+    overflow-y: auto;
+    padding: 20px;
+    border: 1px solid var(--edge);
+    border-radius: 18px;
+    background: var(--slab);
+    scrollbar-width: thin;
+    font-size: 0.95rem;
+}
+
+.articlePreviewTitle {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    text-wrap: balance;
+}
+
+.articlePreviewSummary {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 1rem;
+    line-height: 1.55;
+}
+
+.articlePreviewEmpty {
+    margin: 0;
+    padding: 18px;
+    border: 1px dashed var(--edge-strong);
+    border-radius: 12px;
+    color: var(--ink-muted);
+    font-size: 14px;
+}
+
+@media (max-width: 640px) {
+    .toolGroup + .toolGroup {
+        padding-left: 6px;
+    }
+
+    .toolBtn {
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .articlePreview {
+        max-height: none;
+        padding: 16px;
+    }
+}
