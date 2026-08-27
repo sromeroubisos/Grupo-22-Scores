@@ -14,6 +14,104 @@ const OVERRIDE_LOOKUP = Object.fromEntries(
     Object.entries(EXTERNAL_TEAM_LOGO_OVERRIDES).map(([key, value]) => [key.trim().toLowerCase(), value]),
 );
 
+/**
+ * LA BANDERA DE UNA SELECCION.
+ *
+ * Un seleccionado no tiene escudo de club: tiene bandera. El proveedor manda lo que
+ * tenga a mano y no siempre es eso —Argentina llegaba unas veces con la bandera y
+ * otras con dos letras sobre un circulo gris—, asi que la identidad de un pais la
+ * pone la plataforma y no la fuente.
+ *
+ * Va por NOMBRE y no por id a proposito: el mismo pais vive bajo varios ids de
+ * proveedor y aparecen ids nuevos solos (por eso existe `dedupeExternalTeams` en
+ * /api/search/universal). Una tabla de ids nace desactualizada; una de nombres no.
+ * Ademas asi alcanza a las selecciones que viven en `clubs` —las asiaticas estan
+ * cargadas ahi— sin repetir el mapa.
+ */
+const NATIONAL_TEAM_FLAG_BASE = '/logos/selecciones';
+
+const NATIONAL_TEAM_FLAGS: Record<string, string> = {
+    argentina: 'argentina',
+    australia: 'australia',
+    belgium: 'belgium', belgica: 'belgium',
+    brazil: 'brazil', brasil: 'brazil',
+    canada: 'canada',
+    chile: 'chile',
+    china: 'china',
+    croatia: 'croatia', croacia: 'croatia',
+    czechia: 'czechia', 'czech republic': 'czechia', chequia: 'czechia', 'republica checa': 'czechia',
+    denmark: 'denmark', dinamarca: 'denmark',
+    england: 'england', inglaterra: 'england',
+    fiji: 'fiji', fiyi: 'fiji',
+    france: 'france', francia: 'france',
+    georgia: 'georgia',
+    germany: 'germany', alemania: 'germany',
+    guam: 'guam',
+    'hong kong': 'hong-kong', 'hong kong china': 'hong-kong',
+    india: 'india',
+    ireland: 'ireland', irlanda: 'ireland',
+    italy: 'italy', italia: 'italy',
+    japan: 'japan', japon: 'japan',
+    laos: 'laos',
+    lithuania: 'lithuania', lituania: 'lithuania',
+    malaysia: 'malaysia', malasia: 'malaysia',
+    netherlands: 'netherlands', 'paises bajos': 'netherlands', holanda: 'netherlands',
+    'new zealand': 'new-zealand', 'nueva zelanda': 'new-zealand', 'nueva zelandia': 'new-zealand',
+    peru: 'peru',
+    philippines: 'philippines', filipinas: 'philippines',
+    poland: 'poland', polonia: 'poland',
+    portugal: 'portugal',
+    romania: 'romania', rumania: 'romania',
+    samoa: 'samoa',
+    scotland: 'scotland', escocia: 'scotland',
+    singapore: 'singapore', singapur: 'singapore',
+    'south africa': 'south-africa', sudafrica: 'south-africa',
+    'south korea': 'south-korea', korea: 'south-korea', 'corea del sur': 'south-korea',
+    spain: 'spain', espana: 'spain',
+    'sri lanka': 'sri-lanka',
+    sweden: 'sweden', suecia: 'sweden',
+    switzerland: 'switzerland', suiza: 'switzerland',
+    taiwan: 'taiwan', 'chinese taipei': 'taiwan',
+    thailand: 'thailand', tailandia: 'thailand',
+    tonga: 'tonga',
+    turkey: 'turkey', turquia: 'turkey',
+    ukraine: 'ukraine', ucrania: 'ukraine',
+    'united states': 'united-states', usa: 'united-states', 'estados unidos': 'united-states',
+    uruguay: 'uruguay',
+    vietnam: 'vietnam',
+    wales: 'wales', gales: 'wales',
+    zimbabwe: 'zimbabwe', zimbabue: 'zimbabwe',
+};
+
+function normalizeNationKey(value: string): string {
+    return value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+/**
+ * Solo el nombre PELADO del pais.
+ *
+ * "Argentina" lleva la bandera. "Argentina XV", "Argentina 7s", "Argentina M20" y
+ * "Wales W" no: son equipos distintos —otra categoria, otra rama, otro plantel— y
+ * cada uno se queda con la identidad que ya tiene. La bandera es del seleccionado
+ * mayor y de nadie mas.
+ *
+ * Que la coincidencia sea exacta ademas resuelve solo el problema de los clubes que
+ * arrancan igual: "New Zealand Warriors" es de la NRL y "Croatia Dakovo" es un club
+ * croata, y ninguno de los dos entra por la puerta del pais.
+ */
+export function getNationalTeamFlag(rawName: unknown): string | null {
+    if (typeof rawName !== 'string') return null;
+
+    const slug = NATIONAL_TEAM_FLAGS[normalizeNationKey(rawName)];
+    return slug ? `${NATIONAL_TEAM_FLAG_BASE}/${slug}.png` : null;
+}
+
 const ID_FIELDS = [
     'team_id',
     'teamId',
@@ -420,7 +518,9 @@ export function getExternalTeamLogoOverride(...sources: TeamLogoSource[]): strin
         if (override) return override;
     }
 
-    return null;
+    // La bandera se busca DESPUES de los overrides por id: una excepcion escrita a mano
+    // para un equipo puntual tiene que poder ganarle a la regla general del pais.
+    return getNationalTeamFlag(getFirstExternalTeamName(...sources));
 }
 
 export function resolveTeamLogo(...sources: TeamLogoSource[]): string {
