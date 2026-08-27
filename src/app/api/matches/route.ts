@@ -20,6 +20,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getCountryById } from '@/lib/data/countries';
 import { memoryCache } from '@/lib/cache';
+import { dedupeCrossSourceMatches } from '@/lib/matchFeedDedupe';
 import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
 import { isMatchVisibleToPublic } from '@/lib/matchReview';
 import {
@@ -1897,6 +1898,13 @@ async function computeMatchesPayload(
             });
         }
 
+        // Un partido que vive en las dos fuentes es UN partido.
+        const antesDePlegar = enrichedMatches.length;
+        enrichedMatches = dedupeCrossSourceMatches(enrichedMatches);
+        if (antesDePlegar !== enrichedMatches.length) {
+            console.log(`[matches] plegados ${antesDePlegar - enrichedMatches.length} duplicados entre fuentes`);
+        }
+
         // Final sort by date_time
         const sortStartedAt = Date.now();
         enrichedMatches.sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
@@ -2126,6 +2134,10 @@ export async function POST(request: Request) {
         const normalizedWatchUrl = typeof body.watchUrl === 'string' && body.watchUrl.trim()
             ? body.watchUrl.trim()
             : (typeof body.streamUrl === 'string' && body.streamUrl.trim() ? body.streamUrl.trim() : null);
+        // "Público" del alta (amistosos). Sin el campo, la columna queda en su default.
+        const requestedVisibility: boolean | undefined = typeof body.isVisible === 'boolean'
+            ? body.isVisible
+            : (typeof body.isPublic === 'boolean' ? body.isPublic : undefined);
 
         // Validate required fields
         if (!homeClubId || !awayClubId) {
@@ -2194,6 +2206,7 @@ export async function POST(request: Request) {
             supportsHomeDivision,
             supportsAwayDivision,
             supportsCategory,
+            supportsIsVisible,
         ] = await Promise.all([
             normalizedRoundId ? supportsMatchesColumn(supabase, 'round_uuid') : Promise.resolve(false),
             normalizedRoundLabel ? supportsMatchesColumn(supabase, 'round_label') : Promise.resolve(false),
@@ -2204,6 +2217,7 @@ export async function POST(request: Request) {
             homeSquadId ? supportsMatchesColumn(supabase, 'home_division_id') : Promise.resolve(false),
             awaySquadId ? supportsMatchesColumn(supabase, 'away_division_id') : Promise.resolve(false),
             category ? supportsMatchesColumn(supabase, 'category') : Promise.resolve(false),
+            typeof requestedVisibility === 'boolean' ? supportsMatchesColumn(supabase, 'is_visible') : Promise.resolve(false),
         ]);
 
         // Insert match
@@ -2259,6 +2273,10 @@ export async function POST(request: Request) {
 
         if (supportsCategory) {
             matchPayload.category = typeof category === 'string' && category.trim() ? category.trim() : null;
+        }
+
+        if (supportsIsVisible && typeof requestedVisibility === 'boolean') {
+            matchPayload.is_visible = requestedVisibility;
         }
 
         const { data: match, error: insertError } = await supabase
