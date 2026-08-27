@@ -1731,3 +1731,20 @@ html:has(main[data-full-height]) main[data-full-height] {
     min-height: 0;
     height: auto;
 }
+
+/* ── Sticky vivo donde una página lo declara ─────────────────────────────
+   `overflow-x: hidden` en body y en main los convierte en scroll containers
+   y eso MATA todo `position: sticky` de sus descendientes (medido: ni el
+   header ni la barra de pestañas del torneo pegaban al scrollear). `clip`
+   recorta el desborde horizontal exactamente igual, pero sin crear scroll
+   container, así que el sticky vuelve a resolver contra el viewport.
+
+   Va scoped por :has y no global a propósito: cambiar el body de todo el
+   sitio despertaría de golpe cada sticky que hoy duerme (header, filterBar,
+   listHeader) en páginas que nunca se probaron con él vivo. Una página que
+   quiera sticky funcional declara `data-sticky-tabs` en su raíz. En
+   navegadores sin :has no pasa nada: queda el hidden de siempre. */
+body:has([data-sticky-tabs]),
+main:has([data-sticky-tabs]) {
+    overflow-x: clip;
+}

@@ -13,8 +13,13 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react';
-import { AlertCircle, AlertTriangle, ArrowLeft, CheckCircle2, Circle, Eye, EyeOff, ImagePlus, Newspaper, Trash2, X } from 'lucide-react';
+import {
+    AlertCircle, AlertTriangle, ArrowLeft, Bold, CheckCircle2, Circle, Eye, EyeOff, Heading2, Heading3,
+    Image as ImageIcon, ImagePlus, Italic, Link2, List, ListOrdered, Minus, Newspaper, Quote, Trash2, X,
+} from 'lucide-react';
 
+import NewsBody from '@/components/news/NewsBody';
+import { imageCountOf, parseRichText, plainTextOf, wordCountOf } from '@/lib/news/richText';
 import { sessionFetch } from '@/lib/supabase/freshSession';
 
 import styles from './NewsEditor.module.css';
@@ -134,20 +139,118 @@ function validate(form: NewsForm): Partial<Record<FormField, string>> {
     return errors;
 }
 
-function wordCount(text: string): number {
-    return text.trim().split(/\s+/).filter(Boolean).length;
-}
-
 function paragraphCount(text: string): number {
-    return text.split(/\n{2,}/).map((paragraph) => paragraph.trim()).filter(Boolean).length;
+    return parseRichText(text).filter((block) => block.type === 'paragraph').length;
 }
 
+/** El extracto de la tarjeta: el resumen, o el principio del cuerpo sin las marcas. */
 function excerptOf(form: NewsForm): string {
     const summary = form.summary.trim();
     if (summary) return summary;
-    const content = form.content.trim();
+    const content = plainTextOf(form.content);
     if (!content) return 'Abrir para leer la noticia completa.';
     return content.length > 160 ? `${content.slice(0, 157)}...` : content;
+}
+
+// ── El formato del cuerpo ─────────────────────────────────────────────────
+// Las marcas que entiende el lector (lib/news/richText.ts). La barra las
+// escribe en el textarea alrededor de lo seleccionado; el texto guardado
+// sigue siendo texto, y quien prefiera teclearlas a mano puede.
+
+type FormatKind = 'bold' | 'italic' | 'h2' | 'h3' | 'quote' | 'ul' | 'ol' | 'link' | 'rule';
+
+type FormatTool = {
+    kind: FormatKind;
+    label: string;
+    shortcut?: string;
+    Icon: typeof Bold;
+};
+
+const FORMAT_TOOLS: FormatTool[][] = [
+    [
+        { kind: 'bold', label: 'Negrita', shortcut: 'Ctrl+B', Icon: Bold },
+        { kind: 'italic', label: 'Cursiva', shortcut: 'Ctrl+I', Icon: Italic },
+        { kind: 'link', label: 'Link', shortcut: 'Ctrl+K', Icon: Link2 },
+    ],
+    [
+        { kind: 'h2', label: 'Subtítulo', Icon: Heading2 },
+        { kind: 'h3', label: 'Subtítulo menor', Icon: Heading3 },
+        { kind: 'quote', label: 'Cita', Icon: Quote },
+    ],
+    [
+        { kind: 'ul', label: 'Lista', Icon: List },
+        { kind: 'ol', label: 'Lista numerada', Icon: ListOrdered },
+        { kind: 'rule', label: 'Separador', Icon: Minus },
+    ],
+];
+
+type Edit = { text: string; selectionStart: number; selectionEnd: number };
+
+/** Envuelve la selección (o un texto de muestra, que queda seleccionado para pisarlo). */
+function wrapSelection(value: string, start: number, end: number, before: string, after: string, sample: string): Edit {
+    const selected = value.slice(start, end);
+    const inner = selected || sample;
+    const text = `${value.slice(0, start)}${before}${inner}${after}${value.slice(end)}`;
+    return { text, selectionStart: start + before.length, selectionEnd: start + before.length + inner.length };
+}
+
+/** Cualquier marca de bloque al principio de un renglón: un renglón lleva una sola. */
+const ANY_LINE_PREFIX = /^(?:#{1,3}\s+|>\s?|[-*•]\s+|\d{1,3}[.)]\s+)/;
+
+/** Antepone una marca a cada renglón seleccionado (pisando la que tuviera); si todos ya llevan ésta, la saca. */
+function prefixLines(value: string, start: number, end: number, prefix: (index: number) => string, detect: RegExp, sample: string): Edit {
+    const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+    const lineEndRaw = value.indexOf('\n', Math.max(end - (end > start ? 1 : 0), lineStart));
+    const lineEnd = lineEndRaw === -1 ? value.length : lineEndRaw;
+    const block = value.slice(lineStart, lineEnd);
+    const lines = block ? block.split('\n') : [sample];
+    const allMarked = block !== '' && lines.every((line) => detect.test(line));
+    const next = lines
+        .map((line, index) => (allMarked ? line.replace(detect, '') : `${prefix(index)}${line.replace(ANY_LINE_PREFIX, '')}`))
+        .join('\n');
+    const text = `${value.slice(0, lineStart)}${next}${value.slice(lineEnd)}`;
+    return { text, selectionStart: lineStart, selectionEnd: lineStart + next.length };
+}
+
+/** Inserta un bloque en su propio párrafo, con línea en blanco antes y después. */
+function insertBlock(value: string, start: number, end: number, block: string): Edit {
+    const before = value.slice(0, start);
+    const after = value.slice(end);
+    const lead = before === '' ? '' : before.endsWith('\n\n') ? '' : before.endsWith('\n') ? '\n' : '\n\n';
+    const trail = after === '' ? '\n' : after.startsWith('\n\n') ? '' : after.startsWith('\n') ? '\n' : '\n\n';
+    const text = `${before}${lead}${block}${trail}${after}`;
+    const caret = before.length + lead.length + block.length + trail.length;
+    return { text, selectionStart: caret, selectionEnd: caret };
+}
+
+function applyFormatTo(value: string, start: number, end: number, kind: FormatKind): Edit {
+    switch (kind) {
+        case 'bold': return wrapSelection(value, start, end, '**', '**', 'texto en negrita');
+        case 'italic': return wrapSelection(value, start, end, '_', '_', 'texto en cursiva');
+        case 'link': {
+            const selected = value.slice(start, end);
+            const isUrl = /^https?:\/\/\S+$/i.test(selected);
+            if (isUrl) return wrapSelection(value, start, end, '[texto del link](', ')', selected);
+            const edit = wrapSelection(value, start, end, '[', '](https://)', 'texto del link');
+            // Queda seleccionada la URL de muestra, que es lo que hay que reemplazar.
+            const urlStart = edit.selectionEnd + 2;
+            return { text: edit.text, selectionStart: urlStart, selectionEnd: urlStart + 'https://'.length };
+        }
+        case 'h2': return prefixLines(value, start, end, () => '## ', /^#{1,3}\s+/, 'Subtítulo');
+        case 'h3': return prefixLines(value, start, end, () => '### ', /^#{1,3}\s+/, 'Subtítulo');
+        case 'quote': return prefixLines(value, start, end, () => '> ', /^>\s?/, 'La cita');
+        case 'ul': return prefixLines(value, start, end, () => '- ', /^(?:[-*•]|\d{1,3}[.)])\s+/, 'Primer punto');
+        case 'ol': return prefixLines(value, start, end, (index) => `${index + 1}. `, /^(?:[-*•]|\d{1,3}[.)])\s+/, 'Primer punto');
+        case 'rule': return insertBlock(value, start, end, '---');
+        default: return { text: value, selectionStart: start, selectionEnd: end };
+    }
+}
+
+const IMAGE_CAPTION_SAMPLE = 'Epígrafe de la foto';
+
+/** La línea de una imagen intermedia; el epígrafe queda seleccionado para escribirlo. */
+function imageBlock(url: string): string {
+    return `![Foto](${url} "${IMAGE_CAPTION_SAMPLE}")`;
 }
 
 // ── El editor ─────────────────────────────────────────────────────────────
@@ -174,8 +277,17 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
     const [previewOpen, setPreviewOpen] = useState(false);
     const [imageBroken, setImageBroken] = useState(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const bodyFileInputRef = useRef<HTMLInputElement | null>(null);
+    const contentRef = useRef<HTMLTextAreaElement | null>(null);
+    /** Dónde poner el cursor después de aplicar un formato (se resuelve al renderizar el nuevo texto). */
+    const pendingSelectionRef = useRef<{ start: number; end: number } | null>(null);
     const titleRef = useRef<HTMLInputElement | null>(null);
     const tagInputRef = useRef<HTMLInputElement | null>(null);
+    /** Subiendo una foto intermedia del cuerpo (distinta de la de portada). */
+    const [bodyUploading, setBodyUploading] = useState(false);
+    const [bodyImageError, setBodyImageError] = useState<string | null>(null);
+    /** Qué muestra la columna de vista previa: la tarjeta de la portada o la nota como se lee. */
+    const [previewTab, setPreviewTab] = useState<'card' | 'article'>('card');
     /** Lo que se está escribiendo en el campo de etiquetas, antes de convertirse en chip. */
     const [tagDraft, setTagDraft] = useState('');
     /** true = quien edita eligió "Otro deporte" y escribe el suyo. */
@@ -246,32 +358,38 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
         return (touched[field] || attempted) ? errors[field] ?? null : null;
     }
 
-    // ── La imagen ──
+    // ── Las imágenes ──
 
-    async function uploadImage(file: File) {
-        setImageError(null);
-        if (!IMAGE_TYPES.includes(file.type)) {
-            setImageError('Formato no soportado: usá JPG, PNG, WebP, GIF o AVIF.');
-            return;
-        }
-        if (file.size > IMAGE_MAX_BYTES) {
-            setImageError('La imagen pesa más de 5 MB. Achicala antes de subirla.');
-            return;
-        }
-        setUploading(true);
+    /** Sube un archivo al bucket `news` y devuelve su URL pública, o el error para mostrar. */
+    async function uploadToBucket(file: File): Promise<{ url: string } | { error: string }> {
+        if (!IMAGE_TYPES.includes(file.type)) return { error: 'Formato no soportado: usá JPG, PNG, WebP, GIF o AVIF.' };
+        if (file.size > IMAGE_MAX_BYTES) return { error: 'La imagen pesa más de 5 MB. Achicala antes de subirla.' };
         try {
             const body = new FormData();
             body.append('file', file);
             const response = await sessionFetch('/api/news/image', { method: 'POST', body });
             const payload = await response.json().catch(() => null);
             if (!response.ok || typeof payload?.url !== 'string') {
-                setImageError(typeof payload?.error === 'string' ? payload.error : 'No se pudo subir la imagen. Probá de nuevo.');
+                return { error: typeof payload?.error === 'string' ? payload.error : 'No se pudo subir la imagen. Probá de nuevo.' };
+            }
+            return { url: payload.url };
+        } catch {
+            return { error: 'No se pudo subir la imagen. Revisá la conexión y probá de nuevo.' };
+        }
+    }
+
+    /** La imagen de portada. */
+    async function uploadImage(file: File) {
+        setImageError(null);
+        setUploading(true);
+        try {
+            const result = await uploadToBucket(file);
+            if ('error' in result) {
+                setImageError(result.error);
                 return;
             }
-            update('image_url', payload.url);
+            update('image_url', result.url);
             touch('image_url');
-        } catch {
-            setImageError('No se pudo subir la imagen. Revisá la conexión y probá de nuevo.');
         } finally {
             setUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -282,6 +400,70 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
         const file = event.target.files?.[0];
         if (file) void uploadImage(file);
     }
+
+    // ── El formato del cuerpo ──
+
+    /** Aplica el resultado al textarea y deja el cursor donde corresponde. */
+    function commitEdit(edit: Edit) {
+        pendingSelectionRef.current = { start: edit.selectionStart, end: edit.selectionEnd };
+        update('content', edit.text);
+    }
+
+    function applyFormat(kind: FormatKind) {
+        const textarea = contentRef.current;
+        if (!textarea) return;
+        const { selectionStart, selectionEnd } = textarea;
+        commitEdit(applyFormatTo(form.content, selectionStart, selectionEnd, kind));
+    }
+
+    /** Una foto intermedia: se sube al bucket y su línea entra donde está el cursor. */
+    async function insertBodyImage(file: File) {
+        setBodyImageError(null);
+        setBodyUploading(true);
+        try {
+            const result = await uploadToBucket(file);
+            if ('error' in result) {
+                setBodyImageError(result.error);
+                return;
+            }
+            const textarea = contentRef.current;
+            const start = textarea?.selectionStart ?? form.content.length;
+            const end = textarea?.selectionEnd ?? start;
+            const block = imageBlock(result.url);
+            const edit = insertBlock(form.content, start, end, block);
+            // Queda seleccionado el epígrafe de muestra, para escribir el de verdad.
+            const blockStart = edit.text.indexOf(block, start);
+            const captionFrom = blockStart + block.indexOf('"') + 1;
+            commitEdit({ text: edit.text, selectionStart: captionFrom, selectionEnd: captionFrom + IMAGE_CAPTION_SAMPLE.length });
+        } finally {
+            setBodyUploading(false);
+            if (bodyFileInputRef.current) bodyFileInputRef.current.value = '';
+        }
+    }
+
+    function onBodyFilePicked(event: ChangeEvent<HTMLInputElement>) {
+        const file = event.target.files?.[0];
+        if (file) void insertBodyImage(file);
+    }
+
+    function onContentKeyDown(event: ReactKeyboardEvent<HTMLTextAreaElement>) {
+        if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+        const key = event.key.toLowerCase();
+        const kind: FormatKind | null = key === 'b' ? 'bold' : key === 'i' ? 'italic' : key === 'k' ? 'link' : null;
+        if (!kind) return;
+        event.preventDefault();
+        applyFormat(kind);
+    }
+
+    // Después de un formato, el textarea recibe el texto nuevo: recién ahí se puede mover el cursor.
+    useEffect(() => {
+        const pending = pendingSelectionRef.current;
+        const textarea = contentRef.current;
+        if (!pending || !textarea) return;
+        pendingSelectionRef.current = null;
+        textarea.focus();
+        textarea.setSelectionRange(pending.start, pending.end);
+    }, [form.content]);
 
     function onDrop(event: DragEvent<HTMLDivElement>) {
         event.preventDefault();
@@ -435,9 +617,10 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
             removeTag(form.tags[form.tags.length - 1]);
         }
     }
-    const words = wordCount(`${form.summary} ${form.content}`);
+    const words = wordCountOf(`${form.summary}\n\n${form.content}`);
     const minutes = Math.max(1, Math.ceil(words / 220));
     const paragraphs = paragraphCount(form.content);
+    const bodyImages = imageCountOf(form.content);
     const scopeLabel = SCOPES.find((scope) => scope.id === form.scope)?.label ?? 'General';
     const previewDate = formatDate(publishedAt) ?? 'Hoy';
     const isPublished = status === 'published';
@@ -565,18 +748,65 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                                 <label htmlFor="news-content" className={styles.label}>Contenido</label>
                                 <span className={styles.counter}>{words} palabras · {minutes} min</span>
                             </div>
+                            <div className={styles.toolbar} role="toolbar" aria-label="Formato del contenido" aria-controls="news-content">
+                                {FORMAT_TOOLS.map((group, groupIndex) => (
+                                    <div key={groupIndex} className={styles.toolGroup}>
+                                        {group.map(({ kind, label, shortcut, Icon }) => (
+                                            <button
+                                                key={kind}
+                                                type="button"
+                                                className={styles.toolBtn}
+                                                onMouseDown={(event) => event.preventDefault() /* que el textarea no pierda la selección */}
+                                                onClick={() => applyFormat(kind)}
+                                                aria-label={shortcut ? `${label} (${shortcut})` : label}
+                                                title={shortcut ? `${label} · ${shortcut}` : label}
+                                            >
+                                                <Icon size={16} aria-hidden="true" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                ))}
+                                <div className={styles.toolGroup}>
+                                    <input
+                                        ref={bodyFileInputRef}
+                                        type="file"
+                                        accept={IMAGE_TYPES.join(',')}
+                                        onChange={onBodyFilePicked}
+                                        disabled={bodyUploading}
+                                        className={styles.srOnly}
+                                        tabIndex={-1}
+                                        aria-hidden="true"
+                                    />
+                                    <button
+                                        type="button"
+                                        className={`${styles.toolBtn} ${styles.toolBtnLabeled}`}
+                                        onMouseDown={(event) => event.preventDefault()}
+                                        onClick={() => bodyFileInputRef.current?.click()}
+                                        disabled={bodyUploading}
+                                        aria-label="Insertar una foto en el texto"
+                                        title="Insertar una foto donde está el cursor"
+                                    >
+                                        <ImageIcon size={16} aria-hidden="true" />
+                                        <span>{bodyUploading ? 'Subiendo…' : 'Foto'}</span>
+                                    </button>
+                                </div>
+                            </div>
                             <textarea
                                 id="news-content"
+                                ref={contentRef}
                                 className={`${styles.textarea} ${showError('content') ? styles.inputInvalid : ''}`}
                                 value={form.content}
-                                placeholder={'El texto de la nota.\n\nSepará los párrafos con una línea en blanco: así se muestran en la página.'}
+                                placeholder={'El texto de la nota.\n\nSepará los párrafos con una línea en blanco: así se muestran en la página. Con la barra de arriba van la negrita, la cursiva, los subtítulos y las fotos intermedias.'}
                                 onChange={(event) => update('content', event.target.value)}
+                                onKeyDown={onContentKeyDown}
                                 onBlur={() => touch('content')}
                                 aria-invalid={Boolean(showError('content'))}
                                 aria-describedby="news-content-hint"
+                                spellCheck
                             />
+                            {bodyImageError && <p className={`${styles.hint} ${styles.hintError}`} role="alert">{bodyImageError}</p>}
                             <p id="news-content-hint" className={`${styles.hint} ${showError('content') ? styles.hintError : ''}`}>
-                                {showError('content') ?? 'Separá los párrafos con una línea en blanco. El primero sale destacado.'}
+                                {showError('content') ?? 'Separá los párrafos con una línea en blanco; el primero sale destacado. Seleccioná un texto y tocá un botón para darle formato: **negrita**, _cursiva_, ## subtítulo. La vista previa muestra cómo se lee.'}
                             </p>
                         </div>
                     </section>
@@ -806,11 +1036,44 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
 
                 <aside className={`${styles.preview} ${previewOpen ? '' : styles.previewHidden}`} aria-label="Vista previa">
                     <div className={styles.previewHead}>
-                        <h2 className={styles.cardTitle}>Así se ve en la portada</h2>
-                        <span className={styles.counter}>Vista previa</span>
+                        <h2 className={styles.cardTitle}>{previewTab === 'card' ? 'Así se ve en la portada' : 'Así se lee la nota'}</h2>
+                        <div className={styles.previewTabs} role="tablist" aria-label="Qué vista previa mostrar">
+                            <button
+                                type="button"
+                                role="tab"
+                                id="preview-tab-card"
+                                aria-selected={previewTab === 'card'}
+                                aria-controls="preview-panel"
+                                className={`${styles.previewTab} ${previewTab === 'card' ? styles.previewTabActive : ''}`}
+                                onClick={() => setPreviewTab('card')}
+                            >
+                                Tarjeta
+                            </button>
+                            <button
+                                type="button"
+                                role="tab"
+                                id="preview-tab-article"
+                                aria-selected={previewTab === 'article'}
+                                aria-controls="preview-panel"
+                                className={`${styles.previewTab} ${previewTab === 'article' ? styles.previewTabActive : ''}`}
+                                onClick={() => setPreviewTab('article')}
+                            >
+                                Nota
+                            </button>
+                        </div>
                     </div>
 
-                    <div className={styles.previewCard}>
+                    {previewTab === 'article' ? (
+                        <div id="preview-panel" role="tabpanel" aria-labelledby="preview-tab-article" className={styles.articlePreview}>
+                            {form.title.trim() && <h3 className={styles.articlePreviewTitle}>{form.title.trim()}</h3>}
+                            {form.summary.trim() && <p className={styles.articlePreviewSummary}>{form.summary.trim()}</p>}
+                            <NewsBody
+                                content={form.content}
+                                empty={<p className={styles.articlePreviewEmpty}>Escribí el contenido y acá se ve cómo queda.</p>}
+                            />
+                        </div>
+                    ) : (
+                    <div id="preview-panel" role="tabpanel" aria-labelledby="preview-tab-card" className={styles.previewCard}>
                         <div className={styles.previewMedia}>
                             {imageOk && !imageBroken ? (
                                 // eslint-disable-next-line @next/next/no-img-element -- la misma imagen de la nota.
@@ -836,6 +1099,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                             <span className={styles.previewCta}>Leer la nota →</span>
                         </div>
                     </div>
+                    )}
 
                     <ul className={styles.previewStats} aria-label="Medidas de la nota">
                         <li className={styles.previewStat}>
@@ -850,6 +1114,12 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                             <span className={styles.previewStatValue}>{paragraphs}</span>
                             <span className={styles.previewStatLabel}>{paragraphs === 1 ? 'párrafo' : 'párrafos'}</span>
                         </li>
+                        {bodyImages > 0 && (
+                            <li className={styles.previewStat}>
+                                <span className={styles.previewStatValue}>{bodyImages}</span>
+                                <span className={styles.previewStatLabel}>{bodyImages === 1 ? 'foto en el texto' : 'fotos en el texto'}</span>
+                            </li>
+                        )}
                     </ul>
 
                     <ul className={styles.checklist} aria-label="Qué le falta a la nota">

@@ -1,0 +1,180 @@
+/* El cuerpo de la nota. Las variables `--news-*` las fija quien lo contiene:
+   el lector las apunta a los tokens del sitio (siguen a data-theme); el
+   editor, que vive en el shell oscuro del admin, les pasa su propia tinta.
+   Sin contenedor, caen a los tokens del sitio. */
+
+.body {
+    --news-ink: var(--color-text-primary, #f2f2f2);
+    --news-ink-muted: var(--color-text-secondary, #a1a1aa);
+    --news-edge: var(--color-border, #2a2a2e);
+    --news-raised: var(--color-bg-tertiary, #1c1c1f);
+    --news-accent: var(--color-accent, #00a365);
+    --news-accent-ink: var(--color-accent-ink, #22c55e);
+    --news-measure: 74ch;
+
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    color: var(--news-ink);
+    font-size: 1.075rem;
+    line-height: 1.75;
+}
+
+.body > * {
+    margin: 0;
+    max-width: var(--news-measure);
+}
+
+.body p {
+    text-wrap: pretty;
+}
+
+.lead {
+    font-size: 1.2rem;
+    line-height: 1.65;
+    font-weight: 500;
+}
+
+.body strong {
+    font-weight: 700;
+    color: var(--news-ink);
+}
+
+.body em {
+    font-style: italic;
+}
+
+.h2,
+.h3 {
+    margin-top: 10px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--news-ink);
+    text-wrap: balance;
+}
+
+.h2 {
+    font-size: 1.55rem;
+}
+
+.h3 {
+    font-size: 1.25rem;
+}
+
+.link {
+    color: var(--news-accent-ink);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.18s ease;
+}
+
+.link:hover,
+.link:focus-visible {
+    text-decoration-thickness: 2px;
+}
+
+.quote {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 0 4px 20px;
+    border-left: 3px solid var(--news-accent);
+    color: var(--news-ink);
+    font-size: 1.15rem;
+    line-height: 1.55;
+    font-style: italic;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-left: 1.4em;
+}
+
+.list li {
+    padding-left: 4px;
+}
+
+.list li::marker {
+    color: var(--news-accent-ink);
+    font-weight: 700;
+}
+
+/* La figura rompe la medida: una foto intermedia va al ancho de la columna. */
+.figure {
+    max-width: none;
+    margin: 8px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 640px;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid var(--news-edge);
+    background: var(--news-raised);
+}
+
+.figure figcaption {
+    color: var(--news-ink-muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.rule {
+    width: 72px;
+    height: 3px;
+    margin: 12px 0;
+    border: 0;
+    border-radius: 999px;
+    background: var(--news-edge);
+}
+
+@media (max-width: 768px) {
+    .body {
+        gap: 18px;
+        font-size: 1.0625rem;
+        line-height: 1.72;
+    }
+
+    .lead {
+        font-size: 1.125rem;
+        line-height: 1.62;
+    }
+
+    .h2 {
+        font-size: 1.4rem;
+    }
+
+    .h3 {
+        font-size: 1.15rem;
+    }
+
+    .quote {
+        font-size: 1.05rem;
+        padding-left: 16px;
+    }
+
+    /* La foto intermedia va de borde a borde, como la de portada. */
+    .figure {
+        width: calc(100% + 32px);
+        margin-inline: -16px;
+    }
+
+    .figure img {
+        border-inline: none;
+        border-radius: 0;
+    }
+
+    .figure figcaption {
+        padding-inline: 16px;
+    }
+}

@@ -25,6 +25,7 @@ import {
 
 import MobileSectionTabs from '@/components/MobileSectionTabs';
 import ProtectedLink from '@/components/ProtectedLink';
+import { plainTextOf } from '@/lib/news/richText';
 import { sessionFetch } from '@/lib/supabase/freshSession';
 import { useSport } from '@/context/SportContext';
 import type { VideoHubSummary } from '@/lib/videoHub/types';
@@ -122,7 +123,8 @@ function buildNewsPreview(item: NewsItem): string {
     const summary = item.summary?.trim();
     if (summary) return summary;
 
-    const content = item.content?.trim();
+    // Sin las marcas del editor: la tarjeta no muestra `**` ni `##`.
+    const content = plainTextOf(item.content);
     if (!content) return 'Abrir para leer la noticia completa.';
     return content.length > 160 ? `${content.slice(0, 157)}...` : content;
 }

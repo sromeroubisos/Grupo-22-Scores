@@ -25,7 +25,7 @@
     --on-accent: #04130c; /* tinta oscura sobre el acento: 6:1 */
     --font-sans: var(--font-primary, 'Outfit', 'Inter', system-ui, sans-serif);
     --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-    --measure: 68ch;
+    --measure: 74ch;
     --ease: cubic-bezier(0.25, 1, 0.5, 1);
 
     color: var(--ink);
@@ -33,9 +33,19 @@
     padding: 24px 24px 96px;
 }
 
-.readerShell {
-    max-width: 760px;
+.readerLayout {
+    max-width: 1360px;
     margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+}
+
+.readerShell {
+    width: 100%;
+    max-width: 880px;
+    margin: 0 auto;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 28px;
@@ -205,28 +215,6 @@
     gap: 32px;
 }
 
-.bodyContent {
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-    color: var(--ink);
-    font-size: 1.075rem;
-    line-height: 1.75;
-}
-
-.bodyContent p {
-    margin: 0;
-    max-width: var(--measure);
-    text-wrap: pretty;
-}
-
-.leadParagraph {
-    font-size: 1.2rem;
-    line-height: 1.65;
-    font-weight: 500;
-    color: var(--ink);
-}
-
 .emptyBody {
     margin: 0;
     padding: 20px;
@@ -303,6 +291,385 @@
     border-radius: 6px;
 }
 
+/* ── Columna lateral: más noticias y partidos de hoy ────────────────────── */
+/* Dos carriles con el mismo marco. No pintan fondo: son parte de la página,
+   no tarjetas apiladas. En escritorio ancho van al costado y se quedan
+   pegados al scrollear (data-sticky-tabs libera el sticky); más angosto,
+   pasan debajo de la nota, en dos columnas si entran. */
+.readerAside {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    align-content: start;
+    min-width: 0;
+}
+
+.railCard {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid var(--edge);
+    border-radius: 16px;
+    min-width: 0;
+}
+
+.railHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--edge);
+}
+
+.railTitle {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+}
+
+.railBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--edge-strong);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    white-space: nowrap;
+}
+
+.railBadgeLive {
+    border-color: rgba(239, 68, 68, 0.4);
+    color: var(--live-ink);
+}
+
+.railFooterLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    margin-top: -2px;
+    color: var(--accent-ink);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.railFooterLink::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-top: 1.5px solid currentColor;
+    border-right: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.18s var(--ease);
+}
+
+.railFooterLink:hover::after {
+    transform: rotate(45deg) translate(2px, -2px);
+}
+
+.railEmpty {
+    margin: 0;
+    padding: 14px 0;
+    color: var(--ink-muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* Más noticias */
+.relatedList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.relatedList li + li {
+    border-top: 1px solid var(--edge);
+}
+
+.relatedItem {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    min-height: 44px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.relatedThumb {
+    display: block;
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--edge);
+    background: var(--raised);
+}
+
+.relatedThumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.25s var(--ease);
+}
+
+.relatedItem:hover .relatedThumb img {
+    transform: scale(1.04);
+}
+
+.relatedBody {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.relatedMeta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.relatedTitle {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ink);
+    transition: color 0.18s var(--ease);
+}
+
+.relatedItem:hover .relatedTitle {
+    color: var(--accent-ink);
+}
+
+/* Partidos de hoy */
+.readerPage {
+    --live: #ef4444;
+    --live-ink: #f87171;
+}
+
+.railGroups {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.railGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.railGroupTitle {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+.railList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.railList li + li {
+    border-top: 1px solid var(--edge);
+}
+
+.railMatch {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    padding: 8px 6px 8px 0;
+    min-height: 56px;
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+    transition: background 0.18s var(--ease);
+}
+
+.railMatch:hover {
+    background: var(--raised);
+}
+
+.railMatchLive {
+    box-shadow: inset 3px 0 0 var(--live);
+    padding-left: 6px;
+}
+
+.railStatus {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-muted);
+    white-space: nowrap;
+}
+
+.railStatusLive {
+    color: var(--live-ink);
+}
+
+.railStatusFinal {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.railLiveDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--live);
+    animation: railPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes railPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+.railTeams {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.railTeam {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+    color: var(--ink-muted);
+}
+
+.railTeamWinner {
+    color: var(--ink);
+}
+
+.railCrest {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+.railCrest img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.railTeamName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.railTeamWinner .railTeamName {
+    font-weight: 700;
+}
+
+.railScore {
+    min-width: 2ch;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+}
+
+/* Mientras llega el feed, el carril reserva su alto: la nota no salta. */
+.railSkeleton {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.railSkeleton li {
+    height: 48px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--raised) 0%, var(--edge-strong) 50%, var(--raised) 100%);
+    background-size: 200% 100%;
+    animation: railShimmer 1.4s ease-in-out infinite;
+    opacity: 0.6;
+}
+
+@keyframes railShimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+}
+
+@media (min-width: 720px) {
+    .readerAside {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1140px) {
+    .readerLayout {
+        grid-template-columns: minmax(0, 1fr) 360px;
+        align-items: stretch;
+        gap: 64px;
+    }
+
+    /* Sin scroll propio: la columna se estira al alto de la nota, "Más
+       noticias" se va con la página y el ÚLTIMO carril (los partidos, que
+       se actualizan solos) es el que queda pegado mientras se lee. Así
+       entra entero en la ventana y no hace falta una barra adentro. */
+    .readerAside {
+        grid-template-columns: minmax(0, 1fr);
+        align-content: start;
+    }
+
+    .readerAside > :last-child {
+        position: sticky;
+        top: calc(var(--h-header, 60px) + 20px);
+    }
+}
+
 /* ── Mobile ─────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .readerPage {
@@ -319,7 +686,7 @@
     /* La vuelta queda al alcance del pulgar durante toda la lectura. */
     .readerTopBar {
         position: sticky;
-        top: calc(env(safe-area-inset-top, 0px) + 8px);
+        top: calc(env(safe-area-inset-top, 0px) + var(--h-header, 52px) + 8px);
         z-index: 20;
         margin-inline: -6px;
         padding: 6px 14px;
@@ -370,18 +737,6 @@
         gap: 26px;
     }
 
-    .bodyContent {
-        gap: 18px;
-        /* 17px: el renglón corto de un teléfono pide un cuerpo más grande, no
-           más chico. Antes bajaba a 0,93rem y se leía apretado. */
-        font-size: 1.0625rem;
-        line-height: 1.72;
-    }
-
-    .leadParagraph {
-        font-size: 1.125rem;
-        line-height: 1.62;
-    }
 
     .actionRow {
         display: grid;
@@ -413,5 +768,6 @@
     .readerPage *,
     .readerPage *::before {
         transition-duration: 0.01ms !important;
+        animation: none !important;
     }
 }
