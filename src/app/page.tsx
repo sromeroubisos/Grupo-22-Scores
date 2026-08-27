@@ -16,6 +16,7 @@ import { useMatchesStore } from '@/hooks/useMatchesStore';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
+import BannerXvPuma from '@/components/xv-puma/BannerXvPuma';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { AUDIENCE_LABELS, isDualAudienceTournament, matchesTournamentAudience, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
@@ -1901,6 +1902,9 @@ export default function HomePage() {
 
         {/* Main Content - Matches */}
         <main className={styles.mainContent}>
+          {/* Promo con fecha de vencimiento: se apaga sola, no hay que sacarla. */}
+          <BannerXvPuma />
+
           <div className={styles.mobileTopControls}>
             {/* Sport Selector (Mobile) */}
             <div className={styles.mobileSportSelector}>

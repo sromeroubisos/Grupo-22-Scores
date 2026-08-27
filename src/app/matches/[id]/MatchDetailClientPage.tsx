@@ -2950,20 +2950,31 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     </div>
                                 )}
 
-                                {/* Armá tu propia formación. Va debajo de la oficial
-                                    y no compite con ella: una es la que sale a la
-                                    cancha y la otra es la del hincha. */}
-                                <MyLineupBuilder
-                                    sport={String(matchData.sportId || '')}
-                                    home={{ key: String(matchData.home?.id || ''), name: matchData.home?.name || 'Local', logo: matchData.home?.logo }}
-                                    away={{ key: String(matchData.away?.id || ''), name: matchData.away?.name || 'Visitante', logo: matchData.away?.logo }}
-                                    tournament={matchData.tournament}
-                                    tournamentLogo={matchData.tournamentLogo}
-                                    dateLabel={new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ })}
-                                    timeLabel={matchTimerText}
-                                    venue={matchData.venue}
-                                    kickoffAt={matchData.date}
-                                />
+                                {/* Armá tu propia formación: es la previa, y se
+                                    cierra cuando llega la de verdad.
+
+                                    Mientras no hay formación oficial, adivinar el
+                                    XV es el contenido de la pestaña. Apenas los
+                                    clubes confirman, deja de serlo: el hincha ya
+                                    tiene los nombres, y un armador abierto al lado
+                                    de la formación real invita a completar algo que
+                                    ya no se puede acertar. Se apaga con la misma
+                                    señal que enciende la formación oficial
+                                    (`hasAnyLineups`), así que las dos no conviven
+                                    nunca. */}
+                                {!hasAnyLineups && (
+                                    <MyLineupBuilder
+                                        sport={String(matchData.sportId || '')}
+                                        home={{ key: String(matchData.home?.id || ''), name: matchData.home?.name || 'Local', logo: matchData.home?.logo }}
+                                        away={{ key: String(matchData.away?.id || ''), name: matchData.away?.name || 'Visitante', logo: matchData.away?.logo }}
+                                        tournament={matchData.tournament}
+                                        tournamentLogo={matchData.tournamentLogo}
+                                        dateLabel={new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ })}
+                                        timeLabel={matchTimerText}
+                                        venue={matchData.venue}
+                                        kickoffAt={matchData.date}
+                                    />
+                                )}
                             </div>
                         )}
 
