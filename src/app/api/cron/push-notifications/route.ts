@@ -24,6 +24,11 @@ const MAX_NOTIFICATIONS_PER_RUN = 50;
 type PendingNotification = {
     id: string;
     user_id: string;
+    title: string;
+    body: string;
+    entity_type: string | null;
+    entity_id: string | null;
+    match_id: string | null;
 };
 
 type SupabaseResult<T> = {
@@ -117,7 +122,10 @@ export async function GET(request: NextRequest) {
     const db = createAdminClient() as unknown as LooseSupabaseClient;
     const pendingResult = await db
         .from<PendingNotification[]>('user_notifications')
-        .select('id, user_id')
+        // El push viaja con titulo, cuerpo y destino adentro (cifrado): el
+        // service worker lo muestra sin volver a pedirle nada al servidor, que
+        // con la app cerrada horas es lo que fallaba (sesion vencida).
+        .select('id, user_id, title, body, entity_type, entity_id, match_id')
         .is('read_at', null)
         .is('system_notified_at', null)
         .order('created_at', { ascending: true })
@@ -186,8 +194,17 @@ export async function GET(request: NextRequest) {
             continue;
         }
 
+        const payload = {
+            id: notification.id,
+            title: notification.title,
+            body: notification.body,
+            entity_type: notification.entity_type,
+            entity_id: notification.entity_id,
+            match_id: notification.match_id,
+        };
+
         const results = await Promise.all(subscriptions.map(async (subscription) => {
-            const result = await sendSystemPush(subscription);
+            const result = await sendSystemPush(subscription, payload);
             if (result.expired) {
                 await disableExpiredSubscription(db, subscription, result.error || `expired:${result.status}`);
             }

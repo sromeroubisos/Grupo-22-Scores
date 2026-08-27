@@ -1,4 +1,4 @@
-const SW_VERSION = '2026-05-12-1';
+const SW_VERSION = '2026-08-27-1';
 const LOGO_CACHE = `g22-logo-cache-${SW_VERSION}`;
 const STATIC_CACHE = `g22-static-cache-${SW_VERSION}`;
 const OWNED_CACHE_PREFIXES = ['g22-logo-cache-', 'g22-static-cache-', 'g22-runtime-cache-', 'g22-app-cache-'];
@@ -152,7 +152,8 @@ self.addEventListener('push', (event) => {
       notification = await getLatestUnreadNotification();
     }
 
-    // El envio del cron viaja sin payload: el detalle lo busca el service worker.
+    // El push del cron trae titulo, cuerpo y destino cifrados adentro; la
+    // consulta a /api/notifications queda solo para un push viejo sin payload.
     // Si esa consulta falla (sesion vencida, red caida), salir sin dibujar nada
     // deja el push mudo, que desde el celular no se distingue de uno que nunca
     // llego. Ademas la suscripcion es userVisibleOnly: los navegadores castigan
@@ -175,6 +176,48 @@ self.addEventListener('push', (event) => {
         notificationId: notification.id || null,
       },
     });
+  })());
+});
+
+// El navegador puede rotar la suscripcion por su cuenta (vence, cambia el push
+// service). Si no se vuelve a suscribir aca, el endpoint viejo rebota con 410,
+// el cron lo apaga y el usuario deja de recibir avisos sin haber tocado nada.
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil((async () => {
+    const previous = event.oldSubscription || null;
+    const applicationServerKey = previous && previous.options
+      ? previous.options.applicationServerKey
+      : null;
+
+    if (!applicationServerKey) return;
+
+    let renewed = event.newSubscription || null;
+    if (!renewed) {
+      renewed = await self.registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey,
+      });
+    }
+
+    if (previous && previous.endpoint && previous.endpoint !== renewed.endpoint) {
+      await fetch('/api/notifications/system', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ endpoint: previous.endpoint }),
+      }).catch(() => undefined);
+    }
+
+    await fetch('/api/notifications/system', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        subscription: renewed.toJSON(),
+        userAgent: self.navigator ? self.navigator.userAgent : null,
+        platform: 'service-worker',
+      }),
+    }).catch(() => undefined);
   })());
 });
 
