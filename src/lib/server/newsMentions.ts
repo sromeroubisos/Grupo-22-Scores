@@ -8,10 +8,10 @@
 //   videos cargados en la web (`match_videos`). Una URL suelta de YouTube o de
 //   X no pasa por acá, la dibuja el lector directo.
 // - El Mundial de hockey (feed de la FIH, `lib/services/fihHockey.ts`): sus
-//   partidos (`fih-match-…`, con ficha en /matches), las selecciones y los
-//   planteles. Selecciones y jugadoras no tienen ficha propia: el id lleva el
-//   torneo adelante (`fih-wc-1867-ARG-<persona>`) y la mención va a la
-//   página del torneo (ver `hrefForMention`).
+//   partidos (`fih-match-…`), las selecciones y las jugadoras de cada plantel.
+//   No viven en la base, pero tienen ficha igual: la arma
+//   `server/worldCupProfiles.ts` contra el feed, y el id de la mención es el
+//   mismo que la URL de esa ficha (`fih-wc-1867-ARG-3968`).
 //
 // Se lee con el cliente de servicio, como el hub de videos: son entidades
 // públicas y lo que no se ve (`is_visible = false`) se filtra acá.
@@ -33,8 +33,11 @@ import {
     FIH_COMPETITION_KEYS,
     FIH_LOGO_URL,
     FIH_TOURNAMENT_ID_PREFIX,
+    fihPlayerDisplayName,
     fihTeamFlagUrl,
     fihTeamNameFromCode,
+    toFihPlayerRef,
+    toFihTeamRef,
     type FihCompetition,
 } from '@/lib/services/fihHockeyParser';
 import type { FihSquadPlayer } from '@/lib/services/fihMatchDataParser';
@@ -289,7 +292,7 @@ function fihTeamName(entry: FihWorldCupTeam): string {
 
 /** `fih-wc-1867-ARG` */
 function fihTeamRef(entry: FihWorldCupTeam): string {
-    return `${entry.competition.tournamentId}-${entry.team.code.toUpperCase()}`;
+    return toFihTeamRef(entry.competition.key, entry.team.code);
 }
 
 /** El id de la jugadora si sirve como id; si no, su nombre en minúsculas y guiones. */
@@ -300,7 +303,7 @@ function fihPlayerSlug(player: FihSquadPlayer): string {
 
 /** `fih-wc-1867-ARG-<persona>` */
 function fihPlayerRef(entry: FihWorldCupTeam, player: FihSquadPlayer): string {
-    return `${fihTeamRef(entry)}-${fihPlayerSlug(player)}`;
+    return toFihPlayerRef(entry.competition.key, entry.team.code, fihPlayerSlug(player));
 }
 
 function fihTournamentMention(competition: FihCompetition): ResolvedMention {
@@ -328,24 +331,6 @@ function fihTeamMention(entry: FihWorldCupTeam): ResolvedMention {
         match: null,
         video: null,
     };
-}
-
-/**
- * El feed escribe "JANKUNAS Julieta": el apellido en mayúsculas y adelante.
- * En una nota se lee "Julieta Jankunas". Un nombre que no viene así queda
- * como está.
- */
-export function fihPlayerDisplayName(raw: string): string {
-    const words = raw.trim().split(/\s+/).filter(Boolean);
-    const isUpper = (word: string) => word.length > 1 && word === word.toLocaleUpperCase('es') && word !== word.toLocaleLowerCase('es');
-    let split = 0;
-    while (split < words.length && isUpper(words[split])) split += 1;
-    if (split === 0 || split === words.length) return raw.trim();
-    const surname = words.slice(0, split).map((word) => word
-        .toLocaleLowerCase('es')
-        .replace(/(^|[\s'-])(\p{L})/gu, (_match, before: string, letter: string) => `${before}${letter.toLocaleUpperCase('es')}`)
-        .replace(/^(De|Del|Da|Di|Van|Von|La|Le)$/u, (particle) => particle.toLocaleLowerCase('es')));
-    return `${words.slice(split).join(' ')} ${surname.join(' ')}`;
 }
 
 function fihPlayerMention(entry: FihWorldCupTeam, player: FihSquadPlayer): ResolvedMention {

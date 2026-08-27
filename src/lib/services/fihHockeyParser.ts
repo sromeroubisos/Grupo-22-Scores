@@ -650,3 +650,87 @@ export function parseFihTournamentId(value: unknown): FihCompetitionKey | null {
     const altiusId = Number(normalized.slice(FIH_TOURNAMENT_ID_PREFIX.length));
     return FIH_COMPETITION_KEYS.find((key) => FIH_COMPETITIONS[key].altiusId === altiusId) || null;
 }
+
+// --------------------------------------------------------------------------
+// Ids de las fichas del Mundial
+// --------------------------------------------------------------------------
+//
+// Una selección y una jugadora del Mundial no viven en la base: existen solo
+// en el feed. Para que tengan ficha necesitan un id estable que se pueda
+// escribir en una URL y volver a resolver contra el feed. Se cuelgan del id
+// del torneo, que ya distingue masculino de femenino:
+//
+//   fih-wc-1867-ARG        → Argentina, Mundial Femenino
+//   fih-wc-1867-ARG-3968   → la jugadora 3968 de esa selección
+//
+// El viejo `fih-team-ARG` (el que ponen las filas de partidos, ver
+// `fihTeamId`) sigue resolviendo: no dice el género, así que la ficha muestra
+// las dos competencias en las que juega ese país.
+
+/** `fih-wc-1867-ARG`: la selección de un país en una competencia. */
+export function toFihTeamRef(key: FihCompetitionKey, code: string): string {
+    return `${FIH_COMPETITIONS[key].tournamentId}-${code.toUpperCase()}`;
+}
+
+/** `fih-wc-1867-ARG-3968`: una jugadora de esa selección, por su id en el feed. */
+export function toFihPlayerRef(key: FihCompetitionKey, code: string, personId: string): string {
+    return `${toFihTeamRef(key, code)}-${personId}`;
+}
+
+const TEAM_REF = new RegExp(`^${FIH_TOURNAMENT_ID_PREFIX}(\\d+)-([a-z]{3})$`, 'i');
+const PLAYER_REF = new RegExp(`^${FIH_TOURNAMENT_ID_PREFIX}(\\d+)-([a-z]{3})-([a-z0-9_-]{1,64})$`, 'i');
+const LEGACY_TEAM_REF = new RegExp(`^${FIH_TEAM_ID_PREFIX}([a-z]{3})$`, 'i');
+
+function keyOfAltiusId(raw: string): FihCompetitionKey | null {
+    const altiusId = Number(raw);
+    return FIH_COMPETITION_KEYS.find((key) => FIH_COMPETITIONS[key].altiusId === altiusId) || null;
+}
+
+/**
+ * La selección que nombra un id. `key: null` = el id no dice el género (el
+ * viejo `fih-team-ARG`), así que la ficha tiene que mirar las dos.
+ */
+export function parseFihTeamRef(value: unknown): { key: FihCompetitionKey | null; code: string } | null {
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim();
+
+    const legacy = LEGACY_TEAM_REF.exec(trimmed);
+    if (legacy) return { key: null, code: legacy[1].toUpperCase() };
+
+    const match = TEAM_REF.exec(trimmed);
+    if (!match) return null;
+    const key = keyOfAltiusId(match[1]);
+    return key ? { key, code: match[2].toUpperCase() } : null;
+}
+
+export function parseFihPlayerRef(value: unknown): { key: FihCompetitionKey; code: string; personId: string } | null {
+    if (typeof value !== 'string') return null;
+    const match = PLAYER_REF.exec(value.trim());
+    if (!match) return null;
+    const key = keyOfAltiusId(match[1]);
+    return key ? { key, code: match[2].toUpperCase(), personId: match[3] } : null;
+}
+
+/**
+ * El feed escribe "JANKUNAS Julieta": el apellido en mayusculas y adelante.
+ * En una ficha o en una nota se lee "Julieta Jankunas". Un nombre que no
+ * viene asi queda como esta.
+ */
+export function fihPlayerDisplayName(raw: string): string {
+    const words = raw.trim().split(/\s+/).filter(Boolean);
+    const isUpper = (word: string) => word.length > 1
+        && word === word.toLocaleUpperCase('es')
+        && word !== word.toLocaleLowerCase('es');
+
+    let split = 0;
+    while (split < words.length && isUpper(words[split])) split += 1;
+    if (split === 0 || split === words.length) return raw.trim();
+
+    const surname = words.slice(0, split).map((word) => word
+        .toLocaleLowerCase('es')
+        .replace(/(^|[\s'-])(\p{L})/gu, (_match, before: string, letter: string) => `${before}${letter.toLocaleUpperCase('es')}`)
+        // Las particulas van en minuscula: "Van Der Berg" se lee "van der Berg".
+        .replace(/^(De|Del|Da|Di|Van|Von|La|Le)$/u, (particle) => particle.toLocaleLowerCase('es')));
+
+    return `${words.slice(split).join(' ')} ${surname.join(' ')}`;
+}
