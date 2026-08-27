@@ -1,6 +1,6 @@
 # URBA — la sincronización automática
 
-Las cinco entradas de cron están en `vercel.json` y el conector escribe solo. Este
+Las siete entradas de cron están en `vercel.json` y el conector escribe solo. Este
 documento es el runbook: qué hace cada corrida, qué mirar cuando algo no cuadra, y
 las decisiones que quedaron tomadas.
 
@@ -11,12 +11,14 @@ las decisiones que quedaron tomadas.
 { "path": "/api/cron/urba-sync", "schedule": "*/20 0-5 * * 0,1"  },
 { "path": "/api/cron/urba-sync", "schedule": "0 9 * * *"  },
 { "path": "/api/cron/urba-sync", "schedule": "0 10 * * *" },
-{ "path": "/api/cron/urba-sync", "schedule": "0 11 * * *" }
+{ "path": "/api/cron/urba-sync", "schedule": "0 11 * * *" },
+{ "path": "/api/cron/urba-sync", "schedule": "30 20 * * *" },
+{ "path": "/api/cron/urba-sync", "schedule": "0 23 * * *"  }
 ```
 
-**El `path` va SIN query string, y eso no es cosmética.** Las cinco entradas
-llevaban `?scope=…` y Vercel no las invocó nunca: el path de un cron no admite
-`?`, así que la entrada se descarta entera. El síntoma no fue un error sino
+**El `path` va SIN query string, y eso no es cosmética.** Las cinco entradas de
+entonces llevaban `?scope=…` y Vercel no las invocó nunca: el path de un cron no
+admite `?`, así que la entrada se descarta entera. El síntoma no fue un error sino
 silencio — cero corridas, cero logs, la base quieta. El fin de semana del 15 y 16
 de agosto no sincronizó una sola vez y los resultados entraron a mano el lunes a
 la noche. El scope ahora sale del header `x-vercel-cron-schedule`
@@ -29,6 +31,8 @@ Los horarios son **UTC**, que es lo que usa Vercel. En hora de Buenos Aires (UTC
 |---|---|---|
 | jornada (tarde/noche) | sáb y dom 18:00–23:59 | sáb y dom 15:00–20:59 |
 | jornada (madrugada) | dom y lun 00:00–05:59 | sáb y dom 21:00–02:59 |
+| jornada (fija) | todos los días 20:30 | todos los días 17:30 |
+| jornada (fija) | todos los días 23:00 | todos los días 20:00 |
 | barrido | todos los días 09, 10 y 11 | todos los días 06, 07 y 08 |
 
 **El domingo está cubierto igual que el sábado**, y conviene verlo escrito porque
@@ -41,12 +45,39 @@ domingo; la del domingo es el `1`. Corrido a hora de Buenos Aires queda:
 |---|---|
 | sábado | 06, 07, 08 · 15:00 → 02:59 del domingo, cada 20' |
 | domingo | 06, 07, 08 · 15:00 → 02:59 del lunes, cada 20' |
+| lunes a viernes | 06, 07, 08 · 17:30 y 20:00 |
 
 Simétrico, y hace falta que lo sea: en 2026 la URBA juega MÁS el domingo que el
 sábado en cantidad de partidos por jornada (247–303 contra 192), aunque el sábado
 sume más en el total de la temporada.
 
 El hueco de 09:00 a 14:59 es a propósito en los dos días, por lo que sigue.
+
+**Las dos corridas fijas de la tarde son de jornada, y van todos los días.**
+`30 20` y `0 23` no están en `SCHEDULES_BARRIDO`, así que `resolverScope` las
+resuelve como jornada, que es lo que corresponde para levantar los resultados
+del día.
+
+La de las **17:30** existe porque la ventana corre a los minutos 0, 20 y 40 de
+cada hora UTC, o sea 17:00, 17:20 y 17:40 en Buenos Aires: nunca las 17:30, que
+es cerca de la hora a la que URBA venía publicando el Top 14.
+
+La de las **20:00** salió de medir, no de suponer. Sobre los 192 resultados de
+una fecha, el `updated_at` de cada partido daba primero 17:33, mediana 19:14 y
+último 20:14 — el disparador de las 17:30 habría levantado cero. La cobertura de
+una corrida única contra esos 192: 22% a las 19:00, 74% a las 19:30, **99% a las
+20:00** y 100% a las 20:30. Se eligió 20:00: media hora más tarde ganaría el
+partido que falta y perdería media hora de frescura en los otros 191. Ese 1% lo
+toma la ventana del fin de semana o el barrido de la mañana siguiente.
+
+Van todos los días y no sólo el fin de semana. De lunes a viernes la URBA no
+juega, la jornada no encuentra torneos y la corrida termina en cero sin tocar
+nada; sale más barato que acordarse de agregar el día cuando se reprograme una
+fecha entre semana.
+
+**Un sábado con los crons vivos las dos son redundantes**: la ventana ya cubre
+de 15:00 a 20:59 cada veinte minutos y las contiene. El valor está en los días
+que la ventana no corre, y en ser lo único que queda si la ventana se cae.
 
 **El barrido son tres entradas y la hora de cada una importa.** El catálogo se
 parte en tres y qué parte toca sale de `(día + hora) % 3`
@@ -58,7 +89,9 @@ cola de correcciones pasa a tardar tres días.
 Los `schedule` del barrido están declarados **también** en la ruta
 (`SCHEDULES_BARRIDO`): se comparan contra el header `x-vercel-cron-schedule` para
 resolver el scope cuando Vercel no pasa el query string. Si se cambian acá, hay
-que cambiarlos allá.
+que cambiarlos allá. Y al revés: sumar un schedule a esa lista convierte esa
+entrada en barrido, así que las dos corridas fijas de la tarde quedan afuera a
+propósito.
 
 ## Por qué estas ventanas
 
