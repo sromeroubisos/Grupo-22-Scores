@@ -2,9 +2,16 @@
 // torneo que tienen videos cargados, con clubes, marcador y portadas.
 //
 // Un video se cuelga de un partido, así que el hub sale de dar vuelta ese
-// índice: qué partidos tienen videos, y de qué torneo son. Solo entran los
-// partidos locales (los externos no tienen torneo en `matches`) y visibles,
-// de torneos visibles (activos o no: un torneo terminado conserva sus videos).
+// índice: qué partidos tienen videos, y de qué torneo son. Entran los partidos
+// locales (los externos no tienen torneo en `matches`), de cualquier torneo:
+// activo o terminado, publicado o en borrador.
+//
+// UN VIDEO CARGADO LO VE CUALQUIERA. El `is_visible` del partido y el del
+// torneo NO tapan el video: son la visibilidad del FIXTURE (qué aparece en la
+// tabla y en el cuadro), no la del material editorial, y antes acoplaban las
+// dos cosas — un torneo oculto se llevaba puestos sus highlights, y no había
+// forma de verlos ni siquiera administrando, porque el filtro no miraba el rol.
+// Si alguna vez hace falta esconder UN video, va a pedir su propia columna.
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { LooseSupabaseClient } from '@/lib/supabase/loose';
@@ -82,14 +89,15 @@ async function selectIn(
 }
 
 /**
- * Un torneo terminado (`is_active` false) o todavía en borrador sigue
- * teniendo videos que mostrar: solo se respeta el "ocultar" explícito.
+ * Los partidos que se OFRECEN para cargarles un clip desde el editor de la
+ * votación. Acá sí se respeta el `is_visible`: los partidos ocultos de un
+ * playoff son los placeholders del cuadro (todavía sin equipos), y llenarían
+ * la lista de opciones que no significan nada.
+ *
+ * Ojo: esto NO decide qué se VE. Un video cargado se muestra siempre, aunque
+ * su partido o su torneo estén ocultos.
  */
-function isTournamentPublic(row: Row): boolean {
-    return row.is_visible !== false;
-}
-
-function isMatchPublic(row: Row): boolean {
+function isPickableMatch(row: Row): boolean {
     return row.is_visible !== false;
 }
 
@@ -200,7 +208,7 @@ export async function listVideoHubs(): Promise<VideoHubSummary[]> {
     if (stored.length === 0) return [];
 
     const byMatch = new Map(stored.map((entry) => [entry.matchId, entry]));
-    const matches = (await selectIn('matches', MATCH_COLUMNS, 'id', Array.from(byMatch.keys()))).filter(isMatchPublic);
+    const matches = await selectIn('matches', MATCH_COLUMNS, 'id', Array.from(byMatch.keys()));
 
     const byTournament = new Map<string, Row[]>();
     for (const match of matches) {
@@ -212,7 +220,7 @@ export async function listVideoHubs(): Promise<VideoHubSummary[]> {
     }
     if (byTournament.size === 0) return [];
 
-    const tournaments = (await selectIn('tournaments', TOURNAMENT_COLUMNS, 'id', Array.from(byTournament.keys()))).filter(isTournamentPublic);
+    const tournaments = await selectIn('tournaments', TOURNAMENT_COLUMNS, 'id', Array.from(byTournament.keys()));
 
     // El video más reciente de cada torneo. Los clubes de esos partidos se
     // piden una sola vez, para todos los torneos juntos.
@@ -259,14 +267,14 @@ export async function getVideoHub(tournamentId: string): Promise<VideoHub | null
         console.error('[videoHub] tournament read failed:', error);
         throw new Error(VIDEO_HUB_READ_ERROR);
     }
-    if (!row || !isTournamentPublic(row as Row)) return null;
+    if (!row) return null;
     const tournament = toTournament(row as Row);
 
     const stored = await listStoredMatchVideos();
     const candidateIds = stored.map((entry) => entry.matchId);
     const matchRows = candidateIds.length === 0
         ? []
-        : (await selectIn('matches', MATCH_COLUMNS, 'id', candidateIds, (query) => query.eq('tournament_id', tournamentId))).filter(isMatchPublic);
+        : await selectIn('matches', MATCH_COLUMNS, 'id', candidateIds, (query) => query.eq('tournament_id', tournamentId));
 
     const matchIds = matchRows.map((match) => String(match.id));
     const [videosByMatch, clubs] = await Promise.all([
@@ -322,7 +330,7 @@ export async function listHubCandidateMatches(tournamentId: string): Promise<Vid
         throw new Error(VIDEO_HUB_READ_ERROR);
     }
 
-    const rows = ((data ?? []) as Row[]).filter(isMatchPublic);
+    const rows = ((data ?? []) as Row[]).filter(isPickableMatch);
     const clubs = await readClubs(rows);
     return rows.map((match) => ({
         id: String(match.id),
