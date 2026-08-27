@@ -1,0 +1,137 @@
+/*
+ * Una franja, no una placa: entra arriba del feed y tiene que dejar el
+ * resultado que el hincha vino a buscar por encima del pliegue. De ahí el alto
+ * chico y el renglón único.
+ *
+ * El verde de marca va como FONDO y como BORDE. Como texto no llega a AA sobre
+ * el claro; para eso está `--color-accent-ink`, que es el que usan el rótulo y
+ * la marca.
+ */
+
+.banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(var(--color-accent-rgb), 0.34);
+    border-radius: var(--radius-lg, 12px);
+    background:
+        linear-gradient(100deg, rgba(var(--color-accent-rgb), 0.18) 0%, rgba(var(--color-accent-rgb), 0.05) 62%, transparent 100%),
+        var(--color-bg-secondary);
+    overflow: hidden;
+}
+
+.marca {
+    flex: none;
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-accent-ink, #22c55e);
+}
+
+/*
+ * La ventana recorta el riel. El degradado de los bordes evita que un titular
+ * aparezca y desaparezca de golpe contra el borde del banner.
+ */
+.ventana {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent 0, #000 40px, #000 calc(100% - 28px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 40px, #000 calc(100% - 28px), transparent 100%);
+}
+
+/*
+ * Dos copias idénticas, una atrás de la otra, y el riel se corre exactamente la
+ * mitad: cuando la animación reinicia, la segunda copia quedó justo donde
+ * estaba la primera y el loop no tiene costura.
+ *
+ * `width: max-content` es lo que sostiene todo: sin él las copias se encogen al
+ * ancho de la ventana, el 50% deja de ser una copia entera y el salto se ve.
+ */
+.riel {
+    display: flex;
+    width: max-content;
+    animation: desliza var(--duracion, 30s) linear infinite;
+}
+
+.banner:hover .riel,
+.riel:focus-within {
+    animation-play-state: paused;
+}
+
+@keyframes desliza {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+.grupo {
+    display: flex;
+    align-items: center;
+    flex: none;
+}
+
+.celda {
+    display: inline-flex;
+    align-items: center;
+}
+
+.pieza {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 7px;
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.pieza:hover .texto,
+.pieza:focus-visible .texto {
+    text-decoration: underline;
+}
+
+.rotulo {
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-accent-ink, #22c55e);
+}
+
+.texto {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.separador {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    margin: 0 16px;
+    border-radius: 50%;
+    background: rgba(var(--color-accent-rgb), 0.55);
+}
+
+/*
+ * Sin movimiento el riel no se congela mostrando un solo titular: la ventana
+ * pasa a scrollearse a mano y la copia se esconde, porque duplicada sin animar
+ * es contenido repetido.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .riel {
+        animation: none;
+    }
+
+    .ventana {
+        overflow-x: auto;
+        mask-image: none;
+        -webkit-mask-image: none;
+    }
+
+    .grupo[aria-hidden='true'] {
+        display: none;
+    }
+}

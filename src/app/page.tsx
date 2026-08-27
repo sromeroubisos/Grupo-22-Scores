@@ -18,7 +18,7 @@ import { useMatchesStore } from '@/hooks/useMatchesStore';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
-import BannerXvPuma from '@/components/xv-puma/BannerXvPuma';
+import TickerTitulares from '@/components/ticker/TickerTitulares';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { AUDIENCE_LABELS, isDualAudienceTournament, matchesTournamentAudience, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
@@ -774,7 +774,10 @@ export default function HomePage() {
   const userTimeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
 
   // Favorites hook
-  const { toggleFavorite, toggleLeagueFavorite, isLeagueFavorite, isFavorite } = useFavorites();
+  // `favorites` sale de acá y no de otra llamada al hook adentro del ticker: son
+  // los mismos seguidos y el hook no comparte estado entre instancias, así que
+  // pedirlo dos veces son dos consultas a Supabase para el mismo dato.
+  const { favorites, toggleFavorite, toggleLeagueFavorite, isLeagueFavorite, isFavorite } = useFavorites();
 
   const isClubFavorite = useCallback(
     (clubId: string) => isFavorite(clubId, 'club'),
@@ -2027,8 +2030,8 @@ export default function HomePage() {
 
         {/* Main Content - Matches */}
         <main className={styles.mainContent}>
-          {/* Promo con fecha de vencimiento: se apaga sola, no hay que sacarla. */}
-          <BannerXvPuma />
+          {/* Titulares y los partidos de los clubes que sigue. Si no hay nada, no se dibuja. */}
+          <TickerTitulares favorites={favorites} />
 
           <div className={styles.mobileTopControls}>
             {/* Sport Selector (Mobile) */}
