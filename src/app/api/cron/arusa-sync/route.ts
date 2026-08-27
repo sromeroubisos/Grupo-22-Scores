@@ -62,6 +62,7 @@ import {
   construirResolver,
   normalizarNombre,
   planArusaMatches,
+  rotarCompetencias,
   type PartidoExistente,
 } from '@/lib/integrations/arusa/sync.ts';
 
@@ -122,7 +123,9 @@ export async function GET(req: Request) {
   const completo = url.searchParams.get('todo') === '1';
   const DIAS_DE_GRACIA = 21;
   const corte = Date.now() - DIAS_DE_GRACIA * 24 * 60 * 60 * 1000;
-  const objetivos = soloSlug ? TORNEOS.filter((t) => t.slug === soloSlug) : TORNEOS;
+  // El arranque rota entre corridas: con orden fijo, una falla a mitad de
+  // camino dejaba siempre las mismas competencias del final sin sincronizar.
+  const objetivos = rotarCompetencias(soloSlug ? TORNEOS.filter((t) => t.slug === soloSlug) : TORNEOS, Date.now());
   if (!objetivos.length) {
     return NextResponse.json({ ok: false, error: `No hay ninguna competencia declarada con slug=${soloSlug}` }, { status: 400 });
   }
@@ -297,6 +300,12 @@ export async function GET(req: Request) {
     } catch {
       errors.push('No se pudieron invalidar los cachés del feed');
     }
+  }
+
+  // La respuesta del cron no la lee nadie: si un error no queda en el log de
+  // la función, la competencia que falló se queda atrasada en silencio.
+  if (errors.length) {
+    console.error(`[arusa-sync] ${errors.length} error(es) en la corrida (escrituras: ${escrituras}):\n  ${errors.join('\n  ')}`);
   }
 
   return NextResponse.json({ ok: errors.length === 0, dry: enSeco, completo, torneos: resumen, errors });
