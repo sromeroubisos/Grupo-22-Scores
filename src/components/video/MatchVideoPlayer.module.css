@@ -32,13 +32,15 @@
 }
 
 /* Una publicación embebida (tweet, post de Instagram): texto y botones
-   alrededor del video, así que el marco es una tarjeta de alto fijo y ancho
-   acotado, no una proporción. El fondo claro es el de la tarjeta misma. */
+   alrededor del video, así que necesita alto. Va en 9:16 sobre el ancho que
+   le toque —la misma proporción para cualquier red— en vez de un alto fijo
+   en píxeles, que dejaba la publicación con barra propia adentro del marco.
+   El fondo claro es el de la tarjeta misma. */
 .frameCard {
     width: 100%;
     max-width: 550px;
-    height: min(80vh, 680px);
-    aspect-ratio: auto;
+    height: auto;
+    aspect-ratio: 9 / 16;
     margin: 0 auto;
     background: var(--color-bg-primary, #111);
 }

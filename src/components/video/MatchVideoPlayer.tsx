@@ -124,6 +124,7 @@ export default function MatchVideoPlayer({ video, matchLabel, embedParent, withO
         <div className={styles.player}>
             {playing ? (
                 <div className={frameClass}>
+                    {/* scrolling="no": la publicación no lleva barra propia adentro del marco. */}
                     <iframe
                         className={styles.iframe}
                         src={withAutoplay(video.provider, parsed.embedUrl)}
@@ -132,6 +133,7 @@ export default function MatchVideoPlayer({ video, matchLabel, embedParent, withO
                         allowFullScreen
                         loading="lazy"
                         referrerPolicy="strict-origin-when-cross-origin"
+                        scrolling="no"
                     />
                 </div>
             ) : (

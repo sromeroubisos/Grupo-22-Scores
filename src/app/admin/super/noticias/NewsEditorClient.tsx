@@ -21,8 +21,10 @@ import {
 import NewsBody from '@/components/news/NewsBody';
 import { formatMention, isSiteVideoRef, mentionKey, type ResolvedMention } from '@/lib/news/mentions';
 import { collectMentions, imageCountOf, mentionCountOf, parseRichText, plainTextOf, wordCountOf } from '@/lib/news/richText';
+import { isUrlAlone, liftVideoToOwnLine, strandedVideoIn } from '@/lib/news/videoInBody';
 import { sessionFetch } from '@/lib/supabase/freshSession';
 
+import LinkInserter, { type InsertMode } from './LinkInserter';
 import MentionPicker, { type MentionPickerHandle } from './MentionPicker';
 import styles from './NewsEditor.module.css';
 
@@ -172,7 +174,7 @@ const FORMAT_TOOLS: FormatTool[][] = [
     [
         { kind: 'bold', label: 'Negrita', shortcut: 'Ctrl+B', Icon: Bold },
         { kind: 'italic', label: 'Cursiva', shortcut: 'Ctrl+I', Icon: Italic },
-        { kind: 'link', label: 'Link', shortcut: 'Ctrl+K', Icon: Link2 },
+        { kind: 'link', label: 'Link o video', shortcut: 'Ctrl+K', Icon: Link2 },
         { kind: 'mention', label: 'Etiquetar un club, jugador, torneo, partido o video', shortcut: '@', Icon: AtSign },
     ],
     [
@@ -230,15 +232,8 @@ function applyFormatTo(value: string, start: number, end: number, kind: FormatKi
     switch (kind) {
         case 'bold': return wrapSelection(value, start, end, '**', '**', 'texto en negrita');
         case 'italic': return wrapSelection(value, start, end, '_', '_', 'texto en cursiva');
-        case 'link': {
-            const selected = value.slice(start, end);
-            const isUrl = /^https?:\/\/\S+$/i.test(selected);
-            if (isUrl) return wrapSelection(value, start, end, '[texto del link](', ')', selected);
-            const edit = wrapSelection(value, start, end, '[', '](https://)', 'texto del link');
-            // Queda seleccionada la URL de muestra, que es lo que hay que reemplazar.
-            const urlStart = edit.selectionEnd + 2;
-            return { text: edit.text, selectionStart: urlStart, selectionEnd: urlStart + 'https://'.length };
-        }
+        // 'link' no escribe nada acá: abre el panel de "Link o video", que es
+        // el que sabe si esa dirección se muestra adentro de la nota.
         case 'mention': {
             // Un @ delante de lo seleccionado (o del cursor): el panel de menciones se abre solo.
             const selected = value.slice(start, end);
@@ -379,6 +374,11 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
     const pickerRef = useRef<MentionPickerHandle | null>(null);
     /** Lo etiquetado, resuelto contra la web para la vista previa. null = se preguntó y no existe. */
     const [resolvedMentions, setResolvedMentions] = useState<Record<string, ResolvedMention | null>>({});
+    /** El panel de "Link o video" abierto, con el tramo del cuerpo que va a reemplazar. */
+    const [inserter, setInserter] = useState<{ url: string; text: string; start: number; end: number } | null>(null);
+
+    /** Un link de video que quedó adentro de un párrafo: ahí no se ve el reproductor. */
+    const strandedVideo = useMemo(() => strandedVideoIn(form.content), [form.content]);
 
     const mentionTrigger = useMemo(() => detectMentionTrigger(form.content, caret), [form.content, caret]);
     const mentionOpen = mentionTrigger !== null && mentionTrigger.at !== dismissedAt;
@@ -552,8 +552,37 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
         const textarea = contentRef.current;
         if (!textarea) return;
         const { selectionStart, selectionEnd } = textarea;
+        if (kind === 'link') {
+            openInserter(selectionStart, selectionEnd);
+            return;
+        }
         if (kind === 'mention') setDismissedAt(null);
         commitEdit(applyFormatTo(form.content, selectionStart, selectionEnd, kind));
+    }
+
+    /** Abre "Link o video" sobre lo seleccionado: una URL entra como dirección, cualquier otra cosa como texto. */
+    function openInserter(start: number, end: number) {
+        const selected = form.content.slice(start, end).trim();
+        const isUrl = isUrlAlone(selected);
+        setInserter({ url: isUrl ? selected : '', text: isUrl ? '' : selected, start, end });
+    }
+
+    /** Lo elegido en el panel: la dirección sola en su renglón, o `[texto](url)` donde estaba el cursor. */
+    function insertFromPanel(mode: InsertMode, url: string, label: string) {
+        const target = inserter;
+        setInserter(null);
+        if (!target) return;
+        if (mode === 'video') {
+            commitEdit(insertBlock(form.content, target.start, target.end, url));
+            return;
+        }
+        const written = `[${label}](${url})`;
+        const position = target.start + written.length;
+        commitEdit({
+            text: `${form.content.slice(0, target.start)}${written}${form.content.slice(target.end)}`,
+            selectionStart: position,
+            selectionEnd: position,
+        });
     }
 
     /** El cursor del cuerpo, para saber si hay un @ abierto. */
@@ -998,6 +1027,14 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                                 aria-describedby="news-content-hint"
                                 spellCheck
                             />
+                            {inserter && (
+                                <LinkInserter
+                                    initialUrl={inserter.url}
+                                    initialText={inserter.text}
+                                    onInsert={insertFromPanel}
+                                    onClose={() => setInserter(null)}
+                                />
+                            )}
                             {mentionOpen && mentionAnchor && mentionTrigger && (
                                 <MentionPicker
                                     ref={pickerRef}
@@ -1009,8 +1046,23 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                             )}
                             </div>
                             {bodyImageError && <p className={`${styles.hint} ${styles.hintError}`} role="alert">{bodyImageError}</p>}
+                            {strandedVideo && (
+                                <p className={`${styles.hint} ${styles.hintWarn}`}>
+                                    Hay un link de video en medio de un párrafo: ahí no se ve el reproductor, se lee como texto.{' '}
+                                    <button
+                                        type="button"
+                                        className={styles.inlineAction}
+                                        onClick={() => {
+                                            const lifted = liftVideoToOwnLine(form.content, strandedVideo);
+                                            if (lifted) commitEdit({ text: lifted.content, selectionStart: lifted.caret, selectionEnd: lifted.caret });
+                                        }}
+                                    >
+                                        Ponerlo en su renglón
+                                    </button>
+                                </p>
+                            )}
                             <p id="news-content-hint" className={`${styles.hint} ${showError('content') ? styles.hintError : ''}`}>
-                                {showError('content') ?? 'Separá los párrafos con una línea en blanco; el primero sale destacado. Seleccioná un texto y tocá un botón para darle formato: **negrita**, _cursiva_, ## subtítulo. Escribí @ y un nombre para etiquetar un club, un jugador, un torneo, un partido o un video de la web; un partido o un video solos en su renglón salen como tarjeta o reproductor. Un link de YouTube, X, Instagram, Facebook o ESPN pegado solo en su renglón también se ve como video.'}
+                                {showError('content') ?? 'Separá los párrafos con una línea en blanco; el primero sale destacado. Seleccioná un texto y tocá un botón para darle formato: **negrita**, _cursiva_, ## subtítulo. Con el botón de link (Ctrl+K) se pega una dirección y se elige qué se ve: el video adentro de la nota o solo el link. Escribí @ y un nombre para etiquetar un club, un jugador, un torneo, un partido o un video de la web; un partido o un video solos en su renglón salen como tarjeta o reproductor.'}
                             </p>
                         </div>
                     </section>
