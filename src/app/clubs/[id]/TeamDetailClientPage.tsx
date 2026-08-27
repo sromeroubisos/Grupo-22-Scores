@@ -17,6 +17,7 @@ import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { useAuth } from '@/context/AuthContext';
 import HistoryTab from './HistoryTab';
+import QuickSquadModal from './QuickSquadModal';
 import PanelMatchForm, { type PanelFamilyClub } from './PanelMatchForm';
 import PanelCategories from './PanelCategories';
 
@@ -166,6 +167,21 @@ function isEspnAmericanFootballTeamId(value: string) {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/**
+ * Como se lee una convocatoria en el selector. Sin fechas es la vigente: "sin fecha
+ * de corte" no es lo mismo que "vacia", y decirlo evita que parezca un error.
+ */
+function etiquetaDePeriodo(from: string | null, to: string | null): string {
+    const dia = (iso: string) => {
+        const [a, m, d] = iso.split('-');
+        return `${d}/${m}/${a}`;
+    };
+    if (from && to) return `${dia(from)} — ${dia(to)}`;
+    if (from) return `Desde ${dia(from)}`;
+    if (to) return `Hasta ${dia(to)}`;
+    return 'Sin fecha';
+}
+
 function getExternalTeamId(value: string, teamUrl?: string) {
     if (value.startsWith('fs-team-')) return value.slice(8);
     const rugbyMatch = /^ras-team-(\d+)$/i.exec(value);
@@ -299,6 +315,11 @@ function TeamDetailInner({ id }: { id: string }) {
     const [fixtures, setFixtures] = useState<any[]>([]);
     const [squad, setSquad] = useState<any>(null);
     const [squadFetched, setSquadFetched] = useState(false);
+    const [quickSquadOpen, setQuickSquadOpen] = useState(false);
+    // Un club tiene un plantel POR PERIODO. `squadPeriods` los trae todos y
+    // `periodoElegido` dice cual se esta mirando.
+    const [squadPeriods, setSquadPeriods] = useState<Array<{ from: string | null; to: string | null; players: Array<{ id: string; name: string; position: string | null; jerseyNumber: number | null }> }>>([]);
+    const [periodoElegido, setPeriodoElegido] = useState(0);
     const [transfers, setTransfers] = useState<any[]>([]);
     const [honours, setHonours] = useState<any[]>([]);
     const [resolvedClubId, setResolvedClubId] = useState<string | null>(null);
@@ -405,6 +426,27 @@ function TeamDetailInner({ id }: { id: string }) {
     // Lazy-load squad when the squad tab is first selected. Uses `?only=squad`
     // so the API skips the schedule/scoreboard/standings work and only hits the
     // roster endpoints (typically ~300ms vs ~3s+ for the full bundle).
+    // Los planteles por periodo van por su propio camino: /api/teams devuelve UNA
+    // lista con todas las membresias juntas, y con dos temporadas cargadas eso es
+    // una lista mezclada que no es el plantel de nadie.
+    useEffect(() => {
+        if (activeTab !== 'squad' || loading || !rawId) return;
+        const controller = new AbortController();
+        (async () => {
+            try {
+                const res = await fetch(`/api/team-squads?team=${encodeURIComponent(rawId)}`, { signal: controller.signal });
+                const payload = await res.json();
+                if (controller.signal.aborted) return;
+                const periodos = Array.isArray(payload?.periods) ? payload.periods : [];
+                setSquadPeriods(periodos);
+                setPeriodoElegido(0);
+            } catch {
+                // Sin periodos se cae a la plantilla de siempre.
+            }
+        })();
+        return () => controller.abort();
+    }, [activeTab, loading, rawId, squadFetched]);
+
     useEffect(() => {
         if (activeTab !== 'squad' || squadFetched || loading) return;
 
@@ -992,6 +1034,27 @@ function TeamDetailInner({ id }: { id: string }) {
     const selectedSquadData = squadTabs.length > 0 && activeSquadTabValue
         ? (Array.isArray(squad) ? squad.filter((t: any) => t.tab_name === activeSquadTabValue) : squad)
         : squad;
+    /**
+     * EL PLAZO QUE CUBRE EL PLANTEL. Sale de los jugadores y no de un campo propio:
+     * un plantel no tiene una fecha, tiene la de los que lo componen. Se muestra la
+     * ventana completa —del que llego primero al que se va ultimo— porque es lo que
+     * responde la pregunta "de cuando es esta lista".
+     */
+    // OJO: esto NO puede ser un useMemo. Este punto del componente queda DESPUES de
+    // los return tempranos de carga y de error, asi que un hook aca corre unas veces
+    // si y otras no, y React corta con "Rendered more hooks than during the previous
+    // render". Es un calculo de dos pasadas sobre el plantel: no necesita memoria.
+    const squadPeriod = (() => {
+        const filas = Array.isArray(selectedSquadData) ? selectedSquadData : [];
+        const desde = filas.map((p: any) => p?.joined_at).filter(Boolean).sort();
+        const hasta = filas.map((p: any) => p?.left_at).filter(Boolean).sort();
+        if (desde.length === 0 && hasta.length === 0) return null;
+        const fmt = (iso: string) => formatDateInTimeZone(new Date(`${iso}T12:00:00Z`), APP_TIMEZONE, { day: '2-digit', month: '2-digit', year: 'numeric' });
+        if (desde.length > 0 && hasta.length > 0) return `Del ${fmt(desde[0])} al ${fmt(hasta[hasta.length - 1])}`;
+        if (desde.length > 0) return `Desde el ${fmt(desde[0])}`;
+        return `Hasta el ${fmt(hasta[hasta.length - 1])}`;
+    })();
+
     const squadGroups = groupSquadByPosition(selectedSquadData);
     const sortedPositionKeys = Object.keys(squadGroups)
         .map(Number)
@@ -1628,6 +1691,54 @@ function TeamDetailInner({ id }: { id: string }) {
                             <div className={styles.section}>
                                 <div className={styles.sectionHeader} style={{ marginBottom: '16px' }}>
                                     <h2 className={styles.pageTitle}>Plantilla</h2>
+                                    {squadPeriods.length > 1 ? (
+                                        <div>
+                                            <label htmlFor="plantel-periodo" style={{ display: 'block', fontSize: 11, color: 'var(--meta, var(--color-text-secondary))' }}>
+                                                Convocatoria
+                                            </label>
+                                            <select
+                                                id="plantel-periodo"
+                                                value={periodoElegido}
+                                                onChange={(e) => setPeriodoElegido(Number(e.target.value))}
+                                                style={{
+                                                    padding: '6px 8px', borderRadius: 6, fontSize: 13,
+                                                    background: 'var(--color-bg-secondary, rgba(127,127,127,0.12))',
+                                                    color: 'var(--color-text-primary)',
+                                                    border: '1px solid var(--color-glass-border, rgba(127,127,127,0.25))',
+                                                }}
+                                            >
+                                                {squadPeriods.map((p, i) => (
+                                                    <option key={`${p.from}-${p.to}-${i}`} value={i}>
+                                                        {etiquetaDePeriodo(p.from, p.to)} · {p.players.length}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    ) : squadPeriods.length === 1 ? (
+                                        <span style={{ fontSize: 12, color: 'var(--meta, var(--color-text-secondary))' }}>
+                                            {etiquetaDePeriodo(squadPeriods[0].from, squadPeriods[0].to)}
+                                        </span>
+                                    ) : squadPeriod ? (
+                                        <span style={{ fontSize: 12, color: 'var(--meta, var(--color-text-secondary))' }}>
+                                            {squadPeriod}
+                                        </span>
+                                    ) : null}
+                                    {isSuperAdminUser ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => setQuickSquadOpen(true)}
+                                            style={{
+                                                padding: '8px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                                                textTransform: 'uppercase', letterSpacing: '0.06em', cursor: 'pointer',
+                                                background: 'transparent',
+                                                border: '1px solid var(--accent)',
+                                                color: 'var(--accent)',
+                                            }}
+                                            aria-label="Cargar el plantel de este equipo"
+                                        >
+                                            Cargar plantel
+                                        </button>
+                                    ) : null}
                                     {squadExportData ? (
                                         <ExportImage
                                             template="squad"
@@ -1636,7 +1747,32 @@ function TeamDetailInner({ id }: { id: string }) {
                                         />
                                     ) : null}
                                 </div>
-                                {squadLoading ? (
+                                {squadPeriods.length > 0 ? (
+                                    // Con periodos cargados se muestra EL PERIODO ELEGIDO. La
+                                    // plantilla de siempre junta todas las membresias del club en
+                                    // una sola lista, y con dos temporadas cargadas esa lista
+                                    // mezclada no es el plantel de nadie.
+                                    <div className={styles.positionGroup}>
+                                        {(squadPeriods[periodoElegido]?.players ?? []).map((jugador) => (
+                                            // La fila entera es el enlace a la ficha del jugador: el
+                                            // nombre de un plantel es una puerta, no una etiqueta.
+                                            <Link
+                                                key={jugador.id}
+                                                href={`/players/${jugador.id}`}
+                                                className={styles.playerRow}
+                                                style={{ display: 'flex', gap: 10, alignItems: 'baseline', padding: '6px 0', color: 'inherit', textDecoration: 'none' }}
+                                            >
+                                                <span style={{ width: 26, fontVariantNumeric: 'tabular-nums', color: 'var(--meta, var(--color-text-secondary))' }}>
+                                                    {jugador.jerseyNumber ?? '–'}
+                                                </span>
+                                                <span style={{ fontWeight: 600 }}>{jugador.name}</span>
+                                                {jugador.position ? (
+                                                    <span style={{ fontSize: 12, color: 'var(--meta, var(--color-text-secondary))' }}>{jugador.position}</span>
+                                                ) : null}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                ) : squadLoading ? (
                                     <div>
                                         {[1, 2, 3, 4, 5, 6].map(i => (
                                             <div key={i} style={{ height: 52, borderRadius: 8, background: 'rgba(255,255,255,0.04)', marginBottom: 6, animation: 'pulse 1.5s ease-in-out infinite' }} />
@@ -1713,6 +1849,24 @@ function TeamDetailInner({ id }: { id: string }) {
                                 )}
                             </div>
                         )}
+
+                        {/* La carga rapida vive al lado de la plantilla que corrige:
+                            si el plantel no esta, el boton para cargarlo tiene que
+                            estar en la misma pantalla donde se lo fue a buscar. */}
+                        {quickSquadOpen ? (
+                            <QuickSquadModal
+                                teamKey={rawId}
+                                teamName={teamName}
+                                sport={preferredSport || canonicalizeSportId(details?.sport) || 'rugby'}
+                                onClose={() => setQuickSquadOpen(false)}
+                                onSaved={() => {
+                                    setQuickSquadOpen(false);
+                                    // El plantel recien escrito se relee: dejar la pantalla
+                                    // con el estado viejo hace dudar de si guardo.
+                                    setSquadFetched(false);
+                                }}
+                            />
+                        ) : null}
 
                         {/* Transfers Tab */}
                         {activeTab === 'transfers' && (
