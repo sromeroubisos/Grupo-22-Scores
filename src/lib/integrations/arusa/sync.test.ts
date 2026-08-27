@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { PartidoArusa } from './client.ts';
-import { filaSegunArusa, planArusaMatches, type PartidoExistente } from './sync.ts';
+import { filaSegunArusa, planArusaMatches, rotarCompetencias, type PartidoExistente } from './sync.ts';
 
 const partido = (over: Partial<PartidoArusa> = {}): PartidoArusa => ({
     id: '144833532',
@@ -99,4 +99,22 @@ test('sin cambios en la fuente, un postergado no genera parche', () => {
     const p = plan(fuente, fila(fuente));
     assert.equal(p.actualizar.length, 0);
     assert.equal(p.sinCambios, 1);
+});
+
+test('rotarCompetencias: es una rotación, no pierde ni repite, y el arranque cambia entre corridas', () => {
+    const lista = ['a', 'b', 'c', 'd', 'e'];
+    const a15 = Date.UTC(2026, 7, 27, 15); // jue 27/8 15:00 UTC, la corrida diaria
+    const r = rotarCompetencias(lista, a15);
+    assert.deepEqual([...r].sort(), lista);
+    assert.equal(r.length, lista.length);
+    // Mismo instante, mismo orden: la corrida es reproducible.
+    assert.deepEqual(rotarCompetencias(lista, a15), r);
+    // Al día siguiente a la misma hora empieza un lugar más adelante.
+    const manana = rotarCompetencias(lista, a15 + 86_400_000);
+    assert.equal(manana[0], lista[(lista.indexOf(r[0]) + 1) % lista.length]);
+    // Las corridas del finde, cada dos horas, no repiten arranque entre sí.
+    const arranques = [16, 18, 20, 22].map((h) => rotarCompetencias(lista, Date.UTC(2026, 7, 29, h))[0]);
+    assert.equal(new Set(arranques).size, arranques.length);
+    // Con una sola competencia (`?slug=`) no hay nada que rotar.
+    assert.deepEqual(rotarCompetencias(['solo'], a15), ['solo']);
 });

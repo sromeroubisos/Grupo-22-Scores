@@ -55,15 +55,58 @@ interface Documento {
     errors?: Array<{ detail?: string }>;
 }
 
+/**
+ * Cuántas veces se insiste con un pedido que falló por causas pasajeras —429,
+ * 5xx o la red— antes de darlo por perdido. Tres intentos: el primero y dos
+ * reintentos.
+ *
+ * Leverade limita a 400 pedidos por minuto (`x-ratelimit-limit`, ventana de un
+ * minuto medida el 2026-08-27) y con la pausa de cortesía una corrida no pasa
+ * de 240. Pero el límite es por IP de salida y la de Vercel es compartida, así
+ * que un 429 puede llegar igual; sin reintento la rama entera se perdía y el
+ * cron seguía "en verde". La espera sale de `Retry-After` cuando viene, y si
+ * no, crece de a dos: 1 s, 2 s. El tope evita que un `Retry-After` exagerado
+ * se coma el presupuesto de la función.
+ */
+const INTENTOS = 3;
+const ESPERA_MAXIMA_MS = 30_000;
+
+function esperaAntesDeReintentar(res: Response | null, intento: number): number {
+    const retryAfter = Number(res?.headers.get('retry-after'));
+    const pedida = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 1000 * 2 ** (intento - 1);
+    return Math.min(pedida, ESPERA_MAXIMA_MS);
+}
+
+const esPasajero = (status: number) => status === 429 || status >= 500;
+
 async function leer(ruta: string): Promise<Documento> {
-    await pausaCortesia();
-    const res = await fetch(`${BASE}/${ruta}`, { headers: { Accept: 'application/json' } });
-    const texto = await res.text();
-    if (!res.ok) throw new Error(`Leverade ${ruta}: HTTP ${res.status} ${texto.slice(0, 200)}`);
-    if (texto.trimStart().startsWith('<')) throw new Error(`Leverade ${ruta}: respuesta HTML (ruta inexistente)`);
-    const doc = JSON.parse(texto) as Documento;
-    if (doc.errors?.length) throw new Error(`Leverade ${ruta}: ${doc.errors.map((e) => e.detail).join(' / ')}`);
-    return doc;
+    let ultimoError: Error | null = null;
+    for (let intento = 1; intento <= INTENTOS; intento += 1) {
+        await pausaCortesia();
+        let res: Response;
+        try {
+            res = await fetch(`${BASE}/${ruta}`, { headers: { Accept: 'application/json' } });
+        } catch (e) {
+            // Red caída o DNS: pasajero, se reintenta igual que un 5xx.
+            ultimoError = new Error(`Leverade ${ruta}: ${e instanceof Error ? e.message : String(e)}`);
+            if (intento < INTENTOS) await new Promise((r) => setTimeout(r, esperaAntesDeReintentar(null, intento)));
+            continue;
+        }
+        const texto = await res.text();
+        if (!res.ok) {
+            ultimoError = new Error(`Leverade ${ruta}: HTTP ${res.status} ${texto.slice(0, 200)}`);
+            if (esPasajero(res.status) && intento < INTENTOS) {
+                await new Promise((r) => setTimeout(r, esperaAntesDeReintentar(res, intento)));
+                continue;
+            }
+            throw ultimoError;
+        }
+        if (texto.trimStart().startsWith('<')) throw new Error(`Leverade ${ruta}: respuesta HTML (ruta inexistente)`);
+        const doc = JSON.parse(texto) as Documento;
+        if (doc.errors?.length) throw new Error(`Leverade ${ruta}: ${doc.errors.map((e) => e.detail).join(' / ')}`);
+        return doc;
+    }
+    throw ultimoError ?? new Error(`Leverade ${ruta}: sin respuesta`);
 }
 
 function unoDe(rel: Recurso['relationships'], nombre: string): string | null {

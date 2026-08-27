@@ -349,3 +349,26 @@ export function planArusaMatches(opts: {
     plan.huerfanos = existentes.filter((m) => !usados.has(m.id));
     return plan;
 }
+
+/**
+ * Por dónde empieza a recorrer la lista de competencias cada corrida.
+ *
+ * El orden del array `TORNEOS` del cron era fijo, y una falla acumulativa
+ * —un 429 de Leverade a mitad de corrida, la función que se muere— pegaba
+ * SIEMPRE en las mismas tres competencias del final: el 2026-08-27 la corrida
+ * escribió hasta M14 Primera y M13, M18 Segunda y M14 Segunda quedaron sin
+ * sincronizar mientras el cron respondía en verde. Rotando el arranque, lo
+ * que hoy queda en la cola mañana va primero.
+ *
+ * El corrimiento es `(día + hora) % n`, la misma idea que `parteDelBarrido`
+ * en URBA: la corrida diaria de las 15 UTC avanza un lugar por día y las del
+ * fin de semana, que van cada dos horas, caen en arranques distintos entre sí.
+ * Con día solo, las siete corridas del sábado repetirían el mismo orden.
+ */
+export function rotarCompetencias<T>(lista: readonly T[], ahoraMs: number): T[] {
+    if (lista.length < 2) return [...lista];
+    const dia = Math.floor(ahoraMs / 86_400_000);
+    const hora = Math.floor(ahoraMs / 3_600_000) % 24;
+    const desde = (dia + hora) % lista.length;
+    return [...lista.slice(desde), ...lista.slice(0, desde)];
+}
