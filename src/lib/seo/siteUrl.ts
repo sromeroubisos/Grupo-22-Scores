@@ -3,7 +3,9 @@
 // local) se cae al dominio de producción: un sitemap o un canonical con URLs
 // locales le enseña mal al buscador.
 
-const PRODUCTION_URL = 'https://g22scores.com';
+// Con www: el apex g22scores.com contesta 308 hacia www, y un canonical que
+// redirige no canoniza nada.
+const PRODUCTION_URL = 'https://www.g22scores.com';
 
 export function publicSiteUrl(): string {
     const configured = (process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || '').trim();
@@ -13,6 +15,8 @@ export function publicSiteUrl(): string {
         const host = url.hostname.toLowerCase();
         const isLocal = host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local');
         if (url.protocol !== 'https:' || isLocal) return PRODUCTION_URL;
+        // El apex configurado a mano también se pliega al host real.
+        if (host === 'g22scores.com') return PRODUCTION_URL;
         return url.origin;
     } catch {
         return PRODUCTION_URL;
