@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { db } from "@/lib/mock-db";
+import { newsPath } from '@/lib/news/newsUrl';
 import styles from "./not-found.module.css";
 // import { createClient } from "@/lib/supabase/client"; // Use this when switching to Supabase
 
@@ -55,7 +56,7 @@ export default function NotFound() {
 
                     <div className={styles.nf__newsList}>
                         {(news ?? []).map((n) => (
-                            <Link key={n.id} className={styles.card} href={`/noticias/${n.id}`}>
+                            <Link key={n.id} className={styles.card} href={newsPath(n)}>
                                 <div className={styles.card__meta}>
                                     <span className={styles.tag}>{n.sport?.toUpperCase() || "DEPORTE"}</span>
                                     <span className={styles.time}>

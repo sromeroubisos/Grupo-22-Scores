@@ -9,6 +9,7 @@ import { useSport } from '@/context/SportContext';
 import { getTournamentsBySport, getInternationalTournamentsBySport, getTournamentById } from '@/lib/data/tournaments/index';
 import { buildEspnFootballTournaments, getEspnFootballInternationalTournaments } from '@/lib/data/tournaments/espnFootballCatalog';
 import { findCountryRecord, getCountryById, resolveCountryId } from '@/lib/data/countries';
+import { newsPath } from '@/lib/news/newsUrl';
 import type { Tournament } from '@/lib/types'; // Keep this for existing tournament logic
 import TournamentSeasonTag from '@/components/TournamentSeasonTag';
 import CountryFlag from '@/components/CountryFlag';
@@ -2433,7 +2434,7 @@ export default function HomePage() {
 
                   <div className={styles.newsList}>
                     {news.slice(0, 5).map((item) => (
-                      <Link key={item.id} href={`/noticias/${item.id}`} className={styles.newsCard}>
+                      <Link key={item.id} href={newsPath(item)} className={styles.newsCard}>
                         <div
                           className={styles.newsImage}
                           style={{ backgroundImage: item.image_url ? `url(${item.image_url})` : 'none', backgroundSize: 'cover' }}

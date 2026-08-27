@@ -22,6 +22,7 @@ import NewsBody from '@/components/news/NewsBody';
 import { formatMention, isSiteVideoRef, mentionKey, type ResolvedMention } from '@/lib/news/mentions';
 import { collectMentions, imageCountOf, mentionCountOf, parseRichText, plainTextOf, wordCountOf } from '@/lib/news/richText';
 import { isUrlAlone, liftVideoToOwnLine, strandedVideoIn } from '@/lib/news/videoInBody';
+import { newsPath } from '@/lib/news/newsUrl';
 import { sessionFetch } from '@/lib/supabase/freshSession';
 
 import LinkInserter, { type InsertMode } from './LinkInserter';
@@ -904,7 +905,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                         {STATUS_LABELS[status]}
                     </span>
                     {recordId && (
-                        <Link href={`/noticias/${recordId}`} className={styles.viewLink} target="_blank" rel="noopener noreferrer">
+                        <Link href={newsPath({ id: recordId, title: form.title })} className={styles.viewLink} target="_blank" rel="noopener noreferrer">
                             <Eye size={14} aria-hidden="true" /> Ver la nota
                         </Link>
                     )}
@@ -1242,7 +1243,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                             <CheckCircle2 size={18} aria-hidden="true" />
                             <span>
                                 {success}
-                                {recordId && <> <Link href={`/noticias/${recordId}`} target="_blank" rel="noopener noreferrer">Ver la nota</Link></>}
+                                {recordId && <> <Link href={newsPath({ id: recordId, title: form.title })} target="_blank" rel="noopener noreferrer">Ver la nota</Link></>}
                             </span>
                         </div>
                     )}
