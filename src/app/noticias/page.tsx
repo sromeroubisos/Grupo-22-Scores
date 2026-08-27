@@ -16,6 +16,18 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
     title: 'Noticias | G22 Scores',
     description: 'Novedades y comunicados, y los videos de cada torneo: highlights, partidos completos y la votación al mejor try.',
+    alternates: {
+        canonical: '/noticias',
+    },
+    openGraph: {
+        type: 'website',
+        title: 'Noticias | G22 Scores',
+        description: 'Novedades y comunicados, y los videos de cada torneo: highlights, partidos completos y la votación al mejor try.',
+        siteName: 'G22 Scores',
+        locale: 'es_AR',
+        url: '/noticias',
+        images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'G22 Scores' }],
+    },
 };
 
 const INITIAL_NEWS_LIMIT = 50;

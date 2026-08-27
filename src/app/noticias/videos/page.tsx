@@ -15,6 +15,18 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
     title: 'Videos por torneo | Noticias',
     description: 'Todos los torneos con videos: highlights, partidos completos y clips, y la votación al mejor try o gol.',
+    alternates: {
+        canonical: '/noticias/videos',
+    },
+    openGraph: {
+        type: 'website',
+        title: 'Videos por torneo | Noticias G22 Scores',
+        description: 'Todos los torneos con videos: highlights, partidos completos y clips, y la votación al mejor try o gol.',
+        siteName: 'G22 Scores',
+        locale: 'es_AR',
+        url: '/noticias/videos',
+        images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'G22 Scores' }],
+    },
 };
 
 export default async function VideoHubsIndexPage() {

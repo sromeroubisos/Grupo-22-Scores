@@ -11,6 +11,7 @@ import { cache } from 'react';
 import ProtectedLink from '@/components/ProtectedLink';
 import { getServerAuthRole } from '@/lib/auth/newsAccess';
 import { hasNewsManagementAccess } from '@/lib/auth/roles';
+import { absoluteUrl } from '@/lib/seo/siteUrl';
 import styles from './page.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -75,13 +76,16 @@ function paragraphsOf(news: NewsRow): string[] {
         .filter(Boolean);
 }
 
-/** La descripción para los buscadores: el resumen o el primer párrafo, en 160. */
+/** La descripción para los buscadores: el resumen o el primer párrafo, en 155. */
 function descriptionOf(news: NewsRow): string {
     const summary = (news.summary || '').trim();
-    if (summary) return summary.length > 160 ? `${summary.slice(0, 157)}...` : summary;
+    if (summary) return summary.length > 155 ? `${summary.slice(0, 152)}...` : summary;
     const first = paragraphsOf(news)[0] ?? '';
-    return first.length > 160 ? `${first.slice(0, 157)}...` : first;
+    return first.length > 155 ? `${first.slice(0, 152)}...` : first;
 }
+
+// La placa de la casa: la imagen para compartir cuando la nota no trae foto.
+const FALLBACK_OG_IMAGE = '/og-default.png';
 
 function publicImageOf(news: NewsRow): string | null {
     const url = (news.image_url || '').trim();
@@ -111,29 +115,34 @@ export async function generateMetadata({ params }: NewsPageProps): Promise<Metad
     const tags = tagsOf(news);
     const sport = sportLabel(news.sport);
     const keywords = [...tags, ...(sport ? [sport] : [])];
-    const image = publicImageOf(news);
+    const image = publicImageOf(news) ?? FALLBACK_OG_IMAGE;
     const published = news.status === 'published';
+    const canonicalPath = `/noticias/${news.id}`;
 
     return {
         title: `${news.title} | Noticias G22 Scores`,
         description: description || undefined,
         keywords: keywords.length > 0 ? keywords : undefined,
+        alternates: {
+            canonical: canonicalPath,
+        },
         openGraph: {
             type: 'article',
             title: news.title,
             description: description || undefined,
             siteName: 'G22 Scores',
             locale: 'es_AR',
+            url: canonicalPath,
             publishedTime: news.published_at ?? undefined,
             modifiedTime: news.updated_at ?? undefined,
             tags: tags.length > 0 ? tags : undefined,
-            images: image ? [{ url: image }] : undefined,
+            images: [{ url: image }],
         },
         twitter: {
-            card: image ? 'summary_large_image' : 'summary',
+            card: 'summary_large_image',
             title: news.title,
             description: description || undefined,
-            images: image ? [image] : undefined,
+            images: [image],
         },
         // Un borrador lo ve solo quien administra: que ningún buscador lo indexe.
         robots: published ? undefined : { index: false, follow: false },
@@ -170,20 +179,29 @@ export default async function NewsPage({ params }: NewsPageProps) {
     const readingMinutes = Math.max(1, Math.ceil(readingWords / 220));
 
     // Solo una nota publicada se anuncia como artículo a los buscadores.
+    // El JSON-LD no pasa por metadataBase: acá las URLs van absolutas.
+    const canonicalUrl = absoluteUrl(`/noticias/${news.id}`);
     const jsonLd = news.status === 'published'
         ? {
             '@context': 'https://schema.org',
             '@type': 'NewsArticle',
             headline: news.title,
             description: description || undefined,
+            url: canonicalUrl,
+            mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
             datePublished: news.published_at ?? undefined,
             dateModified: news.updated_at ?? news.published_at ?? undefined,
-            image: image ? [image] : undefined,
+            image: [image ?? absoluteUrl('/og-default.png')],
             keywords: [...tags, ...(sport ? [sport] : [])].join(', ') || undefined,
             articleSection: sport ?? undefined,
             inLanguage: 'es-AR',
-            author: { '@type': 'Organization', name: 'G22 Scores' },
-            publisher: { '@type': 'Organization', name: 'G22 Scores' },
+            author: { '@type': 'Organization', name: 'G22 Scores', url: absoluteUrl('/') },
+            publisher: {
+                '@type': 'Organization',
+                name: 'G22 Scores',
+                url: absoluteUrl('/'),
+                logo: { '@type': 'ImageObject', url: absoluteUrl('/icon.png') },
+            },
         }
         : null;
 

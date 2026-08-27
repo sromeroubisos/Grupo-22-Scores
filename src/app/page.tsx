@@ -2084,13 +2084,13 @@ export default function HomePage() {
               {!loading && displayedMatchesByLeague.length === 0 && displayedFavoriteClubMatches.length === 0 && !sourceError && (
                 <div className={styles.noMatches}>
                   <div className={styles.noMatchesIcon}></div>
-                  <h3>
+                  <h2>
                     {showLiveOnly
                       ? 'No hay partidos en vivo'
                       : selectedAudience === 'juveniles'
                         ? 'No hay partidos de juveniles ni de reserva programados'
                         : 'No hay partidos programados'}
-                  </h3>
+                  </h2>
                   <p>
                     {showLiveOnly
                       ? `No se encontraron encuentros en vivo para ${AUDIENCE_LABELS[selectedAudience].toLowerCase()}.`
@@ -2104,7 +2104,7 @@ export default function HomePage() {
               {!loading && displayedMatchesByLeague.length === 0 && displayedFavoriteClubMatches.length === 0 && sourceError && (
                 <div className={styles.noMatches}>
                   <div className={styles.noMatchesIcon}></div>
-                  <h3>No se pudieron cargar los partidos</h3>
+                  <h2>No se pudieron cargar los partidos</h2>
                   {sourceError.message ? <p>{sourceError.message}</p> : null}
                   <p>Hay un problema de conexión con una o más fuentes de datos.</p>
                 </div>
