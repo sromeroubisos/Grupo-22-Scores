@@ -1134,3 +1134,168 @@
         padding: 16px;
     }
 }
+
+/* ── Menciones: el panel que se abre al escribir @ en el cuerpo ─────────── */
+.contentWrap {
+    position: relative;
+}
+
+.mentionPanel {
+    position: absolute;
+    z-index: 30;
+    width: min(440px, 100%);
+    max-height: 340px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--edge-strong);
+    border-radius: 12px;
+    background: var(--raised-2);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+}
+
+.mentionKinds {
+    display: flex;
+    gap: 4px;
+    padding: 8px 8px 6px;
+    border-bottom: 1px solid var(--edge);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.mentionKind {
+    flex: none;
+    min-height: 28px;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.mentionKind:hover {
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.mentionKindActive,
+.mentionKindActive:hover {
+    color: var(--accent-ink);
+    border-color: rgba(var(--accent-rgb), 0.45);
+    background: rgba(var(--accent-rgb), 0.14);
+}
+
+.mentionList {
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mentionItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.mentionItem:hover,
+.mentionItemActive {
+    background: rgba(var(--accent-rgb), 0.14);
+}
+
+.mentionCrest,
+.mentionAvatar {
+    width: 30px;
+    height: 30px;
+    flex: none;
+    border-radius: 50%;
+    object-fit: contain;
+    background: #fff;
+}
+
+.mentionAvatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--ink-soft);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.mentionThumb {
+    width: 48px;
+    height: 30px;
+    flex: none;
+    border-radius: 6px;
+    object-fit: cover;
+    background: #000;
+}
+
+.mentionText {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 1px;
+}
+
+.mentionLabel {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mentionDetail {
+    font-size: 12px;
+    color: var(--ink-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mentionEmpty {
+    margin: 0;
+    padding: 14px 12px;
+    font-size: 13px;
+    color: var(--ink-muted);
+}
+
+.mentionFoot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding: 6px 10px 8px;
+    border-top: 1px solid var(--edge);
+    font-size: 11px;
+    color: var(--ink-muted);
+}
+
+.mentionKbd {
+    display: inline-block;
+    padding: 0 5px;
+    border: 1px solid var(--edge-strong);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 10px;
+    color: var(--ink-soft);
+}

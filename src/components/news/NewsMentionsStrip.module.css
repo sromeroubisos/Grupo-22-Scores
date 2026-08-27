@@ -1,0 +1,108 @@
+/* "En esta nota": chips de lo etiquetado. Tokens del sitio (siguen a data-theme). */
+
+.strip {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-border, #2a2a2e);
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #a1a1aa);
+}
+
+.list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 4px 12px 4px 6px;
+    border: 1px solid var(--color-border, #2a2a2e);
+    border-radius: 999px;
+    background: var(--color-bg-tertiary, #1c1c1f);
+    color: var(--color-text-primary, #f2f2f2);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.2;
+    transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.chip:hover,
+.chip:focus-visible {
+    border-color: var(--color-accent, #00a365);
+    background: color-mix(in srgb, var(--color-accent, #00a365) 12%, var(--color-bg-tertiary, #1c1c1f));
+}
+
+.chip:focus-visible {
+    outline: 2px solid var(--color-accent, #00a365);
+    outline-offset: 2px;
+}
+
+.crest {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: #fff;
+    flex: none;
+}
+
+.kindDot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex: none;
+    background: color-mix(in srgb, var(--color-accent, #00a365) 22%, transparent);
+    position: relative;
+}
+
+.kindDot::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    background: var(--color-accent-ink, #22c55e);
+}
+
+.chip[data-kind='player'] .kindDot::after {
+    inset: 7px;
+    border-radius: 40% 40% 50% 50%;
+}
+
+.chip[data-kind='match'] .kindDot::after,
+.chip[data-kind='video'] .kindDot::after {
+    inset: 8px 7px 8px 9px;
+    border-radius: 2px;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.chipLabel {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 260px;
+}
+
+.chipKind {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary, #a1a1aa);
+}

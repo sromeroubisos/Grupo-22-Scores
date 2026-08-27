@@ -87,8 +87,13 @@ export interface ParsedVideoUrl {
     embedUrl: string | null;
     /** Miniatura conocida sin pedirle nada a nadie (hoy solo YouTube). */
     thumbnailUrl: string | null;
-    /** 'portrait' para shorts y reels: el marco se dibuja alto en vez de ancho. */
-    aspect: 'video' | 'portrait';
+    /**
+     * 'portrait' para shorts y reels: el marco se dibuja alto en vez de ancho.
+     * 'card' para una publicación (un tweet, un post de Instagram): el embed
+     * trae texto y botones alrededor del video, así que el marco es una
+     * tarjeta de alto fijo y ancho acotado, no una proporción.
+     */
+    aspect: 'video' | 'portrait' | 'card';
     /** El sitio, para el rótulo "Abrir en …" cuando no hay plataforma conocida. */
     host: string;
 }
@@ -133,7 +138,7 @@ function segmentsOf(url: URL): string[] {
     return url.pathname.split('/').filter(Boolean);
 }
 
-function linkOnly(provider: MatchVideoProvider, host: string, aspect: 'video' | 'portrait' = 'video'): ParsedVideoUrl {
+function linkOnly(provider: MatchVideoProvider, host: string, aspect: ParsedVideoUrl['aspect'] = 'video'): ParsedVideoUrl {
     return { provider, embedUrl: null, thumbnailUrl: null, aspect, host };
 }
 
@@ -368,13 +373,83 @@ function parseEspn(url: URL, host: string): ParsedVideoUrl | null {
     };
 }
 
-// ── Las que solo se abren afuera ──────────────────────────────────────────
+// ── X (Twitter) ───────────────────────────────────────────────────────────
+//
+// El embed oficial sin widgets.js: platform.twitter.com/embed/Tweet.html?id=
+// dibuja la publicación con su video adentro. Es una tarjeta (texto, autor,
+// botones), no un reproductor a proporción: va con aspect 'card'.
 
-function parseLinkOnlyProviders(host: string): ParsedVideoUrl | null {
-    if (host === 'instagram.com' || host === 'instagr.am') return linkOnly('instagram', 'instagram.com', 'portrait');
-    if (host === 'tiktok.com' || host === 'vm.tiktok.com' || host === 'm.tiktok.com') return linkOnly('tiktok', 'tiktok.com', 'portrait');
-    if (host === 'x.com' || host === 'twitter.com' || host === 'mobile.twitter.com' || host === 't.co') return linkOnly('x', 'x.com');
-    return null;
+const X_HOSTS = new Set(['x.com', 'twitter.com', 'mobile.twitter.com', 'm.twitter.com']);
+const X_STATUS_ID = /^\d{5,25}$/;
+
+function parseX(url: URL, host: string): ParsedVideoUrl | null {
+    // El corto t.co redirige: sin resolverlo no hay id. Afuera.
+    if (host === 't.co') return linkOnly('x', 'x.com');
+    if (!X_HOSTS.has(host)) return null;
+
+    // x.com/{usuario}/status/{id} · x.com/i/status/{id} · x.com/i/web/status/{id}
+    const segments = segmentsOf(url);
+    const statusIndex = segments.indexOf('status');
+    const id = statusIndex >= 0 ? segments[statusIndex + 1] : null;
+    if (!id || !X_STATUS_ID.test(id)) return linkOnly('x', 'x.com');
+
+    const params = new URLSearchParams({ id, dnt: 'true', theme: 'dark', hideThread: 'true' });
+    return {
+        provider: 'x',
+        embedUrl: `https://platform.twitter.com/embed/Tweet.html?${params.toString()}`,
+        thumbnailUrl: null,
+        aspect: 'card',
+        host: 'x.com',
+    };
+}
+
+// ── Instagram ─────────────────────────────────────────────────────────────
+//
+// instagram.com/p/{código}/embed/ (y /reel/, /tv/) es el embed oficial y
+// no pide script. Un reel va alto; un post, como tarjeta.
+
+const INSTAGRAM_CODE = /^[A-Za-z0-9_-]{5,40}$/;
+
+function parseInstagram(url: URL, host: string): ParsedVideoUrl | null {
+    if (host !== 'instagram.com' && host !== 'instagr.am') return null;
+
+    const segments = segmentsOf(url);
+    // instagram.com/p/{código} · /reel/{código} · /reels/{código} · /tv/{código} ·
+    // /{usuario}/p/{código} · /{usuario}/reel/{código}
+    const typeIndex = segments.findIndex((segment) => segment === 'p' || segment === 'reel' || segment === 'reels' || segment === 'tv');
+    const code = typeIndex >= 0 ? segments[typeIndex + 1] : null;
+    if (!code || !INSTAGRAM_CODE.test(code)) return linkOnly('instagram', 'instagram.com', 'portrait');
+
+    const type = segments[typeIndex] === 'reels' ? 'reel' : segments[typeIndex];
+    return {
+        provider: 'instagram',
+        embedUrl: `https://www.instagram.com/${type}/${code}/embed/`,
+        thumbnailUrl: null,
+        aspect: type === 'reel' ? 'portrait' : 'card',
+        host: 'instagram.com',
+    };
+}
+
+// ── TikTok ────────────────────────────────────────────────────────────────
+
+const TIKTOK_ID = /^\d{10,25}$/;
+
+function parseTikTok(url: URL, host: string): ParsedVideoUrl | null {
+    if (host !== 'tiktok.com' && host !== 'm.tiktok.com' && host !== 'vm.tiktok.com') return null;
+
+    // tiktok.com/@{usuario}/video/{id}. El corto vm.tiktok.com/{código} redirige: afuera.
+    const segments = segmentsOf(url);
+    const videoIndex = segments.indexOf('video');
+    const id = videoIndex >= 0 ? segments[videoIndex + 1] : null;
+    if (!id || !TIKTOK_ID.test(id)) return linkOnly('tiktok', 'tiktok.com', 'portrait');
+
+    return {
+        provider: 'tiktok',
+        embedUrl: `https://www.tiktok.com/embed/v2/${id}`,
+        thumbnailUrl: null,
+        aspect: 'portrait',
+        host: 'tiktok.com',
+    };
 }
 
 // ── Punto de entrada ──────────────────────────────────────────────────────
@@ -394,7 +469,9 @@ export function parseVideoUrl(raw: unknown, options: ParseVideoUrlOptions = {}):
         ?? parseFacebook(url, host)
         ?? parseTwitch(url, host, parent)
         ?? parseEspn(url, host)
-        ?? parseLinkOnlyProviders(host)
+        ?? parseX(url, host)
+        ?? parseInstagram(url, host)
+        ?? parseTikTok(url, host)
         ?? { provider: 'other', embedUrl: null, thumbnailUrl: null, aspect: 'video', host }
     );
 }
@@ -414,6 +491,12 @@ export function withAutoplay(provider: MatchVideoProvider, embedUrl: string): st
         case 'twitch':
         case 'espn':
             url.searchParams.set('autoplay', 'true');
+            break;
+        // Una publicación embebida no tiene autoplay: el video arranca cuando
+        // el lector lo toca adentro de la tarjeta.
+        case 'x':
+        case 'instagram':
+        case 'tiktok':
             break;
         default:
             url.searchParams.set('autoplay', '1');

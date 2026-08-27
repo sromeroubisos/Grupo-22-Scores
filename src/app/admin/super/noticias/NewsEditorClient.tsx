@@ -12,16 +12,18 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ClipboardEvent, type DragEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import {
-    AlertCircle, AlertTriangle, ArrowLeft, Bold, CheckCircle2, Circle, Eye, EyeOff, Heading2, Heading3,
+    AlertCircle, AlertTriangle, ArrowLeft, AtSign, Bold, CheckCircle2, Circle, Eye, EyeOff, Heading2, Heading3,
     Image as ImageIcon, ImagePlus, Italic, Link2, List, ListOrdered, Minus, Newspaper, Quote, Trash2, X,
 } from 'lucide-react';
 
 import NewsBody from '@/components/news/NewsBody';
-import { imageCountOf, parseRichText, plainTextOf, wordCountOf } from '@/lib/news/richText';
+import { formatMention, isSiteVideoRef, mentionKey, type ResolvedMention } from '@/lib/news/mentions';
+import { collectMentions, imageCountOf, mentionCountOf, parseRichText, plainTextOf, wordCountOf } from '@/lib/news/richText';
 import { sessionFetch } from '@/lib/supabase/freshSession';
 
+import MentionPicker, { type MentionPickerHandle } from './MentionPicker';
 import styles from './NewsEditor.module.css';
 
 type NewsStatus = 'draft' | 'published' | 'archived';
@@ -157,7 +159,7 @@ function excerptOf(form: NewsForm): string {
 // escribe en el textarea alrededor de lo seleccionado; el texto guardado
 // sigue siendo texto, y quien prefiera teclearlas a mano puede.
 
-type FormatKind = 'bold' | 'italic' | 'h2' | 'h3' | 'quote' | 'ul' | 'ol' | 'link' | 'rule';
+type FormatKind = 'bold' | 'italic' | 'h2' | 'h3' | 'quote' | 'ul' | 'ol' | 'link' | 'mention' | 'rule';
 
 type FormatTool = {
     kind: FormatKind;
@@ -171,6 +173,7 @@ const FORMAT_TOOLS: FormatTool[][] = [
         { kind: 'bold', label: 'Negrita', shortcut: 'Ctrl+B', Icon: Bold },
         { kind: 'italic', label: 'Cursiva', shortcut: 'Ctrl+I', Icon: Italic },
         { kind: 'link', label: 'Link', shortcut: 'Ctrl+K', Icon: Link2 },
+        { kind: 'mention', label: 'Etiquetar un club, jugador, torneo, partido o video', shortcut: '@', Icon: AtSign },
     ],
     [
         { kind: 'h2', label: 'Subtítulo', Icon: Heading2 },
@@ -236,6 +239,13 @@ function applyFormatTo(value: string, start: number, end: number, kind: FormatKi
             const urlStart = edit.selectionEnd + 2;
             return { text: edit.text, selectionStart: urlStart, selectionEnd: urlStart + 'https://'.length };
         }
+        case 'mention': {
+            // Un @ delante de lo seleccionado (o del cursor): el panel de menciones se abre solo.
+            const selected = value.slice(start, end);
+            const text = `${value.slice(0, start)}@${selected}${value.slice(end)}`;
+            const caret = start + 1 + selected.length;
+            return { text, selectionStart: caret, selectionEnd: caret };
+        }
         case 'h2': return prefixLines(value, start, end, () => '## ', /^#{1,3}\s+/, 'Subtítulo');
         case 'h3': return prefixLines(value, start, end, () => '### ', /^#{1,3}\s+/, 'Subtítulo');
         case 'quote': return prefixLines(value, start, end, () => '> ', /^>\s?/, 'La cita');
@@ -251,6 +261,71 @@ const IMAGE_CAPTION_SAMPLE = 'Epígrafe de la foto';
 /** La línea de una imagen intermedia; el epígrafe queda seleccionado para escribirlo. */
 function imageBlock(url: string): string {
     return `![Foto](${url} "${IMAGE_CAPTION_SAMPLE}")`;
+}
+
+// ── Menciones (@) ─────────────────────────────────────────────────────────
+
+/** Hasta dónde se busca para atrás un @ que abra el panel. */
+const MENTION_LOOKBACK = 60;
+
+interface MentionTrigger {
+    /** Dónde está el @. */
+    at: number;
+    /** Lo escrito después del @, hasta el cursor. */
+    query: string;
+}
+
+/**
+ * Si el cursor viene escribiendo una mención: un @ al principio de una
+ * palabra, en el mismo renglón, sin otra marca en el medio. Un @ adentro de
+ * un mail o de un usuario de X (pegado a letras) no cuenta, y una mención ya
+ * escrita tampoco: sus corchetes y paréntesis cortan la búsqueda.
+ */
+function detectMentionTrigger(value: string, caret: number): MentionTrigger | null {
+    const from = Math.max(0, caret - MENTION_LOOKBACK);
+    for (let i = caret - 1; i >= from; i -= 1) {
+        const ch = value[i];
+        if (ch === '\n' || ch === '[' || ch === ']' || ch === '(' || ch === ')') return null;
+        if (ch === '@') {
+            const before = value[i - 1];
+            const opensWord = i === 0 || /[\s(¿"'«>—-]/.test(before);
+            return opensWord ? { at: i, query: value.slice(i + 1, caret) } : null;
+        }
+    }
+    return null;
+}
+
+const MIRRORED_STYLES = [
+    'boxSizing', 'width', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+    'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth',
+    'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'letterSpacing', 'lineHeight', 'textTransform', 'wordSpacing', 'tabSize',
+] as const;
+
+/**
+ * Dónde está un carácter del textarea, relativo a su contenedor posicionado:
+ * un espejo invisible con el mismo texto y las mismas medidas, hasta ese
+ * carácter, y se mide el siguiente. El panel de menciones se cuelga de ahí.
+ */
+function caretAnchor(textarea: HTMLTextAreaElement, index: number): { top: number; left: number } {
+    const computed = window.getComputedStyle(textarea);
+    const mirror = document.createElement('div');
+    for (const property of MIRRORED_STYLES) mirror.style[property] = computed[property];
+    Object.assign(mirror.style, {
+        position: 'absolute', top: '0', left: '0', visibility: 'hidden', whiteSpace: 'pre-wrap',
+        overflowWrap: 'break-word', overflow: 'hidden', height: '0', pointerEvents: 'none',
+    } satisfies Partial<CSSStyleDeclaration>);
+    mirror.textContent = textarea.value.slice(0, index);
+    const marker = document.createElement('span');
+    marker.textContent = textarea.value[index] || '.';
+    mirror.appendChild(marker);
+    (textarea.parentElement ?? document.body).appendChild(mirror);
+    const lineHeight = Number.parseFloat(computed.lineHeight) || Number.parseFloat(computed.fontSize) * 1.5;
+    const top = textarea.offsetTop + marker.offsetTop - textarea.scrollTop + lineHeight + 6;
+    const left = textarea.offsetLeft + marker.offsetLeft - textarea.scrollLeft;
+    mirror.remove();
+    // Que el panel no se salga por la derecha del contenedor.
+    const maxLeft = Math.max(0, textarea.offsetLeft + textarea.offsetWidth - 440);
+    return { top, left: Math.min(Math.max(0, left), maxLeft) };
 }
 
 // ── El editor ─────────────────────────────────────────────────────────────
@@ -294,6 +369,70 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
     const [sportCustom, setSportCustom] = useState(false);
     /** Se guardó, pero con una advertencia (por ejemplo, la columna de etiquetas no existe todavía). */
     const [warning, setWarning] = useState<string | null>(null);
+    /** Etiquetas que no entraron al pegar una lista (tope o repetidas). */
+    const [tagNotice, setTagNotice] = useState<string | null>(null);
+    /** Dónde está el cursor en el cuerpo: de acá sale si hay un @ abierto. */
+    const [caret, setCaret] = useState(0);
+    /** El @ que se cerró con Esc: no se vuelve a abrir hasta que el cursor cambie de @. */
+    const [dismissedAt, setDismissedAt] = useState<number | null>(null);
+    const [mentionAnchor, setMentionAnchor] = useState<{ top: number; left: number } | null>(null);
+    const pickerRef = useRef<MentionPickerHandle | null>(null);
+    /** Lo etiquetado, resuelto contra la web para la vista previa. null = se preguntó y no existe. */
+    const [resolvedMentions, setResolvedMentions] = useState<Record<string, ResolvedMention | null>>({});
+
+    const mentionTrigger = useMemo(() => detectMentionTrigger(form.content, caret), [form.content, caret]);
+    const mentionOpen = mentionTrigger !== null && mentionTrigger.at !== dismissedAt;
+
+    // El panel se cuelga del @: se mide cuando abre y cada vez que el texto cambia.
+    useEffect(() => {
+        const textarea = contentRef.current;
+        if (!mentionOpen || !textarea || !mentionTrigger) {
+            setMentionAnchor(null);
+            return;
+        }
+        setMentionAnchor(caretAnchor(textarea, mentionTrigger.at));
+    }, [mentionOpen, mentionTrigger, form.content]);
+
+    // Las menciones del cuerpo, resueltas para que la vista previa dibuje escudos, tarjetas y reproductores.
+    const mentionRefs = useMemo(() => collectMentions(form.content), [form.content]);
+    const pendingMentionKeys = useMemo(
+        () => mentionRefs
+            .filter((mention) => (mention.kind !== 'video' || isSiteVideoRef(mention.ref)) && !(mentionKey(mention) in resolvedMentions))
+            .map(mentionKey)
+            .join('\n'),
+        [mentionRefs, resolvedMentions],
+    );
+    useEffect(() => {
+        if (!pendingMentionKeys) return;
+        const keys = pendingMentionKeys.split('\n');
+        const controller = new AbortController();
+        const timer = window.setTimeout(async () => {
+            try {
+                const params = new URLSearchParams();
+                keys.forEach((key) => params.append('key', key));
+                const response = await fetch(`/api/news/mentions/resolve?${params.toString()}`, { signal: controller.signal, cache: 'no-store', credentials: 'same-origin' });
+                const payload = await response.json().catch(() => null);
+                if (!response.ok || controller.signal.aborted) return;
+                const data = (payload?.data ?? {}) as Record<string, ResolvedMention>;
+                setResolvedMentions((current) => {
+                    const next = { ...current };
+                    for (const key of keys) next[key] = data[key] ?? null;
+                    return next;
+                });
+            } catch {
+                // Sin resolver, la vista previa muestra la mención como link con su etiqueta.
+            }
+        }, 400);
+        return () => {
+            controller.abort();
+            window.clearTimeout(timer);
+        };
+    }, [pendingMentionKeys]);
+    const previewMentions = useMemo(() => {
+        const out: Record<string, ResolvedMention> = {};
+        for (const [key, value] of Object.entries(resolvedMentions)) if (value) out[key] = value;
+        return out;
+    }, [resolvedMentions]);
 
     const errors = useMemo(() => validate(form), [form]);
     const invalid = Object.keys(errors).length > 0;
@@ -413,7 +552,29 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
         const textarea = contentRef.current;
         if (!textarea) return;
         const { selectionStart, selectionEnd } = textarea;
+        if (kind === 'mention') setDismissedAt(null);
         commitEdit(applyFormatTo(form.content, selectionStart, selectionEnd, kind));
+    }
+
+    /** El cursor del cuerpo, para saber si hay un @ abierto. */
+    function syncCaret() {
+        const textarea = contentRef.current;
+        if (textarea) setCaret(textarea.selectionStart);
+    }
+
+    /** Lo elegido en el panel reemplaza el @ y lo escrito después. */
+    function pickMention(mention: ResolvedMention) {
+        if (!mentionTrigger) return;
+        const before = form.content.slice(0, mentionTrigger.at);
+        const after = form.content.slice(caret);
+        // Un partido o un video solos en su renglón salen como tarjeta o reproductor: sin espacio de más.
+        const aloneInLine = (before === '' || before.endsWith('\n')) && (after === '' || after.startsWith('\n'));
+        const written = formatMention({ kind: mention.kind, ref: mention.ref, label: mention.label });
+        const insert = aloneInLine && (mention.kind === 'match' || mention.kind === 'video') ? written : `${written} `;
+        const position = before.length + insert.length;
+        setDismissedAt(null);
+        setResolvedMentions((current) => ({ ...current, [mentionKey(mention)]: mention }));
+        commitEdit({ text: `${before}${insert}${after}`, selectionStart: position, selectionEnd: position });
     }
 
     /** Una foto intermedia: se sube al bucket y su línea entra donde está el cursor. */
@@ -447,6 +608,10 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
     }
 
     function onContentKeyDown(event: ReactKeyboardEvent<HTMLTextAreaElement>) {
+        if (mentionOpen && pickerRef.current?.handleKey(event)) {
+            event.preventDefault();
+            return;
+        }
         if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
         const key = event.key.toLowerCase();
         const kind: FormatKind | null = key === 'b' ? 'bold' : key === 'i' ? 'italic' : key === 'k' ? 'link' : null;
@@ -463,6 +628,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
         pendingSelectionRef.current = null;
         textarea.focus();
         textarea.setSelectionRange(pending.start, pending.end);
+        setCaret(pending.end);
     }, [form.content]);
 
     function onDrop(event: DragEvent<HTMLDivElement>) {
@@ -592,20 +758,43 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
     const knownSport = SPORTS.some((sport) => sport.id === form.sport);
     const customSport = sportCustom || (form.sport.trim() !== '' && !knownSport);
 
+    /**
+     * Agrega lo escrito como etiquetas. Una lista pegada ("Mundial de Hockey
+     * 2026, hockey femenino, Selección Argentina") entra partida por comas,
+     * puntos y coma o saltos de línea; lo que no entra por el tope se avisa
+     * debajo del campo en vez de perderse en silencio.
+     */
     function addTag(raw: string) {
-        const tag = raw.replace(/\s+/g, ' ').trim().slice(0, TAG_MAX);
+        const parts = raw.split(/[,;\n]+/).map((part) => part.replace(/\s+/g, ' ').trim().slice(0, TAG_MAX)).filter(Boolean);
         setTagDraft('');
-        if (!tag) return;
+        if (parts.length === 0) return;
         setSuccess(null);
         setForm((current) => {
-            if (current.tags.length >= TAGS_MAX) return current;
-            if (current.tags.some((existing) => existing.toLowerCase() === tag.toLowerCase())) return current;
-            return { ...current, tags: [...current.tags, tag] };
+            const tags = [...current.tags];
+            const skipped: string[] = [];
+            for (const tag of parts) {
+                if (tags.some((existing) => existing.toLowerCase() === tag.toLowerCase())) continue;
+                if (tags.length >= TAGS_MAX) { skipped.push(tag); continue; }
+                tags.push(tag);
+            }
+            setTagNotice(skipped.length > 0
+                ? `Quedaron afuera por el tope de ${TAGS_MAX}: ${skipped.join(', ')}.`
+                : null);
+            return tags.length === current.tags.length ? current : { ...current, tags };
         });
+    }
+
+    /** Pegar una lista separada por comas la convierte en chips de una. */
+    function onTagPaste(event: ClipboardEvent<HTMLInputElement>) {
+        const pasted = event.clipboardData.getData('text');
+        if (!/[,;\n]/.test(pasted)) return;
+        event.preventDefault();
+        addTag(`${tagDraft}${pasted}`);
     }
 
     function removeTag(tag: string) {
         setSuccess(null);
+        setTagNotice(null);
         setForm((current) => ({ ...current, tags: current.tags.filter((existing) => existing !== tag) }));
     }
 
@@ -621,6 +810,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
     const minutes = Math.max(1, Math.ceil(words / 220));
     const paragraphs = paragraphCount(form.content);
     const bodyImages = imageCountOf(form.content);
+    const bodyMentions = mentionCountOf(form.content);
     const scopeLabel = SCOPES.find((scope) => scope.id === form.scope)?.label ?? 'General';
     const previewDate = formatDate(publishedAt) ?? 'Hoy';
     const isPublished = status === 'published';
@@ -748,6 +938,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                                 <label htmlFor="news-content" className={styles.label}>Contenido</label>
                                 <span className={styles.counter}>{words} palabras · {minutes} min</span>
                             </div>
+                            <div className={styles.contentWrap}>
                             <div className={styles.toolbar} role="toolbar" aria-label="Formato del contenido" aria-controls="news-content">
                                 {FORMAT_TOOLS.map((group, groupIndex) => (
                                     <div key={groupIndex} className={styles.toolGroup}>
@@ -797,16 +988,29 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                                 className={`${styles.textarea} ${showError('content') ? styles.inputInvalid : ''}`}
                                 value={form.content}
                                 placeholder={'El texto de la nota.\n\nSepará los párrafos con una línea en blanco: así se muestran en la página. Con la barra de arriba van la negrita, la cursiva, los subtítulos y las fotos intermedias.'}
-                                onChange={(event) => update('content', event.target.value)}
+                                onChange={(event) => { update('content', event.target.value); setCaret(event.target.selectionStart); }}
                                 onKeyDown={onContentKeyDown}
+                                onKeyUp={syncCaret}
+                                onClick={syncCaret}
+                                onSelect={syncCaret}
                                 onBlur={() => touch('content')}
                                 aria-invalid={Boolean(showError('content'))}
                                 aria-describedby="news-content-hint"
                                 spellCheck
                             />
+                            {mentionOpen && mentionAnchor && mentionTrigger && (
+                                <MentionPicker
+                                    ref={pickerRef}
+                                    query={mentionTrigger.query}
+                                    anchor={mentionAnchor}
+                                    onPick={pickMention}
+                                    onClose={() => setDismissedAt(mentionTrigger.at)}
+                                />
+                            )}
+                            </div>
                             {bodyImageError && <p className={`${styles.hint} ${styles.hintError}`} role="alert">{bodyImageError}</p>}
                             <p id="news-content-hint" className={`${styles.hint} ${showError('content') ? styles.hintError : ''}`}>
-                                {showError('content') ?? 'Separá los párrafos con una línea en blanco; el primero sale destacado. Seleccioná un texto y tocá un botón para darle formato: **negrita**, _cursiva_, ## subtítulo. La vista previa muestra cómo se lee.'}
+                                {showError('content') ?? 'Separá los párrafos con una línea en blanco; el primero sale destacado. Seleccioná un texto y tocá un botón para darle formato: **negrita**, _cursiva_, ## subtítulo. Escribí @ y un nombre para etiquetar un club, un jugador, un torneo, un partido o un video de la web; un partido o un video solos en su renglón salen como tarjeta o reproductor. Un link de YouTube, X, Instagram, Facebook o ESPN pegado solo en su renglón también se ve como video.'}
                             </p>
                         </div>
                     </section>
@@ -955,14 +1159,16 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                                     disabled={form.tags.length >= TAGS_MAX}
                                     onChange={(event) => setTagDraft(event.target.value)}
                                     onKeyDown={onTagKeyDown}
+                                    onPaste={onTagPaste}
                                     onBlur={() => addTag(tagDraft)}
                                     aria-describedby="news-tags-hint"
                                 />
                             </div>
+                            {tagNotice && <p className={`${styles.hint} ${styles.hintError}`} role="status">{tagNotice}</p>}
                             <p id="news-tags-hint" className={styles.hint}>
                                 {form.tags.length >= TAGS_MAX
                                     ? `Tope de ${TAGS_MAX} etiquetas. Quitá una para agregar otra.`
-                                    : 'Enter o coma para agregar. Van a las palabras clave y al Open Graph de la nota, y a la búsqueda de la portada.'}
+                                    : 'Enter o coma para agregar; también podés pegar una lista separada por comas. Van a las palabras clave y al Open Graph de la nota, y a la búsqueda de la portada.'}
                             </p>
                         </div>
                     </section>
@@ -1069,6 +1275,8 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                             {form.summary.trim() && <p className={styles.articlePreviewSummary}>{form.summary.trim()}</p>}
                             <NewsBody
                                 content={form.content}
+                                mentions={previewMentions}
+                                title={form.title.trim() || undefined}
                                 empty={<p className={styles.articlePreviewEmpty}>Escribí el contenido y acá se ve cómo queda.</p>}
                             />
                         </div>
@@ -1118,6 +1326,12 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                             <li className={styles.previewStat}>
                                 <span className={styles.previewStatValue}>{bodyImages}</span>
                                 <span className={styles.previewStatLabel}>{bodyImages === 1 ? 'foto en el texto' : 'fotos en el texto'}</span>
+                            </li>
+                        )}
+                        {bodyMentions > 0 && (
+                            <li className={styles.previewStat}>
+                                <span className={styles.previewStatValue}>{bodyMentions}</span>
+                                <span className={styles.previewStatLabel}>{bodyMentions === 1 ? 'etiqueta en el texto' : 'etiquetas en el texto'}</span>
                             </li>
                         )}
                     </ul>
