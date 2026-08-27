@@ -1,0 +1,404 @@
+/*
+ * Crear partido — estilos propios encima de creation-forms.css.
+ *
+ * Todo cuelga de .match-create. Un CSS global importado desde un page.tsx queda
+ * cargado al navegar por el resto del panel, así que acá no hay reglas sueltas
+ * sobre input, label o select: eso era lo que hacía monolith.css y le pisaba
+ * los campos a las otras pantallas.
+ */
+
+.match-create .creation-container {
+    max-width: 960px;
+}
+
+.match-create .btn-back {
+    width: auto;
+    height: auto;
+    padding: 8px 16px;
+    margin-bottom: 16px;
+    font-size: 0.75rem;
+}
+
+.match-create .partition-header > div {
+    min-width: 0;
+}
+
+.match-create .field-label {
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+}
+
+.match-create .opt {
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-dim);
+}
+
+.match-create .form-input,
+.match-create .form-select {
+    min-height: 48px;
+}
+
+/* El calendario y el reloj nativos en oscuro, como el resto del panel. */
+.match-create .form-input[type="date"],
+.match-create .form-input[type="time"] {
+    color-scheme: dark;
+}
+
+/* #888 sobre #000: 5,3:1. */
+.match-create .form-input::placeholder {
+    color: var(--text-dim);
+}
+
+.match-create .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.match-create .choice-pair button.selected {
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* ===== Clubes ===== */
+.match-create .match-teams {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 16px;
+    align-items: stretch;
+}
+
+.match-create .team-card {
+    display: grid;
+    gap: 16px;
+    align-content: start;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    background: var(--surface-1);
+}
+
+.match-create .team-card-title {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+}
+
+.match-create .match-vs-divider {
+    align-self: center;
+}
+
+/* ===== Combobox con búsqueda ===== */
+.match-create .ss {
+    position: relative;
+}
+
+.match-create .ss-field {
+    position: relative;
+}
+
+.match-create .ss-input {
+    padding-right: 76px;
+    text-overflow: ellipsis;
+}
+
+/* Enfocado y vacío, el placeholder es la opción elegida: se lee como texto. */
+.match-create .ss.has-value .ss-input::placeholder {
+    color: var(--text-primary);
+}
+
+.match-create .ss-clear,
+.match-create .ss-toggle {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.match-create .ss-toggle {
+    right: 8px;
+}
+
+.match-create .ss-clear {
+    right: 42px;
+}
+
+.match-create .ss-clear:hover,
+.match-create .ss-toggle:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.match-create .ss-clear:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 1px;
+}
+
+.match-create .ss-toggle svg {
+    transition: transform 0.15s;
+}
+
+.match-create .ss.is-open .ss-toggle svg {
+    transform: rotate(180deg);
+}
+
+.match-create .ss.is-disabled .ss-toggle {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.match-create .ss-list {
+    position: absolute;
+    z-index: 40;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    max-height: 300px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--surface-1);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--r-md);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+.match-create .ss-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    min-height: 40px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.match-create .ss-option-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.match-create .ss-option-hint {
+    flex-shrink: 0;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+.match-create .ss-option.is-active {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+}
+
+.match-create .ss-option.is-selected {
+    color: var(--accent-2);
+    font-weight: 700;
+}
+
+.match-create .ss-option.is-selected.is-active {
+    background: var(--accent-soft);
+}
+
+.match-create .ss-empty {
+    padding: 12px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    text-align: center;
+}
+
+/* ===== Estado (segmentado) ===== */
+.match-create .segmented {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.match-create .segmented-btn {
+    flex: 1 1 0;
+    min-height: 48px;
+    padding: 10px 14px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    background: var(--surface-1);
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+
+.match-create .segmented-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+}
+
+.match-create .segmented-btn.is-active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--text-primary);
+}
+
+.match-create .segmented-btn.tone-warn.is-active {
+    background: rgba(250, 204, 21, 0.12);
+    border-color: var(--warning);
+}
+
+.match-create .segmented-btn.tone-danger.is-active {
+    background: rgba(248, 113, 113, 0.12);
+    border-color: var(--danger);
+}
+
+/* ===== Interruptor (público) ===== */
+.match-create .toggle {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 14px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    background: var(--surface-1);
+    color: var(--text-secondary);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+    transition: border-color 0.15s;
+}
+
+.match-create .toggle.is-on {
+    border-color: rgba(0, 163, 101, 0.45);
+}
+
+.match-create .toggle-track {
+    position: relative;
+    flex-shrink: 0;
+    width: 42px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--surface-3);
+    border: 1px solid var(--border-strong);
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.match-create .toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    transition: transform 0.15s, background-color 0.15s;
+}
+
+.match-create .toggle.is-on .toggle-track {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.match-create .toggle.is-on .toggle-thumb {
+    transform: translateX(18px);
+    background: #000;
+}
+
+.match-create .toggle-text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.match-create .toggle-text strong {
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.match-create .toggle-text span {
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+/* Foco visible en todo lo que se opera con teclado. */
+.match-create .segmented-btn:focus-visible,
+.match-create .toggle:focus-visible,
+.match-create .choice-pair button:focus-visible,
+.match-create .btn:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 2px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .match-create .grid-3,
+    .match-create .match-teams {
+        grid-template-columns: 1fr;
+    }
+
+    .match-create .btn-back {
+        width: auto;
+        height: auto;
+    }
+
+    .match-create .match-vs-divider {
+        padding: 6px 0;
+    }
+
+    .match-create .vs-line {
+        height: 2px;
+    }
+}
+
+@media (pointer: coarse) {
+    .match-create .btn-back {
+        min-height: 44px;
+    }
+
+    .match-create .ss-option {
+        min-height: 44px;
+    }
+
+    .match-create .ss-clear,
+    .match-create .ss-toggle {
+        width: 40px;
+        height: 40px;
+    }
+
+    .match-create .ss-clear {
+        right: 46px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .match-create .toggle,
+    .match-create .toggle-track,
+    .match-create .toggle-thumb,
+    .match-create .segmented-btn,
+    .match-create .ss-toggle svg {
+        transition: none;
+    }
+}

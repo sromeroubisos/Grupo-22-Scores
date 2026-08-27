@@ -7,12 +7,21 @@ las decisiones que quedaron tomadas.
 ## Las entradas de cron
 
 ```json
-{ "path": "/api/cron/urba-sync?scope=jornada", "schedule": "*/20 18-23 * * 6,0" },
-{ "path": "/api/cron/urba-sync?scope=jornada", "schedule": "*/20 0-5 * * 0,1"  },
-{ "path": "/api/cron/urba-sync?scope=barrido", "schedule": "0 9 * * *"  },
-{ "path": "/api/cron/urba-sync?scope=barrido", "schedule": "0 10 * * *" },
-{ "path": "/api/cron/urba-sync?scope=barrido", "schedule": "0 11 * * *" }
+{ "path": "/api/cron/urba-sync", "schedule": "*/20 18-23 * * 6,0" },
+{ "path": "/api/cron/urba-sync", "schedule": "*/20 0-5 * * 0,1"  },
+{ "path": "/api/cron/urba-sync", "schedule": "0 9 * * *"  },
+{ "path": "/api/cron/urba-sync", "schedule": "0 10 * * *" },
+{ "path": "/api/cron/urba-sync", "schedule": "0 11 * * *" }
 ```
+
+**El `path` va SIN query string, y eso no es cosmética.** Las cinco entradas
+llevaban `?scope=…` y Vercel no las invocó nunca: el path de un cron no admite
+`?`, así que la entrada se descarta entera. El síntoma no fue un error sino
+silencio — cero corridas, cero logs, la base quieta. El fin de semana del 15 y 16
+de agosto no sincronizó una sola vez y los resultados entraron a mano el lunes a
+la noche. El scope ahora sale del header `x-vercel-cron-schedule`
+(`resolverScope` en la ruta); el query string sigue andando para dispararlo a
+mano con curl. Si alguna vez volvés a ver un `?` acá, ése es el bug.
 
 Los horarios son **UTC**, que es lo que usa Vercel. En hora de Buenos Aires (UTC-3):
 
@@ -21,6 +30,23 @@ Los horarios son **UTC**, que es lo que usa Vercel. En hora de Buenos Aires (UTC
 | jornada (tarde/noche) | sáb y dom 18:00–23:59 | sáb y dom 15:00–20:59 |
 | jornada (madrugada) | dom y lun 00:00–05:59 | sáb y dom 21:00–02:59 |
 | barrido | todos los días 09, 10 y 11 | todos los días 06, 07 y 08 |
+
+**El domingo está cubierto igual que el sábado**, y conviene verlo escrito porque
+el `dayOfWeek` de las dos ventanas no coincide y da la impresión contraria: la de
+la tarde dice `6,0` y la de la madrugada `0,1`, pero es el MISMO día visto desde
+dos husos. `0` en la ventana de la madrugada es la noche del sábado, no la del
+domingo; la del domingo es el `1`. Corrido a hora de Buenos Aires queda:
+
+| día en Buenos Aires | cobertura |
+|---|---|
+| sábado | 06, 07, 08 · 15:00 → 02:59 del domingo, cada 20' |
+| domingo | 06, 07, 08 · 15:00 → 02:59 del lunes, cada 20' |
+
+Simétrico, y hace falta que lo sea: en 2026 la URBA juega MÁS el domingo que el
+sábado en cantidad de partidos por jornada (247–303 contra 192), aunque el sábado
+sume más en el total de la temporada.
+
+El hueco de 09:00 a 14:59 es a propósito en los dos días, por lo que sigue.
 
 **El barrido son tres entradas y la hora de cada una importa.** El catálogo se
 parte en tres y qué parte toca sale de `(día + hora) % 3`
