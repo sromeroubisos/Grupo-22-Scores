@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { FavoriteItem } from '@/hooks/useFavorites';
 import { newsPath } from '@/lib/news/newsUrl';
-import { formatDateKey, getTodayKey } from '@/lib/timezone';
 
 import styles from './TickerTitulares.module.css';
 
@@ -67,29 +66,19 @@ type MatchLike = {
 type NewsLike = {
     id?: string | null;
     title?: string | null;
-    published_at?: string | null;
-    created_at?: string | null;
 };
 
 /**
- * ¿La nota es de hoy?
+ * Cuántos titulares entran a la franja.
  *
- * El día se compara por CLAVE en la zona del que mira (`2026-08-27`) y no por
- * una resta de horas: "hoy" termina a la medianoche de acá, no veinticuatro
- * horas atrás. Una nota de anoche a las 23 sigue siendo de ayer a las 00:30.
+ * Son las últimas, sin filtro de fecha: así el riel nunca se queda sin
+ * titulares, que es lo que pasaba recortando por día —el 28/8 no se publicó
+ * ninguna nota y la franja quedaba solo con los partidos de los clubes—.
  *
- * `published_at` es nullable en la base; `created_at` no. Si la fecha de
- * publicación falta, manda la de alta, que es lo más parecido que hay.
+ * `/api/news` ya las devuelve ordenadas por `published_at` descendente, así que
+ * las primeras cinco SON las últimas cinco.
  */
-function esDeHoy(fila: NewsLike, timeZone: string, hoy: string): boolean {
-    const cuando = fila.published_at || fila.created_at;
-    if (!cuando) return false;
-
-    const fecha = new Date(cuando);
-    if (Number.isNaN(fecha.getTime())) return false;
-
-    return formatDateKey(fecha, timeZone) === hoy;
-}
+const MAX_TITULARES = 5;
 
 /**
  * La clave navegable de un partido. Las filas del archivo ('ra-…') no tienen
@@ -134,19 +123,18 @@ function cuandoJuega(timestamp: number, timeZone: string): string {
     return `${diaSemana} ${diaMes} ${hora}`;
 }
 
-async function traerTitulares(timeZone: string, signal: AbortSignal): Promise<Pieza[]> {
+async function traerTitulares(signal: AbortSignal): Promise<Pieza[]> {
     const res = await fetch('/api/news', { cache: 'no-store', signal });
     if (!res.ok) return [];
 
     const payload = (await res.json()) as { data?: NewsLike[] | null };
     const filas = Array.isArray(payload?.data) ? payload.data : [];
-    const hoy = getTodayKey(timeZone);
 
     return filas
-        .filter((fila) => esDeHoy(fila, timeZone, hoy))
         .filter((fila): fila is { id: string; title: string } => (
             Boolean(fila?.id) && Boolean((fila?.title || '').trim())
         ))
+        .slice(0, MAX_TITULARES)
         .map((fila) => ({
             key: `noticia:${fila.id}`,
             rotulo: 'Noticia',
@@ -225,6 +213,20 @@ export default function TickerTitulares({ favorites }: { favorites: FavoriteItem
     const [titulares, setTitulares] = useState<Pieza[]>([]);
     const [deClubes, setDeClubes] = useState<Pieza[]>([]);
 
+    /*
+     * Si las dos búsquedas ya contestaron.
+     *
+     * La franja se dibuja DESDE EL PRIMER PINTADO, vacía y con su alto puesto:
+     * apareciendo recién con los datos empujaba para abajo todo lo que tiene
+     * debajo, que es el feed —justo lo que el hincha vino a mirar—.
+     *
+     * El precio es que un día sin nada dejaría una franja vacía para siempre, y
+     * por eso hace falta saber cuándo terminó de buscar: recién ahí, si no hay
+     * ni una pieza, se colapsa.
+     */
+    const [buscoTitulares, setBuscoTitulares] = useState(false);
+    const [buscoClubes, setBuscoClubes] = useState(false);
+
     const ventanaRef = useRef<HTMLDivElement | null>(null);
     const rielRef = useRef<HTMLDivElement | null>(null);
     const grupoRef = useRef<HTMLDivElement | null>(null);
@@ -247,7 +249,7 @@ export default function TickerTitulares({ favorites }: { favorites: FavoriteItem
      * animación arrancaba de cero cada vez. Acá el riel sigue exactamente donde
      * estaba y lo único que cambia es dónde da la vuelta.
      */
-    const posicionRef = useRef(0);
+    const posicionRef = useRef<number | null>(null);
 
     /** Se detiene con el mouse encima o con el foco adentro: un link que huye no se clickea. */
     const detenidoRef = useRef(false);
@@ -267,12 +269,18 @@ export default function TickerTitulares({ favorites }: { favorites: FavoriteItem
     useEffect(() => {
         const controller = new AbortController();
 
-        traerTitulares(timeZone, controller.signal)
+        traerTitulares(controller.signal)
             .then((piezas) => {
                 if (!controller.signal.aborted) setTitulares(piezas);
             })
             .catch(() => {
                 // Sin noticias la franja sigue: se queda con lo de los clubes.
+            })
+            .finally(() => {
+                // En el `finally` y no en el `then`: si la búsqueda falla, la
+                // franja tiene que poder colapsar igual en vez de quedarse
+                // vacía esperando una respuesta que ya no viene.
+                if (!controller.signal.aborted) setBuscoTitulares(true);
             });
 
         return () => controller.abort();
@@ -281,6 +289,9 @@ export default function TickerTitulares({ favorites }: { favorites: FavoriteItem
     useEffect(() => {
         if (!clavesDeClubes) {
             setDeClubes([]);
+            // Sin clubes seguidos no hay nada que buscar: la búsqueda está
+            // terminada de entrada, y la franja no queda esperándola.
+            setBuscoClubes(true);
             return;
         }
 
@@ -294,6 +305,8 @@ export default function TickerTitulares({ favorites }: { favorites: FavoriteItem
             traerPiezasDelClub(club, timeZone, controller.signal).catch(() => [] as Pieza[])
         ))).then((tandas) => {
             if (!controller.signal.aborted) setDeClubes(tandas.flat());
+        }).finally(() => {
+            if (!controller.signal.aborted) setBuscoClubes(true);
         });
 
         return () => controller.abort();
@@ -330,19 +343,36 @@ export default function TickerTitulares({ favorites }: { favorites: FavoriteItem
     useEffect(() => {
         const riel = rielRef.current;
         const grupo = grupoRef.current;
-        if (!riel || !grupo || piezas.length === 0) return;
+        const ventana = ventanaRef.current;
+        if (!riel || !grupo || !ventana || piezas.length === 0) return;
 
         // Sin movimiento no hay riel que mover: la franja se lee quieta y se
         // scrollea a mano (ver el bloque de reduced-motion en el CSS).
         if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
+            posicionRef.current = 0;
             riel.style.transform = '';
             return;
         }
 
-        // El contenido nuevo puede ser más corto que la posición actual: se
-        // pliega ya para no dejar un hueco hasta la próxima vuelta.
-        const vueltaInicial = grupo.scrollWidth;
-        if (vueltaInicial > 0) posicionRef.current %= vueltaInicial;
+        if (posicionRef.current === null) {
+            /*
+             * La primera vez la tira arranca justo afuera del borde derecho y
+             * entra girando. Antes las piezas ya estaban puestas cuando la
+             * franja se dibujaba, y aparecían de la nada.
+             *
+             * Es una posición NEGATIVA: el módulo de más abajo conserva el
+             * signo, así que la entrada se recorre una sola vez y a partir de
+             * la primera vuelta el riel queda en el ciclo normal.
+             */
+            posicionRef.current = -ventana.clientWidth;
+        } else {
+            // El contenido nuevo puede ser más corto que la posición actual: se
+            // pliega ya para no dejar un hueco hasta la próxima vuelta.
+            const vueltaInicial = grupo.scrollWidth;
+            if (vueltaInicial > 0) posicionRef.current %= vueltaInicial;
+        }
+
+        riel.style.transform = `translate3d(${-posicionRef.current}px, 0, 0)`;
 
         let anterior = 0;
         let cuadro = 0;
@@ -363,7 +393,16 @@ export default function TickerTitulares({ favorites }: { favorites: FavoriteItem
             const vuelta = grupo.scrollWidth;
             if (vuelta <= 0) return;
 
-            posicionRef.current = (posicionRef.current + VELOCIDAD * delta) % vuelta;
+            /*
+             * El módulo recién manda cuando la tira ya entró.
+             *
+             * Durante la entrada la posición es negativa (la tira está a la
+             * derecha del borde) y aplicarle el módulo la pliega de una: si la
+             * tira es más angosta que la ventana —pocas piezas—, `-844 % 743`
+             * da -101 y la entrada se saltea con un tirón de 744 px. Medido.
+             */
+            const avanzada = (posicionRef.current ?? 0) + VELOCIDAD * delta;
+            posicionRef.current = avanzada >= 0 ? avanzada % vuelta : avanzada;
             riel.style.transform = `translate3d(${-posicionRef.current}px, 0, 0)`;
         };
 
@@ -395,7 +434,9 @@ export default function TickerTitulares({ favorites }: { favorites: FavoriteItem
     const detener = useCallback(() => { detenidoRef.current = true; }, []);
     const soltar = useCallback(() => { detenidoRef.current = false; }, []);
 
-    if (piezas.length === 0) return null;
+    // Mientras busca, la franja está: vacía, con su alto, sin mover el feed.
+    // Si terminó de buscar y no juntó nada, recién ahí se va.
+    if (piezas.length === 0 && buscoTitulares && buscoClubes) return null;
 
     const dibujarGrupo = (indice: number) => {
         const esCopia = indice > 0;

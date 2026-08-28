@@ -35,9 +35,21 @@
  * La ventana recorta el riel. El degradado de los bordes evita que un titular
  * aparezca y desaparezca de golpe contra el borde del banner.
  */
+/*
+ * `min-height` fijo y no el alto que dé el contenido: la franja se dibuja vacía
+ * desde el primer pintado y tiene que medir EXACTAMENTE lo mismo antes y
+ * después de que lleguen los titulares. Si el alto lo pusiera el texto, la
+ * franja crecería al cargar y empujaría el feed para abajo, que es justo lo que
+ * se vino a sacar.
+ *
+ * El valor es la caja de línea del texto (0,8125rem × 1,6 = 1,3rem, redondeado
+ * para arriba). Va atado al `line-height` de .texto: si cambia uno, cambia el
+ * otro.
+ */
 .ventana {
     flex: 1;
     min-width: 0;
+    min-height: 1.3125rem;
     overflow: hidden;
     mask-image: linear-gradient(to right, transparent 0, #000 40px, #000 calc(100% - 28px), transparent 100%);
     -webkit-mask-image: linear-gradient(to right, transparent 0, #000 40px, #000 calc(100% - 28px), transparent 100%);
@@ -97,6 +109,7 @@
 
 .texto {
     font-size: 0.8125rem;
+    line-height: 1.6;
     font-weight: 600;
     color: var(--color-text-primary);
 }
