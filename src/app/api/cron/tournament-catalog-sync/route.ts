@@ -11,6 +11,7 @@
  *
  * Authentication: Bearer {CRON_SECRET} header (open in development, like the other crons).
  */
+import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import { syncExternalTournamentCatalog } from '@/lib/server/externalTournamentCatalog';
 
@@ -19,21 +20,9 @@ export const maxDuration = 300;
 
 const DEFAULT_SPORTS = ['rugby-union', 'rugby-league'];
 
-function isAuthorized(request: NextRequest): boolean {
-    const secret = process.env.CRON_SECRET;
-    if (!secret) {
-        if (process.env.NODE_ENV === 'development') {
-            console.warn('[tournament-catalog-sync] CRON_SECRET not set — allowing request in development mode');
-            return true;
-        }
-        return false;
-    }
-    const authHeader = request.headers.get('authorization');
-    return authHeader === `Bearer ${secret}`;
-}
 
 export async function GET(request: NextRequest) {
-    if (!isAuthorized(request)) {
+    if (!(await authorizeCronRequest(request, 'tournament-catalog-sync'))) {
         return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
     }
 

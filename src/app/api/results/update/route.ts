@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   authorizeResultsApiRequest,
+  describeResultsApiAuthFailure,
   parseResultsUpdatePayload,
   toResultsApiError,
   updateResultAndRecalculate,
@@ -31,18 +32,12 @@ export async function POST(request: NextRequest) {
       // por lo que la respuesta NO vuelve antes de terminar los derivados.
       markEditTrace({ responseBeforeDerived: false });
 
-      const auth = await authorizeResultsApiRequest(request.headers);
+      // Escribe marcadores: pide el permiso de escritura, no el de lectura.
+      const auth = await authorizeResultsApiRequest(request.headers, 'results:write');
 
       if (!auth.ok) {
-        if (auth.reason === 'missing_secret') {
-          return jsonError(
-            'Falta configurar una API key para resultados en Super Admin > Configuracion o mediante variables de entorno.',
-            500,
-            'missing_secret',
-          );
-        }
-
-        return jsonError('Unauthorized', 401, 'unauthorized');
+        const failure = describeResultsApiAuthFailure(auth.reason);
+        return jsonError(failure.message, failure.status, failure.code);
       }
 
       try {

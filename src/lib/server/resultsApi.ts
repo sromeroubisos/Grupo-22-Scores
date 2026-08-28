@@ -3,6 +3,8 @@ import { MOTORSPORT_TOURNAMENTS_BY_COUNTRY, MOTORSPORT_TOURNAMENTS_INTERNATIONAL
 import { RUGBY_TOURNAMENTS_INTERNATIONAL } from '@/lib/data/tournaments/rugby';
 import type { ClubNameResolution } from '@/lib/integrations/whatsappMatchSync';
 import { resolveClubName } from '@/lib/integrations/whatsappMatchSync';
+import { hasAnyCredentialFor, verifyApiKeyRequest, type ApiKeyScope } from '@/lib/server/apiKeys';
+import { resultsEnvFallback } from '@/lib/server/apiKeyFallbacks';
 import { hasAnyResultsApiSecretConfigured, matchesResultsApiSecretCandidates } from '@/lib/server/resultsApiKeys';
 import { recalculatePhaseStandingsScopes } from '@/lib/server/recalculateStandings';
 import { FixtureService } from '@/lib/services/fixtureService';
@@ -177,9 +179,15 @@ type ManualBonusResolution = {
 
 type PublishingPieceType = 'match_result' | 'match_schedule' | 'daily_matches' | 'standings';
 
+export type ResultsApiAuthFailureReason =
+  | 'missing_secret'
+  | 'unauthorized'
+  | 'revoked'
+  | 'forbidden_scope';
+
 export type ResultsApiAuthResult =
   | { ok: true; reason?: undefined }
-  | { ok: false; reason: 'missing_secret' | 'unauthorized' };
+  | { ok: false; reason: ResultsApiAuthFailureReason };
 
 export class ResultsApiError extends Error {
   status: number;
@@ -615,27 +623,80 @@ export function parseResultsPublishingPiecesPayload(raw: unknown): ResultsPublis
   };
 }
 
-export async function authorizeResultsApiRequest(headers: Headers): Promise<ResultsApiAuthResult> {
+/**
+ * Autentica un request de la API de resultados.
+ *
+ * Orden: primero el sistema de API keys (una key por consumidor, con permisos
+ * y revocacion); si no engancha, la key unica heredada de `system_api_keys` y
+ * los secrets por entorno, para no cortar lo que ya estaba andando.
+ *
+ * `scope` separa leer de escribir: una key de solo lectura no puede cargar un
+ * marcador aunque llegue por el mismo endpoint de siempre.
+ */
+export async function authorizeResultsApiRequest(
+  headers: Headers,
+  scope: Extract<ApiKeyScope, 'results:read' | 'results:write' | 'lineups:write'> = 'results:read',
+): Promise<ResultsApiAuthResult> {
+  const verification = await verifyApiKeyRequest(headers, scope, [resultsEnvFallback()]);
+
+  if (verification.ok) {
+    return { ok: true };
+  }
+
+  if (verification.reason === 'revoked') {
+    return { ok: false, reason: 'revoked' };
+  }
+
+  if (verification.reason === 'forbidden_scope') {
+    return { ok: false, reason: 'forbidden_scope' };
+  }
+
+  // Camino heredado: la key unica de `system_api_keys`, que da los dos permisos.
   const authorization = headers.get('authorization');
   const bearerToken = authorization?.startsWith('Bearer ') ? authorization.slice(7).trim() : null;
   const apiKey = headers.get('x-api-key')?.trim() || null;
   const webhookSecret = headers.get('x-webhook-secret')?.trim() || null;
 
-  const authorized = await matchesResultsApiSecretCandidates([
-    bearerToken,
-    apiKey,
-    webhookSecret,
-  ]);
-
-  if (authorized) {
+  if (await matchesResultsApiSecretCandidates([bearerToken, apiKey, webhookSecret])) {
     return { ok: true };
   }
 
-  if (!await hasAnyResultsApiSecretConfigured()) {
+  const hasCredentials =
+    (await hasAnyCredentialFor(scope, [resultsEnvFallback()])) ||
+    (await hasAnyResultsApiSecretConfigured());
+
+  if (!hasCredentials) {
     return { ok: false, reason: 'missing_secret' };
   }
 
   return { ok: false, reason: 'unauthorized' };
+}
+
+/** Un motivo de rechazo, traducido a lo que la ruta tiene que contestar. */
+export function describeResultsApiAuthFailure(reason: ResultsApiAuthFailureReason) {
+  switch (reason) {
+    case 'missing_secret':
+      return {
+        status: 500,
+        code: 'missing_secret',
+        message:
+          'Falta crear una API key en Super Admin > Configuracion, o configurar un secret por entorno.',
+      };
+    case 'revoked':
+      return {
+        status: 401,
+        code: 'revoked',
+        message: 'Esa API key esta revocada. Crea una nueva desde Super Admin > Configuracion.',
+      };
+    case 'forbidden_scope':
+      return {
+        status: 403,
+        code: 'forbidden_scope',
+        message: 'La API key no tiene el permiso que pide este endpoint.',
+      };
+    default:
+      return { status: 401, code: 'unauthorized', message: 'Unauthorized' };
+  }
 }
 
 function isMissingColumnLike(error: unknown) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   authorizeResultsApiRequest,
+  describeResultsApiAuthFailure,
   getResultsPublishingPieces,
   parseResultsPublishingPiecesPayload,
   toResultsApiError,
@@ -25,15 +26,8 @@ export async function POST(request: NextRequest) {
   const auth = await authorizeResultsApiRequest(request.headers);
 
   if (!auth.ok) {
-    if (auth.reason === 'missing_secret') {
-      return jsonError(
-        'Falta configurar una API key para resultados en Super Admin > Configuracion o mediante variables de entorno.',
-        500,
-        'missing_secret',
-      );
-    }
-
-    return jsonError('Unauthorized', 401, 'unauthorized');
+    const failure = describeResultsApiAuthFailure(auth.reason);
+    return jsonError(failure.message, failure.status, failure.code);
   }
 
   try {

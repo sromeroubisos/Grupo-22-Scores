@@ -8,6 +8,7 @@
  *
  * Authentication: Bearer {CRON_SECRET} header (set in Vercel env vars)
  */
+import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import { getFlashScoreMatches } from '@/lib/services/flashscore';
 import { getActiveSports } from '@/lib/data/sports';
@@ -24,18 +25,6 @@ export const maxDuration = 60;
 
 const DAYS_AHEAD = 3; // today + 2 ahead
 
-function isAuthorized(request: NextRequest): boolean {
-    const secret = process.env.CRON_SECRET;
-    if (!secret) {
-        if (process.env.NODE_ENV === 'development') {
-            console.warn('[fixture-sync] CRON_SECRET not set — allowing request in development mode');
-            return true;
-        }
-        return false;
-    }
-    const authHeader = request.headers.get('authorization');
-    return authHeader === `Bearer ${secret}`;
-}
 
 /** Build an array of [Date, dateKey] pairs for today through today+DAYS_AHEAD in UTC. */
 function getTargetDates(): { date: Date; dateKey: string }[] {
@@ -50,7 +39,7 @@ function getTargetDates(): { date: Date; dateKey: string }[] {
 }
 
 export async function GET(request: NextRequest) {
-    if (!isAuthorized(request)) {
+    if (!(await authorizeCronRequest(request, 'fixture-sync'))) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

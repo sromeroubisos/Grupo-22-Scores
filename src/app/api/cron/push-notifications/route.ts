@@ -6,6 +6,7 @@
  *
  * Authentication: Bearer {CRON_SECRET} header.
  */
+import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -50,18 +51,6 @@ type LooseSupabaseClient = {
     from: <T = unknown>(table: string) => SupabaseQuery<T>;
 };
 
-function isAuthorized(request: NextRequest): boolean {
-    const secret = process.env.CRON_SECRET;
-    if (!secret) {
-        if (process.env.NODE_ENV === 'development') {
-            console.warn('[push-notifications] CRON_SECRET not set; allowing request in development mode');
-            return true;
-        }
-        return false;
-    }
-
-    return request.headers.get('authorization') === `Bearer ${secret}`;
-}
 
 function isPushSchemaMissing(error: PostgrestError | null | undefined) {
     if (!error) return false;
@@ -107,7 +96,7 @@ async function disableExpiredSubscription(
 }
 
 export async function GET(request: NextRequest) {
-    if (!isAuthorized(request)) {
+    if (!(await authorizeCronRequest(request, 'push-notifications'))) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

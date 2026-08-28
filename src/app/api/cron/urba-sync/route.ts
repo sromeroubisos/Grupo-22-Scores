@@ -90,6 +90,7 @@
  * No se usa `FixtureService.updateMatch`: hace ~15 sondeos de columnas por
  * llamada, y un domingo de 289 partidos son ~4.300 round-trips de más.
  */
+import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { fetchChampionship, fetchChampionshipList, HTTP_FORMA_INESPERADA } from '@/lib/integrations/urba/client';
@@ -132,17 +133,6 @@ const PRESUPUESTO_MS = 48_000;
  */
 const PASO_DE_ROTACION = 11;
 
-function autorizado(request: NextRequest): boolean {
-    const secret = process.env.CRON_SECRET;
-    if (!secret) {
-        if (process.env.NODE_ENV === 'development') {
-            console.warn('[urba-sync] CRON_SECRET sin definir — se permite en desarrollo');
-            return true;
-        }
-        return false;
-    }
-    return request.headers.get('authorization') === `Bearer ${secret}`;
-}
 
 /**
  * Los `schedule` con los que está declarado el barrido en `vercel.json`.
@@ -203,7 +193,7 @@ const diaBA = (iso: string | Date) =>
     }).format(new Date(iso));
 
 export async function GET(request: NextRequest) {
-    if (!autorizado(request)) {
+    if (!(await authorizeCronRequest(request, 'urba-sync'))) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

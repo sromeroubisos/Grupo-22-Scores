@@ -106,11 +106,19 @@ function getConfiguredResultsApiEnvSecrets() {
   );
 }
 
+/**
+ * La tabla no existe todavia.
+ *
+ * Mira SOLO el codigo de error. Antes tambien daba por "falta la migracion"
+ * cualquier mensaje que mencionara `system_api_keys` — el nombre de la tabla
+ * aparece en el texto de toda violacion de constraint—, asi que el panel
+ * mandaba a correr una migracion que ya estaba corrida y tapaba el error real.
+ */
 function isMissingSystemApiKeysTableError(error: unknown) {
   const code = typeof error === 'object' && error !== null && 'code' in error ? String((error as { code?: unknown }).code ?? '') : '';
-  const message = error instanceof Error ? error.message.toLowerCase() : String(error ?? '').toLowerCase();
 
-  return code === '42P01' || message.includes('system_api_keys');
+  // PGRST205: PostgREST no tiene la tabla en su cache de esquema.
+  return code === '42P01' || code === 'PGRST205';
 }
 
 function clearStoredResultsApiKeyCache() {
