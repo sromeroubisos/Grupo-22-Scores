@@ -66,6 +66,7 @@ const RESULTS_ENDPOINTS = [
   { label: 'Piezas publicables', path: '/api/results/pieces', scope: 'results:read' },
   { label: 'Actualizar resultado', path: '/api/results/update', scope: 'results:write' },
   { label: 'Cargar formacion', path: '/api/results/lineups', scope: 'lineups:write' },
+  { label: 'Alta de partido', path: '/api/results/fixtures', scope: 'matches:create' },
 ] as const;
 
 function buildSearchExample() {
@@ -372,13 +373,14 @@ export default function ConfiguracionPage() {
               </div>
               <div style={{ padding: '1rem 1.25rem', display: 'grid', gap: '0.9rem' }}>
                 <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-                  Usa esta URL OpenAPI en la conexion personalizada. Publica seis acciones:
+                  Usa esta URL OpenAPI en la conexion personalizada. Publica siete acciones:
                   <span className={styles.mono}> searchResultsMatch</span>,
                   <span className={styles.mono}> searchResultsTournaments</span>,
                   <span className={styles.mono}> searchResultsMatchesByDate</span>,
                   <span className={styles.mono}> getResultsPublishingPieces</span>,
                   <span className={styles.mono}> updateResultsMatch</span> y
-                  <span className={styles.mono}> setResultsMatchLineups</span>.
+                  <span className={styles.mono}> setResultsMatchLineups</span> y
+                  <span className={styles.mono}> createResultsFixture</span>.
                   Si agregaste la conexion antes, refrescala: el bot solo sabe hacer lo que este schema
                   le declara.
                 </div>

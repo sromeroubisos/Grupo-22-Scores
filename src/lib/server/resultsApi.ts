@@ -187,8 +187,8 @@ export type ResultsApiAuthFailureReason =
   | 'forbidden_scope';
 
 export type ResultsApiAuthResult =
-  | { ok: true; reason?: undefined }
-  | { ok: false; reason: ResultsApiAuthFailureReason };
+  | { ok: true; keyId: string | null; reason?: undefined }
+  | { ok: false; keyId?: undefined; reason: ResultsApiAuthFailureReason };
 
 export class ResultsApiError extends Error {
   status: number;
@@ -636,12 +636,15 @@ export function parseResultsPublishingPiecesPayload(raw: unknown): ResultsPublis
  */
 export async function authorizeResultsApiRequest(
   headers: Headers,
-  scope: Extract<ApiKeyScope, 'results:read' | 'results:write' | 'lineups:write'> = 'results:read',
+  scope: Extract<
+    ApiKeyScope,
+    'results:read' | 'results:write' | 'lineups:write' | 'matches:create'
+  > = 'results:read',
 ): Promise<ResultsApiAuthResult> {
   const verification = await verifyApiKeyRequest(headers, scope, [resultsEnvFallback()]);
 
   if (verification.ok) {
-    return { ok: true };
+    return { ok: true, keyId: verification.keyId };
   }
 
   if (verification.reason === 'revoked') {
@@ -659,7 +662,8 @@ export async function authorizeResultsApiRequest(
   const webhookSecret = headers.get('x-webhook-secret')?.trim() || null;
 
   if (await matchesResultsApiSecretCandidates([bearerToken, apiKey, webhookSecret])) {
-    return { ok: true };
+    // La key heredada no tiene fila, asi que no hay id que atar.
+    return { ok: true, keyId: null };
   }
 
   const hasCredentials =

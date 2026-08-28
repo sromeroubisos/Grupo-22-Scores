@@ -46,6 +46,7 @@ Una key del panel lleva permisos, y el endpoint pide el suyo:
 | `results:read` | `/api/results/search`, `/api/results/tournaments/search`, `/api/results/matches/by-date`, `/api/results/pieces` |
 | `results:write` | `/api/results/update` |
 | `lineups:write` | `/api/results/lineups` |
+| `matches:create` | `/api/results/fixtures` |
 
 Una key de solo lectura que intente actualizar un resultado recibe **403** con
 `code: "forbidden_scope"`; una key revocada recibe **401** con
@@ -443,3 +444,55 @@ poner los quince no necesita nada de eso.
 Rechaza con **400** y la lista de problemas en `details.issues` si hay dos
 capitanes del mismo lado, un numero repetido, un jugador sin nombre o un `id`
 que no es uuid. Si el partido no existe, **404** con `code: "match_not_found"`.
+
+## Alta de partido
+
+`POST /api/results/fixtures`, con permiso `matches:create`. **Va en dos pasos, y
+el primero no crea nada.**
+
+Un bot resolviendo nombres contra el catalogo se equivoca: hay clubes
+duplicados, filiales que se llaman casi igual y torneos homonimos de distintas
+temporadas. Un alta directa deja partidos colgados del torneo equivocado, y
+borrarlos despues es peor que no haberlos creado.
+
+**Paso 1 — pedir el plan.** Sin `confirmation_token`:
+
+```json
+{
+  "tournament": "Top 14",
+  "home_team": "CASI",
+  "away_team": "SIC",
+  "match_date": "2026-09-05",
+  "time": "15:30",
+  "venue": "Cancha 1",
+  "round": "Fecha 5"
+}
+```
+
+Contesta `created: false` con `resolved` (que torneo, que fase, que clubes, con
+que confianza), `warnings` y un `confirmation_token` que vence en 15 minutos.
+
+**Paso 2 — confirmar.** Solo el token, nada mas:
+
+```json
+{ "confirmation_token": "<el del paso 1>" }
+```
+
+Contesta `created: true` con el `match_id`. El token lleva el plan firmado
+adentro: se crea lo que se mostro, no lo que el bot recuerde. Un token vencido,
+retocado o pedido por otra API key se rechaza con 400.
+
+### Cuando corta
+
+| Codigo | Que paso |
+|---|---|
+| `tournament_not_found` (404) | Ningun torneo coincide. Buscar con `searchResultsTournaments`. |
+| `tournament_ambiguous` (409) | Varios torneos con ese nombre. Repetir con `tournament_id`. |
+| `phase_required` (409) | El torneo tiene mas de una fase. Repetir con `phase_id`. |
+| `clubs_unresolved` (409) | Uno de los dos clubes no se identifico con seguridad. En `details.clubs` vienen las alternativas. |
+| `same_club` (409) | Los dos nombres resuelven al mismo club. |
+| `tournament_without_phase` (422) | Hay que crear la fase desde el gestor. |
+
+`possible_duplicate` no corta: llega como aviso en `warnings` cuando ese par ya
+tiene un partido en el torneo dentro de los tres dias. Una ida y vuelta el mismo
+fin de semana es legitima, asi que decide quien confirma.

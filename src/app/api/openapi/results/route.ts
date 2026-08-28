@@ -314,6 +314,88 @@ function buildOpenApiSpec(origin: string) {
           },
         },
       },
+      '/api/results/fixtures': {
+        post: {
+          operationId: 'createResultsFixture',
+          summary: 'Create a match in a tournament (two steps)',
+          description:
+            'TWO STEPS. Call it WITHOUT confirmation_token first: nothing is created, and the answer says which tournament, phase and clubs were resolved, warns about a possible duplicate, and returns a confirmation_token. Show that to the person. Only if they agree, call it again sending ONLY confirmation_token, and the match is created. The token expires in 15 minutes and belongs to the API key that asked for it. Requires the matches:create scope.',
+          security: [{ bearerAuth: [] }],
+          'x-openai-isConsequential': true,
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ResultsFixturePayload',
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description:
+                'Either the resolved plan with a confirmation_token (created: false), or the created match (created: true).',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/ResultsFixtureResponse',
+                  },
+                },
+              },
+            },
+            '400': {
+              description: 'Missing or malformed fields, or an invalid/expired confirmation_token.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ErrorResponse' },
+                },
+              },
+            },
+            '401': {
+              description: 'Unauthorized.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ErrorResponse' },
+                },
+              },
+            },
+            '403': {
+              description: 'The API key does not carry the matches:create scope.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ErrorResponse' },
+                },
+              },
+            },
+            '404': {
+              description: 'No tournament matches that name.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ErrorResponse' },
+                },
+              },
+            },
+            '409': {
+              description:
+                'Something is ambiguous and must be narrowed: several tournaments, several phases, or clubs that could not be identified. details carries the options.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ErrorResponse' },
+                },
+              },
+            },
+            '422': {
+              description: 'The tournament has no phase yet, or the match could not be created.',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/ErrorResponse' },
+                },
+              },
+            },
+          },
+        },
+      },
       '/api/results/lineups': {
         post: {
           operationId: 'setResultsMatchLineups',
@@ -679,6 +761,55 @@ function buildOpenApiSpec(origin: string) {
             warnings: {
               type: 'array',
               items: { type: 'string' },
+            },
+          },
+        },
+        ResultsFixturePayload: {
+          type: 'object',
+          description:
+            'To get a plan: send tournament, home_team, away_team and match_date. To create: send ONLY confirmation_token.',
+          properties: {
+            confirmation_token: {
+              type: 'string',
+              description:
+                'Only on the second call. When present every other field is ignored: what gets created is the plan that was shown.',
+            },
+            tournament: {
+              type: 'string',
+              description: 'Tournament name or uuid. If the name matches several, the answer lists them and asks for tournament_id.',
+            },
+            tournament_id: { type: 'string', description: 'Tournament uuid, to settle an ambiguous name.' },
+            phase_id: {
+              type: 'string',
+              description: 'Only needed when the tournament has more than one phase. The answer lists them.',
+            },
+            home_team: { type: 'string', description: 'Home club name, as people say it.' },
+            away_team: { type: 'string', description: 'Away club name.' },
+            match_date: { type: 'string', description: 'YYYY-MM-DD.' },
+            time: { type: 'string', description: 'HH:mm local. Defaults to 00:00.' },
+            venue: { type: 'string', description: 'Ground. Optional.' },
+            round: { type: 'string', description: 'Round label, e.g. "Fecha 5". Created if it does not exist.' },
+          },
+        },
+        ResultsFixtureResponse: {
+          type: 'object',
+          properties: {
+            ok: { type: 'boolean' },
+            created: {
+              type: 'boolean',
+              description: 'false on the planning step, true once the match exists.',
+            },
+            match_id: { type: 'string', description: 'Only when created is true.' },
+            confirmation_token: { type: 'string', description: 'Only when created is false.' },
+            expires_in_seconds: { type: 'integer' },
+            resolved: {
+              type: 'object',
+              description: 'What was understood. Show this before confirming.',
+            },
+            warnings: {
+              type: 'array',
+              description: 'possible_duplicate when the same pair already has a match within three days.',
+              items: { type: 'object' },
             },
           },
         },

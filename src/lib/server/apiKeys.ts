@@ -33,6 +33,11 @@ export const API_KEY_SCOPES = [
     description: 'Titulares y suplentes de un partido, con numero, puesto y capitan.',
   },
   {
+    id: 'matches:create',
+    label: 'Dar de alta partidos',
+    description: 'Crear un partido en un torneo. Va en dos pasos: primero muestra que entendio, despues crea.',
+  },
+  {
     id: 'matches:ingest',
     label: 'Ingesta de partidos',
     description: 'Webhook de WhatsApp y n8n para dar de alta o corregir partidos.',
