@@ -44,27 +44,22 @@
 }
 
 /*
- * Dos copias idénticas, una atrás de la otra, y el riel se corre exactamente la
- * mitad: cuando la animación reinicia, la segunda copia quedó justo donde
- * estaba la primera y el loop no tiene costura.
+ * Dos copias idénticas, una atrás de la otra: cuando la primera termina de
+ * salir por la izquierda, la segunda está exactamente donde arrancó la primera
+ * y la vuelta no tiene costura.
+ *
+ * El `transform` lo escribe el componente cuadro a cuadro y NO hay `animation`
+ * acá: una animación de CSS necesita que la duración se calcule del ancho, y
+ * recalcularla cuando llega contenido nuevo reubica de golpe un riel que ya
+ * venía corriendo. Ver el comentario largo en TickerTitulares.tsx.
  *
  * `width: max-content` es lo que sostiene todo: sin él las copias se encogen al
- * ancho de la ventana, el 50% deja de ser una copia entera y el salto se ve.
+ * ancho de la ventana y las dos dejan de ser una sola tira.
  */
 .riel {
     display: flex;
     width: max-content;
-    animation: desliza var(--duracion, 30s) linear infinite;
-}
-
-.banner:hover .riel,
-.riel:focus-within {
-    animation-play-state: paused;
-}
-
-@keyframes desliza {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
+    will-change: transform;
 }
 
 .grupo {
@@ -117,14 +112,10 @@
 
 /*
  * Sin movimiento el riel no se congela mostrando un solo titular: la ventana
- * pasa a scrollearse a mano y la copia se esconde, porque duplicada sin animar
- * es contenido repetido.
+ * pasa a scrollearse a mano y la copia se esconde, porque duplicada sin correr
+ * es contenido repetido. El componente además no arranca el bucle de cuadros.
  */
 @media (prefers-reduced-motion: reduce) {
-    .riel {
-        animation: none;
-    }
-
     .ventana {
         overflow-x: auto;
         mask-image: none;

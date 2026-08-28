@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { FavoriteItem } from '@/hooks/useFavorites';
 import { newsPath } from '@/lib/news/newsUrl';
+import { formatDateKey, getTodayKey } from '@/lib/timezone';
 
 import styles from './TickerTitulares.module.css';
 
@@ -31,8 +32,14 @@ const MAX_CLUBES = 3;
 /** Velocidad del deslizado, en píxeles por segundo. */
 const VELOCIDAD = 55;
 
-/** El riel nunca da una vuelta en menos que esto: con dos piezas quedaría frenético. */
-const DURACION_MINIMA = 18;
+/**
+ * Tope del salto de tiempo entre dos cuadros.
+ *
+ * Una pestaña que estuvo en segundo plano vuelve con un `delta` de minutos, y
+ * sin tope el riel pegaría un salto de miles de píxeles en un solo cuadro. Con
+ * él, vuelve caminando desde donde estaba.
+ */
+const SALTO_MAXIMO_S = 0.1;
 
 /**
  * Un partido empezado sigue siendo "el próximo" un rato: el resultado tarda en
@@ -60,7 +67,29 @@ type MatchLike = {
 type NewsLike = {
     id?: string | null;
     title?: string | null;
+    published_at?: string | null;
+    created_at?: string | null;
 };
+
+/**
+ * ¿La nota es de hoy?
+ *
+ * El día se compara por CLAVE en la zona del que mira (`2026-08-27`) y no por
+ * una resta de horas: "hoy" termina a la medianoche de acá, no veinticuatro
+ * horas atrás. Una nota de anoche a las 23 sigue siendo de ayer a las 00:30.
+ *
+ * `published_at` es nullable en la base; `created_at` no. Si la fecha de
+ * publicación falta, manda la de alta, que es lo más parecido que hay.
+ */
+function esDeHoy(fila: NewsLike, timeZone: string, hoy: string): boolean {
+    const cuando = fila.published_at || fila.created_at;
+    if (!cuando) return false;
+
+    const fecha = new Date(cuando);
+    if (Number.isNaN(fecha.getTime())) return false;
+
+    return formatDateKey(fecha, timeZone) === hoy;
+}
 
 /**
  * La clave navegable de un partido. Las filas del archivo ('ra-…') no tienen
@@ -105,14 +134,16 @@ function cuandoJuega(timestamp: number, timeZone: string): string {
     return `${diaSemana} ${diaMes} ${hora}`;
 }
 
-async function traerTitulares(signal: AbortSignal): Promise<Pieza[]> {
+async function traerTitulares(timeZone: string, signal: AbortSignal): Promise<Pieza[]> {
     const res = await fetch('/api/news', { cache: 'no-store', signal });
     if (!res.ok) return [];
 
     const payload = (await res.json()) as { data?: NewsLike[] | null };
     const filas = Array.isArray(payload?.data) ? payload.data : [];
+    const hoy = getTodayKey(timeZone);
 
     return filas
+        .filter((fila) => esDeHoy(fila, timeZone, hoy))
         .filter((fila): fila is { id: string; title: string } => (
             Boolean(fila?.id) && Boolean((fila?.title || '').trim())
         ))
@@ -193,9 +224,33 @@ async function traerPiezasDelClub(
 export default function TickerTitulares({ favorites }: { favorites: FavoriteItem[] }) {
     const [titulares, setTitulares] = useState<Pieza[]>([]);
     const [deClubes, setDeClubes] = useState<Pieza[]>([]);
-    const [duracion, setDuracion] = useState(DURACION_MINIMA);
 
+    const ventanaRef = useRef<HTMLDivElement | null>(null);
+    const rielRef = useRef<HTMLDivElement | null>(null);
     const grupoRef = useRef<HTMLDivElement | null>(null);
+
+    /*
+     * Cuántas copias de la tira hacen falta.
+     *
+     * Dos alcanzan mientras una copia sea más ancha que la ventana. Con un solo
+     * titular del día y ningún club seguido no lo es, y ahí dos copias dejan un
+     * hueco a la derecha durante media vuelta. La cuenta es "las que tapan la
+     * ventana, más una que entra": la vuelta sigue siendo el ancho de UNA copia,
+     * así que agregar copias no cambia el loop.
+     */
+    const [copias, setCopias] = useState(2);
+
+    /*
+     * La posición vive en un ref y NO en el estado, a propósito: es lo único
+     * que garantiza el loop. Cuando llegan los partidos de los clubes —después
+     * que los titulares— el contenido del riel cambia, y con el estado la
+     * animación arrancaba de cero cada vez. Acá el riel sigue exactamente donde
+     * estaba y lo único que cambia es dónde da la vuelta.
+     */
+    const posicionRef = useRef(0);
+
+    /** Se detiene con el mouse encima o con el foco adentro: un link que huye no se clickea. */
+    const detenidoRef = useRef(false);
 
     // La zona horaria del que mira, igual que el selector de días del feed: un
     // partido de las 15:30 de Argentina no son las 15:30 en Madrid.
@@ -212,7 +267,7 @@ export default function TickerTitulares({ favorites }: { favorites: FavoriteItem
     useEffect(() => {
         const controller = new AbortController();
 
-        traerTitulares(controller.signal)
+        traerTitulares(timeZone, controller.signal)
             .then((piezas) => {
                 if (!controller.signal.aborted) setTitulares(piezas);
             })
@@ -221,7 +276,7 @@ export default function TickerTitulares({ favorites }: { favorites: FavoriteItem
             });
 
         return () => controller.abort();
-    }, []);
+    }, [timeZone]);
 
     useEffect(() => {
         if (!clavesDeClubes) {
@@ -259,64 +314,130 @@ export default function TickerTitulares({ favorites }: { favorites: FavoriteItem
     }, [deClubes, titulares]);
 
     /*
-     * La duración se MIDE, no se adivina: el riel tiene que correr siempre a la
-     * misma velocidad, y con una duración fija dos titulares se arrastran y
-     * quince vuelan. Se recalcula cuando cambia el contenido o el ancho.
+     * El riel lo mueve un `requestAnimationFrame`, no una animación de CSS.
+     *
+     * Con CSS la vuelta es un `translateX(-50%)` cuya DURACIÓN hay que calcular
+     * a partir del ancho, y ahí estaba el corte que se veía: los titulares y
+     * los partidos de los clubes llegan en momentos distintos, cada llegada
+     * cambia el ancho, y cambiarle la duración a una animación que ya está
+     * corriendo la reubica de golpe en otro punto del recorrido.
+     *
+     * Acá la vuelta es un módulo sobre el ancho de UNA copia, y el ancho se lee
+     * en cada cuadro: si el contenido cambia, el riel no se entera —sigue en el
+     * mismo píxel— y lo único que se corre es dónde da la vuelta. Un loop que
+     * no se puede cortar, porque no hay nada que reiniciar.
      */
-    useLayoutEffect(() => {
+    useEffect(() => {
+        const riel = rielRef.current;
         const grupo = grupoRef.current;
-        if (!grupo || piezas.length === 0) return;
+        if (!riel || !grupo || piezas.length === 0) return;
 
-        const medir = () => {
-            const ancho = grupo.scrollWidth;
-            if (!ancho) return;
-            setDuracion(Math.max(DURACION_MINIMA, ancho / VELOCIDAD));
+        // Sin movimiento no hay riel que mover: la franja se lee quieta y se
+        // scrollea a mano (ver el bloque de reduced-motion en el CSS).
+        if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
+            riel.style.transform = '';
+            return;
+        }
+
+        // El contenido nuevo puede ser más corto que la posición actual: se
+        // pliega ya para no dejar un hueco hasta la próxima vuelta.
+        const vueltaInicial = grupo.scrollWidth;
+        if (vueltaInicial > 0) posicionRef.current %= vueltaInicial;
+
+        let anterior = 0;
+        let cuadro = 0;
+
+        const paso = (ahora: number) => {
+            cuadro = requestAnimationFrame(paso);
+
+            if (!anterior) {
+                anterior = ahora;
+                return;
+            }
+
+            const delta = Math.min((ahora - anterior) / 1000, SALTO_MAXIMO_S);
+            anterior = ahora;
+
+            if (detenidoRef.current) return;
+
+            const vuelta = grupo.scrollWidth;
+            if (vuelta <= 0) return;
+
+            posicionRef.current = (posicionRef.current + VELOCIDAD * delta) % vuelta;
+            riel.style.transform = `translate3d(${-posicionRef.current}px, 0, 0)`;
         };
 
-        medir();
+        cuadro = requestAnimationFrame(paso);
+        return () => cancelAnimationFrame(cuadro);
+    }, [piezas]);
+
+    useEffect(() => {
+        const grupo = grupoRef.current;
+        const ventana = ventanaRef.current;
+        if (!grupo || !ventana || piezas.length === 0) return;
+
+        const calcular = () => {
+            const unaCopia = grupo.scrollWidth;
+            const aLaVista = ventana.clientWidth;
+            if (unaCopia <= 0 || aLaVista <= 0) return;
+            setCopias(Math.max(2, Math.ceil(aLaVista / unaCopia) + 1));
+        };
+
+        calcular();
 
         if (typeof ResizeObserver === 'undefined') return;
-        const observer = new ResizeObserver(medir);
+        const observer = new ResizeObserver(calcular);
         observer.observe(grupo);
+        observer.observe(ventana);
         return () => observer.disconnect();
     }, [piezas]);
 
+    const detener = useCallback(() => { detenidoRef.current = true; }, []);
+    const soltar = useCallback(() => { detenidoRef.current = false; }, []);
+
     if (piezas.length === 0) return null;
 
-    const dibujarGrupo = (esCopia: boolean) => (
-        <div
-            className={styles.grupo}
-            ref={esCopia ? undefined : grupoRef}
-            aria-hidden={esCopia || undefined}
-        >
-            {piezas.map((pieza) => (
-                <span key={`${esCopia ? 'copia' : 'original'}:${pieza.key}`} className={styles.celda}>
-                    <Link
-                        href={pieza.href}
-                        className={styles.pieza}
-                        // La copia existe para que el loop no tenga costura: no
-                        // se navega ni se tabula por ella.
-                        tabIndex={esCopia ? -1 : undefined}
-                    >
-                        <span className={styles.rotulo}>{pieza.rotulo}</span>
-                        <span className={styles.texto}>{pieza.texto}</span>
-                    </Link>
-                    <span className={styles.separador} aria-hidden="true" />
-                </span>
-            ))}
-        </div>
-    );
+    const dibujarGrupo = (indice: number) => {
+        const esCopia = indice > 0;
+
+        return (
+            <div
+                key={`grupo-${indice}`}
+                className={styles.grupo}
+                ref={esCopia ? undefined : grupoRef}
+                aria-hidden={esCopia || undefined}
+            >
+                {piezas.map((pieza) => (
+                    <span key={`${indice}:${pieza.key}`} className={styles.celda}>
+                        <Link
+                            href={pieza.href}
+                            className={styles.pieza}
+                            // Las copias existen para que el loop no tenga
+                            // costura: no se navega ni se tabula por ellas.
+                            tabIndex={esCopia ? -1 : undefined}
+                        >
+                            <span className={styles.rotulo}>{pieza.rotulo}</span>
+                            <span className={styles.texto}>{pieza.texto}</span>
+                        </Link>
+                        <span className={styles.separador} aria-hidden="true" />
+                    </span>
+                ))}
+            </div>
+        );
+    };
 
     return (
-        <div className={styles.banner}>
+        <div
+            className={styles.banner}
+            onMouseEnter={detener}
+            onMouseLeave={soltar}
+            onFocusCapture={detener}
+            onBlurCapture={soltar}
+        >
             <span className={styles.marca}>G22</span>
-            <div className={styles.ventana}>
-                <div
-                    className={styles.riel}
-                    style={{ ['--duracion' as string]: `${duracion}s` }}
-                >
-                    {dibujarGrupo(false)}
-                    {dibujarGrupo(true)}
+            <div className={styles.ventana} ref={ventanaRef}>
+                <div className={styles.riel} ref={rielRef}>
+                    {Array.from({ length: copias }, (_, indice) => dibujarGrupo(indice))}
                 </div>
             </div>
         </div>
