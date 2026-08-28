@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import styles from '../page.module.css';
+import { ApiKeysPanel } from './ApiKeysPanel';
 import { TelegramBotAuthorizationPanel } from './TelegramBotAuthorizationPanel';
 
 type ResultsApiKeySettings = {
@@ -52,6 +53,20 @@ function formatDateTime(value: string | null) {
     return value;
   }
 }
+
+/**
+ * Los seis endpoints de /api/results, con el permiso que pide cada uno. La
+ * tabla del panel mostraba solo dos: los otros cuatro existian y nadie los
+ * veia desde aca.
+ */
+const RESULTS_ENDPOINTS = [
+  { label: 'Buscar partido', path: '/api/results/search', scope: 'results:read' },
+  { label: 'Buscar torneo', path: '/api/results/tournaments/search', scope: 'results:read' },
+  { label: 'Partidos por fecha', path: '/api/results/matches/by-date', scope: 'results:read' },
+  { label: 'Piezas publicables', path: '/api/results/pieces', scope: 'results:read' },
+  { label: 'Actualizar resultado', path: '/api/results/update', scope: 'results:write' },
+  { label: 'Cargar formacion', path: '/api/results/lineups', scope: 'lineups:write' },
+] as const;
 
 function buildSearchExample() {
   return JSON.stringify(
@@ -185,7 +200,6 @@ export default function ConfiguracionPage() {
   }, []);
 
   const searchEndpoint = `${baseUrl}/api/results/search`;
-  const updateEndpoint = `${baseUrl}/api/results/update`;
   const openApiUrl = `${baseUrl}/api/openapi/results`;
 
   const curlSnippet = useMemo(() => {
@@ -203,7 +217,7 @@ export default function ConfiguracionPage() {
       <header className={styles.header}>
         <div className={styles.headerLeft}>
           <h1 className={styles.pageTitle}>Configuracion del sistema</h1>
-          <p className={styles.pageSubtitle}>API key local para resultados y uso de integraciones externas</p>
+          <p className={styles.pageSubtitle}>API keys de las integraciones y uso de la API de resultados</p>
         </div>
         <div className={styles.headerRight}>
           <button
@@ -233,9 +247,12 @@ export default function ConfiguracionPage() {
           </div>
         ) : null}
 
+        <ApiKeysPanel />
+
         <section className={styles.section}>
           <div className={styles.sectionHeaderRow}>
-            <h2 className={styles.sectionTitle}>Estado de la API key de resultados</h2>
+            <h2 className={styles.sectionTitle}>Key unica de resultados (heredada)</h2>
+            <span className={`${styles.pill} ${styles.pillNeutral}`}>Se conserva por compatibilidad</span>
           </div>
 
           <div className={styles.grid}>
@@ -381,21 +398,22 @@ export default function ConfiguracionPage() {
                 <thead>
                   <tr>
                     <th>Operacion</th>
-                    <th>Metodo</th>
-                    <th>URL</th>
+                    <th>Permiso</th>
+                    <th>URL (POST)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className={styles.tableRow}>
-                    <td>Buscar partido</td>
-                    <td>POST</td>
-                    <td className={styles.mono}>{searchEndpoint}</td>
-                  </tr>
-                  <tr className={styles.tableRow}>
-                    <td>Actualizar resultado</td>
-                    <td>POST</td>
-                    <td className={styles.mono}>{updateEndpoint}</td>
-                  </tr>
+                  {RESULTS_ENDPOINTS.map((endpoint) => (
+                    <tr key={endpoint.path} className={styles.tableRow}>
+                      <td>{endpoint.label}</td>
+                      <td>
+                        <span className={`${styles.pill} ${endpoint.scope === 'results:read' ? styles.pillInfo : styles.pillWarning}`}>
+                          {endpoint.scope}
+                        </span>
+                      </td>
+                      <td className={styles.mono}>{`${baseUrl}${endpoint.path}`}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

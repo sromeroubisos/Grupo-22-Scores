@@ -6,6 +6,7 @@
  *
  * Authentication: Bearer {CRON_SECRET} header (set in Vercel env vars)
  */
+import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import { getFlashScoreLiveMatches } from '@/lib/services/flashscore';
 import { getActiveSports } from '@/lib/data/sports';
@@ -21,22 +22,9 @@ import {
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
-function isAuthorized(request: NextRequest): boolean {
-    const secret = process.env.CRON_SECRET;
-    // Dev bypass: allow unauthenticated requests in development when secret is not set
-    if (!secret) {
-        if (process.env.NODE_ENV === 'development') {
-            console.warn('[live-sync] CRON_SECRET not set — allowing request in development mode');
-            return true;
-        }
-        return false;
-    }
-    const authHeader = request.headers.get('authorization');
-    return authHeader === `Bearer ${secret}`;
-}
 
 export async function GET(request: NextRequest) {
-    if (!isAuthorized(request)) {
+    if (!(await authorizeCronRequest(request, 'live-sync'))) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

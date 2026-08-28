@@ -54,6 +54,7 @@
  * `external_id` = id de equipo de Leverade), NO el nombre: "PWCC" es el primer
  * equipo en Primera y el B en Cuarta.
  */
+import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextResponse } from 'next/server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -105,16 +106,11 @@ const CAMPOS = 'id,date_time,venue,status,score,home_club_id,away_club_id,home_b
   + 'home_bonus_points,away_base_points,away_bonus_points,points_autocalculated,points_override_reason,'
   + 'round_label,external_id,phase_id,season_id';
 
-function autorizado(req: Request): boolean {
-  const secreto = process.env.CRON_SECRET?.trim();
-  if (!secreto) return process.env.NODE_ENV !== 'production';
-  return req.headers.get('authorization') === `Bearer ${secreto}`;
-}
 
 const clave = (s: string) => normalizarNombre(s).replace(/ /g, '');
 
 export async function GET(req: Request) {
-  if (!autorizado(req)) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  if (!(await authorizeCronRequest(req, 'arusa-sync'))) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
   const url = new URL(req.url);
   const enSeco = url.searchParams.get('dry') === '1';

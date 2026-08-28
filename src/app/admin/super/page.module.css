@@ -61,9 +61,18 @@
     text-decoration: none;
 }
 
-.viewSiteBtn:hover {
+.viewSiteBtn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px var(--color-accent-glow);
+}
+
+/* Sin esto el boton deshabilitado se ve identico al habilitado: mismo verde,
+   mismo cursor de mano, y el hover incluso lo levanta. */
+.viewSiteBtn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 /* Content */
@@ -612,9 +621,16 @@
     gap: 8px;
 }
 
-.btn:hover {
+.btn:hover:not(:disabled) {
     background: var(--basalt-600);
     transform: translateY(-2px);
+}
+
+/* Mismo motivo que en .viewSiteBtn: sin esto, "Revocando..." se ve clickeable. */
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .btnPrimary {

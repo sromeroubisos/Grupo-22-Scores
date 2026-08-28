@@ -20,10 +20,15 @@ Ambos usan API key y devuelven JSON consistente para:
 
 ## Autenticacion
 
-La API acepta dos fuentes de autenticacion:
+La API acepta tres fuentes, en este orden:
 
-- una API key generada desde `Super Admin > Configuracion`
-- o una variable de entorno
+1. **Una API key del panel** (`Super Admin > Configuracion > API keys`). Es la
+   recomendada: cada integracion tiene la suya, con nombre, permisos y boton de
+   revocar. En la base queda solo el hash, asi que la key se muestra una unica
+   vez, cuando se crea.
+2. La key unica heredada de `system_api_keys`, que se conserva para no cortar
+   lo que ya estaba configurado.
+3. Una variable de entorno.
 
 Variables soportadas:
 
@@ -31,6 +36,20 @@ Variables soportadas:
 - `MATCH_RESULTS_API_KEY`
 - `WHATSAPP_MATCH_WEBHOOK_SECRET`
 - `N8N_MATCH_WEBHOOK_SECRET`
+
+### Permisos
+
+Una key del panel lleva permisos, y el endpoint pide el suyo:
+
+| Permiso | Endpoints |
+|---|---|
+| `results:read` | `/api/results/search`, `/api/results/tournaments/search`, `/api/results/matches/by-date`, `/api/results/pieces` |
+| `results:write` | `/api/results/update` |
+| `lineups:write` | `/api/results/lineups` |
+
+Una key de solo lectura que intente actualizar un resultado recibe **403** con
+`code: "forbidden_scope"`; una key revocada recibe **401** con
+`code: "revoked"`. Las variables de entorno conceden los dos permisos.
 
 Puedes autenticar con cualquiera de estos headers:
 
@@ -387,3 +406,40 @@ No devuelve un PNG binario renderizado desde servidor.
 6. `POST /api/results/update` con el resultado definitivo.
 7. `POST /api/results/pieces` para obtener captions, WhatsApp text y render payloads listos.
 8. Usar `summary.short` como confirmacion para WhatsApp.
+
+## Cargar formaciones
+
+`POST /api/results/lineups`, con permiso `lineups:write`.
+
+Va aparte de `PATCH /api/matches/[id]` a proposito: aquel pide sesion y ademas
+escribe eventos, reloj y campos del partido. Una integracion que solo tiene que
+poner los quince no necesita nada de eso.
+
+```json
+{
+  "match_id": "<uuid del partido>",
+  "home": {
+    "titulares": [
+      { "numero": 1, "nombre": "Perez" },
+      { "numero": 10, "nombre": "Gomez", "capitan": true }
+    ],
+    "suplentes": [{ "numero": 16, "nombre": "Lopez" }]
+  },
+  "away": [
+    { "number": 1, "name": "Diaz", "role": "starter" },
+    { "number": 16, "name": "Ruiz", "role": "substitute" }
+  ]
+}
+```
+
+- Las claves van en castellano o en ingles (`numero`/`number`, `nombre`/`name`,
+  `capitan`/`isCaptain`, `titulares`/`starters`, `suplentes`/`substitutes`).
+- Un lado se puede mandar como lista plana con `role` en cada jugador, o
+  partido en titulares y suplentes.
+- El `puesto` se deduce del numero de camiseta si no viene (convencion de XV).
+- **El lado que no mandas no se toca.** Mandar solo `home` deja la formacion
+  visitante como estaba.
+
+Rechaza con **400** y la lista de problemas en `details.issues` si hay dos
+capitanes del mismo lado, un numero repetido, un jugador sin nombre o un `id`
+que no es uuid. Si el partido no existe, **404** con `code: "match_not_found"`.

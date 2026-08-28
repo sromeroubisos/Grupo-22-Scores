@@ -15,6 +15,7 @@
  * Llamado por Vercel Cron cada 5 minutos: "*\/5 * * * *"
  * Autenticación: header Bearer {CRON_SECRET}.
  */
+import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import { syncActiveProdeCompetitionsBaseEvents } from '@/lib/server/prodePlay';
 import { refreshStoredProdeScoreboards } from '@/lib/server/prodeScoring';
@@ -22,21 +23,9 @@ import { refreshStoredProdeScoreboards } from '@/lib/server/prodeScoring';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-function isAuthorized(request: NextRequest): boolean {
-    const secret = process.env.CRON_SECRET;
-    if (!secret) {
-        if (process.env.NODE_ENV === 'development') {
-            console.warn('[prode-scoring] CRON_SECRET not set — allowing request in development mode');
-            return true;
-        }
-        return false;
-    }
-    const authHeader = request.headers.get('authorization');
-    return authHeader === `Bearer ${secret}`;
-}
 
 export async function GET(request: NextRequest) {
-    if (!isAuthorized(request)) {
+    if (!(await authorizeCronRequest(request, 'prode-scoring'))) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

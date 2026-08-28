@@ -23,6 +23,7 @@
  * entendido viaja en la respuesta: `omitidos`, `errors`, `seccionesSinTorneo`,
  * `resultadosNoResueltos`.
  */
+import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextResponse } from 'next/server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -66,14 +67,9 @@ const CAMPEONATOS: { slug: string; campeonato: number; externalId?: string }[] =
   { slug: 'torneo-interprovincial-caballeros-2026', campeonato: 244, externalId: 'fedhockeycba:torneo-interprovincial-caballeros-2026' },
 ];
 
-function autorizado(req: Request): boolean {
-  const secreto = process.env.CRON_SECRET?.trim();
-  if (!secreto) return process.env.NODE_ENV !== 'production';
-  return req.headers.get('authorization') === `Bearer ${secreto}`;
-}
 
 export async function GET(req: Request) {
-  if (!autorizado(req)) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  if (!(await authorizeCronRequest(req, 'ahl-sync'))) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
   const url = new URL(req.url);
   const enSeco = url.searchParams.get('dry') === '1';

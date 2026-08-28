@@ -16,27 +16,16 @@
  *
  * Autenticación: header Bearer {CRON_SECRET}.
  */
+import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import { runWeeklyClubRankingUpdate } from '@/lib/server/clubRankings';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-function isAuthorized(request: NextRequest): boolean {
-    const secret = process.env.CRON_SECRET;
-    if (!secret) {
-        if (process.env.NODE_ENV === 'development') {
-            console.warn('[weekly-club-ranking] CRON_SECRET no configurado — se permite en desarrollo');
-            return true;
-        }
-        return false;
-    }
-
-    return request.headers.get('authorization') === `Bearer ${secret}`;
-}
 
 export async function GET(request: NextRequest) {
-    if (!isAuthorized(request)) {
+    if (!(await authorizeCronRequest(request, 'weekly-club-ranking'))) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

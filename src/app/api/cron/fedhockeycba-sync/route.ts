@@ -20,6 +20,7 @@
  * la lección de FlashScore es que un scraper caído que responde "día vacío"
  * es peor que uno que grita.
  */
+import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextResponse } from 'next/server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -47,18 +48,12 @@ const DIAS_POR_DEFECTO = 10;
 /** La división del PDF que alimenta los torneos vinculados (primera). */
 const DIVISION = '1';
 
-function autorizado(req: Request): boolean {
-  const secreto = process.env.CRON_SECRET?.trim();
-  // En dev sin CRON_SECRET pasa, como el resto de los crons.
-  if (!secreto) return process.env.NODE_ENV !== 'production';
-  return req.headers.get('authorization') === `Bearer ${secreto}`;
-}
 
 /** Los boletines son administrativos (sanciones) pero ADJUNTAN el fixture semanal. */
 const esPostDeBoletin = (p: WpPost) => /BOLET[ÍI]N/i.test(p.titulo);
 
 export async function GET(req: Request) {
-  if (!autorizado(req)) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  if (!(await authorizeCronRequest(req, 'fedhockeycba-sync'))) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
   const url = new URL(req.url);
   const enSeco = url.searchParams.get('dry') === '1';

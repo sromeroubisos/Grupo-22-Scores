@@ -10,6 +10,8 @@ import { isTournamentSyncLocked, TOURNAMENT_SYNC_LOCKED_MESSAGE } from '@/lib/se
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isUuid } from '@/lib/utils/postgrest';
 import { traceEditRoute, markEditTrace } from '@/lib/perf/editTrace';
+import { hasAnyCredentialFor, verifyApiKeyRequest } from '@/lib/server/apiKeys';
+import { matchIngestEnvFallback } from '@/lib/server/apiKeyFallbacks';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -175,22 +177,33 @@ function resolveRequestPayload(rawBody: unknown): MatchWebhookRequest {
   };
 }
 
-function getWebhookSecret() {
-  return process.env.WHATSAPP_MATCH_WEBHOOK_SECRET || process.env.N8N_MATCH_WEBHOOK_SECRET || null;
-}
+/**
+ * Autentica el webhook contra el sistema de API keys (permiso
+ * `matches:ingest`), y si no engancha cae en los secrets por entorno que ya
+ * estaban configurados.
+ *
+ * Antes comparaba el secreto con `===`, que corta en el primer byte distinto:
+ * ahora la comparacion es por hash, dentro de `verifyApiKeyRequest`.
+ */
+async function isAuthorized(request: NextRequest) {
+  const verification = await verifyApiKeyRequest(request.headers, 'matches:ingest', [
+    matchIngestEnvFallback(),
+  ]);
 
-function isAuthorized(request: NextRequest) {
-  const secret = getWebhookSecret();
-  if (!secret) {
-    return { ok: false as const, reason: 'missing_secret' as const };
+  if (verification.ok) {
+    return { ok: true as const };
   }
 
-  const authHeader = request.headers.get('authorization');
-  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
-  const headerSecret = request.headers.get('x-webhook-secret');
+  if (verification.reason === 'revoked') {
+    return { ok: false as const, reason: 'revoked' as const };
+  }
 
-  if (bearerToken === secret || headerSecret === secret) {
-    return { ok: true as const };
+  if (verification.reason === 'forbidden_scope') {
+    return { ok: false as const, reason: 'forbidden_scope' as const };
+  }
+
+  if (!(await hasAnyCredentialFor('matches:ingest', [matchIngestEnvFallback()]))) {
+    return { ok: false as const, reason: 'missing_secret' as const };
   }
 
   return { ok: false as const, reason: 'unauthorized' as const };
@@ -332,10 +345,21 @@ export async function POST(request: NextRequest) {
 
 async function handleWhatsappMatchPost(request: NextRequest): Promise<Response> {
   markEditTrace({ responseBeforeDerived: false });
-  const auth = isAuthorized(request);
+  const auth = await isAuthorized(request);
   if (!auth.ok) {
     if (auth.reason === 'missing_secret') {
-      return jsonError('Falta configurar WHATSAPP_MATCH_WEBHOOK_SECRET o N8N_MATCH_WEBHOOK_SECRET.', 500);
+      return jsonError(
+        'Falta crear una API key con permiso de ingesta en Super Admin > Configuracion, o configurar WHATSAPP_MATCH_WEBHOOK_SECRET / N8N_MATCH_WEBHOOK_SECRET.',
+        500,
+      );
+    }
+
+    if (auth.reason === 'revoked') {
+      return jsonError('Esa API key esta revocada.', 401);
+    }
+
+    if (auth.reason === 'forbidden_scope') {
+      return jsonError('La API key no tiene permiso de ingesta de partidos.', 403);
     }
 
     return jsonError('Unauthorized', 401);

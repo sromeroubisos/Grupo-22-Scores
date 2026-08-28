@@ -16,27 +16,16 @@
  * Llamado por Vercel Cron cada 2 minutos. Autenticacion: header Bearer {CRON_SECRET}.
  * Ver [[perf_edit_bottleneck_rootcause]].
  */
+import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import { rebuildStaleClubRankings } from '@/lib/server/clubRankings';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-function isAuthorized(request: NextRequest): boolean {
-    const secret = process.env.CRON_SECRET;
-    if (!secret) {
-        if (process.env.NODE_ENV === 'development') {
-            console.warn('[rebuild-stale-rankings] CRON_SECRET not set — allowing request in development mode');
-            return true;
-        }
-        return false;
-    }
-    const authHeader = request.headers.get('authorization');
-    return authHeader === `Bearer ${secret}`;
-}
 
 export async function GET(request: NextRequest) {
-    if (!isAuthorized(request)) {
+    if (!(await authorizeCronRequest(request, 'rebuild-stale-rankings'))) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
