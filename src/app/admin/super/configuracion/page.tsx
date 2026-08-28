@@ -372,10 +372,15 @@ export default function ConfiguracionPage() {
               </div>
               <div style={{ padding: '1rem 1.25rem', display: 'grid', gap: '0.9rem' }}>
                 <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-                  Usa esta URL OpenAPI en la conexion personalizada para que publique las acciones
-                  <span className={styles.mono}> searchResultsMatch </span>
-                  y
-                  <span className={styles.mono}> updateResultsMatch</span>.
+                  Usa esta URL OpenAPI en la conexion personalizada. Publica seis acciones:
+                  <span className={styles.mono}> searchResultsMatch</span>,
+                  <span className={styles.mono}> searchResultsTournaments</span>,
+                  <span className={styles.mono}> searchResultsMatchesByDate</span>,
+                  <span className={styles.mono}> getResultsPublishingPieces</span>,
+                  <span className={styles.mono}> updateResultsMatch</span> y
+                  <span className={styles.mono}> setResultsMatchLineups</span>.
+                  Si agregaste la conexion antes, refrescala: el bot solo sabe hacer lo que este schema
+                  le declara.
                 </div>
                 <div className={styles.mono}>{openApiUrl}</div>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>

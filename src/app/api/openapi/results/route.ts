@@ -314,6 +314,78 @@ function buildOpenApiSpec(origin: string) {
           },
         },
       },
+      '/api/results/lineups': {
+        post: {
+          operationId: 'setResultsMatchLineups',
+          summary: 'Load the lineups of a match',
+          description:
+            'Loads starters and substitutes for one or both sides of a match. The side that is not sent is left untouched, so sending only "home" keeps the away lineup as it was. Requires the lineups:write scope.',
+          security: [{ bearerAuth: [] }],
+          'x-openai-isConsequential': true,
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ResultsLineupsPayload',
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Lineups stored.',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/ResultsLineupsResponse',
+                  },
+                },
+              },
+            },
+            '400': {
+              description: 'Invalid lineup: missing name, repeated shirt number or two captains on the same side. The offending items come back in details.issues.',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/ErrorResponse',
+                  },
+                },
+              },
+            },
+            '401': {
+              description: 'Unauthorized.',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/ErrorResponse',
+                  },
+                },
+              },
+            },
+            '403': {
+              description: 'The API key does not carry the lineups:write scope.',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/ErrorResponse',
+                  },
+                },
+              },
+            },
+            '404': {
+              description: 'Match not found.',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/ErrorResponse',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
     components: {
       securitySchemes: {
@@ -607,6 +679,71 @@ function buildOpenApiSpec(origin: string) {
             warnings: {
               type: 'array',
               items: { type: 'string' },
+            },
+          },
+        },
+        ResultsLineupPlayer: {
+          type: 'object',
+          required: ['name'],
+          properties: {
+            name: { type: 'string', description: 'Player name. Required.' },
+            number: { type: 'integer', description: 'Shirt number. Fills in the position when position is omitted.' },
+            position: { type: 'string', description: 'Position. Derived from the shirt number when omitted.' },
+            role: {
+              type: 'string',
+              enum: ['starter', 'substitute'],
+              description: 'Only needed when the side is sent as a flat list.',
+            },
+            isCaptain: { type: 'boolean', description: 'At most one per side.' },
+            id: { type: 'string', description: 'Player uuid, when it is known.' },
+          },
+        },
+        ResultsLineupSide: {
+          description:
+            'One side. Either a flat list of players carrying role, or an object with starters and substitutes.',
+          oneOf: [
+            {
+              type: 'array',
+              items: { $ref: '#/components/schemas/ResultsLineupPlayer' },
+            },
+            {
+              type: 'object',
+              properties: {
+                starters: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/ResultsLineupPlayer' },
+                },
+                substitutes: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/ResultsLineupPlayer' },
+                },
+              },
+            },
+          ],
+        },
+        ResultsLineupsPayload: {
+          type: 'object',
+          required: ['match_id'],
+          description:
+            'At least one of home or away must be present. The side that is omitted is left untouched.',
+          properties: {
+            match_id: { type: 'string', description: 'Match uuid. Get it from searchResultsMatch.' },
+            home: { $ref: '#/components/schemas/ResultsLineupSide' },
+            away: { $ref: '#/components/schemas/ResultsLineupSide' },
+          },
+        },
+        ResultsLineupsResponse: {
+          type: 'object',
+          properties: {
+            ok: { type: 'boolean' },
+            match_id: { type: 'string' },
+            persisted: {
+              type: 'object',
+              description: 'How many players were stored per side. null means the side was not sent.',
+              properties: {
+                home: { type: 'integer', nullable: true },
+                away: { type: 'integer', nullable: true },
+              },
             },
           },
         },
