@@ -702,14 +702,33 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string, en
 }
 
 // Muchos escudos estan guardados a 600-1080 px y se pintan en chips de 18-42 px:
-// un ranking de 20 filas bajaba 2,6 MB para dibujar miniaturas. `w` es opcional,
-// asi que ningun llamador existente cambia de comportamiento; el ancho entra en
+// un ranking de 20 filas bajaba 2,6 MB para dibujar miniaturas. El ancho entra en
 // la URL, o sea que tambien diferencia la entrada de cache del navegador y el CDN.
 const MAX_PROXY_WIDTH = 512;
 
+// El ancho dejo de ser opcional de hecho. Pedir `w` alcanzaba mientras el unico que
+// lo pidiera fuera `TeamLogo`, pero unas treinta pantallas dibujan el escudo con un
+// `<img src={club.logo_url}>` pelado y no pasan por ahi. La peor es el catalogo de
+// clubes: ~500 escudos en el DOM sin virtualizar, cada uno servido a su resolucion
+// original. Medido con scroll hasta el fondo, el bitmap trepaba de 20 MB a 280 MB
+// con el heap JS clavado en 19 MB — de ahi el "Out of Memory" del navegador SIN un
+// solo error en consola, porque la memoria de una imagen decodificada no es heap y
+// no la ve el recolector.
+//
+// El tope va aca y no en cada llamador porque es lo unico que los cubre a todos de
+// una, y porque es el lugar honesto: nadie que consuma este endpoint dibuja un
+// escudo grande. El mayor que pinta la UI publica mide 63 px, asi que 320 le deja
+// aire hasta a una pantalla 3x y igual baja un escudo de 1200 px de 5,5 MB a 0,4 MB.
+const DEFAULT_PROXY_WIDTH = 320;
+
 function parseRequestedWidth(url: URL): number {
     const raw = Number(url.searchParams.get('w'));
-    if (!Number.isFinite(raw) || raw <= 0) return 0;
+    if (!Number.isFinite(raw) || raw <= 0) {
+        // `fallback` es la unica puerta por la que entra algo que no es un escudo: el
+        // export la usa para traerse cualquier imagen externa, incluida una foto de
+        // fondo a sangre. Esa no se toca; el que quiera achicarla que pida `w`.
+        return url.searchParams.has('fallback') ? 0 : DEFAULT_PROXY_WIDTH;
+    }
     // Topeado para que nadie use el endpoint como redimensionador generico.
     return Math.min(MAX_PROXY_WIDTH, Math.round(raw));
 }

@@ -21,7 +21,12 @@
 import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { Trophy, ChevronRight } from 'lucide-react';
-import ExportImage, { type StandingsData } from '@/components/ExportImage';
+import dynamic from 'next/dynamic';
+import { type StandingsData } from '@/components/ExportImage';
+
+// El tipo se borra al compilar; el componente son ~900 KB que solo hacen falta si
+// alguien abre el modal, asi que entra en diferido como en el resto de las rutas.
+const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
 import styles from './page.module.css';
 
 export type ChampionRef = { id: string; name: string; logo: string | null };

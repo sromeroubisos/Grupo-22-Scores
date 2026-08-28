@@ -5762,6 +5762,17 @@ function getTournamentLogoImageSource(data: TournamentLogoSourceData): string {
 // Un escudo se pide UNA vez por sesion. Sin esto cada pasada del preview volvia a crear
 // un <img> por escudo y a esperar su decodificacion; con el modal abierto y veinte
 // filas en la tabla, eso era lo que se sentia como "trabado".
+//
+// Pero "una vez por sesion" no puede ser "para siempre": cada entrada retiene un
+// HTMLImageElement decodificado, y ese bitmap no es heap de JS, asi que el recolector
+// no lo cuenta ni lo suelta mientras el Map lo referencie. Exportando en tanda —un
+// palmares, un ranking, la tabla de varios torneos— se juntaban cientos de escudos
+// vivos y la pestaña se quedaba sin memoria de imagenes, que es la misma forma en que
+// moria el catalogo de clubes.
+//
+// 120 entradas alcanzan de sobra para la placa mas poblada (una tabla de 20 equipos
+// mas escudos de torneo y marcas) y le ponen techo a la sesion.
+const EXPORT_IMAGE_CACHE_LIMIT = 120;
 const exportImageCache = new Map<string, Promise<HTMLImageElement | null>>();
 
 // Ancho que se le pide al proxy para escudos y logos: el mas grande que dibuja una
@@ -5792,7 +5803,14 @@ export async function loadImage(url: string): Promise<HTMLImageElement | null> {
         .map(withExportCrestWidth);
     const cacheKey = sources[0];
     const cached = exportImageCache.get(cacheKey);
-    if (cached) return cached;
+    if (cached) {
+        // Volver a insertarlo lo deja ultimo en el orden del Map, o sea el mas
+        // reciente. Sin esto el recorte de abajo seria por antiguedad de carga y
+        // tiraria justo el escudo que se redibuja en cada pasada del preview.
+        exportImageCache.delete(cacheKey);
+        exportImageCache.set(cacheKey, cached);
+        return cached;
+    }
 
     const pending = loadImageFromSources(sources).then((image) => {
         // Un fallo (timeout, 404 transitorio) no queda pegado: la proxima pasada reintenta.
@@ -5800,6 +5818,15 @@ export async function loadImage(url: string): Promise<HTMLImageElement | null> {
         return image;
     });
     exportImageCache.set(cacheKey, pending);
+
+    // Un Map recorre en orden de insercion, asi que la primera clave es la que hace
+    // mas que nadie la pidio: se suelta esa y con ella su bitmap.
+    while (exportImageCache.size > EXPORT_IMAGE_CACHE_LIMIT) {
+        const masVieja = exportImageCache.keys().next().value;
+        if (masVieja === undefined || masVieja === cacheKey) break;
+        exportImageCache.delete(masVieja);
+    }
+
     return pending;
 }
 

@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 import { getTournamentById } from '@/lib/data/tournaments';
 import { AlertTriangle, ArrowLeft, Calendar, Trophy, Users, ChevronRight, Share2, MapPin } from 'lucide-react';
-import ExportImage from '@/components/ExportImage';
+import dynamic from 'next/dynamic';
 import { useFavorites } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { setCachedLogo } from '@/lib/utils/logoCache';
@@ -40,6 +40,11 @@ import {
     getPlayoffTeamsCount,
     resolvePlayoffStagesForTeams,
 } from '@/lib/utils/playoffStages';
+
+// ExportImage son ~900 KB de fuente. Las otras nueve rutas que exportan ya lo traen
+// en diferido; esta ruta y sus dos paneles lo importaban estatico, asi que la ficha
+// de torneo parseaba el modal entero al abrirse, exporte alguien o no.
+const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
 
 // Tabs
 const BASE_TABS = [

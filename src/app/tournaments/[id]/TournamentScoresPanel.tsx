@@ -2,7 +2,12 @@
 
 import React, { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
-import ExportImage, { type TeamOfWeekData, type TeamOfWeekPlayerData } from '@/components/ExportImage';
+import dynamic from 'next/dynamic';
+import { type TeamOfWeekData, type TeamOfWeekPlayerData } from '@/components/ExportImage';
+
+// Los tipos se borran al compilar; el componente son ~900 KB que solo hacen falta si
+// alguien abre el modal, asi que entra en diferido como en el resto de las rutas.
+const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
 import styles from './TournamentScoresPanel.module.css';
 
 type ScoresSubTab = 'scores' | 'team-of-round' | 'history';
