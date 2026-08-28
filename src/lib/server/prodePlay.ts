@@ -21,7 +21,7 @@ import type {
 import type { Tournament } from '@/lib/types';
 
 type AnyRow = Record<string, unknown>;
-type QueryError = { message?: string | null } | null;
+type QueryError = { message?: string | null; code?: string | null } | null;
 
 type QueryResult = { data: AnyRow[] | null; error: QueryError };
 type MaybeSingleResult = { data: AnyRow | null; error: QueryError };
@@ -47,9 +47,13 @@ interface LooseMutationClient {
         select(columns: string): LooseQueryBuilder;
         insert(payload: AnyRow | AnyRow[]): LooseMutationBuilder;
         update(payload: AnyRow): LooseMutationBuilder;
-        // `ignoreDuplicates` es lo que traduce a `resolution=ignore-duplicates`,
-        // o sea a un ON CONFLICT DO NOTHING sin target: el único que sabe
-        // resolver contra un índice único PARCIAL.
+        // OJO con `ignoreDuplicates`: NO alcanza por sí solo. Traduce a
+        // `Prefer: resolution=ignore-duplicates`, pero PostgREST sólo emite un
+        // ON CONFLICT cuando además hay `on_conflict` en la URL; sin target, la
+        // preferencia se ignora y sale un INSERT pelado. Se vio en los logs del
+        // 28/8: `POST /rest/v1/prode_events?columns=...` sin `on_conflict`,
+        // respondiendo 409 con 23505. Para arbitrar hace falta un índice único
+        // TOTAL nombrado (acá, `id`); los parciales no se pueden targetear.
         upsert(
             payload: AnyRow | AnyRow[],
             options?: { onConflict?: string; ignoreDuplicates?: boolean },
@@ -1179,6 +1183,213 @@ async function getFlashscoreExternalBaseMatches(
     }).filter((row) => Boolean(row.externalMatchId && row.startsAt));
 }
 
+type EventKind = 'local' | 'external';
+
+/**
+ * Cuántas filas de `prode_events` entran en cada request de escritura.
+ *
+ * La versión anterior mandaba un PATCH por partido: en la corrida del cron de
+ * las 12:20 del 28/8 fueron 839 requests en 4,3 segundos (~195/s), y esa ráfaga
+ * se repetía cada cinco minutos. Con lotes de 200 la misma corrida entra en un
+ * puñado de requests.
+ */
+const EVENT_WRITE_CHUNK_SIZE = 200;
+
+function chunkRows(rows: AnyRow[], size: number): AnyRow[][] {
+    const chunks: AnyRow[][] = [];
+    for (let index = 0; index < rows.length; index += size) {
+        chunks.push(rows.slice(index, index + size));
+    }
+    return chunks;
+}
+
+function eventKeyOf(kind: EventKind, row: AnyRow): string | null {
+    if (kind === 'local') {
+        return toNullableString(row.local_match_id);
+    }
+
+    const provider = toNullableString(row.external_provider);
+    const matchId = toNullableString(row.external_match_id);
+    return provider && matchId ? `${provider}:${matchId}` : null;
+}
+
+/**
+ * Deduplica por clave natural conservando la última aparición. Dos filas con la
+ * misma clave dentro de UNA sentencia hacen que Postgres aborte con "ON CONFLICT
+ * DO UPDATE command cannot affect row a second time", así que el lote tiene que
+ * llegar limpio: al lotear, lo que antes eran dos requests independientes que se
+ * pisaban sin ruido ahora sería un error.
+ */
+function dedupeEventRows(kind: EventKind, rows: AnyRow[]): AnyRow[] {
+    const byKey = new Map<string, AnyRow>();
+    for (const row of rows) {
+        const key = eventKeyOf(kind, row);
+        if (key) {
+            byKey.set(key, row);
+        }
+    }
+    return Array.from(byKey.values());
+}
+
+function isUniqueViolation(error: QueryError) {
+    if (error?.code === '23505') {
+        return true;
+    }
+    return (error?.message || '').includes('duplicate key value');
+}
+
+async function loadExistingEventIds(admin: LooseMutationClient, competitionId: string) {
+    const result = await admin
+        .from('prode_events')
+        .select('id, local_match_id, external_provider, external_match_id')
+        .eq('competition_id', competitionId);
+
+    if (result.error) {
+        throw new Error(result.error.message || 'No se pudieron cargar los eventos existentes del prode.');
+    }
+
+    const local = new Map<string, string>();
+    const external = new Map<string, string>();
+
+    for (const row of result.data || []) {
+        const existingId = toSafeString(row.id);
+        if (!existingId) continue;
+
+        const localKey = eventKeyOf('local', row);
+        if (localKey) {
+            local.set(localKey, existingId);
+        }
+
+        const externalKey = eventKeyOf('external', row);
+        if (externalKey) {
+            external.set(externalKey, existingId);
+        }
+    }
+
+    return { local, external };
+}
+
+/**
+ * Actualiza en lote por clave primaria.
+ *
+ * `id` es un índice único TOTAL, no parcial: a diferencia de
+ * `idx_prode_events_unique_local` / `_external`, sí puede arbitrar un
+ * ON CONFLICT, así que acá el `onConflict` va nombrado y el upsert se comporta
+ * como un UPDATE masivo. Las columnas que no viajan en el payload (`created_at`,
+ * las que escribe el scoring) quedan intactas: el SET sólo alcanza a las que
+ * entran en la sentencia.
+ */
+async function updateEventsById(admin: LooseMutationClient, rows: AnyRow[]) {
+    for (const batch of chunkRows(rows, EVENT_WRITE_CHUNK_SIZE)) {
+        const result = await admin.from('prode_events').upsert(batch, { onConflict: 'id' });
+        if (result.error) {
+            throw new Error(result.error.message || 'No se pudieron sincronizar los partidos del prode.');
+        }
+    }
+}
+
+/**
+ * Inserta los eventos nuevos y devuelve los que chocaron contra un índice único.
+ *
+ * Va sin `onConflict`, y no es un olvido: los dos índices que protegen la tabla
+ * son PARCIALES (`idx_prode_events_unique_local` ... WHERE local_match_id IS NOT
+ * NULL, e `idx_prode_events_unique_external` ... WHERE external_match_id IS NOT
+ * NULL), y un índice parcial sólo puede arbitrar un ON CONFLICT si la sentencia
+ * repite su WHERE — cosa que PostgREST no emite. Nombrar las columnas hacía que
+ * Postgres rechazara el target con 42P10.
+ *
+ * Y tampoco alcanza con `ignoreDuplicates`, que es lo que había antes: sin
+ * `on_conflict` en la URL, PostgREST ignora `resolution=ignore-duplicates` y
+ * manda un INSERT pelado. Medido en los logs del 28/8: ~22 violaciones de
+ * `idx_prode_events_unique_local` por hora, cada una tirando el error hacia
+ * arriba y cortando el sync de esa competencia a mitad de camino. Por eso el
+ * choque se devuelve en vez de lanzarse: quien llama lo resuelve releyendo.
+ */
+async function insertNewEvents(admin: LooseMutationClient, rows: AnyRow[]): Promise<AnyRow[]> {
+    const collided: AnyRow[] = [];
+
+    for (const batch of chunkRows(rows, EVENT_WRITE_CHUNK_SIZE)) {
+        const result = await admin.from('prode_events').insert(batch);
+        if (!result.error) continue;
+
+        if (!isUniqueViolation(result.error)) {
+            throw new Error(result.error.message || 'No se pudieron sincronizar los partidos del prode.');
+        }
+
+        collided.push(...batch);
+    }
+
+    return collided;
+}
+
+/**
+ * Escribe los eventos de una familia (local o externa) y devuelve si quedó todo
+ * persistido. Un `false` significa "no marques el sync como fresco": la próxima
+ * corrida lo retoma, en vez de dar por buena una sincronización a medias.
+ */
+export async function writeCompetitionEvents(
+    admin: LooseMutationClient,
+    competitionId: string,
+    kind: EventKind,
+    payloads: AnyRow[],
+    existingIds: Map<string, string>,
+): Promise<boolean> {
+    const rows = dedupeEventRows(kind, payloads);
+    if (!rows.length) {
+        return true;
+    }
+
+    const updates: AnyRow[] = [];
+    const inserts: AnyRow[] = [];
+
+    for (const payload of rows) {
+        const key = eventKeyOf(kind, payload);
+        const existingId = key ? existingIds.get(key) : undefined;
+        if (existingId) {
+            updates.push({ ...payload, id: existingId });
+        } else {
+            inserts.push(payload);
+        }
+    }
+
+    await updateEventsById(admin, updates);
+
+    const collided = await insertNewEvents(admin, inserts);
+    if (!collided.length) {
+        return true;
+    }
+
+    // Carrera: otro sync (el cron y el render de /prode/[slug] corren en
+    // paralelo) creó estas filas entre nuestra lectura y nuestra escritura.
+    // Releemos los ids y las mandamos por la rama de update.
+    const refreshed = await loadExistingEventIds(admin, competitionId);
+    const refreshedIds = kind === 'local' ? refreshed.local : refreshed.external;
+
+    const recovered: AnyRow[] = [];
+    let unresolved = 0;
+
+    for (const row of collided) {
+        const key = eventKeyOf(kind, row);
+        const existingId = key ? refreshedIds.get(key) : undefined;
+        if (existingId) {
+            recovered.push({ ...row, id: existingId });
+        } else {
+            unresolved += 1;
+        }
+    }
+
+    await updateEventsById(admin, recovered);
+
+    if (unresolved) {
+        console.error(
+            `[prode/sync] ${unresolved} evento(s) ${kind} de la competencia ${competitionId} chocaron contra un índice único sin fila visible; se reintentan en la próxima corrida.`,
+        );
+        return false;
+    }
+
+    return true;
+}
+
 async function syncCompetitionBaseEvents(admin: LooseMutationClient, competitionRow: AnyRow) {
     const competitionId = toSafeString(competitionRow.id);
     if (!competitionId) {
@@ -1224,32 +1435,7 @@ async function syncCompetitionBaseEvents(admin: LooseMutationClient, competition
             return;
         }
 
-        const existingEventsResult = await admin
-            .from('prode_events')
-            .select('id, local_match_id, external_provider, external_match_id')
-            .eq('competition_id', competitionId);
-
-        if (existingEventsResult.error) {
-            throw new Error(existingEventsResult.error.message || 'No se pudieron cargar los eventos existentes del prode.');
-        }
-
-        const existingLocalEventIds = new Map<string, string>();
-        const existingExternalEventIds = new Map<string, string>();
-
-        for (const row of existingEventsResult.data || []) {
-            const existingId = toSafeString(row.id);
-            const localMatchId = toNullableString(row.local_match_id);
-            const externalProvider = toNullableString(row.external_provider);
-            const externalMatchId = toNullableString(row.external_match_id);
-
-            if (existingId && localMatchId) {
-                existingLocalEventIds.set(localMatchId, existingId);
-            }
-
-            if (existingId && externalProvider && externalMatchId) {
-                existingExternalEventIds.set(`${externalProvider}:${externalMatchId}`, existingId);
-            }
-        }
+        const existingEventIds = await loadExistingEventIds(admin, competitionId);
 
         const localPayloads = baseMatches
             .filter((row) => row.sourceType === 'local' && row.localMatchId)
@@ -1286,84 +1472,36 @@ async function syncCompetitionBaseEvents(admin: LooseMutationClient, competition
                 match_snapshot: row.matchSnapshot,
             }));
 
-        const inserts: AnyRow[] = [];
-        const updates: Array<{ id: string; payload: AnyRow }> = [];
-
-        for (const payload of localPayloads) {
-            const localMatchId = toNullableString(payload.local_match_id);
-            if (!localMatchId) continue;
-
-            const existingEventId = existingLocalEventIds.get(localMatchId);
-            if (existingEventId) {
-                updates.push({ id: existingEventId, payload });
-            } else {
-                inserts.push(payload);
-            }
-        }
-
-        for (const payload of externalPayloads) {
-            const externalProvider = toNullableString(payload.external_provider);
-            const externalMatchId = toNullableString(payload.external_match_id);
-            if (!externalProvider || !externalMatchId) continue;
-
-            const existingEventId = existingExternalEventIds.get(`${externalProvider}:${externalMatchId}`);
-            if (existingEventId) {
-                updates.push({ id: existingEventId, payload });
-            } else {
-                inserts.push(payload);
-            }
-        }
-
-        if (!inserts.length && !updates.length) {
+        if (!localPayloads.length && !externalPayloads.length) {
             eventSyncCompletedAt.set(competitionId, Date.now());
             return;
         }
 
-        const operations: Array<PromiseLike<MutationResult>> = [];
+        // Las dos familias se escriben por separado a propósito: comparten tabla
+        // pero no columnas (la local trae `local_match_id`, la externa
+        // `external_provider`/`external_match_id`), y un lote de PostgREST tiene
+        // que ser homogéneo. Secuencial y no en paralelo: el pool de la base es
+        // lo que estamos cuidando.
+        const localComplete = await writeCompetitionEvents(
+            admin,
+            competitionId,
+            'local',
+            localPayloads,
+            existingEventIds.local,
+        );
 
-        if (inserts.length) {
-            // Upsert en vez de insert: dos syncs concurrentes podían insertar el
-            // mismo evento dos veces.
-            //
-            // Va SIN `onConflict`, y no es un olvido. Los dos índices que
-            // protegen esta tabla son PARCIALES
-            // (idx_prode_events_unique_external ... WHERE external_match_id IS
-            // NOT NULL, e idx_prode_events_unique_local ... WHERE
-            // local_match_id IS NOT NULL), y un índice parcial sólo puede
-            // arbitrar un ON CONFLICT si la sentencia repite su WHERE — cosa
-            // que PostgREST no emite. Nombrar las columnas hacía que Postgres
-            // rechazara el target con 42P10 y que este sync fallara entero:
-            // acá no hay fallback, el error sube y corta la sincronización.
-            //
-            // Sin target, Postgres resuelve contra CUALQUIER índice único, así
-            // que además cubre las dos carreras y no sólo la externa: `inserts`
-            // trae eventos locales y externos mezclados, y el onConflict
-            // anterior sólo nombraba la clave externa.
-            //
-            // DO NOTHING es lo que corresponde: una fila llega acá porque no
-            // existía cuando se leyó. Si existe al escribir, la creó otro sync
-            // recién y no hay nada que pisar — el próximo pasa por la rama de
-            // update.
-            operations.push(
-                admin.from('prode_events').upsert(inserts, { ignoreDuplicates: true }),
-            );
+        const externalComplete = await writeCompetitionEvents(
+            admin,
+            competitionId,
+            'external',
+            externalPayloads,
+            existingEventIds.external,
+        );
+
+        if (!localComplete || !externalComplete) {
+            return;
         }
 
-        for (const updateOperation of updates) {
-            operations.push(
-                admin
-                    .from('prode_events')
-                    .update(updateOperation.payload)
-                    .eq('id', updateOperation.id),
-            );
-        }
-
-        const results = await Promise.all(operations);
-        const failedOperation = results.find((result) => result.error);
-
-        if (failedOperation?.error) {
-            throw new Error(failedOperation.error.message || 'No se pudieron sincronizar los partidos del prode.');
-        }
         eventSyncCompletedAt.set(competitionId, Date.now());
     })().finally(() => {
         eventSyncInFlight.delete(competitionId);
