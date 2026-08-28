@@ -21,7 +21,7 @@ export function resultsEnvFallback(): ApiKeyFallback {
       process.env.WHATSAPP_MATCH_WEBHOOK_SECRET,
       process.env.N8N_MATCH_WEBHOOK_SECRET,
     ],
-    scopes: ['results:read', 'results:write', 'lineups:write'],
+    scopes: ['results:read', 'results:write', 'lineups:write', 'matches:create'],
   };
 }
 
@@ -56,6 +56,12 @@ const ENV_NAMES_BY_SCOPE: Record<ApiKeyScope, string[]> = {
     'N8N_MATCH_WEBHOOK_SECRET',
   ],
   'lineups:write': [
+    'RESULTS_API_KEY',
+    'MATCH_RESULTS_API_KEY',
+    'WHATSAPP_MATCH_WEBHOOK_SECRET',
+    'N8N_MATCH_WEBHOOK_SECRET',
+  ],
+  'matches:create': [
     'RESULTS_API_KEY',
     'MATCH_RESULTS_API_KEY',
     'WHATSAPP_MATCH_WEBHOOK_SECRET',
