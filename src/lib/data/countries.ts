@@ -1,5 +1,8 @@
 import type { Country } from '@/lib/types';
-import regionIndex from 'language-subtag-registry/data/json/region.json';
+// El atributo `with { type: 'json' }` no es decorativo: sin el, Node se planta
+// con ERR_IMPORT_ATTRIBUTE_MISSING y ningun test puede importar este catalogo,
+// ni siquiera de rebote. El bundler de Next lo acepta igual.
+import regionIndex from 'language-subtag-registry/data/json/region.json' with { type: 'json' };
 
 const CURATED_COUNTRIES: Record<string, Country> = {
     // ===== INTERNATIONAL / REGIONS =====
@@ -791,6 +794,21 @@ const COUNTRY_ALIASES: Record<string, string> = {
     fij: 'fiji',
     sam: 'samoa',
     ton: 'tonga',
+    // Las seis uniones del ranking de World Rugby que no resolvian ni por
+    // trigrama ni por nombre: la API las escribe distinto que nuestro catalogo.
+    cze: 'czech-republic',
+    czechia: 'czech-republic',
+    tpe: 'taiwan',
+    'chinese taipei': 'taiwan',
+    civ: 'ivory-coast',
+    "cote d'ivoire": 'ivory-coast',
+    'côte d’ivoire': 'ivory-coast',
+    vct: 'saint-vincent-and-the-grenadines',
+    'st vincent and the grenadines': 'saint-vincent-and-the-grenadines',
+    lca: 'saint-lucia',
+    'st lucia': 'saint-lucia',
+    niu: 'niue',
+    'niue island': 'niue',
     'estados unidos': 'usa',
     'united states': 'usa',
     'reino unido': 'united-kingdom',

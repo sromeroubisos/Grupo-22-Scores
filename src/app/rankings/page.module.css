@@ -594,6 +594,121 @@
     background: color-mix(in srgb, var(--position-label-color, #3b82f6) 14%, transparent);
 }
 
+/* Selector de semana — solo en los rankings con fotos semanales (World Rugby).
+   Va arriba de la tabla y no en la cabecera porque la cabecera se esconde en
+   mobile, y en el telefono es justo donde mas se usa. */
+.weekPicker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.weekPickerLabel {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+.weekPickerStep {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.weekPickerStep:hover:not(:disabled) {
+    border-color: var(--rankings-accent);
+    color: var(--rankings-accent);
+}
+
+.weekPickerStep:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.weekPickerInput {
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    /* El icono nativo del calendario es negro sobre negro en el tema oscuro. */
+    color-scheme: light dark;
+}
+
+.weekPickerInput:focus-visible {
+    outline: 2px solid var(--rankings-accent);
+    outline-offset: 2px;
+}
+
+.weekPickerNow {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--rankings-accent);
+}
+
+.weekPickerReset {
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 6px 10px;
+    border: 1px solid var(--rankings-accent);
+    background: var(--rankings-plate);
+    color: var(--rankings-accent);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+/* Subrayado por movimiento — SOLO en el ranking de World Rugby.
+   Oro para el lider, verde para el que subio, rojo para el que bajo.
+
+   El gradiente va sobre la FILA y no sobre cada celda: puesto en el `td` se
+   reinicia seis veces y la tabla queda a rayas. Por eso las celdas de esta fila
+   van transparentes, incluso en hover.
+
+   Arranca a la izquierda, donde esta el puesto, y se apaga antes de llegar a
+   las cifras: tiñe sin comerse la legibilidad del numero.
+   `--movement-strength` la calcula RankingsClient con el tamanio del salto. */
+.movementRow {
+    background-image: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--movement-color, #2fbf71) calc(var(--movement-strength, 1) * 22%), transparent) 0%,
+        transparent 68%
+    );
+}
+
+.movementRow:hover {
+    background-image: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--movement-color, #2fbf71) calc(var(--movement-strength, 1) * 32%), transparent) 0%,
+        transparent 74%
+    );
+}
+
+.movementRow td,
+.movementRow:hover td {
+    background: transparent;
+}
+
+.movementRow td:first-child {
+    box-shadow: inset 3px 0 0 var(--movement-color, #2fbf71);
+}
+
 .posCell {
     font-family: var(--mono);
     font-weight: 600;
@@ -971,6 +1086,30 @@
         background: color-mix(in srgb, var(--position-label-color, #3b82f6) 12%, var(--surface));
         border-color: color-mix(in srgb, var(--position-label-color, #3b82f6) 32%, var(--border));
         box-shadow: inset 3px 0 0 var(--position-label-color, #3b82f6);
+    }
+
+    /* En mobile la fila es una tarjeta con fondo propio, y el `background` de
+       `.table tr` de arriba borraria el gradiente. Va la tarjeta entera teñida,
+       que ademas se lee mejor en una grilla de cinco columnas angostas. */
+    .movementRow {
+        background:
+            linear-gradient(
+                90deg,
+                color-mix(in srgb, var(--movement-color, #2fbf71) calc(var(--movement-strength, 1) * 24%), transparent) 0%,
+                transparent 78%
+            ),
+            var(--surface);
+        border-color: color-mix(in srgb, var(--movement-color, #2fbf71) calc(var(--movement-strength, 1) * 42%), var(--border));
+        box-shadow: inset 3px 0 0 var(--movement-color, #2fbf71);
+    }
+
+    .movementRow td,
+    .movementRow:hover td {
+        background: transparent;
+    }
+
+    .movementRow td:first-child {
+        box-shadow: none;
     }
 
     .positionLabeledRow td,
