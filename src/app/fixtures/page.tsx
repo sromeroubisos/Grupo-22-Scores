@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import ExportImage from '@/components/ExportImage';
 import DateStrip from '@/components/DateStrip';
 import TeamLogo from '@/components/TeamLogo';
 import { useSport } from '@/context/SportContext';
@@ -12,6 +10,13 @@ import { getMatchPenaltyScore, hasMatchPenaltyShootout } from '@/lib/matchUtils'
 import { generateLocalDateKeys, toLocalMatch } from '@/lib/timezone';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import styles from './page.module.css';
+import dynamic from 'next/dynamic';
+
+// El export es la pieza mas pesada que carga esta pagina y solo hace falta cuando
+// alguien aprieta el boton. Diferido, deja de viajar en la primera carga: en el
+// telefono eso es codigo que no se baja, no se parsea y no se compila.
+const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
+
 
 type PublicMatch = {
     id: string | number;
@@ -378,19 +383,13 @@ export default function FixturesPage() {
                                                 <span className={styles.matchTournament}>{group.country}: {group.tournamentName}</span>
                                                 <div className={styles.matchTeams}>
                                                     <div className={styles.matchTeam}>
-                                                        <span className={styles.teamLogo}>
-                                                            {match.homeLogo ? (
-                                                                <Image
-                                                                    src={match.homeLogo}
-                                                                    alt={match.home}
-                                                                    className={styles.teamLogoImg}
-                                                                    width={28}
-                                                                    height={28}
-                                                                />
-                                                            ) : (
-                                                                <span className={styles.teamLogoFallback}>?</span>
-                                                            )}
-                                                        </span>
+                                                        <TeamLogo
+                                                            name={match.home}
+                                                            logoUrl={match.homeLogo}
+                                                            className={styles.teamLogo}
+                                                            size={28}
+                                                            radius="round"
+                                                        />
                                                         <span className={styles.teamName}>{match.home}</span>
                                                         <span className={styles.matchScoreWrap}>
                                                             <span className={styles.matchScore}>
@@ -402,19 +401,13 @@ export default function FixturesPage() {
                                                         </span>
                                                     </div>
                                                     <div className={styles.matchTeam}>
-                                                        <span className={styles.teamLogo}>
-                                                            {match.awayLogo ? (
-                                                                <Image
-                                                                    src={match.awayLogo}
-                                                                    alt={match.away}
-                                                                    className={styles.teamLogoImg}
-                                                                    width={28}
-                                                                    height={28}
-                                                                />
-                                                            ) : (
-                                                                <span className={styles.teamLogoFallback}>?</span>
-                                                            )}
-                                                        </span>
+                                                        <TeamLogo
+                                                            name={match.away}
+                                                            logoUrl={match.awayLogo}
+                                                            className={styles.teamLogo}
+                                                            size={28}
+                                                            radius="round"
+                                                        />
                                                         <span className={styles.teamName}>{match.away}</span>
                                                         <span className={styles.matchScoreWrap}>
                                                             <span className={styles.matchScore}>

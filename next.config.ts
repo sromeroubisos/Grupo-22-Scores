@@ -4,6 +4,24 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 const nextConfig: NextConfig = {
   /* config options here */
   images: {
+    // Next 16 cambio el default de `localPatterns`: si no se declara, la config
+    // queda en [{ pathname: '**', search: '' }] y CUALQUIER imagen local con
+    // query string hace tirar a `next/image` (error E871) en pleno render.
+    //
+    // El escudo de todo partido de base de datos entra por
+    // `/api/assets/team-logo?key=...&name=...&v=...` (ver `logoUrl.ts` y
+    // `TeamLogo.tsx`), asi que la portada, /resultados y /fixtures se caian
+    // enteras con "ERROR INESPERADO" apenas aparecia un partido nuestro. Los
+    // partidos externos seguian dibujandose porque traen URL absoluta de
+    // FlashScore: por eso el sintoma se leia como "la base carga mal" cuando en
+    // realidad era el proxy de escudos.
+    //
+    // Al proxy se le permite cualquier query (`search` omitido = no se compara);
+    // el resto del sitio se queda con la regla nueva, sin query.
+    localPatterns: [
+      { pathname: '/api/assets/team-logo' },
+      { pathname: '**', search: '' },
+    ],
     remotePatterns: [
       {
         protocol: 'https',
@@ -118,6 +136,18 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // cornercorto.com es un dominio del mismo proyecto de Vercel que manda
+      // derecho a la home de hockey. Se redirige (no se reescribe) para que el
+      // dominio no quede como espejo indexable de todo el sitio ni abra una
+      // sesion aparte por host. Quedan afuera /api/* (crons y fetches). 307 a
+      // proposito: un 308 lo cachea el navegador y ata las manos si mas
+      // adelante el dominio pasa a servir hockey con marca propia.
+      {
+        source: '/:path((?!api(?:/|$)).*)',
+        has: [{ type: 'host', value: '(www\\.)?cornercorto\\.com' }],
+        destination: 'https://www.g22scores.com/?sport=field-hockey',
+        permanent: false,
+      },
       {
         source: '/torneos/:id',
         destination: '/tournaments/:id',
