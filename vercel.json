@@ -22,6 +22,10 @@
       "schedule": "0 3 * * 2"
     },
     {
+      "path": "/api/cron/world-rugby-rankings",
+      "schedule": "0 14 * * 1"
+    },
+    {
       "path": "/api/cron/urba-sync",
       "schedule": "*/20 18-23 * * 6,0"
     },

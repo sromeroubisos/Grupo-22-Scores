@@ -2,12 +2,10 @@ import { cache } from 'react';
 import type { Metadata } from 'next';
 import { SPORTS } from '@/lib/data/sports';
 import type { Sport } from '@/lib/types';
-import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
-import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
-import { getClubRankingDetail, listClubRankings } from '@/lib/server/clubRankings';
+import { getPublicRankingDetail, listPublicRankings } from '@/lib/server/publicRankings';
 import RankingsClient from './RankingsClient';
 
-type SearchParams = Promise<{ sport?: string; ranking?: string }>;
+type SearchParams = Promise<{ sport?: string; ranking?: string; fecha?: string }>;
 
 function getSportLabel(sportId: string) {
     // El id llega de la URL: no es un SportId validado, asi que se indexa como
@@ -26,17 +24,11 @@ function getSportLabel(sportId: string) {
  * piden con los mismos argumentos en el mismo request: sin esto, cada visita
  * pagaba la consulta dos veces.
  */
-const loadInitialData = cache(async (sportId: string, rankingId: string) => {
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+const loadInitialData = cache(async (sportId: string, rankingId: string, fecha: string) => {
     try {
-        const all = await listClubRankings();
-        const rankings = all
-            .filter((ranking) => String(ranking.sport || '').trim().toLowerCase() === sportId)
-            .map((ranking) => ({
-                ...ranking,
-                metadata: {
-                    positionLabels: normalizeRankingPositionLabels(ranking.metadata?.positionLabels),
-                },
-            }));
+        const rankings = await listPublicRankings(sportId);
 
         const selectedId = rankings.some((ranking) => ranking.id === rankingId)
             ? rankingId
@@ -44,54 +36,20 @@ const loadInitialData = cache(async (sportId: string, rankingId: string) => {
 
         if (!selectedId) return { rankings, detail: null };
 
-        const detail = await getClubRankingDetail(selectedId, { includeClubLogos: false, includeActivity: false });
+        const date = ISO_DATE_REGEX.test(fecha) ? fecha : null;
 
-        return {
-            rankings,
-            detail: {
-                ranking: {
-                    ...detail.ranking,
-                    metadata: {
-                        positionLabels: normalizeRankingPositionLabels(detail.ranking.metadata?.positionLabels),
-                    },
-                },
-                entries: detail.entries.map((entry) => {
-                    const club = Array.isArray(entry.clubs) ? entry.clubs[0] : entry.clubs;
-                    return {
-                        id: entry.id,
-                        club_id: entry.club_id,
-                        source_name: entry.source_name,
-                        source_region: entry.source_region,
-                        current_position: entry.current_position,
-                        source_previous_position: entry.source_previous_position,
-                        current_rating: entry.current_rating,
-                        previous_rating: entry.previous_rating,
-                        initial_rating: entry.initial_rating,
-                        clubs: club
-                            ? {
-                                name: club.name,
-                                short_name: club.short_name,
-                                logo_url: buildTeamLogoProxyUrl({
-                                    key: entry.club_id,
-                                    name: club.name ?? entry.source_name,
-                                }),
-                            }
-                            : null,
-                    };
-                }),
-            },
-        };
+        return { rankings, detail: await getPublicRankingDetail(selectedId, { date }) };
     } catch {
         return { rankings: [], detail: null };
     }
 });
 
 export async function generateMetadata({ searchParams }: { searchParams: SearchParams }): Promise<Metadata> {
-    const { sport = 'rugby', ranking = '' } = await searchParams;
+    const { sport = 'rugby', ranking = '', fecha = '' } = await searchParams;
     const sportId = sport.trim().toLowerCase();
     const sportLabel = getSportLabel(sportId);
 
-    const { rankings, detail } = await loadInitialData(sportId, ranking.trim());
+    const { rankings, detail } = await loadInitialData(sportId, ranking.trim(), fecha.trim());
     const active = detail?.ranking ?? rankings[0];
 
     if (!active) {
@@ -105,12 +63,15 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
         entry.clubs?.short_name || entry.clubs?.name || entry.source_name
     ));
     const total = detail?.entries.length ?? 0;
+    // Un ranking de selecciones no cuenta clubes: la descripcion tiene que decir
+    // lo que hay en la tabla o miente en el resultado de busqueda.
+    const unidad = active.entity === 'seleccion' ? 'uniones' : 'clubes';
     // Las descripciones cargadas a mano no siempre terminan en punto y despues se
     // pegan con la frase siguiente ("...Salida de 22 151 clubes").
-    const headline = active.description?.trim() || `${active.name}: ranking de clubes de ${sportLabel}`;
+    const headline = active.description?.trim() || `${active.name}: ranking de ${unidad} de ${sportLabel}`;
     const description = [
         /[.!?]$/.test(headline) ? headline : `${headline}.`,
-        total ? `${total} clubes, base ${active.season}.` : '',
+        total ? `${total} ${unidad}, base ${active.season}.` : '',
         leaders.length ? `Lideran ${leaders.join(', ')}.` : '',
     ].filter(Boolean).join(' ');
 
@@ -126,9 +87,9 @@ export async function generateMetadata({ searchParams }: { searchParams: SearchP
 }
 
 export default async function RankingsPage({ searchParams }: { searchParams: SearchParams }) {
-    const { sport = 'rugby', ranking = '' } = await searchParams;
+    const { sport = 'rugby', ranking = '', fecha = '' } = await searchParams;
     const sportId = sport.trim().toLowerCase();
-    const { rankings, detail } = await loadInitialData(sportId, ranking.trim());
+    const { rankings, detail } = await loadInitialData(sportId, ranking.trim(), fecha.trim());
 
     return (
         <RankingsClient

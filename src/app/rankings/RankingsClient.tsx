@@ -19,7 +19,6 @@ import styles from './page.module.css';
 import { useSport } from '@/context/SportContext';
 import { useAuth } from '@/context/AuthContext';
 import type { Sport } from '@/lib/types';
-import ExportImage from '@/components/ExportImage';
 import MobileSectionTabs from '@/components/MobileSectionTabs';
 import TeamLogo from '@/components/TeamLogo';
 import {
@@ -33,9 +32,19 @@ import {
     getRankingPositionLabel,
     paginateRankingEntries,
     RANKING_EXPORT_COLUMN_LABELS,
+    WORLD_RUGBY_EXPORT_COLUMN_LABELS,
+    getRankingMovementHighlight,
+    type RankingMovementHighlight,
     normalizeRankingPositionLabels,
     type RankingPositionLabel,
 } from '@/lib/rankings/rankingTable';
+import dynamic from 'next/dynamic';
+
+// El export es la pieza mas pesada que carga esta pagina y solo hace falta cuando
+// alguien aprieta el boton. Diferido, deja de viajar en la primera carga: en el
+// telefono eso es codigo que no se baja, no se parsea y no se compila.
+const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
+
 
 // El nombre del deporte NO vive aca: sale del catalogo (`nameEs`). Este mapa es
 // solo la piel visual, y por eso su default es aceptable — un acento generico se
@@ -48,6 +57,63 @@ type SportSurface = {
     selectorMeta: string;
 };
 
+/**
+ * Que se esta rankeando. Los rankings de clubes los calcula esta casa; el de
+ * selecciones lo publica World Rugby y entra por `publicRankings.ts`. La
+ * pantalla no necesita saber nada mas de esa diferencia que como nombrar a lo
+ * que esta listando.
+ */
+type RankingEntity = 'club' | 'seleccion';
+
+type RankingNouns = {
+    /** Encabezado de la columna del nombre. */
+    entidad: string;
+    /** Como se cuenta en plural: "114 uniones". */
+    plural: string;
+    /** El plural ya concordado: el genero no se puede deducir de la palabra. */
+    publicados: string;
+    /** Encabezado de la columna de procedencia. */
+    procedencia: string;
+    /** Encabezado de la columna del puntaje. */
+    puntaje: string;
+    /** Titulo por omision del afiche exportado. */
+    tituloExport: string;
+};
+
+const RANKING_NOUNS: Record<RankingEntity, RankingNouns> = {
+    club: {
+        entidad: 'Club',
+        plural: 'clubes',
+        publicados: 'Clubes publicados',
+        procedencia: 'Region',
+        puntaje: 'OVR Rating',
+        tituloExport: 'Ranking de Clubes',
+    },
+    // "Union" y no "Seleccion": es el rotulo que usa el propio World Rugby, y es
+    // el correcto para los que no son paises (Chinese Taipei, Hong Kong China).
+    seleccion: {
+        entidad: 'Union',
+        plural: 'uniones',
+        publicados: 'Uniones publicadas',
+        procedencia: 'Continente',
+        puntaje: 'Puntos WR',
+        tituloExport: 'Ranking de World Rugby',
+    },
+};
+
+function getRankingNouns(entity?: RankingEntity | null): RankingNouns {
+    return RANKING_NOUNS[entity ?? 'club'] ?? RANKING_NOUNS.club;
+}
+
+function getMovementHighlightStyle(movement: RankingMovementHighlight): CSSProperties {
+    return {
+        '--movement-color': movement.color,
+        // El piso de 0,35 es para que un salto de un solo lugar igual se vea: por
+        // debajo de eso el tinte no se distingue del fondo.
+        '--movement-strength': String(0.35 + movement.strength * 0.65),
+    } as CSSProperties;
+}
+
 type PublicRankingSummary = {
     id: string;
     name: string;
@@ -56,6 +122,11 @@ type PublicRankingSummary = {
     results_season?: number | null;
     scope?: string | null;
     description?: string | null;
+    entity?: RankingEntity | null;
+    // Que semana esta mostrando y desde cuando hay historico. Solo los rankings
+    // importados los traen; con los dos se dibuja el selector de semana.
+    snapshot_date?: string | null;
+    history_from?: string | null;
     stale_from_match_id?: string | null;
     stale_reason?: string | null;
     initial_imported_at?: string | null;
@@ -68,7 +139,8 @@ type PublicRankingSummary = {
 
 type PublicRankingEntry = {
     id: string;
-    club_id: string;
+    // Null en el ranking de selecciones: una union no es una fila de `clubs`.
+    club_id: string | null;
     source_name: string;
     source_region?: string | null;
     current_position?: number | null;
@@ -150,10 +222,28 @@ function getSportLabel(sport: Sport) {
     return sport.nameEs || sport.name || sport.id;
 }
 
-function buildRankingsHref(sportId: string, rankingId?: string | null) {
+function buildRankingsHref(sportId: string, rankingId?: string | null, fecha?: string | null) {
     const params = new URLSearchParams({ sport: sportId });
     if (rankingId) params.set('ranking', rankingId);
+    // La semana viaja en la URL para que una tabla del pasado se pueda compartir
+    // y sobreviva a un F5. Sin fecha = la vigente.
+    if (fecha) params.set('fecha', fecha);
     return `/rankings?${params.toString()}`;
+}
+
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Corre una fecha ISO N dias, sin pasar por el huso horario del que mira. */
+function shiftIsoDate(iso: string, days: number): string {
+    const [year, month, day] = iso.split('-').map(Number);
+    const moved = new Date(Date.UTC(year, month - 1, day + days));
+    return moved.toISOString().slice(0, 10);
+}
+
+function clampIsoDate(iso: string, min: string, max: string): string {
+    if (min && iso < min) return min;
+    if (max && iso > max) return max;
+    return iso;
 }
 
 async function readJson(response: Response) {
@@ -236,12 +326,19 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
     // Marcar como ya cargado lo que vino del servidor evita que la primera pintura
     // muestre "Cargando" sobre datos que ya tenemos.
     const [loadedSportId, setLoadedSportId] = useState(initialRankings ? (initialSportId ?? '') : '');
-    const [loadedRankingId, setLoadedRankingId] = useState(initialDetail?.ranking.id ?? '');
+    // La clave lleva la semana: cambiar de fecha sin cambiar de ranking tambien
+    // es una carga nueva, y con solo el id la pantalla se creia al dia.
+    const [loadedDetailKey, setLoadedDetailKey] = useState(
+        initialDetail ? `${initialDetail.ranking.id}|${ISO_DATE_REGEX.test((searchParams.get('fecha') ?? '').trim()) ? (searchParams.get('fecha') ?? '').trim() : ''}` : '',
+    );
     const [publicError, setPublicError] = useState<string | null>(null);
     const [tablePageState, setTablePageState] = useState({ rankingId: '', page: 1 });
 
     const sportParam = searchParams.get('sport');
     const rankingParam = searchParams.get('ranking');
+    // Una fecha con otra forma se ignora: la escribe cualquiera en la barra.
+    const fechaParam = (searchParams.get('fecha') ?? '').trim();
+    const selectedDate = ISO_DATE_REGEX.test(fechaParam) ? fechaParam : '';
 
     useEffect(() => {
         if (!sportParam) return;
@@ -297,17 +394,21 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
         }
 
         if (!rankingParam || !rankingList.some((ranking) => ranking.id === rankingParam)) {
-            router.replace(buildRankingsHref(selectedSport.id, rankingList[0].id), { scroll: false });
+            router.replace(buildRankingsHref(selectedSport.id, rankingList[0].id, selectedDate), { scroll: false });
         }
-    }, [rankingList, rankingParam, router, selectedSport.id]);
+    }, [rankingList, rankingParam, router, selectedDate, selectedSport.id]);
+
+    const detailKey = selectedRankingId ? `${selectedRankingId}|${selectedDate}` : '';
 
     useEffect(() => {
         if (!selectedRankingId) return;
+        if (detailKey === loadedDetailKey) return;
 
         let cancelled = false;
         const controller = new AbortController();
+        const query = selectedDate ? `?date=${encodeURIComponent(selectedDate)}` : '';
 
-        fetch(`/api/rankings/${encodeURIComponent(selectedRankingId)}`, {
+        fetch(`/api/rankings/${encodeURIComponent(selectedRankingId)}${query}`, {
             signal: controller.signal,
         })
             .then(readJson)
@@ -315,29 +416,39 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                 if (cancelled) return;
                 setRankingDetail((payload?.data ?? null) as PublicRankingDetail | null);
                 setPublicError(null);
-                setLoadedRankingId(selectedRankingId);
+                setLoadedDetailKey(detailKey);
             })
             .catch((error) => {
                 if (cancelled || error?.name === 'AbortError') return;
                 setPublicError(error instanceof Error ? error.message : 'No se pudo cargar la tabla publicada.');
-                setLoadedRankingId(selectedRankingId);
+                setLoadedDetailKey(detailKey);
             });
 
         return () => {
             cancelled = true;
             controller.abort();
         };
-    }, [selectedRankingId]);
+        // `loadedDetailKey` NO va en las dependencias: lo escribe este mismo
+        // efecto, y ponerlo lo haria correr de nuevo apenas termina.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [detailKey, selectedDate, selectedRankingId]);
 
     const surface = getSportSurface(selectedSport.id);
     const sportLabel = getSportLabel(selectedSport);
     const activeRankingDetail = rankingDetail?.ranking.id === selectedRankingId ? rankingDetail : null;
     const loadingList = loadedSportId !== selectedSport.id;
-    const loadingDetail = selectedRankingId ? loadedRankingId !== selectedRankingId : false;
-    const selectedRanking = useMemo(
-        () => rankingList.find((ranking) => ranking.id === selectedRankingId) ?? activeRankingDetail?.ranking ?? null,
-        [activeRankingDetail?.ranking, rankingList, selectedRankingId],
+    const loadingDetail = detailKey ? loadedDetailKey !== detailKey : false;
+    // El del catalogo describe el ranking VIGENTE; el del detalle describe la foto
+    // que se esta mirando. Cuando alguien pide una semana del pasado no son el
+    // mismo: la leyenda decia "base 2026" abajo de la tabla del Mundial 2019.
+    const rankingDelCatalogo = useMemo(
+        () => rankingList.find((ranking) => ranking.id === selectedRankingId) ?? null,
+        [rankingList, selectedRankingId],
     );
+    // Para MOSTRAR manda la foto; mientras carga, lo del catalogo alcanza.
+    const selectedRanking = activeRankingDetail?.ranking ?? rankingDelCatalogo;
+    // El subrayado por movimiento es exclusivo del ranking de World Rugby.
+    const subrayaMovimiento = selectedRanking?.entity === 'seleccion';
     const rankingPositionLabels = useMemo(
         () => normalizeRankingPositionLabels(activeRankingDetail?.ranking.metadata?.positionLabels ?? selectedRanking?.metadata?.positionLabels),
         [activeRankingDetail?.ranking.metadata?.positionLabels, selectedRanking?.metadata?.positionLabels],
@@ -377,14 +488,26 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
     );
     const visibleEntries = paginatedEntries.items;
     const rankingExportRows = useMemo(
-        () => buildRankingExportRows(activeRankingDetail?.entries ?? [], rankingPositionLabels),
-        [activeRankingDetail?.entries, rankingPositionLabels],
+        () => buildRankingExportRows(activeRankingDetail?.entries ?? [], rankingPositionLabels, {
+            movementHighlight: subrayaMovimiento,
+        }),
+        [activeRankingDetail?.entries, rankingPositionLabels, subrayaMovimiento],
     );
     const rankingExportSubtitle = selectedRanking?.description?.trim()
         || `Base ${selectedRanking?.season || '-'} / resultados ${selectedRanking?.results_season || '-'}`;
     // El afiche del ranking lo baja cualquiera, invitado incluido: solo se espera
     // a que resuelva la sesion para no dibujar el boton y sacarlo un tick despues.
-    const canExportPublicRanking = !authLoading;
+    //
+    // `montado` no es decorativo: sin el, esta seccion rompia la hidratacion. El
+    // servidor la omite (ahi la sesion siempre esta cargando), pero este arbol
+    // cuelga de un <Suspense> —lo pide `useSearchParams`— asi que hidrata TARDE,
+    // cuando el efecto de AuthContext ya resolvio la sesion desde el cache y
+    // `authLoading` es false. React comparaba un HTML sin seccion contra un
+    // cliente con seccion. Con `montado` el primer render del cliente es
+    // identico al del servidor y la seccion entra recien en el segundo.
+    const [montado, setMontado] = useState(false);
+    useEffect(() => { setMontado(true); }, []);
+    const canExportPublicRanking = montado && !authLoading;
 
     const rankingStatusLabel = loadingList || loadingDetail
         ? 'Cargando'
@@ -400,8 +523,9 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
             : hasEntries
                 ? styles.statusPublished
                 : styles.statusIdle;
+    const nouns = getRankingNouns(selectedRanking?.entity);
     const heroDescription = hasEntries
-        ? `${selectedRanking?.name || 'Ranking activo'} ya esta publicado con ${activeRankingDetail?.entries.length ?? 0} clubes y base ${selectedRanking?.season || '-'}.`
+        ? `${selectedRanking?.name || 'Ranking activo'} ya esta publicado con ${activeRankingDetail?.entries.length ?? 0} ${nouns.plural} y base ${selectedRanking?.season || '-'}.`
         : 'Esta vista publica muestra el ranking guardado para el deporte activo. Cuando no aparece la tabla, es porque todavia no hay una version publicada.';
     const lastRun = formatDateTime(selectedRanking?.backfill_completed_at || selectedRanking?.updated_at);
     const summaryTitle = selectedRanking?.description || `Vista publica de ${sportLabel}`;
@@ -421,7 +545,26 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
     };
 
     const handleRankingChange = (rankingId: string) => {
-        router.replace(buildRankingsHref(selectedSport.id, rankingId), { scroll: false });
+        router.replace(buildRankingsHref(selectedSport.id, rankingId, selectedDate), { scroll: false });
+    };
+
+    // La foto que se esta mirando y los dos bordes del historico. `semanaTope` es
+    // la vigente: no hay ranking despues del ultimo publicado.
+    const historyFrom = rankingDelCatalogo?.history_from ?? selectedRanking?.history_from ?? '';
+    const semanaTope = rankingDelCatalogo?.snapshot_date ?? selectedRanking?.snapshot_date ?? '';
+    const semanaMostrada = selectedDate || semanaTope;
+    const tieneHistorico = Boolean(historyFrom && semanaTope);
+    const enLaSemanaVigente = !selectedDate || semanaMostrada >= semanaTope;
+
+    const irASemana = (fecha: string) => {
+        if (!tieneHistorico) return;
+        const destino = clampIsoDate(fecha, historyFrom, semanaTope);
+        router.replace(
+            // Volver a la vigente es sacar la fecha de la URL, no fijar la de hoy:
+            // asi la pagina sigue mostrando la ultima aunque pase una semana.
+            buildRankingsHref(selectedSport.id, selectedRankingId, destino >= semanaTope ? '' : destino),
+            { scroll: false },
+        );
     };
 
     const setTablePage = (page: number) => {
@@ -495,7 +638,7 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                             </div>
                             <div className={styles.metric}>
                                 <span className={styles.metricValue}>{activeRankingDetail?.entries.length ?? 0}</span>
-                                <span className={styles.metricLabel}>Clubes publicados</span>
+                                <span className={styles.metricLabel}>{nouns.publicados}</span>
                             </div>
                             <div className={styles.metric}>
                                 <span className={styles.metricValue}>{lastRun}</span>
@@ -681,7 +824,7 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                             <Layers3 size={16} />
                             <span>
                                 {rankingList.length
-                                    ? 'Este ranking todavia no tiene clubes publicados.'
+                                    ? `Este ranking todavia no tiene ${nouns.plural} publicad${nouns.publicados.endsWith('as') ? 'a' : 'o'}s.`
                                     : 'Cuando guardes un ranking en el panel, va a aparecer aca automaticamente.'}
                             </span>
                         </div>
@@ -694,6 +837,52 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                     <div className={styles.sectionHeader}>
                         <h3 className={styles.sectionTitle}>Tabla completa de posiciones</h3>
                     </div>
+
+                    {/* Solo los rankings con fotos semanales tienen pasado que
+                        mirar. El de clubes guarda un estado, no una serie. */}
+                    {tieneHistorico ? (
+                        <div className={styles.weekPicker}>
+                            <span className={styles.weekPickerLabel}>Semana</span>
+                            <button
+                                type="button"
+                                className={styles.weekPickerStep}
+                                onClick={() => irASemana(shiftIsoDate(semanaMostrada, -7))}
+                                disabled={semanaMostrada <= historyFrom}
+                                aria-label="Semana anterior"
+                            >
+                                <ChevronLeft size={16} />
+                            </button>
+                            <input
+                                type="date"
+                                className={styles.weekPickerInput}
+                                value={semanaMostrada}
+                                min={historyFrom}
+                                max={semanaTope}
+                                onChange={(event) => irASemana(event.target.value)}
+                                aria-label="Elegir la semana del ranking"
+                            />
+                            <button
+                                type="button"
+                                className={styles.weekPickerStep}
+                                onClick={() => irASemana(shiftIsoDate(semanaMostrada, 7))}
+                                disabled={enLaSemanaVigente}
+                                aria-label="Semana siguiente"
+                            >
+                                <ChevronRight size={16} />
+                            </button>
+                            {enLaSemanaVigente ? (
+                                <span className={styles.weekPickerNow}>Ranking vigente</span>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className={styles.weekPickerReset}
+                                    onClick={() => irASemana(semanaTope)}
+                                >
+                                    Volver al vigente
+                                </button>
+                            )}
+                        </div>
+                    ) : null}
 
                     {/* El motivo del "Revision" ya viaja en la API; sin pintarlo, el
                         lector ve la chapa y no sabe de que. Va aca y no en la cabecera
@@ -713,16 +902,16 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                             <div className={`${styles.techBorder} ${styles.tableContainer}`}>
                                 <table className={styles.table}>
                                     <caption className={styles.tableCaption}>
-                                        {selectedRanking?.name || 'Ranking de clubes'} — {activeRankingDetail?.entries.length ?? 0} clubes, base {selectedRanking?.season || '-'}
+                                        {selectedRanking?.name || nouns.tituloExport} — {activeRankingDetail?.entries.length ?? 0} {nouns.plural}, base {selectedRanking?.season || '-'}
                                     </caption>
                                     <thead>
                                         <tr>
                                             <th scope="col">Pos</th>
-                                            <th scope="col">Club</th>
-                                            <th scope="col">Region</th>
+                                            <th scope="col">{nouns.entidad}</th>
+                                            <th scope="col">{nouns.procedencia}</th>
                                             <th scope="col">Anterior</th>
                                             <th scope="col">Delta</th>
-                                            <th scope="col">OVR Rating</th>
+                                            <th scope="col">{nouns.puntaje}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -734,12 +923,29 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                                             const position = entry.current_position || absoluteIndex;
                                             const positionChange = getRankingPositionChange(entry.current_position, entry.source_previous_position);
                                             const positionLabel = getRankingPositionLabel(rankingPositionLabels, position);
+                                            // La zona manda sobre el movimiento: si la fila ya tiene
+                                            // color por ascenso o descenso, no se le encima un segundo.
+                                            const movement = subrayaMovimiento && !positionLabel
+                                                ? getRankingMovementHighlight(position, entry.source_previous_position)
+                                                : null;
 
                                             return (
                                                 <tr
                                                     key={entry.id}
-                                                    className={positionLabel ? styles.positionLabeledRow : undefined}
-                                                    style={positionLabel ? getPositionLabelStyle(positionLabel) : undefined}
+                                                    className={
+                                                        positionLabel
+                                                            ? styles.positionLabeledRow
+                                                            : movement
+                                                                ? styles.movementRow
+                                                                : undefined
+                                                    }
+                                                    style={
+                                                        positionLabel
+                                                            ? getPositionLabelStyle(positionLabel)
+                                                            : movement
+                                                                ? getMovementHighlightStyle(movement)
+                                                                : undefined
+                                                    }
                                                 >
                                                     <td className={styles.posCell} data-label="Pos">
                                                         <span className={styles.posWrap}>
@@ -774,7 +980,7 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                                                             <span className={styles.clubMetaMobile}>{entry.source_region || '-'}</span>
                                                         </div>
                                                     </td>
-                                                    <td data-label="Region">{entry.source_region || '-'}</td>
+                                                    <td data-label={nouns.procedencia}>{entry.source_region || '-'}</td>
                                                     <td data-label="Anterior">{formatRankingRating(previousRating)}</td>
                                                     <td
                                                         data-label="Delta"
@@ -788,7 +994,7 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                                                     >
                                                         {delta.label}
                                                     </td>
-                                                    <td className={styles.ovrCell} data-label="OVR">
+                                                    <td className={styles.ovrCell} data-label={nouns.puntaje}>
                                                         {formatRankingRating(entry.current_rating)}
                                                     </td>
                                                 </tr>
@@ -860,7 +1066,7 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                             <span className={styles.sectionTitle}>Lectura rapida</span>
                             <p className={styles.readoutText}>
                                 {rankingList.length
-                                    ? `${rankingList.length} ranking${rankingList.length === 1 ? '' : 's'} cargado${rankingList.length === 1 ? '' : 's'} y ${activeRankingDetail?.entries.length ?? 0} clubes publicados.`
+                                    ? `${rankingList.length} ranking${rankingList.length === 1 ? '' : 's'} cargado${rankingList.length === 1 ? '' : 's'} y ${activeRankingDetail?.entries.length ?? 0} ${nouns.publicados.toLowerCase()}.`
                                     : 'Sin rankings cargados para este deporte.'}
                             </p>
                         </div>
@@ -891,10 +1097,12 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                                 template="standings"
                                 filename={`ranking-${selectedRanking?.name || selectedSport.id}`}
                                 data={{
-                                    title: selectedRanking?.name || 'Ranking de Clubes',
+                                    title: selectedRanking?.name || nouns.tituloExport,
                                     subtitle: rankingExportSubtitle,
                                     rows: rankingExportRows,
-                                    columnLabels: RANKING_EXPORT_COLUMN_LABELS,
+                                    columnLabels: subrayaMovimiento
+                                        ? WORLD_RUGBY_EXPORT_COLUMN_LABELS
+                                        : RANKING_EXPORT_COLUMN_LABELS,
                                     plainDiff: true,
                                     showPositionDelta: true,
                                     variant: 'rankingPoster',

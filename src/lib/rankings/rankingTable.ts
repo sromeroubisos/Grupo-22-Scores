@@ -230,7 +230,78 @@ function buildRankingExportLegendLabels(labels: RankingPositionLabel[]) {
     return labelMap;
 }
 
-export function buildRankingExportRows(entries: RankingTableEntryLike[], positionLabels: RankingPositionLabel[] = []) {
+/**
+ * Los tres colores del subrayado por movimiento del ranking de World Rugby.
+ * Viven aca y no en la pantalla porque los usan DOS dibujos: la tabla en HTML y
+ * el afiche en canvas. Duplicarlos era garantizar que un dia dejaran de ser el
+ * mismo verde.
+ */
+export const RANKING_MOVEMENT_COLORS = {
+    oro: '#e8b23a',
+    sube: '#2fbf71',
+    baja: '#e5484d',
+} as const;
+
+export type RankingMovementTone = keyof typeof RANKING_MOVEMENT_COLORS;
+
+export type RankingMovementHighlight = {
+    tone: RankingMovementTone;
+    /** 0 a 1: cuanto tinte lleva la fila. */
+    strength: number;
+    color: string;
+};
+
+/**
+ * Oro para el lider, verde para el que subio, rojo para el que bajo.
+ *
+ * SOLO se usa en el ranking de selecciones. En el de clubes la fila ya se pinta
+ * por zona (ascenso, descenso, clasificacion) y dos sistemas de color sobre la
+ * misma fila no se leen: se contradicen.
+ *
+ * La intensidad la da el tamanio del salto y no el puesto: en una tabla de 114
+ * uniones, mover un lugar es ruido y mover cinco es noticia. Corta en cinco
+ * porque arriba de eso el color satura igual y una union que aparece de la nada
+ * apagaria a todas las demas.
+ */
+export function getRankingMovementHighlight(
+    position: number | null | undefined,
+    previousPosition: number | null | undefined,
+): RankingMovementHighlight | null {
+    if (!position) return null;
+
+    // El lider va en oro lleve una semana o tres anios: lo que se destaca ahi es
+    // el puesto, no el movimiento.
+    if (position === 1) {
+        return { tone: 'oro', strength: 1, color: RANKING_MOVEMENT_COLORS.oro };
+    }
+
+    if (!previousPosition) return null;
+
+    const salto = previousPosition - position;
+    if (salto === 0) return null;
+
+    const tone: RankingMovementTone = salto > 0 ? 'sube' : 'baja';
+
+    return {
+        tone,
+        strength: Math.min(Math.abs(salto), 5) / 5,
+        color: RANKING_MOVEMENT_COLORS[tone],
+    };
+}
+
+export type RankingExportOptions = {
+    /**
+     * Marcar cada fila con el color de su movimiento. Lo prende SOLO el ranking
+     * de World Rugby; en el de clubes el color de la fila ya lo pone la zona.
+     */
+    movementHighlight?: boolean;
+};
+
+export function buildRankingExportRows(
+    entries: RankingTableEntryLike[],
+    positionLabels: RankingPositionLabel[] = [],
+    options: RankingExportOptions = {},
+) {
     const exportLegendLabels = buildRankingExportLegendLabels(positionLabels);
 
     return entries.map((entry, index) => {
@@ -255,6 +326,16 @@ export function buildRankingExportRows(entries: RankingTableEntryLike[], positio
             // Sin cambio de puesto, `getRankingPositionChange` devuelve null y el
             // export no dibuja ficha de variacion.
             pointsDeltaTone: positionChange?.tone ?? ('neutral' as const),
+            // El afiche pinta la fila con este color. Va vacio salvo en World
+            // Rugby: en el ranking de clubes manda `zoneColor`, que es la zona.
+            ...(options.movementHighlight && !positionLabel
+                ? (() => {
+                    const movement = getRankingMovementHighlight(position, entry.source_previous_position);
+                    return movement
+                        ? { movementColor: movement.color, movementStrength: movement.strength }
+                        : {};
+                })()
+                : {}),
         };
     });
 }
@@ -265,4 +346,15 @@ export const RANKING_EXPORT_COLUMN_LABELS = {
     lost: 'DEL',
     diff: 'TR',
     points: 'VAR',
+} as const;
+
+/**
+ * Las mismas columnas para el afiche del ranking de World Rugby. Cambian dos:
+ * ahi no hay OVR sino los puntos que publica World Rugby, y la procedencia es
+ * el continente de la union, no la region de un club.
+ */
+export const WORLD_RUGBY_EXPORT_COLUMN_LABELS = {
+    ...RANKING_EXPORT_COLUMN_LABELS,
+    played: 'PTS',
+    diff: 'CONT',
 } as const;

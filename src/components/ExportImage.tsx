@@ -47,6 +47,13 @@ interface StandingsRowData {
     points: number | string;
     pointsDeltaLabel?: string;
     pointsDeltaTone?: 'positive' | 'negative' | 'neutral';
+    // Subrayado por movimiento del afiche de ranking: oro para el lider, verde
+    // para el que subio, rojo para el que bajo. Lo llena SOLO el ranking de
+    // World Rugby (`buildRankingExportRows` con `movementHighlight`); en el de
+    // clubes el color de la fila lo pone `zoneColor`, que es la zona.
+    movementColor?: string;
+    /** 0 a 1: cuanto tinte lleva la banda. */
+    movementStrength?: number;
 }
 
 interface StandingsGroupData {
@@ -9254,7 +9261,15 @@ async function drawRankingPoster(
         const y = bodyTop + index * rowHeight;
         const centerY = y + rowHeight / 2;
         const isLeader = row.pos === 1;
-        const rowTextColor = isLeader ? barContrast : textColor;
+        // Con subrayado por movimiento el lider va en oro, no en el color del
+        // afiche. El contraste del texto se recalcula sobre el color REAL de la
+        // barra: heredar el del acento deja el nombre ilegible sobre el dorado.
+        const leaderBarTo = isLeader && row.movementColor ? row.movementColor : glowColor;
+        const leaderBarFrom = isLeader && row.movementColor
+            ? mixHexColors(row.movementColor, '#000000', 0.3)
+            : barFrom;
+        const leaderContrast = isLeader && row.movementColor ? getContrastColor(leaderBarTo) : barContrast;
+        const rowTextColor = isLeader ? leaderContrast : textColor;
         const img = teamLogos[index] || null;
 
         ctx.save();
@@ -9264,13 +9279,23 @@ async function drawRankingPoster(
             // La barra del lider usa el color de brillo: es la misma luz que
             // sube desde la base del afiche.
             const barGradient = ctx.createLinearGradient(tableLeft - 18, 0, tableRight + 18, 0);
-            barGradient.addColorStop(0, barFrom);
-            barGradient.addColorStop(1, glowColor);
+            barGradient.addColorStop(0, leaderBarFrom);
+            barGradient.addColorStop(1, leaderBarTo);
             ctx.save();
             ctx.fillStyle = barGradient;
-            ctx.shadowColor = hexToRGBA(glowColor, 0.5);
+            ctx.shadowColor = hexToRGBA(leaderBarTo, 0.5);
             ctx.shadowBlur = 26;
             ctx.shadowOffsetY = 6;
+            ctx.beginPath();
+            ctx.roundRect(tableLeft - 18, y + 3, tableRight - tableLeft + 36, rowHeight - 6, 12);
+            ctx.fill();
+            ctx.restore();
+        } else if (row.movementColor) {
+            // Banda del que se movio. Mas suave que la del lider a proposito: en
+            // una tabla de 20 filas, media docena tenidas al mismo peso que el
+            // primero convierten el afiche en un semaforo y no se lee nada.
+            ctx.save();
+            ctx.fillStyle = hexToRGBA(row.movementColor, 0.1 + (row.movementStrength ?? 1) * 0.14);
             ctx.beginPath();
             ctx.roundRect(tableLeft - 18, y + 3, tableRight - tableLeft + 36, rowHeight - 6, 12);
             ctx.fill();
@@ -9317,7 +9342,10 @@ async function drawRankingPoster(
         ctx.fillText(ptsText, ptsCenterX, centerY + 1);
 
         const varText = (row.pointsDeltaLabel || '').trim().replace(/^\+/, '') || '0';
-        ctx.fillStyle = rowTextColor;
+        // El numero de la variacion toma el color de su movimiento: es la cifra
+        // que el subrayado esta senialando, y en gris habia que deducirla del
+        // signo. En la fila del lider manda el contraste de la barra.
+        ctx.fillStyle = !isLeader && row.movementColor ? row.movementColor : rowTextColor;
         ctx.font = `800 ${varFontSize}px ${FONT_BODY}`;
         ctx.fillText(varText, varCenterX, centerY + 1);
 

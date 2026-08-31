@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
-import { listClubRankings } from '@/lib/server/clubRankings';
+import { listPublicRankings } from '@/lib/server/publicRankings';
 
 // Mismo criterio que el detalle: el catalogo de rankings publicados cambia cuando
 // alguien guarda uno en el panel, no en cada visita.
@@ -19,30 +18,10 @@ function getStatusCode(error: unknown) {
 export async function GET(request: NextRequest) {
     try {
         const sport = String(request.nextUrl.searchParams.get('sport') || '').trim().toLowerCase();
-        const rankings = await listClubRankings();
-        const filtered = sport
-            ? rankings.filter((ranking) => String(ranking.sport || '').trim().toLowerCase() === sport)
-            : rankings;
-
-        const data = filtered.map((ranking) => ({
-            id: ranking.id,
-            name: ranking.name,
-            sport: ranking.sport,
-            season: ranking.season,
-            results_season: ranking.results_season,
-            scope: ranking.scope,
-            description: ranking.description,
-            stale_from_match_id: ranking.stale_from_match_id,
-            stale_reason: ranking.stale_reason,
-            initial_imported_at: ranking.initial_imported_at,
-            backfill_completed_at: ranking.backfill_completed_at,
-            last_incremental_match_id: ranking.last_incremental_match_id,
-            created_at: ranking.created_at,
-            updated_at: ranking.updated_at,
-            metadata: {
-                positionLabels: normalizeRankingPositionLabels(ranking.metadata?.positionLabels),
-            },
-        }));
+        // El filtro por deporte y el armado del payload viven en el compositor:
+        // es el que sabe que los rankings de rugby son dos cosas distintas (los
+        // clubes que calculamos nosotros y las selecciones de World Rugby).
+        const data = await listPublicRankings(sport);
 
         return NextResponse.json({ data }, {
             headers: { 'Cache-Control': PUBLIC_RANKING_CACHE_CONTROL },
