@@ -36,6 +36,7 @@ import { SPORTS } from '@/lib/data/sports';
 import { findCountryRecord } from '@/lib/data/countries';
 import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { APP_TIMEZONE } from '@/lib/timezone';
+import { computeElapsedSeconds, formatClockSeconds, normalizeStoredClock } from '@/lib/matchClock';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { cruzarEstado, mapMatchStatus } from '@/lib/matches/providerStatus';
 import {
@@ -62,6 +63,17 @@ function formatClockLabel(
     syncedAt?: string | null,
 ) {
     if (!clock) return '';
+
+    // Modelo derivado (matches.clock nuevo): misma cuenta que el gestor —
+    // accumulated_seconds + (now - period_started_at). Es la fuente de verdad;
+    // el espejo minute/seconds queda solo para relojes guardados con la forma
+    // vieja o para proveedores externos.
+    if (Object.prototype.hasOwnProperty.call(clock, 'accumulated_seconds')) {
+        const normalized = normalizeStoredClock(clock);
+        const time = formatClockSeconds(computeElapsedSeconds(normalized, Date.now()));
+        const period = normalized.period && normalized.period !== 'PRE' ? normalized.period : '';
+        return period ? `${time} - ${period}` : time;
+    }
 
     const minute = Number(clock.minute);
     const seconds = Number(clock.seconds);
@@ -1431,15 +1443,25 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         // Poll con conciencia de visibilidad (mismo criterio que useMatchesStore):
         // no consultamos la red mientras la pestaña está en background y, al volver
         // a foco, refrescamos de inmediato lo que no se pidió.
+        //
+        // En vivo el tick es de 12s: un try cargado en la consola aparece acá sin
+        // que nadie recargue (el CDN colapsa a los viewers en un cache corto, ver
+        // jsonLiveCached en /api/matches/[id]). Un partido programado se sondea
+        // cada 5 ticks (60s) solo para enterarse de que arrancó; finalizado no se
+        // sondea.
         let interval: ReturnType<typeof setInterval> | null = null;
+        let pollTick = 0;
 
         const startPolling = () => {
             if (interval != null) return;
             interval = setInterval(() => {
+                pollTick += 1;
                 if (statusRef.current === 'live') {
                     fetchData();
+                } else if (statusRef.current === 'scheduled' && pollTick % 5 === 0) {
+                    fetchData();
                 }
-            }, 60000);
+            }, 12000);
         };
 
         const stopPolling = () => {
@@ -1485,6 +1507,42 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
         return () => window.clearInterval(intervalId);
     }, [state.kind, state.matchData?.date, state.matchData?.status]);
+
+    // Destello del marcador: cuando el poll trae puntos nuevos, el numero del
+    // equipo que anoto hace un pop. El contador es la key del nodo: cada
+    // anotacion lo remonta y la animacion CSS corre una vez, sin timers.
+    const [scoreFlash, setScoreFlash] = useState({ home: 0, away: 0 });
+    const prevScoreRef = useRef<{ matchId: string | null; home: number | null; away: number | null }>({
+        matchId: null,
+        home: null,
+        away: null,
+    });
+
+    useEffect(() => {
+        const matchData = state.kind === 'ok' ? state.matchData : null;
+        if (!matchData) return;
+
+        const matchId = String(matchData.id ?? '');
+        const home = typeof matchData.home?.score === 'number' ? matchData.home.score : null;
+        const away = typeof matchData.away?.score === 'number' ? matchData.away.score : null;
+        const prev = prevScoreRef.current;
+        const sameMatch = prev.matchId === matchId;
+        prevScoreRef.current = { matchId, home, away };
+
+        if (!sameMatch) {
+            setScoreFlash({ home: 0, away: 0 });
+            return;
+        }
+
+        const homeScored = prev.home !== null && home !== null && home > prev.home;
+        const awayScored = prev.away !== null && away !== null && away > prev.away;
+        if (!homeScored && !awayScored) return;
+
+        setScoreFlash((current) => ({
+            home: homeScored ? current.home + 1 : current.home,
+            away: awayScored ? current.away + 1 : current.away,
+        }));
+    }, [state.kind, state.matchData]);
 
     const playerStatsTable = useMemo(() => buildPlayerStatsTableData({
         localPlayerRows: state.localPlayerRows,
@@ -1895,6 +1953,14 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     );
     void liveClockTick;
     const matchTimerText = liveDisplayTime || matchTimeText;
+    // El reloj en vivo se muestra grande, partido en tiempo y periodo. El label
+    // viene como "MM:SS - PERIODO" (o un virtual tipo "45'" sin periodo).
+    const [liveClockTime, liveClockPeriod] = (() => {
+        const raw = String(matchTimerText || '').trim();
+        const separatorIndex = raw.indexOf(' - ');
+        if (separatorIndex === -1) return [raw, ''];
+        return [raw.slice(0, separatorIndex), raw.slice(separatorIndex + 3)];
+    })();
     // Penalties may sit at the top level (DB/FlashScore branches) or inside
     // `score` (ESPN bundle) — accept either so every provider renders the shootout.
     const penaltyScoreInput = {
@@ -2377,12 +2443,22 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             )}
                               <div className={styles.scoreDisplay}>
                                  <div className={styles.scoreValue}>
-                                     <div className={styles.scoreNum}>{matchData.home.score ?? '-'}</div>
+                                     <div
+                                         key={`home-score-flash-${scoreFlash.home}`}
+                                         className={`${styles.scoreNum} ${scoreFlash.home > 0 ? styles.scoreNumFlash : ''}`}
+                                     >
+                                         {matchData.home.score ?? '-'}
+                                     </div>
                                      {publicPenaltyScore ? <div className={styles.scorePenalty}>({publicPenaltyScore.home})</div> : null}
                                  </div>
                                  <div className={styles.scoreSep}>:</div>
                                  <div className={styles.scoreValue}>
-                                     <div className={styles.scoreNum}>{matchData.away.score ?? '-'}</div>
+                                     <div
+                                         key={`away-score-flash-${scoreFlash.away}`}
+                                         className={`${styles.scoreNum} ${scoreFlash.away > 0 ? styles.scoreNumFlash : ''}`}
+                                     >
+                                         {matchData.away.score ?? '-'}
+                                     </div>
                                      {publicPenaltyScore ? <div className={styles.scorePenalty}>({publicPenaltyScore.away})</div> : null}
                                  </div>
                               </div>
@@ -2391,11 +2467,19 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     Sin marcador provisto por API
                                 </div>
                             )}
-                            <div className={styles.matchTimer}>
-                                <span>{matchTimerText}</span>
-                                <span style={{ opacity: 0.3 }}>|</span>
-                                <span>{matchData.status === 'live' ? 'En Juego' : matchData.status === 'final' ? 'FT' : 'Pendiente'}</span>
-                            </div>
+                            {matchData.status === 'live' ? (
+                                <div className={styles.liveClockBox}>
+                                    <span className={styles.liveClockDot} aria-hidden="true"></span>
+                                    <span className={styles.liveClockTime}>{liveClockTime}</span>
+                                    {liveClockPeriod ? <span className={styles.liveClockPeriod}>{liveClockPeriod}</span> : null}
+                                </div>
+                            ) : (
+                                <div className={styles.matchTimer}>
+                                    <span>{matchTimerText}</span>
+                                    <span style={{ opacity: 0.3 }}>|</span>
+                                    <span>{matchData.status === 'final' ? 'FT' : 'Pendiente'}</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* Visitor */}

@@ -64,12 +64,14 @@ function jsonNoStore(body: unknown, init?: ResponseInit) {
   });
 }
 
-// Cache compartido corto para el partido EN VIVO: colapsa el poll de 60s de
-// muchos viewers en el CDN de Vercel sin exceder ~15s de desfase. El resto de
-// los estados sigue con no-store (jsonNoStore).
+// Cache compartido corto para el partido EN VIVO: colapsa el poll de 12s de
+// muchos viewers en el CDN de Vercel. s-maxage=5 acota el desfase total
+// (poll + cache) a ~17s en el peor caso: un try cargado en la consola llega a
+// la ficha publica sin que nadie recargue. El resto de los estados sigue con
+// no-store (jsonNoStore).
 function jsonLiveCached(body: unknown, init?: ResponseInit) {
   const headers = new Headers(init?.headers);
-  headers.set('Cache-Control', 'public, s-maxage=15, stale-while-revalidate=30');
+  headers.set('Cache-Control', 'public, s-maxage=5, stale-while-revalidate=15');
   return NextResponse.json(body, {
     ...init,
     headers,
