@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef, useCallback, memo, Fragment, type
 import { Trophy, ChevronRight, ChevronLeft, Star } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
+import { resolverEstado } from '@/lib/utils/matchState';
 import InstallAppButton from '@/components/InstallAppButton';
 import { useSport } from '@/context/SportContext';
 import { getTournamentsBySport, getInternationalTournamentsBySport, getTournamentById } from '@/lib/data/tournaments/index';
@@ -147,6 +148,21 @@ function formatMatchRoundLabel(roundId: unknown): string {
 
 const FAVORITE_TEAMS_SECTION_ID = '__favorite-teams__';
 
+/* La columna de la hora mide 45px: la etiqueta larga (POSTERGADO) no entra.
+   La corta va en la fila y la completa queda en el title. */
+const ETIQUETA_CORTA_SUSPENDIDO: Record<string, string> = {
+  POSTERGADO: 'POST',
+  CANCELADO: 'CANC',
+  SUSPENDIDO: 'SUSP',
+  ABANDONADO: 'AB',
+  'W.O.': 'W.O.',
+};
+
+function etiquetaCortaDeSuspendido(etiqueta?: string) {
+  const larga = String(etiqueta || 'SUSPENDIDO').toUpperCase();
+  return ETIQUETA_CORTA_SUSPENDIDO[larga] || 'SUSP';
+}
+
 function getTournamentCountryName(tournament: { country?: unknown } | null | undefined): string {
   return typeof tournament?.country === 'string' && tournament.country.trim()
     ? tournament.country
@@ -166,7 +182,9 @@ interface Match {
   awayScore?: number;
   awayPenaltyScore?: number | null;
   winner?: 'home' | 'away' | null;
-  status: 'live' | 'scheduled' | 'finished';
+  status: 'live' | 'scheduled' | 'finished' | 'suspended';
+  /** Etiqueta del suspendido (POSTERGADO, CANCELADO, W.O.); la fila muestra la corta. */
+  statusLabel?: string;
   minute?: string;
   homeClubId?: string;
   awayClubId?: string;
@@ -571,6 +589,12 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
           </span>
         ) : match.status === 'finished' ? (
           <span className={styles.matchFinished}>FT</span>
+        ) : match.status === 'suspended' ? (
+          /* Sin horario: anunciar la hora de un partido que no se juega manda
+             a la gente a una cancha vacía. */
+          <span className={styles.matchSuspended} title={match.statusLabel || 'Suspendido'}>
+            {etiquetaCortaDeSuspendido(match.statusLabel)}
+          </span>
         ) : (
           <span className={styles.matchTimeText}>{match.time}</span>
         )}
@@ -702,7 +726,8 @@ const MotorsportMatchRow = memo(({ match, styles }: {
 }) => {
   const isLive = match.status === 'live';
   const isFinished = match.status === 'finished';
-  const statusLabel = isLive ? 'Live' : isFinished ? 'Final' : 'Scheduled';
+  const isSuspended = match.status === 'suspended';
+  const statusLabel = isLive ? 'Live' : isFinished ? 'Final' : isSuspended ? (match.statusLabel || 'Suspendido') : 'Scheduled';
   const footerLabel = match.footerLabel || (isLive ? 'Telemetry' : isFinished ? 'Race data' : 'Event details');
 
   return (
@@ -715,7 +740,8 @@ const MotorsportMatchRow = memo(({ match, styles }: {
           <span className={styles.motorsportHomeRowSeries}>{match.away}</span>
           <h3 className={styles.motorsportHomeRowTitle}>{match.home}</h3>
           <div className={styles.motorsportHomeRowMeta}>
-            {match.time && <span>{isFinished ? 'Finished' : match.time}</span>}
+            {/* La hora de un evento suspendido no se anuncia. */}
+            {match.time && !isSuspended && <span>{isFinished ? 'Finished' : match.time}</span>}
             {match.venue && <span>{match.venue}</span>}
           </div>
         </div>
@@ -1183,23 +1209,33 @@ export default function HomePage() {
         const { localTime: timeStr } = toLocalMatch(match.dateTime, userTimeZone);
         const normalizedMatchStatus = String(match.status || '').trim().toLowerCase();
 
-        let status: 'live' | 'scheduled' | 'finished' = 'scheduled';
-        if (normalizedMatchStatus === 'live' || normalizedMatchStatus === 'in_play') status = 'live';
-        if (normalizedMatchStatus === 'final' || normalizedMatchStatus === 'finished' || normalizedMatchStatus === 'ft') status = 'finished';
+        /* El estado sale del resolvedor, no de dos comparaciones sueltas: antes
+           'postponed' y 'cancelled' caían a "scheduled" y la fila anunciaba el
+           horario de un partido que no se juega. */
+        const estadoResuelto = resolverEstado(match.status);
+        let status: 'live' | 'scheduled' | 'finished' | 'suspended' = 'scheduled';
+        if (estadoResuelto.estado === 'en-vivo' || estadoResuelto.estado === 'entretiempo') status = 'live';
+        if (estadoResuelto.estado === 'finalizado') status = 'finished';
+        if (estadoResuelto.estado === 'suspendido') status = 'suspended';
+
+        /* Un postergado no lleva marcador aunque el proveedor mande ceros; un
+           W.O. o un abandonado sí pueden (muestraMarcador lo decide). */
+        const marcadorVisible = estadoResuelto.muestraMarcador;
 
         groups[groupKey].matches.push({
           id: match.id,
           time: timeStr,
           home: String(match.homeTeam?.name || 'Local'),
           homeLogo: resolveTeamLogo(match.homeTeam),
-          homeScore: typeof match.score?.home === 'number' ? match.score.home : (status === 'scheduled' ? null : 0),
+          homeScore: !marcadorVisible ? null : (typeof match.score?.home === 'number' ? match.score.home : (status === 'suspended' ? null : 0)),
           homePenaltyScore: hasMatchPenaltyShootout(match) ? (getMatchPenaltyScore(match)?.home ?? null) : null,
           away: String(match.awayTeam?.name || 'Visita'),
           awayLogo: resolveTeamLogo(match.awayTeam),
-          awayScore: typeof match.score?.away === 'number' ? match.score.away : (status === 'scheduled' ? null : 0),
+          awayScore: !marcadorVisible ? null : (typeof match.score?.away === 'number' ? match.score.away : (status === 'suspended' ? null : 0)),
           awayPenaltyScore: hasMatchPenaltyShootout(match) ? (getMatchPenaltyScore(match)?.away ?? null) : null,
-          winner: getMatchWinnerByScore(match),
+          winner: status === 'suspended' ? null : getMatchWinnerByScore(match),
           status: status,
+          statusLabel: status === 'suspended' ? estadoResuelto.etiqueta : undefined,
           // minutes will be calculated by the MatchRow component using the original dateTime
           minute: (match.clock?.period === 'HT' || match.clock?.period === 'ET' || match.clock?.period === 'Final') ? match.clock.period : undefined,
           _dateTime: match.dateTime, // Preserve for real-time calculation

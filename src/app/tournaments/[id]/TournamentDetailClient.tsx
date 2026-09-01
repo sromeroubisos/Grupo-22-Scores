@@ -13,7 +13,7 @@ import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
 import RadialBracketPredictor from '@/components/RadialBracketPredictor';
 import TournamentPublicStats from './TournamentPublicStats';
-import TournamentScoresPanel from './TournamentScoresPanel';
+import TournamentScoresPanel, { hasRatedLineups, sondaDePuntajes } from './TournamentScoresPanel';
 import TournamentChampionsTab, { ClubCrest, type ChampionRef } from './TournamentChampionsTab';
 import TournamentSofascoreStats from './TournamentSofascoreStats';
 import TournamentNavigation from './TournamentNavigation';
@@ -475,10 +475,17 @@ function getMatchRenderKey(match: any, fallbackIndex: number): string {
 /** Pick the most relevant match to feature: live > next scheduled > last result */
 function getFeaturedMatch(results: any[], fixtures: any[]): { match: any; isResult: boolean } | null {
     const all = [...results, ...fixtures];
-    const live = all.find(m => m.status === 'live' || m.status === 'in_play');
+    const live = all.find(m => {
+        const estado = resolverEstado(m.status).estado;
+        return estado === 'en-vivo' || estado === 'entretiempo';
+    });
     if (live) return { match: live, isResult: true };
-    if (fixtures.length > 0) return { match: fixtures[0], isResult: false };
+    // Un postergado no es el "próximo partido": el destacado busca el primer
+    // fixture que de verdad se va a jugar.
+    const jugable = fixtures.find(m => resolverEstado(m.status).estado !== 'suspendido');
+    if (jugable) return { match: jugable, isResult: false };
     if (results.length > 0) return { match: results[0], isResult: true };
+    if (fixtures.length > 0) return { match: fixtures[0], isResult: false };
     return null;
 }
 
@@ -488,8 +495,10 @@ function getMotorsportRoundNumber(match: any, fallbackIndex: number) {
 }
 
 function getMotorsportEventStatusLabel(match: any) {
-    if (match?.status === 'live' || match?.status === 'in_play') return 'Live';
-    if (match?.status === 'final' || match?.status === 'finished' || match?.status === 'ft') return 'Finalizado';
+    const estado = resolverEstado(match?.status);
+    if (estado.estado === 'en-vivo' || estado.estado === 'entretiempo') return 'Live';
+    if (estado.estado === 'finalizado') return 'Finalizado';
+    if (estado.estado === 'suspendido') return estado.etiqueta;
     return 'Proximo';
 }
 
@@ -2498,6 +2507,45 @@ export default function TournamentDetailPage({
     const shouldForceStandingsTabVisible = tournamentData?.sportId === 'basketball';
     const hasEspnSoccerTopScorers = isEspnSoccerSource && topScorers.length > 0;
     const hasChampionSeasons = seasonOptions.some((season) => Boolean(season.champion));
+
+    /* ── ¿La pestaña Puntajes tiene algo que mostrar? ─────────────────────
+       Una pestaña que abre a "Sin puntajes cargados" no es una pestaña: es un
+       callejón. La sonda contesta en el acto con los ratings locales; cuando
+       la única esperanza son los overrides externos, se les pregunta una vez
+       y la pestaña se retira sola si vuelven vacíos. Mientras la consulta
+       está en vuelo la pestaña se muestra, así un deep link a ?tab=scores no
+       rebota a Resumen por una respuesta que todavía no llegó. */
+    const sondaPuntajes = useMemo(() => sondaDePuntajes(results), [results]);
+    const [overridesConPuntajes, setOverridesConPuntajes] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        setOverridesConPuntajes(null);
+        if (sondaPuntajes.hasLocalRatings || sondaPuntajes.overrideCandidateIds.length === 0) return;
+
+        let active = true;
+        const idsParam = sondaPuntajes.overrideCandidateIds.join(',');
+        fetch(`/api/tournaments/${encodeURIComponent(id)}/lineup-overrides?matchIds=${encodeURIComponent(idsParam)}`, { cache: 'no-store' })
+            .then((response) => (response.ok ? response.json() : null))
+            .then((payload) => {
+                if (!active) return;
+                const overrides = Array.isArray(payload?.overrides) ? payload.overrides : [];
+                setOverridesConPuntajes(overrides.some((override: any) => hasRatedLineups(override?.lineups)));
+            })
+            .catch(() => {
+                if (active) setOverridesConPuntajes(false);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [id, sondaPuntajes]);
+
+    /* Mientras los partidos siguen en vuelo la pestaña se considera con datos:
+       esconderla por una lista vacía que aún no llegó rebotaría el deep link. */
+    const scoresTabConDatos = loading
+        || sondaPuntajes.hasLocalRatings
+        || (sondaPuntajes.overrideCandidateIds.length > 0 && overridesConPuntajes !== false);
+
     const navigationTabs = useMemo(() => {
         let tabs = BASE_TABS
             .filter((tab: { id: string; label: string }) => !(isLimitedExternalProvider && !hasEspnSoccerTopScorers && tab.id === 'stats'))
@@ -2505,6 +2553,7 @@ export default function TournamentDetailPage({
             .filter((tab: { id: string; label: string }) => !(tab.id === 'standings' && !shouldUseIntegratedBracketView && !hasVisibleStandingsData && !shouldForceStandingsTabVisible))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'playoff' && !hasDedicatedPlayoffTab))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'champions' && !hasChampionSeasons))
+            .filter((tab: { id: string; label: string }) => !(tab.id === 'scores' && !scoresTabConDatos))
             .map((tab: { id: string; label: string }) => {
                 if (tab.id === 'standings' && shouldUseIntegratedBracketView) {
                     return { ...tab, label: 'Cuadro' };
@@ -2532,7 +2581,7 @@ export default function TournamentDetailPage({
         }
 
         return tabs;
-    }, [hasChampionSeasons, hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
+    }, [hasChampionSeasons, hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, scoresTabConDatos, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
 
     useEffect(() => {
         if (navigationTabs.some((tab: { id: string; label: string }) => tab.id === activeTab)) return;
@@ -3544,7 +3593,9 @@ export default function TournamentDetailPage({
         const secondaryName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Competidor 2';
         const primaryLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
         const secondaryLogo = getTeamLogo(match.away_team) || match.away_team_logo || '';
-        const statusLabel = isLive ? 'En vivo' : isFinished ? 'Finalizada' : 'Programada';
+        const estadoEvento = resolverEstado(match.status, { estaEnResultados: isResult });
+        const eventoSuspendido = estadoEvento.estado === 'suspendido';
+        const statusLabel = isLive ? 'En vivo' : eventoSuspendido ? estadoEvento.etiqueta : isFinished ? 'Finalizada' : 'Programada';
         const footerLabel = isLive ? 'Telemetry' : isFinished ? 'Resultados' : 'Event details';
 
         return (
@@ -3559,7 +3610,7 @@ export default function TournamentDetailPage({
                         <h3 className={styles.motorsportEventTitle}>{eventTitle}</h3>
                         <div className={styles.motorsportEventMeta}>
                             {dateLabel && <span>{dateLabel}</span>}
-                            {timeLabel && <span>{timeLabel} hs</span>}
+                            {timeLabel && !eventoSuspendido && <span>{timeLabel} hs</span>}
                             {venue && <span>{venue}</span>}
                         </div>
                     </div>
@@ -3603,7 +3654,9 @@ export default function TournamentDetailPage({
         const secondaryName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Competidor 2';
         const primaryLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
         const secondaryLogo = getTeamLogo(match.away_team) || match.away_team_logo || '';
-        const statusLabel = isLive ? 'En vivo' : isFinished ? 'Finalizada' : 'Programada';
+        const estadoEvento = resolverEstado(match.status, { estaEnResultados: isResult });
+        const eventoSuspendido = estadoEvento.estado === 'suspendido';
+        const statusLabel = isLive ? 'En vivo' : eventoSuspendido ? estadoEvento.etiqueta : isFinished ? 'Finalizada' : 'Programada';
         const footerLabel = match.session_label || 'Carrera';
         const podiumSource = Array.isArray(match.podium) && match.podium.length > 0
             ? match.podium.slice(0, 3)
@@ -3625,7 +3678,7 @@ export default function TournamentDetailPage({
                         <h3 className={styles.motorsportEventTitle}>{eventTitle}</h3>
                         <div className={styles.motorsportEventMeta}>
                             {dateLabel && <span>{dateLabel}</span>}
-                            {timeLabel && <span>{timeLabel} hs</span>}
+                            {timeLabel && !eventoSuspendido && <span>{timeLabel} hs</span>}
                             {venue && <span>{venue}</span>}
                         </div>
                     </div>
@@ -3784,13 +3837,21 @@ export default function TournamentDetailPage({
         const awayName = match.away_team?.name || match.event_away_team || match.away_team_name || 'Visitante';
         const homeLogo = getTeamLogo(match.home_team) || match.home_team_logo || '';
         const awayLogo = getTeamLogo(match.away_team) || match.away_team_logo || '';
-        const isLive = match.status === 'live' || match.status === 'in_play';
+        /* El estado sale del resolvedor: un 'postponed' que llegue hasta acá
+           (todos los fixtures suspendidos) se anuncia como tal, no como
+           "Próximo partido" con un horario que no existe. */
+        const estado = resolverEstado(match.status, { estaEnResultados: isResult });
+        const isLive = estado.estado === 'en-vivo' || estado.estado === 'entretiempo';
+        const suspendido = estado.estado === 'suspendido';
         // Only treat as scored when the match is actually played/live — otherwise a default 0 from the
         // API renders "0 - 0" on an upcoming fixture.
-        const hasScore = (isResult || isLive)
+        const hasScore = estado.muestraMarcador
             && scoreHome !== undefined && scoreHome !== null && scoreHome !== '-';
 
-        const badgeLabel = isLive ? '🔴 En vivo' : isResult ? 'Último resultado' : 'Próximo partido';
+        const badgeLabel = isLive ? '🔴 En vivo'
+            : suspendido ? estado.etiqueta
+            : isResult ? 'Último resultado'
+            : 'Próximo partido';
 
         return (
             <div className={styles.featuredMatchCard}>
@@ -3819,6 +3880,13 @@ export default function TournamentDetailPage({
                                     <span className={styles.featuredScoreSep}>-</span>
                                     <span className={styles.featuredScoreNum}>{scoreAway}</span>
                                 </>
+                            ) : suspendido ? (
+                                /* Sin fecha ni hora: el dato de un suspendido es
+                                   su condición, no un kickoff que no va a pasar.
+                                   Clase propia: .featuredVS se esconde en mobile. */
+                                <span className={styles.featuredSuspended} title={estado.descripcion}>
+                                    {estado.etiqueta}
+                                </span>
                             ) : (
                                 <div className={styles.featuredKickoff}>
                                     {shortDateStr && (
@@ -3834,7 +3902,7 @@ export default function TournamentDetailPage({
                             )}
                         </div>
                         {hasScore && !isLive && (
-                            <span className={styles.featuredScoreTime}>FT</span>
+                            <span className={styles.featuredScoreTime}>{suspendido ? estado.etiqueta : 'FT'}</span>
                         )}
                     </div>
 
@@ -3850,7 +3918,7 @@ export default function TournamentDetailPage({
                 {dateStr && (
                     <div className={styles.featuredMatchMeta}>
                         <span style={{ textTransform: 'capitalize' }}>{dateStr}</span>
-                        {!isResult && timeStr && <span>· {timeStr} hs{sufijoDeZona}</span>}
+                        {!isResult && !suspendido && timeStr && <span>· {timeStr} hs{sufijoDeZona}</span>}
                         {match.venue && <span>· {match.venue}</span>}
                     </div>
                 )}
@@ -3865,8 +3933,13 @@ export default function TournamentDetailPage({
         const { match, isResult } = featured;
         const timestamp = match.timestamp || match.start_time || match.time;
         const date = timestamp ? new Date(timestamp * 1000) : null;
-        const isLive = match.status === 'live' || match.status === 'in_play';
-        const badgeLabel = isLive ? 'Carrera en vivo' : isResult ? 'Resultado oficial' : 'Proxima carrera';
+        const estadoEvento = resolverEstado(match.status, { estaEnResultados: isResult });
+        const isLive = estadoEvento.estado === 'en-vivo' || estadoEvento.estado === 'entretiempo';
+        const eventoSuspendido = estadoEvento.estado === 'suspendido';
+        const badgeLabel = isLive ? 'Carrera en vivo'
+            : eventoSuspendido ? estadoEvento.etiqueta
+            : isResult ? 'Resultado oficial'
+            : 'Proxima carrera';
         const eventTitle = match.event_name || match.tournament_name_short || match.tournament_name || tournamentName || 'Evento';
         const venue = match.venue || match.country_name || countryName || '';
         const dateLabel = date ? fechaEnZonaDelVisitante(date, { weekday: 'long', day: '2-digit', month: 'long' }) : '';
@@ -3888,7 +3961,7 @@ export default function TournamentDetailPage({
             ];
         const leaderPoints = typeof telemetrySource[0]?.points === 'number' ? telemetrySource[0].points : null;
         const statusMetric = match.session_label || 'Carrera';
-        const flagMetric = isLive ? 'En vivo' : isResult ? 'Finalizada' : 'Programada';
+        const flagMetric = isLive ? 'En vivo' : eventoSuspendido ? estadoEvento.etiqueta : isResult ? 'Finalizada' : 'Programada';
         const footerPrimary = 'Evento';
         const footerPrimaryState = isResult || isLive ? 'completed' : 'pending';
         const footerRaceState = isLive ? 'active' : isResult ? 'completed' : 'pending';
@@ -3911,7 +3984,7 @@ export default function TournamentDetailPage({
                         <h2 className={styles.motorsportFeaturedTitle}>{eventTitle}</h2>
                         <div className={styles.motorsportFeaturedMeta}>
                             {dateLabel && <span style={{ textTransform: 'capitalize' }}>{dateLabel}</span>}
-                            {timeLabel && <span>{timeLabel} hs</span>}
+                            {timeLabel && !eventoSuspendido && <span>{timeLabel} hs</span>}
                         </div>
                         <div className={styles.motorsportMetricsRow}>
                             <div className={styles.motorsportMetricItem}>

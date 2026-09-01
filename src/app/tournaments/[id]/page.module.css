@@ -1174,6 +1174,23 @@
     text-align: center;
 }
 
+/* Estado del suspendido en el centro del destacado: reemplaza al kickoff.
+   Misma paleta que .matchDateStatusOff en la fila, y NO se esconde en mobile
+   como .featuredVS — la condición es el único dato que la tarjeta tiene. */
+.featuredSuspended {
+    display: inline-block;
+    color: var(--fl-off-text);
+    background: color-mix(in srgb, var(--fl-warning) 14%, transparent);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: var(--fl-mono);
+    letter-spacing: 0.06em;
+    text-align: center;
+    white-space: nowrap;
+}
+
 /* Kick-off date+time display shown when the match has not been played */
 .featuredKickoff {
     display: flex;
