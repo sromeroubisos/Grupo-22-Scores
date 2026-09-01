@@ -54,6 +54,7 @@
         order: 3;
         justify-content: center !important;
         margin-left: 0 !important;
+        flex-wrap: wrap;
     }
 
     .header-left {
@@ -1101,7 +1102,10 @@
 }
 
 .event-live-workspace {
-    width: min(1220px, calc(100vw - 32px));
+    /* 100% y no 100vw: con el sidebar del admin visible (>=1024) el viewport
+     * miente — el contenido real es 100vw menos ~226px y el workspace se
+     * salia por la derecha en todo viewport de 1024 a ~1450. */
+    width: min(1220px, 100%);
     margin: 0 auto 22px;
 }
 
@@ -1330,12 +1334,18 @@
 }
 
 .event-timeline-panel {
-    width: min(1220px, calc(100vw - 32px));
+    /* 100% y no 100vw: con el sidebar del admin visible (>=1024) el viewport
+     * miente — el contenido real es 100vw menos ~226px y el workspace se
+     * salia por la derecha en todo viewport de 1024 a ~1450. */
+    width: min(1220px, 100%);
     margin: 0 auto;
 }
 
 .stats-workspace {
-    width: min(1220px, calc(100vw - 32px));
+    /* 100% y no 100vw: con el sidebar del admin visible (>=1024) el viewport
+     * miente — el contenido real es 100vw menos ~226px y el workspace se
+     * salia por la derecha en todo viewport de 1024 a ~1450. */
+    width: min(1220px, 100%);
     margin: 0 auto;
 }
 
@@ -3524,8 +3534,10 @@
     }
 }
 
-@media (max-width: 600px) {
-    /* Con la cabecera apilada los botones son anchos: la etiqueta entra. */
+@media (max-width: 1024px) {
+    /* Con la cabecera apilada los botones son anchos: la etiqueta entra.
+     * El corte es el mismo que apila la cabecera — un iPad vertical tambien
+     * queda con dos iconos mudos centrados si esto corta en 600. */
     .header-actions .btn-label {
         display: inline;
     }
@@ -3618,5 +3630,123 @@
 
     .live-quick-button[data-suggested="true"] .live-event-meta {
         color: #a7f3d0;
+    }
+}
+
+/* ─── Banda tablet (769–1326): el iPad y toda ventana con contenido angosto ───
+ * El mobile termina en 768 y el desktop asume 1200+. Un iPad de 810/820/834
+ * puntos quedaba con el layout de escritorio comprimido: aca se recupera
+ * ancho util y las columnas dobles respiran sin caer al apilado del telefono.
+ * El tope es 1326 y no 1100 porque desde 1024 el sidebar del admin come ~226px
+ * de viewport: hasta 1326 el CONTENIDO real sigue midiendo <=1100.
+ * Los !important son contra estilos inline del TSX, igual que en el bloque
+ * mobile. */
+@media (min-width: 769px) and (max-width: 1326px) {
+    .match-content-grid {
+        padding: 24px;
+    }
+
+    /* Siete pestañas a 24px de padding no entran en 810: se scrollea igual,
+     * pero con menos recorrido y la activa casi siempre a la vista. */
+    .tab-btn {
+        padding: 14px 16px;
+    }
+
+    .lineup-team-grid {
+        gap: 24px !important;
+    }
+
+    /* En una columna de ~360px los tres botones de carga rapida aplastaban
+     * el titulo: abajo del texto, alineados al inicio. */
+    .quick-lineup-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .quick-lineup-actions {
+        justify-content: flex-start;
+    }
+
+    /* Cuatro tiles fijas quedan de 170px en un iPad vertical; auto-fit las
+     * deja en tres comodas y vuelve a cuatro cuando el ancho alcanza. */
+    .live-quick-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+/* ─── Puntero grueso en ancho de tablet: iPad a cualquier orientacion ───
+ * Un iPad apaisado mide 1024–1366 y ninguna media query de ancho lo alcanza:
+ * los minimos tactiles van por tipo de puntero. Se corta en 769+ para no
+ * pisar los bloques de telefono, que ya resuelven lo suyo por ancho. Los
+ * campos van a 16px porque iOS hace zoom al enfocar cualquier texto menor. */
+@media (pointer: coarse) and (min-width: 769px) {
+    .mc-btn {
+        min-height: 44px;
+    }
+
+    .tab-btn {
+        min-height: 48px;
+    }
+
+    .stats-panel-tab {
+        min-height: 44px;
+        padding: 10px 16px;
+    }
+
+    .live-match-period-strip button {
+        min-width: 44px;
+        min-height: 40px;
+    }
+
+    .live-match-clock-btn {
+        min-height: 44px;
+    }
+
+    .guided-event-close {
+        width: 44px;
+        height: 44px;
+    }
+
+    .guided-toggle-row button,
+    .guided-player-option,
+    .guided-skip-player {
+        min-height: 48px;
+    }
+
+    .inline-select,
+    .form-group input,
+    .form-group select,
+    .config-parameters-grid .form-group input,
+    .config-parameters-grid .form-group select,
+    .config-points-grid .form-group input,
+    .live-match-clock-editor select,
+    .live-match-clock-editor input,
+    .guided-details-grid input,
+    .guided-details-grid select,
+    .guided-secondary-select select,
+    .guided-detail-text select,
+    .guided-detail-text textarea {
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    /* La cronologia edita minuto y tipo en linea: tocable y sin zoom. */
+    .event-list-row input,
+    .event-list-row select {
+        min-height: 44px;
+        padding: 8px 10px !important;
+        font-size: 16px !important;
+    }
+
+    .event-list-actions .mc-btn {
+        min-height: 44px;
+    }
+
+    /* Los campos inline (nombre del jugador, puntaje) y el textarea de carga
+     * rapida disparaban el zoom de Safari al enfocar. */
+    .inline-input,
+    .quick-lineup-textarea {
+        font-size: 16px;
     }
 }
