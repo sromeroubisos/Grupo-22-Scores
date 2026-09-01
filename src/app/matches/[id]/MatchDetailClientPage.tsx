@@ -10,6 +10,7 @@ import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
 import MatchTimeline from '@/components/match/MatchTimeline';
 import PeopleRatingsPanel, { type RateablePlayer } from '@/components/match/PeopleRatingsPanel';
 import styles from './page.module.css';
+import { TopStatRow, TopStatSplit } from './TopStatsRows';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import {
     buildLocalPlayerStatsRows,
@@ -2999,31 +3000,20 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                 {statsData.map((stat: any, i: number) => {
                                                     const hStr = String(stat.home ?? '');
                                                     const aStr = String(stat.away ?? '');
-                                                    const hVal = parseFloat(hStr.replace(/[^0-9.]/g, '')) || 0;
-                                                    const aVal = parseFloat(aStr.replace(/[^0-9.]/g, '')) || 0;
-                                                    const isPercent = hStr.includes('%') || aStr.includes('%');
-                                                    let hPct: number;
-                                                    let aPct: number;
-                                                    if (isPercent) {
-                                                        hPct = Math.min(100, hVal);
-                                                        aPct = Math.min(100, aVal);
-                                                    } else {
-                                                        const total = hVal + aVal;
-                                                        hPct = total > 0 ? (hVal / total) * 100 : 0;
-                                                        aPct = total > 0 ? (aVal / total) * 100 : 0;
-                                                    }
+                                                    // La planilla del proveedor llega como texto ("236 (81%)",
+                                                    // "72%"). Se compara por el primer numero, que es el que la
+                                                    // fila muestra; el resto es contexto.
+                                                    const num = (raw: string) => {
+                                                        const parsed = parseFloat(raw.replace(',', '.').replace(/[^0-9.\-]/g, ''));
+                                                        return Number.isFinite(parsed) ? parsed : null;
+                                                    };
                                                     return (
-                                                        <div className={styles.publicStatsRow} key={`${stat.label || stat.type}-${i}`}>
-                                                            <strong className={`${styles.publicStatsRowValue} ${styles.publicStatsRowValueHome}`}>{hStr || '—'}</strong>
-                                                            <div className={`${styles.publicStatsRowBar} ${styles.publicStatsRowBarHome}`} aria-hidden="true">
-                                                                <span style={{ width: `${hPct}%` }} />
-                                                            </div>
-                                                            <span className={styles.publicStatsRowLabel}>{stat.label || stat.type}</span>
-                                                            <div className={`${styles.publicStatsRowBar} ${styles.publicStatsRowBarAway}`} aria-hidden="true">
-                                                                <span style={{ width: `${aPct}%` }} />
-                                                            </div>
-                                                            <strong className={`${styles.publicStatsRowValue} ${styles.publicStatsRowValueAway}`}>{aStr || '—'}</strong>
-                                                        </div>
+                                                        <TopStatRow
+                                                            key={`${stat.label || stat.type}-${i}`}
+                                                            label={stat.label || stat.type}
+                                                            home={{ texto: hStr || '—', valor: num(hStr) }}
+                                                            away={{ texto: aStr || '—', valor: num(aStr) }}
+                                                        />
                                                     );
                                                 })}
                                             </div>
@@ -3064,45 +3054,44 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                     <div className={styles.publicStatsRows}>
                                                         {section.rows.map((row) => {
                                                             if (row.valueKind === 'percent') {
-                                                                const h = row.home;
-                                                                const a = row.away;
-                                                                const hLabel = h < 0 ? '—' : `${h.toFixed(1)}%`;
-                                                                const aLabel = a < 0 ? '—' : `${a.toFixed(1)}%`;
+                                                                // -1 es "sin intentos", no un cero: la fila se
+                                                                // dibuja con guion y no entra en la comparacion.
+                                                                const pct = (v: number) => (v < 0
+                                                                    ? { texto: '—', valor: null }
+                                                                    : { texto: `${v.toFixed(1)}%`, valor: v });
                                                                 return (
-                                                                    <div
-                                                                        className={`${styles.publicStatsRow}${row.accent ? ` ${styles.publicStatsRowAccent}` : ''}`}
+                                                                    <TopStatRow
                                                                         key={row.key}
-                                                                    >
-                                                                        <strong className={`${styles.publicStatsRowValue} ${styles.publicStatsRowValueHome}`}>{hLabel}</strong>
-                                                                        <div className={`${styles.publicStatsRowBar} ${styles.publicStatsRowBarHome}`} aria-hidden="true">
-                                                                            <span style={{ width: `${h < 0 ? 0 : Math.min(100, h)}%` }} />
-                                                                        </div>
-                                                                        <span className={styles.publicStatsRowLabel} title={row.tooltip}>{row.label}</span>
-                                                                        <div className={`${styles.publicStatsRowBar} ${styles.publicStatsRowBarAway}`} aria-hidden="true">
-                                                                            <span style={{ width: `${a < 0 ? 0 : Math.min(100, a)}%` }} />
-                                                                        </div>
-                                                                        <strong className={`${styles.publicStatsRowValue} ${styles.publicStatsRowValueAway}`}>{aLabel}</strong>
-                                                                    </div>
+                                                                        metricKey={row.key}
+                                                                        label={row.label}
+                                                                        tooltip={row.tooltip}
+                                                                        home={pct(row.home)}
+                                                                        away={pct(row.away)}
+                                                                    />
                                                                 );
                                                             }
-                                                            const total = row.home + row.away;
-                                                            const homePct = total > 0 ? (row.home / total) * 100 : 0;
-                                                            const awayPct = total > 0 ? (row.away / total) * 100 : 0;
+                                                            // La cabecera de la seccion (Puntos, Goles) va como
+                                                            // barra partida: es un conteo, asi que el reparto
+                                                            // home/(home+away) es una parte de un total real.
+                                                            if (row.accent) {
+                                                                return (
+                                                                    <TopStatSplit
+                                                                        key={row.key}
+                                                                        label={row.label}
+                                                                        home={row.home}
+                                                                        away={row.away}
+                                                                    />
+                                                                );
+                                                            }
                                                             return (
-                                                                <div
-                                                                    className={`${styles.publicStatsRow}${row.accent ? ` ${styles.publicStatsRowAccent}` : ''}`}
+                                                                <TopStatRow
                                                                     key={row.key}
-                                                                >
-                                                                    <strong className={`${styles.publicStatsRowValue} ${styles.publicStatsRowValueHome}`}>{row.home}</strong>
-                                                                    <div className={`${styles.publicStatsRowBar} ${styles.publicStatsRowBarHome}`} aria-hidden="true">
-                                                                        <span style={{ width: `${homePct}%` }} />
-                                                                    </div>
-                                                                    <span className={styles.publicStatsRowLabel} title={row.tooltip}>{row.label}</span>
-                                                                    <div className={`${styles.publicStatsRowBar} ${styles.publicStatsRowBarAway}`} aria-hidden="true">
-                                                                        <span style={{ width: `${awayPct}%` }} />
-                                                                    </div>
-                                                                    <strong className={`${styles.publicStatsRowValue} ${styles.publicStatsRowValueAway}`}>{row.away}</strong>
-                                                                </div>
+                                                                    metricKey={row.key}
+                                                                    label={row.label}
+                                                                    tooltip={row.tooltip}
+                                                                    home={{ texto: String(row.home), valor: row.home }}
+                                                                    away={{ texto: String(row.away), valor: row.away }}
+                                                                />
                                                             );
                                                         })}
                                                     </div>

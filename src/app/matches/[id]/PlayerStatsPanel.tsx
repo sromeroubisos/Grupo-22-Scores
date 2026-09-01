@@ -27,6 +27,29 @@ function metricNumber(row: PlayerStatsTableRow, metricId: string) {
 }
 
 /**
+ * El escalon de color de una chapa de metrica.
+ *
+ * El color se calcula contra el MAXIMO DE LA COLUMNA y no contra un umbral
+ * absoluto, porque estas metricas no son puntajes: 3 tackles puede ser el techo
+ * de un partido y el ultimo puesto de otro. Es la misma lectura que hacia la
+ * micro-barra que habia antes, dibujada como chapa.
+ *
+ * Cuatro escalones y no un degrade continuo: cuarenta verdes apenas distintos
+ * no son una escala, son ruido. Asi cada escalon es un color que se puede
+ * nombrar y la tabla se lee de un vistazo.
+ *
+ * El valor sigue escrito en la chapa: el color refuerza, nunca es el unico
+ * portador del dato.
+ */
+function metricBadgeTier(pct: number, value: number) {
+  if (value <= 0) return 'metricBadgeZero';
+  if (pct >= 100) return 'metricBadgeTop';
+  if (pct >= 66) return 'metricBadgeHigh';
+  if (pct >= 33) return 'metricBadgeMid';
+  return 'metricBadgeLow';
+}
+
+/**
  * Un jugador "sin registro" tiene TODAS las metricas mostradas en cero.
  *
  * Se mide contra lo que se muestra y no contra la fila entera a proposito: si
@@ -147,6 +170,24 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
     });
     return maxes;
   }, [filteredRows, displayedMetrics]);
+
+  /**
+   * Metricas cuyo maximo lo tiene UN solo jugador.
+   *
+   * La estrella marca al lider de la columna, y con empate no hay lider: en un
+   * partido de rugby seis jugadores hacen un try cada uno, y seis estrellas no
+   * senalan a nadie. Los seis conservan la chapa llena —son el maximo, y eso es
+   * cierto—, pero la estrella se apaga.
+   */
+  const metricLeaderIsUnique = useMemo(() => {
+    const unique: Record<string, boolean> = {};
+    displayedMetrics.forEach((metricId) => {
+      const max = metricMaxValues[metricId];
+      const enElTope = filteredRows.filter((r) => metricNumber(r, metricId) === max).length;
+      unique[metricId] = enElTope === 1;
+    });
+    return unique;
+  }, [filteredRows, displayedMetrics, metricMaxValues]);
 
   /**
    * Agrupacion por equipo. Sale del lado del jugador (`home` / `away`), que es
@@ -578,14 +619,14 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
                         isActiveSort ? styles.playerStatsCellMetricActive : ''
                       }`}
                     >
-                      <div className={styles.metricValueWrap}>
-                        <span className={styles.metricValue}>{value}</span>
-                        {pct > 0 && (
-                          <div className={styles.metricBarTrack}>
-                            <div className={styles.metricBarFill} style={{ width: `${pct}%` }} />
-                          </div>
+                      <span
+                        className={`${styles.metricBadge} ${styles[metricBadgeTier(pct, numericValue)]}`}
+                      >
+                        {value}
+                        {pct >= 100 && numericValue > 0 && metricLeaderIsUnique[metricId] && (
+                          <span className={styles.metricBadgeStar} aria-hidden="true">★</span>
                         )}
-                      </div>
+                      </span>
                     </td>
                   );
                 })}
