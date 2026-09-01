@@ -10,6 +10,8 @@ import {
     isContestLostDetail,
 } from '@/lib/matchEventStats';
 import { formatDifference } from '@/lib/utils/formatDifference';
+import TeamLogo from '@/components/TeamLogo';
+import TournamentTopStats, { type TarjetaDeTop } from './TournamentTopStats';
 
 type StatsSubTab = 'teams' | 'players';
 type TeamStatsView = 'summary' | 'attack' | 'defense';
@@ -104,6 +106,57 @@ const PLAYER_COLUMNS: StatColumn[] = [
     { id: 'red_cards', label: 'TR', title: 'Tarjetas rojas', tone: 'danger' },
 ];
 
+/* ── El podio de arriba ──────────────────────────────────────────────────────
+   Qué métrica merece tarjeta y cuál no: sólo las que contestan una pregunta que
+   alguien hace en voz alta ("¿quién es el goleador?", "¿quién defiende mejor?").
+   El resto vive en la tabla, que para eso está.
+
+   Las que se miden por evento (tries, tackles, conversiones) pueden no existir
+   en una competición dada; `unmeasured` les saca la tarjeta sola. */
+const TEAM_TOP_CARDS: TarjetaDeTop[] = [
+    { metric: 'points_for', title: 'Más puntos' },
+    { metric: 'points_for_per_match', title: 'Puntos por partido', decimals: 1 },
+    { metric: 'points_difference', title: 'Mejor diferencia', signed: true },
+    { metric: 'points_against_per_match', title: 'Menos puntos en contra', lowerIsBetter: true, decimals: 1 },
+    { metric: 'tries_scored', title: 'Más tries' },
+    { metric: 'tackles_made', title: 'Más tackles' },
+];
+
+const PLAYER_TOP_CARDS: TarjetaDeTop[] = [
+    { metric: 'points', title: 'Máximo anotador' },
+    { metric: 'tries', title: 'Más tries' },
+    { metric: 'conversions', title: 'Más conversiones' },
+    { metric: 'penalty_goals', title: 'Más penales' },
+    { metric: 'tackles', title: 'Más tackles' },
+    { metric: 'kick_meters', title: 'Más metros de patada' },
+];
+
+/**
+ * El escudo del club de una fila, sea de equipo o de jugador.
+ *
+ * Las dos clases de fila guardan el escudo en `entityLogo`: en la de equipo es
+ * el suyo, en la de jugador es el del club por el que anoto. Lo que cambia es
+ * de donde sale el NOMBRE con el que se pide —`entityName` para un equipo,
+ * `secondary` para un jugador— y ese nombre importa: `TeamLogo` lo usa para
+ * resolver overrides y, si no hay escudo, para las iniciales.
+ *
+ * Antes esto dibujaba iniciales siempre, con el escudo cargado en la fila y sin
+ * usar. Va por `TeamLogo` y no por `next/image` pelado: un escudo de la base con
+ * un host no declarado tumba la pagina entera.
+ */
+function EscudoDeFila({ row, kind }: { row: any; kind: 'teams' | 'players' }) {
+    const esJugador = kind === 'players';
+    return (
+        <TeamLogo
+            name={String((esJugador ? row.secondary : row.entityName) ?? '')}
+            logoUrl={row.entityLogo}
+            teamId={esJugador ? row.teamId : row.entityId}
+            size={28}
+            className={styles.statsAvatar}
+        />
+    );
+}
+
 const n = (value: unknown) => {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : 0;
@@ -125,12 +178,6 @@ const perMatch = (value: unknown, played: unknown) => {
 const percentage = (value: unknown, total: unknown) => {
     const denominator = n(total);
     return denominator > 0 ? (n(value) / denominator) * 100 : 0;
-};
-
-const initials = (value: string) => {
-    const parts = value.split(/\s+/).filter(Boolean);
-    const letters = parts.length > 1 ? `${parts[0][0]}${parts[1][0]}` : value.slice(0, 2);
-    return letters.toUpperCase();
 };
 
 const includesSearch = (value: unknown, query: string) => String(value ?? '').toLowerCase().includes(query);
@@ -689,7 +736,7 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
             <div key={row.entityId} className={styles.statsMobileCard}>
                 <div className={styles.statsMobileIdentity}>
                     <span className={styles.statsRank}>{idx + 1}</span>
-                    <span className={styles.statsAvatar}>{initials(String(row.entityName ?? 'EQ'))}</span>
+                    <EscudoDeFila row={row} kind="teams" />
                     <span className={styles.statsEntityName}>{row.entityName}</span>
                 </div>
                 {teamStatsView === 'attack' ? attackGroups : teamStatsView === 'defense' ? defenseGroups : summaryGroups}
@@ -701,7 +748,7 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
         <div key={row.entityId} className={styles.statsMobileCard}>
             <div className={styles.statsMobileIdentity}>
                 <span className={styles.statsRank}>{idx + 1}</span>
-                <span className={styles.statsAvatar}>{initials(String(row.entityName ?? 'JG'))}</span>
+                <EscudoDeFila row={row} kind="players" />
                 <span className={styles.statsMobileIdentityText}>
                     <span className={styles.statsEntityName}>{row.entityName}</span>
                     <span className={styles.statsEntitySecondary}>{row.secondary}</span>
@@ -772,6 +819,19 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                         </button>
                     ))}
                 </div>
+            )}
+
+            {!showTopScorersFallback && hasStats && (
+                <TournamentTopStats
+                    rows={currentRows}
+                    cards={activeSubTab === 'teams' ? TEAM_TOP_CARDS : PLAYER_TOP_CARDS}
+                    unmeasured={unmeasuredMetrics}
+                    kind={activeSubTab}
+                    onPick={(metric, direction) => {
+                        setSortKey(metric);
+                        setSortDirection(direction);
+                    }}
+                />
             )}
 
             {!showTopScorersFallback && hasStats && (
@@ -919,7 +979,7 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                                                 {col.id === 'entity' ? (
                                                     <div className={styles.statsEntityCell}>
                                                         <span className={styles.statsRank}>{idx + 1}</span>
-                                                        <span className={styles.statsAvatar}>{initials(String(row.entityName ?? ''))}</span>
+                                                        <EscudoDeFila row={row} kind={activeSubTab} />
                                                         <span className={styles.statsEntityText}>
                                                             <span className={styles.statsEntityName}>{row.entityName}</span>
                                                             <span className={styles.statsEntitySecondary}>

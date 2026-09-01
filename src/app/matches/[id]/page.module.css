@@ -821,70 +821,8 @@
     gap: 9px;
 }
 
-.publicStatsRow {
-    display: grid;
-    grid-template-columns: 40px minmax(56px, 1fr) minmax(96px, 1fr) minmax(56px, 1fr) 40px;
-    align-items: center;
-    gap: 8px;
-    min-height: 28px;
-}
-
-.publicStatsRowAccent {
-    padding-bottom: 10px;
-    margin-bottom: 4px;
-    border-bottom: 1px solid var(--stroke);
-}
-
-.publicStatsRowValue {
-    color: var(--text);
-    font-size: 14px;
-    font-weight: 800;
-    line-height: 1;
-}
-
-.publicStatsRowValueHome {
-    text-align: right;
-}
-
-.publicStatsRowValueAway {
-    text-align: left;
-}
-
-.publicStatsRowLabel {
-    color: var(--muted);
-    font-size: 10px;
-    font-weight: 800;
-    line-height: 1.25;
-    text-align: center;
-    text-transform: uppercase;
-}
-
-.publicStatsRowBar {
-    height: 7px;
-    background: rgba(255, 255, 255, 0.06);
-    overflow: hidden;
-    border-radius: 4px;
-}
-
-.publicStatsRowBarHome {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.publicStatsRowBar span {
-    display: block;
-    height: 100%;
-    transition: width 0.25s ease;
-}
-
-.publicStatsRowBarHome span {
-    background: var(--accent);
-    box-shadow: 0 0 8px var(--accent-glow);
-}
-
-.publicStatsRowBarAway span {
-    background: rgba(255, 255, 255, 0.22);
-}
+/* `.publicStatsRow*` y las micro-barras `.metric*` vivian aca. Las
+   reemplazaron `.topStatRow*` y `.metricBadge*`, al final del archivo. */
 
 /* Lineups */
 .lineupsGrid {
@@ -3543,38 +3481,6 @@
     background: rgba(var(--color-accent-rgb), 0.04);
 }
 
-.metricValueWrap {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-}
-
-.metricValue {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-}
-
-.playerStatsColMetricActive .metricValue {
-    color: var(--accent);
-}
-
-.metricBarTrack {
-    width: 48px;
-    height: 3px;
-    border-radius: 99px;
-    background: rgba(255, 255, 255, 0.06);
-    overflow: hidden;
-}
-
-.metricBarFill {
-    height: 100%;
-    border-radius: 99px;
-    background: rgba(var(--color-accent-rgb), 0.45);
-}
-
 @media (max-width: 768px) {
     .playerStatsHeaderBar {
         flex-direction: column;
@@ -4623,4 +4529,250 @@
 @media (max-width: 640px) {
     .tabsSkeleton { gap: 10px; padding: 0 12px; }
     .tabsSkeleton span { flex: 1 1 0; width: auto; }
+}
+
+/* ================================================================
+   Top stats del partido — filas al estilo FotMob
+   ================================================================
+   Reemplazan a `.publicStatsRow*`, que gastaba dos tercios del ancho en
+   dos barras para decir la misma proporcion que ya decia el par de
+   numeros. Acá el ancho va a los datos: valor · etiqueta · valor, y una
+   chapa llena marca quién ganó la métrica.
+
+   La chapa se pinta con --color-accent y texto casi negro: sobre ese
+   verde el negro da 6,2:1, así que la MISMA regla pasa AA en los dos
+   temas y no hace falta un override para el claro. Al revés no: blanco
+   sobre ese verde da 3,3:1 y no llega.
+   ================================================================ */
+
+.topStatRow {
+    display: grid;
+    grid-template-columns: minmax(64px, 1fr) minmax(120px, 2fr) minmax(64px, 1fr);
+    align-items: center;
+    gap: 12px;
+    min-height: 38px;
+    padding: 0 2px;
+}
+
+.topStatRow + .topStatRow {
+    border-top: 1px solid var(--stroke);
+}
+
+.topStatValue {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.topStatValueHome { justify-self: start; text-align: left; }
+.topStatValueAway { justify-self: end;   text-align: right; }
+
+/* La chapa del ganador. `min-width` para que una columna de chapas de
+   una y de tres cifras no quede en diente de sierra. */
+.topStatValueWin {
+    background: var(--color-accent);
+    color: #04070c;
+    border-radius: 999px;
+    padding: 4px 12px;
+    min-width: 46px;
+    text-align: center;
+}
+
+.topStatLabel {
+    justify-self: center;
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--muted);
+}
+
+/* ── La métrica cabecera como barra partida ─────────────────────── */
+
+.topStatSplitBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 14px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--stroke);
+}
+
+.topStatSplitLabel {
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.topStatSplitTrack {
+    display: flex;
+    align-items: stretch;
+    gap: 3px;
+    height: 30px;
+}
+
+.topStatSplitHome,
+.topStatSplitAway {
+    display: flex;
+    align-items: center;
+    min-width: 44px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    transition: width 0.3s ease;
+}
+
+.topStatSplitHome {
+    justify-content: flex-start;
+    padding-left: 12px;
+    background: var(--color-accent);
+    color: #04070c;
+}
+
+.topStatSplitAway {
+    justify-content: flex-end;
+    padding-right: 12px;
+    background: rgba(var(--color-accent-rgb), 0.22);
+    color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .topStatSplitHome,
+    .topStatSplitAway { transition: none; }
+}
+
+/* ── Las pestañas de estadística, como chips ─────────────────────── */
+
+.publicStatsTabs {
+    gap: 6px;
+    border-bottom: 0;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    /* Un flex nowrap aporta su ancho MAX-CONTENT al padre, y `.publicStatsPanel`
+       es flex column: sin esto la tira de cinco chips estiraba el panel a 528px
+       dentro de un contenedor de 367 y el valor del visitante quedaba cortado
+       fuera de la pantalla, sin scroll que lo alcanzara. `overflow-x: auto` por
+       sí solo NO lo evita: hace falta soltar el mínimo automático. */
+    min-width: 0;
+}
+
+.publicStatsPanel,
+.publicStatsSectionGrid,
+.publicStatsSection {
+    min-width: 0;
+}
+
+/* El `min-width: 0` de la tira de chips no alcanza solo: `.panelBlock` es un
+   ITEM DE GRID y su `min-width: auto` lo hace crecer hasta el min-content de lo
+   que tiene adentro, así que nadie llega a apretar la tira. Medido en 390px:
+   528px de panel dentro de 375px de pestaña, con el valor del visitante fuera
+   de la pantalla y `.page { overflow-x: hidden }` tapando el scroll que lo
+   habría alcanzado. Con esta regla el panel mide 335px y la tira scrollea sola.
+
+   Va con `:has()` y no sobre `.panelBlock` a secas porque esa clase la comparten
+   TODAS las pestañas del partido, y a una tabla sin scroller propio soltarle el
+   mínimo la recortaría. */
+.tabContent > .panelBlock:has(> .publicStatsPanel) {
+    min-width: 0;
+}
+
+.publicStatsTabs::-webkit-scrollbar { display: none; }
+
+.publicStatsTab {
+    border: 0;
+    border-radius: 999px;
+    background: var(--panel-solid);
+    color: var(--muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    /* 44px de alto real: es el único control táctil de este panel. */
+    padding: 12px 16px;
+    white-space: nowrap;
+}
+
+.publicStatsTab:hover {
+    background: var(--panel-solid);
+    color: var(--text);
+    border-color: transparent;
+}
+
+.publicStatsTabActive,
+.publicStatsTabActive:hover {
+    background: var(--text);
+    color: var(--bg);
+    border-color: transparent;
+}
+
+/* ── Ancho angosto ───────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+    .topStatRow {
+        grid-template-columns: minmax(52px, auto) 1fr minmax(52px, auto);
+        gap: 8px;
+    }
+
+    .topStatLabel { font-size: 11.5px; }
+    .topStatValue { font-size: 13px; }
+    .topStatValueWin { padding: 4px 10px; min-width: 42px; }
+}
+
+/* ================================================================
+   Chapas de la tabla de jugadores — escala de la columna
+   ================================================================
+   Reemplazan al par «valor + micro-barra». La barra medía lo mismo
+   que mide ahora el color de la chapa, pero se comía 8px de alto por
+   fila y en una tabla de 46 jugadores eso es una pantalla entera.
+
+   El texto queda SIEMPRE escrito: el color refuerza la lectura, no la
+   reemplaza. Nadie tiene que distinguir dos verdes para saber cuántos
+   tackles hizo un jugador.
+   ================================================================ */
+
+.metricBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 40px;
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+/* El líder de la columna, en lleno y con estrella. Es la única chapa que
+   necesita texto casi negro: sobre el verde de marca da 6,2:1 en los dos
+   temas, mientras que blanco daría 3,3:1. */
+.metricBadgeTop {
+    background: var(--color-accent);
+    color: #04070c;
+}
+
+.metricBadgeStar {
+    font-size: 10px;
+    line-height: 1;
+}
+
+.metricBadgeHigh { background: rgba(var(--color-accent-rgb), 0.34); }
+.metricBadgeMid  { background: rgba(var(--color-accent-rgb), 0.20); }
+.metricBadgeLow  { background: rgba(var(--color-accent-rgb), 0.10); }
+
+/* El cero no lleva chapa: pintarlo sería darle peso a la ausencia de
+   registro, que es justo lo que la fila NO quiere destacar. */
+.metricBadgeZero {
+    background: transparent;
+    color: var(--muted);
+    font-weight: 600;
 }

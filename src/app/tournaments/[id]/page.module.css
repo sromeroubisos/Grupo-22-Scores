@@ -2742,19 +2742,13 @@
     font-family: var(--fl-mono);
 }
 
+/* Ya no es una caja de iniciales: adentro va un `TeamLogo`, que trae su propio
+   borde, fondo y —cuando el club no tiene escudo— sus iniciales. Acá queda solo
+   lo que el contenedor tiene que decir: cuánto mide y que no se aplaste. */
 .statsAvatar {
     width: 28px;
     height: 28px;
     flex-shrink: 0;
-    display: grid;
-    place-items: center;
-    border-radius: 8px;
-    border: 1px solid var(--fl-border);
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--fl-text-soft);
-    font-size: 0.68rem;
-    font-weight: 900;
-    font-family: var(--fl-mono);
 }
 
 .statsEntityText,
@@ -4643,4 +4637,155 @@
     font-size: 0.6rem;
     font-weight: 800;
     flex-shrink: 0;
+}
+
+/* ================================================================
+   Lo más destacado — el podio por métrica arriba de la tabla
+   ================================================================
+   La tarjeta contesta "quién va primero" sin scrollear; la tabla de
+   abajo queda para comparar. La cabecera es un botón real: ordena la
+   tabla por esa métrica, así el chevrón dice algo en vez de decorar.
+   ================================================================ */
+
+.topStatsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.topStatsHeading {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--fl-text);
+}
+
+.topStatsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: 14px;
+}
+
+.topStatsCard {
+    background: var(--fl-surface);
+    border: 1px solid var(--fl-border);
+    border-radius: 14px;
+    padding: 6px 16px 10px;
+}
+
+.topStatsCardHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    /* 44px de alto: es el control táctil de la tarjeta. */
+    min-height: 44px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    transition: opacity 0.15s ease;
+}
+
+.topStatsCardHead:hover { opacity: 0.75; }
+
+.topStatsCardHead:focus-visible {
+    outline: 2px solid var(--fl-primary);
+    outline-offset: 3px;
+    border-radius: 8px;
+}
+
+.topStatsCardTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--fl-text);
+}
+
+.topStatsCardChevron {
+    font-size: 20px;
+    line-height: 1;
+    color: var(--fl-text-dim);
+}
+
+.topStatsList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.topStatsItem {
+    display: grid;
+    grid-template-columns: 14px 24px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    min-height: 46px;
+    border-top: 1px solid var(--fl-border-sub);
+}
+
+.topStatsRank {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fl-text-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+.topStatsCrest {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.topStatsIdentity {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.topStatsName {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--fl-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.topStatsTeam {
+    font-size: 11.5px;
+    color: var(--fl-text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.topStatsValue {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--fl-text);
+    font-variant-numeric: tabular-nums;
+}
+
+/* El líder en chapa llena. Texto casi negro y no blanco: sobre el verde
+   de marca el negro da 6,2:1 y el blanco 3,3:1, así que la misma regla
+   pasa AA en el tema claro y en el oscuro sin override. */
+.topStatsValueLead {
+    background: var(--fl-primary);
+    color: #04070c;
+    border-radius: 999px;
+    padding: 4px 11px;
+    min-width: 42px;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .topStatsGrid { gap: 10px; }
+    .topStatsCard { padding: 4px 14px 8px; }
+    .topStatsHeading { font-size: 16px; }
 }
