@@ -3077,6 +3077,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                                 return (
                                                                     <TopStatSplit
                                                                         key={row.key}
+                                                                        metricKey={row.key}
                                                                         label={row.label}
                                                                         home={row.home}
                                                                         away={row.away}
