@@ -2,6 +2,7 @@
 
 import React from 'react';
 import styles from './page.module.css';
+import { ladoGanador, menosEsMejor } from '@/lib/statBetterSide';
 
 /**
  * Las estadisticas del partido al estilo FotMob: el valor de cada equipo en los
@@ -17,49 +18,6 @@ import styles from './page.module.css';
  * se dibuja como barra partida, igual que la posesion en FotMob.
  */
 
-/**
- * Metricas donde gana el que tiene MENOS.
- *
- * La chapa marca al mejor, no al mas grande. Sin esta lista la pantalla
- * felicitaria al equipo con mas tarjetas rojas.
- *
- * Va por clave y no por etiqueta a proposito: la etiqueta cambia de deporte en
- * deporte ("Amarillas", "Yellow cards") y de proveedor en proveedor, la clave
- * la fija `matchStatsFromEvents.ts`.
- */
-const MENOS_ES_MEJOR = new Set([
-    'yellowCards', 'redCards', 'blueCards', 'greenCards', 'twoMinSuspensions',
-    'penaltiesCommitted', 'penaltyYards', 'fouls', 'injuries',
-    'knockOns', 'forwardPasses', 'handlingErrors',
-    'turnovers', 'turnoversLost', 'turnoversBadPass', 'turnoversOffensiveFoul',
-    'turnoversOnDowns', 'turnoversPassivePlay', 'turnoversTechnicalFault',
-    'fumbles', 'fumblesLost', 'interceptionsThrown', 'sacksTaken',
-    'ownGoals', 'linesLost', 'rucksLost', 'maulsLost', 'scrumsLost',
-    'shotsMissed', 'shotsOffTarget', 'conversionsMissed', 'dropGoalsMissed',
-    'penaltyGoalsMissed', 'shootoutMissed',
-]);
-
-/**
- * Etiquetas de las metricas que llegan sin clave (planilla del proveedor).
- *
- * Es un respaldo, no la via principal: el proveedor manda `label` y nada mas,
- * asi que para esas filas la unica sena disponible es el texto. Se compara en
- * minusculas y sin acentos.
- */
-const MENOS_ES_MEJOR_TEXTO = [
-    'amarilla', 'roja', 'tarjeta', 'card', 'falta', 'foul',
-    'perdida', 'error', 'penal cometido', 'offside', 'fuera de juego',
-];
-
-const sinAcentos = (texto: string) =>
-    texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-function menosEsMejor(metricKey: string | undefined, label: string) {
-    if (metricKey) return MENOS_ES_MEJOR.has(metricKey);
-    const plano = sinAcentos(label);
-    return MENOS_ES_MEJOR_TEXTO.some((aguja) => plano.includes(aguja));
-}
-
 /** `null` cuando no hay dato: nadie gana una metrica que nadie midio. */
 export type LadoDeFila = { texto: string; valor: number | null };
 
@@ -71,20 +29,8 @@ type FilaProps = {
     away: LadoDeFila;
 };
 
-/**
- * Quien se lleva la chapa. Empate y falta de dato no la dan a nadie: una chapa
- * en un 0-0 diria que alguien gano algo que no paso.
- */
-function ganador(home: LadoDeFila, away: LadoDeFila, invertido: boolean): 'home' | 'away' | null {
-    if (home.valor === null || away.valor === null) return null;
-    if (home.valor === away.valor) return null;
-    const local = invertido ? home.valor < away.valor : home.valor > away.valor;
-    return local ? 'home' : 'away';
-}
-
 export function TopStatRow({ metricKey, label, tooltip, home, away }: FilaProps) {
-    const invertido = menosEsMejor(metricKey, label);
-    const gana = ganador(home, away, invertido);
+    const gana = ladoGanador(home.valor, away.valor, metricKey, label);
 
     return (
         <div className={styles.topStatRow}>
@@ -112,8 +58,29 @@ export function TopStatRow({ metricKey, label, tooltip, home, away }: FilaProps)
  * tener 93% de pases acertados cada uno— y por eso las filas de porcentaje
  * siguen el camino normal aunque vengan marcadas como cabecera.
  */
-export function TopStatSplit({ label, home, away }: { label: string; home: number; away: number }) {
+export function TopStatSplit({ metricKey, label, home, away }: {
+    metricKey?: string;
+    label: string;
+    home: number;
+    away: number;
+}) {
     const total = home + away;
+
+    // La barra no sabe de "mejor": pinta al local en acento lleno y al visitante
+    // en tinta, asi que el que tiene MAS se lleva la franja brillante. Sobre
+    // "Perdidas", "Turnovers" o "Exclusiones de 2 min" eso condecora al peor.
+    // Esas cabeceras van como fila normal, donde la chapa si premia al que tiene
+    // menos. Medido: 3 de las 162 filas de los seis deportes caian aca.
+    if (menosEsMejor(metricKey, label)) {
+        return (
+            <TopStatRow
+                metricKey={metricKey}
+                label={label}
+                home={{ texto: String(home), valor: home }}
+                away={{ texto: String(away), valor: away }}
+            />
+        );
+    }
 
     // Sin nada anotado no hay reparto que mostrar: media barra de cada lado
     // afirmaria un empate que no ocurrio. La fila normal ya dice 0 y 0, y como
@@ -121,6 +88,7 @@ export function TopStatSplit({ label, home, away }: { label: string; home: numbe
     if (total <= 0) {
         return (
             <TopStatRow
+                metricKey={metricKey}
                 label={label}
                 home={{ texto: String(home), valor: home }}
                 away={{ texto: String(away), valor: away }}
