@@ -1376,6 +1376,17 @@
     font-weight: 600;
 }
 
+/* Suspendido / postergado / cancelado: la etiqueta corta ocupa el lugar de la
+   hora. Va en el mismo gris que FT — el ámbar como texto no pasa contraste en
+   claro — y el texto ya dice lo que pasa. */
+.matchSuspended {
+    color: var(--color-text-tertiary);
+    font-weight: 700;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
 @keyframes livePulse {
     0%, 100% {
         transform: scale(1);

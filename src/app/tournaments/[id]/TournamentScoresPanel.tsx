@@ -341,10 +341,33 @@ function normalizeLineupPlayers(rawLineups: unknown, side: MatchSide): LineupPla
     .filter((player): player is LineupPlayer => Boolean(player));
 }
 
-function hasRatedLineups(rawLineups: unknown) {
+export function hasRatedLineups(rawLineups: unknown) {
   return (['home', 'away'] as MatchSide[]).some((side) =>
     normalizeLineupPlayers(rawLineups, side).some((player) => typeof player.rating === 'number'),
   );
+}
+
+/**
+ * Sonda sincrónica para el padre: ¿la pestaña Puntajes tiene algo que mostrar?
+ *
+ * Contesta sin montar el panel. `hasLocalRatings` alcanza para mostrar la
+ * pestaña; si es false pero hay `overrideCandidateIds`, la respuesta depende
+ * del endpoint de lineup-overrides (los mismos ids que pediría este panel).
+ * Sin ratings locales ni candidatos, la pestaña no tiene nada que ofrecer.
+ */
+export function sondaDePuntajes(matches: unknown[]): {
+  hasLocalRatings: boolean;
+  overrideCandidateIds: string[];
+} {
+  const finales = matches.map(toRecord).filter(isFinalMatch);
+  const hasLocalRatings = finales.some((match) => hasRatedLineups(match.lineups));
+  if (hasLocalRatings) return { hasLocalRatings, overrideCandidateIds: [] };
+
+  const overrideCandidateIds = finales
+    .map(getMatchId)
+    .filter((matchId) => matchId && !UUID_RE.test(matchId))
+    .slice(0, 120);
+  return { hasLocalRatings, overrideCandidateIds };
 }
 
 function buildScoreEntries(
