@@ -330,6 +330,95 @@
     gap: 12px;
 }
 
+/* Try en cancha: el numero del equipo que anoto hace un pop con el acento.
+   La animacion corre una vez por montaje — la key del nodo cambia con cada
+   anotacion, asi que cada punto nuevo la vuelve a disparar. */
+.scoreNumFlash {
+    animation: score-pop 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+    transform-origin: center;
+    will-change: transform;
+}
+
+@keyframes score-pop {
+    0% {
+        transform: scale(1);
+    }
+
+    18% {
+        transform: scale(1.22);
+        color: var(--accent);
+        text-shadow: 0 0 40px rgba(var(--color-accent-rgb), 0.65);
+    }
+
+    55% {
+        transform: scale(1.05);
+        color: var(--accent);
+        text-shadow: 0 0 28px rgba(var(--color-accent-rgb), 0.4);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Reloj protagonista del partido en vivo: reemplaza al matchTimer chico
+   mientras status === 'live'. El tiempo manda, el periodo lo acompaña. */
+.liveClockBox {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    background: rgba(var(--color-accent-rgb), 0.08);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.35);
+    border-radius: 14px;
+    padding: 10px 22px;
+}
+
+.liveClockDot {
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse-ring 1.5s infinite;
+}
+
+.liveClockTime {
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.liveClockPeriod {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    background: rgba(var(--color-accent-rgb), 0.14);
+    padding: 4px 10px;
+    border-radius: 99px;
+}
+
+@media (max-width: 768px) {
+    .liveClockTime {
+        font-size: 26px;
+    }
+
+    .liveClockBox {
+        padding: 8px 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scoreNumFlash {
+        animation: none;
+    }
+}
+
 /* --- Info Bar --- */
 .infoBar {
     margin-top: 32px;
