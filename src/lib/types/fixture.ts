@@ -61,6 +61,10 @@ export interface Match {
   streamUrl?: string | null;
   replayUrl?: string | null;
 
+  // N° de partido en el sistema de la unión (BD UAR u otro). Opcional; se usa
+  // al exportar la planilla oficial. Persistence column: official_sheet_number.
+  officialSheetNumber?: string | null;
+
   // Metadata
   createdAt: string;
   updatedAt: string;
@@ -178,6 +182,7 @@ export interface MatchFormData {
   notes?: string | null;
   referee?: string | null;
   pitch?: string | null;
+  officialSheetNumber?: string | null;
   score?: MatchScore | null;
   clock?: MatchClock | null;
   homeBasePoints?: number | null;
@@ -191,6 +196,9 @@ export interface MatchFormData {
     away: any[];
   } | null;
   events?: any[] | null;
+  // Persistence column: is_visible. El alta lo manda desde "Público"; sin el
+  // campo, la columna queda en su default.
+  isVisible?: boolean | null;
 }
 
 export interface RoundFormData {

@@ -4,6 +4,15 @@ export interface MatchSheetPdfLineupPlayer {
   position?: string;
   role?: string;
   isCaptain?: boolean;
+  /** N° de documento para la planilla oficial (columna N°Doc). */
+  docNumber?: string;
+  /** Curso de primeras líneas aprobado: la marca ① de la planilla oficial. */
+  frontRow?: boolean;
+}
+
+export interface MatchSheetPdfCoach {
+  name: string;
+  docNumber?: string;
 }
 
 export interface MatchSheetPdfTeam {
@@ -14,6 +23,8 @@ export interface MatchSheetPdfTeam {
   points?: string;
   pointsDetail?: string;
   lineup: MatchSheetPdfLineupPlayer[];
+  /** Entrenador del club (pie de la planilla oficial). */
+  coach?: MatchSheetPdfCoach | null;
 }
 
 export interface MatchSheetPdfEvent {
@@ -23,6 +34,14 @@ export interface MatchSheetPdfEvent {
   team: string;
   detail: string;
   score?: string;
+  /** Lado del evento, para volcarlo en las incidencias de la planilla oficial. */
+  side?: 'home' | 'away' | null;
+  /** Puntos que sumó el evento (try 5, conversión 2, penal 3). */
+  points?: number | null;
+  /** Dorsal del jugador del evento, si se pudo casar con la formación. */
+  playerNumber?: string | null;
+  /** Nombre del jugador del evento (columna Observaciones). */
+  playerName?: string | null;
 }
 
 export interface MatchSheetPdfStatRow {
@@ -56,6 +75,17 @@ export interface MatchSheetPdfInput {
   timeline: MatchSheetPdfEvent[];
   statSections: MatchSheetPdfStatSection[];
   notes?: string;
+  /**
+   * Si viene, el PDF abre con las planillas oficiales (formato UAR): una
+   * página para el equipo LOCAL y otra para el VISITANTE, con dorsal, marca ①
+   * de primeras líneas, documento, firmas e incidencias para completar a mano.
+   */
+  officialSheet?: {
+    /** N° de partido en el sistema de la unión (BD UAR). Opcional. */
+    number?: string | null;
+    /** Instancia del torneo (ej: "Fase Clasificación"). Opcional. */
+    instance?: string | null;
+  };
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -238,6 +268,218 @@ function renderInfoGrid(input: MatchSheetPdfInput) {
       <strong>${escapeHtml(value)}</strong>
     </div>
   `).join('');
+}
+
+// La planilla oficial siempre imprime 23 renglones (XV titular + 8 suplentes),
+// aunque la formación cargada tenga menos. Con más jugadores, crece.
+const OFFICIAL_SHEET_MIN_ROWS = 23;
+// Renglones vacíos de la tabla de incidencias, para completar a mano.
+const OFFICIAL_SHEET_INCIDENT_ROWS = 14;
+
+function officialSheetRoleOrder(role: string | undefined) {
+  const normalized = String(role || '').trim().toLowerCase();
+  if (normalized === 'starter' || normalized === 'titular') return 0;
+  return 1;
+}
+
+/** Titulares primero, por dorsal; el mismo orden en el HTML y en el PDF. */
+function sortedOfficialSheetPlayers(team: MatchSheetPdfTeam) {
+  return team.lineup
+    .filter((player) => player.name.trim())
+    .map((player, index) => ({ ...player, originalIndex: index }))
+    .sort((a, b) => {
+      const roleDelta = officialSheetRoleOrder(a.role) - officialSheetRoleOrder(b.role);
+      if (roleDelta !== 0) return roleDelta;
+      const aNumber = Number.parseInt(String(a.number || ''), 10);
+      const bNumber = Number.parseInt(String(b.number || ''), 10);
+      if (Number.isFinite(aNumber) && Number.isFinite(bNumber) && aNumber !== bNumber) return aNumber - bNumber;
+      return a.originalIndex - b.originalIndex;
+    });
+}
+
+/**
+ * Una página de planilla oficial (formato UAR) para un lado del partido. La
+ * mayoría de las celdas quedan vacías A PROPÓSITO: minutos, tarjetas, firmas e
+ * incidencias se completan a mano el día del partido.
+ */
+function renderOfficialSheet(input: MatchSheetPdfInput, side: 'local' | 'visitante') {
+  const team = side === 'local' ? input.home : input.away;
+  const rival = side === 'local' ? input.away : input.home;
+  const sideLabel = side === 'local' ? 'LOCAL' : 'VISITANTE';
+  const sheetNumber = String(input.officialSheet?.number || '').trim();
+  const instance = String(input.officialSheet?.instance || '').trim();
+  const showScores = isFinalStatus(input.status);
+
+  const players = sortedOfficialSheetPlayers(team);
+
+  const rowCount = Math.max(OFFICIAL_SHEET_MIN_ROWS, players.length);
+  const rows = Array.from({ length: rowCount }, (_, index) => {
+    const player = players[index];
+    const pos = String(index + 1).padStart(2, '0');
+    const dorsal = player ? (String(player.number || '').trim() || String(index + 1)) : '';
+    const name = player
+      ? `${player.name}${player.isCaptain ? ' (C)' : ''}`
+      : '';
+
+    return `
+      <tr>
+        <td class="osNum">${pos}</td>
+        <td class="osNum">${escapeHtml(dorsal)}</td>
+        <td class="osMark">${player?.frontRow ? '&#9312;' : ''}</td>
+        <td class="osMark"></td>
+        <td class="osName">${escapeHtml(name)}</td>
+        <td class="osNum">${escapeHtml(player?.docNumber || '')}</td>
+        <td></td><td></td>
+        <td></td><td></td><td></td><td></td><td></td>
+        <td></td><td></td><td></td><td></td><td></td>
+        <td></td><td></td>
+      </tr>
+    `;
+  }).join('');
+
+  // Las incidencias cargadas en el partido se vuelcan a la planilla del lado
+  // que corresponde; los renglones restantes quedan vacíos para completar a
+  // mano el día del partido.
+  const eventSide = side === 'local' ? 'home' : 'away';
+  const sideEvents = input.timeline.filter((event) => event.side === eventSide);
+  const incidentRowCount = Math.max(OFFICIAL_SHEET_INCIDENT_ROWS, sideEvents.length);
+  const incidentRows = Array.from({ length: incidentRowCount }, (_, index) => {
+    const event = sideEvents[index];
+    if (!event) {
+      return '<tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
+    }
+    const points = typeof event.points === 'number' && event.points > 0 ? String(event.points) : '';
+    return `
+      <tr>
+        <td class="osNum">${escapeHtml(event.period || '')}</td>
+        <td class="osNum">${escapeHtml(event.minute || '')}</td>
+        <td>${escapeHtml(event.summary || '')}</td>
+        <td class="osNum">${escapeHtml(points)}</td>
+        <td class="osNum">${escapeHtml(event.playerNumber || '')}</td>
+        <td>${escapeHtml(event.playerName || '')}</td>
+      </tr>
+    `;
+  }).join('');
+
+  const coachLine = team.coach
+    ? `${team.coach.name}${team.coach.docNumber ? ` ${team.coach.docNumber}` : ''}`
+    : '';
+
+  return `
+    <section class="officialSheet">
+      <h2 class="osTitle">Planilla de equipo ${sideLabel} para el partido${sheetNumber ? ` N&deg;: ${escapeHtml(sheetNumber)}` : ''}</h2>
+
+      <table class="osHeaderTable">
+        <thead>
+          <tr>
+            <th>Cancha</th><th>Dia</th><th>Hora</th><th>Torneo</th><th>Division</th><th>Instancia</th><th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>${escapeHtml(input.venue || '')}</td>
+            <td>${escapeHtml(input.date || '')}</td>
+            <td>${escapeHtml(input.time || '')}</td>
+            <td>${escapeHtml(input.tournament.name || '')}</td>
+            <td>${escapeHtml(input.category || '')}</td>
+            <td>${escapeHtml(instance)}</td>
+            <td>${escapeHtml(input.roundLabel || '')}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="osScoreRow">
+        <table class="osScoreTable">
+          <thead><tr><th>Local</th><th class="osPts">Puntos</th></tr></thead>
+          <tbody><tr>
+            <td>${escapeHtml(input.home.name)}</td>
+            <td class="osPts">${showScores ? escapeHtml(input.home.score) : ''}</td>
+          </tr></tbody>
+        </table>
+        <table class="osScoreTable">
+          <thead><tr><th>Visitante</th><th class="osPts">Puntos</th></tr></thead>
+          <tbody><tr>
+            <td>${escapeHtml(input.away.name)}</td>
+            <td class="osPts">${showScores ? escapeHtml(input.away.score) : ''}</td>
+          </tr></tbody>
+        </table>
+      </div>
+
+      <p class="osHint">Indicar los minutos en los que se producen las incidencias</p>
+
+      <table class="osPlayersTable">
+        <thead>
+          <tr>
+            <th colspan="6" class="osGroupHead">Informacion</th>
+            <th colspan="2" class="osGroupHead"></th>
+            <th colspan="5" class="osGroupHead">Tarjeta amarilla 1</th>
+            <th colspan="5" class="osGroupHead">Tarjeta amarilla 2</th>
+            <th colspan="2" class="osGroupHead"></th>
+          </tr>
+          <tr>
+            <th>Pos</th><th>Dor</th><th>1L</th><th>O.M.</th><th class="osName">Apellido y Nombre</th><th>N&deg;Doc</th>
+            <th>Sal.</th><th>Ent.</th>
+            <th>S.C.</th><th>L.I.</th><th>J.G.</th><th>J.S.</th><th>DI.</th>
+            <th>S.C.</th><th>L.I.</th><th>J.G.</th><th>J.S.</th><th>DI.</th>
+            <th>Exp.</th><th>C.C.</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+
+      <div class="osSignRow">
+        <div class="osSignBox"><span>Firma Capitan ${sideLabel === 'LOCAL' ? 'Local' : 'Visitante'}</span></div>
+        <div class="osSignBox"><span>Firma Encargado ${sideLabel === 'LOCAL' ? 'Local' : 'Visitante'}</span></div>
+        <div class="osSignBox"><span>Firma Capitan ${sideLabel === 'LOCAL' ? 'Visitante' : 'Local'}</span></div>
+        <div class="osSignBox"><span>Firma Encargado ${sideLabel === 'LOCAL' ? 'Visitante' : 'Local'}</span></div>
+      </div>
+
+      <div class="osBottomGrid">
+        <div class="osOfficialsCol">
+          <div class="osSignBox osTall"><span>Referee - Firma y Aclaracion</span></div>
+          <div class="osSignRow2">
+            <div class="osSignBox osTall"><span>R.A. 1 - Firma y Aclaracion</span></div>
+            <div class="osSignBox osTall"><span>R.A. 2 - Firma y Aclaracion</span></div>
+          </div>
+          <div class="osSignRow2">
+            <div class="osSignBox osTall"><span>Director del partido - Firma y Aclaracion</span></div>
+            <div class="osSignBox osTall"><span>Medico ${sideLabel === 'LOCAL' ? 'Local' : 'Visitante'} - Firma y Aclaracion</span></div>
+          </div>
+          <div class="osCoachBox">
+            <span>Entrenador:</span>
+            <strong>${escapeHtml(coachLine)}</strong>
+          </div>
+        </div>
+        <div class="osIncidentsCol">
+          <table class="osIncidentsTable">
+            <thead>
+              <tr><th colspan="6">Incidencias equipo ${sideLabel}</th></tr>
+              <tr>
+                <th>Tie.</th><th>Min.</th><th>Incid.</th><th>Ptos.</th><th>Jug.N&deg;</th><th>Observaciones</th>
+              </tr>
+            </thead>
+            <tbody>${incidentRows}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <table class="osLegendTable">
+        <thead><tr><th colspan="6">Tipos de amarilla</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="osLegendKey">S.C.</td><td>Scrum</td>
+            <td class="osLegendKey">L.I.</td><td>Line</td>
+            <td class="osLegendKey">J.G.</td><td>Juego general</td>
+          </tr>
+          <tr>
+            <td class="osLegendKey">J.S.</td><td>Juego sucio</td>
+            <td class="osLegendKey">DI</td><td>Disciplina</td>
+            <td class="osLegendKey"></td><td>${escapeHtml(rival.name ? `Rival: ${rival.name}` : '')}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  `;
 }
 
 // How many timeline rows fit comfortably on one A4 page once headers, padding,
@@ -656,6 +898,108 @@ function buildMatchSheetHtml(input: MatchSheetPdfInput, origin: string) {
       color: #6b7280;
       font-size: 10px;
     }
+    /* ── Planilla oficial (formato UAR): una página por equipo ── */
+    .officialSheet {
+      page-break-after: always;
+      break-after: page;
+      margin-bottom: 28px;
+      color: #111827;
+    }
+    .officialSheet table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: auto;
+    }
+    .officialSheet th,
+    .officialSheet td {
+      border: 1px solid #9ca3af;
+      padding: 2px 4px;
+      font-size: 9px;
+      vertical-align: middle;
+      overflow-wrap: anywhere;
+    }
+    .officialSheet th {
+      background: #f3f4f6;
+      color: #374151;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-align: center;
+      text-transform: none;
+    }
+    .osTitle {
+      margin: 0 0 12px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .osHeaderTable td { text-align: center; }
+    .osScoreRow {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin: 12px 0;
+    }
+    .osScoreTable td { height: 18px; font-weight: 700; }
+    .osPts { width: 80px; text-align: center; }
+    .osHint {
+      margin: 10px 0 4px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .osGroupHead { text-align: center; }
+    .osPlayersTable td { height: 15px; }
+    .osPlayersTable .osName { text-align: left; width: 26%; }
+    .osNum {
+      font-family: "SFMono-Regular", Consolas, ui-monospace, monospace;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .osMark { text-align: center; width: 20px; font-size: 10px; }
+    .osSignRow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .osSignRow2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .osSignBox {
+      border: 1px solid #9ca3af;
+      min-height: 52px;
+      padding: 4px 6px;
+      background: #fff;
+    }
+    .osSignBox span {
+      font-size: 8.5px;
+      font-weight: 700;
+      color: #374151;
+    }
+    .osTall { min-height: 64px; }
+    .osBottomGrid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+      gap: 12px;
+      margin-top: 12px;
+      align-items: start;
+    }
+    .osCoachBox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #9ca3af;
+      margin-top: 8px;
+      padding: 6px 8px;
+      background: #fff;
+    }
+    .osCoachBox span { font-size: 9px; font-weight: 700; color: #374151; }
+    .osCoachBox strong { font-size: 11px; }
+    .osIncidentsTable td { height: 14px; }
+    .osLegendTable { margin-top: 12px; }
+    .osLegendKey { font-weight: 800; width: 36px; text-align: center; }
     @media print {
       @page { size: A4 portrait; margin: 14mm; }
 
@@ -854,6 +1198,7 @@ function buildMatchSheetHtml(input: MatchSheetPdfInput, origin: string) {
 </head>
 <body>
   <main class="sheet">
+    ${input.officialSheet ? renderOfficialSheet(input, 'local') + renderOfficialSheet(input, 'visitante') : ''}
     <header class="topbar">
       <div class="teamsLogos">
         ${renderLogo(input.home.logoUrl, input.home.name, origin)}
@@ -982,6 +1327,552 @@ async function inlineLogosAsDataUris(input: MatchSheetPdfInput, origin: string):
     away: { ...input.away, logoUrl: awayLogo ?? input.away.logoUrl },
     tournament: { ...input.tournament, logoUrl: tournamentLogo ?? input.tournament.logoUrl },
   };
+}
+
+type PdfDoc = import('jspdf').jsPDF;
+type AutoTableFn = typeof import('jspdf-autotable').default;
+type AutoTableStyles = Partial<import('jspdf-autotable').Styles>;
+
+const PDF_MARGIN = 36;
+
+const PDF_TABLE_STYLES: AutoTableStyles = {
+  fontSize: 6.5,
+  cellPadding: 1.5,
+  lineColor: [156, 163, 175],
+  lineWidth: 0.5,
+  textColor: [17, 24, 39],
+  valign: 'middle',
+};
+
+const PDF_HEAD_STYLES: AutoTableStyles = {
+  fillColor: [243, 244, 246],
+  textColor: [55, 65, 81],
+  fontStyle: 'bold',
+  halign: 'center',
+  lineColor: [156, 163, 175],
+  lineWidth: 0.5,
+};
+
+function pdfFinalY(doc: PdfDoc, fallback: number) {
+  return (doc as PdfDoc & { lastAutoTable?: { finalY?: number } }).lastAutoTable?.finalY ?? fallback;
+}
+
+function ensurePdfSpace(doc: PdfDoc, y: number, needed: number) {
+  const pageHeight = doc.internal.pageSize.getHeight();
+  if (y + needed <= pageHeight - PDF_MARGIN) return y;
+  doc.addPage();
+  return PDF_MARGIN;
+}
+
+/** Caja con borde y rótulo chico, para firmas y aclaraciones. */
+function drawPdfLabeledBox(doc: PdfDoc, x: number, y: number, width: number, height: number, label: string) {
+  doc.setDrawColor(156, 163, 175);
+  doc.setLineWidth(0.75);
+  doc.rect(x, y, width, height);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.5);
+  doc.setTextColor(55, 65, 81);
+  doc.text(doc.splitTextToSize(label, width - 8) as string[], x + 4, y + 9);
+}
+
+/**
+ * Convierte un escudo (ya inlineado como data URI) a PNG vía canvas: jsPDF no
+ * sabe de SVG ni de todos los formatos, y el canvas los normaliza todos.
+ */
+async function logoToPngDataUri(url: string | null | undefined): Promise<string | null> {
+  if (!url || typeof document === 'undefined') return null;
+  try {
+    const image = new Image();
+    const loaded = await new Promise<boolean>((resolve) => {
+      image.onload = () => resolve(true);
+      image.onerror = () => resolve(false);
+      image.src = url;
+    });
+    if (!loaded || !image.naturalWidth || !image.naturalHeight) return null;
+
+    const size = 96;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d');
+    if (!context) return null;
+    const ratio = Math.min(size / image.naturalWidth, size / image.naturalHeight);
+    const width = image.naturalWidth * ratio;
+    const height = image.naturalHeight * ratio;
+    context.drawImage(image, (size - width) / 2, (size - height) / 2, width, height);
+    return canvas.toDataURL('image/png');
+  } catch {
+    return null;
+  }
+}
+
+/** Una página de planilla oficial (formato UAR) dibujada en vectorial. */
+function drawOfficialSheetPage(doc: PdfDoc, autoTable: AutoTableFn, input: MatchSheetPdfInput, side: 'local' | 'visitante') {
+  const margin = PDF_MARGIN;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const contentWidth = pageWidth - margin * 2;
+  const team = side === 'local' ? input.home : input.away;
+  const sideLabel = side === 'local' ? 'LOCAL' : 'VISITANTE';
+  const sheetNumber = String(input.officialSheet?.number || '').trim();
+  const instance = String(input.officialSheet?.instance || '').trim();
+  const showScores = isFinalStatus(input.status);
+
+  let y = margin;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(17, 24, 39);
+  doc.text(`Planilla de equipo ${sideLabel} para el partido${sheetNumber ? ` N°: ${sheetNumber}` : ''}`, margin, y + 4);
+  y += 16;
+
+  autoTable(doc, {
+    startY: y,
+    margin: { left: margin, right: margin },
+    theme: 'grid',
+    styles: { ...PDF_TABLE_STYLES, halign: 'center' },
+    headStyles: { ...PDF_HEAD_STYLES, fontSize: 6 },
+    head: [['Cancha', 'Dia', 'Hora', 'Torneo', 'Division', 'Instancia', 'Fecha']],
+    body: [[
+      input.venue || '', input.date || '', input.time || '', input.tournament.name || '',
+      input.category || '', instance, input.roundLabel || '',
+    ]],
+  });
+  y = pdfFinalY(doc, y) + 10;
+
+  const half = (contentWidth - 12) / 2;
+  const scoreStart = y;
+  autoTable(doc, {
+    startY: scoreStart,
+    margin: { left: margin },
+    tableWidth: half,
+    theme: 'grid',
+    styles: { ...PDF_TABLE_STYLES, fontSize: 7, minCellHeight: 14, fontStyle: 'bold' },
+    headStyles: { ...PDF_HEAD_STYLES, fontSize: 6 },
+    head: [['Local', 'Puntos']],
+    body: [[input.home.name, showScores ? input.home.score : '']],
+    columnStyles: { 1: { cellWidth: 50, halign: 'center' } },
+  });
+  const leftScoreBottom = pdfFinalY(doc, scoreStart);
+  autoTable(doc, {
+    startY: scoreStart,
+    margin: { left: margin + half + 12 },
+    tableWidth: half,
+    theme: 'grid',
+    styles: { ...PDF_TABLE_STYLES, fontSize: 7, minCellHeight: 14, fontStyle: 'bold' },
+    headStyles: { ...PDF_HEAD_STYLES, fontSize: 6 },
+    head: [['Visitante', 'Puntos']],
+    body: [[input.away.name, showScores ? input.away.score : '']],
+    columnStyles: { 1: { cellWidth: 50, halign: 'center' } },
+  });
+  y = Math.max(leftScoreBottom, pdfFinalY(doc, scoreStart)) + 12;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.setTextColor(17, 24, 39);
+  doc.text('Indicar los minutos en los que se producen las incidencias', margin, y);
+  y += 4;
+
+  const players = sortedOfficialSheetPlayers(team);
+  const rowCount = Math.max(OFFICIAL_SHEET_MIN_ROWS, players.length);
+  const frontRowIndexes = new Set<number>();
+  const playersBody = Array.from({ length: rowCount }, (_, index) => {
+    const player = players[index];
+    if (player?.frontRow) frontRowIndexes.add(index);
+    return [
+      String(index + 1).padStart(2, '0'),
+      player ? (String(player.number || '').trim() || String(index + 1)) : '',
+      '', '',
+      player ? `${player.name}${player.isCaptain ? ' (C)' : ''}` : '',
+      player?.docNumber || '',
+      '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+    ];
+  });
+
+  const smallCol = { cellWidth: 15 } as const;
+  autoTable(doc, {
+    startY: y,
+    margin: { left: margin, right: margin },
+    theme: 'grid',
+    styles: { ...PDF_TABLE_STYLES, fontSize: 6, cellPadding: 1, minCellHeight: 11.5, halign: 'center' },
+    headStyles: { ...PDF_HEAD_STYLES, fontSize: 5.5, cellPadding: 1 },
+    head: [
+      [
+        { content: 'Informacion', colSpan: 6 },
+        { content: '', colSpan: 2 },
+        { content: 'Tarjeta amarilla 1', colSpan: 5 },
+        { content: 'Tarjeta amarilla 2', colSpan: 5 },
+        { content: '', colSpan: 2 },
+      ],
+      [
+        'Pos', 'Dor', '1L', 'O.M.', 'Apellido y Nombre', 'N°Doc', 'Sal.', 'Ent.',
+        'S.C.', 'L.I.', 'J.G.', 'J.S.', 'DI.', 'S.C.', 'L.I.', 'J.G.', 'J.S.', 'DI.',
+        'Exp.', 'C.C.',
+      ],
+    ],
+    body: playersBody,
+    columnStyles: {
+      0: { cellWidth: 16 },
+      1: { cellWidth: 16 },
+      2: { cellWidth: 14 },
+      3: { cellWidth: 16 },
+      4: { cellWidth: 'auto', halign: 'left' },
+      5: { cellWidth: 50 },
+      6: { cellWidth: 16 },
+      7: { cellWidth: 16 },
+      8: smallCol, 9: smallCol, 10: smallCol, 11: smallCol, 12: smallCol,
+      13: smallCol, 14: smallCol, 15: smallCol, 16: smallCol, 17: smallCol,
+      18: { cellWidth: 17 },
+      19: { cellWidth: 17 },
+    },
+    didDrawCell: (data) => {
+      // La marca ① se dibuja (círculo + 1): las fuentes base de jsPDF no
+      // tienen el glifo.
+      if (data.section !== 'body' || data.column.index !== 2) return;
+      if (!frontRowIndexes.has(data.row.index)) return;
+      const cx = data.cell.x + data.cell.width / 2;
+      const cy = data.cell.y + data.cell.height / 2;
+      doc.setDrawColor(17, 24, 39);
+      doc.setLineWidth(0.6);
+      doc.circle(cx, cy, 3);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(5.5);
+      doc.setTextColor(17, 24, 39);
+      doc.text('1', cx, cy + 1.9, { align: 'center' });
+    },
+  });
+  y = pdfFinalY(doc, y) + 10;
+
+  const signWidth = (contentWidth - 30) / 4;
+  const signLabels = sideLabel === 'LOCAL'
+    ? ['Firma Capitan Local', 'Firma Encargado Local', 'Firma Capitan Visitante', 'Firma Encargado Visitante']
+    : ['Firma Capitan Visitante', 'Firma Encargado Visitante', 'Firma Capitan Local', 'Firma Encargado Local'];
+  signLabels.forEach((label, index) => {
+    drawPdfLabeledBox(doc, margin + index * (signWidth + 10), y, signWidth, 34, label);
+  });
+  y += 44;
+
+  const leftWidth = contentWidth * 0.46;
+  const rightX = margin + leftWidth + 10;
+  const rightWidth = contentWidth - leftWidth - 10;
+  const boxesTop = y;
+  const halfLeft = (leftWidth - 6) / 2;
+  drawPdfLabeledBox(doc, margin, y, leftWidth, 38, 'Referee - Firma y Aclaracion');
+  y += 44;
+  drawPdfLabeledBox(doc, margin, y, halfLeft, 38, 'R.A. 1 - Firma y Aclaracion');
+  drawPdfLabeledBox(doc, margin + halfLeft + 6, y, halfLeft, 38, 'R.A. 2 - Firma y Aclaracion');
+  y += 44;
+  drawPdfLabeledBox(doc, margin, y, halfLeft, 38, 'Director del partido - Firma y Aclaracion');
+  drawPdfLabeledBox(doc, margin + halfLeft + 6, y, halfLeft, 38, `Medico ${sideLabel === 'LOCAL' ? 'Local' : 'Visitante'} - Firma y Aclaracion`);
+  y += 44;
+  drawPdfLabeledBox(doc, margin, y, leftWidth, 20, 'Entrenador:');
+  const coachLine = team.coach
+    ? `${team.coach.name}${team.coach.docNumber ? ` ${team.coach.docNumber}` : ''}`
+    : '';
+  if (coachLine) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(17, 24, 39);
+    doc.text(coachLine, margin + 46, y + 12.5);
+  }
+  const leftBottom = y + 20;
+
+  const eventSide = side === 'local' ? 'home' : 'away';
+  const sideEvents = input.timeline.filter((event) => event.side === eventSide);
+  const incidentRowCount = Math.max(OFFICIAL_SHEET_INCIDENT_ROWS, sideEvents.length);
+  const incidentBody = Array.from({ length: incidentRowCount }, (_, index) => {
+    const event = sideEvents[index];
+    if (!event) return ['', '', '', '', '', ''];
+    const points = typeof event.points === 'number' && event.points > 0 ? String(event.points) : '';
+    return [
+      event.period || '', event.minute || '', event.summary || '',
+      points, event.playerNumber || '', event.playerName || '',
+    ];
+  });
+
+  autoTable(doc, {
+    startY: boxesTop,
+    margin: { left: rightX, right: margin },
+    tableWidth: rightWidth,
+    theme: 'grid',
+    styles: { ...PDF_TABLE_STYLES, fontSize: 5.8, cellPadding: 1, minCellHeight: 10, halign: 'center' },
+    headStyles: { ...PDF_HEAD_STYLES, fontSize: 5.8, cellPadding: 1 },
+    head: [
+      [{ content: `Incidencias equipo ${sideLabel}`, colSpan: 6 }],
+      ['Tie.', 'Min.', 'Incid.', 'Ptos.', 'Jug.N°', 'Observaciones'],
+    ],
+    body: incidentBody,
+    columnStyles: {
+      0: { cellWidth: 36 },
+      1: { cellWidth: 20 },
+      2: { cellWidth: 38 },
+      3: { cellWidth: 20 },
+      4: { cellWidth: 26 },
+      5: { cellWidth: 'auto', halign: 'left' },
+    },
+  });
+
+  y = Math.max(leftBottom, pdfFinalY(doc, boxesTop)) + 10;
+  y = ensurePdfSpace(doc, y, 36);
+
+  autoTable(doc, {
+    startY: y,
+    margin: { left: margin, right: margin },
+    theme: 'grid',
+    styles: { ...PDF_TABLE_STYLES, fontSize: 6, halign: 'left' },
+    headStyles: { ...PDF_HEAD_STYLES, fontSize: 6 },
+    head: [[{ content: 'Tipos de amarilla', colSpan: 6 }]],
+    body: [
+      ['S.C.', 'Scrum', 'L.I.', 'Line', 'J.G.', 'Juego general'],
+      ['J.S.', 'Juego sucio', 'DI', 'Disciplina', '', ''],
+    ],
+    columnStyles: {
+      0: { cellWidth: 26, fontStyle: 'bold' },
+      2: { cellWidth: 26, fontStyle: 'bold' },
+      4: { cellWidth: 26, fontStyle: 'bold' },
+    },
+  });
+}
+
+/** El informe del partido (resumen, plantillas, cronología, estadísticas). */
+function drawReportPages(
+  doc: PdfDoc,
+  autoTable: AutoTableFn,
+  input: MatchSheetPdfInput,
+  logos: { home: string | null; away: string | null; tournament: string | null },
+) {
+  const margin = PDF_MARGIN;
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const contentWidth = pageWidth - margin * 2;
+  let y = margin;
+
+  let logoX = margin;
+  if (logos.home) {
+    doc.addImage(logos.home, 'PNG', logoX, y, 24, 24);
+    logoX += 30;
+  }
+  if (logos.away) {
+    doc.addImage(logos.away, 'PNG', logoX, y, 24, 24);
+  }
+  if (logos.tournament) {
+    doc.addImage(logos.tournament, 'PNG', margin + contentWidth - 26, y, 26, 26);
+  }
+  if (logos.home || logos.away || logos.tournament) {
+    y += 34;
+  }
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(17, 24, 39);
+  const titleLines = doc.splitTextToSize(input.title, contentWidth) as string[];
+  doc.text(titleLines, margin, y + 10);
+  y += 10 + titleLines.length * 15;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(75, 85, 99);
+  doc.text(`${input.home.name} vs ${input.away.name}`, margin, y);
+  y += 16;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(17, 24, 39);
+  const pointsLine = input.home.points || input.away.points
+    ? `   (${input.home.shortName} ${input.home.points || '0'} pts - ${input.away.shortName} ${input.away.points || '0'} pts)`
+    : '';
+  const stateLine = isFinalStatus(input.status)
+    ? `Resultado final: ${input.home.score} - ${input.away.score}${pointsLine}`
+    : `${input.statusLabel} - Marcador: ${input.home.score} - ${input.away.score}`;
+  doc.text(stateLine, margin, y);
+  y += 10;
+
+  const labelStyle: AutoTableStyles = { fontStyle: 'bold', fillColor: [243, 244, 246] };
+  autoTable(doc, {
+    startY: y,
+    margin: { left: margin, right: margin },
+    theme: 'grid',
+    styles: { ...PDF_TABLE_STYLES, fontSize: 7.5, cellPadding: 3, halign: 'left' },
+    body: [
+      ['Estado', input.statusLabel, 'Fecha', input.date],
+      ['Hora', input.time || 'Hora a confirmar', 'Torneo', input.tournament.name],
+      ['Jornada', input.roundLabel || 'Sin jornada', 'Categoria', input.category || 'Sin categoria'],
+      ['Arbitro', input.referee || 'A confirmar', 'Estadio / sede', input.venue || 'Sede a confirmar'],
+    ],
+    columnStyles: {
+      0: { cellWidth: 55, ...labelStyle },
+      2: { cellWidth: 70, ...labelStyle },
+    },
+  });
+  y = pdfFinalY(doc, y) + 16;
+
+  const sectionTitle = (text: string, needed = 70) => {
+    y = ensurePdfSpace(doc, y, needed);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(17, 24, 39);
+    doc.text(text, margin, y + 4);
+    y += 14;
+  };
+  const emptyNote = (text: string) => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(107, 114, 128);
+    doc.text(text, margin, y + 4);
+    y += 18;
+  };
+
+  sectionTitle('1. Plantillas', 120);
+  for (const team of [input.home, input.away]) {
+    y = ensurePdfSpace(doc, y, 70);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(17, 24, 39);
+    doc.text(team.name, margin, y + 2);
+    y += 8;
+
+    const players = team.lineup.filter((player) => player.name.trim());
+    if (players.length === 0) {
+      emptyNote('Sin jugadores cargados.');
+      continue;
+    }
+    autoTable(doc, {
+      startY: y,
+      margin: { left: margin, right: margin, top: margin, bottom: margin },
+      theme: 'grid',
+      styles: { ...PDF_TABLE_STYLES, fontSize: 7, cellPadding: 2, halign: 'left' },
+      headStyles: { ...PDF_HEAD_STYLES, halign: 'left' },
+      head: [['Nro', 'Jugador', 'Posicion', 'Rol', 'Documento']],
+      body: players.map((player, index) => [
+        String(player.number || '').trim() || String(index + 1).padStart(2, '0'),
+        `${player.name}${player.isCaptain ? ' (C)' : ''}`,
+        player.position || '-',
+        ROLE_LABELS[String(player.role || '').trim()] || player.role || '-',
+        player.docNumber || '',
+      ]),
+      columnStyles: {
+        0: { cellWidth: 28, halign: 'center' },
+        2: { cellWidth: 90 },
+        3: { cellWidth: 60 },
+        4: { cellWidth: 70 },
+      },
+    });
+    y = pdfFinalY(doc, y) + 12;
+  }
+
+  sectionTitle(`2. Linea de tiempo (${input.timeline.length} eventos)`, 90);
+  if (input.timeline.length === 0) {
+    emptyNote('Todavia no hay eventos cargados en el partido.');
+  } else {
+    autoTable(doc, {
+      startY: y,
+      margin: { left: margin, right: margin, top: margin, bottom: margin },
+      theme: 'grid',
+      styles: { ...PDF_TABLE_STYLES, fontSize: 7, cellPadding: 2, halign: 'left' },
+      headStyles: { ...PDF_HEAD_STYLES, halign: 'left' },
+      head: [['Periodo', 'Min', 'Evento', 'Equipo', 'Detalle', 'Marcador']],
+      body: input.timeline.map((event) => [
+        event.period || '-', event.minute || '--', event.summary || 'Evento',
+        event.team || 'Neutral', event.detail || '', event.score || '-',
+      ]),
+      columnStyles: {
+        0: { cellWidth: 58 },
+        1: { cellWidth: 26, halign: 'center' },
+        2: { cellWidth: 68 },
+        3: { cellWidth: 68 },
+        5: { cellWidth: 44, halign: 'center' },
+      },
+    });
+    y = pdfFinalY(doc, y) + 12;
+  }
+
+  const statSections = input.statSections.filter((section) => section.rows.length > 0);
+  sectionTitle('3. Estadisticas', 90);
+  if (statSections.length === 0) {
+    emptyNote('Sin estadisticas disponibles.');
+  }
+  for (const section of statSections) {
+    y = ensurePdfSpace(doc, y, 60);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(17, 24, 39);
+    doc.text(section.title, margin, y + 2);
+    y += 8;
+    autoTable(doc, {
+      startY: y,
+      margin: { left: margin, right: margin, top: margin, bottom: margin },
+      theme: 'grid',
+      styles: { ...PDF_TABLE_STYLES, fontSize: 7, cellPadding: 2, halign: 'left' },
+      headStyles: { ...PDF_HEAD_STYLES, halign: 'left' },
+      head: [['Estadistica', input.home.shortName, input.away.shortName]],
+      body: section.rows.map((row) => [row.label, String(row.home), String(row.away)]),
+      columnStyles: {
+        1: { cellWidth: 70, halign: 'center' },
+        2: { cellWidth: 70, halign: 'center' },
+      },
+    });
+    y = pdfFinalY(doc, y) + 10;
+  }
+
+  if (input.notes?.trim()) {
+    sectionTitle('Notas internas', 60);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(55, 65, 81);
+    const noteLines = doc.splitTextToSize(input.notes.trim(), contentWidth) as string[];
+    y = ensurePdfSpace(doc, y, noteLines.length * 10 + 10);
+    doc.text(noteLines, margin, y + 4);
+    y += noteLines.length * 10 + 10;
+  }
+
+  const generatedAt = new Date().toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
+  y = ensurePdfSpace(doc, y, 20);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(107, 114, 128);
+  doc.text(`G22 Scores - Planilla de partido - Generado: ${generatedAt}`, margin, y + 10);
+}
+
+/**
+ * Genera el PDF en VECTORIAL (jspdf + jspdf-autotable, por import dinámico) y
+ * lo descarga en el dispositivo: texto nítido y seleccionable, sin capturas de
+ * pantalla. Si `officialSheet` viene, abre con las dos planillas oficiales y
+ * sigue con el informe del partido.
+ */
+export async function downloadMatchSheetPdf(input: MatchSheetPdfInput, fileName = 'planilla-partido.pdf') {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    const [{ jsPDF }, autoTableModule] = await Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable'),
+    ]);
+    const autoTable = autoTableModule.default;
+
+    const origin = window.location.origin;
+    const inlinedInput = await inlineLogosAsDataUris(input, origin);
+    const [homeLogo, awayLogo, tournamentLogo] = await Promise.all([
+      logoToPngDataUri(inlinedInput.home.logoUrl),
+      logoToPngDataUri(inlinedInput.away.logoUrl),
+      logoToPngDataUri(inlinedInput.tournament.logoUrl),
+    ]);
+
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+
+    if (inlinedInput.officialSheet) {
+      drawOfficialSheetPage(doc, autoTable, inlinedInput, 'local');
+      doc.addPage();
+      drawOfficialSheetPage(doc, autoTable, inlinedInput, 'visitante');
+      doc.addPage();
+    }
+
+    drawReportPages(doc, autoTable, inlinedInput, {
+      home: homeLogo,
+      away: awayLogo,
+      tournament: tournamentLogo,
+    });
+
+    doc.save(fileName);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function exportMatchSheetPdf(input: MatchSheetPdfInput) {

@@ -29,6 +29,16 @@ const RUGBY_POSITION_GROUPS = [
     },
 ];
 
+/**
+ * Sugerencias para el país emisor del documento. El campo acepta cualquier
+ * código: la identidad de un jugador es (país, número), así que un DNI
+ * argentino repetido es la misma persona y el mismo número de otro país no.
+ */
+const DOC_COUNTRY_SUGGESTIONS = [
+    'AR', 'UY', 'CL', 'PY', 'BR', 'PE', 'CO', 'VE', 'BO', 'EC',
+    'ZA', 'NZ', 'AU', 'FJ', 'GB', 'IE', 'FR', 'IT', 'ES', 'PT', 'GE', 'US', 'JP',
+];
+
 const STAFF_ROLES = [
     ['head_coach', 'ENTRENADOR PRINCIPAL'],
     ['assistant_coach', 'ENTRENADOR ASISTENTE'],
@@ -79,6 +89,9 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
     const [loading, setLoading] = useState(false);
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
+    const [idNumber, setIdNumber] = useState('');
+    const [docCountry, setDocCountry] = useState('AR');
+    const [frontRowCertified, setFrontRowCertified] = useState(false);
     const [birthDate, setBirthDate] = useState('');
     const [position, setPosition] = useState('');
     const [role, setRole] = useState(initialMode === 'player' ? 'player' : 'head_coach');
@@ -118,6 +131,9 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
         resetIdentityPrompt();
         setFirstName(person?.first_name ?? '');
         setLastName(person?.last_name ?? '');
+        setIdNumber(person?.id_number ?? '');
+        setDocCountry(person?.doc_country ?? 'AR');
+        setFrontRowCertified(person?.front_row_certified === true);
         setBirthDate(person?.birth_date ?? '');
         setPosition(person?.position ?? '');
         setRole(person?.role ?? (initialMode === 'player' ? 'player' : 'head_coach'));
@@ -132,7 +148,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
         setIdentityMatches([]);
         setPendingPayload(null);
         setFormError(null);
-    }, [firstName, lastName, birthDate, position, role, divisionId, photoUrl, weight, height, hasIdentityPrompt]);
+    }, [firstName, lastName, idNumber, docCountry, birthDate, position, role, divisionId, photoUrl, weight, height, hasIdentityPrompt]);
 
     if (!isOpen) return null;
 
@@ -176,6 +192,9 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
             resetIdentityPrompt();
             setFirstName('');
             setLastName('');
+            setIdNumber('');
+            setDocCountry('AR');
+            setFrontRowCertified(false);
             setBirthDate('');
             setPosition('');
             setPhotoUrl('');
@@ -249,6 +268,8 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                 first_name: firstName.trim(),
                 last_name: lastName.trim(),
                 birth_date: birthDate,
+                id_number: idNumber.trim() || undefined,
+                doc_country: docCountry.trim() || undefined,
                 position,
                 photo_url: photoUrl || undefined,
                 weight: weight ? parseFloat(weight) : undefined,
@@ -256,6 +277,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                 role,
                 division_id: divisionId || undefined,
                 status: 'active',
+                ...(initialMode === 'player' ? { front_row_certified: frontRowCertified } : {}),
             };
 
             if (isEditing && person?.id) {
@@ -357,6 +379,35 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                     placeholder="Ej: Perez"
                                 />
                             </div>
+                            <div className="registry-biometry-grid">
+                                <div className="registry-field-group">
+                                    <label>N&deg; de documento</label>
+                                    <input
+                                        value={idNumber}
+                                        onChange={(e) => setIdNumber(e.target.value)}
+                                        placeholder="Ej: 40123456"
+                                        inputMode="numeric"
+                                    />
+                                </div>
+                                <div className="registry-field-group">
+                                    <label>Pais del doc.</label>
+                                    <input
+                                        list="doc-country-suggestions"
+                                        value={docCountry}
+                                        onChange={(e) => setDocCountry(e.target.value.toUpperCase())}
+                                        placeholder="AR"
+                                        maxLength={3}
+                                    />
+                                    <datalist id="doc-country-suggestions">
+                                        {DOC_COUNTRY_SUGGESTIONS.map((code) => (
+                                            <option key={code} value={code} />
+                                        ))}
+                                    </datalist>
+                                </div>
+                            </div>
+                            <div className="registry-age-indicator">
+                                El documento identifica al jugador dentro de su pais: mismo pais y mismo numero es la misma persona.
+                            </div>
 
                             <div className="registry-column-title" style={{ marginTop: '2.5rem' }}>Biometria</div>
                             {initialMode === 'player' && (
@@ -440,6 +491,28 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                             </div>
                                         </div>
                                     ))}
+                                    <label
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 8,
+                                            marginTop: '1rem',
+                                            cursor: 'pointer',
+                                            fontSize: 12,
+                                        }}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={frontRowCertified}
+                                            onChange={(e) => setFrontRowCertified(e.target.checked)}
+                                        />
+                                        <span>
+                                            Curso de primeras lineas aprobado
+                                            <span style={{ display: 'block', opacity: 0.6, fontSize: 11 }}>
+                                                Sale como &#9312; en la planilla oficial del partido.
+                                            </span>
+                                        </span>
+                                    </label>
                                 </div>
                             ) : (
                                 <div className="registry-field-group">
@@ -488,6 +561,13 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                 <div className="registry-preview-row">
                                     <span className="registry-preview-label">Plantel</span>
                                     <span className="registry-preview-val">{assignmentLabel}</span>
+                                </div>
+                                <div className="registry-preview-row">
+                                    <span className="registry-preview-label">Documento</span>
+                                    <span className="registry-preview-val">
+                                        {idNumber ? `${docCountry || '?'} ${idNumber}` : '—'}
+                                        {initialMode === 'player' && frontRowCertified ? ' ①' : ''}
+                                    </span>
                                 </div>
                                 {initialMode === 'player' && (
                                     <div className="registry-preview-row">
