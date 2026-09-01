@@ -19,6 +19,10 @@ export interface PersonWithRole {
     division_name?: string;
     position?: string;
     id_number?: string;
+    /** País emisor del documento. La identidad es (doc_country, id_number). */
+    doc_country?: string;
+    /** Curso de primeras líneas (la marca ① de la planilla oficial). */
+    front_row_certified?: boolean;
     weight?: number;
     height?: number;
 }
@@ -53,6 +57,8 @@ export interface PersonClubInput {
     position?: string;
     birth_date?: string;
     id_number?: string;
+    doc_country?: string;
+    front_row_certified?: boolean;
     photo_url?: string;
     weight?: number;
     height?: number;
@@ -109,6 +115,7 @@ type PersonRow = {
     photo_url: string | null;
     birth_date: string | null;
     id_number: string | null;
+    doc_country?: string | null;
     position: string | null;
     weight: number | null;
     height: number | null;
@@ -208,6 +215,8 @@ function mapPersonRecord(person: any, membership: any, divisionName?: string, di
         photo_url: person.photo_url || person.avatar_url || undefined,
         birth_date: person.birth_date || undefined,
         id_number: person.id_number || undefined,
+        doc_country: person.doc_country || undefined,
+        front_row_certified: membership.front_row_certified === true || undefined,
         role: membership.role,
         status: membership.status || 'active',
         division_id: divisionId,
@@ -276,9 +285,21 @@ async function fetchPersonRowsByIds(scoped: RlsScopedPersonIds): Promise<PersonR
     // Antes se llamaba `safeSelect`, que en un archivo que selecciona DNIs era una
     // trampa esperando a alguien.
     const fullSelect = 'id, first_name, last_name, full_name, avatar_url, photo_url, birth_date, id_number, position, weight, height';
+    // Primer intento con doc_country (20260901190000). Si la columna todavía no
+    // existe se cae al select sin ella, sin degradar el resto de la ficha.
+    const docSelect = `${fullSelect}, doc_country`;
     const existingColumnsSelect = 'id, first_name, last_name, full_name, avatar_url, birth_date, id_number';
 
     const reader = createAdminClient();
+
+    const { data: docData, error: docError } = await reader
+        .from('people')
+        .select(docSelect)
+        .in('id', personIds);
+
+    if (!docError) {
+        return (docData ?? []) as PersonRow[];
+    }
 
     const { data, error } = await reader
         .from('people')
@@ -319,6 +340,7 @@ function mergePersonRecord(person: PersonRow, personData: PersonClubInput) {
         last_name: normalizePersonText(personData.last_name) || person.last_name,
         birth_date: personData.birth_date || person.birth_date || undefined,
         id_number: normalizeOptionalText(personData.id_number) || person.id_number || undefined,
+        doc_country: normalizeOptionalText(personData.doc_country) || person.doc_country || undefined,
         photo_url: normalizeOptionalText(personData.photo_url) || person.photo_url || person.avatar_url || undefined,
         weight: typeof personData.weight === 'number' ? personData.weight : person.weight ?? undefined,
         height: typeof personData.height === 'number' ? personData.height : person.height ?? undefined,
@@ -333,6 +355,7 @@ async function insertPersonRecord(supabase: any, personData: {
     last_name: string,
     birth_date?: string,
     id_number?: string,
+    doc_country?: string,
     photo_url?: string,
     weight?: number,
     height?: number,
@@ -350,6 +373,9 @@ async function insertPersonRecord(supabase: any, personData: {
         name: fullName,
         birth_date: personData.birth_date || null,
         id_number: personData.id_number || null,
+        // Sólo en el payload rico: si la columna falta (migración sin correr),
+        // el insert cae al payload seguro y la ficha se guarda sin el país.
+        doc_country: personData.doc_country || null,
         photo_url: personData.photo_url || null,
         avatar_url: personData.photo_url || null,
         weight: personData.weight || null,
@@ -388,6 +414,7 @@ async function updatePersonRecord(supabase: any, personId: string, personData: {
     last_name: string,
     birth_date?: string,
     id_number?: string,
+    doc_country?: string,
     photo_url?: string,
     weight?: number,
     height?: number,
@@ -412,6 +439,11 @@ async function updatePersonRecord(supabase: any, personId: string, personData: {
         role: personData.role || null,
         status: personData.status || 'active',
     };
+    // Sólo si el caller lo manda: un update que no conoce el campo no debe
+    // pisar el país del documento ya cargado.
+    if (personData.doc_country !== undefined) {
+        richPayload.doc_country = personData.doc_country || null;
+    }
     if (personData.club_id) {
         richPayload.club_id = personData.club_id;
     }
@@ -736,6 +768,7 @@ async function insertPersonAssignmentsInClub(
         legacyDivisionId?: string | null;
         teamId?: string | null;
         source?: string;
+        frontRowCertified?: boolean;
     }
 ) {
     let existingRoleQuery = supabase
@@ -797,7 +830,7 @@ async function insertPersonAssignmentsInClub(
         return { success: false as const, error: existingMembershipError.message };
     }
 
-    const membershipPayload = {
+    const membershipPayload: Record<string, any> = {
         club_id: params.clubId,
         team_id: params.teamId || null,
         person_id: params.personId,
@@ -806,12 +839,23 @@ async function insertPersonAssignmentsInClub(
         position: params.position || null,
         source: params.source || 'manual',
     };
+    if (typeof params.frontRowCertified === 'boolean') {
+        membershipPayload.front_row_certified = params.frontRowCertified;
+    }
 
-    const membershipMutation = existingMembership?.id
-        ? supabase.from('team_memberships').update(membershipPayload).eq('id', existingMembership.id)
-        : supabase.from('team_memberships').insert(membershipPayload);
+    const runMembershipMutation = (payload: Record<string, any>) => existingMembership?.id
+        ? supabase.from('team_memberships').update(payload).eq('id', existingMembership.id)
+        : supabase.from('team_memberships').insert(payload);
 
-    const { error: membershipError } = await membershipMutation;
+    let { error: membershipError } = await runMembershipMutation(membershipPayload);
+
+    // PGRST204 acá puede ser "falta front_row_certified" (migración 20260901190000
+    // sin correr) y no "falta la tabla": sin el reintento, isMissingTableError lo
+    // daría por éxito y la membresía entera quedaría sin escribir.
+    if (membershipError?.code === 'PGRST204' && 'front_row_certified' in membershipPayload) {
+        const { front_row_certified: _dropped, ...withoutFrontRow } = membershipPayload;
+        ({ error: membershipError } = await runMembershipMutation(withoutFrontRow));
+    }
 
     if (membershipError && !isMissingTableError(membershipError)) {
         return { success: false as const, error: membershipError.message };
@@ -864,7 +908,7 @@ async function isPersonInClubScope(
 
 export async function findPotentialPersonIdentityMatches(
     clubId: string,
-    personData: Pick<PersonClubInput, 'first_name' | 'last_name'>,
+    personData: Pick<PersonClubInput, 'first_name' | 'last_name' | 'id_number' | 'doc_country'>,
     supabaseClient?: any,
 ): Promise<PersonIdentityMatch[]> {
     const supabase = supabaseClient ?? await createClient();
@@ -888,16 +932,46 @@ export async function findPotentialPersonIdentityMatches(
         return [];
     }
 
-    const people = (candidates ?? []) as Array<{
+    type CandidateRow = {
         id: string;
         first_name: string;
         last_name: string;
         full_name: string | null;
         birth_date: string | null;
         id_number: string | null;
+        doc_country?: string | null;
         photo_url: string | null;
         avatar_url: string | null;
-    }>;
+    };
+
+    const people = (candidates ?? []) as CandidateRow[];
+
+    // El documento es identidad más fuerte que el nombre: mismo país + mismo
+    // número ES la misma persona aunque el nombre esté escrito distinto. Un
+    // número igual emitido por OTRO país no suma candidato. Best-effort: si la
+    // columna doc_country no existe todavía, la consulta falla y se sigue con
+    // los candidatos por nombre.
+    const inputIdNumber = normalizeOptionalText(personData.id_number);
+    const inputDocCountry = normalizeOptionalText(personData.doc_country)?.toUpperCase();
+    if (inputIdNumber) {
+        const { data: docCandidates, error: docError } = await db
+            .from('people')
+            .select('id, first_name, last_name, full_name, birth_date, id_number, doc_country, photo_url, avatar_url')
+            .eq('id_number', inputIdNumber)
+            .limit(8);
+
+        if (!docError) {
+            const seenIds = new Set(people.map((person) => person.id));
+            for (const candidate of (docCandidates ?? []) as CandidateRow[]) {
+                if (seenIds.has(candidate.id)) continue;
+                const candidateCountry = normalizeOptionalText(candidate.doc_country ?? undefined)?.toUpperCase();
+                // Países distintos y conocidos en ambas puntas: otra persona.
+                if (inputDocCountry && candidateCountry && candidateCountry !== inputDocCountry) continue;
+                people.push(candidate);
+                seenIds.add(candidate.id);
+            }
+        }
+    }
 
     if (people.length === 0) return [];
 
@@ -973,6 +1047,31 @@ export async function findPotentialPersonIdentityMatches(
     });
 }
 
+/**
+ * Mapa persona → curso de primeras líneas (①) dentro del club. Va en una
+ * consulta aparte y best-effort a propósito: si la columna todavía no existe
+ * (migración 20260901190000 sin correr), agregar el campo al select principal
+ * vaciaría el plantel entero con un 42703. Acá un error devuelve mapa vacío y
+ * el plantel se lee igual, sólo que sin la marca.
+ */
+async function fetchFrontRowCertifiedByPerson(db: any, clubId: string): Promise<Map<string, boolean>> {
+    const map = new Map<string, boolean>();
+    try {
+        const { data, error } = await db
+            .from('team_memberships')
+            .select('person_id, front_row_certified')
+            .eq('club_id', clubId)
+            .eq('front_row_certified', true);
+        if (error || !data) return map;
+        for (const row of data as Array<{ person_id: string | null }>) {
+            if (row.person_id) map.set(String(row.person_id), true);
+        }
+    } catch {
+        // Best effort: sin columna o sin tabla, la marca simplemente no viaja.
+    }
+    return map;
+}
+
 async function fetchPeopleFromTeamMemberships(
     clubId: string,
     divisionId?: string,
@@ -1018,7 +1117,10 @@ async function fetchPeopleFromTeamMemberships(
     if (filteredMemberships.length === 0) return [];
 
     const personIds = Array.from(new Set(filteredMemberships.map((membership: any) => membership.person_id)));
-    const people = await fetchPersonRowsByIds(rlsScopedPersonIds(personIds, 'fetchPeopleFromTeamMemberships'));
+    const [people, frontRowByPerson] = await Promise.all([
+        fetchPersonRowsByIds(rlsScopedPersonIds(personIds, 'fetchPeopleFromTeamMemberships')),
+        fetchFrontRowCertifiedByPerson(db, clubId),
+    ]);
     const peopleById = new Map<string, PersonRow>(((people ?? []) as PersonRow[]).map((person) => [person.id, person]));
 
     return filteredMemberships
@@ -1029,7 +1131,7 @@ async function fetchPeopleFromTeamMemberships(
             const team = membership.team_id ? teamsById.get(membership.team_id) : undefined;
             return mapPersonRecord(
                 person,
-                membership,
+                { ...membership, front_row_certified: frontRowByPerson.get(String(membership.person_id)) === true },
                 team?.name || undefined,
                 team?.legacy_division_id || team?.id || undefined
             );
@@ -1069,11 +1171,12 @@ async function fetchPeopleFromLegacy(
     const personIds = Array.from(new Set(roleRows.map((role) => role.person_id)));
     const divisionIds = Array.from(new Set(roleRows.map((role) => role.division_id).filter(Boolean))) as string[];
 
-    const [people, { data: divisions, error: divisionsError }] = await Promise.all([
+    const [people, { data: divisions, error: divisionsError }, frontRowByPerson] = await Promise.all([
         fetchPersonRowsByIds(rlsScopedPersonIds(personIds, 'fetchPeopleFromLegacy')),
         divisionIds.length > 0
             ? db.from('club_divisions').select('id, name').in('id', divisionIds)
             : Promise.resolve({ data: [], error: null }),
+        fetchFrontRowCertifiedByPerson(db, clubId),
     ]);
 
     if (divisionsError && !isMissingTableError(divisionsError)) {
@@ -1090,7 +1193,7 @@ async function fetchPeopleFromLegacy(
 
             return mapPersonRecord(
                 person,
-                role,
+                { ...role, front_row_certified: frontRowByPerson.get(String(role.person_id)) === true },
                 role.division_id ? divisionsById.get(role.division_id) || undefined : undefined,
                 role.division_id || undefined
             );
@@ -1146,6 +1249,7 @@ export async function addPersonToClub(clubId: string, personData: PersonClubInpu
         last_name: normalizePersonText(personData.last_name),
         position: normalizeOptionalText(personData.position),
         id_number: normalizeOptionalText(personData.id_number),
+        doc_country: normalizeOptionalText(personData.doc_country)?.toUpperCase(),
         photo_url: normalizeOptionalText(personData.photo_url),
     };
 
@@ -1218,6 +1322,7 @@ export async function addPersonToClub(clubId: string, personData: PersonClubInpu
         legacyDivisionId: teamReference.legacyDivisionId || null,
         teamId: teamReference.teamId || null,
         source: reusedExistingPerson ? 'linked_existing_person' : 'manual',
+        frontRowCertified: normalizedPayload.front_row_certified,
     });
 
     if (!assignments.success) {
@@ -1254,6 +1359,8 @@ export async function updatePersonInClub(clubId: string, personId: string, perso
     position?: string,
     birth_date?: string,
     id_number?: string,
+    doc_country?: string,
+    front_row_certified?: boolean,
     photo_url?: string,
     weight?: number,
     height?: number,
@@ -1283,7 +1390,14 @@ export async function updatePersonInClub(clubId: string, personId: string, perso
     const { data: person, error: personError } = await updatePersonRecord(
         supabase,
         personId,
-        { ...personData, club_id: rosterClubId },
+        {
+            ...personData,
+            // '' borra el país a propósito; undefined no lo toca.
+            doc_country: personData.doc_country === undefined
+                ? undefined
+                : normalizeOptionalText(personData.doc_country)?.toUpperCase() ?? '',
+            club_id: rosterClubId,
+        },
     );
     if (personError) {
         return { success: false, error: personError.message };
@@ -1305,6 +1419,7 @@ export async function updatePersonInClub(clubId: string, personId: string, perso
         legacyDivisionId: teamReference.legacyDivisionId || null,
         teamId: teamReference.teamId || null,
         source: 'manual',
+        frontRowCertified: personData.front_row_certified,
     });
 
     if (!assignments.success) {

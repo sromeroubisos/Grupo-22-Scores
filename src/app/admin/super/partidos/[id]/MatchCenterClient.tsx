@@ -63,7 +63,7 @@ import {
     buildCompleteStatTabs,
     type CompleteMatchStats,
 } from '@/lib/matchStatsFromEvents';
-import { exportMatchSheetPdf } from '@/lib/matchSheetPdf';
+import { downloadMatchSheetPdf, exportMatchSheetPdf, type MatchSheetPdfInput } from '@/lib/matchSheetPdf';
 import {
     buildMatchPlayerSelectionGroups,
     findMatchPlayerSelectionOption,
@@ -146,6 +146,61 @@ interface LineupPlayer {
     isCaptain?: boolean;
     squadMemberId?: string | null;
     divisionId?: string | null;
+}
+
+/**
+ * Datos de la planilla oficial que viajan por /api/admin/matches/[id]/planilla:
+ * documento y marca ① por jugador, entrenador por club y N° de partido de la
+ * unión. Se piden aparte porque los DNI no pueden viajar por el pipeline
+ * público de rosters.
+ */
+interface PlanillaSheetPlayer {
+    personId: string;
+    name: string;
+    idNumber: string | null;
+    docCountry: string | null;
+    frontRow: boolean;
+    position: string | null;
+}
+
+interface PlanillaSheetSide {
+    players: PlanillaSheetPlayer[];
+    coach: { name: string; idNumber: string | null; docCountry: string | null } | null;
+}
+
+interface PlanillaSheetData {
+    officialSheetNumber: string | null;
+    officialSheetNumberSupported: boolean;
+    home: PlanillaSheetSide;
+    away: PlanillaSheetSide;
+}
+
+/** Clave de nombre para casar formación con plantel: sin tildes ni mayúsculas. */
+function normalizePlanillaName(value: string) {
+    return value
+        .normalize('NFD')
+        .replace(/\p{M}/gu, '')
+        .replace(/[^a-zA-Z\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+}
+
+/** Nombre de club apto para nombre de archivo: sin tildes ni símbolos. */
+function slugForFileName(value: string) {
+    return value
+        .normalize('NFD')
+        .replace(/\p{M}/gu, '')
+        .replace(/[^a-zA-Z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .toLowerCase() || 'equipo';
+}
+
+/** N°Doc como lo imprime la planilla: el país sólo se antepone si no es AR. */
+function formatPlanillaDoc(doc: { idNumber: string | null; docCountry: string | null } | null | undefined) {
+    if (!doc?.idNumber) return undefined;
+    const country = String(doc.docCountry || '').trim().toUpperCase();
+    return country && country !== 'AR' ? `${country} ${doc.idNumber}` : doc.idNumber;
 }
 
 type QuickLineupEntry = {
@@ -1917,6 +1972,29 @@ export default function MatchCenterClient({
         away: false,
     });
     const [dateTimeDraft, setDateTimeDraft] = useState(() => toDateTimeLocalInput(initialMatch.date_time));
+    // Planilla oficial: documento + ① por jugador, entrenador y N° de la unión.
+    const [planillaData, setPlanillaData] = useState<PlanillaSheetData | null>(null);
+    const [officialSheetDraft, setOfficialSheetDraft] = useState('');
+    const officialSheetPersistedRef = useRef('');
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const res = await fetch(`/api/admin/matches/${initialMatch.id}/planilla`, { credentials: 'same-origin' });
+                if (!res.ok || cancelled) return;
+                const data = await res.json() as PlanillaSheetData;
+                if (cancelled) return;
+                setPlanillaData(data);
+                const number = data.officialSheetNumber || '';
+                officialSheetPersistedRef.current = number;
+                setOfficialSheetDraft(number);
+            } catch {
+                // Sin estos datos la planilla se exporta igual, con las celdas en blanco.
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [initialMatch.id]);
     const availableEventDefinitions = useMemo(
         () => mergeMatchEventDefinitions(
             getBaseMatchEventDefinitions(matchSportId ?? 'rugby', matchRules ? { americanFootball: matchRules } : null),
@@ -2274,8 +2352,12 @@ export default function MatchCenterClient({
             }
         }
 
+        if (officialSheetDraft.trim() !== officialSheetPersistedRef.current.trim()) {
+            payload.officialSheetNumber = officialSheetDraft.trim() || null;
+        }
+
         return payload;
-    }, [dateTimeDraft, match.notes, match.status, match.venue, resolveOfficialScore]);
+    }, [dateTimeDraft, match.notes, match.status, match.venue, officialSheetDraft, resolveOfficialScore]);
 
     const persistMatchPatch = useCallback(async (
         payload: Record<string, unknown>,
@@ -2361,6 +2443,12 @@ export default function MatchCenterClient({
         const result = await res.json();
         if (!res.ok) {
             throw new Error(result?.error || `HTTP ${res.status}`);
+        }
+
+        if (Object.prototype.hasOwnProperty.call(finalPayload, 'officialSheetNumber')) {
+            officialSheetPersistedRef.current = typeof finalPayload.officialSheetNumber === 'string'
+                ? finalPayload.officialSheetNumber
+                : '';
         }
 
         const warnings = (result as { matchCenterWarnings?: PersistMatchWarnings } | null)?.matchCenterWarnings || {};
@@ -3693,7 +3781,8 @@ export default function MatchCenterClient({
     const venueDirty = (match.venue || '') !== (persistedMatchRef.current.venue || '');
     const notesDirty = !areTextValuesEqual(match.notes, persistedMatchRef.current.notes);
     const dateTimeDirty = dateTimeDraft !== toDateTimeLocalInput(persistedMatchRef.current.date_time);
-    const hasUnsavedMatchParameters = scoreDirty || statusDirty || venueDirty || notesDirty || dateTimeDirty;
+    const officialSheetDirty = officialSheetDraft.trim() !== officialSheetPersistedRef.current.trim();
+    const hasUnsavedMatchParameters = scoreDirty || statusDirty || venueDirty || notesDirty || dateTimeDirty || officialSheetDirty;
     // La cabecera muestra el reloj junto al estado EN VIVO.
     const liveClockLabel = clock.label;
     const canPauseClock = clock.isRunning;
@@ -3865,13 +3954,39 @@ export default function MatchCenterClient({
         const formattedTime = match.date_time
             ? formatDateInTimeZone(match.date_time, 'es-AR', { hour: '2-digit', minute: '2-digit' }, APP_TIMEZONE)
             : '';
-        const mapLineup = (players: LineupPlayer[]) => players.map((player) => ({
-            number: String(player.number ?? '').trim(),
-            name: player.name,
-            position: player.position || '',
-            role: player.role || '',
-            isCaptain: Boolean(player.isCaptain),
-        }));
+        // Casa cada jugador de la formación con su ficha del plantel (documento
+        // y marca ① de primeras líneas): primero por id de persona, después por
+        // nombre normalizado. Sin ficha, las celdas de la planilla quedan en
+        // blanco y se completan a mano.
+        const mapLineup = (players: LineupPlayer[], sheetSide?: PlanillaSheetSide) => {
+            const byId = new Map<string, PlanillaSheetPlayer>();
+            const byName = new Map<string, PlanillaSheetPlayer>();
+            (sheetSide?.players ?? []).forEach((sheetPlayer) => {
+                byId.set(sheetPlayer.personId, sheetPlayer);
+                const nameKey = normalizePlanillaName(sheetPlayer.name);
+                if (nameKey && !byName.has(nameKey)) byName.set(nameKey, sheetPlayer);
+            });
+
+            return players.map((player) => {
+                const sheetPlayer = (player.id ? byId.get(player.id) : undefined)
+                    ?? byName.get(normalizePlanillaName(player.name));
+                return {
+                    number: String(player.number ?? '').trim(),
+                    name: player.name,
+                    position: player.position || '',
+                    role: player.role || '',
+                    isCaptain: Boolean(player.isCaptain),
+                    docNumber: formatPlanillaDoc(sheetPlayer),
+                    frontRow: sheetPlayer?.frontRow === true,
+                };
+            });
+        };
+        const mapCoach = (side?: PlanillaSheetSide) => side?.coach
+            ? { name: side.coach.name, docNumber: formatPlanillaDoc(side.coach) }
+            : null;
+        // La planilla oficial es un formato de rugby (UAR): en otros deportes el
+        // PDF sale como siempre, sin esas dos páginas.
+        const includeOfficialSheet = normalizeSportBucket(matchSportId) === 'rugby';
         const eventStatsByType = new Map<string, { label: string; home: number; away: number }>();
         eventsChronologicalAsc.forEach((event) => {
             if (event.team !== 'home' && event.team !== 'away') return;
@@ -3896,8 +4011,21 @@ export default function MatchCenterClient({
                 })),
             }))
         ));
+        // Dorsal por nombre para la columna Jug.N° de las incidencias de la
+        // planilla oficial.
+        const jerseyBySide = { home: new Map<string, string>(), away: new Map<string, string>() };
+        (['home', 'away'] as const).forEach((sideKey) => {
+            lineups[sideKey].forEach((player) => {
+                const key = normalizePlanillaName(player.name);
+                const number = String(player.number ?? '').trim();
+                if (key && number && !jerseyBySide[sideKey].has(key)) {
+                    jerseyBySide[sideKey].set(key, number);
+                }
+            });
+        });
         const timeline = eventsChronologicalAsc.map((event, index) => {
             const scoreAtEvent = eventScoreById.get(event.id);
+            const eventSide = event.team === 'home' ? 'home' as const : event.team === 'away' ? 'away' as const : null;
             return {
                 period: getMatchPeriodLabel(event.period),
                 minute: String(event.minute || '--'),
@@ -3905,10 +4033,16 @@ export default function MatchCenterClient({
                 team: event.team === 'home' ? homeName : event.team === 'away' ? awayName : 'Neutral',
                 detail: formatMatchTimelineEventDescription(event, eventsChronologicalAsc, index, event.playerName || event.detail || 'Sin detalle adicional'),
                 score: scoreAtEvent && scoreAtEvent.points > 0 ? `${scoreAtEvent.home} - ${scoreAtEvent.away}` : undefined,
+                side: eventSide,
+                points: scoreAtEvent?.points ?? null,
+                playerName: event.playerName || null,
+                playerNumber: eventSide && event.playerName
+                    ? jerseyBySide[eventSide].get(normalizePlanillaName(event.playerName)) || null
+                    : null,
             };
         });
 
-        const opened = await exportMatchSheetPdf({
+        const sheetInput: MatchSheetPdfInput = {
             title: `Planilla: ${homeFullName} vs ${awayFullName}`,
             status: match.status,
             statusLabel: statusLabel(match.status),
@@ -3930,7 +4064,8 @@ export default function MatchCenterClient({
                 score: String(score.home ?? 0),
                 points: formatPointValue(homeBasePoints + homeBonusPoints),
                 pointsDetail: formatPointBreakdown(homeBasePoints, homeBonusPoints),
-                lineup: mapLineup(lineups.home),
+                lineup: mapLineup(lineups.home, planillaData?.home),
+                coach: mapCoach(planillaData?.home),
             },
             away: {
                 name: awayFullName,
@@ -3939,19 +4074,47 @@ export default function MatchCenterClient({
                 score: String(score.away ?? 0),
                 points: formatPointValue(awayBasePoints + awayBonusPoints),
                 pointsDetail: formatPointBreakdown(awayBasePoints, awayBonusPoints),
-                lineup: mapLineup(lineups.away),
+                lineup: mapLineup(lineups.away, planillaData?.away),
+                coach: mapCoach(planillaData?.away),
             },
+            ...(includeOfficialSheet
+                ? {
+                    officialSheet: {
+                        number: officialSheetDraft.trim() || planillaData?.officialSheetNumber || '',
+                    },
+                }
+                : {}),
             timeline,
             statSections: [
                 { title: 'Resumen de eventos', rows: eventStatRows },
                 ...completeStatSections,
             ],
             notes: match.notes || undefined,
-        });
+        };
 
-        if (!opened) {
-            setSaveMsg({ type: 'err', text: 'No se pudo abrir la ventana de impresion. Revisa el bloqueo de pop-ups del navegador.' });
+        // Primero la descarga directa del .pdf al dispositivo; si algo falla
+        // (librería, captura), cae a la ventana de impresión de siempre.
+        setSaveMsg({ type: 'ok', text: 'Generando el PDF de la planilla...' });
+        const fileName = `planilla-${slugForFileName(homeFullName)}-vs-${slugForFileName(awayFullName)}.pdf`;
+        let downloaded = false;
+        try {
+            downloaded = await downloadMatchSheetPdf(sheetInput, fileName);
+        } catch {
+            downloaded = false;
+        }
+
+        if (downloaded) {
+            setSaveMsg({ type: 'ok', text: `Planilla descargada: ${fileName}` });
             scheduleSaveMsgClear(3000);
+            return;
+        }
+
+        const opened = await exportMatchSheetPdf(sheetInput);
+        if (!opened) {
+            setSaveMsg({ type: 'err', text: 'No se pudo generar el PDF ni abrir la ventana de impresion. Revisa el bloqueo de pop-ups del navegador.' });
+            scheduleSaveMsgClear(3000);
+        } else {
+            setSaveMsg(null);
         }
     }, [
         availableEventDefinitions,
@@ -3983,6 +4146,9 @@ export default function MatchCenterClient({
         match.tournament?.logo_url,
         match.tournament?.name,
         match.venue,
+        matchSportId,
+        officialSheetDraft,
+        planillaData,
         score.away,
         score.home,
     ]);
@@ -5907,6 +6073,25 @@ export default function MatchCenterClient({
                                     style={{ borderRadius: 4 }}
                                     onChange={(e) => setMatch((prev) => ({ ...prev, venue: e.target.value }))}
                                 />
+                            </div>
+                            <div className="form-group config-field-official-number">
+                                <label>N&deg; de partido (union / BD UAR)</label>
+                                <input
+                                    type="text"
+                                    value={officialSheetDraft}
+                                    placeholder="Opcional - Ej: 295731"
+                                    disabled={planillaData?.officialSheetNumberSupported === false}
+                                    title={planillaData?.officialSheetNumberSupported === false
+                                        ? 'Falta correr la migracion 20260901190000_planilla_oficial.sql para poder guardar este numero.'
+                                        : 'Numero del partido en el sistema de la union. Sale impreso en la planilla oficial exportada.'}
+                                    style={{ borderRadius: 4 }}
+                                    onChange={(e) => setOfficialSheetDraft(e.target.value)}
+                                />
+                                {planillaData?.officialSheetNumberSupported === false ? (
+                                    <p style={{ margin: '4px 0 0', fontSize: 11, opacity: 0.75 }}>
+                                        Para habilitarlo, corre la migracion 20260901190000_planilla_oficial.sql en Supabase.
+                                    </p>
+                                ) : null}
                             </div>
                         </div>
 

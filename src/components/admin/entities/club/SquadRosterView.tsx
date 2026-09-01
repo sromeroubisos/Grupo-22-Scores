@@ -176,7 +176,22 @@ export function SquadRosterView({ clubId, division, onBack }: Props) {
                                         </div>
                                     </td>
                                     <td className="px-4 py-4 text-xs font-mono text-[var(--color-text-secondary)]">
-                                        {person.id_number || <span className="text-[var(--color-text-muted)]">-</span>}
+                                        {person.id_number ? (
+                                            <span>
+                                                {person.doc_country ? `${person.doc_country} ` : ''}
+                                                {person.id_number}
+                                            </span>
+                                        ) : (
+                                            <span className="text-[var(--color-text-muted)]">-</span>
+                                        )}
+                                        {person.front_row_certified ? (
+                                            <span
+                                                className="ml-1.5 text-amber-500"
+                                                title="Curso de primeras lineas aprobado: sale como ① en la planilla oficial"
+                                            >
+                                                ①
+                                            </span>
+                                        ) : null}
                                     </td>
                                     <td className="px-4 py-4 text-xs font-mono text-[var(--color-text-secondary)]">
                                         {person.birth_date ? new Date(person.birth_date).toLocaleDateString() : <span className="text-[var(--color-text-muted)]">-</span>}

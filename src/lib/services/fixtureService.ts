@@ -965,6 +965,7 @@ export class FixtureService {
       supportsAwayBonusPoints,
       supportsPointsAutocalculated,
       supportsPointsOverrideReason,
+      supportsIsVisible,
     ] = await Promise.all([
       this.checkRoundLabelSupport(supabase),
       data.homeSquadId ? this.checkMatchColumnSupport('home_division_id', supabase) : Promise.resolve(false),
@@ -980,6 +981,7 @@ export class FixtureService {
       data.awayBonusPoints !== undefined ? this.checkMatchColumnSupport('away_bonus_points', supabase) : Promise.resolve(false),
       data.pointsAutocalculated !== undefined ? this.checkMatchColumnSupport('points_autocalculated', supabase) : Promise.resolve(false),
       data.pointsOverrideReason !== undefined ? this.checkMatchColumnSupport('points_override_reason', supabase) : Promise.resolve(false),
+      typeof data.isVisible === 'boolean' ? this.checkMatchColumnSupport('is_visible', supabase) : Promise.resolve(false),
     ]);
     console.log(`[FixtureService] createMatch - round_label: ${supportsRoundLabel}`);
 
@@ -1059,6 +1061,10 @@ export class FixtureService {
 
     if (supportsReplayUrl && data.replayUrl !== undefined) {
       insertData.replay_url = data.replayUrl || null;
+    }
+
+    if (supportsIsVisible && typeof data.isVisible === 'boolean') {
+      insertData.is_visible = data.isVisible;
     }
 
     // Fixed roster: pre-seed the lineup from the team's registered roster so the
@@ -1168,6 +1174,7 @@ export class FixtureService {
       supportsAwayBonusPoints,
       supportsPointsAutocalculated,
       supportsPointsOverrideReason,
+      supportsOfficialSheetNumber,
     ] = await Promise.all([
       this.checkRoundLabelSupport(supabase),
       data.homeSquadId !== undefined ? this.checkMatchColumnSupport('home_division_id', supabase) : Promise.resolve(false),
@@ -1184,6 +1191,7 @@ export class FixtureService {
       data.awayBonusPoints !== undefined ? this.checkMatchColumnSupport('away_bonus_points', supabase) : Promise.resolve(false),
       data.pointsAutocalculated !== undefined ? this.checkMatchColumnSupport('points_autocalculated', supabase) : Promise.resolve(false),
       data.pointsOverrideReason !== undefined ? this.checkMatchColumnSupport('points_override_reason', supabase) : Promise.resolve(false),
+      data.officialSheetNumber !== undefined ? this.checkMatchColumnSupport('official_sheet_number', supabase) : Promise.resolve(false),
     ]);
     console.log(`[FixtureService] updateMatch - round_label: ${supportsRoundLabel}`);
 
@@ -1319,6 +1327,9 @@ export class FixtureService {
     if (supportsAwayBonusPoints && data.awayBonusPoints !== undefined) updateData.away_bonus_points = data.awayBonusPoints;
     if (supportsPointsAutocalculated && data.pointsAutocalculated !== undefined) updateData.points_autocalculated = data.pointsAutocalculated;
     if (supportsPointsOverrideReason && data.pointsOverrideReason !== undefined) updateData.points_override_reason = data.pointsOverrideReason;
+    if (supportsOfficialSheetNumber && data.officialSheetNumber !== undefined) {
+      updateData.official_sheet_number = String(data.officialSheetNumber || '').trim() || null;
+    }
 
     // Guard: if nothing to update (e.g. only events/lineups were sent but those columns
     // were removed in schema simplification), skip the UPDATE to avoid PostgREST returning
@@ -2260,6 +2271,7 @@ export class FixtureService {
       awayBonusPoints: match.away_bonus_points ?? null,
       pointsAutocalculated: match.points_autocalculated ?? null,
       pointsOverrideReason: match.points_override_reason ?? null,
+      officialSheetNumber: match.official_sheet_number ?? null,
       roundLabel: match.round_label || null,
       createdAt: match.created_at,
       updatedAt: match.updated_at,
