@@ -909,7 +909,13 @@ export default function ExportImage(props: ExportImageProps) {
         return null;
     }
 
-    return <ExportImageInner {...props} />;
+    // La clave por plantilla remonta el componente cuando cambia la plantilla en
+    // el MISMO lugar del arbol (la hero de mobile de un torneo pasa de "standings"
+    // a "dailyMatches" al cambiar de pestana). Sin eso React reusa la instancia,
+    // y todo el estado que se inicializa leyendo `data` —la foto del modal, la
+    // seleccion de partidos, el marcador manual— queda con la forma de la
+    // plantilla anterior: `data.matches` era undefined y reventaba la pagina.
+    return <ExportImageInner key={props.template} {...props} />;
 }
 
 function ExportImageInner({ template, data: liveData, filename = 'g22-export', className = '' }: ExportImageProps) {
@@ -930,7 +936,10 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     // redibujaba la pieza entera sin que nadie tocara nada, y los efectos que leen
     // `data` pisaban el marcador cargado a mano. Se exporta lo que se vio al abrir.
     const [frozenData, setFrozenData] = useState<ExportData>(liveData);
-    const data = frozenData;
+    // La foto solo vale con el modal abierto. Cerrado, el boton y sus deducciones
+    // (que haya partidos programados, el nombre por defecto) siguen a la prop viva:
+    // si se congelara siempre, una instancia reusada leeria datos de otra plantilla.
+    const data = showModal ? frozenData : liveData;
     const [isPortalReady, setIsPortalReady] = useState(false);
     const [format, setFormat] = useState<ExportFormat>('1080x1350');
     const [status, setStatus] = useState('');
@@ -2166,7 +2175,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         }
     };
 
-    const dailyMatches = template === 'dailyMatches' ? (data as DailyMatchesData).matches : [];
+    const dailyMatchesSource = template === 'dailyMatches' ? (data as DailyMatchesData).matches : [];
+    const dailyMatches = Array.isArray(dailyMatchesSource) ? dailyMatchesSource : [];
     const hasScheduledDailyMatches = dailyMatches.some((match) => match.status === 'scheduled');
     const modalPreviewData = useMemo<ExportData>(() => {
         const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset);
