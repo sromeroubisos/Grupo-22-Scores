@@ -90,6 +90,7 @@ const SQUAD: SquadData = {
     teamName: 'Duendes',
     teamLogo: '/clubs/sb-duendes-r-c.png',
     subtitle: 'Plantel 2026',
+    sport: 'rugby',
     groups: [
         {
             label: 'Forwards',
@@ -125,14 +126,19 @@ const LINEUPS: LineupsData = {
     date: '17/08/2026',
     time: '20:30',
     venue: 'Apollo Projects Stadium',
+    kickoffAt: '2026-08-17T23:30:00Z',
+    sport: 'rugby',
+    // Foto de muestra para la formacion editorial: vive en /public/local-dev, que
+    // git ignora. Sin el archivo, la pieza cae al escudo grande.
+    backgroundImage: '/local-dev/formacion-foto.jpg',
     homeTeam: {
         name: 'Canterbury',
         logo: '/clubs/canterbury.png',
         starters: [
-            { number: 1, name: 'Mateo Alvarez' },
-            { number: 2, name: 'Bruno Ferrero' },
+            { number: 1, name: 'Nicolas Revol Pitt' },
+            { number: 2, name: 'Juan Ignacio Greising Revol' },
             { number: 3, name: 'Ignacio Sosa' },
-            { number: 4, name: 'Julian Riquelme' },
+            { number: 4, name: 'Rodrigo Fernandez Criado' },
             { number: 5, name: 'Tomas Bengoechea' },
             { number: 6, name: 'Facundo Miranda' },
             { number: 7, name: 'Santiago Peralta' },
@@ -382,6 +388,31 @@ export default function ExportLabPage() {
                         visualFamily={family}
                         format={format}
                         lineupExportMode="both"
+                        previewColors={previewColors}
+                        className="lab-preview"
+                    />
+                </figure>
+                <figure style={{ margin: 0 }}>
+                    <figcaption style={{ marginBottom: 8, fontWeight: 700 }}>Formacion de un equipo (clasica)</figcaption>
+                    <ExportImagePreview
+                        template="lineups"
+                        data={LINEUPS}
+                        visualFamily={family}
+                        format={format}
+                        lineupExportMode="home"
+                        previewColors={previewColors}
+                        className="lab-preview"
+                    />
+                </figure>
+                <figure style={{ margin: 0 }}>
+                    <figcaption style={{ marginBottom: 8, fontWeight: 700 }}>Formacion editorial (con foto)</figcaption>
+                    <ExportImagePreview
+                        template="lineups"
+                        data={LINEUPS}
+                        visualFamily={family}
+                        format={format}
+                        lineupExportMode="home"
+                        lineupExportLayout="editorial"
                         previewColors={previewColors}
                         className="lab-preview"
                     />

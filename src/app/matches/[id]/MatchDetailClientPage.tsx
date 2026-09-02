@@ -2855,6 +2855,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                     time: matchTimerText,
                                                     venue: matchData.venue,
                                                     kickoffAt: matchData.date,
+                                                    sport: matchData.sportId,
                                                     homeTeam: {
                                                         name: matchData.home.name,
                                                         logo: matchData.home.logo,
