@@ -77,6 +77,38 @@ const NOMBRES_ES: Record<string, string> = {
   'Group 6': 'Zona 6',
   'Group 7': 'Zona 7',
   'Group 8': 'Zona 8',
+  // Rótulos del Uruguayo de Clubes (comp 396). Los que ya vienen en castellano
+  // (Clasificatorio, Campeonato Nacional, Copa de Plata, Primera A, Serie 1-3,
+  // Super 4, Super Uru, Playoff) pasan tal cual. "Domingo Tricanico" es el
+  // nombre de una copa y se deja como lo escribe la fuente.
+  'Apertura tournament': 'Torneo Apertura',
+  'Clausura tournament': 'Torneo Clausura',
+  'Apertura final phase': 'Fase final del Apertura',
+  'Clausura final phase': 'Fase final del Clausura',
+  'Clausura tournament - Zona A': 'Torneo Clausura - Zona A',
+  'Clausura tournament - Zona B': 'Torneo Clausura - Zona B',
+  'Torneo Preparacion - first phase': 'Torneo Preparación - primera fase',
+  'Torneo Preparacion - final phase': 'Torneo Preparación - fase final',
+  'Torneo Preparacion - Zona A': 'Torneo Preparación - Zona A',
+  'Torneo Preparacion - Zona B': 'Torneo Preparación - Zona B',
+  'Carlos Cat - first phase': 'Carlos Cat - primera fase',
+  'Carlos Cat - final phase': 'Carlos Cat - fase final',
+  'Carlos Cat - 5th place final phase': 'Carlos Cat - fase final por el 5º puesto',
+  '54 Anos': '54 Años',
+  '56 Anos - first phase': '56 Años - primera fase',
+  '56 Anos - final phase': '56 Años - fase final',
+  '56 Anos - Zona A': '56 Años - Zona A',
+  '56 Anos - Zona B': '56 Años - Zona B',
+  'Zona Reclasificacion': 'Zona Reclasificación',
+  'Reubicacion final phase': 'Fase final de la Reubicación',
+  'Reubicacion semifinals': 'Semifinales de la Reubicación',
+  'Reubicacion final': 'Final de la Reubicación',
+  '5th place ranking': 'Por el 5º puesto',
+  '7th place ranking': 'Por el 7º puesto',
+  '7th place semifinals': 'Semifinales por el 7º puesto',
+  'Oro - Semifinals': 'Oro - Semifinales',
+  'Plata - Semifinals': 'Plata - Semifinales',
+  'Bronce - Semifinals': 'Bronce - Semifinales',
 };
 
 export function traducir(rotulo: string): string {

@@ -45,6 +45,16 @@ export interface CompetenciaInterior {
     /** season_id (texto) con el que nace la fila del torneo. */
     seasonCode: string;
     region: string;
+    /**
+     * País y unión del torneo. Por omisión, Argentina / UAR: todo lo importado
+     * hasta la quinta tanda era argentino. El Uruguayo de Clubes (396) es el
+     * primer destino de otra unión, y sin esto la fila nacería diciendo que la
+     * organiza la UAR — el filtro por país de la home lo dejaría en Argentina.
+     */
+    unionId?: string;
+    country?: string;
+    countryId?: string;
+    countryName?: string;
   };
   /**
    * Correcciones de mapeo que valen SOLO en esta competición. La fuente a veces
@@ -106,6 +116,16 @@ const YEARS_PAMPEANO: string[] = [];
 for (let y = 2008; y <= 2026; y++) YEARS_PAMPEANO.push(String(y));
 const YEARS_PATAGONICO: string[] = [];
 for (let y = 2008; y <= 2026; y++) YEARS_PATAGONICO.push(String(y));
+
+// ── Sexta tanda 2026-08: Uruguayo de Clubes (comp 396) ──────────────────────
+// La fuente lista 1951-2026 sin huecos. El 2026 vive en G22 cargado a mano
+// (fixture en curso) y la guarda de `season_code` lo saltea; el año va en la
+// lista igual, para que el día que se relea esta comp el runner lo considere.
+// Ese 2026 NO se puede reescribir por acá aunque la guarda se cayera: de sus
+// partidos cuelgan 73 `prode_events` con predicciones puntuadas, y el escritor
+// borra y rehace la temporada entera. Se actualiza en el lugar.
+const YEARS_URUGUAYO: string[] = [];
+for (let y = 1951; y <= 2026; y++) YEARS_URUGUAYO.push(String(y));
 
 /**
  * ¿Esta fase del Oeste (comp 124) pertenece a la línea PLATA?
@@ -336,6 +356,26 @@ export const COMPETENCIAS: CompetenciaInterior[] = [
       ? `Torneo Regional de los Valles ${y}`
       : `Torneo Regional Patagónico ${y}`),
   },
+  // ── Sexta tanda 2026-08: Uruguayo de Clubes ──────────────────────────────
+  // 1951-2002 son solo-campeón (la fuente no publica partidos ni tablas);
+  // desde 2003 hay partidos, tablas y fase final.
+  //
+  // SIN `crear` a propósito. El torneo YA existía en G22 con su 2026 cargado a
+  // mano, pero bajo el nombre de una FASE ("Apertura - Super Uru de Clubes"),
+  // así que una búsqueda por "urugua" no lo encontraba y la primera corrida
+  // creó un duplicado. Se unificó a mano el 2026-08-31 y el que sobrevivió es
+  // el viejo (271638cc…, ahora renombrado), porque de sus partidos del 2026
+  // cuelgan los `prode_events`. Sin receta de creación, un slug que no matchee
+  // vuelve a ser un error ruidoso en vez de un segundo torneo silencioso.
+  {
+    comp: 396,
+    nombreEsperado: 'Uruguay - Uruguayo de Clubes',
+    slug: 'uruguayo-de-clubes',
+    years: YEARS_URUGUAYO,
+    // La fuente usa el mismo nombre en las 76 temporadas: no hay eras que
+    // distinguir, así que la temporada se nombra igual que el torneo.
+    nombreTemporada: (y) => `Uruguayo de Clubes ${y}`,
+  },
 ];
 
 /**
@@ -501,14 +541,40 @@ export const CLUB_MAP_INTERIOR: Record<number, string> = {
   1401: 'bigornia-r-c',
   1659: 'calafate-r-c',
   1877: 'deportivo-portugues',
-  // ── Uruguay / Paraguay (invitados) ────────────────────────────────────────
+  // ── Uruguay / Paraguay ────────────────────────────────────────────────────
+  // Los seis primeros entraron como invitados del Regional del Centro "B"; los
+  // que siguen los suma el Uruguayo de Clubes (comp 396), donde son locales.
+  // Todos con `idNazione: 616` (Uruguay) en su ficha de la fuente.
   1194: 'montevideo-c-c',
   1389: 'carrasco-polo',
   1390: 'old-christians-club',
   1394: 'old-boys-girls-club',
-  1399: 'trebol-de-paysandu',
+  1399: 'trebol-de-paysandu',   // ficha: Paysandú
   5066: 'psg',
   1398: 'curda',
+  // Sexta tanda (396). Decisiones que no salen del nombre:
+  //  - 5065 "Los Cuervos Rugby" es el rugby del Club de Golf del Uruguay
+  //    (la ficha enlaza cgu.com.uy) → `los-cuervos`, el de Montevideo.
+  //  - 5067 "Los Lobos" es el rugby del Cantegril Country Club de Punta del
+  //    Este → `lobos-pde`. No confundir con ningún Lobos argentino.
+  //  - 5068 "Champagnat Rugby" (Montevideo, champagnat.com.uy) → `champagnat`,
+  //    NO `club-champagnat`, que es el de General Pacheco (URBA, RA 1308).
+  5065: 'los-cuervos',
+  5067: 'lobos-pde',
+  5068: 'champagnat',
+  5069: 'ceibos-club',
+  5070: 'club-seminario',
+  5071: 'circulo-de-tenis',
+  // Los nueve que G22 no tenía (se crean en CLUBES_NUEVOS_INTERIOR).
+  5080: 'trouville',
+  5079: 'colonia-rowing',
+  5078: 'la-cachila',
+  5075: 'la-olla-rugby',
+  5072: 'canarios-rugby',
+  5073: 'nazarenos-rugby',
+  5077: 'pucaru',            // fusionado con PSG (5066) en 2005
+  9019: 'remeros-de-mercedes',
+  5074: 'salto-rugby',
   // ── URBA (tanda 2: comps 116/117/342/343) ─────────────────────────────────
   // Trampas verificadas de esta tanda:
   //  - 1330 "Old Georgians" (Palermo) → `old-georgian` (URBA), NO el
@@ -724,6 +790,7 @@ const U_SAN_JUAN = '765e6c46-b1c1-4e44-8490-aa0085ebeb99';
 const U_CUYO = '40159cd1-5876-4720-b953-d639b09d5f5b';
 const U_MDP = 'union-de-rugby-de-mar-del-plata';
 const U_MISIONES = 'union-de-rugby-de-misiones';
+const U_URUGUAY = 'uru-rugby';
 
 /**
  * Clubes que el catálogo de G22 todavía no tiene, con la ciudad y la unión de
@@ -811,6 +878,23 @@ export const CLUBES_NUEVOS_INTERIOR: Array<Record<string, unknown>> = [
   { id: 'coihues-r-c', name: 'Coihues R.C.', short_name: 'Coihues', city: 'Villa La Angostura', union_id: null, region: 'Neuquén', country: 'ARG' },
   { id: 'catriel-r-c', name: 'Catriel Rugby Club', short_name: 'Catriel', city: 'Catriel', union_id: 'union-de-rugby-de-alto-valle', region: 'Río Negro', country: 'ARG' },
   { id: 'patagonia-r-c', name: 'Patagonia R.C.', short_name: 'Patagonia', city: 'Neuquén', union_id: 'union-de-rugby-de-alto-valle', region: 'Neuquén', country: 'ARG' },
+  // ── Uruguayo de Clubes (396): los nueve que G22 no tenía ──────────────────
+  // Todos con ficha `idNazione: 616`. La ciudad sale de `localita`; los que no
+  // aparecen más son clubes históricos o fusionados, y van igual porque son
+  // campeones o participantes reales de alguna edición.
+  { id: 'trouville', name: 'Trouville Rugby', short_name: 'Trouville', city: 'Montevideo', union_id: U_URUGUAY, region: 'Montevideo', country: 'Uruguay' },
+  { id: 'colonia-rowing', name: 'Colonia Rowing Club', short_name: 'Colonia Rowing', city: 'Colonia del Sacramento', union_id: U_URUGUAY, region: 'Colonia', country: 'Uruguay' },
+  // La ficha pone "La Cachila" también como `localita`: es el nombre del club,
+  // no una ciudad, así que la ciudad queda sin declarar.
+  { id: 'la-cachila', name: 'La Cachila', short_name: 'La Cachila', city: null, union_id: U_URUGUAY, region: 'Uruguay', country: 'Uruguay' },
+  { id: 'la-olla-rugby', name: 'La Olla Rugby', short_name: 'La Olla', city: 'Florida', union_id: U_URUGUAY, region: 'Florida', country: 'Uruguay' },
+  { id: 'canarios-rugby', name: 'Canarios Rugby', short_name: 'Canarios', city: 'Montevideo', union_id: U_URUGUAY, region: 'Montevideo', country: 'Uruguay' },
+  { id: 'nazarenos-rugby', name: 'Nazarenos Rugby', short_name: 'Nazarenos', city: 'Montevideo', union_id: U_URUGUAY, region: 'Montevideo', country: 'Uruguay' },
+  // La ficha lo dice: se fusionó con PSG Rugby (5066) en 2005. Va aparte igual
+  // porque jugó 2003 y 2004 con su propio nombre.
+  { id: 'pucaru', name: 'Pucarú', short_name: 'Pucarú', city: 'Montevideo', union_id: U_URUGUAY, region: 'Montevideo', country: 'Uruguay' },
+  { id: 'remeros-de-mercedes', name: 'Remeros de Mercedes', short_name: 'Remeros', city: 'Mercedes', union_id: U_URUGUAY, region: 'Soriano', country: 'Uruguay' },
+  { id: 'salto-rugby', name: 'Salto Rugby', short_name: 'Salto', city: 'Salto', union_id: U_URUGUAY, region: 'Salto', country: 'Uruguay' },
 ].map((c) => ({
   ...c,
   slug: c.id,

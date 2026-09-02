@@ -57,7 +57,12 @@ const LOG = path.join(REPO, `RUGBYARCHIVE_INTERIOR${sufijo}_LOG.jsonl`);
 /** Actor del import del Top 10 del Centro; se usa si --user no viene y las temporadas existentes no tienen creador. */
 const ACTOR_FALLBACK = '2442e0bd-59c9-404a-969d-edba2cfeaf6f';
 
-/** Ruleset estándar de los torneos de la UAR en G22 (calcado del Interior A). */
+/**
+ * Ruleset estándar de los torneos de la UAR en G22 (calcado del Interior A).
+ * Es el 4/2/0 con bonus del rugby de clubes y sirve igual fuera de Argentina:
+ * las tablas del Uruguayo de Clubes cierran con esta cuenta (Old Christians
+ * 2026: 11 ganados × 4 + 9 bonus ofensivos = 53 puntos, el número de la fuente).
+ */
 const RULESET_UAR = {
   phases: [{
     id: 'phase_1', name: 'Regular Season', format: 'league',
@@ -633,7 +638,7 @@ async function main() {
   if (torneosACrear.length) {
     await insertar('tournaments', torneosACrear.map((t) => ({
       id: idNuevoPorSlug.get(t.slug),
-      union_id: 'union-argentina-de-rugby',
+      union_id: t.crear!.unionId || 'union-argentina-de-rugby',
       season_id: t.crear!.seasonCode,
       name: t.crear!.name,
       slug: t.slug,
@@ -641,16 +646,16 @@ async function main() {
       category: null,
       age_grade: 'Mayores (Adults)',
       region: t.crear!.region,
-      country: 'Argentina',
+      country: t.crear!.country || 'Argentina',
       format: 'league',
       is_visible: true,
       ruleset: RULESET_UAR,
       ruleset_version: 1,
-      country_id: 'argentina',
+      country_id: t.crear!.countryId || 'argentina',
       sport_id: 'rugby',
       sport: 'rugby',
       sport_name: 'Rugby',
-      country_name: 'Argentina',
+      country_name: t.crear!.countryName || 'Argentina',
       is_popular: false,
       priority: t.crear!.priority,
       sponsors: [],
