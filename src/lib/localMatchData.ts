@@ -5,9 +5,14 @@ import {
   outcomeScores,
   type MatchEventCategory,
   type MatchEventDefinition,
-} from './matchEventCatalog';
-import { goalKickOutcomeSuffixSpanish, parseSubstitutionIncomingPlayer } from './matchEventStats';
-import { getEventPeriodForType, getNextActivePeriodAfterEvent, normalizeMatchPeriod } from './matchPeriods';
+} from './matchEventCatalog.ts';
+import {
+  goalKickOutcomeSuffixSpanish,
+  isGoalKickAttemptEvent,
+  isGoalKickMade,
+  parseSubstitutionIncomingPlayer,
+} from './matchEventStats.ts';
+import { getEventPeriodForType, getNextActivePeriodAfterEvent, normalizeMatchPeriod } from './matchPeriods.ts';
 
 export type LocalMatchTeam = 'home' | 'away';
 
@@ -192,10 +197,10 @@ export function publicEventTypeDisplay(evt: Pick<LocalPublicEvent, 'type' | 'des
 }
 
 /**
- * Puntos de un evento para la fila del jugador. Tabla fija por tipo, mas la
- * regla de los desenlaces: un evento que declara resultados (field goal,
- * punto extra) suma solo si el elegido convierte. Rugby no declara ninguno y
- * sigue exactamente igual.
+ * Puntos de un evento para la fila del jugador. Tabla fija por tipo, mas dos
+ * reglas: un tiro a los palos (`kickAtGoal`) suma solo si entro, y un evento
+ * que declara desenlaces (field goal, punto extra) suma solo si el elegido
+ * convierte. Es la misma cuenta que hace el marcador del partido.
  */
 function getEventPoints(
   type: string,
@@ -203,6 +208,14 @@ function getEventPoints(
   definitionMap: Record<string, MatchEventDefinition>,
 ) {
   const definition = definitionMap[type];
+  // Tiro a los palos (conversion, penal, drop): suma solo si entro. Sin esta
+  // guarda una conversion errada le acreditaba dos puntos al pateador aunque
+  // el marcador del partido, que pasa por getConfiguredEventPoints, no los
+  // contara. El penal a touch o al scrum tampoco es un tiro y no suma.
+  if (definition?.kickAtGoal) {
+    const kick = { type, detail: String(description ?? '') };
+    if (!isGoalKickAttemptEvent(kick) || !isGoalKickMade(type, description)) return 0;
+  }
   if (definition?.outcomes?.length && !outcomeScores(definition, description)) return 0;
   return getEventPointsByType(type);
 }
