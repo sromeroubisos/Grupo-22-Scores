@@ -712,6 +712,13 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     // tournaments and stays in sync with the backend.
     const [canManageMatch, setCanManageMatch] = useState(false);
     const statusRef = useRef<string>('scheduled');
+    // Tabla e historial ya cargados para este partido. El poll en vivo trae
+    // el marcador cada 12s; si en cada tick volviamos a blanquear la barra de
+    // pestanas y el panel para pedir de nuevo la tabla, la pagina "parpadeaba"
+    // entera y perdias donde estabas leyendo. Con esto se piden una sola vez
+    // por partido y otra vez cuando cambia el estado (al terminar, la tabla
+    // se mueve).
+    const secondaryRef = useRef<{ key: string; standings: any[]; h2h: any[] } | null>(null);
     const isFlashScore = /^[A-Za-z0-9]{8}$/.test(id);
     const isRugbyExternal = isRugbyApiSportsMatchId(id);
     const isEspnExternal = isEspnAmericanFootballMatchId(id);
@@ -1291,10 +1298,56 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             };
 
                             statusRef.current = matchData.status || 'scheduled';
-                            setState({
+
+                            const secondaryKey = [
+                                matchData.id, tournamentId, phaseId, groupId,
+                                homeClubId, awayClubId, matchData.status || 'scheduled',
+                            ].join('|');
+                            const cachedSecondary = secondaryRef.current?.key === secondaryKey
+                                ? secondaryRef.current
+                                : null;
+
+                            if (cachedSecondary) {
+                                // Refresco en vivo: solo cambia lo que trajo el
+                                // partido (marcador, reloj, eventos). La tabla y
+                                // el historial siguen siendo los mismos nodos.
+                                setState(prev => ({
+                                    ...prev,
+                                    kind: 'ok',
+                                    secondaryReady: true,
+                                    message: undefined,
+                                    matchData: {
+                                        ...baseProcessedMatch,
+                                        standings: cachedSecondary.standings,
+                                        h2h: cachedSecondary.h2h,
+                                    },
+                                    videosData: normalizeMatchVideoLinks(matchData.videos),
+                                    eventsData: localEvents,
+                                    statsData: localStats,
+                                    playerStats: null,
+                                    localPlayerRows,
+                                    commentaryData: [],
+                                    issues: [],
+                                }));
+                                return;
+                            }
+
+                            setState(prev => ({
+                                ...prev,
                                 kind: 'ok',
-                                secondaryReady: false,
-                                matchData: baseProcessedMatch,
+                                // Solo la primera carga muestra el esqueleto. Si
+                                // ya habia partido en pantalla (cambio de estado
+                                // en vivo), se mantiene lo que habia mientras
+                                // llega la tabla nueva.
+                                secondaryReady: Boolean(prev.matchData),
+                                message: undefined,
+                                matchData: prev.matchData
+                                    ? {
+                                        ...baseProcessedMatch,
+                                        standings: prev.matchData.standings ?? [],
+                                        h2h: prev.matchData.h2h ?? [],
+                                    }
+                                    : baseProcessedMatch,
                                 videosData: normalizeMatchVideoLinks(matchData.videos),
                                 eventsData: localEvents,
                                 statsData: localStats,
@@ -1303,7 +1356,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 commentaryData: [],
                                 issues: [],
                                 debug: {}
-                            });
+                            }));
 
                             // Parallel-fetch standings + H2H
                             const [standingsRes, h2hRes] = await Promise.allSettled([
@@ -1353,6 +1406,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             const h2h = h2hRes.status === 'fulfilled' && h2hRes.value?.matches
                                 ? h2hRes.value.matches
                                 : [];
+                            secondaryRef.current = { key: secondaryKey, standings, h2h };
 
                             const processedMatch = {
                                 id: matchData.id,
