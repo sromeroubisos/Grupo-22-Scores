@@ -473,6 +473,19 @@ function buildProxyLogoUrl(key: string, fallbackLogo: string, teamUrl: string, t
     return `${TEAM_LOGO_PROXY_PATH}?${params.toString()}`;
 }
 
+/**
+ * URL del proxy para el escudo de un club de la base, pedido por su id.
+ *
+ * El feed de partidos NO lee `clubs.logo_url`: hay cientos de escudos en base64
+ * (uno solo llega a 850 KB) y un sábado con 500 clubes hacía que la consulta
+ * devolviera 47 MB y muriera en producción. El proxy resuelve el escudo por id
+ * y lo sirve con cache; la versión (`v`) la agrega `resolveTeamLogo` desde
+ * `updated_at`, así que acá no viaja.
+ */
+export function buildClubLogoProxyUrl(clubId: string, teamName: string): string {
+    return buildProxyLogoUrl(clubId, '', '', teamName, '', '');
+}
+
 function extendProxyLogoUrl(
     proxyLogoUrl: string,
     key: string,

@@ -25,6 +25,7 @@ import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
 import { isMatchVisibleToPublic } from '@/lib/matchReview';
 import {
     readMatchesFeedSnapshotMetadata,
+    readMatchesFeedSnapshotPayload,
     readUsableMatchesFeedSnapshot,
     upsertMatchesFeedSnapshot,
 } from '@/lib/server/matchesFeedCache';
@@ -35,7 +36,7 @@ import {
 } from '@/lib/server/externalTournamentOverrides';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
-import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
+import { buildClubLogoProxyUrl, resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { isTournamentVisibleToPublic } from '@/lib/tournamentReview';
 import {
     getMatchesForDate,
@@ -212,26 +213,38 @@ async function selectManyWithFallback<T>(
         : variants;
     let lastError: { code?: string | null; message?: string | null; details?: string | null } | null = null;
 
-    for (const columns of orderedVariants) {
-        const result = await client
-            .from(table)
-            .select(columns)
-            .in(idColumn, ids);
+    // Un domingo de rugby junta 630 clubes: en un solo `in (...)` la URL pasa
+    // los 12 KB y PostgREST la rechaza. Se pide por lotes, en paralelo.
+    const chunks: string[][] = [];
+    for (let index = 0; index < ids.length; index += LOOKUP_IN_CHUNK_SIZE) {
+        chunks.push(ids.slice(index, index + LOOKUP_IN_CHUNK_SIZE));
+    }
 
-        if (!result.error) {
+    for (const columns of orderedVariants) {
+        const results = await Promise.all(
+            chunks.map((chunk) => client.from(table).select(columns).in(idColumn, chunk)),
+        );
+        const failed = results.find((result) => result.error);
+
+        if (!failed) {
             lookupSelectVariantCache.set(variantCacheKey, columns);
-            return { data: (result.data as T[] | null) || [], error: null };
+            return {
+                data: results.flatMap((result) => (result.data as T[] | null) || []),
+                error: null,
+            };
         }
 
-        lastError = result.error;
+        lastError = failed.error;
 
-        if (result.error.code !== 'PGRST204') {
-            return { data: [] as T[], error: result.error };
+        if (failed.error?.code !== 'PGRST204') {
+            return { data: [] as T[], error: failed.error };
         }
     }
 
     return { data: [] as T[], error: lastError };
 }
+
+const LOOKUP_IN_CHUNK_SIZE = 150;
 
 async function getReadClient() {
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -378,23 +391,26 @@ async function fetchDbLookupMaps(
                 'id, name'
             ]
         ),
+        // Sin `logo_url` A PROPÓSITO: 409 de los 521 clubes de un sábado guardan
+        // el escudo en base64 (hasta 850 KB cada uno) y la consulta devolvía
+        // 47 MB en 8 s; sin la columna son 100 KB en medio segundo. El escudo
+        // sale por el proxy, que lo resuelve por id (ver mapDbMatchToPublicFeed).
         selectManyWithFallback<DbClubLite>(
             lookupClient,
             'clubs',
             'id',
             clubIds,
             [
-                'id, name, short_name, logo_url, primary_color, sport_id, sport, updated_at',
-                'id, name, short_name, logo_url, primary_color, sport_id, sport',
-                'id, name, short_name, logo_url, primary_color, sport_id',
-                'id, name, short_name, logo_url, primary_color, sport',
-                'id, name, short_name, logo_url, primary_color',
-                'id, name, short_name, logo_url, sport_id',
-                'id, name, short_name, logo_url, sport',
-                'id, name, short_name, logo_url',
-                'id, name, logo_url, sport_id',
-                'id, name, logo_url, sport',
-                'id, name, logo_url',
+                'id, name, short_name, primary_color, sport_id, sport, updated_at',
+                'id, name, short_name, primary_color, sport_id, sport',
+                'id, name, short_name, primary_color, sport_id',
+                'id, name, short_name, primary_color, sport',
+                'id, name, short_name, primary_color',
+                'id, name, short_name, sport_id',
+                'id, name, short_name, sport',
+                'id, name, short_name',
+                'id, name, sport_id',
+                'id, name, sport',
                 'id, name'
             ]
         ),
@@ -500,7 +516,7 @@ function mapDbMatchToPublicFeed(
         homeTeam: buildResolvedMatchTeam(homeTeam ? {
             id: homeTeam.id,
             name: homeTeam.name,
-            logo_url: homeTeam.logo_url || '',
+            logo: buildClubLogoProxyUrl(homeTeam.id, homeTeam.name),
             shortName: homeTeam.short_name || homeTeam.name?.substring(0, 3).toUpperCase() || 'LOC',
             updated_at: homeTeam.updated_at || '',
         } : {
@@ -512,7 +528,7 @@ function mapDbMatchToPublicFeed(
         awayTeam: buildResolvedMatchTeam(awayTeam ? {
             id: awayTeam.id,
             name: awayTeam.name,
-            logo_url: awayTeam.logo_url || '',
+            logo: buildClubLogoProxyUrl(awayTeam.id, awayTeam.name),
             shortName: awayTeam.short_name || awayTeam.name?.substring(0, 3).toUpperCase() || 'VIS',
             updated_at: awayTeam.updated_at || '',
         } : {
@@ -1020,9 +1036,98 @@ function shouldPersistExternalCatalog(
     return true;
 }
 
+/**
+ * La base no contestó y esta respuesta es la última sana, servida en su lugar.
+ * Viaja con `ok: true` porque la pantalla tiene partidos de verdad; la razón
+ * queda para el log y para que la cache la reintente enseguida.
+ */
+const DB_STALE_FALLBACK_REASON = 'database_stale_fallback';
+const MAX_DB_STALE_FALLBACK_AGE_MS = 12 * 60 * 60 * 1000;
+const MAX_LAST_HEALTHY_PAYLOADS = 64;
+
+/** Última respuesta con la base sana, por clave. Vive lo que vive la instancia. */
+const lastHealthyMatchesPayloads = new Map<string, { payload: MatchesPayload; createdAt: number }>();
+
+function isDatabaseUnhealthy(payload?: MatchesPayload) {
+    const supabase = payload?.sources?.supabase;
+    return supabase?.ok === false || supabase?.reason === DB_STALE_FALLBACK_REASON;
+}
+
+function rememberHealthyMatchesPayload(key: string, payload: MatchesPayload, createdAt: number) {
+    if (isDatabaseUnhealthy(payload)) return;
+    lastHealthyMatchesPayloads.delete(key);
+    if (lastHealthyMatchesPayloads.size >= MAX_LAST_HEALTHY_PAYLOADS) {
+        const oldest = lastHealthyMatchesPayloads.keys().next().value;
+        if (oldest !== undefined) lastHealthyMatchesPayloads.delete(oldest);
+    }
+    lastHealthyMatchesPayloads.set(key, { payload, createdAt });
+}
+
+/**
+ * Si la base se cayó en esta lectura, devuelve la última respuesta sana en vez
+ * del cartel: primero la de memoria, en frío el snapshot persistido aunque
+ * esté vencido. Un corte de un minuto no puede vaciar la portada.
+ */
+async function recoverFromDatabaseOutage(
+    key: string,
+    params: MatchesRequestParams,
+    payload: MatchesPayload,
+    trace: MatchesTraceContext,
+): Promise<MatchesPayload> {
+    if (payload.sources?.supabase?.ok !== false) return payload;
+
+    let fallback: MatchesPayload | null = null;
+    let generatedAtMs: number | null = null;
+    let origin: 'memory' | 'persisted' | null = null;
+
+    const remembered = lastHealthyMatchesPayloads.get(key);
+    if (remembered) {
+        fallback = remembered.payload;
+        generatedAtMs = remembered.createdAt;
+        origin = 'memory';
+    } else if (shouldUsePersistedFeedCache(params)) {
+        try {
+            const snapshot = await readMatchesFeedSnapshotPayload<MatchesPayload>(await getReadClient(), key);
+            if (snapshot && !isDatabaseUnhealthy(snapshot.payload)) {
+                fallback = snapshot.payload;
+                generatedAtMs = new Date(snapshot.generatedAt).getTime();
+                origin = 'persisted';
+            }
+        } catch (error) {
+            console.error('[matches] stale fallback snapshot read failed:', error);
+        }
+    }
+
+    const ageMs = generatedAtMs ? Date.now() - generatedAtMs : Number.NaN;
+    if (!fallback || Number.isNaN(ageMs) || ageMs > MAX_DB_STALE_FALLBACK_AGE_MS) {
+        return payload;
+    }
+
+    logMatchesEvent('warn', 'matches_database_stale_fallback', trace, {
+        fallback_origin: origin,
+        fallback_age_ms: ageMs,
+        fallback_items_count: fallback.data.length,
+        database_reason: payload.sources?.supabase?.reason ?? null,
+    });
+
+    return {
+        ...fallback,
+        sources: {
+            ...fallback.sources,
+            supabase: {
+                ok: true,
+                count: fallback.sources?.supabase?.count ?? 0,
+                fallback: fallback.sources?.supabase?.fallback,
+                reason: DB_STALE_FALLBACK_REASON,
+                message: null,
+            },
+        },
+    };
+}
+
 function hasSourceDegradation(payload?: MatchesPayload) {
     if (!payload?.sources) return false;
-    return payload.sources.flashscore?.ok === false || payload.sources.supabase?.ok === false;
+    return payload.sources.flashscore?.ok === false || isDatabaseUnhealthy(payload);
 }
 
 function hasShortLivedExternalResult(params: MatchesRequestParams, payload?: MatchesPayload) {
@@ -1041,7 +1146,9 @@ function getMatchesResponseCachePolicy(params: MatchesRequestParams, payload?: M
         return { freshTtlSec: 60, staleTtlSec: 240 };
     }
 
-    if (hasShortLivedExternalResult(params, payload)) {
+    // Una fuente caída se reintenta enseguida, pida o no FlashScore: sin esto,
+    // un día lejano con la base caída quedaba cacheado hasta cuatro horas.
+    if (hasSourceDegradation(payload) || hasShortLivedExternalResult(params, payload)) {
         return { freshTtlSec: 15, staleTtlSec: 60 };
     }
 
@@ -1126,6 +1233,7 @@ function writeMatchesResponseCache(
     };
 
     memoryCache.set(key, entry, Math.ceil(policy.staleTtlSec));
+    rememberHealthyMatchesPayload(key, payload, createdAt);
 }
 
 async function persistMatchesFeedSnapshot(
@@ -1188,6 +1296,16 @@ function queuePersistMatchesFeedSnapshot(
         return Promise.resolve(false);
     }
 
+    // Una lectura fallida de la base no pisa el snapshot compartido: si lo
+    // hiciera, todas las instancias servirían el cartel de "no se pudieron
+    // cargar" hasta que venciera, aunque el snapshot anterior estuviera sano.
+    // La respuesta fallida vive solo en la memoria de esta instancia y con TTL
+    // corto (hasSourceDegradation), así el próximo pedido vuelve a intentar.
+    // Tampoco se re-persiste un respaldo viejo con fecha nueva.
+    if (isDatabaseUnhealthy(payload)) {
+        return Promise.resolve(false);
+    }
+
     const existing = matchesSnapshotPersistLocks.get(key);
     if (existing) return existing;
 
@@ -1223,7 +1341,12 @@ async function refreshMatchesResponseCache(
         logMatchesEvent('info', 'matches_refresh_started', trace);
         try {
             const computeStartedAt = Date.now();
-            const payload = await computeMatchesPayload(params, trace);
+            const payload = await recoverFromDatabaseOutage(
+                key,
+                params,
+                await computeMatchesPayload(params, trace),
+                trace,
+            );
             const computeDurationMs = trackDuration(trace.metrics, 'compute_payload_ms', computeStartedAt);
             writeMatchesResponseCache(key, payload, params, startedAt.getTime());
             void queuePersistMatchesFeedSnapshot(key, params, payload, startedAt, trace);
@@ -1257,7 +1380,27 @@ async function getOrComputeMatchesPayload(
         const startedAt = new Date();
         try {
             const computeStartedAt = Date.now();
-            const payload = await computeMatchesPayload(params, trace);
+            let computed: MatchesPayload;
+            try {
+                computed = await computeMatchesPayload(params, trace);
+            } catch (error) {
+                // El cómputo entero reventó (la base cortó la conexión a mitad
+                // de camino): se intenta el respaldo antes de contestar 500.
+                computed = await recoverFromDatabaseOutage(
+                    key,
+                    params,
+                    {
+                        data: [],
+                        sources: {
+                            flashscore: { ok: false, count: 0, reason: 'compute_failed', message: null },
+                            supabase: { ok: false, count: 0, reason: 'compute_failed', message: null },
+                        },
+                    },
+                    trace,
+                );
+                if (computed.sources?.supabase?.reason !== DB_STALE_FALLBACK_REASON) throw error;
+            }
+            const payload = await recoverFromDatabaseOutage(key, params, computed, trace);
             const computeDurationMs = trackDuration(trace.metrics, 'compute_payload_ms', computeStartedAt);
             writeMatchesResponseCache(key, payload, params, startedAt.getTime());
             void queuePersistMatchesFeedSnapshot(key, params, payload, startedAt, trace);
