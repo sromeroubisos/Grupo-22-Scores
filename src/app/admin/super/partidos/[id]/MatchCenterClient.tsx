@@ -802,8 +802,18 @@ function mergeMatchEventDefinitions(
     return Array.from(merged.values());
 }
 
+/**
+ * Errores de manejo. El catalogo los tiene como `discipline` —asi los lista el
+ * resumen de estadisticas, junto a los penales— pero en la botonera no son una
+ * sancion del referee: son jugadas que salen mal y se cargan como
+ * estadistica. Van a "Juego", con el scrum y el tackle, para que "Disciplina"
+ * sea solo lo que decide el arbitro: tarjetas, penal cometido, free kick.
+ */
+const PLAY_ERROR_TYPES = new Set(['knock_on', 'forward_pass', 'handling_error', 'turnover_lost']);
+
 function getEventButtonGroup(definition: MatchEventDefinition) {
     if (definition.category === 'score') return 'Marcador';
+    if (PLAY_ERROR_TYPES.has(definition.type)) return 'Juego';
     if (definition.category === 'card' || definition.category === 'discipline') return 'Disciplina';
     if (definition.category === 'substitution') return 'Plantel';
     if (definition.category === 'clock') return 'Reloj';
@@ -1016,6 +1026,38 @@ const QUICK_ACTIONS_BY_SPORT: Record<string, readonly string[]> = {
     // torneo (tackle o flag), ver getAmericanFootballQuickActions.
 };
 
+interface QuickActionGroup {
+    title: string;
+    hint: string;
+    types: readonly string[];
+}
+
+/**
+ * Acciones rapidas AGRUPADAS. En rugby lo que se carga en el momento es lo
+ * que mueve el marcador, lo que sanciona el referee y el cambio: el anotador
+ * lo busca por familia, con su titulo, y no en una tira plana de veinte
+ * botones. Las fases del juego (scrum, line, tackle, ruck, patada...) son
+ * estadistica que se completa despues: quedan plegadas en "Mas acciones".
+ *
+ * Se listan las dos grafias de cada tipo (`penalty`/`penalty_goal`,
+ * `card_yellow`/`yellow_card`): el panel descarta las que la botonera completa
+ * tambien esconde, asi el torneo decide cual se ofrece.
+ */
+const QUICK_ACTION_GROUPS_BY_SPORT: Record<string, readonly QuickActionGroup[]> = {
+    rugby: [
+        { title: 'Marcador', hint: 'Suma puntos', types: ['try', 'penalty_try', 'conversion', 'penalty', 'penalty_goal', 'drop_goal'] },
+        { title: 'Disciplina', hint: 'Lo que decide el referee', types: ['card_yellow', 'card_red', 'yellow_card', 'red_card', 'penalty_committed', 'free_kick'] },
+        // Las formaciones se cargan en el momento: cada scrum y cada line se
+        // gana o se pierde, y el dato vale por quien lo gano.
+        { title: 'Formaciones', hint: 'Ganado / perdido', types: ['scrum', 'line'] },
+        { title: 'Plantel', hint: 'Sale / entra', types: ['substitution'] },
+    ],
+};
+
+function getQuickActionGroups(sportId: string | null | undefined): readonly QuickActionGroup[] | null {
+    return QUICK_ACTION_GROUPS_BY_SPORT[normalizeSportBucket(sportId)] ?? null;
+}
+
 /**
  * Segunda fila de acciones rapidas: las JUGADAS. En futbol americano el
  * operador carga una por snap, asi que no pueden vivir plegadas en "Mas
@@ -1033,11 +1075,15 @@ const QUICK_CLOCK_ACTIONS_BY_SPORT: Record<string, readonly string[]> = {
     // Dos tiempos: inicio, entretiempo, reanudacion y final. `end_period` no
     // va porque con mitades el panel lo esconde detras de `match_half`.
     handball: ['match_start', 'match_half', 'start_period', 'match_end'],
+    // Rugby: dos tiempos, como handball. El reloj es lo primero que se carga.
+    rugby: ['match_start', 'match_half', 'start_period', 'match_end'],
 };
 
 function getQuickActionTypes(sportId: string | null | undefined, rules: AmericanFootballRuleset | null): readonly string[] {
     const bucket = normalizeSportBucket(sportId);
     if (bucket === 'american-football') return getAmericanFootballQuickActions(rules?.discipline ?? 'tackle').scoring;
+    const grouped = QUICK_ACTION_GROUPS_BY_SPORT[bucket];
+    if (grouped) return grouped.flatMap((group) => group.types);
     return QUICK_ACTIONS_BY_SPORT[bucket] ?? [];
 }
 
@@ -3822,13 +3868,37 @@ export default function MatchCenterClient({
             }))
             .filter((group) => group.definitions.length > 0);
     }, [availableEventDefinitions, sportRef]);
+    // Lo que la botonera completa ofrece. Las acciones rapidas se listan por
+    // tipo y no por catalogo: sin este cedazo, un rugby con `penalty` mostraba
+    // tambien `penalty_goal` (dos "Penal a los palos"), y un legacy volvia.
+    const visibleEventTypes = useMemo(
+        () => new Set(eventPanelGroups.flatMap((group) => group.definitions.map((definition) => definition.type))),
+        [eventPanelGroups],
+    );
     // Las acciones grandes del deporte (si tiene) y el resto plegado.
     const quickActionDefinitions = useMemo(
         () => getQuickActionTypes(matchSportId, matchRules)
             .map((type) => eventDefinitionMap[type])
-            .filter((definition): definition is MatchEventDefinition => Boolean(definition)),
-        [eventDefinitionMap, matchSportId, matchRules],
+            .filter((definition): definition is MatchEventDefinition => Boolean(definition) && visibleEventTypes.has(definition.type)),
+        [eventDefinitionMap, matchSportId, matchRules, visibleEventTypes],
     );
+    // Con titulo por familia si el deporte lo pide; si no, una sola tira.
+    const quickActionGroups = useMemo(() => {
+        const groups = getQuickActionGroups(matchSportId);
+        if (!groups) {
+            return quickActionDefinitions.length > 0 ? [{ title: null, hint: null, definitions: quickActionDefinitions }] : [];
+        }
+        const byType = new Map(quickActionDefinitions.map((definition) => [definition.type, definition]));
+        return groups
+            .map((group) => ({
+                title: group.title,
+                hint: group.hint,
+                definitions: group.types
+                    .map((type) => byType.get(type))
+                    .filter((definition): definition is MatchEventDefinition => Boolean(definition)),
+            }))
+            .filter((group) => group.definitions.length > 0);
+    }, [matchSportId, quickActionDefinitions]);
     const quickPlayDefinitions = useMemo(
         () => getQuickPlayActionTypes(matchSportId, matchRules)
             .map((type) => eventDefinitionMap[type])
@@ -3906,6 +3976,16 @@ export default function MatchCenterClient({
     }, [clock.isRunning, clock.period, eventDefinitionMap, lastLoadedEvent, sportRef]);
     // Un solo boton de reloj con tres estados en vez de cuatro botones de
     // los que siempre hay dos o tres apagados.
+    // "Poner en hora" abre el editor plegado y deja el cursor en el minuto:
+    // el ajuste fino existia, pero escondido detras de un summary chico que
+    // nadie encontraba cuando el reloj ya iba desfasado.
+    const manualClockRef = useRef<HTMLDetailsElement>(null);
+    const openManualClock = useCallback(() => {
+        const details = manualClockRef.current;
+        if (!details) return;
+        details.open = true;
+        details.querySelector<HTMLInputElement>('input[type="number"]')?.focus();
+    }, []);
     const clockToggle = canPauseClock
         ? { label: 'Pausar', Icon: Pause, onClick: handlePauseClock }
         : canResumeClock
@@ -4790,6 +4870,42 @@ export default function MatchCenterClient({
                                 >
                                     <Undo2 size={15} aria-hidden="true" /> Deshacer último
                                 </button>
+                                {/* Corregir el desfase con el arbitro sin frenar la carga:
+                                  * un minuto o diez segundos para cada lado, y el editor
+                                  * para ponerlo en hora exacta. Desde cero no hay que
+                                  * restar: el boton avisa en vez de hacer nada. */}
+                                <div className="live-clock-nudge" role="group" aria-label="Corregir el reloj">
+                                    <span className="live-clock-nudge-label">Corregir</span>
+                                    {[
+                                        { delta: -60, label: '−1 min' },
+                                        { delta: -10, label: '−10 s' },
+                                        { delta: 10, label: '+10 s' },
+                                        { delta: 60, label: '+1 min' },
+                                    ].map(({ delta, label }) => {
+                                        const blocked = delta < 0 && clock.elapsedSeconds === 0;
+                                        return (
+                                            <button
+                                                key={delta}
+                                                type="button"
+                                                className="mc-btn live-clock-nudge-btn"
+                                                disabled={blocked}
+                                                title={blocked ? 'El reloj está en cero.' : `Mover el reloj ${label}`}
+                                                aria-label={`Mover el reloj ${label}`}
+                                                onClick={() => clock.nudge(delta).catch(reportClockError)}
+                                            >
+                                                {label}
+                                            </button>
+                                        );
+                                    })}
+                                    <button
+                                        type="button"
+                                        className="mc-btn live-clock-nudge-btn live-clock-nudge-exact"
+                                        onClick={openManualClock}
+                                        title="Escribir el minuto y segundo exactos"
+                                    >
+                                        Poner en hora
+                                    </button>
+                                </div>
                             </div>
 
                             {/*
@@ -4801,7 +4917,7 @@ export default function MatchCenterClient({
                               * Va plegado: en un partido en vivo se usa una vez cada
                               * muchos partidos, y abierto competia con las acciones.
                               */}
-                            <details className="live-clock-manual">
+                            <details className="live-clock-manual" ref={manualClockRef}>
                                 <summary>Ajustar el reloj a mano</summary>
                                 <div className="live-match-clock-editor">
                                     <label>
@@ -4875,23 +4991,33 @@ export default function MatchCenterClient({
                                             <span>Acciones rápidas</span>
                                             <small>Cada evento se guarda con el minuto del reloj</small>
                                         </div>
-                                        <div className="live-quick-grid">
-                                            {quickActionDefinitions.map((definition) => (
-                                                <button
-                                                    key={definition.type}
-                                                    type="button"
-                                                    className="live-event-button live-quick-button"
-                                                    data-tone={getEventButtonTone(definition)}
-                                                    data-event-type={definition.type}
-                                                    aria-label={`Cargar ${definition.label}`}
-                                                    onClick={() => openGuidedEvent(definition)}
-                                                >
-                                                    <span className="live-event-glyph">{getEventButtonGlyph(definition.type)}</span>
-                                                    <span className="live-event-label">{getEventButtonLabel(definition, matchSportId)}</span>
-                                                    <span className="live-event-meta">{getEventButtonMeta(definition, matchSportId)}</span>
-                                                </button>
-                                            ))}
-                                        </div>
+                                        {quickActionGroups.map((group) => (
+                                            <React.Fragment key={group.title ?? 'quick'}>
+                                                {group.title ? (
+                                                    <div className="live-event-group-title live-quick-subtitle">
+                                                        <span>{group.title}</span>
+                                                        <small>{group.hint}</small>
+                                                    </div>
+                                                ) : null}
+                                                <div className="live-quick-grid" data-group={group.title?.toLowerCase()}>
+                                                    {group.definitions.map((definition) => (
+                                                        <button
+                                                            key={definition.type}
+                                                            type="button"
+                                                            className="live-event-button live-quick-button"
+                                                            data-tone={getEventButtonTone(definition)}
+                                                            data-event-type={definition.type}
+                                                            aria-label={`Cargar ${definition.label}`}
+                                                            onClick={() => openGuidedEvent(definition)}
+                                                        >
+                                                            <span className="live-event-glyph">{getEventButtonGlyph(definition.type)}</span>
+                                                            <span className="live-event-label">{getEventButtonLabel(definition, matchSportId)}</span>
+                                                            <span className="live-event-meta">{getEventButtonMeta(definition, matchSportId)}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </React.Fragment>
+                                        ))}
                                         {quickPlayDefinitions.length > 0 ? (
                                             <>
                                                 <div className="live-event-group-title live-quick-subtitle">

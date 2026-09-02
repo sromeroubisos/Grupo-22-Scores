@@ -3257,6 +3257,44 @@
     justify-content: center;
 }
 
+/* Corregir el reloj: siempre a la vista, en la fila de la consola. */
+.live-clock-nudge {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.live-clock-nudge-label {
+    margin-right: 6px;
+    color: #8b8b8b;
+    font-size: 0.68rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.live-clock-nudge-btn {
+    flex: 1 1 0;
+    min-height: 40px;
+    justify-content: center;
+    padding: 8px 10px;
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+    font-size: 0.78rem;
+}
+
+.live-clock-nudge-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.live-clock-nudge-exact {
+    flex-grow: 1.6;
+    border-color: rgba(148, 163, 184, 0.45);
+}
+
 .live-clock-manual,
 .live-more-actions {
     border-bottom: 1px solid #1f1f1f;
@@ -3330,6 +3368,17 @@
     grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
+/* Rugby: cinco formas de sumar en una sola fila; el drop no queda solo abajo. */
+.live-quick-grid[data-group="marcador"] {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+/* Dos formaciones o un cambio: media fila cada uno, sin columnas vacias. */
+.live-quick-grid[data-group="formaciones"],
+.live-quick-grid[data-group="plantel"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .live-quick-button {
     min-height: 88px;
     grid-template-columns: 46px minmax(0, 1fr);
@@ -3354,20 +3403,24 @@
     color: #052e16;
 }
 
-.live-quick-button[data-event-type="yellow_card"] {
+.live-quick-button[data-event-type="yellow_card"],
+.live-quick-button[data-event-type="card_yellow"] {
     border-color: rgba(234, 179, 8, 0.55);
 }
 
-.live-quick-button[data-event-type="yellow_card"] .live-event-glyph {
+.live-quick-button[data-event-type="yellow_card"] .live-event-glyph,
+.live-quick-button[data-event-type="card_yellow"] .live-event-glyph {
     background: #eab308;
     color: #1c1917;
 }
 
-.live-quick-button[data-event-type="red_card"] {
+.live-quick-button[data-event-type="red_card"],
+.live-quick-button[data-event-type="card_red"] {
     border-color: rgba(239, 68, 68, 0.55);
 }
 
-.live-quick-button[data-event-type="red_card"] .live-event-glyph {
+.live-quick-button[data-event-type="red_card"] .live-event-glyph,
+.live-quick-button[data-event-type="card_red"] .live-event-glyph {
     background: #dc2626;
     color: #fff;
 }
@@ -3421,7 +3474,8 @@
 }
 
 @media (max-width: 1024px) {
-    .live-quick-grid-clock {
+    .live-quick-grid-clock,
+    .live-quick-grid[data-group="marcador"] {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
@@ -3458,6 +3512,20 @@
         min-height: 56px;
     }
 
+    .live-clock-nudge-label {
+        flex-basis: 100%;
+        margin-right: 0;
+    }
+
+    .live-clock-nudge-btn {
+        min-height: 44px;
+        flex-basis: calc(50% - 3px);
+    }
+
+    .live-clock-nudge-exact {
+        flex-basis: 100%;
+    }
+
     .live-clock-manual summary,
     .live-more-actions summary {
         padding: 10px 14px;
@@ -3484,7 +3552,8 @@
     }
 
     .live-quick-grid,
-    .live-quick-grid-clock {
+    .live-quick-grid-clock,
+    .live-quick-grid[data-group="marcador"] {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 

@@ -212,6 +212,20 @@ export function useMatchClock({
         });
     }, [runTransition, sportId]);
 
+    /**
+     * Corrige el reloj en caliente, sin abrir el editor: el operador se
+     * desfaso un minuto respecto del arbitro y lo empareja de un toque. Es la
+     * misma transicion 'set' del override manual, asi que si estaba corriendo
+     * sigue corriendo re-anclado al nuevo valor. Nunca baja de cero.
+     */
+    const nudge = useCallback((deltaSeconds: number) => {
+        const current = clockRef.current;
+        const elapsed = computeElapsedSeconds(current, Date.now() + skewMsRef.current);
+        const target = Math.max(0, elapsed + Math.trunc(deltaSeconds));
+        if (target === elapsed) return Promise.resolve();
+        return runTransition({ mode: 'set', seconds: target, running: current.is_running });
+    }, [runTransition]);
+
     const beginManualEdit = useCallback(() => {
         const current = clockRef.current;
         const total = computeElapsedSeconds(current, Date.now() + skewMsRef.current);
@@ -281,6 +295,7 @@ export function useMatchClock({
         reset,
         changePeriod,
         rebaseToPeriodStart,
+        nudge,
         runTransition,
         applyServerClock,
 
