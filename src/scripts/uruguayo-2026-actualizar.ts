@@ -94,6 +94,23 @@ interface PartidoFuente {
     as: number;
 }
 
+/** Partido ganado sin jugarse. La fuente no publica marcador, sólo quién ganó. */
+interface Walkover {
+    turno: string;
+    fecha: string;
+    home: string;
+    away: string;
+    ganador: string;
+}
+
+/** Partido del fixture por delante: fecha y rivales, sin resultado. */
+interface PorJugar {
+    turno: string;
+    fecha: string;
+    home: string;
+    away: string;
+}
+
 interface TablaFuente {
     clubId: string; nombreRA: string; posicion: number; jugados: number;
     ganados: number; empatados: number; perdidos: number;
@@ -103,10 +120,17 @@ interface TablaFuente {
 
 const aIso = (ddmmyyyy: string) => ddmmyyyy.split('/').reverse().join('-');
 
-function leerFuente(): { jugados: PartidoFuente[]; descartados: string[]; tablas: Map<string, TablaFuente[]> } {
+function leerFuente(): {
+    jugados: PartidoFuente[];
+    walkovers: Walkover[];
+    porJugar: PorJugar[];
+    descartados: string[];
+    tablas: Map<string, TablaFuente[]>;
+} {
     const d = JSON.parse(fs.readFileSync(CACHE, 'utf8')) as Record<string, any>;
     const descartados: string[] = [];
     const jugados: PartidoFuente[] = [];
+    const walkovers: Walkover[] = [];
 
     for (const p of (d.partiteGiocate || []).filter((x: any) => x?.partita)) {
         const resultado = String(p.partita.risultato || '');
@@ -115,8 +139,29 @@ function leerFuente(): { jugados: PartidoFuente[]; descartados: string[]; tablas
         const rotulo = `${p.turno} ${p.partita.dataPartita} ${p.partita.squadraCasa?.nome} vs ${p.partita.squadraTrasferta?.nome}`;
         if (!home || !away) { descartados.push(`${rotulo}: club sin mapear`); continue; }
         const m = resultado.match(/^(\d+)-(\d+)$/);
-        if (!m) { descartados.push(`${rotulo}: resultado "${resultado}" no importable`); continue; }
+        if (!m) {
+            // HTWO/ATWO son walkovers: el partido SÍ está resuelto (la tabla de la
+            // fuente lo cuenta como ganado y perdido) pero no hay marcador. Se
+            // registran aparte para cerrarlos con los puntos, no con un resultado.
+            if (resultado === 'HTWO' || resultado === 'ATWO') {
+                walkovers.push({ turno: p.turno, fecha: aIso(p.partita.dataPartita), home, away, ganador: resultado === 'HTWO' ? home : away });
+            } else {
+                descartados.push(`${rotulo}: resultado "${resultado}" no importable`);
+            }
+            continue;
+        }
         jugados.push({ turno: p.turno, fecha: aIso(p.partita.dataPartita), home, away, hs: Number(m[1]), as: Number(m[2]) });
+    }
+
+    // El fixture por delante: la fuente lo publica en `partiteDaGiocare`. Nueve
+    // de las 63 entradas vienen sin `partita` (una por fecha: el hueco del
+    // formato, no un partido) y se ignoran solas.
+    const porJugar: PorJugar[] = [];
+    for (const p of (d.partiteDaGiocare || []).filter((x: any) => x?.partita)) {
+        const home = CLUB_MAP_INTERIOR[p.partita.squadraCasa?.id];
+        const away = CLUB_MAP_INTERIOR[p.partita.squadraTrasferta?.id];
+        if (!home || !away) { descartados.push(`por jugar ${p.partita.dataPartita}: club sin mapear`); continue; }
+        porJugar.push({ turno: p.turno, fecha: aIso(p.partita.dataPartita || p.data), home, away });
     }
 
     const tablas = new Map<string, TablaFuente[]>();
@@ -136,7 +181,7 @@ function leerFuente(): { jugados: PartidoFuente[]; descartados: string[]; tablas
             }
         }
     }
-    return { jugados, descartados, tablas };
+    return { jugados, walkovers, porJugar, descartados, tablas };
 }
 
 // ── La base ─────────────────────────────────────────────────────────────────
@@ -185,9 +230,9 @@ function filaPartido(phaseId: string, roundId: string, rotulo: string, f: Partid
 
 async function main() {
     const ahora = new Date().toISOString();
-    const { jugados, descartados, tablas } = leerFuente();
+    const { jugados, walkovers, porJugar, descartados, tablas } = leerFuente();
     console.log(`${APPLY ? 'MODO APLICAR' : 'DRY-RUN (no escribe)'}`);
-    console.log(`fuente: ${jugados.length} partidos jugados e importables`);
+    console.log(`fuente: ${jugados.length} jugados · ${walkovers.length} ganados por walkover · ${porJugar.length} por jugar`);
     if (descartados.length) {
         console.log(`no importables (${descartados.length}):`);
         descartados.forEach((s) => console.log('  ·', s));
@@ -234,6 +279,35 @@ async function main() {
             id: fila.id,
             patch: { status: 'final', score: { home: hs, away: as_ }, home_base_points: base.home, away_base_points: base.away, home_bonus_points: 0, away_bonus_points: 0, points_autocalculated: true, updated_at: ahora },
             linea: `Apertura ${f.fecha}: ${f.home} ${hs}-${as_} ${f.away} (estaba ${fila.status} ${JSON.stringify(sc)})`,
+        });
+    }
+
+    // ── 1b · Walkovers: cerrarlos con los puntos, no con un marcador ────────
+    // El CHECK de `matches.status` acepta sólo scheduled/live/final/postponed/
+    // suspended: no hay estado "walkover". Y ningún partido `final` de la base
+    // tiene el marcador en NULL, así que tampoco se puede dejar vacío. Se cierra
+    // como `final` 0-0 —nadie anotó, es literal— con los puntos puestos a mano
+    // (`points_autocalculated: false`) para el que ganó, y el motivo escrito.
+    // Sin esto el partido se queda para siempre en el fixture por jugar.
+    for (const w of walkovers) {
+        const fila = regPorFechaPar.get(`${w.fecha}|${par(w.home, w.away)}`)
+            || poPorPar.get(par(w.home, w.away));
+        if (!fila) { console.log('  OJO: walkover sin fila en la base:', w.fecha, w.home, 'vs', w.away); continue; }
+        if (fila.status === 'final' && fila.points_autocalculated === false) continue;
+        const ganaLocal = fila.home_club_id === w.ganador;
+        rollback.push({ tabla: 'matches', id: fila.id, antes: { status: fila.status, score: fila.score, home_base_points: fila.home_base_points, away_base_points: fila.away_base_points, points_autocalculated: fila.points_autocalculated } });
+        patchesPartido.push({
+            id: fila.id,
+            patch: {
+                status: 'final', score: { home: 0, away: 0 },
+                home_base_points: ganaLocal ? PUNTOS.win : PUNTOS.loss,
+                away_base_points: ganaLocal ? PUNTOS.loss : PUNTOS.win,
+                home_bonus_points: 0, away_bonus_points: 0,
+                points_autocalculated: false,
+                points_override_reason: `Walkover a favor de ${w.ganador}. La fuente lo da por ganado sin publicar marcador, y así lo cuenta su tabla.`,
+                updated_at: ahora,
+            },
+            linea: `WALKOVER ${w.fecha}: gana ${w.ganador} (${w.home} vs ${w.away}, sin marcador publicado)`,
         });
     }
 
@@ -338,6 +412,39 @@ async function main() {
         const rotulo = `Fecha ${fechasClausura.indexOf(f.fecha) + 1}`;
         inserts.push(filaPartido(faseClausuraId!, rondaPorFecha.get(f.fecha)!, rotulo, f, ahora));
         lineasInsert.push(`Clausura ${rotulo} ${f.fecha}: ${f.home} ${f.hs}-${f.as} ${f.away}`);
+    }
+
+    // ── 3b · El fixture por delante ─────────────────────────────────────────
+    // Las fechas que faltan jugar del Clausura entran como `scheduled` y sin
+    // marcador. Sin esto la pestaña Fixture queda vacía y el torneo parece
+    // terminado cuando le quedan dos meses.
+    const porJugarClausura = porJugar.filter((x) => x.turno === 'Clausura tournament');
+    const fechasPorJugar = [...new Set(porJugarClausura.map((c) => c.fecha))].sort();
+    for (const fecha of fechasPorJugar) {
+        if (rondaPorFecha.has(fecha)) continue;
+        const id = crypto.randomUUID();
+        rondaPorFecha.set(fecha, id);
+        nuevasRondas.push({
+            id, phase_id: faseClausuraId, season_id: TEMPORADA,
+            name: `Fecha ${fechasClausura.length + fechasPorJugar.indexOf(fecha) + 1}`,
+            order_index: ++ordenClausura, start_date: fecha, end_date: fecha, is_completed: false,
+            notes: 'Torneo Clausura (rugbyarchive)', created_at: ahora, updated_at: ahora,
+        });
+    }
+    for (const f of porJugarClausura) {
+        if (yaEnClausura.has(`${f.fecha}|${par(f.home, f.away)}`)) continue;
+        const rotulo = `Fecha ${fechasClausura.length + fechasPorJugar.indexOf(f.fecha) + 1}`;
+        // `score` y los puntos son NOT NULL: un partido por jugar va en cero,
+        // igual que los `scheduled` que ya tenía el torneo.
+        inserts.push({
+            ...filaPartido(faseClausuraId!, rondaPorFecha.get(f.fecha)!, rotulo, { ...f, hs: 0, as: 0 }, ahora),
+            status: 'scheduled', score: { home: 0, away: 0 },
+            home_base_points: 0, away_base_points: 0,
+            home_bonus_points: 0, away_bonus_points: 0,
+            points_autocalculated: true,
+            notes: 'Fixture importado desde rugbyarchive (Uruguayo de Clubes 2026)',
+        });
+        lineasInsert.push(`POR JUGAR ${rotulo} ${f.fecha}: ${f.home} vs ${f.away}`);
     }
 
     // ── 4 · Tablas ──────────────────────────────────────────────────────────
