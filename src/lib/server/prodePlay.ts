@@ -800,8 +800,33 @@ async function getCompetitionEventRows(admin: LooseMutationClient, competitionId
     };
 }
 
+/**
+ * Partidos del torneo base, ACOTADOS a su temporada en curso.
+ *
+ * Sin ese corte el prode se rompe en silencio en cuanto el torneo tiene
+ * historia: PostgREST devuelve como mucho 1000 filas, y `order(date_time)` deja
+ * adentro las MÁS VIEJAS. Al importarle 75 temporadas al Uruguayo de Clubes
+ * (2026-09-02), el sync creó 1000 eventos de partidos de 2003-2016 y los de la
+ * temporada en curso quedaron fuera de la ventana. Es el mismo error que ya
+ * había mordido en `/api/db/tournaments/[id]/data` con el Regional del NEA.
+ *
+ * Si el torneo no declara `current_season_id` se lee entero, que es el
+ * comportamiento correcto para un torneo de una sola temporada.
+ */
 async function getLocalBaseMatches(admin: LooseMutationClient, tournamentId: string): Promise<BaseMatchRow[]> {
-    const result = await admin
+    const tournamentResult = await admin
+        .from('tournaments')
+        .select('current_season_id')
+        .eq('id', tournamentId)
+        .maybeSingle();
+
+    if (tournamentResult.error) {
+        throw new Error(tournamentResult.error.message || 'No se pudo cargar el torneo base.');
+    }
+
+    const currentSeasonId = toNullableString(toRecord(tournamentResult.data).current_season_id);
+
+    const query = admin
         .from('matches')
         .select(`
             id,
@@ -813,7 +838,9 @@ async function getLocalBaseMatches(admin: LooseMutationClient, tournamentId: str
             home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url),
             away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url)
         `)
-        .eq('tournament_id', tournamentId)
+        .eq('tournament_id', tournamentId);
+
+    const result = await (currentSeasonId ? query.eq('season_id', currentSeasonId) : query)
         .order('date_time', { ascending: true });
 
     if (result.error) {
