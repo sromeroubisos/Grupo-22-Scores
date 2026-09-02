@@ -236,13 +236,27 @@ export function useMatchesStore(
           }
 
           const data = await res.json();
-          const arr = Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
-          const sources = data.sources || null;
+          const fetched = Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
+          const fetchedSources = data.sources || null;
 
           // Use a shorter retry window when a source failed so errors self-correct quickly;
           // normal 5 minute TTL when everything is healthy.
-          const hasError = sources && (!sources.flashscore?.ok || !sources.supabase?.ok);
+          const hasError = fetchedSources && (!fetchedSources.flashscore?.ok || !fetchedSources.supabase?.ok);
           const SHORT_MISS = PUBLIC_STALE_TTL - ERROR_RECOVERY_TTL; // shift timestamp back so cache is stale in ~1m
+
+          // La base no contestó pero esta pestaña ya tenía los partidos de ese día:
+          // se conservan en vez de vaciar la pantalla y colgar el cartel. El servidor
+          // hace lo mismo con su último snapshot sano; esto cubre la instancia fría
+          // que no tenía ninguno. El reintento corto de arriba sigue corriendo.
+          const previous = matchesCache.get(cacheKey(date, sportId));
+          const keepPrevious = Boolean(
+            fetchedSources?.supabase?.ok === false && previous && previous.length > fetched.length,
+          );
+          const arr = keepPrevious ? previous! : fetched;
+          const sources = keepPrevious
+            ? { ...fetchedSources, supabase: { ...fetchedSources.supabase, ok: true, reason: 'client_stale_fallback', message: null } }
+            : fetchedSources;
+
           matchesCache.set(cacheKey(date, sportId), arr);
           lastFetchedAt.set(cacheKey(date, sportId), hasError ? Date.now() - SHORT_MISS : Date.now());
 
