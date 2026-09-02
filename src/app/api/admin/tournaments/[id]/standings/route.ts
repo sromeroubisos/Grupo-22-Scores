@@ -8,6 +8,7 @@ import {
     isFinalStandingsStatus,
 } from '@/lib/standings/matchScope';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
+import { loadRelationalMatchEvents, mergeRelationalMatchEvents } from '@/lib/server/relationalMatchEvents';
 import { resolveStandingsCarryOverRows } from '@/lib/server/standingsCarryOver';
 import { loadPhaseScopedParticipants } from '@/lib/server/phaseParticipants';
 import { normalizeTableType } from '@/lib/standings/tableType';
@@ -578,7 +579,13 @@ export async function GET(
         );
         if (mError) throw mError;
 
-        const scopedMatches = filterMatchesForParticipantScope(matches || [], participants || [], scopedGroupId);
+        // Mismo criterio que recalculateStandings: los tries cargados en vivo
+        // estan en `match_events`, no en el JSON del partido.
+        const matchesWithEvents = mergeRelationalMatchEvents(
+            matches || [],
+            await loadRelationalMatchEvents(supabase, matches || []),
+        );
+        const scopedMatches = filterMatchesForParticipantScope(matchesWithEvents, participants || [], scopedGroupId);
         const carryOver = await resolveStandingsCarryOverRows({
             supabase,
             tournamentId,

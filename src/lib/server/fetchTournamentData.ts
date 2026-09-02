@@ -1,6 +1,7 @@
 import { getReadClient } from '@/lib/supabase/read';
 import { normalizeTeamLabelAssignments } from '@/lib/teamLabels';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
+import { loadRelationalMatchEvents, mergeRelationalMatchEvents } from '@/lib/server/relationalMatchEvents';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { isTournamentVisibleToPublic } from '@/lib/tournamentReview';
@@ -362,6 +363,16 @@ function hydrateStandingsRows(rows: TournamentStandingRow[], clubsById: Map<stri
             club,
         };
     });
+}
+
+async function withRelationalEventsTimeout<T extends Map<string, unknown[]>>(promise: Promise<T>): Promise<T> {
+    try {
+        return await withTimeout(promise, MATCHES_TIMEOUT_MS, 'matchEvents');
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.warn(`[fetchTournamentData] ${message}`);
+        return new Map() as T;
+    }
 }
 
 async function settleSupabaseQuery<T>(
@@ -866,7 +877,14 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
         }
 
         const clubsById = buildClubLookup(sanitizedParticipants);
-        const hydratedMatches = hydrateMatches(matchesRes.data, clubsById);
+        // Los eventos cargados en vivo desde el Match Center viven solo en
+        // `match_events`; el JSON `matches.events` queda vacio. Sin este paso la
+        // pestaña Estadisticas > Jugadores no ve ni un try.
+        const relationalEvents = await withRelationalEventsTimeout(
+            loadRelationalMatchEvents(supabase, matchesRes.data),
+        );
+        const matchesWithEvents = mergeRelationalMatchEvents(matchesRes.data, relationalEvents);
+        const hydratedMatches = hydrateMatches(matchesWithEvents, clubsById);
         const hydratedStandings = hydrateStandingsRows(standingsRes.data, clubsById);
 
         return {
