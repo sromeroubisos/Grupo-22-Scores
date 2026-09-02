@@ -296,16 +296,22 @@ export async function POST(request: NextRequest) {
         existingRole = (profileRow?.role as string | null) ?? null;
     }
 
-    const profilePayload: Record<string, unknown> = {
-        id: userId,
-        email,
-        name: name ?? email.split('@')[0],
-    };
+    // Una cuenta que ya existía conserva su nombre salvo que se mande uno:
+    // el fallback al prefijo del email es solo para la fila nueva, si no
+    // "asignar torneos" a alguien le pisaba el nombre real.
+    const profilePayload: Record<string, unknown> = { id: userId, email };
+    if (name) profilePayload.name = name;
+    else if (!alreadyExisted) profilePayload.name = email.split('@')[0];
     if (!existingRole || isDefaultRoleValue(existingRole)) {
         profilePayload.role = ASSIGNED_USER_ROLE;
     }
 
-    const { error: profileError } = await usersTable.upsert(profilePayload, { onConflict: 'id' });
+    let { error: profileError } = await usersTable.upsert(profilePayload, { onConflict: 'id' });
+    if (profileError?.code === '23505') {
+        // Carrera con el trigger de auth que inserta la fila de public.users al
+        // crear la cuenta: la fila ya existe, el reintento toma el camino UPDATE.
+        ({ error: profileError } = await usersTable.upsert(profilePayload, { onConflict: 'id' }));
+    }
     if (profileError) {
         return err('La cuenta existe pero no se pudo guardar el perfil.', 500, profileError.message);
     }

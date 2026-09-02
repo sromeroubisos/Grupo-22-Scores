@@ -61,7 +61,10 @@ const AdminConsoleContext = createContext<AdminContextType | undefined>(undefine
 export function AdminConsoleProvider({ children }: { children: ReactNode }) {
     const { user, isAuthenticated, isLoading: authLoading } = useAuth();
     const pathname = usePathname();
-    const isSuperConsoleRoute = pathname?.startsWith('/admin/super') ?? false;
+    // /admin/super trae su propia consola y /admin/torneo usa sus endpoints
+    // scoped (/api/admin/torneo/*): en ambos esta precarga global solo genera
+    // 403 + fallbacks a tablas enteras que nadie consume.
+    const isSuperConsoleRoute = (pathname?.startsWith('/admin/super') || pathname?.startsWith('/admin/torneo')) ?? false;
     const [tournaments, setTournaments] = useState<TournamentRow[]>([]);
     const [clubs, setClubs] = useState<ClubRow[]>([]);
     const [unions, setUnions] = useState<UnionRow[]>([]);
