@@ -273,7 +273,7 @@ export default function CreateMatchPage() {
         // No va el catálogo público (/api/catalog/tournaments): corta en 10 y
         // acá hay casi mil torneos. El del gestor devuelve todos los que el
         // usuario administra.
-        const response = await fetch('/api/admin/torneo/tournaments?limit=1000', { cache: 'no-store' });
+        const response = await fetch('/api/admin/torneo/tournaments?limit=all', { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const rows = readArray(await response.json());
         if (cancelled) return;

@@ -74,7 +74,7 @@ export default function CrearTrabajadorPage() {
                 const [clubsRes, familiesRes, tournamentsRes] = await Promise.all([
                     fetch('/api/admin/clubs?limit=1000', { cache: 'no-store', credentials: 'include' }),
                     fetch('/api/admin/super/club-families', { cache: 'no-store', credentials: 'include' }),
-                    fetch('/api/admin/torneo/tournaments?limit=1000', { cache: 'no-store', credentials: 'include' }),
+                    fetch('/api/admin/torneo/tournaments?limit=all&fields=basic', { cache: 'no-store', credentials: 'include' }),
                 ]);
                 const clubsPayload = (await clubsRes.json().catch(() => [])) as ClubRow[] | { error?: string };
                 const familiesPayload = (await familiesRes.json().catch(() => ({}))) as { data?: FamilyRelationRow[] };

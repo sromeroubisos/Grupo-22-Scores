@@ -714,6 +714,13 @@ async function createPhases(writer: any, params: {
     return { phases, warnings };
 }
 
+const FULL_COLUMNS = 'id, name, display_name, slug, sport_id, season_id, country, country_id, region, category, age_grade, format, status, is_visible, is_popular, union_id, logo_url, primary_color, secondary_color, ruleset, created_at, created_by_user_id';
+const BASIC_COLUMNS = 'id, name, display_name, slug, sport_id, season_id, status, is_visible, created_at';
+/** Tope de PostgREST por respuesta (db-max-rows). */
+const PAGE_SIZE = 1000;
+/** Techo de seguridad para `limit=all`: hoy la tabla tiene ~1100 filas. */
+const ALL_ROWS_CEILING = 20000;
+
 export async function GET(request: NextRequest) {
     const supabase = await createClient();
 
@@ -733,36 +740,58 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const search = (searchParams.get('search') || '').trim();
     const status = (searchParams.get('status') || '').trim();
-    const limit = Math.min(Number.parseInt(searchParams.get('limit') || '300', 10) || 300, 1000);
+    const limitParam = (searchParams.get('limit') || '').trim();
+    // `limit=all` devuelve la tabla entera. Los diálogos que asignan torneos a
+    // un usuario buscan en memoria sobre lo que reciben: si acá se corta, un
+    // torneo viejo es imposible de encontrar por más que se escriba su nombre.
+    const limit = limitParam === 'all'
+        ? ALL_ROWS_CEILING
+        : Math.min(Number.parseInt(limitParam || '300', 10) || 300, ALL_ROWS_CEILING);
+    // `fields=basic` deja afuera escudo y reglamento: la lista completa pesa
+    // 1,2 MB con todo y 200 KB con lo que necesita un selector.
+    const columns = searchParams.get('fields') === 'basic' ? BASIC_COLUMNS : FULL_COLUMNS;
 
     // Service-role read: results are already constrained to scope.tournamentIds
     // below, but the RLS SELECT policy would hide the caller's own drafts.
     const reader = getServiceWriter(supabase, 'admin/torneo/tournaments');
-    let query = reader
-        .from('tournaments')
-        .select('id, name, display_name, slug, sport_id, season_id, country, country_id, region, category, age_grade, format, status, is_visible, is_popular, union_id, logo_url, primary_color, secondary_color, ruleset, created_at, created_by_user_id')
-        .order('created_at', { ascending: false })
-        .limit(limit);
+    const escapedSearch = search.replace(/[%_]/g, (m) => `\\${m}`);
 
-    if (!scope.isUnlimited) {
-        query = query.in('id', Array.from(scope.tournamentIds));
+    // PostgREST corta cada respuesta en 1000 filas (db-max-rows) sin importar
+    // el limit que se pida, así que se trae por tandas con range() hasta que
+    // una vuelva incompleta. El orden desempata por id para que dos tandas no
+    // se pisen cuando varios torneos comparten created_at.
+    const rows: Record<string, unknown>[] = [];
+    for (let from = 0; from < limit; from += PAGE_SIZE) {
+        const to = Math.min(from + PAGE_SIZE, limit) - 1;
+        let query = reader
+            .from('tournaments')
+            .select(columns)
+            .order('created_at', { ascending: false })
+            .order('id', { ascending: true })
+            .range(from, to);
+
+        if (!scope.isUnlimited) {
+            query = query.in('id', Array.from(scope.tournamentIds));
+        }
+
+        if (search) {
+            query = query.or(`name.ilike.%${escapedSearch}%,display_name.ilike.%${escapedSearch}%,slug.ilike.%${escapedSearch}%`);
+        }
+
+        if (status) {
+            query = query.eq('status', status);
+        }
+
+        const { data, error } = await query;
+        if (error) {
+            return err('No se pudieron cargar los torneos', 500, error.message);
+        }
+        const batch = (data ?? []) as Record<string, unknown>[];
+        rows.push(...batch);
+        if (batch.length < to - from + 1) break;
     }
 
-    if (search) {
-        const escaped = search.replace(/[%_]/g, (m) => `\\${m}`);
-        query = query.or(`name.ilike.%${escaped}%,display_name.ilike.%${escaped}%,slug.ilike.%${escaped}%`);
-    }
-
-    if (status) {
-        query = query.eq('status', status);
-    }
-
-    const { data, error } = await query;
-    if (error) {
-        return err('No se pudieron cargar los torneos', 500, error.message);
-    }
-
-    return NextResponse.json({ data: data ?? [] });
+    return NextResponse.json({ data: rows });
 }
 
 export async function POST(request: NextRequest) {
