@@ -30,6 +30,8 @@ export type MatchExportMode = 'schedule' | 'result';
 export type MatchExportLayout = 'classic' | 'editorial4x5';
 export type StandingsExportMode = 'table' | 'groups' | 'singleGroup';
 export type LineupExportMode = 'both' | 'home' | 'away';
+// Formacion de G22 Base: la escalera clasica o la editorial con foto.
+export type LineupExportLayout = 'classic' | 'editorial';
 // Que se lee en el centro de un partido que todavia no se jugo: la hora o un VS.
 export type DailyMatchesTimeMode = 'time' | 'vs';
 type DensityMode = 'comfortable' | 'compact' | 'ultra-compact';
@@ -194,6 +196,10 @@ export interface LineupsData {
     kickoffAt?: ExportDateValue | null;
     homeTeam: LineupExportTeamData;
     awayTeam: LineupExportTeamData;
+    // Solo la formacion editorial de G22 Base: la foto que ocupa la mitad izquierda.
+    backgroundImage?: string;
+    // Deporte del partido: decide la marca del pie (Salida de 22 en rugby).
+    sport?: string | null;
 }
 
 export interface TeamOfWeekPlayerData {
@@ -244,6 +250,8 @@ export interface SquadData {
     teamName: string;
     teamLogo?: string;
     groups: SquadExportGroupData[];
+    // Deporte del club: decide la marca del pie de la convocatoria.
+    sport?: string | null;
 }
 
 export interface PlayoffBracketMatchData {
@@ -401,6 +409,12 @@ type ExportPreviewColorOverrides = {
     impactoInkColor?: string;
     impactoBarColor?: string;
     impactoRowColor?: string;
+    // Solo para la formacion y la convocatoria de G22 Base. Vacio = derivado de Fondo + Acento.
+    lineupFieldColor?: string;
+    lineupGlowColor?: string;
+    lineupNamesColor?: string;
+    lineupInkColor?: string;
+    lineupLinesColor?: string;
 };
 
 type ExportImagePreviewProps = {
@@ -415,6 +429,7 @@ type ExportImagePreviewProps = {
     matchExportMode?: MatchExportMode;
     matchExportLayout?: MatchExportLayout;
     lineupExportMode?: LineupExportMode;
+    lineupExportLayout?: LineupExportLayout;
     standingsExportMode?: StandingsExportMode;
     dailyMatchesTimeMode?: DailyMatchesTimeMode;
     className?: string;
@@ -697,6 +712,17 @@ const EXPORT_TYPOGRAPHY_PRESETS: ExportTypographyPreset[] = [
     },
 ];
 type ImpactoColorControlId = 'field' | 'ink' | 'bar' | 'row';
+// Los cinco colores de la formacion y la convocatoria de G22 Base. Vacio = derivado
+// de Fondo + Acento, que es lo que se ve con todo en Auto.
+type LineupColorControlId = 'field' | 'glow' | 'names' | 'ink' | 'lines';
+type LineupColorOverrides = Partial<Record<LineupColorControlId, string>>;
+const LINEUP_COLOR_CONTROLS: Array<{ id: LineupColorControlId; label: string; hint: string; placeholder: string }> = [
+    { id: 'field', label: 'Fondo', hint: 'El campo oscuro de toda la pieza', placeholder: '#0b1220' },
+    { id: 'glow', label: 'Luz', hint: 'La marca de agua XV de un equipo, el brillo de la cabecera de dos y el fundido sin foto de la editorial', placeholder: '#f59e0b' },
+    { id: 'names', label: 'Nombres', hint: 'Los nombres de un equipo, los dorsales y rotulos de dos, y el titulo condensado de la editorial y la convocatoria', placeholder: '#f59e0b' },
+    { id: 'ink', label: 'Tinta', hint: 'Nombres, titular XV INICIAL y el pie', placeholder: '#ffffff' },
+    { id: 'lines', label: 'Filetes', hint: 'El subrayado de Suplentes con dos equipos y la tarjeta de la editorial', placeholder: '#f59e0b' },
+];
 const IMPACTO_COLOR_CONTROLS: Array<{ id: ImpactoColorControlId; label: string; hint: string; placeholder: string }> = [
     { id: 'field', label: 'Principal', hint: 'El campo de color de toda la pieza', placeholder: '#1d6d92' },
     { id: 'ink', label: 'Tinta', hint: 'Titular, reglas, numeros y nombres', placeholder: '#ffffff' },
@@ -715,6 +741,10 @@ const LINEUP_EXPORT_MODE_OPTIONS: Array<{ value: LineupExportMode; label: string
     { value: 'both', label: 'Dos equipos', description: 'Lista las dos formaciones del partido en una sola pieza' },
     { value: 'home', label: 'Solo local', description: 'Centra la pieza en la formacion del equipo local' },
     { value: 'away', label: 'Solo visitante', description: 'Centra la pieza en la formacion del equipo visitante' },
+];
+const LINEUP_EXPORT_LAYOUT_OPTIONS: Array<{ value: LineupExportLayout; label: string; description: string }> = [
+    { value: 'classic', label: 'Clasica', description: 'Un equipo: la lista centrada en serif con los suplentes al pie. Dos equipos: la banda con los escudos y dos columnas numeradas' },
+    { value: 'editorial', label: 'Editorial', description: 'La foto del jugador a la izquierda y la lista numerada a la derecha' },
 ];
 const DAILY_MATCHES_TIME_MODE_OPTIONS: Array<{ value: DailyMatchesTimeMode; label: string; description: string }> = [
     { value: 'time', label: 'Horario', description: 'Los partidos sin jugar muestran la hora de inicio' },
@@ -924,6 +954,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const [typographyOverrides, setTypographyOverrides] = useState<Partial<Record<ExportTypographyRole, ExportFontFamilyOptionId>>>({});
     const [designCustomizationState, setDesignCustomizationState] = useState<ExportDesignCustomizationState | null>(null);
     const [lineupExportMode, setLineupExportMode] = useState<LineupExportMode>('both');
+    const [lineupExportLayout, setLineupExportLayout] = useState<LineupExportLayout>('classic');
     const [dailyMatchesTimeMode, setDailyMatchesTimeMode] = useState<DailyMatchesTimeMode>('time');
     const isRankingPoster = isRankingPosterData(template, data);
     const isPalmares = isPalmaresData(template, data);
@@ -945,6 +976,11 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const [impactoInkColor, setImpactoInkColor] = useState('');
     const [impactoBarColor, setImpactoBarColor] = useState('');
     const [impactoRowColor, setImpactoRowColor] = useState('');
+    const [lineupFieldColor, setLineupFieldColor] = useState('');
+    const [lineupGlowColor, setLineupGlowColor] = useState('');
+    const [lineupNamesColor, setLineupNamesColor] = useState('');
+    const [lineupInkColor, setLineupInkColor] = useState('');
+    const [lineupLinesColor, setLineupLinesColor] = useState('');
     const [rankingGlowColor, setRankingGlowColor] = useState(RANKING_POSTER_COMBOS[0].glow);
     const [rankingPanelColor, setRankingPanelColor] = useState(RANKING_POSTER_COMBOS[0].panel);
     const [rankingGoldColor, setRankingGoldColor] = useState(RANKING_POSTER_COMBOS[0].gold);
@@ -2071,7 +2107,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                     } else if (visualFamily === 'momentumV2') {
                         await drawMomentumSquad(ctx, canvas, squadData, page, config, accentColor, bgColor, brandLogo);
                     } else {
-                        await drawG22BaseSquad(ctx, canvas, squadData, page, config, accentColor, bgColor, brandLogo);
+                        await drawG22BaseSquad(ctx, canvas, squadData, page, config, accentColor, bgColor, brandLogo, lineupColors);
                     }
                     await downloadCanvas(canvas, buildExportFilename(filename, template, resolvedFormat, index + 1, pages.length));
                     if (index < pages.length - 1) {
@@ -2091,7 +2127,11 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                 } else if (visualFamily === 'momentumV2') {
                     await drawMomentumLineups(ctx, canvas, exportData as LineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode);
                 } else {
-                    await drawG22BaseLineups(ctx, canvas, exportData as LineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode);
+                    const lineupsData: LineupsData = {
+                        ...(exportData as LineupsData),
+                        backgroundImage: matchBackgroundUpload?.src || (exportData as LineupsData).backgroundImage,
+                    };
+                    await drawG22BaseLineups(ctx, canvas, lineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode, lineupExportLayout, lineupColors);
                 }
             } else if (template === 'teamOfWeek') {
                 await drawG22BaseTeamOfWeek(ctx, canvas, exportData as TeamOfWeekData, config, accentColor, bgColor, brandLogo);
@@ -2168,6 +2208,13 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             return scopeStandingsDataForExport(exportData as StandingsData, standingsExportMode, selectedStandingsGroupIndex);
         }
 
+        if (template === 'lineups' && lineupExportLayout === 'editorial') {
+            return {
+                ...(exportData as LineupsData),
+                backgroundImage: matchBackgroundUpload?.src || (exportData as LineupsData).backgroundImage,
+            };
+        }
+
         return exportData;
     }, [
         activeEditorialSponsors,
@@ -2180,6 +2227,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         editorialShowHeaderArrows,
         editorialShowTopBadge,
         manualAwayScore,
+        lineupExportLayout,
         manualHomeScore,
         matchBackgroundUpload?.src,
         matchExportLayout,
@@ -2208,6 +2256,27 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         bar: impactoBarColor,
         row: impactoRowColor,
     }), [impactoBarColor, impactoFieldColor, impactoInkColor, impactoRowColor]);
+    const lineupColorValues: Record<LineupColorControlId, string> = {
+        field: lineupFieldColor,
+        glow: lineupGlowColor,
+        names: lineupNamesColor,
+        ink: lineupInkColor,
+        lines: lineupLinesColor,
+    };
+    const lineupColorSetters: Record<LineupColorControlId, (value: string) => void> = {
+        field: setLineupFieldColor,
+        glow: setLineupGlowColor,
+        names: setLineupNamesColor,
+        ink: setLineupInkColor,
+        lines: setLineupLinesColor,
+    };
+    const lineupColors = useMemo<LineupColorOverrides>(() => ({
+        field: lineupFieldColor,
+        glow: lineupGlowColor,
+        names: lineupNamesColor,
+        ink: lineupInkColor,
+        lines: lineupLinesColor,
+    }), [lineupFieldColor, lineupGlowColor, lineupInkColor, lineupLinesColor, lineupNamesColor]);
     const modalPlateOptions = useMemo<ExportPlateOptions>(() => ({
         field: plateFieldColor,
         fieldEnd: plateFieldEndColor,
@@ -2222,12 +2291,17 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         impactoInkColor,
         impactoBarColor,
         impactoRowColor,
+        lineupFieldColor,
+        lineupGlowColor,
+        lineupNamesColor,
+        lineupInkColor,
+        lineupLinesColor,
         editorialGradientLeftColor,
         editorialGradientRightColor,
         rankingGlowColor,
         rankingPanelColor,
         rankingGoldColor,
-    }), [accentColor, bgColor, editorialGradientLeftColor, editorialGradientRightColor, rankingGlowColor, rankingPanelColor, rankingGoldColor, impactoFieldColor, impactoInkColor, impactoBarColor, impactoRowColor]);
+    }), [accentColor, bgColor, editorialGradientLeftColor, editorialGradientRightColor, rankingGlowColor, rankingPanelColor, rankingGoldColor, impactoFieldColor, impactoInkColor, impactoBarColor, impactoRowColor, lineupFieldColor, lineupGlowColor, lineupNamesColor, lineupInkColor, lineupLinesColor]);
 
     return (
         <div className={`${styles.container} ${className}`}>
@@ -2422,6 +2496,72 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                     <p className={styles.modalHint}>
                                         {LINEUP_EXPORT_MODE_OPTIONS.find((option) => option.value === lineupExportMode)?.description}
                                     </p>
+                                </div>
+                            )}
+
+                            {template === 'lineups' && visualFamily === 'g22Base' && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Diseno</label>
+                                    <div className={styles.formatOptions}>
+                                        {LINEUP_EXPORT_LAYOUT_OPTIONS.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                className={`${styles.formatBtn} ${lineupExportLayout === option.value ? styles.active : ''}`}
+                                                onClick={() => setLineupExportLayout(option.value)}
+                                                type="button"
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className={styles.modalHint}>
+                                        {LINEUP_EXPORT_LAYOUT_OPTIONS.find((option) => option.value === lineupExportLayout)?.description}
+                                    </p>
+                                </div>
+                            )}
+
+                            {template === 'lineups' && visualFamily === 'g22Base' && lineupExportLayout === 'editorial' && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Foto del jugador</label>
+                                    <div className={styles.uploadCard}>
+                                        <div className={styles.uploadMeta}>
+                                            <span className={styles.uploadTitle}>Subi la foto que va a la izquierda</span>
+                                            <span className={styles.uploadSubtitle}>
+                                                Vertical, con el jugador arriba: la pieza la recorta a la mitad izquierda y la funde con el fondo. Sin foto, ese lugar lo ocupa el escudo.
+                                            </span>
+                                        </div>
+                                        <div className={styles.uploadActions}>
+                                            <label className={styles.uploadBtn}>
+                                                Subir foto
+                                                <input
+                                                    className={styles.fileInput}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleMatchBackgroundUpload}
+                                                />
+                                            </label>
+                                            <button
+                                                className={styles.ghostBtn}
+                                                onClick={clearMatchBackgroundUpload}
+                                                disabled={!matchBackgroundUpload}
+                                                type="button"
+                                            >
+                                                Quitar
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {matchBackgroundUpload && (
+                                        <div className={styles.uploadPreview}>
+                                            <div
+                                                className={styles.uploadThumb}
+                                                style={{ backgroundImage: `url(${matchBackgroundUpload.src})` }}
+                                            />
+                                            <div className={styles.uploadMeta}>
+                                                <span className={styles.uploadTitle}>{matchBackgroundUpload.name}</span>
+                                                <span className={styles.uploadSubtitle}>Ocupa la mitad izquierda de la pieza.</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -3318,6 +3458,42 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                         </p>
                                     </div>
                                 )}
+                                {visualFamily === 'g22Base' && (template === 'lineups' || template === 'squad') && (
+                                    <div style={{ marginTop: 16 }}>
+                                        <label className={styles.modalLabel}>{template === 'lineups' ? 'Colores de la formacion' : 'Colores de la convocatoria'}</label>
+                                        <div className={styles.customColors}>
+                                            {LINEUP_COLOR_CONTROLS.map((control) => {
+                                                const value = lineupColorValues[control.id];
+                                                return (
+                                                    <div className={styles.colorInp} key={control.id}>
+                                                        <span>{control.label}</span>
+                                                        <input
+                                                            type="color"
+                                                            value={value || control.placeholder}
+                                                            onChange={(event) => lineupColorSetters[control.id](event.target.value)}
+                                                            title={control.hint}
+                                                        />
+                                                        <button
+                                                            className={styles.ghostBtn}
+                                                            type="button"
+                                                            onClick={() => lineupColorSetters[control.id]('')}
+                                                            disabled={!value}
+                                                            title="Volver al color derivado de Fondo y Acento"
+                                                        >
+                                                            Auto
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        <p className={styles.modalHint}>
+                                            Fondo es el campo oscuro; Luz, la marca de agua o el brillo de la cabecera; Nombres pinta la
+                                            lista de un equipo y los dorsales y rotulos de dos; Tinta, el resto del texto; Filetes, el
+                                            subrayado de Suplentes y la tarjeta de la editorial. En Auto salen de Fondo, Acento y, con dos
+                                            equipos, del color de cada escudo.
+                                        </p>
+                                    </div>
+                                )}
                                 {isClassicPlate && (
                                     <div style={{ marginTop: 16 }}>
                                         <label className={styles.modalLabel}>Degradado de la placa</label>
@@ -3564,6 +3740,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                         matchExportMode={matchExportMode}
                                         matchExportLayout={matchExportLayout}
                                         lineupExportMode={lineupExportMode}
+                                        lineupExportLayout={lineupExportLayout}
                                         standingsExportMode={standingsExportMode}
                                         dailyMatchesTimeMode={dailyMatchesTimeMode}
                                         className={styles.modalPreviewImage}
@@ -3620,6 +3797,7 @@ export function ExportImagePreview({
     matchExportMode = 'result',
     matchExportLayout = 'classic',
     lineupExportMode = 'both',
+    lineupExportLayout = 'classic',
     standingsExportMode = 'table',
     dailyMatchesTimeMode = 'time',
     className = '',
@@ -3643,6 +3821,7 @@ export function ExportImagePreview({
         matchExportMode,
         matchExportLayout,
         lineupExportMode,
+        lineupExportLayout,
         standingsExportMode,
         dailyMatchesTimeMode,
     };
@@ -3650,11 +3829,21 @@ export function ExportImagePreview({
     latestOptionsRef.current = renderOptions;
     const renderLoopRef = useRef({ inFlight: false, dirty: false, dirtyAt: 0 });
     const isMountedRef = useRef(true);
+    // El lienzo donde se dibuja a tamano real, uno por preview y para toda su vida.
+    const scratchCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     useEffect(() => {
         isMountedRef.current = true;
         return () => {
             isMountedRef.current = false;
+            // Al cerrar el modal se suelta: son varios MB que no tienen por que
+            // quedar colgando hasta que el recolector se acuerde.
+            const scratch = scratchCanvasRef.current;
+            if (scratch) {
+                scratch.width = 0;
+                scratch.height = 0;
+                scratchCanvasRef.current = null;
+            }
         };
     }, []);
 
@@ -3677,7 +3866,13 @@ export function ExportImagePreview({
                 while (loop.dirty && isMountedRef.current) {
                     loop.dirty = false;
                     try {
-                        const rendered = await renderMatchExportPreviewCanvas(latestOptionsRef.current);
+                        if (!scratchCanvasRef.current) {
+                            scratchCanvasRef.current = document.createElement('canvas');
+                        }
+                        const rendered = await renderMatchExportPreviewCanvas(
+                            latestOptionsRef.current,
+                            scratchCanvasRef.current,
+                        );
                         if (!isMountedRef.current) return;
                         paintPreviewCanvas(canvasRef.current, rendered);
                         setHasPreview(true);
@@ -3696,7 +3891,17 @@ export function ExportImagePreview({
         return () => {
             window.clearTimeout(timer);
         };
-    }, [customizationState, dailyMatchesTimeMode, data, format, lineupExportMode, matchExportLayout, matchExportMode, plateOptions, previewColors, standingsExportMode, template, visualFamily]);
+    }, [customizationState, dailyMatchesTimeMode, data, format, lineupExportLayout, lineupExportMode, matchExportLayout, matchExportMode, plateOptions, previewColors, standingsExportMode, template, visualFamily]);
+
+    // La primera pasada pinta con el lienzo todavia oculto: si el panel toma su alto
+    // del propio lienzo (el laboratorio, una tarjeta suelta) mide unos pixeles y el
+    // preview queda diminuto. Al mostrarse se vuelve a copiar desde el dibujo a
+    // tamano real, que sigue en el lienzo de trabajo: cuesta un drawImage.
+    useEffect(() => {
+        if (!hasPreview) return;
+        const scratch = scratchCanvasRef.current;
+        if (scratch && scratch.width > 0) paintPreviewCanvas(canvasRef.current, scratch);
+    }, [hasPreview]);
 
     // El lienzo queda montado siempre, aunque este oculto: si se desmontara mientras
     // se muestra el error o el "Generando", el dibujo siguiente no tendria donde caer.
@@ -3731,16 +3936,58 @@ function buildDefaultMatchSelection(template: ExportTemplate, data: ExportData):
     return new Set(Array.from({ length: Math.min(matches.length, 10) }, (_, index) => index));
 }
 
+// Cuanto se permite densificar el preview por encima de su caja. Un telefono
+// declara 3, pero la diferencia entre 2 y 3 no se ve en una vista previa y el costo
+// se paga en pixeles: 3 son mas del doble de memoria que 2.
+const PREVIEW_MAX_DEVICE_PIXEL_RATIO = 2;
+// Cuando todavia no se puede medir la caja (el modal recien abre), un tope sano.
+const PREVIEW_FALLBACK_MAX_EDGE = 720;
+
+function scalePreviewSize(width: number, height: number, scale: number) {
+    return {
+        width: Math.max(1, Math.round(width * scale)),
+        height: Math.max(1, Math.round(height * scale)),
+    };
+}
+
+// A que resolucion conviene dejar el lienzo visible. El export se dibuja siempre a
+// 1080 de ancho, pero el preview se MUESTRA en un panel de pocos cientos de pixeles
+// —en el telefono son ~380 de alto—, asi que copiar los 1080x1920 enteros era
+// cargar 8,3 MB de textura para que el compositor la reescalara en cada cuadro.
+function getPreviewPaintSize(target: HTMLCanvasElement, rendered: HTMLCanvasElement) {
+    const fallback = () => scalePreviewSize(
+        rendered.width,
+        rendered.height,
+        Math.min(1, PREVIEW_FALLBACK_MAX_EDGE / Math.max(rendered.width, rendered.height)),
+    );
+    if (typeof window === 'undefined') return fallback();
+
+    // El lienzo esta oculto hasta que hay algo dibujado, asi que no se puede medir a
+    // el: se mide el panel que lo contiene, que siempre tiene caja.
+    const box = target.parentElement;
+    const boxWidth = box?.clientWidth ?? 0;
+    const boxHeight = box?.clientHeight ?? 0;
+    if (boxWidth <= 0 || boxHeight <= 0) return fallback();
+
+    const density = Math.min(Math.max(window.devicePixelRatio || 1, 1), PREVIEW_MAX_DEVICE_PIXEL_RATIO);
+    const fit = Math.min(boxWidth / rendered.width, boxHeight / rendered.height);
+    // Nunca por encima del dibujo original: agrandarlo no agrega detalle.
+    return scalePreviewSize(rendered.width, rendered.height, Math.min(1, fit * density));
+}
+
 function paintPreviewCanvas(target: HTMLCanvasElement | null, rendered: HTMLCanvasElement) {
     if (!target) return;
-    if (target.width !== rendered.width || target.height !== rendered.height) {
-        target.width = rendered.width;
-        target.height = rendered.height;
+    const { width, height } = getPreviewPaintSize(target, rendered);
+    if (target.width !== width || target.height !== height) {
+        target.width = width;
+        target.height = height;
     }
     const ctx = target.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, target.width, target.height);
-    ctx.drawImage(rendered, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(rendered, 0, 0, rendered.width, rendered.height, 0, 0, target.width, target.height);
 }
 
 function getDefaultTournamentName(template: ExportTemplate, data: ExportData): string {
@@ -4933,7 +5180,7 @@ function applyManualMatchScore(data: MatchStatsData, homeScoreInput: string, awa
     };
 }
 
-type ExportPreviewRenderOptions = {
+export type ExportPreviewRenderOptions = {
     template: ExportTemplate;
     data: ExportData;
     format: ExportFormat;
@@ -4944,6 +5191,7 @@ type ExportPreviewRenderOptions = {
     matchExportMode: MatchExportMode;
     matchExportLayout: MatchExportLayout;
     lineupExportMode: LineupExportMode;
+    lineupExportLayout?: LineupExportLayout;
     standingsExportMode: StandingsExportMode;
     dailyMatchesTimeMode?: DailyMatchesTimeMode;
 };
@@ -4951,7 +5199,32 @@ type ExportPreviewRenderOptions = {
 // Devuelve el lienzo dibujado, no un PNG: codificar 1080x1350 con toDataURL bloquea el
 // hilo principal y deja un string de varios MB que el <img> tenia que volver a
 // decodificar. El preview lo copia con un drawImage y listo.
-async function renderMatchExportPreviewCanvas(options: ExportPreviewRenderOptions): Promise<HTMLCanvasElement> {
+// Cada pasada del preview creaba su propio lienzo de 1080x1920 —8,3 MB— y lo tiraba.
+// Arrastrar el selector de color es una pasada cada 350 ms: en un telefono eso es
+// pedir y soltar 8 MB sin parar. Ahora el que dibuja trae SU lienzo y lo reusa.
+function acquireExportRenderCanvas(
+    scratch: HTMLCanvasElement | null | undefined,
+    width: number,
+    height: number,
+): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } {
+    const canvas = scratch ?? document.createElement('canvas');
+    // Asignar el tamano —aunque no haya cambiado— es lo que devuelve el lienzo y su
+    // contexto al estado inicial: sin transformacion, sin sombra, sin alpha y sin la
+    // pila de save() que haya dejado la pasada anterior. Con un lienzo nuevo por vez
+    // eso venia de arriba; reusandolo hay que pedirlo.
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        throw new Error('No se pudo inicializar el canvas del preview');
+    }
+    return { canvas, ctx };
+}
+
+export async function renderMatchExportPreviewCanvas(
+    options: ExportPreviewRenderOptions,
+    scratchCanvas?: HTMLCanvasElement | null,
+): Promise<HTMLCanvasElement> {
     const {
         template,
         data,
@@ -4963,6 +5236,7 @@ async function renderMatchExportPreviewCanvas(options: ExportPreviewRenderOption
         matchExportMode,
         matchExportLayout,
         lineupExportMode,
+        lineupExportLayout = 'classic',
         standingsExportMode,
         dailyMatchesTimeMode = 'time',
     } = options;
@@ -5012,19 +5286,20 @@ async function renderMatchExportPreviewCanvas(options: ExportPreviewRenderOption
         }
         : { ...DEFAULT_EXPORT_COLOR_DEFAULTS };
 
-    const canvas = document.createElement('canvas');
-    canvas.width = config.width;
-    canvas.height = config.height;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-        throw new Error('No se pudo inicializar el canvas del preview');
-    }
+    const { canvas, ctx } = acquireExportRenderCanvas(scratchCanvas, config.width, config.height);
 
     const impactoColors: ImpactoColorOverrides = {
         field: previewColors?.impactoFieldColor,
         ink: previewColors?.impactoInkColor,
         bar: previewColors?.impactoBarColor,
         row: previewColors?.impactoRowColor,
+    };
+    const lineupColors: LineupColorOverrides = {
+        field: previewColors?.lineupFieldColor,
+        glow: previewColors?.lineupGlowColor,
+        names: previewColors?.lineupNamesColor,
+        ink: previewColors?.lineupInkColor,
+        lines: previewColors?.lineupLinesColor,
     };
 
     const exportData = buildExportData(template, data, getDefaultTournamentName(template, data), findBestPresetByOffset(DEFAULT_TIMEZONE_OFFSET_MINUTES));
@@ -5151,7 +5426,7 @@ async function renderMatchExportPreviewCanvas(options: ExportPreviewRenderOption
         } else if (visualFamily === 'momentumV2') {
             await drawMomentumLineups(ctx, canvas, exportData as LineupsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupExportMode);
         } else {
-            await drawG22BaseLineups(ctx, canvas, exportData as LineupsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupExportMode);
+            await drawG22BaseLineups(ctx, canvas, exportData as LineupsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupExportMode, lineupExportLayout, lineupColors);
         }
     } else if (template === 'teamOfWeek') {
         await drawG22BaseTeamOfWeek(ctx, canvas, exportData as TeamOfWeekData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
@@ -5167,7 +5442,7 @@ async function renderMatchExportPreviewCanvas(options: ExportPreviewRenderOption
         } else if (visualFamily === 'momentumV2') {
             await drawMomentumSquad(ctx, canvas, squadData, firstPage, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
         } else {
-            await drawG22BaseSquad(ctx, canvas, squadData, firstPage, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+            await drawG22BaseSquad(ctx, canvas, squadData, firstPage, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupColors);
         }
     } else if (template === 'playoffBracket') {
         if (visualFamily === 'posterV3') {
@@ -5467,14 +5742,6 @@ function buildExportData(
         };
     }
 
-    if (template === 'lineups') {
-        const lineupsData = data as LineupsData;
-        return {
-            ...lineupsData,
-            tournament: tournamentName || lineupsData.tournament,
-        };
-    }
-
     if (template === 'squad') {
         const squadData = data as SquadData;
         return {
@@ -5504,6 +5771,28 @@ function buildExportData(
         return {
             ...nextData,
             date: formatDateInFixedOffset(kickoffAt, timeZonePreset.utcOffsetMinutes, {}),
+            time: formatDateInFixedOffset(kickoffAt, timeZonePreset.utcOffsetMinutes, {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+            }),
+        };
+    }
+
+    if (template === 'lineups') {
+        const lineupsData = data as LineupsData;
+        const nextData: LineupsData = {
+            ...lineupsData,
+            tournament: tournamentName || lineupsData.tournament,
+        };
+        const kickoffAt = toExportDate(lineupsData.kickoffAt);
+        if (!kickoffAt) return nextData;
+
+        // La formacion escribe "VIE 28 AGO | 20:30 HS": el dia de semana sale de la
+        // hora de salida en la zona horaria elegida, no del UTC.
+        return {
+            ...nextData,
+            date: formatDateInFixedOffset(kickoffAt, timeZonePreset.utcOffsetMinutes, { weekday: 'short', day: '2-digit', month: 'short' }),
             time: formatDateInFixedOffset(kickoffAt, timeZonePreset.utcOffsetMinutes, {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -5653,6 +5942,9 @@ export async function ensureExportFonts(): Promise<void> {
             document.fonts.load('800 24px "dharma-gothic-m"'),
             document.fonts.load('800 24px "G22 Dharma Gothic"'),
             document.fonts.load('900 24px "Articulat CF"'),
+            document.fonts.load('400 24px "Playfair Display"'),
+            document.fonts.load('500 24px "Playfair Display"'),
+            document.fonts.load('900 24px "Playfair Display"'),
             document.fonts.load('800 24px "Dharma Gothic Expanded Heavy"'),
             document.fonts.load('800 24px "Dharma Gothic E Heavy"'),
             document.fonts.load('700 24px "Dharma Gothic Expanded"'),
@@ -9292,7 +9584,7 @@ async function drawRankingPoster(
             ctx.restore();
         } else if (row.movementColor) {
             // Banda del que se movio. Mas suave que la del lider a proposito: en
-            // una tabla de 20 filas, media docena tenidas al mismo peso que el
+            // una tabla de 20 filas, media docena teñidas al mismo peso que el
             // primero convierten el afiche en un semaforo y no se lee nada.
             ctx.save();
             ctx.fillStyle = hexToRGBA(row.movementColor, 0.1 + (row.movementStrength ?? 1) * 0.14);
@@ -10403,119 +10695,6 @@ function drawSquadBoard(
     ctx.restore();
 }
 
-async function drawG22BaseSquad(
-    ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement,
-    data: SquadData,
-    page: SquadPageData,
-    _format: CanvasFormat,
-    accentColor: string,
-    bgColor: string,
-    brandLogo: HTMLImageElement | null,
-) {
-    void _format;
-    const isDark = getContrastColor(bgColor) === '#ffffff';
-    const primaryText = isDark ? '#f8fafc' : '#0f172a';
-    const secondaryText = hexToRGBA(primaryText, isDark ? 0.7 : 0.6);
-    const accent = normalizeHexColor(accentColor) || BRAND_ACCENT;
-    const headerLogo = await loadImage(data.teamLogo || data.tournamentLogo || '');
-    const headerLabel = data.tournament && data.tournament !== data.teamName ? data.tournament : '';
-    const pageMeta = getSquadPageMetaLabel(data, page);
-    const footerMetrics = getBrandFooterMetrics(canvas);
-    const panelY = canvas.height > 1500 ? 360 : 300;
-    const panelX = canvas.height > 1500 ? 54 : 58;
-    const panelHeight = footerMetrics.topLine - panelY - (canvas.height > 1500 ? 20 : 16);
-    const panelWidth = canvas.width - panelX * 2;
-
-    const background = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    background.addColorStop(0, mixHexColors(bgColor, accent, isDark ? 0.08 : 0.04));
-    background.addColorStop(0.38, isDark ? mixHexColors(bgColor, '#08111d', 0.24) : mixHexColors(bgColor, '#ffffff', 0.08));
-    background.addColorStop(1, isDark ? mixHexColors(bgColor, '#020617', 0.38) : mixHexColors(bgColor, '#e2e8f0', 0.16));
-    ctx.fillStyle = background;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const topGlow = ctx.createRadialGradient(canvas.width / 2, 0, 0, canvas.width / 2, 0, canvas.width * 0.58);
-    topGlow.addColorStop(0, hexToRGBA(accent, isDark ? 0.24 : 0.14));
-    topGlow.addColorStop(0.45, hexToRGBA(accent, isDark ? 0.08 : 0.05));
-    topGlow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = topGlow;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.save();
-    ctx.globalAlpha = isDark ? 0.08 : 0.05;
-    ctx.strokeStyle = hexToRGBA(primaryText, isDark ? 0.3 : 0.18);
-    ctx.lineWidth = 1;
-    for (let x = 0; x <= canvas.width; x += 48) {
-        ctx.beginPath();
-        ctx.moveTo(x + 0.5, 0);
-        ctx.lineTo(x + 0.5, canvas.height);
-        ctx.stroke();
-    }
-    ctx.restore();
-
-    if (headerLogo) {
-        drawOverflowCrest(ctx, {
-            x: canvas.width / 2,
-            y: canvas.height > 1500 ? 86 : 78,
-            width: canvas.height > 1500 ? 70 : 62,
-            height: canvas.height > 1500 ? 70 : 62,
-            img: headerLogo,
-            label: data.teamName,
-            rawLogo: data.teamLogo || data.tournamentLogo,
-            isDark,
-            showFrame: false,
-        });
-    }
-
-    if (headerLabel) {
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.fillStyle = secondaryText;
-        ctx.font = `800 ${canvas.height > 1500 ? 16 : 14}px ${FONT_MONO}`;
-        ctx.fillText(truncateTextToWidth(ctx, headerLabel.toUpperCase(), canvas.width - 180), canvas.width / 2, canvas.height > 1500 ? 154 : 136);
-        ctx.restore();
-    }
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.fillStyle = primaryText;
-    setFittedFont(ctx, 'PLANTEL', canvas.width - 180, '900', canvas.height > 1500 ? 104 : 84, FONT_EDITORIAL_SCORE, 54);
-    ctx.fillText('PLANTEL', canvas.width / 2, canvas.height > 1500 ? 240 : 214);
-    ctx.restore();
-
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.fillStyle = primaryText;
-    setFittedFont(ctx, data.teamName.toUpperCase(), canvas.width - 220, '800', canvas.height > 1500 ? 30 : 24, FONT_BODY, 16);
-    ctx.fillText(truncateTextToWidth(ctx, data.teamName.toUpperCase(), canvas.width - 220), canvas.width / 2, canvas.height > 1500 ? 284 : 252);
-    if (pageMeta) {
-        ctx.fillStyle = secondaryText;
-        ctx.font = `700 ${canvas.height > 1500 ? 16 : 14}px ${FONT_MONO}`;
-        ctx.fillText(truncateTextToWidth(ctx, pageMeta.toUpperCase(), canvas.width - 220), canvas.width / 2, canvas.height > 1500 ? 318 : 282);
-    }
-    ctx.restore();
-
-    drawSquadBoard(ctx, canvas, page, {
-        x: panelX,
-        y: panelY,
-        width: panelWidth,
-        height: panelHeight,
-        panelFill: isDark ? hexToRGBA(mixHexColors(bgColor, '#020617', 0.24), 0.72) : hexToRGBA('#ffffff', 0.72),
-        panelStroke: hexToRGBA(accent, isDark ? 0.26 : 0.16),
-        groupFill: isDark ? hexToRGBA(accent, 0.16) : hexToRGBA(accent, 0.12),
-        groupTextColor: primaryText,
-        rowFillEven: isDark ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.88)',
-        rowFillOdd: isDark ? 'rgba(255,255,255,0.025)' : 'rgba(241,245,249,0.82)',
-        rowStroke: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.06)',
-        primaryText,
-        secondaryText,
-        numberFill: isDark ? hexToRGBA(accent, 0.2) : hexToRGBA(accent, 0.18),
-        numberText: primaryText,
-        accentColor: accent,
-    });
-
-    drawBrandFooter(ctx, canvas, brandLogo, isDark);
-}
 
 async function drawMomentumSquad(
     ctx: CanvasRenderingContext2D,
@@ -11018,713 +11197,1187 @@ async function drawLineups(
     drawBrandFooter(ctx, canvas, brandLogo, isDark);
 }
 
+// ============================================================================
+// Formaciones y convocatoria de G22 Base. Las tres placas estan calcadas de las
+// piezas que publican las uniones en Instagram, y la referencia manda:
+//
+//   * FORMACION CLASICA — la de Uruguay XV: fondo oscuro con la luz del acento
+//     arriba, "XV INICIAL" (XV en serif, INICIAL en negra), los quince en
+//     ESCALERA que baja hacia la derecha (1-3, 4-5, 6-8, 9-10, 12-13, 11-14-15),
+//     el nombre chico en blanco sobre el apellido grande en serif del acento, y
+//     los suplentes colgados de un filete vertical a la derecha. El pie es una
+//     linea con fecha y hora, sede y el nombre del equipo.
+//   * FORMACION EDITORIAL — la de Los Pumas: la foto del jugador ocupa la mitad
+//     izquierda y se funde con el fondo, "XV INICIAL" condensado en el acento,
+//     la lista numerada en oblicua pesada, los FINISHERS en parrafo corrido y
+//     una tarjeta del acento con los escudos, la sede y la hora de salida.
+//   * CONVOCATORIA — la de Argentina XV: "CONVOCATORIA" enorme en el acento, el
+//     torneo debajo, el escudo arriba a la derecha y la lista "Apellido, Nombre"
+//     en oblicua a dos columnas, numerada de corrido.
+//
+// Las tres se escalan por ANCHO (u = v * W / 1080) y reparten el alto de mas
+// del story como aire, igual que la placa de partido. La marca del pie es la
+// del medio que cubre el deporte (Salida de 22 en rugby), como en la placa.
+// ============================================================================
+
+const FONT_LINEUP_SERIF = '"Playfair Display", "Georgia", "Times New Roman", serif';
+
+// Los nombres llegan enteros ("Felipe Arcos Perez") y las piezas piden nombre y
+// apellido por separado. Sin un dato de origen la particion es heuristica:
+// - con coma, ya viene "Apellido, Nombre";
+// - dos palabras: nombre y apellido;
+// - tres o mas: el apellido compuesto es mas comun que el nombre doble en un
+//   plantel de rugby (Sanchez Valarolo, Benitez Cruz, Arcos Perez), asi que el
+//   nombre es la primera palabra... salvo que arranque con un nombre que casi
+//   siempre viene de a dos (Juan Manuel, Juan Cruz, Jose Luis, Maria Jose).
+const LINEUP_GIVEN_NAME_LEADERS = new Set(['juan', 'jose', 'josé', 'maria', 'maría', 'luis', 'carlos', 'ana', 'miguel', 'jean', 'marco', 'pablo']);
+const LINEUP_SURNAME_PARTICLES = new Set(['de', 'del', 'la', 'las', 'los', 'di', 'da', 'van', 'von', 'der', 'mc', 'mac', 'san', 'santa']);
+
+function splitLineupPlayerName(name: string): { given: string; surname: string } {
+    const trimmed = String(name || '').replace(/\s+/g, ' ').trim();
+    if (!trimmed) return { given: '', surname: '' };
+    const commaIndex = trimmed.indexOf(',');
+    if (commaIndex > 0) {
+        return { surname: trimmed.slice(0, commaIndex).trim(), given: trimmed.slice(commaIndex + 1).trim() };
+    }
+    const tokens = trimmed.split(' ');
+    if (tokens.length === 1) return { given: '', surname: tokens[0] };
+    if (tokens.length === 2) return { given: tokens[0], surname: tokens[1] };
+    let givenCount = LINEUP_GIVEN_NAME_LEADERS.has(tokens[0].toLowerCase()) ? 2 : 1;
+    if (LINEUP_SURNAME_PARTICLES.has(tokens[1].toLowerCase())) givenCount = 1;
+    return { given: tokens.slice(0, givenCount).join(' '), surname: tokens.slice(givenCount).join(' ') };
+}
+
+// "Juan Ignacio Greising Revol" -> "J. I. Greising Revol": lo que hace la prensa cuando
+// la columna no da para el nombre entero.
+function abbreviateLineupGivenNames(name: string) {
+    const { given, surname } = splitLineupPlayerName(name);
+    if (!given) return surname;
+    const initials = given.split(' ').filter(Boolean).map((part) => `${part[0]}.`).join(' ');
+    return `${initials} ${surname}`;
+}
+
+function formatLineupSurnameFirst(name: string) {
+    const { given, surname } = splitLineupPlayerName(name);
+    return given ? `${surname}, ${given}` : surname;
+}
+
+function sortLineupPlayersByNumber(players: LineupExportPlayerData[]) {
+    return players
+        .filter((player) => player && String(player.name || '').trim())
+        .slice()
+        .sort((left, right) => {
+            const leftNumber = Number(left.number);
+            const rightNumber = Number(right.number);
+            if (Number.isFinite(leftNumber) && Number.isFinite(rightNumber)) return leftNumber - rightNumber;
+            if (Number.isFinite(leftNumber)) return -1;
+            if (Number.isFinite(rightNumber)) return 1;
+            return String(left.name || '').localeCompare(String(right.name || ''));
+        });
+}
+
+function splitLineupTeamPlayers(team: LineupExportTeamData) {
+    const players = sortLineupPlayersByNumber(Array.isArray(team.starters) ? team.starters : []);
+    const starters = players.filter((player, index) => isLineupStarter(player, index));
+    if (starters.length > 0) {
+        return { starters, bench: players.filter((player, index) => !isLineupStarter(player, index)) };
+    }
+    return { starters: players.slice(0, 15), bench: players.slice(15) };
+}
+
+// ---------------------------------------------------------------------------
+// Helpers de la formacion clasica.
+// ---------------------------------------------------------------------------
+
+function hexLuminance(hex: string) {
+    const value = normalizeHexColor(hex);
+    if (!value) return 0;
+    const red = parseInt(value.slice(1, 3), 16) / 255;
+    const green = parseInt(value.slice(3, 5), 16) / 255;
+    const blue = parseInt(value.slice(5, 7), 16) / 255;
+    return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+}
+
+// Un color de equipo que se lea sobre negro: si es muy oscuro se le mezcla blanco.
+function liftColorForDark(hex: string) {
+    const luminance = hexLuminance(hex);
+    if (luminance >= 0.28) return hex;
+    return mixHexColors(hex, '#ffffff', Math.min(0.55, (0.28 - luminance) * 2.2 + 0.2));
+}
+
+// Color dominante de un escudo, para pintar la banda de cada equipo en la
+// formacion doble. Promedio pesado por saturacion: el blanco del fondo y el
+// negro de los trazos no cuentan.
+function sampleCrestColor(image: HTMLImageElement | null, fallback: string): string {
+    if (!image || typeof document === 'undefined') return fallback;
+    try {
+        const size = 28;
+        const sample = document.createElement('canvas');
+        sample.width = size;
+        sample.height = size;
+        const sampleCtx = sample.getContext('2d', { willReadFrequently: true });
+        if (!sampleCtx) return fallback;
+        sampleCtx.drawImage(image, 0, 0, size, size);
+        const pixels = sampleCtx.getImageData(0, 0, size, size).data;
+        let red = 0;
+        let green = 0;
+        let blue = 0;
+        let weightTotal = 0;
+        for (let index = 0; index < pixels.length; index += 4) {
+            const alpha = pixels[index + 3] / 255;
+            if (alpha <= 0.05) continue;
+            const r = pixels[index];
+            const g = pixels[index + 1];
+            const b = pixels[index + 2];
+            const max = Math.max(r, g, b) / 255;
+            const min = Math.min(r, g, b) / 255;
+            const saturation = max <= 0 ? 0 : (max - min) / max;
+            const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+            if (luminance > 0.92 || luminance < 0.06) continue;
+            const weight = alpha * (0.08 + saturation * saturation * 2);
+            red += r * weight;
+            green += g * weight;
+            blue += b * weight;
+            weightTotal += weight;
+        }
+        if (weightTotal <= 0) return fallback;
+        const toHex = (value: number) => Math.round(value).toString(16).padStart(2, '0');
+        return `#${toHex(red / weightTotal)}${toHex(green / weightTotal)}${toHex(blue / weightTotal)}`;
+    } catch {
+        return fallback;
+    }
+}
+
+// Parte una lista de nombres en renglones que entren en el ancho, con el
+// separador que se le pida (" • " o ", ").
+function wrapLineupNames(ctx: CanvasRenderingContext2D, items: string[], separator: string, maxWidth: number) {
+    const lines: string[] = [];
+    let line = '';
+    for (const item of items) {
+        const candidate = line ? `${line}${separator}${item}` : item;
+        if (line && ctx.measureText(candidate).width > maxWidth) {
+            lines.push(line);
+            line = item;
+        } else {
+            line = candidate;
+        }
+    }
+    if (line) lines.push(line);
+    return lines;
+}
+
+// "vie, 28 ago" (lo que da Intl en es-AR) -> "VIE 28 AGO". Una fecha numerica
+// se deja como vino.
+function formatLineupDayLabel(value: string | undefined) {
+    return String(value || '').replace(/[,.]/g, '').replace(/\s+/g, ' ').trim().toUpperCase();
+}
+
+function formatLineupShirtNumber(player: LineupExportPlayerData, fallback: number) {
+    const raw = player.number;
+    if (raw === null || raw === undefined || String(raw).trim() === '') return String(fallback);
+    return String(raw).trim();
+}
+
+function drawLineupBrandMark(
+    ctx: CanvasRenderingContext2D,
+    image: HTMLImageElement | null,
+    edge: number,
+    bottom: number,
+    width: number,
+    align: 'left' | 'right' = 'right',
+) {
+    if (!image) return 0;
+    const sourceWidth = image.naturalWidth || image.width || 1;
+    const sourceHeight = image.naturalHeight || image.height || 1;
+    const height = Math.round((width * sourceHeight) / sourceWidth);
+    const x = align === 'right' ? edge - width : edge;
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(image, x, bottom - height, width, height);
+    ctx.restore();
+    return height;
+}
+
+// Foto recortada a un rectangulo, cubriendo (como object-fit: cover) y con el
+// foco arriba: en una foto de jugador la cara esta en el tercio superior.
+function drawLineupCoverPhoto(
+    ctx: CanvasRenderingContext2D,
+    image: HTMLImageElement,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    focusY = 0.28,
+) {
+    const sourceWidth = image.naturalWidth || image.width || width;
+    const sourceHeight = image.naturalHeight || image.height || height;
+    const scale = Math.max(width / sourceWidth, height / sourceHeight);
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+    const offsetX = x + (width - drawWidth) / 2;
+    const offsetY = Math.min(y, Math.max(y + height - drawHeight, y + height / 2 - drawHeight * focusY));
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, width, height);
+    ctx.clip();
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+    ctx.restore();
+}
+
+function getLineupFooterDateLabel(data: LineupsData) {
+    const date = String(data.date || '').trim();
+    const time = String(data.time || '').trim();
+    // "02.09 - 13:00 hs": dia y mes con punto, como en la referencia.
+    const shortDate = (() => {
+        const match = date.match(/^(\d{1,2})[\/.-](\d{1,2})/);
+        if (!match) return date;
+        return `${match[1].padStart(2, '0')}.${match[2].padStart(2, '0')}`;
+    })();
+    const timeLabel = /^\d{1,2}:\d{2}$/.test(time) ? `${time} hs` : time;
+    return [shortDate, timeLabel].filter(Boolean).join(' - ');
+}
+
 async function drawG22BaseLineups(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     data: LineupsData,
-    format: CanvasFormat,
+    _format: CanvasFormat,
     accentColor: string,
     bgColor: string,
-    brandLogo: HTMLImageElement | null,
+    _brandLogo: HTMLImageElement | null,
     lineupExportMode: LineupExportMode,
+    lineupExportLayout: LineupExportLayout = 'classic',
+    colors: LineupColorOverrides = {},
 ) {
-    const isDark = getContrastColor(bgColor) === '#ffffff';
-    const primaryText = isDark ? '#f8fafc' : '#0f172a';
-    const secondaryText = hexToRGBA(primaryText, isDark ? 0.74 : 0.66);
-    const tertiaryText = hexToRGBA(primaryText, isDark ? 0.58 : 0.5);
-    const highlightColor = normalizeHexColor(accentColor) || BRAND_ACCENT;
-    const titleText = 'FORMACION';
-    const roundText = data.subtitle?.trim().toUpperCase() || '';
-    const metaLabel = getLineupMetaLabel(data);
-    const [tournamentLogo, homeLogo, awayLogo] = await Promise.all([
+    void _format;
+    void _brandLogo;
+    if (lineupExportLayout === 'editorial') {
+        await drawG22BaseLineupsEditorial(ctx, canvas, data, accentColor, bgColor, lineupExportMode, colors);
+        return;
+    }
+    await drawG22BaseLineupsClassic(ctx, canvas, data, accentColor, bgColor, lineupExportMode, colors);
+}
+
+// Los cinco colores de la pieza, con el Auto resuelto: el que no vino se deriva
+// de Fondo + Acento igual que antes de que existieran los controles.
+function resolveLineupColors(colors: LineupColorOverrides, derived: Record<LineupColorControlId, string>): Record<LineupColorControlId, string> {
+    return {
+        field: normalizeHexColor(colors.field) || derived.field,
+        glow: normalizeHexColor(colors.glow) || derived.glow,
+        names: normalizeHexColor(colors.names) || derived.names,
+        ink: normalizeHexColor(colors.ink) || derived.ink,
+        lines: normalizeHexColor(colors.lines) || derived.lines,
+    };
+}
+
+// ---------------------------------------------------------------------------
+// Formacion clasica: la escalera de Uruguay XV.
+// ---------------------------------------------------------------------------
+async function drawG22BaseLineupsClassic(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: LineupsData,
+    accentColor: string,
+    bgColor: string,
+    lineupExportMode: LineupExportMode,
+    colorOverrides: LineupColorOverrides,
+) {
+    const W = canvas.width;
+    const H = canvas.height;
+    const u = (value: number) => Math.round((value * W) / 1080);
+    const extra = Math.max(0, H - Math.round((W * 1350) / 1080));
+    const paletteAccent = normalizeHexColor(accentColor) || '#e5322d';
+    const baseHex = normalizeHexColor(bgColor) || '#0a0a0b';
+    // Las dos referencias son negras: un Fondo claro del modal se hunde igual,
+    // porque la pieza es oscura por definicion.
+    const isLightBg = getContrastColor(baseHex) !== '#ffffff';
+    const teams = getSelectedLineupTeams(data, lineupExportMode).map((team) => ({ ...team, ...splitLineupTeamPlayers(team) }));
+    const isSingleTeam = teams.length === 1;
+    const [tournamentLogo, wordmark, sportMark, homeCrest, awayCrest] = await Promise.all([
         loadImage(getTournamentLogoImageSource(data)),
+        loadImage('/header-logo.png'),
+        loadImage(resolvePlateBrandSource('auto', data.sport)),
         loadImage(data.homeTeam.logo || ''),
         loadImage(data.awayTeam.logo || ''),
     ]);
-    const logoMap = {
-        home: homeLogo,
-        away: awayLogo,
-    } as const;
+    const crestBySide = { home: homeCrest, away: awayCrest } as const;
+    const dayLabel = formatLineupDayLabel(data.date);
+    const timeLabel = String(data.time || '').trim();
+    const venueLabel = String(data.venue || '').trim();
 
-    const colorDistance = (left: string, right: string) => {
-        if (!/^#[0-9a-f]{6}$/i.test(left) || !/^#[0-9a-f]{6}$/i.test(right)) return 999;
-
-        const leftRed = parseInt(left.slice(1, 3), 16);
-        const leftGreen = parseInt(left.slice(3, 5), 16);
-        const leftBlue = parseInt(left.slice(5, 7), 16);
-        const rightRed = parseInt(right.slice(1, 3), 16);
-        const rightGreen = parseInt(right.slice(3, 5), 16);
-        const rightBlue = parseInt(right.slice(5, 7), 16);
-
-        return Math.abs(leftRed - rightRed) + Math.abs(leftGreen - rightGreen) + Math.abs(leftBlue - rightBlue);
-    };
-
-    const deriveTeamAccent = (image: HTMLImageElement | null, fallback: string) => {
-        const fallbackHex = normalizeHexColor(fallback) || highlightColor;
-        const contrastTarget = isDark ? '#ffffff' : '#0f172a';
-
-        if (!image || typeof document === 'undefined') {
-            return mixHexColors(fallbackHex, contrastTarget, isDark ? 0.2 : 0.16);
-        }
-
-        try {
-            const sampleCanvas = document.createElement('canvas');
-            const sampleSize = 28;
-            sampleCanvas.width = sampleSize;
-            sampleCanvas.height = sampleSize;
-            const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
-            if (!sampleCtx) {
-                return mixHexColors(fallbackHex, contrastTarget, isDark ? 0.2 : 0.16);
-            }
-
-            sampleCtx.drawImage(image, 0, 0, sampleSize, sampleSize);
-            const imageData = sampleCtx.getImageData(0, 0, sampleSize, sampleSize).data;
-            let redTotal = 0;
-            let greenTotal = 0;
-            let blueTotal = 0;
-            let weightTotal = 0;
-
-            for (let index = 0; index < imageData.length; index += 4) {
-                const alpha = imageData[index + 3] / 255;
-                if (alpha <= 0.04) continue;
-
-                const red = imageData[index];
-                const green = imageData[index + 1];
-                const blue = imageData[index + 2];
-                const max = Math.max(red, green, blue) / 255;
-                const min = Math.min(red, green, blue) / 255;
-                const saturation = max <= 0 ? 0 : (max - min) / max;
-                const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
-                const weight = alpha * (0.45 + saturation * 1.35 + (luminance > 0.12 && luminance < 0.9 ? 0.18 : 0));
-
-                redTotal += red * weight;
-                greenTotal += green * weight;
-                blueTotal += blue * weight;
-                weightTotal += weight;
-            }
-
-            if (weightTotal <= 0) {
-                return mixHexColors(fallbackHex, contrastTarget, isDark ? 0.2 : 0.16);
-            }
-
-            const toHex = (value: number) => Math.round(value).toString(16).padStart(2, '0');
-            const sampledColor = `#${toHex(redTotal / weightTotal)}${toHex(greenTotal / weightTotal)}${toHex(blueTotal / weightTotal)}`;
-            return mixHexColors(sampledColor, contrastTarget, isDark ? 0.16 : 0.22);
-        } catch {
-            return mixHexColors(fallbackHex, contrastTarget, isDark ? 0.2 : 0.16);
-        }
-    };
-
-    const splitTeamPlayers = (players: LineupExportPlayerData[]) => {
-        const starters = players.filter((player, index) => isLineupStarter(player, index));
-        if (starters.length > 0) {
-            return {
-                starters,
-                bench: players.filter((player, index) => !isLineupStarter(player, index)),
-            };
-        }
-
-        return {
-            starters: players.slice(0, Math.min(players.length, 15)),
-            bench: players.slice(Math.min(players.length, 15)),
-        };
-    };
-
-    const cleanExtraInfo = (value: string | undefined) => {
-        const normalized = String(value || '').trim();
-        if (!normalized) return '';
-        const lowered = normalized.toLowerCase();
-        if (lowered === 'titulares' || lowered === 'titulares y suplentes' || lowered === 'starters' || lowered === 'starting lineup') {
-            return '';
-        }
-        return normalized.toUpperCase();
-    };
-
-    const selectedTeams = getSelectedLineupTeams(data, lineupExportMode).map((team, index) => {
-        const players = Array.isArray(team.starters)
-            ? team.starters
-                .filter((player) => player && String(player.name || '').trim())
-                .sort((left, right) => {
-                    const leftNumber = Number(left.number);
-                    const rightNumber = Number(right.number);
-                    if (Number.isFinite(leftNumber) && Number.isFinite(rightNumber)) return leftNumber - rightNumber;
-                    if (Number.isFinite(leftNumber)) return -1;
-                    if (Number.isFinite(rightNumber)) return 1;
-                    return String(left.name || '').localeCompare(String(right.name || ''));
-                })
-            : [];
-        const split = splitTeamPlayers(players);
-        const fallbackAccent = index === 0 ? highlightColor : mixHexColors(highlightColor, '#38bdf8', 0.3);
-
-        return {
-            ...team,
-            logoImage: logoMap[team.side],
-            accentTone: deriveTeamAccent(logoMap[team.side], fallbackAccent),
-            starters: split.starters,
-            bench: split.bench,
-            extraInfo: cleanExtraInfo(team.lineupLabel),
-        };
-    });
-    const isSingleTeam = selectedTeams.length === 1;
-
-    if (!isSingleTeam && selectedTeams.length > 1 && colorDistance(selectedTeams[0].accentTone, selectedTeams[1].accentTone) < 96) {
-        selectedTeams[1].accentTone = mixHexColors(selectedTeams[1].accentTone, '#38bdf8', 0.34);
-    }
-
-    const totalPlayers = selectedTeams.reduce((sum, team) => sum + team.starters.length + team.bench.length, 0);
-    const highestRating = computeHighestLineupRating(
-        selectedTeams.map((team) => ({ starters: [...team.starters, ...team.bench] })),
-    );
-    const scaleX = canvas.width / 1080;
-    const scaleY = canvas.height / 1350;
-    const scaleFont = Math.min(scaleX, scaleY);
-    const snapToGrid = (value: number) => Math.round(value / 2) * 2;
-    const sx = (value: number) => snapToGrid(value * scaleX);
-    const sy = (value: number) => snapToGrid(value * scaleY);
-    const sf = (value: number) => Math.max(1, Math.round(value * scaleFont));
-    const surfaceTop = isDark ? mixHexColors(bgColor, '#0b1220', 0.28) : mixHexColors('#ffffff', bgColor, 0.08);
-    const surfaceBottom = isDark ? mixHexColors(bgColor, '#030712', 0.52) : mixHexColors('#eef2f7', bgColor, 0.18);
-    const panelFill = isDark ? hexToRGBA(mixHexColors(bgColor, '#020617', 0.2), 0.16) : hexToRGBA(mixHexColors('#ffffff', bgColor, 0.03), 0.58);
-    const headerHeight = sy(225);
-    const teamBannerY = headerHeight;
-    const teamBannerHeight = sy(175);
-    const brandFooterMetrics = getBrandFooterMetrics(canvas);
-    const brandingTopLine = brandFooterMetrics.topLine;
-    const contentBottomLimit = brandingTopLine - sy(12);
-    const contentPanelX = sx(60);
-    const contentPanelY = teamBannerY + teamBannerHeight;
-    const contentPanelWidth = canvas.width - contentPanelX * 2;
-    const contentPanelHeight = Math.max(sy(320), contentBottomLimit - contentPanelY);
-    const contentInsetTop = sy(40);
-    const columnGap = isSingleTeam ? 0 : sx(50);
-    const columnWidth = isSingleTeam
-        ? Math.min(contentPanelWidth, sx(760))
-        : (contentPanelWidth - columnGap) / 2;
-    const columnStartX = isSingleTeam
-        ? canvas.width / 2 - columnWidth / 2
-        : contentPanelX;
-    const columnTop = contentPanelY + contentInsetTop;
-    const bannerInnerHeight = teamBannerHeight - sy(28);
-    const teamNameMaxWidth = columnWidth - sx(48);
-    const hasAnyRating = highestRating != null;
-    const ratingAreaWidth = hasAnyRating ? sx(96) : 0;
-    const ratingRightInset = sx(20);
-    const playerTextMaxWidth = columnWidth - sx(68) - ratingAreaWidth;
-    const teamNameBaseSize = isSingleTeam ? sf(36) : sf(32);
-    const teamNameMinSize = sf(20);
-    const playerLabels = selectedTeams.flatMap((team) => [...team.starters, ...team.bench].map((player) => `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase()));
-
-    const teamNameLayouts = selectedTeams.map((team) =>
-        fitTextLinesToWidth(ctx, team.name.toUpperCase(), teamNameMaxWidth, '900', teamNameBaseSize, FONT_DISPLAY, teamNameMinSize, 2),
-    );
-    const maxTeamNameLines = Math.max(...teamNameLayouts.map((layout) => layout.lines.length), 1);
-    const maxTeamNameSize = Math.max(...teamNameLayouts.map((layout) => layout.size), teamNameMinSize);
-    const teamNameLineHeight = maxTeamNameSize * 0.94;
-    const hasExtraInfo = selectedTeams.some((team) => team.extraInfo);
-    const teamExtraInfoHeight = hasExtraInfo ? sy(20) : 0;
-    let teamLogoSize = isSingleTeam ? sy(98) : sy(88);
-    const teamLogoSpacingBottom = sy(10);
-    const teamIdentityHeight = teamLogoSize + teamLogoSpacingBottom + maxTeamNameLines * teamNameLineHeight + teamExtraInfoHeight;
-    if (teamIdentityHeight > bannerInnerHeight) {
-        teamLogoSize = Math.max(sy(68), teamLogoSize - (teamIdentityHeight - bannerInnerHeight));
-    }
-
-    const teamBlockHeight = teamLogoSize + teamLogoSpacingBottom + maxTeamNameLines * teamNameLineHeight + teamExtraInfoHeight;
-    const teamBlockTop = teamBannerY + Math.max(0, (teamBannerHeight - teamBlockHeight) / 2);
-    const listTop = columnTop;
-    const listHeight = Math.max(sy(220), contentBottomLimit - listTop);
-    const textStartOffset = sx(36);
-    const numberAreaWidth = sx(28);
-    // El piso tipografico no es fijo: sale del alto que queda para la lista.
-    // Una planilla de pretemporada trae 30 o 35 fichas y a 20px no entran en la
-    // columna. Antes se cortaba en 23 y los ultimos nombres no existian; ahora
-    // la letra baja hasta donde haga falta para que entren todos.
-    const maxStarterRows = Math.max(...selectedTeams.map((team) => team.starters.length), 0);
-    const maxBenchRows = Math.max(...selectedTeams.map((team) => team.bench.length), 0);
-    const longestColumnRows = Math.max(maxStarterRows + maxBenchRows, 1);
-    const benchBlockReserve = maxBenchRows > 0 ? sy(46) : 0;
-    const minStarterFontSizeBase = clampNumber(
-        Math.floor((listHeight - benchBlockReserve) / longestColumnRows) - sy(8),
-        sf(11),
-        sf(20),
-    );
-    const minNumberFontSize = Math.min(sf(18), Math.max(sf(10), Math.round(minStarterFontSizeBase * 0.9)));
-    const sharedPlayerFontSize = playerLabels.length > 0
-        ? getSharedFittedFontSize(
-            ctx,
-            playerLabels.map((text) => ({ text, maxWidth: playerTextMaxWidth })),
-            '700',
-            sf(26),
-            FONT_BODY,
-            minStarterFontSizeBase,
-        )
-        : sf(24);
-    const fitColumnMetrics = (starterCount: number, benchCount: number) => {
-        let starterFontSize = sharedPlayerFontSize;
-        let benchFontSize = sharedPlayerFontSize;
-        let starterRowGap = sy(8);
-        let benchRowGap = sy(8);
-        let starterToBenchGap = sy(18);
-        let benchLabelToListGap = sy(12);
-        let starterRowHeight = Math.max(sy(34), starterFontSize + sy(10));
-        let benchRowHeight = Math.max(sy(32), benchFontSize + sy(10));
-        let benchLabelFontSize = sf(18);
-        // El piso es el que sale del alto disponible. La letra es el ultimo
-        // recurso del ajuste -- primero se comen los aires y los altos de fila --,
-        // asi que atarla a un porcentaje del cuerpo compartido solo lograba que
-        // la columna se pasara de largo en vez de comprimirse.
-        const minStarterFontSize = minStarterFontSizeBase;
-        const minBenchFontSize = Math.min(sf(18), minStarterFontSizeBase);
-
-        const getRequiredHeight = () =>
-            starterCount * starterRowHeight
-            + Math.max(0, starterCount - 1) * starterRowGap
-            + (benchCount > 0
-                ? starterToBenchGap
-                    + benchLabelFontSize
-                    + benchLabelToListGap
-                    + benchCount * benchRowHeight
-                    + Math.max(0, benchCount - 1) * benchRowGap
-                : 0);
-
-        let requiredHeight = getRequiredHeight();
-        while (
-            requiredHeight > listHeight
-            && (
-                starterRowGap > sy(2)
-                || benchRowGap > sy(2)
-                || starterToBenchGap > sy(10)
-                || benchLabelToListGap > sy(6)
-                || starterRowHeight > starterFontSize + sy(6)
-                || benchRowHeight > benchFontSize + sy(6)
-                || benchFontSize > minBenchFontSize
-                || starterFontSize > minStarterFontSize
-            )
-        ) {
-            if (starterRowGap > sy(2)) {
-                starterRowGap -= 1;
-            } else if (benchRowGap > sy(2)) {
-                benchRowGap -= 1;
-            } else if (starterToBenchGap > sy(10)) {
-                starterToBenchGap -= 1;
-            } else if (benchLabelToListGap > sy(6)) {
-                benchLabelToListGap -= 1;
-            } else if (starterRowHeight > starterFontSize + sy(6)) {
-                starterRowHeight -= 1;
-            } else if (benchRowHeight > benchFontSize + sy(6)) {
-                benchRowHeight -= 1;
-            } else if (benchFontSize > minBenchFontSize) {
-                benchFontSize -= 1;
-                benchLabelFontSize = Math.max(sf(15), benchLabelFontSize - 1);
-                benchRowHeight = Math.max(benchFontSize + sy(6), benchRowHeight - 1);
-            } else {
-                starterFontSize -= 1;
-                starterRowHeight = Math.max(starterFontSize + sy(6), starterRowHeight - 1);
-            }
-
-            requiredHeight = getRequiredHeight();
-        }
-
-        return {
-            starterFontSize,
-            benchFontSize,
-            // El dorsal nunca puede quedar mas grande que el nombre que acompana.
-            starterNumberFontSize: Math.min(starterFontSize, Math.max(minNumberFontSize, Math.round(starterFontSize * 0.9))),
-            benchNumberFontSize: Math.min(benchFontSize, Math.max(sf(16), Math.round(benchFontSize * 0.9))),
-            starterRowHeight,
-            benchRowHeight,
-            starterRowGap,
-            benchRowGap,
-            starterToBenchGap,
-            benchLabelToListGap,
-            benchLabelFontSize,
-            listStartY: listTop,
-            listBottomY: contentBottomLimit,
-        };
-    };
-
-    // Las dos columnas comparten metricas y se ajustan a la mas larga. Si cada
-    // una se midiera sola, un plantel de 35 al lado de uno de 23 dejaria dos
-    // cuerpos de letra distintos enfrentados.
-    const columnMetrics = fitColumnMetrics(maxStarterRows, maxBenchRows);
-
-    const preparedColumns = selectedTeams.map((team, index) => {
-        const columnX = isSingleTeam ? columnStartX : columnStartX + index * (columnWidth + columnGap);
-        return {
-            ...team,
-            nameLayout: teamNameLayouts[index],
-            columnX,
-            bannerCenterX: columnX + columnWidth / 2,
-            metrics: columnMetrics,
-        };
-    });
-
-    const leftGlow = selectedTeams[0]?.accentTone || highlightColor;
-    const rightGlow = selectedTeams[1]?.accentTone || mixHexColors(highlightColor, '#38bdf8', 0.24);
-    const backgroundGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    backgroundGradient.addColorStop(0, surfaceTop);
-    backgroundGradient.addColorStop(1, surfaceBottom);
-    ctx.fillStyle = backgroundGradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const headerWash = ctx.createLinearGradient(0, 0, canvas.width, headerHeight);
-    headerWash.addColorStop(0, hexToRGBA(leftGlow, isDark ? 0.2 : 0.1));
-    headerWash.addColorStop(0.5, hexToRGBA(highlightColor, isDark ? 0.08 : 0.05));
-    headerWash.addColorStop(1, hexToRGBA(rightGlow, isDark ? 0.2 : 0.1));
-    ctx.fillStyle = headerWash;
-    ctx.fillRect(0, 0, canvas.width, headerHeight);
-
-    ctx.save();
-    const ambientLeft = ctx.createRadialGradient(canvas.width * 0.18, headerHeight * 0.18, 0, canvas.width * 0.18, headerHeight * 0.18, canvas.width * 0.38);
-    ambientLeft.addColorStop(0, hexToRGBA(leftGlow, isDark ? 0.24 : 0.12));
-    ambientLeft.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = ambientLeft;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const ambientRight = ctx.createRadialGradient(canvas.width * 0.82, headerHeight * 0.18, 0, canvas.width * 0.82, headerHeight * 0.18, canvas.width * 0.38);
-    ambientRight.addColorStop(0, hexToRGBA(rightGlow, isDark ? 0.24 : 0.12));
-    ambientRight.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = ambientRight;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.restore();
-
-    ctx.save();
-    ctx.globalAlpha = isDark ? 0.12 : 0.08;
-    ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(15,23,42,0.12)';
-    ctx.lineWidth = 1;
-    for (let y = 0; y < canvas.height; y += sy(24)) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-    }
-    ctx.restore();
-
-    const fitHeaderSingleLineSize = (
-        text: string,
-        weight: string,
-        family: string,
-        preferredSize: number,
-        minSize: number,
-        maxSize: number,
-        maxWidth: number,
-    ) => {
-        let resolvedSize = preferredSize;
-        ctx.font = `${weight} ${resolvedSize}px ${family}`;
-        while (resolvedSize > minSize && ctx.measureText(text).width > maxWidth) {
-            resolvedSize -= 1;
-            ctx.font = `${weight} ${resolvedSize}px ${family}`;
-        }
-        while (resolvedSize < maxSize) {
-            ctx.font = `${weight} ${resolvedSize + 1}px ${family}`;
-            if (ctx.measureText(text).width > maxWidth) break;
-            resolvedSize += 1;
-        }
-        return resolvedSize;
-    };
-
-    const headerPaddingX = sx(32);
-    const headerTopPadding = sy(30);
-    const headerBottomPadding = sy(26);
-    const headerInnerHeight = headerHeight - headerTopPadding - headerBottomPadding;
-    const headerLeftX = headerPaddingX;
-    const headerLeftRightLimit = canvas.width / 2;
-    const headerRightLineGap = sy(8);
-    const roundLineY = headerTopPadding + sy(34);
-    const dateTimeLine = [data.date?.trim(), data.time?.trim()].filter(Boolean).join(' / ').toUpperCase();
-    const metaLabelText = (!roundText ? metaLabel.toUpperCase() : metaLabel).toUpperCase();
-    const headerMetaLines = [
-        { text: roundText, font: `800 ${sf(28)}px ${FONT_BODY}` },
-        { text: metaLabelText, font: `700 ${sf(20)}px ${FONT_MONO}` },
-        { text: dateTimeLine, font: `700 ${sf(20)}px ${FONT_MONO}` },
-        { text: data.venue?.trim().toUpperCase() || '', font: `700 ${sf(20)}px ${FONT_MONO}` },
-    ].filter((entry) => entry.text);
-    const headerRightMaxWidth = headerMetaLines.reduce((maxWidth, line) => {
-        ctx.font = line.font;
-        return Math.max(maxWidth, ctx.measureText(line.text).width);
-    }, 0);
-    const headerRightLimitLeft = canvas.width - headerPaddingX - headerRightMaxWidth;
-    const headerTextGap = sx(14);
-    const headerLeftUsableRight = Math.min(headerLeftRightLimit, headerRightLimitLeft - sx(24));
-    let headerLogoSize = sx(52);
-    let headerTextX = headerLeftX + headerLogoSize + headerTextGap;
-    let headerTitleWidth = Math.max(sx(180), headerLeftUsableRight - headerTextX);
-    let tournamentFontSize = fitHeaderSingleLineSize(
-        (data.tournament || 'TORNEO').toUpperCase(),
-        '800',
-        FONT_MONO,
-        sf(22),
-        sf(14),
-        sf(30),
-        headerTitleWidth,
-    );
-    let titleFontSize = fitHeaderSingleLineSize(
-        titleText,
-        '900',
-        FONT_EDITORIAL_SCORE,
-        sf(52),
-        sf(32),
-        sf(74),
-        headerTitleWidth,
-    );
-    headerLogoSize = Math.min(sy(64), Math.max(sx(44), Math.round(titleFontSize * 1.4)));
-    headerTextX = headerLeftX + headerLogoSize + headerTextGap;
-    headerTitleWidth = Math.max(sx(160), headerLeftUsableRight - headerTextX);
-    tournamentFontSize = fitHeaderSingleLineSize(
-        (data.tournament || 'TORNEO').toUpperCase(),
-        '800',
-        FONT_MONO,
-        tournamentFontSize,
-        sf(14),
-        sf(30),
-        headerTitleWidth,
-    );
-    titleFontSize = fitHeaderSingleLineSize(
-        titleText,
-        '900',
-        FONT_EDITORIAL_SCORE,
-        titleFontSize,
-        sf(32),
-        sf(74),
-        headerTitleWidth,
-    );
-    const tournamentLabelY = headerTopPadding + tournamentFontSize;
-    const titleBaselineY = tournamentLabelY + sy(10) + titleFontSize;
-    const headerBlockHeight = titleBaselineY - tournamentLabelY + titleFontSize;
-    const logoCenterY = headerTopPadding + Math.max(headerLogoSize / 2, Math.min(headerInnerHeight - headerLogoSize / 2, headerBlockHeight / 2 + sy(14)));
-    const infoLineWidth = Math.max(sx(180), canvas.width - headerPaddingX - Math.max(headerLeftUsableRight + sx(24), headerRightLimitLeft));
-
-    if (tournamentLogo) {
-        drawOverflowCrest(ctx, {
-            x: headerLeftX + headerLogoSize / 2,
-            y: logoCenterY,
-            width: headerLogoSize,
-            height: headerLogoSize,
-            img: tournamentLogo,
-            label: data.tournament,
-            rawLogo: data.tournamentLogo,
-            isDark,
-            showFrame: false,
+    if (isSingleTeam) {
+        // -------------------------------------------------------------------
+        // Un equipo: la lista centrada en serif de Saracens. Negro con un XV
+        // gigante de marca de agua, los dos escudos arriba, el renglon de
+        // fecha, hora y sede, los quince en versalitas del acento con el dorsal
+        // chico a la izquierda, y los suplentes en un parrafo separado por
+        // puntos al pie.
+        // -------------------------------------------------------------------
+        const colors = resolveLineupColors(colorOverrides, {
+            field: isLightBg ? '#14100e' : mixHexColors(baseHex, '#14100e', 0.7),
+            glow: paletteAccent,
+            names: paletteAccent,
+            ink: '#ffffff',
+            lines: paletteAccent,
         });
-    }
+        const base = colors.field;
+        const ink = colors.ink;
+        const team = teams[0];
 
-    ctx.save();
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = secondaryText;
-    ctx.font = `800 ${tournamentFontSize}px ${FONT_MONO}`;
-    ctx.fillText(truncateTextToWidth(ctx, (data.tournament || 'TORNEO').toUpperCase(), headerTitleWidth), headerTextX, tournamentLabelY);
-    ctx.fillStyle = primaryText;
-    ctx.font = `900 ${titleFontSize}px ${FONT_EDITORIAL_SCORE}`;
-    ctx.fillText(truncateTextToWidth(ctx, titleText, headerTitleWidth), headerTextX, titleBaselineY);
-    ctx.restore();
+        const field = ctx.createLinearGradient(0, 0, 0, H);
+        field.addColorStop(0, mixHexColors(base, '#000000', 0.1));
+        field.addColorStop(0.5, base);
+        field.addColorStop(1, mixHexColors(base, '#000000', 0.25));
+        ctx.fillStyle = field;
+        ctx.fillRect(0, 0, W, H);
 
-    ctx.save();
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'alphabetic';
-    if (roundText) {
-        ctx.fillStyle = hexToRGBA(highlightColor, 0.96);
-        ctx.font = `800 ${sf(28)}px ${FONT_BODY}`;
-        ctx.fillText(truncateTextToWidth(ctx, roundText, infoLineWidth), canvas.width - headerPaddingX, roundLineY);
-    }
-    ctx.fillStyle = tertiaryText;
-    ctx.font = `700 ${sf(20)}px ${FONT_MONO}`;
-    ctx.fillText(truncateTextToWidth(ctx, metaLabelText, infoLineWidth), canvas.width - headerPaddingX, roundLineY + sf(28) + headerRightLineGap);
-    if (dateTimeLine) {
-        ctx.fillText(truncateTextToWidth(ctx, dateTimeLine, infoLineWidth), canvas.width - headerPaddingX, roundLineY + sf(56) + headerRightLineGap * 2);
-    }
-    if (data.venue?.trim()) {
-        ctx.fillText(
-            truncateTextToWidth(ctx, data.venue.trim().toUpperCase(), infoLineWidth),
-            canvas.width - headerPaddingX,
-            roundLineY + sf(84) + headerRightLineGap * 3,
-        );
-    }
-    ctx.restore();
-
-    ctx.save();
-    const headerDivider = ctx.createLinearGradient(canvas.width * 0.18, headerHeight - sy(20), canvas.width * 0.82, headerHeight - sy(20));
-    headerDivider.addColorStop(0, 'rgba(255,255,255,0)');
-    headerDivider.addColorStop(0.18, hexToRGBA(leftGlow, 0.64));
-    headerDivider.addColorStop(0.5, hexToRGBA(highlightColor, 0.92));
-    headerDivider.addColorStop(0.82, hexToRGBA(rightGlow, 0.64));
-    headerDivider.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = headerDivider;
-    ctx.fillRect(canvas.width * 0.16, headerHeight - sy(12), canvas.width * 0.68, sy(4));
-    ctx.restore();
-
-    ctx.save();
-    ctx.fillStyle = panelFill;
-    ctx.beginPath();
-    ctx.roundRect(contentPanelX, contentPanelY, contentPanelWidth, contentPanelHeight, sx(28));
-    ctx.fill();
-    ctx.restore();
-
-    if (totalPlayers === 0) {
+        // Marca de agua: una X arriba a la izquierda y una V abajo a la derecha,
+        // en el color de la Luz y casi transparentes.
         ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = secondaryText;
-        ctx.font = `700 ${sf(24)}px ${FONT_BODY}`;
-        ctx.fillText('No hay alineaciones confirmadas para exportar.', canvas.width / 2, contentPanelY + contentPanelHeight / 2);
+        ctx.globalAlpha = 0.09;
+        ctx.fillStyle = colors.glow;
+        ctx.textBaseline = 'alphabetic';
+        ctx.textAlign = 'left';
+        ctx.font = `900 ${u(900)}px ${FONT_LINEUP_SERIF}`;
+        ctx.fillText('X', -u(120), u(640) + Math.round(extra * 0.1));
+        ctx.fillText('V', u(700), H - u(20));
         ctx.restore();
-        drawBrandFooter(ctx, canvas, brandLogo, isDark);
+
+        // Grano fino, como la textura de la referencia.
+        ctx.save();
+        ctx.globalAlpha = 0.05;
+        ctx.fillStyle = ink;
+        const grainStep = u(6);
+        for (let y = 0; y < H; y += grainStep) {
+            const rowNoise = g22pNoise(y * 17.23);
+            for (let x = 0; x < W; x += grainStep) {
+                if (g22pNoise(y * 1080 + x * 1.37 + rowNoise) > 0.7) ctx.fillRect(x, y, 1, 1);
+            }
+        }
+        ctx.restore();
+
+        // Los dos escudos, el local primero.
+        const crestY = u(112) + Math.round(extra * 0.05);
+        const crestSize = u(112);
+        const crestGap = u(28);
+        const crests = [homeCrest, awayCrest].filter(Boolean) as HTMLImageElement[];
+        const crestsWidth = crests.length * crestSize + Math.max(0, crests.length - 1) * crestGap;
+        let crestCursor = W / 2 - crestsWidth / 2 + crestSize / 2;
+        [{ img: homeCrest, name: data.homeTeam.name, logo: data.homeTeam.logo }, { img: awayCrest, name: data.awayTeam.name, logo: data.awayTeam.logo }].forEach((entry) => {
+            if (!entry.img) return;
+            drawOverflowCrest(ctx, {
+                x: crestCursor,
+                y: crestY,
+                width: crestSize,
+                height: crestSize,
+                img: entry.img,
+                label: entry.name,
+                rawLogo: entry.logo,
+                isDark: true,
+                showFrame: false,
+            });
+            crestCursor += crestSize + crestGap;
+        });
+
+        // "VIE 28 AGO  |  19:30 HS  |  LA SEDE"
+        const metaParts = [dayLabel, timeLabel ? `${timeLabel} HS` : '', venueLabel.toUpperCase()].filter(Boolean);
+        const metaY = u(222) + Math.round(extra * 0.08);
+        if (metaParts.length > 0) {
+            ctx.save();
+            ctx.textBaseline = 'alphabetic';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = ink;
+            setCanvasTracking(ctx, u(1));
+            const metaText = metaParts.join('   |   ');
+            setFittedFont(ctx, metaText, W - u(160), '500', u(26), FONT_OUTFIT_BLACK, u(16));
+            ctx.fillText(metaText, W / 2, metaY);
+            setCanvasTracking(ctx, 0);
+            ctx.restore();
+        }
+
+        // Pie: la marca del medio, la firma de G22 y el logo del torneo.
+        const footerBottom = H - u(48);
+        drawLineupBrandMark(ctx, sportMark, u(60), footerBottom, u(150), 'left');
+        drawLineupBrandMark(ctx, wordmark, W / 2 + u(95), footerBottom - u(2), u(190));
+        if (tournamentLogo) {
+            drawOverflowCrest(ctx, {
+                x: W - u(100),
+                y: footerBottom - u(36),
+                width: u(76),
+                height: u(76),
+                img: tournamentLogo,
+                label: data.tournament,
+                rawLogo: getTournamentLogoImageSource(data),
+                isDark: true,
+                showFrame: false,
+            });
+        }
+        const footerTop = footerBottom - u(80);
+
+        // El parrafo de suplentes se mide primero: la lista se queda con el
+        // alto que sobra.
+        const bench = team.bench;
+        const benchFontSize = u(26);
+        ctx.save();
+        ctx.font = `400 ${benchFontSize}px ${FONT_OUTFIT_BLACK}`;
+        const benchLines = bench.length > 0
+            ? wrapLineupNames(ctx, bench.map((player) => player.name), '  •  ', W - u(120))
+            : [];
+        ctx.restore();
+        const benchLinePitch = Math.round(benchFontSize * 1.05);
+        const benchBlock = benchLines.length > 0 ? benchLines.length * benchLinePitch + u(46) : 0;
+
+        const listTop = metaY + u(36);
+        const listBottom = footerTop - benchBlock - u(10);
+        const starters = team.starters;
+        const rows = Math.max(starters.length, 1);
+        // En story sobra alto: la lista se abre hasta un paso mas generoso.
+        const pitch = Math.max(u(30), Math.min(u(53) + Math.round(extra * 0.05), Math.floor((listBottom - listTop) / rows)));
+        const baseNameSize = Math.round(pitch * 0.96);
+        const numberSize = Math.round(pitch * 0.48);
+        const maxNameWidth = W - u(220);
+        // Un solo cuerpo para los quince: el mas largo decide. Los NOMBRES van en
+        // Articulat CF Heavy (pedido del usuario); el dorsal sigue en la serif.
+        const nameSize = getSharedFittedFontSize(
+            ctx,
+            starters.map((player) => ({ text: `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase(), maxWidth: maxNameWidth })),
+            '900',
+            baseNameSize,
+            FONT_ARTICULAT,
+            Math.round(baseNameSize * 0.55),
+        );
+
+        ctx.save();
+        ctx.textBaseline = 'alphabetic';
+        starters.forEach((player, index) => {
+            const baseline = listTop + baseNameSize + pitch * index;
+            const label = truncateTextToWidth(ctx, `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase(), maxNameWidth);
+            ctx.font = `900 ${nameSize}px ${FONT_ARTICULAT}`;
+            const nameWidth = ctx.measureText(label).width;
+            const nameFont = ctx.font;
+            const numberText = formatLineupShirtNumber(player, index + 1);
+            ctx.font = `400 ${numberSize}px ${FONT_LINEUP_SERIF}`;
+            const numberWidth = ctx.measureText(numberText).width;
+            const gap = u(14);
+            const startX = W / 2 - (numberWidth + gap + nameWidth) / 2;
+            ctx.textAlign = 'left';
+            ctx.fillStyle = ink;
+            ctx.fillText(numberText, startX, baseline - u(2));
+            ctx.font = nameFont;
+            ctx.fillStyle = colors.names;
+            ctx.fillText(label, startX + numberWidth + gap, baseline);
+        });
+        ctx.restore();
+
+        if (benchLines.length > 0) {
+            const benchTop = listTop + baseNameSize + pitch * (starters.length - 1) + u(46);
+            ctx.save();
+            ctx.textBaseline = 'alphabetic';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = hexToRGBA(ink, 0.92);
+            ctx.font = `400 ${benchFontSize}px ${FONT_OUTFIT_BLACK}`;
+            benchLines.forEach((line, index) => {
+                ctx.fillText(line, W / 2, benchTop + benchFontSize + benchLinePitch * index);
+            });
+            ctx.restore();
+        }
         return;
     }
 
-    preparedColumns.forEach((team) => {
-        const centerX = team.bannerCenterX;
-        const localTeamNameLineHeight = team.nameLayout.size * 0.94;
-        const logoCenterY = teamBlockTop + teamLogoSize / 2;
-        const logoBottomY = logoCenterY + teamLogoSize / 2;
-        const teamNameTop = logoBottomY + teamLogoSpacingBottom + team.nameLayout.size * 0.82;
-        const extraInfoY = teamNameTop + team.nameLayout.lines.length * localTeamNameLineHeight + sy(16);
-        const {
-            starterFontSize,
-            benchFontSize,
-            starterNumberFontSize,
-            benchNumberFontSize,
-            starterRowHeight,
-            benchRowHeight,
-            starterRowGap,
-            benchRowGap,
-            starterToBenchGap,
-            benchLabelToListGap,
-            benchLabelFontSize,
-            listStartY,
-        } = team.metrics;
+    // -----------------------------------------------------------------------
+    // Dos equipos: la lista de la NRL. Cabecera negra con el torneo a la
+    // izquierda y la fecha a la derecha, una banda partida con el color de cada
+    // escudo, y dos columnas numeradas con SUPLENTES subrayado en el color del
+    // equipo. Los que sobran del banco van en un renglon chico al pie.
+    // -----------------------------------------------------------------------
+    const colors = resolveLineupColors(colorOverrides, {
+        field: isLightBg ? '#070707' : mixHexColors(baseHex, '#000000', 0.7),
+        glow: paletteAccent,
+        names: paletteAccent,
+        ink: '#ffffff',
+        lines: '',
+    });
+    const base = colors.field;
+    const ink = colors.ink;
+    ctx.fillStyle = base;
+    ctx.fillRect(0, 0, W, H);
 
+    const headerHeight = u(360) + Math.round(extra * 0.08);
+    const headerGlow = ctx.createRadialGradient(W * 0.98, -u(40), 0, W * 0.98, -u(40), u(760));
+    headerGlow.addColorStop(0, hexToRGBA(colors.glow, 0.5));
+    headerGlow.addColorStop(0.45, hexToRGBA(colors.glow, 0.12));
+    headerGlow.addColorStop(1, hexToRGBA(colors.glow, 0));
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, W, headerHeight);
+    ctx.clip();
+    ctx.fillStyle = headerGlow;
+    ctx.fillRect(0, 0, W, headerHeight);
+    ctx.restore();
+
+    // Izquierda: logo del torneo, filete vertical y el nombre del torneo en
+    // hasta tres renglones.
+    const headerMid = headerHeight / 2 + u(10);
+    let titleLeft = u(70);
+    if (tournamentLogo) {
         drawOverflowCrest(ctx, {
-            x: centerX,
-            y: logoCenterY,
-            width: teamLogoSize,
-            height: teamLogoSize,
-            img: team.logoImage,
-            label: team.name,
-            rawLogo: team.logo,
-            isDark,
+            x: u(70) + u(40),
+            y: headerMid - u(6),
+            width: u(84),
+            height: u(84),
+            img: tournamentLogo,
+            label: data.tournament,
+            rawLogo: getTournamentLogoImageSource(data),
+            isDark: true,
             showFrame: false,
         });
+        titleLeft = u(70) + u(84) + u(24);
+        ctx.save();
+        ctx.strokeStyle = hexToRGBA(ink, 0.45);
+        ctx.lineWidth = Math.max(1, u(2));
+        ctx.beginPath();
+        ctx.moveTo(u(70) + u(84) + u(6), headerMid - u(56));
+        ctx.lineTo(u(70) + u(84) + u(6), headerMid + u(44));
+        ctx.stroke();
+        ctx.restore();
+        titleLeft += u(18);
+    }
+    const titleText = stripTournamentCountryPrefix(data.tournament || data.title || 'Formaciones').toUpperCase();
+    ctx.save();
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = ink;
+    const titleSize = u(50);
+    ctx.font = `900 ${titleSize}px ${FONT_OUTFIT_BLACK}`;
+    setCanvasTracking(ctx, -u(1));
+    const titleMax = W - u(400) - titleLeft;
+    let titleLines = wrapLineupNames(ctx, titleText.split(' '), ' ', titleMax).slice(0, 3);
+    if (titleLines.length === 0) titleLines = [titleText];
+    const titlePitch = Math.round(titleSize * 0.92);
+    const titleTop = headerMid - (titleLines.length * titlePitch) / 2 + titleSize * 0.82 - u(6);
+    titleLines.forEach((line, index) => {
+        ctx.fillText(truncateTextToWidth(ctx, line, titleMax), titleLeft, titleTop + titlePitch * index);
+    });
+    setCanvasTracking(ctx, 0);
+    ctx.restore();
 
+    // Derecha: la firma de G22, la fecha en el acento, la hora y la sede.
+    drawLineupBrandMark(ctx, wordmark, W - u(64), headerMid - u(68), u(150));
+    ctx.save();
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'right';
+    const rightMax = u(420);
+    const subtitleLabel = String(data.subtitle || '').trim().toUpperCase();
+    let rightCursor = headerMid - u(6);
+    if (subtitleLabel || dayLabel) {
+        ctx.fillStyle = colors.names;
+        const line = subtitleLabel || dayLabel;
+        setFittedFont(ctx, line, rightMax, '800', u(30), FONT_OUTFIT_BLACK, u(18));
+        ctx.fillText(line, W - u(64), rightCursor);
+        rightCursor += u(34);
+    }
+    const whenLabel = [subtitleLabel ? dayLabel : '', timeLabel ? `${timeLabel} HS` : ''].filter(Boolean).join(' · ');
+    if (whenLabel) {
+        ctx.fillStyle = ink;
+        setFittedFont(ctx, whenLabel, rightMax, '800', u(28), FONT_OUTFIT_BLACK, u(18));
+        ctx.fillText(whenLabel, W - u(64), rightCursor);
+        rightCursor += u(32);
+    }
+    if (venueLabel) {
+        ctx.fillStyle = hexToRGBA(ink, 0.9);
+        setCanvasTracking(ctx, u(2));
+        setFittedFont(ctx, venueLabel.toUpperCase(), rightMax, '400', u(22), FONT_OUTFIT_BLACK, u(14));
+        ctx.fillText(venueLabel.toUpperCase(), W - u(64), rightCursor);
+        setCanvasTracking(ctx, 0);
+    }
+    ctx.restore();
+
+    // La banda: cada mitad del color dominante de su escudo, partida en flecha.
+    const bandTop = headerHeight;
+    const bandHeight = u(150);
+    const bandBottom = bandTop + bandHeight;
+    const fallbackAway = mixHexColors(paletteAccent, '#1f2937', 0.55);
+    const homeColor = sampleCrestColor(homeCrest, paletteAccent);
+    let awayColor = sampleCrestColor(awayCrest, fallbackAway);
+    if (Math.abs(hexLuminance(homeColor) - hexLuminance(awayColor)) < 0.08) {
+        awayColor = mixHexColors(awayColor, hexLuminance(awayColor) > 0.5 ? '#000000' : '#ffffff', 0.28);
+    }
+    const teamColors = { home: homeColor, away: awayColor } as const;
+    ctx.save();
+    ctx.fillStyle = teamColors[teams[1].side];
+    ctx.fillRect(0, bandTop, W, bandHeight);
+    ctx.fillStyle = teamColors[teams[0].side];
+    ctx.beginPath();
+    ctx.moveTo(0, bandTop);
+    ctx.lineTo(W / 2, bandTop);
+    ctx.lineTo(W / 2 + u(40), bandTop + bandHeight / 2);
+    ctx.lineTo(W / 2, bandBottom);
+    ctx.lineTo(0, bandBottom);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.rect(0, bandTop, W, bandHeight);
+    ctx.clip();
+    teams.forEach((team, index) => {
+        const crest = crestBySide[team.side];
+        if (!crest) return;
+        drawOverflowCrest(ctx, {
+            x: index === 0 ? W * 0.27 : W * 0.75,
+            y: bandTop + bandHeight / 2 + u(10),
+            width: u(210),
+            height: u(210),
+            img: crest,
+            label: team.name,
+            rawLogo: team.logo,
+            isDark: true,
+            showFrame: false,
+        });
+    });
+    ctx.restore();
+
+    // Las dos columnas.
+    const listTop = bandBottom + u(56) + Math.round(extra * 0.04);
+    const listBottom = H - u(70);
+    const columnStarts = [u(100), u(620)];
+    const columnRight = [u(520), W - u(60)];
+    const maxRows = Math.max(...teams.map((team) => team.starters.length + Math.min(team.bench.length, 8)), 1);
+    const anyBench = teams.some((team) => team.bench.length > 0);
+    const anyExtras = teams.some((team) => team.bench.length > 8);
+    const extrasBlock = anyExtras ? u(30) + u(24) * 2 : 0;
+    const labelBlock = anyBench ? u(78) : 0;
+    // En story sobra alto: las columnas se abren hasta un paso mas generoso.
+    const pitch = Math.max(u(20), Math.min(u(30) + Math.round(extra * 0.035), Math.floor((listBottom - listTop - labelBlock - extrasBlock) / maxRows)));
+    const baseNameSize = Math.round(pitch * 0.96);
+    // Un solo cuerpo para las dos columnas: si cada nombre se achicara por su
+    // cuenta, un apellido compuesto quedaria diminuto al lado de uno corto.
+    // Si con el nombre entero el cuerpo cae por debajo del 78% del que le toca
+    // a la fila, toda la lista pasa a iniciales de pila: mejor "J. I. Greising
+    // Revol" legible que un nombre entero en cuerpo de nota al pie.
+    const measureNames = (useInitials: boolean) => getSharedFittedFontSize(
+        ctx,
+        teams.flatMap((team, teamIndex) => [...team.starters, ...team.bench.slice(0, 8)].map((player) => ({
+            text: `${useInitials ? abbreviateLineupGivenNames(player.name) : player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase(),
+            maxWidth: columnRight[teamIndex] - (columnStarts[teamIndex] + u(25)),
+        }))),
+        '800',
+        baseNameSize,
+        FONT_OUTFIT_BLACK,
+        Math.round(baseNameSize * 0.55),
+    );
+    let nameSize = measureNames(false);
+    const useInitials = nameSize < baseNameSize * 0.78;
+    if (useInitials) nameSize = measureNames(true);
+
+    teams.forEach((team, teamIndex) => {
+        const numberRight = columnStarts[teamIndex];
+        const nameX = numberRight + u(25);
+        const nameMax = columnRight[teamIndex] - nameX;
+        const teamColor = normalizeHexColor(colorOverrides.names) || liftColorForDark(teamColors[team.side]);
+        const lineColor = colors.lines || teamColor;
+        const bench = team.bench.slice(0, 8);
+        const extras = team.bench.slice(8);
+        let cursor = listTop;
+        ctx.save();
+        ctx.textBaseline = 'alphabetic';
+        const drawRow = (player: LineupExportPlayerData, fallbackNumber: number, baseline: number) => {
+            ctx.fillStyle = teamColor;
+            ctx.textAlign = 'right';
+            ctx.font = `800 ${nameSize}px ${FONT_OUTFIT_BLACK}`;
+            ctx.fillText(formatLineupShirtNumber(player, fallbackNumber), numberRight, baseline);
+            ctx.fillStyle = ink;
+            ctx.textAlign = 'left';
+            const label = `${useInitials ? abbreviateLineupGivenNames(player.name) : player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
+            ctx.font = `800 ${nameSize}px ${FONT_OUTFIT_BLACK}`;
+            ctx.fillText(truncateTextToWidth(ctx, label, nameMax), nameX, baseline);
+        };
+        team.starters.forEach((player, index) => {
+            drawRow(player, index + 1, cursor + nameSize + pitch * index);
+        });
+        cursor += pitch * team.starters.length;
+
+        if (bench.length > 0) {
+            cursor += u(46);
+            ctx.fillStyle = teamColor;
+            ctx.textAlign = 'left';
+            ctx.font = `700 ${u(20)}px ${FONT_OUTFIT_BLACK}`;
+            setCanvasTracking(ctx, u(3));
+            ctx.fillText('SUPLENTES', nameX, cursor);
+            setCanvasTracking(ctx, 0);
+            ctx.strokeStyle = lineColor;
+            ctx.lineWidth = Math.max(1, u(2));
+            ctx.beginPath();
+            ctx.moveTo(nameX, cursor + u(12) + 0.5);
+            ctx.lineTo(Math.min(nameX + u(356), columnRight[teamIndex]), cursor + u(12) + 0.5);
+            ctx.stroke();
+            cursor += u(16);
+            bench.forEach((player, index) => {
+                drawRow(player, team.starters.length + index + 1, cursor + nameSize + pitch * index);
+            });
+            cursor += pitch * bench.length;
+        }
+
+        if (extras.length > 0) {
+            cursor += u(30);
+            ctx.fillStyle = hexToRGBA(ink, 0.88);
+            ctx.textAlign = 'left';
+            ctx.font = `500 ${u(20)}px ${FONT_OUTFIT_BLACK}`;
+            setCanvasTracking(ctx, u(1));
+            const lines = wrapLineupNames(ctx, extras.map((player) => player.name.toUpperCase()), ', ', nameMax);
+            lines.slice(0, 3).forEach((line, index) => {
+                ctx.fillText(truncateTextToWidth(ctx, line, nameMax), nameX, cursor + u(20) + u(24) * index);
+            });
+            setCanvasTracking(ctx, 0);
+        }
+        ctx.restore();
+    });
+}
+
+// ---------------------------------------------------------------------------
+// Formacion editorial: la foto de Los Pumas.
+// ---------------------------------------------------------------------------
+async function drawG22BaseLineupsEditorial(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: LineupsData,
+    accentColor: string,
+    bgColor: string,
+    lineupExportMode: LineupExportMode,
+    colorOverrides: LineupColorOverrides,
+) {
+    const W = canvas.width;
+    const H = canvas.height;
+    const u = (value: number) => Math.round((value * W) / 1080);
+    const extra = Math.max(0, H - Math.round((W * 1350) / 1080));
+    const paletteAccent = normalizeHexColor(accentColor) || '#7dd3fc';
+    const baseHex = normalizeHexColor(bgColor) || '#0f172a';
+    const isLightBg = getContrastColor(baseHex) !== '#ffffff';
+    // El campo es un azul profundo tenido por el acento; un Fondo claro se hunde.
+    const colors = resolveLineupColors(colorOverrides, {
+        field: isLightBg ? mixHexColors(paletteAccent, '#0b1220', 0.72) : mixHexColors(baseHex, paletteAccent, 0.16),
+        glow: paletteAccent,
+        names: paletteAccent,
+        ink: '#ffffff',
+        lines: paletteAccent,
+    });
+    const base = colors.field;
+    const ink = colors.ink;
+    const accent = colors.names;
+    const glow = colors.glow;
+    const lines = colors.lines;
+
+    const teams = getSelectedLineupTeams(data, lineupExportMode).map((team) => ({ ...team, ...splitLineupTeamPlayers(team) }));
+    const isSingleTeam = teams.length === 1;
+    const [photo, homeCrest, awayCrest, sportMark] = await Promise.all([
+        loadImage(data.backgroundImage || ''),
+        loadImage(data.homeTeam.logo || ''),
+        loadImage(data.awayTeam.logo || ''),
+        loadImage(resolvePlateBrandSource('auto', data.sport)),
+    ]);
+    const crestBySide = { home: homeCrest, away: awayCrest } as const;
+
+    const field = ctx.createLinearGradient(0, 0, 0, H);
+    field.addColorStop(0, mixHexColors(base, glow, 0.06));
+    field.addColorStop(1, mixHexColors(base, '#000000', 0.22));
+    ctx.fillStyle = field;
+    ctx.fillRect(0, 0, W, H);
+
+    // La foto ocupa la mitad izquierda y se funde con el campo por la derecha y
+    // por abajo. Sin foto, el escudo del equipo ocupa ese lugar.
+    const photoWidth = isSingleTeam ? u(560) : u(430);
+    const heroCrest = crestBySide[teams[0].side];
+    if (photo) {
+        drawLineupCoverPhoto(ctx, photo, 0, 0, photoWidth, H);
+        const fadeRight = ctx.createLinearGradient(photoWidth - u(190), 0, photoWidth, 0);
+        fadeRight.addColorStop(0, hexToRGBA(base, 0));
+        fadeRight.addColorStop(1, hexToRGBA(base, 1));
+        ctx.fillStyle = fadeRight;
+        ctx.fillRect(0, 0, photoWidth, H);
+        const fadeBottom = ctx.createLinearGradient(0, H * 0.78, 0, H);
+        fadeBottom.addColorStop(0, hexToRGBA(base, 0));
+        fadeBottom.addColorStop(1, hexToRGBA(base, 0.92));
+        ctx.fillStyle = fadeBottom;
+        ctx.fillRect(0, 0, photoWidth, H);
+        if (heroCrest) {
+            drawOverflowCrest(ctx, {
+                x: u(120),
+                y: u(120),
+                width: u(150),
+                height: u(150),
+                img: heroCrest,
+                label: teams[0].name,
+                rawLogo: teams[0].logo,
+                isDark: true,
+                showFrame: false,
+            });
+        }
+    } else {
+        const heroGlow = ctx.createRadialGradient(photoWidth / 2, H * 0.42, 0, photoWidth / 2, H * 0.42, photoWidth * 0.8);
+        heroGlow.addColorStop(0, hexToRGBA(glow, 0.3));
+        heroGlow.addColorStop(1, hexToRGBA(glow, 0));
+        ctx.fillStyle = heroGlow;
+        ctx.fillRect(0, 0, photoWidth, H);
+        if (heroCrest) {
+            drawOverflowCrest(ctx, {
+                x: photoWidth / 2,
+                y: H * 0.42,
+                width: photoWidth - u(120),
+                height: photoWidth - u(120),
+                img: heroCrest,
+                label: teams[0].name,
+                rawLogo: teams[0].logo,
+                isDark: true,
+                showFrame: false,
+            });
+        }
+    }
+
+    const columnLeft = photoWidth - u(40);
+    const contentRight = W - u(60);
+    const contentWidth = contentRight - columnLeft;
+
+    // Titular condensado en el acento, al ancho de la columna.
+    const titleBaseline = u(240) + Math.round(extra * 0.08);
+    ctx.save();
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = accent;
+    setFilledFont(ctx, 'XV INICIAL', contentWidth, '800', BASE_FONT_DHARMA, u(110), u(215));
+    ctx.fillText('XV INICIAL', columnLeft, titleBaseline);
+    ctx.restore();
+
+    // Tarjeta del acento al pie: escudos, sede y hora de salida.
+    const cardHeight = u(96);
+    const cardBottom = H - u(125);
+    const cardTop = cardBottom - cardHeight;
+    const cardWidth = contentWidth;
+    ctx.save();
+    ctx.fillStyle = lines;
+    ctx.beginPath();
+    ctx.roundRect(columnLeft, cardTop, cardWidth, cardHeight, u(12));
+    ctx.fill();
+    const cardInk = getContrastColor(lines) === '#ffffff' ? '#ffffff' : mixHexColors(base, '#000000', 0.2);
+    let cardCursor = columnLeft + u(18);
+    for (const crest of [homeCrest, awayCrest]) {
+        if (!crest) continue;
+        drawOverflowCrest(ctx, {
+            x: cardCursor + u(30),
+            y: cardTop + cardHeight / 2,
+            width: u(64),
+            height: u(64),
+            img: crest,
+            label: '',
+            isDark: false,
+            showFrame: false,
+        });
+        cardCursor += u(66);
+    }
+    const cardTextX = cardCursor + u(16);
+    const cardTextMax = columnLeft + cardWidth - u(16) - cardTextX;
+    ctx.fillStyle = cardInk;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    const venue = String(data.venue || data.tournament || '').trim();
+    const time = String(data.time || '').trim();
+    const kickoff = time ? `Kick Off ${/^\d{1,2}:\d{2}$/.test(time) ? `${time} hs` : time}` : getLineupFooterDateLabel(data);
+    if (venue && kickoff) {
+        setFittedFont(ctx, venue, cardTextMax, '800', u(24), FONT_OUTFIT_BLACK, u(16));
+        ctx.fillText(truncateTextToWidth(ctx, venue, cardTextMax), cardTextX, cardTop + u(42));
+        setFittedFont(ctx, kickoff, cardTextMax, '800', u(24), FONT_OUTFIT_BLACK, u(16));
+        ctx.fillText(truncateTextToWidth(ctx, kickoff, cardTextMax), cardTextX, cardTop + u(72));
+    } else {
+        const single = venue || kickoff;
+        setFittedFont(ctx, single, cardTextMax, '800', u(24), FONT_OUTFIT_BLACK, u(16));
+        ctx.fillText(truncateTextToWidth(ctx, single, cardTextMax), cardTextX, cardTop + cardHeight / 2 + u(9));
+    }
+    ctx.restore();
+
+    // Marca del medio abajo a la derecha, como el sello de la referencia.
+    drawLineupBrandMark(ctx, sportMark, contentRight, H - u(48), u(190));
+
+    const listTop = titleBaseline + u(20);
+    const listBottom = cardTop - u(40);
+
+    const drawColumn = (
+        team: (typeof teams)[number],
+        x: number,
+        width: number,
+        top: number,
+        bottom: number,
+        showHeader: boolean,
+    ) => {
+        let cursor = top;
+        ctx.save();
+        ctx.textBaseline = 'alphabetic';
+        if (showHeader) {
+            ctx.fillStyle = accent;
+            ctx.textAlign = 'left';
+            setFittedFont(ctx, team.name.toUpperCase(), width, '800', u(34), BASE_FONT_DHARMA, u(20));
+            ctx.fillText(team.name.toUpperCase(), x, cursor + u(30));
+            cursor += u(48);
+        }
+        const starters = team.starters;
+        const bench = team.bench;
+        const benchLines = bench.length > 0 ? Math.ceil(bench.length / 2) : 0;
+        const benchBlock = bench.length > 0 ? u(62) + u(32) * benchLines + u(10) : 0;
+        const available = bottom - cursor - benchBlock;
+        // En story sobra alto: la lista se abre hasta un paso mas generoso.
+        const pitch = Math.max(u(24), Math.min(u(41) + Math.round(extra * 0.03), Math.floor(available / Math.max(starters.length, 1))));
+        const baseNameSize = Math.round(pitch * 0.8);
+        const numberRight = x + u(30);
+        const nameX = numberRight + u(16);
+        // Un solo cuerpo para toda la lista: el mas largo decide.
+        const measureNames = (useInitials: boolean) => getSharedFittedFontSize(
+            ctx,
+            starters.map((player) => ({ text: `${useInitials ? abbreviateLineupGivenNames(player.name) : player.name}${player.isCaptain ? ' (C)' : ''}`, maxWidth: x + width - nameX })),
+            '900',
+            baseNameSize,
+            FONT_ARTICULAT,
+            Math.round(baseNameSize * 0.55),
+        );
+        let nameSize = measureNames(false);
+        const useInitials = nameSize < baseNameSize * 0.78;
+        if (useInitials) nameSize = measureNames(true);
+        starters.forEach((player, index) => {
+            const baseline = cursor + baseNameSize + pitch * index;
+            ctx.fillStyle = accent;
+            ctx.textAlign = 'right';
+            ctx.font = `900 ${nameSize}px ${FONT_ARTICULAT}`;
+            ctx.fillText(formatLineupShirtNumber(player, index + 1), numberRight, baseline);
+            ctx.fillStyle = ink;
+            ctx.textAlign = 'left';
+            const label = `${useInitials ? abbreviateLineupGivenNames(player.name) : player.name}${player.isCaptain ? ' (C)' : ''}`;
+            ctx.font = `900 ${nameSize}px ${FONT_ARTICULAT}`;
+            ctx.fillText(truncateTextToWidth(ctx, label, x + width - nameX), nameX, baseline);
+        });
+        cursor += pitch * starters.length;
+
+        if (bench.length > 0) {
+            cursor += u(50);
+            ctx.fillStyle = accent;
+            ctx.textAlign = 'left';
+            ctx.font = `800 ${u(40)}px ${BASE_FONT_DHARMA}`;
+            ctx.fillText('FINISHERS', x, cursor);
+            cursor += u(44);
+            // Parrafo corrido: "16. Nombre, 17. Nombre," con dos por linea, y
+            // punto final en el ultimo.
+            const paragraphSize = Math.min(u(26), Math.max(u(16), Math.round(nameSize * 0.72)));
+            ctx.font = `900 ${paragraphSize}px ${FONT_ARTICULAT}`;
+            ctx.fillStyle = ink;
+            const items = bench.map((player, index) => `${formatLineupShirtNumber(player, 16 + index)}. ${player.name}`);
+            const lines: string[] = [];
+            let line = '';
+            items.forEach((item, index) => {
+                const isLast = index === items.length - 1;
+                const piece = `${item}${isLast ? '.' : ','}`;
+                const candidate = line ? `${line} ${piece}` : piece;
+                if (line && ctx.measureText(candidate).width > width) {
+                    lines.push(line);
+                    line = piece;
+                } else {
+                    line = candidate;
+                }
+            });
+            if (line) lines.push(line);
+            const linePitch = Math.round(paragraphSize * 1.32);
+            lines.forEach((text, index) => {
+                ctx.fillText(truncateTextToWidth(ctx, text, width), x, cursor + paragraphSize + linePitch * index);
+            });
+        }
+        ctx.restore();
+    };
+
+    if (isSingleTeam) {
+        drawColumn(teams[0], columnLeft, contentWidth, listTop, listBottom, false);
+        return;
+    }
+    const gap = u(24);
+    const columnWidth = Math.floor((contentWidth - gap) / 2);
+    teams.forEach((team, index) => {
+        drawColumn(team, columnLeft + (columnWidth + gap) * index, columnWidth, listTop, listBottom, true);
+    });
+}
+
+// ---------------------------------------------------------------------------
+// Convocatoria: la lista a dos columnas de Argentina XV.
+// ---------------------------------------------------------------------------
+type SquadCallupEntry =
+    | { kind: 'caption'; label: string }
+    | { kind: 'player'; index: number; label: string };
+
+function buildSquadCallupEntries(page: SquadPageData): SquadCallupEntry[] {
+    const entries: SquadCallupEntry[] = [];
+    const showCaptions = page.groups.length > 1;
+    let counter = 0;
+    for (const group of page.groups) {
+        const players = (Array.isArray(group.players) ? group.players : [])
+            .filter((player) => player && String(player.name || '').trim())
+            .map((player) => ({ player, label: formatLineupSurnameFirst(player.name) }))
+            .sort((left, right) => left.label.localeCompare(right.label, 'es', { sensitivity: 'base' }));
+        if (players.length === 0) continue;
+        if (showCaptions) entries.push({ kind: 'caption', label: formatSquadGroupLabel(group) });
+        for (const { label } of players) {
+            counter += 1;
+            entries.push({ kind: 'player', index: counter, label });
+        }
+    }
+    return entries;
+}
+
+async function drawG22BaseSquad(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: SquadData,
+    page: SquadPageData,
+    _format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    _brandLogo: HTMLImageElement | null,
+    colorOverrides: LineupColorOverrides = {},
+) {
+    void _format;
+    void _brandLogo;
+    const W = canvas.width;
+    const H = canvas.height;
+    const u = (value: number) => Math.round((value * W) / 1080);
+    const extra = Math.max(0, H - Math.round((W * 1350) / 1080));
+    const paletteAccent = normalizeHexColor(accentColor) || '#38bdf8';
+    const baseHex = normalizeHexColor(bgColor) || '#0f172a';
+    const isLightBg = getContrastColor(baseHex) !== '#ffffff';
+    const colors = resolveLineupColors(colorOverrides, {
+        field: isLightBg ? mixHexColors(paletteAccent, '#0b1220', 0.72) : mixHexColors(baseHex, paletteAccent, 0.16),
+        glow: paletteAccent,
+        names: paletteAccent,
+        ink: '#ffffff',
+        lines: paletteAccent,
+    });
+    const base = colors.field;
+    const ink = colors.ink;
+    const accent = colors.names;
+    const glow = colors.glow;
+
+    const [teamLogo, sportMark, wordmark] = await Promise.all([
+        loadImage(data.teamLogo || data.tournamentLogo || ''),
+        loadImage(resolvePlateBrandSource('auto', data.sport)),
+        loadImage('/header-logo.png'),
+    ]);
+
+    const field = ctx.createLinearGradient(0, 0, 0, H);
+    field.addColorStop(0, mixHexColors(base, glow, 0.08));
+    field.addColorStop(1, mixHexColors(base, '#000000', 0.26));
+    ctx.fillStyle = field;
+    ctx.fillRect(0, 0, W, H);
+
+    // Escudo (o wordmark) arriba a la derecha, contenido en una caja apaisada.
+    if (teamLogo) {
+        drawOverflowCrest(ctx, {
+            x: W - u(60) - u(140),
+            y: u(130),
+            width: u(280),
+            height: u(140),
+            img: teamLogo,
+            label: data.teamName,
+            rawLogo: data.teamLogo || data.tournamentLogo,
+            isDark: true,
+            showFrame: false,
+        });
+    }
+
+    const left = u(58);
+    const titleBaseline = u(232) + Math.round(extra * 0.06);
+    ctx.save();
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = accent;
+    setFilledFont(ctx, 'CONVOCATORIA', u(690), '800', BASE_FONT_DHARMA, u(120), u(236));
+    ctx.fillText('CONVOCATORIA', left, titleBaseline);
+    const subtitleSource = data.tournament && data.tournament.trim() !== data.teamName.trim()
+        ? data.tournament
+        : (data.subtitle || data.title || 'Plantel');
+    const subtitle = String(subtitleSource).trim().toUpperCase();
+    setFittedFont(ctx, subtitle, u(700), '800', u(96), BASE_FONT_DHARMA, u(48));
+    ctx.fillText(subtitle, left, titleBaseline + u(104));
+    ctx.restore();
+
+    // Lista a dos columnas: la izquierda se llena hasta su capacidad y el resto
+    // pasa a la derecha, como en la referencia (18 y 10).
+    const entries = buildSquadCallupEntries(page);
+    const listTop = titleBaseline + u(168) + Math.round(extra * 0.06);
+    const listBottom = H - u(150);
+    const basePitch = u(43.5);
+    let pitch = basePitch;
+    let capacity = Math.max(1, Math.floor((listBottom - listTop) / pitch));
+    if (entries.length > capacity * 2) {
+        capacity = Math.ceil(entries.length / 2);
+        pitch = Math.floor((listBottom - listTop) / capacity);
+    } else if (extra > 0) {
+        // En story sobra alto: la lista se estira hasta un 40% mas de paso.
+        const rowsPerColumn = Math.min(capacity, Math.max(Math.ceil(entries.length / 2), 14));
+        pitch = Math.min(Math.round(basePitch * 1.4), Math.floor((listBottom - listTop) / rowsPerColumn));
+        capacity = Math.max(1, Math.floor((listBottom - listTop) / pitch));
+    }
+    const baseNameSize = Math.round(pitch * 0.76);
+    const columns = [entries.slice(0, capacity), entries.slice(capacity)];
+    const columnXs = [left + u(26), u(650)];
+    const columnRight = [u(620), W - u(60)];
+    // Un solo cuerpo para las dos columnas: el nombre mas largo decide.
+    const nameSize = getSharedFittedFontSize(
+        ctx,
+        columns.flatMap((column, columnIndex) => column
+            .filter((entry): entry is Extract<SquadCallupEntry, { kind: 'player' }> => entry.kind === 'player')
+            .map((entry) => ({ text: entry.label, maxWidth: columnRight[columnIndex] - (columnXs[columnIndex] + u(22)) }))),
+        '900',
+        baseNameSize,
+        FONT_ARTICULAT,
+        Math.round(baseNameSize * 0.55),
+    );
+
+    ctx.save();
+    ctx.textBaseline = 'alphabetic';
+    columns.forEach((column, columnIndex) => {
+        const numberRight = columnXs[columnIndex];
+        const nameX = numberRight + u(22);
+        const maxWidth = columnRight[columnIndex] - nameX;
+        column.forEach((entry, rowIndex) => {
+            const baseline = listTop + baseNameSize + pitch * rowIndex;
+            if (entry.kind === 'caption') {
+                ctx.fillStyle = accent;
+                ctx.textAlign = 'left';
+                ctx.font = `800 ${Math.round(nameSize * 0.58)}px ${FONT_OUTFIT_BLACK}`;
+                setCanvasTracking(ctx, u(2));
+                ctx.fillText(truncateTextToWidth(ctx, entry.label, maxWidth + u(22)), numberRight - u(20), baseline - u(2));
+                setCanvasTracking(ctx, 0);
+                return;
+            }
+            ctx.fillStyle = accent;
+            ctx.textAlign = 'right';
+            ctx.font = `900 ${nameSize}px ${FONT_ARTICULAT}`;
+            ctx.fillText(String(entry.index), numberRight, baseline);
+            ctx.fillStyle = ink;
+            ctx.textAlign = 'left';
+            ctx.font = `900 ${nameSize}px ${FONT_ARTICULAT}`;
+            ctx.fillText(truncateTextToWidth(ctx, entry.label, maxWidth), nameX, baseline);
+        });
+    });
+    ctx.restore();
+
+    // Pie: la marca del medio a la izquierda, la firma de G22 a la derecha y,
+    // si la lista sigue en otra imagen, el numero de pagina al medio.
+    drawLineupBrandMark(ctx, sportMark, left, H - u(48), u(190), 'left');
+    drawLineupBrandMark(ctx, wordmark, W - u(60), H - u(52), u(150));
+    if (page.totalPages > 1) {
         ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
-        ctx.fillStyle = primaryText;
-        team.nameLayout.lines.forEach((line, index) => {
-            ctx.font = `900 ${team.nameLayout.size}px ${FONT_DISPLAY}`;
-            ctx.fillText(line, centerX, teamNameTop + index * localTeamNameLineHeight);
-        });
-        if (team.extraInfo) {
-            ctx.fillStyle = secondaryText;
-            ctx.font = `700 ${sf(16)}px ${FONT_MONO}`;
-            ctx.fillText(truncateTextToWidth(ctx, team.extraInfo, columnWidth - sx(54)), centerX, extraInfoY);
-        }
+        ctx.fillStyle = hexToRGBA(ink, 0.7);
+        ctx.font = `700 ${u(18)}px ${FONT_OUTFIT_BLACK}`;
+        ctx.fillText(`${page.pageNumber} / ${page.totalPages}`, W / 2, H - u(56));
         ctx.restore();
-
-        if (team.starters.length === 0 && team.bench.length === 0) {
-            ctx.save();
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = secondaryText;
-            ctx.font = `700 ${sf(18)}px ${FONT_BODY}`;
-            ctx.fillText('Sin alineacion confirmada', centerX, listTop + listHeight / 2);
-            ctx.restore();
-            return;
-        }
-
-        ctx.save();
-        ctx.textBaseline = 'middle';
-        const numberColor = hexToRGBA(mixHexColors(team.accentTone, highlightColor, 0.32), 0.98);
-
-        team.starters.forEach((player, index) => {
-            const rowY = listStartY + index * (starterRowHeight + starterRowGap);
-            const centerY = rowY + starterRowHeight / 2;
-            const numberLabel = String(player.number ?? index + 1).padStart(2, '0');
-            const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
-
-            ctx.textAlign = 'right';
-            ctx.fillStyle = numberColor;
-            ctx.font = `900 ${starterNumberFontSize}px ${FONT_MONO}`;
-            ctx.fillText(numberLabel, team.columnX + numberAreaWidth, centerY);
-
-            ctx.textAlign = 'left';
-            ctx.fillStyle = primaryText;
-            ctx.font = `700 ${starterFontSize}px ${FONT_BODY}`;
-            ctx.fillText(truncateTextToWidth(ctx, playerLabel, playerTextMaxWidth), team.columnX + textStartOffset, centerY + 1);
-
-            if (hasAnyRating) {
-                const ratingLabel = formatLineupExportRating(player.rating);
-                if (ratingLabel) {
-                    const ratingValue = getLineupExportRatingValue(player.rating);
-                    const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
-                    ctx.textAlign = 'right';
-                    ctx.fillStyle = isTopRated ? '#facc15' : team.accentTone;
-                    ctx.font = `800 ${starterFontSize}px ${FONT_MONO}`;
-                    const display = isTopRated ? `${ratingLabel} ★` : ratingLabel;
-                    ctx.fillText(display, team.columnX + columnWidth - ratingRightInset, centerY + 1);
-                }
-            }
-        });
-
-        if (team.bench.length > 0) {
-            const benchLabelCenterY = listStartY
-                + team.starters.length * starterRowHeight
-                + Math.max(0, team.starters.length - 1) * starterRowGap
-                + starterToBenchGap
-                + benchLabelFontSize / 2;
-
-            ctx.font = `800 ${benchLabelFontSize}px ${FONT_MONO}`;
-            const benchLabelText = 'SUPLENTES';
-            const benchLabelWidth = ctx.measureText(benchLabelText).width;
-            ctx.textAlign = 'center';
-            ctx.fillStyle = numberColor;
-            ctx.fillText(benchLabelText, centerX, benchLabelCenterY);
-
-            ctx.strokeStyle = hexToRGBA(team.accentTone, isDark ? 0.5 : 0.36);
-            ctx.lineWidth = Math.max(2, sx(2));
-            ctx.beginPath();
-            ctx.moveTo(team.columnX, benchLabelCenterY);
-            ctx.lineTo(centerX - benchLabelWidth / 2 - sx(14), benchLabelCenterY);
-            ctx.moveTo(centerX + benchLabelWidth / 2 + sx(14), benchLabelCenterY);
-            ctx.lineTo(team.columnX + columnWidth, benchLabelCenterY);
-            ctx.stroke();
-
-            team.bench.forEach((player, index) => {
-                const rowY = benchLabelCenterY + benchLabelFontSize / 2 + benchLabelToListGap + index * (benchRowHeight + benchRowGap);
-                const centerY = rowY + benchRowHeight / 2;
-                const numberLabel = String(player.number ?? team.starters.length + index + 1).padStart(2, '0');
-                const playerLabel = `${player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
-
-                ctx.textAlign = 'right';
-                ctx.fillStyle = numberColor;
-                ctx.font = `900 ${benchNumberFontSize}px ${FONT_MONO}`;
-                ctx.fillText(numberLabel, team.columnX + numberAreaWidth, centerY);
-
-                ctx.textAlign = 'left';
-                ctx.fillStyle = primaryText;
-                ctx.font = `700 ${benchFontSize}px ${FONT_BODY}`;
-                ctx.fillText(truncateTextToWidth(ctx, playerLabel, playerTextMaxWidth), team.columnX + textStartOffset, centerY + 1);
-
-                if (hasAnyRating) {
-                    const ratingLabel = formatLineupExportRating(player.rating);
-                    if (ratingLabel) {
-                        const ratingValue = getLineupExportRatingValue(player.rating);
-                        const isTopRated = ratingValue != null && highestRating != null && ratingValue === highestRating;
-                        ctx.textAlign = 'right';
-                        ctx.fillStyle = isTopRated ? '#facc15' : team.accentTone;
-                        ctx.font = `800 ${benchFontSize}px ${FONT_MONO}`;
-                        const display = isTopRated ? `${ratingLabel} ★` : ratingLabel;
-                        ctx.fillText(display, team.columnX + columnWidth - ratingRightInset, centerY + 1);
-                    }
-                }
-            });
-        }
-
-        ctx.restore();
-    });
-
-    drawBrandFooter(ctx, canvas, brandLogo, isDark);
+    }
 }
+
 
 async function drawG22BaseTeamOfWeek(
     ctx: CanvasRenderingContext2D,

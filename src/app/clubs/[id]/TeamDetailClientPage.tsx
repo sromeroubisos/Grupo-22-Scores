@@ -1082,6 +1082,7 @@ function TeamDetailInner({ id }: { id: string }) {
             tournamentLogo: teamLogoUrl,
             teamName,
             teamLogo: teamLogoUrl,
+            sport: details?.sport_id || details?.sport || details?.team?.sport_id || preferredSport || null,
             groups: exportPositionKeys.map((posIdx) => ({
                 label: getExportPositionLabel(posIdx),
                 players: squadGroups[posIdx]
