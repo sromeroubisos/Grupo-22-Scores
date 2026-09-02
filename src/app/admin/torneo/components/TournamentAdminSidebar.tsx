@@ -11,7 +11,6 @@ import {
     MoreHorizontal,
     Shield,
     Trophy,
-    Upload,
     UserCog,
     X,
 } from 'lucide-react';
@@ -28,7 +27,6 @@ const NAV_ITEMS: NavItem[] = [
     { href: '/admin/torneo', label: 'Inicio', Icon: Home, match: (p) => p === '/admin/torneo' },
     { href: '/admin/torneo/clubes', label: 'Clubes', Icon: Shield, match: (p) => p.startsWith('/admin/torneo/clubes') },
     { href: '/admin/torneo/torneos', label: 'Torneos', Icon: Trophy, match: (p) => p.startsWith('/admin/torneo/torneos') },
-    { href: '/admin/torneo/importar', label: 'Importar Excel', Icon: Upload, match: (p) => p.startsWith('/admin/torneo/importar') },
     { href: '/admin/torneo/partidos', label: 'Editar partidos', Icon: ClipboardList, match: (p) => p.startsWith('/admin/torneo/partidos') },
     { href: '/admin/torneo/usuarios', label: 'Usuarios', Icon: UserCog, match: (p) => p.startsWith('/admin/torneo/usuarios') },
 ];

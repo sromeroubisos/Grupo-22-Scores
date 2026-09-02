@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowUpRight, ChevronDown, ChevronRight, Info, Plus, Shield, Upload } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, ChevronRight, Info, Plus, Shield } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getServiceWriter } from '@/lib/supabase/serviceWriter';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
@@ -103,13 +103,6 @@ export default async function TournamentAdminHome() {
                         <span className={styles.quickActionMain}>
                             <Shield size={20} aria-hidden className={styles.quickActionIconAccent} />
                             <span>Crear club</span>
-                        </span>
-                        <ChevronRight size={18} aria-hidden className={styles.quickActionChevron} />
-                    </Link>
-                    <Link href="/admin/torneo/importar" prefetch={false} className={styles.quickAction}>
-                        <span className={styles.quickActionMain}>
-                            <Upload size={20} aria-hidden />
-                            <span>Importar Excel</span>
                         </span>
                         <ChevronRight size={18} aria-hidden className={styles.quickActionChevron} />
                     </Link>
