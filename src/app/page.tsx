@@ -20,6 +20,7 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
 import TickerTitulares from '@/components/ticker/TickerTitulares';
+import GanaConTuClubBanner from '@/components/marcas/GanaConTuClubBanner';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { AUDIENCE_LABELS, isDualAudienceTournament, matchesTournamentAudience, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
@@ -2068,6 +2069,9 @@ export default function HomePage() {
         <main className={styles.mainContent}>
           {/* Titulares y los partidos de los clubes que sigue. Si no hay nada, no se dibuja. */}
           <TickerTitulares favorites={favorites} />
+
+          {/* La placa de Ganá con tu club: entre los titulares y el selector de día. */}
+          <GanaConTuClubBanner />
 
           <div className={styles.mobileTopControls}>
             {/* Sport Selector (Mobile) */}

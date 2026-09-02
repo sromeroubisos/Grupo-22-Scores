@@ -1,0 +1,37 @@
+/*
+ * Una placa, no una tarjeta: el GIF ya trae su propio diseño y su fondo, así
+ * que la envoltura no pinta nada. Sólo recorta las esquinas para que quede a
+ * tono con la franja de titulares y el selector de día que la rodean.
+ *
+ * `aspect-ratio` reserva el alto antes de que llegue el archivo: la home no
+ * salta cuando carga, ni con el GIF de 500 KB en una conexión lenta.
+ */
+
+.placa {
+    display: block;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    aspect-ratio: 1200 / 110;
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    line-height: 0;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.placa:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px -18px rgba(0, 0, 0, 0.55);
+}
+
+.placa:focus-visible {
+    outline: 2px solid var(--color-accent, #22c55e);
+    outline-offset: 3px;
+}
+
+.imagen {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
