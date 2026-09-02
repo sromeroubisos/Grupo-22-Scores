@@ -69,6 +69,23 @@ const FIXTURE: DailyMatchesData = {
     ],
 };
 
+// La placa ladder: valor principal + unidad, secundario y flecha por fila.
+const LADDER: StandingsData = {
+    ...STANDINGS,
+    variant: 'ladder',
+    title: 'PUNTOS A FAVOR',
+    subtitle: 'Anual Tucumano · Equipos',
+    columnLabels: { points: 'PTS', diff: '' },
+    rows: STANDINGS.rows.map((row, index) => ({
+        ...row,
+        points: [186, 171, 160, 148, 133, 120, 104, 98, 71][index] ?? 0,
+        pointsDeltaTone: row.diff.startsWith('+') ? 'positive' : row.diff.startsWith('-') ? 'negative' : 'neutral',
+        caption: row.played + ' PJ',
+        zoneColor: undefined,
+        labelName: undefined,
+    })),
+};
+
 // La vitrina: mismas filas que una tabla, pero `points` son titulos.
 const PALMARES: StandingsData = {
     title: 'Torneo del Interior A',
@@ -354,6 +371,18 @@ export default function ExportLabPage() {
                         format={format}
                         dailyMatchesTimeMode="time"
                         previewColors={previewColors}
+                        className="lab-preview"
+                    />
+                </figure>
+                <figure style={{ margin: 0 }}>
+                    <figcaption style={{ marginBottom: 8, fontWeight: 700 }}>Placa ladder</figcaption>
+                    <ExportImagePreview
+                        template="standings"
+                        data={LADDER}
+                        visualFamily={family}
+                        format={format}
+                        standingsExportMode="table"
+                        previewColors={{ ...previewColors, bgColor: '#0b0b0b', accentColor: '#3ddc5a' }}
                         className="lab-preview"
                     />
                 </figure>

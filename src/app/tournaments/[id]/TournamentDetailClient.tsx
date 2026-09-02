@@ -5173,7 +5173,14 @@ export default function TournamentDetailPage({
                     if (sofascoreLeague) {
                         return <TournamentSofascoreStats sofascoreLeague={sofascoreLeague} />;
                     }
-                    return <TournamentPublicStats matches={initialData?.matches || []} topScorers={topScorers} />;
+                    return (
+                        <TournamentPublicStats
+                            matches={initialData?.matches || []}
+                            topScorers={topScorers}
+                            tournamentName={tournamentData?.name}
+                            tournamentLogo={tournamentLogo}
+                        />
+                    );
                 })()}
 
                 {activeTab === 'scores' && (

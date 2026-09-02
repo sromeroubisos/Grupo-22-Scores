@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
+import type { StandingsData } from '@/components/ExportImage';
 import styles from './page.module.css';
 import {
     isGoalKickAttemptEvent,
@@ -10,8 +12,11 @@ import {
     isContestLostDetail,
 } from '@/lib/matchEventStats';
 import { formatDifference } from '@/lib/utils/formatDifference';
+import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import TeamLogo from '@/components/TeamLogo';
 import TournamentTopStats, { type TarjetaDeTop } from './TournamentTopStats';
+
+const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
 
 type StatsSubTab = 'teams' | 'players';
 type TeamStatsView = 'summary' | 'attack' | 'defense';
@@ -31,6 +36,9 @@ type StatColumn = {
 interface TournamentPublicStatsProps {
     matches: any[];
     topScorers?: any[];
+    // Solo para el export: el nombre va al subtitulo de la placa y el logo al modal.
+    tournamentName?: string;
+    tournamentLogo?: string;
 }
 
 const MOBILE_BREAKPOINT = 640;
@@ -262,7 +270,7 @@ function useIsMobile() {
     return isMobile;
 }
 
-export default function TournamentPublicStats({ matches, topScorers }: TournamentPublicStatsProps) {
+export default function TournamentPublicStats({ matches, topScorers, tournamentName, tournamentLogo }: TournamentPublicStatsProps) {
     const isMobile = useIsMobile();
     const [activeSubTab, setActiveSubTab] = useState<StatsSubTab>('teams');
     const [teamStatsView, setTeamStatsView] = useState<TeamStatsView>('summary');
@@ -636,6 +644,64 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
     };
 
     const hasStats = finalMatches.length > 0 && (activeSubTab === 'teams' ? teamRows.length > 0 : playerRows.length > 0);
+
+    // La placa "ladder" exporta LO QUE SE VE (mismo orden, filtro y tope) y el
+    // motor la pagina de a diez filas por placa. El titulo es la estadistica por
+    // la que esta ordenada la tabla, en mayusculas; el valor principal es esa
+    // columna; el secundario es la diferencia de puntos en equipos y los tries
+    // en jugadores. Sin flecha de tendencia en jugadores: no hay fecha anterior
+    // contra la cual compararlos.
+    const ladderExportData = useMemo<StandingsData>(() => {
+        const isTeams = activeSubTab === 'teams';
+        const columns = isTeams ? teamColumns : playerColumns;
+        const fallbackKey = isTeams ? TEAM_DEFAULT_SORT[teamStatsView].key : 'points';
+        const mainKey = sortKey === 'entity' ? fallbackKey : sortKey;
+        const mainColumn = columns.find((column) => column.id === mainKey) ?? columns.find((column) => column.id === fallbackKey);
+        // Secundario: diferencia (equipos) o tries (jugadores). Si la tabla ya
+        // esta ordenada por ese dato, el secundario pasa a ser los puntos: no
+        // tiene sentido repetir la misma cifra dos veces en la fila.
+        const secondaryKey = isTeams ? 'points_difference' : 'tries';
+        const secondaryIsMain = mainKey === secondaryKey;
+        const rows = displayRows.map((row, index) => {
+            const secondary = n(row[secondaryKey]);
+            // El escudo va por el proxy por id, como en la tabla de la web: el
+            // logo_url del partido casi nunca viene (y si viene puede ser base64).
+            const clubId = String(isTeams ? row.entityId : row.teamId ?? '');
+            const clubName = String(isTeams ? row.entityName : row.secondary ?? '');
+            return {
+                pos: index + 1,
+                team: String(row.entityName ?? (isTeams ? 'Equipo' : 'Jugador')),
+                teamLogo: buildTeamLogoProxyUrl({ key: clubId, name: clubName, fallback: row.entityLogo || null }) || row.entityLogo || undefined,
+                caption: isTeams ? String(n(row.matches_played)) + ' PJ' : clubName,
+                played: 0,
+                won: 0,
+                lost: 0,
+                diff: secondaryIsMain
+                    ? String(fmt(isTeams ? row.points_for : row.points)) + ' PTS'
+                    : isTeams
+                        ? formatDifference(secondary)
+                        : String(secondary) + (secondary === 1 ? ' try' : ' tries'),
+                points: mainColumn ? formatStatValue(row, mainColumn) : fmt(row[mainKey]),
+                pointsDeltaTone: isTeams && !secondaryIsMain
+                    ? (secondary > 0 ? 'positive' : secondary < 0 ? 'negative' : 'neutral')
+                    : 'neutral',
+            } as StandingsData['rows'][number];
+        });
+        // "TRIES", "PUNTOS A FAVOR": el rotulo largo de la columna si lo tiene,
+        // porque "PTS" solo no dice de que puntos habla.
+        const statTitle = (mainColumn?.title || mainColumn?.label || 'Estadísticas').trim().toUpperCase();
+        return {
+            variant: 'ladder',
+            title: statTitle,
+            subtitle: [tournamentName?.trim() || 'Estadísticas', isTeams ? 'Equipos' : 'Jugadores'].join(' · '),
+            tournamentLogo,
+            rows,
+            columnLabels: {
+                points: mainColumn?.label || 'PTS',
+                diff: '',
+            },
+        };
+    }, [activeSubTab, displayRows, playerColumns, sortKey, teamColumns, teamStatsView, tournamentLogo, tournamentName]);
     const hasEvents = finalMatches.some((m) => Array.isArray(m.events) && m.events.length > 0);
     const showTopScorersFallback = !hasEvents && (topScorers?.length || 0) > 0;
     const activeSortColumn = currentColumns.find((column) => column.id === sortKey);
@@ -786,21 +852,30 @@ export default function TournamentPublicStats({ matches, topScorers }: Tournamen
                     )}
                 </div>
                 {!showTopScorersFallback && (
-                    <div className={styles.statsSubTabs}>
-                        <button
-                            type="button"
-                            className={`${styles.statsSubTab} ${activeSubTab === 'teams' ? styles.statsSubTabActive : ''}`}
-                            onClick={() => handleSubTabChange('teams')}
-                        >
-                            Equipos
-                        </button>
-                        <button
-                            type="button"
-                            className={`${styles.statsSubTab} ${activeSubTab === 'players' ? styles.statsSubTabActive : ''}`}
-                            onClick={() => handleSubTabChange('players')}
-                        >
-                            Jugadores
-                        </button>
+                    <div className={styles.statsHeaderActions}>
+                        <div className={styles.statsSubTabs}>
+                            <button
+                                type="button"
+                                className={`${styles.statsSubTab} ${activeSubTab === 'teams' ? styles.statsSubTabActive : ''}`}
+                                onClick={() => handleSubTabChange('teams')}
+                            >
+                                Equipos
+                            </button>
+                            <button
+                                type="button"
+                                className={`${styles.statsSubTab} ${activeSubTab === 'players' ? styles.statsSubTabActive : ''}`}
+                                onClick={() => handleSubTabChange('players')}
+                            >
+                                Jugadores
+                            </button>
+                        </div>
+                        {hasStats && displayRows.length > 0 && (
+                            <ExportImage
+                                template="standings"
+                                filename={`estadisticas-${activeSubTab === 'teams' ? 'equipos' : 'jugadores'}-${tournamentName || 'torneo'}`}
+                                data={ladderExportData}
+                            />
+                        )}
                     </div>
                 )}
             </div>

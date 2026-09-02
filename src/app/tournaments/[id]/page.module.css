@@ -2512,6 +2512,14 @@
     margin-bottom: 12px;
 }
 
+/* Subpestanas + boton de exportar, en una sola fila. */
+.statsHeaderActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .statsTitleBlock {
     min-width: 0;
 }
@@ -3488,7 +3496,8 @@
     .pageTitle { font-size: 1rem; margin-bottom: 12px; }
     .statsHeaderBar { flex-direction: column; gap: 10px; margin-bottom: 10px; }
     .statsSubtitle { margin-top: -6px; font-size: 0.74rem; }
-    .statsSubTabs { width: 100%; }
+    .statsHeaderActions { width: 100%; }
+    .statsSubTabs { flex: 1 1 auto; }
     .statsSubTab { flex: 1; }
     .statsFilterBar {
         grid-template-columns: 1fr;

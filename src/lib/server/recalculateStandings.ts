@@ -10,6 +10,7 @@ import {
     filterMatchesForGroupScope,
 } from '@/lib/standings/matchScope';
 import { queryMatchesWithOptionalEvents } from '@/lib/utils/queryMatchesWithOptionalEvents';
+import { loadRelationalMatchEvents, mergeRelationalMatchEvents } from '@/lib/server/relationalMatchEvents';
 import {
     findCarryOverDependentPhases,
     resolveStandingsCarryOverRows,
@@ -238,7 +239,13 @@ export async function recalculateAndPersistStandings(
         return { ok: false, rows_calculated: 0 };
     }
 
-    const scopedMatches = filterMatchesForGroupScope(matches || [], participants || [], groupId);
+    // El bonus ofensivo cuenta tries desde `events`; los cargados en vivo
+    // viven solo en `match_events`, asi que se funden antes de correr el motor.
+    const matchesWithEvents = mergeRelationalMatchEvents(
+        matches || [],
+        await loadRelationalMatchEvents(supabase, matches || []),
+    );
+    const scopedMatches = filterMatchesForGroupScope(matchesWithEvents, participants || [], groupId);
     const carryOver = await resolveStandingsCarryOverRows({
         supabase,
         tournamentId,

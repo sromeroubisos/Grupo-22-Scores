@@ -56,6 +56,9 @@ interface StandingsRowData {
     movementColor?: string;
     /** 0 a 1: cuanto tinte lleva la banda. */
     movementStrength?: number;
+    // Solo la placa ladder: renglon chico bajo el nombre (el club del jugador,
+    // los partidos jugados del equipo).
+    caption?: string;
 }
 
 interface StandingsGroupData {
@@ -104,7 +107,11 @@ export interface StandingsData {
     // titulo, columnas P/Equipo/PTS/VAR) en vez de la tabla de posiciones clasica.
     // 'palmares' dibuja la vitrina de un torneo: podio 2-1-3 con el escudo grande
     // y el resto de los campeones como listado. En sus filas `points` son titulos.
-    variant?: 'rankingPoster' | 'palmares';
+    // 'ladder' es la placa de tabla al estilo NRL: fondo negro, titulo enorme y
+    // una fila por entidad con escudo en tile, valor principal (`points` + la
+    // unidad de `columnLabels.points`), dato secundario (`diff` + opcionalmente
+    // `columnLabels.diff`) y flecha de tendencia (`pointsDeltaTone`).
+    variant?: 'rankingPoster' | 'palmares' | 'ladder';
 }
 
 export interface DailyMatchesData {
@@ -636,6 +643,8 @@ type RankingPosterExtraColors = {
 const DEFAULT_TIMEZONE_PRESET_ID = 'buenos-aires-ar';
 const DEFAULT_TIMEZONE_OFFSET_MINUTES = -180;
 const MAX_STANDINGS_ROWS_PER_SLIDE = 20;
+// La placa ladder pagina de a diez: cada placa es un top diez, no media tabla.
+const LADDER_MAX_ROWS = 10;
 const EXPORT_VISUAL_FAMILY_OPTIONS: Array<{ value: ExportVisualFamily; label: string; description: string }> = [
     { value: 'g22Base', label: 'G22 Base', description: 'Sistema actual con superficies limpias y estructura modular' },
     { value: 'momentumV2', label: 'Momentum V2', description: 'Nueva familia inspirada en los templates editoriales del rar' },
@@ -895,6 +904,20 @@ function isRankingPosterData(template: ExportTemplate, data: ExportData): boolea
     return template === 'standings' && (data as StandingsData).variant === 'rankingPoster';
 }
 
+function isLadderData(template: ExportTemplate, data: ExportData): boolean {
+    return template === 'standings' && (data as StandingsData).variant === 'ladder';
+}
+
+// La placa ladder nace negra con el verde de la referencia; el usuario puede
+// cambiar Fondo y Acento en el modal como en cualquier otra pieza.
+const LADDER_COLOR_DEFAULTS: ExportColorDefaults = {
+    selectedPaletteId: DEFAULT_PALETTE.id,
+    bgColor: '#0b0b0b',
+    accentColor: '#3ddc5a',
+    editorialGradientLeftColor: '#df255c',
+    editorialGradientRightColor: '#3ddc5a',
+};
+
 function isPalmaresData(template: ExportTemplate, data: ExportData): boolean {
     return template === 'standings' && (data as StandingsData).variant === 'palmares';
 }
@@ -967,6 +990,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const [dailyMatchesTimeMode, setDailyMatchesTimeMode] = useState<DailyMatchesTimeMode>('time');
     const isRankingPoster = isRankingPosterData(template, data);
     const isPalmares = isPalmaresData(template, data);
+    const isLadder = isLadderData(template, data);
     const groupedStandings = useMemo(
         () => (template === 'standings' ? getExportableStandingsGroups(data as StandingsData) : []),
         [data, template]
@@ -1208,7 +1232,11 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             return;
         }
 
-        const defaults = isRankingPoster ? RANKING_POSTER_COLOR_DEFAULTS : defaultExportColorsRef.current;
+        const defaults = isRankingPoster
+            ? RANKING_POSTER_COLOR_DEFAULTS
+            : isLadder
+                ? LADDER_COLOR_DEFAULTS
+                : defaultExportColorsRef.current;
         setHasSessionColorOverrides(false);
         setImpactoFieldColor('');
         setImpactoInkColor('');
@@ -1226,17 +1254,17 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             setRankingPanelColor(combo.panel);
             setRankingGoldColor(combo.gold);
         }
-    }, [isRankingPoster, showModal]);
+    }, [isLadder, isRankingPoster, showModal]);
 
     useEffect(() => {
-        if (!showModal || hasSessionColorOverrides || isRankingPoster) return;
+        if (!showModal || hasSessionColorOverrides || isRankingPoster || isLadder) return;
 
         setSelectedPaletteId(defaultExportColors.selectedPaletteId);
         setBgColor(defaultExportColors.bgColor);
         setAccentColor(defaultExportColors.accentColor);
         setEditorialGradientLeftColor(defaultExportColors.editorialGradientLeftColor);
         setEditorialGradientRightColor(defaultExportColors.editorialGradientRightColor);
-    }, [defaultExportColors, hasSessionColorOverrides, isRankingPoster, showModal]);
+    }, [defaultExportColors, hasSessionColorOverrides, isLadder, isRankingPoster, showModal]);
 
     useEffect(() => {
         setIsPortalReady(true);
@@ -1467,7 +1495,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     }, [dailyMatchesTimeMode, isPalmares, lineupExportMode, matchExportLayout, matchExportMode, selectedStandingsGroupLabel, standingsExportMode, template]);
     const exportSummaryChips = useMemo(() => {
         const chips = [selectedFormatConfig.label];
-        chips.push(isRankingPoster ? 'Poster Ranking' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily));
+        chips.push(isRankingPoster ? 'Poster Ranking' : isLadder ? 'Placa Ladder' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily));
         if (template === 'matchStats') {
             chips.push(getMatchExportLayoutLabel(matchExportLayout));
         } else if (template === 'standings') {
@@ -1498,6 +1526,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     }, [
         customTournamentName,
         data,
+        isLadder,
         isPalmares,
         isRankingPoster,
         lineupExportMode,
@@ -1513,6 +1542,10 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const paletteUsageHint = useMemo(() => {
         if (isRankingPoster) {
             return 'El poster se pinta con cinco colores: Fondo (la esquina oscura), Banda (la columna del titulo), Brillo (la luz de abajo y la fila del lider), Panel (la lamina de la tabla) y Dorado (posiciones y puntos). Las combinaciones fijan los cinco de una vez.';
+        }
+
+        if (isLadder) {
+            return 'En la placa ladder, Fondo es la placa entera (nace negra) y Acento pinta el remate del subtitulo, los numeros de zona y la flecha del que sube. La flecha del que baja es roja siempre.';
         }
 
         if (isPalmares) {
@@ -1544,7 +1577,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         }
 
         return 'La marca de agua G22 se mantiene en todas las exportaciones.';
-    }, [isPalmares, isRankingPoster, template, visualFamily]);
+    }, [isLadder, isPalmares, isRankingPoster, template, visualFamily]);
 
     const toggleMatch = (index: number) => {
         setSelectedMatchIndices((previous) => {
@@ -2060,6 +2093,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                             panel: rankingPanelColor,
                             gold: rankingGoldColor,
                         });
+                    } else if (standingsData.variant === 'ladder') {
+                        await drawLadderPoster(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
                     } else if (standingsData.variant === 'palmares') {
                         if (visualFamily === 'fanV5') {
                             await drawFanPalmares(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
@@ -2361,10 +2396,12 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                 <label className={styles.modalLabel}>Diseno activo</label>
                                 <div className={styles.activeDesignCard}>
                                     <div className={styles.activeDesignCopy}>
-                                        <strong>{isRankingPoster ? 'Poster Ranking' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily)}</strong>
+                                        <strong>{isRankingPoster ? 'Poster Ranking' : isLadder ? 'Placa Ladder' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily)}</strong>
                                         <span>
                                             {isRankingPoster
                                                 ? 'Afiche dedicado del ranking: banda vertical con el titulo, tabla P/Equipo/PTS/VAR y fila del lider destacada.'
+                                                : isLadder
+                                                    ? 'Placa dedicada de la tabla: titulo grande, una fila por club con escudo, valor principal, dato secundario y flecha de tendencia.'
                                                 : isPalmares
                                                     ? 'Afiche dedicado del palmares: podio 2-1-3 con el escudo grande y el resto de los campeones como listado.'
                                                     : (
@@ -5411,6 +5448,8 @@ export async function renderMatchExportPreviewCanvas(
                 panel: previewColors?.rankingPanelColor,
                 gold: previewColors?.rankingGoldColor,
             });
+        } else if (standingsData.variant === 'ladder') {
+            await drawLadderPoster(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
         } else if (standingsData.variant === 'palmares') {
             if (visualFamily === 'fanV5') {
                 await drawFanPalmares(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
@@ -5533,6 +5572,7 @@ function scopeStandingsDataForExport(data: StandingsData, mode: StandingsExportM
 }
 
 function buildStandingsSlides(data: StandingsData, mode: StandingsExportMode): StandingsSlideData[] {
+    const rowsPerSlide = data.variant === 'ladder' ? LADDER_MAX_ROWS : MAX_STANDINGS_ROWS_PER_SLIDE;
     if (getStandingsSlideMode(mode) === 'groups') {
         const groups = getExportableStandingsGroups(data);
         if (groups.length > 0) {
@@ -5551,16 +5591,16 @@ function buildStandingsSlides(data: StandingsData, mode: StandingsExportMode): S
                 let offset = 0;
 
                 while (offset < group.rows.length) {
-                    if (currentRowCount >= MAX_STANDINGS_ROWS_PER_SLIDE) {
+                    if (currentRowCount >= rowsPerSlide) {
                         pushCurrentSlide();
                     }
 
-                    let availableRows = MAX_STANDINGS_ROWS_PER_SLIDE - currentRowCount;
+                    let availableRows = rowsPerSlide - currentRowCount;
                     const remainingRows = group.rows.length - offset;
 
-                    if (currentRowCount > 0 && remainingRows <= MAX_STANDINGS_ROWS_PER_SLIDE && remainingRows > availableRows) {
+                    if (currentRowCount > 0 && remainingRows <= rowsPerSlide && remainingRows > availableRows) {
                         pushCurrentSlide();
-                        availableRows = MAX_STANDINGS_ROWS_PER_SLIDE;
+                        availableRows = rowsPerSlide;
                     }
 
                     const take = Math.min(remainingRows, availableRows);
@@ -5589,8 +5629,8 @@ function buildStandingsSlides(data: StandingsData, mode: StandingsExportMode): S
     if (rows.length === 0) return [];
 
     const slides: StandingsSlideData[] = [];
-    for (let index = 0; index < rows.length; index += MAX_STANDINGS_ROWS_PER_SLIDE) {
-        const chunk = rows.slice(index, index + MAX_STANDINGS_ROWS_PER_SLIDE);
+    for (let index = 0; index < rows.length; index += rowsPerSlide) {
+        const chunk = rows.slice(index, index + rowsPerSlide);
         slides.push({
             groups: [{ name: '', rows: chunk }],
             pageNumber: slides.length + 1,
@@ -9366,6 +9406,333 @@ function getRankingNoiseTile(): HTMLCanvasElement | null {
     tileCtx.putImageData(image, 0, 0);
     rankingNoiseTile = tile;
     return tile;
+}
+
+// ---------------------------------------------------------------------------
+// Placa "ladder" (2026-09-02). Referencia: la tabla de la NRL — fondo negro,
+// titulo enorme junto al logo, subtitulo con remate en acento y una fila por
+// entidad: numero, escudo en tile, nombre en mayusculas, valor principal con
+// su unidad, dato secundario y flecha de tendencia. Ignora la familia visual a
+// proposito, como el afiche del ranking: es una pieza dedicada.
+//
+// Todo se escala por ANCHO (`u`): el story reparte el alto de mas en filas mas
+// altas, no en tipografia mas grande.
+// ---------------------------------------------------------------------------
+async function drawLadderPoster(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: StandingsData,
+    slide: StandingsSlideData,
+    format: CanvasFormat,
+    accentColor: string,
+    bgColor: string,
+    brandLogo: HTMLImageElement | null,
+) {
+    const width = canvas.width;
+    const height = canvas.height;
+    const isStory = format.height > format.width;
+    const u = (value: number) => Math.round((value * width) / 1080);
+    const isDark = getContrastColor(bgColor) === '#ffffff';
+    const textColor = isDark ? '#ffffff' : '#0b0f19';
+    const softColor = isDark ? 'rgba(255,255,255,0.78)' : 'rgba(11,15,25,0.72)';
+    const mutedColor = getMutedColor(isDark, 0.55);
+    const lineColor = isDark ? 'rgba(255,255,255,0.16)' : 'rgba(11,15,25,0.14)';
+    const tileColor = isDark ? mixHexColors(bgColor, '#ffffff', 0.11) : mixHexColors(bgColor, '#000000', 0.07);
+    const downColor = '#e5484d';
+
+    const rows = slide.groups.flatMap((group) => group.rows).slice(0, LADDER_MAX_ROWS);
+    const [teamLogos, tournamentLogo] = await Promise.all([
+        Promise.all(rows.map((row) => loadImage(row.teamLogo || ''))),
+        loadImage(data.tournamentLogo || ''),
+    ]);
+
+    // ---- Fondo: placa plena, luz suave arriba y grano fino ----
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, width, height);
+    const glow = ctx.createRadialGradient(width * 0.5, height * 0.18, 0, width * 0.5, height * 0.18, height * 0.75);
+    glow.addColorStop(0, isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.35)');
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, width, height);
+    const noiseTile = getRankingNoiseTile();
+    if (noiseTile) {
+        const noisePattern = ctx.createPattern(noiseTile, 'repeat');
+        if (noisePattern) {
+            ctx.save();
+            ctx.globalAlpha = 0.07;
+            ctx.globalCompositeOperation = 'overlay';
+            ctx.fillStyle = noisePattern;
+            ctx.fillRect(0, 0, width, height);
+            ctx.restore();
+        }
+    }
+
+    // ---- Cabecera: logo a la izquierda, titulo al lado, subtitulo debajo ----
+    const margin = u(136);
+    const headerTop = u(isStory ? 140 : 84);
+    const logoSize = u(118);
+    // Donde la referencia pone el escudo de la competencia va el logo del
+    // torneo; sin logo, el icono de G22 (el cuadrado, no el wordmark: en 118px
+    // el wordmark ancho queda como una etiqueta diminuta).
+    const logoImage = tournamentLogo || brandLogo;
+    if (logoImage) {
+        drawLogoBadge(ctx, {
+            x: margin + logoSize / 2,
+            y: headerTop + logoSize / 2,
+            size: logoSize,
+            img: logoImage,
+            label: data.title || 'G22 Scores',
+            rawLogo: tournamentLogo ? data.tournamentLogo : '/icon.png',
+            isDark,
+            showFrame: false,
+        });
+    }
+
+    const title = (data.title || 'Tabla').trim();
+    const titleX = margin + logoSize + u(22);
+    const titleMaxWidth = width - margin - titleX;
+    ctx.save();
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = textColor;
+    setFittedFont(ctx, title, titleMaxWidth, '900', u(150), FONT_BODY, u(64));
+    ctx.fillText(title, titleX - u(4), headerTop + Math.round(logoSize * 0.9));
+    ctx.restore();
+
+    // Subtitulo: "TORNEO · FECHA" — lo que va despues del separador se pinta en acento.
+    const subtitle = (data.subtitle || '').trim();
+    const subtitleY = headerTop + logoSize + u(40);
+    if (subtitle) {
+        const separatorIndex = subtitle.lastIndexOf(' · ');
+        const leftText = (separatorIndex >= 0 ? subtitle.slice(0, separatorIndex) : subtitle).trim().toUpperCase();
+        const rightText = separatorIndex >= 0 ? subtitle.slice(separatorIndex + 3).trim().toUpperCase() : '';
+        const gap = rightText ? u(18) : 0;
+        ctx.save();
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
+        const spacedCtx = ctx as CanvasRenderingContext2D & { letterSpacing?: string };
+        spacedCtx.letterSpacing = `${u(3)}px`;
+        let subtitleSize = u(26);
+        while (subtitleSize > u(14)) {
+            ctx.font = `800 ${subtitleSize}px ${FONT_BODY}`;
+            if (ctx.measureText(leftText).width + gap + ctx.measureText(rightText).width <= titleMaxWidth) break;
+            subtitleSize -= 1;
+        }
+        ctx.fillStyle = textColor;
+        ctx.fillText(leftText, titleX, subtitleY);
+        if (rightText) {
+            ctx.fillStyle = accentColor;
+            ctx.fillText(rightText, titleX + ctx.measureText(leftText).width + gap, subtitleY);
+        }
+        spacedCtx.letterSpacing = '0px';
+        ctx.restore();
+    }
+
+    // ---- Geometria de las filas ----
+    const left = margin;
+    const right = width - margin;
+    const bodyTop = subtitleY + u(66);
+    const footerCenterY = height - u(isStory ? 84 : 56);
+    const bodyBottom = footerCenterY - u(30);
+    // Con pocas filas la fila crece (hasta un tope) para no dejar media placa
+    // vacia; la tipografia y el tile tienen su propio tope, asi una tabla de
+    // cinco no se convierte en un cartel.
+    const rowHeight = Math.min(u(isStory ? 112 : 96), Math.floor((bodyBottom - bodyTop) / Math.max(rows.length, 1)));
+    const tileSize = Math.min(u(72), Math.round(rowHeight * 0.88));
+    const tileX = left + u(58);
+    const nameX = tileX + tileSize + u(22);
+    const arrowCenterX = right - u(10);
+    const secondaryRight = right - u(42);
+    // La unidad se omite cuando ya es el titulo de la placa: "TRIES" arriba y
+    // "1 TRIES" en cada fila es decirlo dos veces.
+    const rawUnitLabel = (data.columnLabels?.points || 'PTS').trim().toUpperCase();
+    const unitLabel = rawUnitLabel === title.toUpperCase() ? '' : rawUnitLabel;
+    const secondaryLabel = (data.columnLabels?.diff || '').trim().toUpperCase();
+    const posSize = Math.min(u(34), Math.round(rowHeight * 0.44));
+    const mainSize = Math.min(u(36), Math.round(rowHeight * 0.46));
+    const unitSize = Math.round(mainSize * 0.8);
+    const secondarySize = Math.min(u(30), Math.round(rowHeight * 0.42));
+    // El renglon chico bajo el nombre entra solo si la fila es alta.
+    const hasCaptions = rows.some((row) => (row.caption || '').trim()) && rowHeight >= u(70);
+    const captionSize = Math.min(u(20), Math.round(rowHeight * 0.24));
+    const nameOffset = hasCaptions ? -Math.round(rowHeight * 0.16) : 0;
+
+    const secondaryTextOf = (row: StandingsRowData) => {
+        const value = String(row.diff ?? '').trim();
+        if (!value) return '';
+        return secondaryLabel ? `${value} ${secondaryLabel}` : value;
+    };
+    ctx.font = `500 ${secondarySize}px ${FONT_BODY}`;
+    const secondaryWidth = rows.reduce((max, row) => Math.max(max, ctx.measureText(secondaryTextOf(row)).width), 0);
+    const mainRight = secondaryRight - (secondaryWidth > 0 ? secondaryWidth + u(26) : 0);
+    ctx.font = `800 ${unitSize}px ${FONT_BODY}`;
+    const unitWidth = unitLabel ? ctx.measureText(unitLabel).width + u(10) : 0;
+    ctx.font = `800 ${mainSize}px ${FONT_BODY}`;
+    const mainWidth = rows.reduce((max, row) => Math.max(max, ctx.measureText(String(row.points ?? '-')).width), 0);
+    const nameMaxWidth = Math.max(u(120), mainRight - unitWidth - mainWidth - u(28) - nameX);
+    const nameSize = getSharedFittedFontSize(
+        ctx,
+        rows.map((row) => ({ text: row.team.trim().toUpperCase(), maxWidth: nameMaxWidth })),
+        '800',
+        Math.round(Math.min(u(34), rowHeight * 0.5)),
+        FONT_BODY,
+        u(15),
+    );
+
+    rows.forEach((row, index) => {
+        const y = bodyTop + index * rowHeight;
+        const centerY = y + rowHeight / 2;
+        const img = teamLogos[index] || null;
+
+        // El podio va en acento (numero y filete), como la zona de finales de
+        // la referencia. Una zona explicita (zoneColor) manda sobre eso, y solo
+        // en la primera placa: la fila 11 no es podio.
+        const rowAccent = row.zoneColor || (slide.pageNumber === 1 && index < 3 ? accentColor : null);
+        const isLeader = slide.pageNumber === 1 && index === 0;
+
+        ctx.save();
+        ctx.textBaseline = 'middle';
+
+        // El lider lleva un lavado de acento que sale del margen izquierdo y se
+        // apaga antes de los numeros: destaca sin tapar nada.
+        if (isLeader) {
+            const wash = ctx.createLinearGradient(left - u(40), 0, right, 0);
+            wash.addColorStop(0, hexToRGBA(accentColor, 0.22));
+            wash.addColorStop(0.55, hexToRGBA(accentColor, 0.06));
+            wash.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = wash;
+            ctx.beginPath();
+            ctx.roundRect(left - u(40), y + u(2), right - left + u(80), rowHeight - u(4), u(12));
+            ctx.fill();
+        }
+
+        // Filete bajo la fila.
+        ctx.strokeStyle = rowAccent ? hexToRGBA(rowAccent, 0.85) : lineColor;
+        ctx.lineWidth = rowAccent ? u(2) : 1;
+        ctx.beginPath();
+        ctx.moveTo(left, y + rowHeight - 0.5);
+        ctx.lineTo(right, y + rowHeight - 0.5);
+        ctx.stroke();
+
+        // Numero.
+        ctx.fillStyle = rowAccent || textColor;
+        ctx.textAlign = 'left';
+        ctx.font = `800 ${posSize}px ${FONT_BODY}`;
+        ctx.fillText(String(row.pos), left, centerY + 1);
+
+        // Tile con el escudo.
+        ctx.fillStyle = tileColor;
+        ctx.beginPath();
+        ctx.roundRect(tileX, centerY - tileSize / 2, tileSize, tileSize, u(9));
+        ctx.fill();
+        drawOverflowCrest(ctx, {
+            x: tileX + tileSize / 2,
+            y: centerY,
+            width: Math.round(tileSize * 0.84),
+            height: Math.round(tileSize * 0.84),
+            img,
+            label: row.team,
+            rawLogo: row.teamLogo,
+            isDark,
+            showFrame: false,
+        });
+
+        // Nombre, y debajo el renglon de contexto si hay lugar.
+        ctx.fillStyle = textColor;
+        ctx.font = `800 ${nameSize}px ${FONT_BODY}`;
+        ctx.fillText(row.team.trim().toUpperCase(), nameX, centerY + 1 + nameOffset);
+        const caption = (row.caption || '').trim();
+        if (hasCaptions && caption) {
+            ctx.fillStyle = mutedColor;
+            ctx.font = `600 ${captionSize}px ${FONT_BODY}`;
+            ctx.fillText(caption.toUpperCase(), nameX, centerY + 1 + Math.round(rowHeight * 0.2));
+        }
+
+        // Valor principal + unidad ("38 PTS").
+        ctx.textAlign = 'right';
+        if (unitLabel) {
+            ctx.font = `800 ${unitSize}px ${FONT_BODY}`;
+            ctx.fillText(unitLabel, mainRight, centerY + 1);
+        }
+        ctx.font = `800 ${mainSize}px ${FONT_BODY}`;
+        ctx.fillText(String(row.points ?? '-').trim(), mainRight - unitWidth, centerY + 1);
+
+        // Dato secundario ("+163").
+        const secondaryText = secondaryTextOf(row);
+        if (secondaryText) {
+            ctx.fillStyle = softColor;
+            ctx.font = `500 ${secondarySize}px ${FONT_BODY}`;
+            ctx.fillText(secondaryText, secondaryRight, centerY + 1);
+        }
+
+        // Flecha de tendencia.
+        const arrow = u(17);
+        if (row.pointsDeltaTone === 'positive') {
+            ctx.fillStyle = accentColor;
+            ctx.beginPath();
+            ctx.moveTo(arrowCenterX, centerY - arrow * 0.55);
+            ctx.lineTo(arrowCenterX + arrow * 0.62, centerY + arrow * 0.45);
+            ctx.lineTo(arrowCenterX - arrow * 0.62, centerY + arrow * 0.45);
+            ctx.closePath();
+            ctx.fill();
+        } else if (row.pointsDeltaTone === 'negative') {
+            ctx.fillStyle = downColor;
+            ctx.beginPath();
+            ctx.moveTo(arrowCenterX, centerY + arrow * 0.55);
+            ctx.lineTo(arrowCenterX + arrow * 0.62, centerY - arrow * 0.45);
+            ctx.lineTo(arrowCenterX - arrow * 0.62, centerY - arrow * 0.45);
+            ctx.closePath();
+            ctx.fill();
+        } else {
+            ctx.strokeStyle = mutedColor;
+            ctx.lineWidth = u(3);
+            ctx.beginPath();
+            ctx.moveTo(arrowCenterX - arrow * 0.6, centerY + 1);
+            ctx.lineTo(arrowCenterX + arrow * 0.6, centerY + 1);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    });
+
+    // ---- Pie: marca chica a la izquierda, pagina y flechas de carrusel a la derecha ----
+    ctx.save();
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = mutedColor;
+    ctx.font = `700 ${u(18)}px ${FONT_BODY}`;
+    let brandX = left;
+    if (brandLogo) {
+        const brandSize = u(28);
+        drawLogoBadge(ctx, {
+            x: left + brandSize / 2,
+            y: footerCenterY,
+            size: brandSize,
+            img: brandLogo,
+            label: 'G22 Scores',
+            rawLogo: '/icon.png',
+            isDark,
+            showFrame: false,
+        });
+        brandX = left + brandSize + u(10);
+    }
+    ctx.fillText('G22 SCORES', brandX, footerCenterY);
+
+    let cursorRight = right;
+    if (slide.pageNumber < slide.totalPages) {
+        ctx.font = `900 ${u(24)}px ${FONT_BODY}`;
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'right';
+        ctx.fillText('>>>', cursorRight, footerCenterY);
+        cursorRight -= ctx.measureText('>>>').width + u(22);
+    }
+    if (slide.totalPages > 1) {
+        ctx.font = `700 ${u(18)}px ${FONT_BODY}`;
+        ctx.fillStyle = mutedColor;
+        ctx.textAlign = 'right';
+        ctx.fillText(`${slide.pageNumber}/${slide.totalPages}`, cursorRight, footerCenterY);
+    }
+    ctx.restore();
 }
 
 async function drawRankingPoster(
