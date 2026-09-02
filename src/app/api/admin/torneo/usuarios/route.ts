@@ -94,12 +94,22 @@ export async function GET() {
     // Universo de torneos del caller (para filtrar y mostrar nombres).
     let scopeTournamentIds: string[];
     if (scope.isUnlimited) {
-        const { data: allT } = await admin
-            .from('tournaments')
-            .select('id')
-            .order('created_at', { ascending: false })
-            .limit(500);
-        scopeTournamentIds = (allT ?? []).map((t: { id: string }) => t.id);
+        // Sin tope: PostgREST corta en 1000 por respuesta, así que se pagina
+        // hasta que una tanda vuelva incompleta. Con un limit fijo los torneos
+        // más viejos quedaban afuera de la lista para asignar.
+        const PAGE = 1000;
+        scopeTournamentIds = [];
+        for (let from = 0; ; from += PAGE) {
+            const { data: batch } = await admin
+                .from('tournaments')
+                .select('id')
+                .order('created_at', { ascending: false })
+                .order('id', { ascending: true })
+                .range(from, from + PAGE - 1);
+            const ids = (batch ?? []).map((t: { id: string }) => t.id);
+            scopeTournamentIds.push(...ids);
+            if (ids.length < PAGE) break;
+        }
     } else {
         scopeTournamentIds = Array.from(scope.tournamentIds);
     }

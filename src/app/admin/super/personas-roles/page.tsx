@@ -228,7 +228,7 @@ export default function PersonasRolesPage() {
                     cache: 'no-store',
                     credentials: 'include',
                 }),
-                fetch('/api/admin/torneo/tournaments?limit=1000', {
+                fetch('/api/admin/torneo/tournaments?limit=all&fields=basic', {
                     cache: 'no-store',
                     credentials: 'include',
                 }),
