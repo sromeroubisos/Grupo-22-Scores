@@ -986,13 +986,17 @@ function shouldUsePersistedFeedCache(params: MatchesRequestParams) {
 }
 
 /**
- * Stale-while-revalidate para todos. Antes estaba apagado con external=true
- * —que es lo que manda la portada— y cada request pasada la ventana fresh
- * esperaba el recálculo entero (proveedor incluido) con el usuario mirando.
- * Servir lo viejo y refrescar atrás es exactamente lo que ese caso necesita.
+ * Stale-while-revalidate para el feed diario. Antes estaba apagado con
+ * external=true —que es lo que manda la portada— y cada request pasada la
+ * ventana fresh esperaba el recálculo entero (proveedor incluido) con el
+ * usuario mirando. Servir lo viejo y refrescar atrás es exactamente lo que ese
+ * caso necesita.
+ *
+ * El sondeo de en vivo queda afuera: lo viejo, ahí, es un partido que ya
+ * arrancó y todavía no figura, y el cliente lo lee como que terminó.
  */
-function shouldServeStaleMatchesFeed(_params: MatchesRequestParams) {
-    return true;
+function shouldServeStaleMatchesFeed(params: MatchesRequestParams) {
+    return !params.liveOnly;
 }
 
 /**
@@ -1143,7 +1147,15 @@ function hasShortLivedExternalResult(params: MatchesRequestParams, payload?: Mat
 
 function getMatchesResponseCachePolicy(params: MatchesRequestParams, payload?: MatchesPayload) {
     if (params.liveOnly) {
-        return { freshTtlSec: 60, staleTtlSec: 240 };
+        // El sondeo de en vivo se cacheaba 60 s fresco y 240 s rancio. Con el
+        // cliente sondeando cada 60 s, una copia de antes de que un partido
+        // arrancara —vacía— podía contestarle hasta cuatro minutos después y
+        // la portada la leía como «terminó». Ahora la copia dura menos que un
+        // sondeo, y una respuesta con una fuente caída casi nada.
+        if (hasSourceDegradation(payload)) {
+            return { freshTtlSec: 3, staleTtlSec: 3 };
+        }
+        return { freshTtlSec: 15, staleTtlSec: 15 };
     }
 
     // Una fuente caída se reintenta enseguida, pida o no FlashScore: sin esto,
@@ -1538,8 +1550,26 @@ async function computeMatchesPayload(
 
                 let finalLiveMatches: any[] = [...enrichedLive];
 
+                // Lo que se le cuenta al cliente de cada fuente. Sin esto, el
+                // sondeo devolvía `{ data: [] }` con 200 cuando la base no
+                // contestaba, y la portada leía ese vacío como «terminaron
+                // todos»: un partido de la base en el segundo tiempo se dibujaba
+                // «FT» y el sondeo se apagaba.
+                let liveSupabase: NonNullable<MatchesPayload['sources']>['supabase'] = {
+                    ok: false,
+                    count: 0,
+                    reason: 'database_query_failed',
+                    message: null,
+                };
+
                 try {
                     const dbLiveResult = await dbLiveMatchesPromise;
+                    liveSupabase = {
+                        ok: dbLiveResult.ok,
+                        count: dbLiveResult.count,
+                        reason: dbLiveResult.reason ?? null,
+                        message: dbLiveResult.message ?? null,
+                    };
                     if (dbLiveResult.ok) {
                         supabaseItemsCount = dbLiveResult.count;
                         const mergeLiveStartedAt = Date.now();
@@ -1572,7 +1602,14 @@ async function computeMatchesPayload(
                         live_poll_gated: livePollGated,
                     });
                 }
-                return { data: finalLiveMatches };
+                return {
+                    data: finalLiveMatches,
+                    sources: {
+                        // Con el sondeo gateado no se preguntó nada: no es una caída.
+                        flashscore: { ok: true, count: externalItemsCount },
+                        supabase: liveSupabase,
+                    },
+                };
             } catch (e) {
                 console.error('Live-only fetch failed, trying external_match_cache:', e);
                 try {
@@ -1605,10 +1642,27 @@ async function computeMatchesPayload(
                     }
                     return {
                         data: enriched,
-                        sources: { flashscore: { ok: false, count: 0, fromCache: cachedLive.length > 0 } }
+                        sources: {
+                            flashscore: { ok: false, count: 0, fromCache: cachedLive.length > 0 },
+                            supabase: {
+                                ok: dbLiveResult.ok,
+                                count: dbLiveResult.count,
+                                reason: dbLiveResult.reason ?? null,
+                                message: dbLiveResult.message ?? null,
+                            },
+                        },
                     };
                 } catch {
-                    return { data: [] };
+                    // Ni el proveedor ni la base: un vacío que NO significa
+                    // «no hay nada en vivo». Se declara para que el cliente no
+                    // cierre partidos con él.
+                    return {
+                        data: [],
+                        sources: {
+                            flashscore: { ok: false, count: 0, reason: 'live_fetch_failed', message: null },
+                            supabase: { ok: false, count: 0, reason: 'live_fetch_failed', message: null },
+                        },
+                    };
                 }
             }
         }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { generateLocalDateKeys, getTodayKey } from '@/lib/timezone';
 import { logRefreshLoop } from '@/lib/debug/refreshLoop';
+import { reconcileLiveOverlay, type LiveSnapshot } from '@/lib/matches/liveOverlay';
 
 export type SourceErrorScenario = 'fs_down_db_ok' | 'db_down_fs_ok' | 'both_down' | null;
 
@@ -45,32 +46,10 @@ function cacheKey(date: string, sportId: string) {
   return `${MATCHES_STORE_CACHE_VERSION}__${date}__${sportId}`;
 }
 
-// ─── Live reconciliation ─────────────────────────────────────────────────────
-// Merges a live snapshot into the current match list:
-//   - matches present in snapshot  → status='live' + live fields merged
-//   - matches that WERE live but absent from snapshot → status='final', live_time cleared
-//   - all others → unchanged
-function reconcileLiveOverlay<T extends { id: string; status?: string | null; live_time?: number | null }>(
-  current: T[],
-  liveSnapshot: T[]
-): T[] {
-  const nextLiveMap = new Map(liveSnapshot.map(m => [m.id, m]));
-  const nextLiveIds = new Set(liveSnapshot.map(m => m.id));
-
-  return current.map(m => {
-    const wasLive = m.status === 'live';
-    const nowLive = nextLiveIds.has(m.id);
-
-    if (nowLive) {
-      const live = nextLiveMap.get(m.id)!;
-      return { ...m, ...live, status: 'live' as const };
-    }
-    if (wasLive && !nowLive) {
-      return { ...m, status: 'final' as const, live_time: null };
-    }
-    return m;
-  });
-}
+// La conciliación del sondeo de en vivo vive en `@/lib/matches/liveOverlay`:
+// es una función pura con test propio. Acá vivía una copia de tres líneas que
+// daba por terminado todo lo que faltara del sondeo, sin preguntar si el
+// sondeo había contestado.
 
 export function useMatchesStore(
   selectedDate: string,
@@ -302,20 +281,24 @@ export function useMatchesStore(
   );
 
   // Fetch live-only matches for fast polling
+  // El sondeo de en vivo. `null` es «no sé»: un 5xx, un timeout o la red caída
+  // no son «no hay nada en vivo», y la conciliación no puede cerrar partidos
+  // con eso. Devolver [] acá era lo que dibujaba «FT» sobre un partido en
+  // juego y, de paso, apagaba el sondeo para siempre.
   const fetchLive = useCallback(
-    async (signal?: AbortSignal): Promise<any[]> => {
+    async (signal?: AbortSignal): Promise<LiveSnapshot<any> | null> => {
       try {
         const url = `/api/matches?sport=${sportId}&live=true`;
         const res = await fetch(url, {
           signal,
           cache: 'no-store',
         });
-        if (!res.ok) return [];
+        if (!res.ok) return null;
         const data = await res.json();
-        return Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
-      } catch (e: any) {
-        if (e?.name === 'AbortError') return [];
-        return [];
+        const matches = Array.isArray(data) ? data : (data.data && Array.isArray(data.data) ? data.data : (data.items && Array.isArray(data.items) ? data.items : []));
+        return { matches, sources: Array.isArray(data) ? null : (data.sources ?? null) };
+      } catch {
+        return null;
       }
     },
     [sportId]
@@ -470,13 +453,14 @@ export function useMatchesStore(
         const liveSnapshot = await fetchLive(controller.signal);
         if (controller.signal.aborted) return;
 
-        // 2. Reconcile: promote live, demote finished
+        // 2. Reconcile: promote live, demote finished — but only what the
+        //    snapshot can vouch for. A missing/degraded snapshot keeps what we have.
         const current = matchesCache.get(key) ?? [];
         const merged = reconcileLiveOverlay(current, liveSnapshot);
 
         matchesCache.set(key, merged);
         // Only reset staleness clock when we actually got live data
-        if (liveSnapshot.length > 0) lastFetchedAt.set(key, Date.now());
+        if (liveSnapshot && liveSnapshot.matches.length > 0) lastFetchedAt.set(key, Date.now());
         setMatches(merged);
 
         // 3. Smart stop — no more live matches visible
