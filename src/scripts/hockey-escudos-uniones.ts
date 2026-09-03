@@ -67,6 +67,14 @@ const ESCUDOS: Record<string, { clubes: string[]; recorte?: Recorte; nota?: stri
   'SUDOESTE BUENOS AIRES': { clubes: ['asociacion-sudoeste-de-buenos-aires-cah-hockey'] },
   'TANDILENSE': { clubes: ['federacion-tandilense-cah-hockey'] },
   'TUCUMAN': { clubes: ['asociacion-tucumana-cah-hockey'] },
+  // Segunda tanda (Downloads/logos-hockey-1080, ya a 1080×1080 con fondo transparente)
+  'UNION DEL CENTRO': { clubes: ['federacion-amateur-de-hockey-sobre-cesped-union-del-centro-cah-hockey'] },
+  'VALLE DEL CHUBUT': { clubes: ['asociacion-del-valle-de-chubut-cah-hockey'] },
+  'SANRAFAELINA': { clubes: ['asociacion-sanrafaelina-cah-hockey'] },
+  // "Asociación Noroeste" jugó los regionales bonaerenses (2013, 2023): es la FNHBA, no la del NOA
+  'NOROESTE': { clubes: ['asociacion-noroeste-cah-hockey'] },
+  'NEUQUINA': { clubes: ['federacion-neuquina-cah-hockey'], nota: 'original de ~330 px: queda blando' },
+  'SANLUISEÑA': { clubes: ['federacion-sanluisena-cah-hockey'], nota: 'original de ~340 px: queda blando' },
 };
 
 /** archivo (sin extensión) → torneos (external_id) que llevan la placa. */
