@@ -947,7 +947,7 @@ function TeamDetailInner({ id }: { id: string }) {
                             ) : (
                                 <div className={styles.teamLogoPlaceholder} />
                             )}
-                            <span className={homeClass}>{homeName}</span>
+                            <span className={`${styles.teamInfoName} ${homeClass}`.trim()} title={homeName}>{homeName}</span>
                         </div>
                         <span className={styles.score}>{scoreHome}</span>
                     </div>
@@ -958,7 +958,7 @@ function TeamDetailInner({ id }: { id: string }) {
                             ) : (
                                 <div className={styles.teamLogoPlaceholder} />
                             )}
-                            <span className={awayClass}>{awayName}</span>
+                            <span className={`${styles.teamInfoName} ${awayClass}`.trim()} title={awayName}>{awayName}</span>
                         </div>
                         <span className={styles.score}>{scoreAway}</span>
                     </div>
