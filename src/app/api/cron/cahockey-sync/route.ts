@@ -4,6 +4,7 @@
  *   GET /api/cron/cahockey-sync              corrida normal
  *   GET /api/cron/cahockey-sync?dry=1        plan sin escribir
  *   GET /api/cron/cahockey-sync?dias=7       ventana hacia atrás y adelante (default 3)
+ *   GET /api/cron/cahockey-sync?modo=en-juego sólo los torneos con partidos en curso o recién terminados
  *   GET /api/cron/cahockey-sync?torneo=1580  un torneo puntual, esté o no en la ventana
  *
  * Qué torneos entran: los que tienen `external_id = 'cahockey:<id>'` (los
@@ -11,6 +12,12 @@
  * de la ventana. Un Argentino de Selecciones dura cuatro días y se juegan tres
  * o cuatro por año: el cron corre seguido pero fuera de esos días hace UNA
  * consulta y se va, sin tocar la fuente.
+ *
+ * Dos cadencias, porque un resultado tiene que entrar cuando termina el
+ * partido y no un cuarto de hora después: cada 2 minutos la pasada `en-juego`
+ * (torneos con algún partido que empezó hace menos de tres horas o empieza en
+ * menos de una), y cada 15 la pasada completa de ±3 días, que además levanta
+ * los cambios de fixture y los cruces recién definidos.
  *
  * El ciclo por torneo: `POST /updateTorneo` da la URL del iframe de SICAH; la
  * página (iso-8859-1) se parsea; `planTournamentMatches` decide qué se crea y
@@ -43,6 +50,9 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 const DIAS_POR_DEFECTO = 3;
+/** Pasada en juego: un partido de hockey dura ~70' y SICAH carga al terminar. */
+const EN_JUEGO_HACIA_ATRAS_MS = 3 * 3_600_000;
+const EN_JUEGO_HACIA_ADELANTE_MS = 60 * 60_000;
 const SPORT = 'field-hockey';
 const NOMBRE_FASE_LLAVE = 'Playoffs';
 
@@ -71,6 +81,7 @@ export async function GET(req: Request) {
     enSeco: url.searchParams.get('dry') === '1',
     dias: Number(url.searchParams.get('dias') ?? DIAS_POR_DEFECTO) || DIAS_POR_DEFECTO,
     torneoPedido: url.searchParams.get('torneo')?.trim() || null,
+    enJuego: url.searchParams.get('modo') === 'en-juego',
   });
   return NextResponse.json(body, { status });
 }
@@ -82,8 +93,13 @@ const responder = (body: Record<string, unknown>, status = 200): Resultado => ({
  * El sync entero, separado de la ruta para poder correrlo en seco por `tsx`
  * sin una API key: la autenticación queda en `GET`, y esto es lo que hace.
  */
-export async function sincronizarCahockey(opts: { enSeco: boolean; dias: number; torneoPedido: string | null }): Promise<Resultado> {
-  const { enSeco, dias, torneoPedido } = opts;
+export async function sincronizarCahockey(opts: {
+  enSeco: boolean;
+  dias: number;
+  torneoPedido: string | null;
+  enJuego?: boolean;
+}): Promise<Resultado> {
+  const { enSeco, dias, torneoPedido, enJuego = false } = opts;
   const ahora = new Date();
   const ahoraIso = ahora.toISOString();
 
@@ -112,8 +128,8 @@ export async function sincronizarCahockey(opts: { enSeco: boolean; dias: number;
       return responder({ ok: false, error: `No hay un torneo con external_id ${CAHOCKEY_ID_PREFIX}${torneoPedido}` });
     }
   } else {
-    const desde = new Date(ahora.getTime() - dias * 86_400_000).toISOString();
-    const hasta = new Date(ahora.getTime() + dias * 86_400_000).toISOString();
+    const desde = new Date(ahora.getTime() - (enJuego ? EN_JUEGO_HACIA_ATRAS_MS : dias * 86_400_000)).toISOString();
+    const hasta = new Date(ahora.getTime() + (enJuego ? EN_JUEGO_HACIA_ADELANTE_MS : dias * 86_400_000)).toISOString();
     const { data: enVentana, error: errVentana } = await supabase
       .from('matches')
       .select('tournament_id')
@@ -129,7 +145,7 @@ export async function sincronizarCahockey(opts: { enSeco: boolean; dias: number;
   }
 
   if (!activos.length) {
-    return responder({ ok: true, dry: enSeco, torneos: [], sinActividad: true, ventanaDias: dias, errors });
+    return responder({ ok: true, dry: enSeco, modo: enJuego ? 'en-juego' : 'completa', torneos: [], sinActividad: true, ventanaDias: dias, errors });
   }
 
   // ── alias y clubes conocidos (una sola vez para todos los torneos) ───────
@@ -334,6 +350,7 @@ export async function sincronizarCahockey(opts: { enSeco: boolean; dias: number;
   return responder({
     ok: errors.length === 0,
     dry: enSeco,
+    modo: enJuego ? 'en-juego' : 'completa',
     ventanaDias: dias,
     torneosActivos: activos.map((t) => t.external_id),
     torneos: resumen,
