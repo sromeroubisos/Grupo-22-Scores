@@ -332,3 +332,22 @@ pero se muestran también en mayores, como el Argentino Juvenil de rugby. El
 Argentino de **Clubes** no entra. Se purgaron los 13 snapshots de
 `tournaments_feed_cache` y los 2 de `matches_feed_cache` de hockey para que la
 lista no sirviera la foto vieja.
+
+---
+
+## 11. Tercera tanda (2026-09-03, tarde): cada dos minutos, zonas como grupos y estadísticas de goles
+
+- **Cadencia.** A los 15 minutos se sumó la pasada `?modo=en-juego` cada 2
+  minutos, que sólo mira los torneos con un partido que empezó hace menos de
+  tres horas o empieza en menos de una. Medido: los primeros seis resultados
+  del fin de semana entraron en el primer tick del cron, sin intervención.
+- **Grupos.** Las "Zona X" de SICAH son ahora `tournament_groups` de la fase,
+  que pasa a `group_stage`; participantes de fase y partidos de zona llevan su
+  `group_id`. Antes el motor armaba una sola tabla con las dos zonas mezcladas.
+  Con una sola zona la fase sigue siendo liga (Sub 14 B Caballeros). Aplicado a
+  los 18 torneos; el Sub 16 D Damas tiene cuatro zonas.
+- **Estadísticas.** La pestaña era de rugby para cualquier deporte (TRIES+,
+  TACK, todo en cero). Ahora recibe `sportId`: fuera de rugby muestra PJ/PG/PE/
+  PP/GF/GC/DIF y esconde jugadores y el podio de tries. Lo que la CAH no
+  publica —goleadoras, tarjetas— sigue sin existir, porque SICAH sólo da el
+  marcador.
