@@ -82,3 +82,7 @@ RUGBYARCHIVE_HISTORICO_LOG.jsonl
 
 # Respaldos de las fusiones de catálogo (pesados y de una sola corrida; no se versionan)
 *.backup.json
+
+# cosechas de los scrapers de hockey (decenas de MB): se regeneran
+scripts/cahockey/out/
+scripts/atahockey/out/

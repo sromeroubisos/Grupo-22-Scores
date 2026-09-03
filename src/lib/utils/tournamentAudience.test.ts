@@ -120,6 +120,27 @@ test('el Argentino Juvenil entra en las dos pestañas sin dejar de ser juvenil',
     assert.equal(isDualAudienceTournament({ originalName: 'Campeonato Argentino Juvenil M17 - Zona Ascenso' }), true);
 });
 
+test('los Argentinos de Seleccionados de hockey entran en las dos pestañas sin dejar de ser juveniles', () => {
+    // Como los escribe el importador de la CAH (singular y plural) y como los
+    // dice la gente ("de Selecciones"). Son Sub 14/16/19 —siguen siendo
+    // juveniles— pero son selecciones provinciales, y van a la portada.
+    for (const nombre of [
+        'Campeonatos Argentinos de Seleccionados Sub 16 A Damas',
+        'Campeonato Argentino de Seleccionados Sub 19 Caballeros',
+        'Campeonatos Argentinos de Seleccionados Promocionales Sub 14 Damas',
+        'Campeonato Argentino de Selecciones Sub 19 Damas',
+    ]) {
+        assert.equal(resolveTournamentAudience({ name: nombre }), 'juveniles', nombre);
+        assert.equal(isDualAudienceTournament({ name: nombre }), true, nombre);
+        assert.equal(matchesTournamentAudience({ name: nombre }, 'mayores'), true, nombre);
+        assert.equal(matchesTournamentAudience({ name: nombre }, 'juveniles'), true, nombre);
+    }
+
+    // El Argentino de CLUBES de la misma confederación no es de selecciones:
+    // sigue sólo en su pestaña.
+    assert.equal(isDualAudienceTournament({ name: 'Campeonato Argentino de Clubes Sub 16 A Caballeros' }), false);
+});
+
 test('la puerta no se lleva puesto ningún otro torneo', () => {
     // El resto de los juveniles sigue sólo en su pestaña: si esto se rompe, la
     // portada se llena de M15 y el segmento deja de servir para nada.

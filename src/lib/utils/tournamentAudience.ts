@@ -162,6 +162,11 @@ export function resolveTournamentAudience(input: TournamentAudienceInput): Tourn
  */
 const BOTH_AUDIENCES_PATTERNS = [
     /\bcampeonato\s+argentino\s+juvenil\b/i,
+    // Los Argentinos de Seleccionados de hockey (CAH): Sub 14, Sub 16 y Sub 19
+    // por grado, pero son las selecciones provinciales —la misma jerarquía que
+    // el Juvenil de rugby—, y el hincha los busca en la portada. Las dos
+    // grafías porque el sitio escribe "Seleccionados" y la gente "Selecciones".
+    /\bcampeonatos?\s+argentinos?\s+de\s+seleccion(?:ad[oa]s|es)\b/i,
 ];
 
 /** Si el torneo se muestra en los dos segmentos en vez de en el suyo. */
