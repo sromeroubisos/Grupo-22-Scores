@@ -22,7 +22,6 @@ import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
 import TickerTitulares from '@/components/ticker/TickerTitulares';
 import GanaConTuClubBanner from '@/components/marcas/GanaConTuClubBanner';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
-import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { AUDIENCE_LABELS, isDualAudienceTournament, matchesTournamentAudience, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { compareTournamentsByPriority, getTournamentPriority } from '@/lib/utils/tournamentOrdering';
 import { readCachedLeagueCatalog, writeCachedLeagueCatalog } from '@/lib/utils/leagueCatalogStorage';
@@ -431,17 +430,6 @@ function generateDates(timeZone: string) {
 
 // --- Memoized Sub-components for Performance ---
 
-const LiveMinute = ({ dateTime, sport }: { dateTime: string, sport: any }) => {
-  const [, setTick] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  return <>{calculateVirtualMatchTime(dateTime, sport, 'live') || 'En Vivo'}</>;
-};
-
 function getCountryFlagEmoji(countryName: unknown): string {
   if (typeof countryName !== 'string' || !countryName.trim()) return '';
   return findCountryRecord(undefined, countryName)?.flagEmoji || '';
@@ -584,9 +572,13 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
     >
       <div className={styles.matchTime}>
         {match.status === 'live' ? (
+          /* Sin minuto: la portada no sabe a qué hora se dio el kick-off de
+             verdad, y un reloj virtual desde el horario programado marcaba 97'
+             en un partido que iba por el 2T. Acá alcanza con decir que está en
+             juego; el minuto real vive en la ficha del partido. */
           <span className={styles.matchLive}>
             <span className={styles.matchLiveDot}></span>
-            {match.minute || <LiveMinute dateTime={match._dateTime} sport={selectedSport} />}
+            En vivo
           </span>
         ) : match.status === 'finished' ? (
           <span className={styles.matchFinished}>FT</span>
