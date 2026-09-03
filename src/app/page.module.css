@@ -1200,6 +1200,12 @@
     /* space between rows */
     flex: 1;
     justify-content: center;
+    /* Sin esto el ancho mínimo del bloque es el del nombre más largo (nowrap):
+       "Asociación Amateur de Hockey Sobre Cesped de Buenos Aires" ensanchaba
+       la fila y los marcadores de TODA la tarjeta quedaban fuera del borde.
+       Con min-width: 0 el nombre se corta con puntos suspensivos y el
+       resultado se ve siempre. */
+    min-width: 0;
 }
 
 .matchTeam {
