@@ -29,6 +29,11 @@
  * los había metido en la fase de liga y la tabla de la zona sumaba los cruces:
  * el cron corrige eso también para las filas viejas, moviéndolas de fase.
  *
+ * Y las zonas son GRUPOS: con dos o más "Zona X" la fase pasa a `group_stage`,
+ * cada zona es una fila de `tournament_groups`, y participantes y partidos
+ * llevan su `group_id`. Sin eso el motor arma una sola tabla con las dos zonas
+ * mezcladas, que es lo que se veía.
+ *
  * Todo lo que no se entiende viaja en la respuesta (`omitidos`, `errors`): un
  * scraper caído que responde "sin novedades" es peor que uno que grita.
  */
@@ -37,10 +42,14 @@ import { NextResponse } from 'next/server';
 import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
+  AMBITO_CAH,
   CAHOCKEY_ID_PREFIX,
   CAHOCKEY_PROVIDER,
   buildMatchExternalId,
   buildTeamAlias,
+  esClubReal,
+  idDeClub,
+  nombreLimpio,
 } from '@/lib/integrations/cahockey/nombres.ts';
 import { planTournamentMatches, type ExistenteCah } from '@/lib/integrations/cahockey/planMatches.ts';
 import { esEtapaDeZona, fetchSicahHtml, fetchSicahUrl, parsearSicah } from '@/lib/integrations/cahockey/sicah.ts';
@@ -232,11 +241,16 @@ export async function sincronizarCahockey(opts: {
     });
     const necesitaFaseLlave = !faseLlave && (plan.crear.some((a) => a.fase === 'llave') || enFaseEquivocada.length > 0);
 
+    const zonasSicah = [...new Set(sicah.partidos.map((p) => p.etapa).filter((e): e is string => esEtapaDeZona(e)))].sort();
+
     const fasesTocadas = new Set<string>();
     let creados = 0;
     let actualizados = 0;
     let movidos = 0;
     let faseCreada = false;
+    let gruposCreados = 0;
+    let asignaciones = 0;
+    let faseConvertida = false;
 
     if (!enSeco) {
       if (necesitaFaseLlave) {
@@ -307,6 +321,15 @@ export async function sincronizarCahockey(opts: {
         fasesTocadas.add(phaseId);
       }
 
+      // ── zonas → grupos ─────────────────────────────────────────────────
+      if (faseZona && zonasSicah.length >= 2) {
+        const r = await sincronizarZonas({ supabase, t, faseZona, zonasSicah, sicah, alias, errors, ahoraIso });
+        gruposCreados = r.gruposCreados;
+        asignaciones = r.asignaciones;
+        faseConvertida = r.faseConvertida;
+        if (r.tocada) fasesTocadas.add(faseZona.id);
+      }
+
       // La tabla sólo tiene sentido en la fase de zona: la de llave no se recalcula.
       if (faseLlave) fasesTocadas.delete(faseLlave.id);
       if (fasesTocadas.size) {
@@ -317,7 +340,7 @@ export async function sincronizarCahockey(opts: {
           if (!r.ok) errors.push(`${t.external_id}: recálculo de la fase ${fase} falló`);
         }
       }
-      escrituras += creados + actualizados + movidos;
+      escrituras += creados + actualizados + movidos + gruposCreados + asignaciones;
     }
 
     resumen.push({
@@ -328,6 +351,8 @@ export async function sincronizarCahockey(opts: {
       actualizar: enSeco ? plan.actualizar.length : actualizados,
       moverAFaseDeLlave: enSeco ? enFaseEquivocada.length : movidos,
       faseDeLlave: faseCreada ? 'creada' : faseLlave ? 'existe' : necesitaFaseLlave ? 'a crear' : 'no hace falta',
+      zonas: zonasSicah,
+      grupos: { creados: gruposCreados, asignaciones, faseConvertida },
       sinCambios: plan.sinCambios,
       omitidos: plan.omitidos,
       clubesDesconocidos: plan.clubesDesconocidos,
@@ -357,4 +382,106 @@ export async function sincronizarCahockey(opts: {
     escrituras,
     errors,
   });
+}
+
+type ClienteAdmin = ReturnType<typeof createAdminClient>;
+
+/**
+ * Las zonas de SICAH como grupos de la fase: crea los `tournament_groups` que
+ * falten, pasa la fase a `group_stage`, y pone el `group_id` en los
+ * participantes de fase y en los partidos de zona. Idempotente: en la segunda
+ * corrida no escribe nada.
+ *
+ * La zona de un club sale de sus partidos de zona (un equipo juega una sola).
+ * Las filas de posiciones sin grupo de esa fase se borran al convertirla: el
+ * motor limpia por alcance (fase, grupo) y las de grupo NULL quedarían rancias
+ * al lado de las nuevas.
+ */
+async function sincronizarZonas(args: {
+  supabase: ClienteAdmin;
+  t: TorneoFila;
+  faseZona: FaseFila;
+  zonasSicah: string[];
+  sicah: ReturnType<typeof parsearSicah>;
+  alias: Map<string, string>;
+  errors: string[];
+  ahoraIso: string;
+}): Promise<{ gruposCreados: number; asignaciones: number; faseConvertida: boolean; tocada: boolean }> {
+  const { supabase, t, faseZona, zonasSicah, sicah, alias, errors, ahoraIso } = args;
+  const salida = { gruposCreados: 0, asignaciones: 0, faseConvertida: false, tocada: false };
+
+  const zonaPorClub = new Map<string, string>();
+  const zonaPorPartido = new Map<string, string>();
+  for (const p of sicah.partidos) {
+    if (!esEtapaDeZona(p.etapa) || !p.etapa) continue;
+    zonaPorPartido.set(buildMatchExternalId(t.external_id, p.nro), p.etapa);
+    for (const lado of [p.local, p.visitante]) {
+      const nombre = nombreLimpio(lado?.equipo ?? '');
+      if (!esClubReal(nombre)) continue;
+      zonaPorClub.set(alias.get(buildTeamAlias(t.external_id, nombre)) ?? idDeClub(nombre, AMBITO_CAH), p.etapa);
+    }
+  }
+
+  // grupos
+  const { data: gruposRaw, error: errGrupos } = await supabase
+    .from('tournament_groups').select('id, name').eq('phase_id', faseZona.id);
+  if (errGrupos) { errors.push(`${t.external_id}: no se pudieron leer los grupos (${errGrupos.message})`); return salida; }
+  const grupoPorZona = new Map(((gruposRaw ?? []) as { id: string; name: string }[]).map((g) => [g.name, g.id]));
+  for (const [i, zona] of zonasSicah.entries()) {
+    if (grupoPorZona.has(zona)) continue;
+    const id = globalThis.crypto.randomUUID();
+    const { error } = await supabase.from('tournament_groups').insert([{ id, phase_id: faseZona.id, name: zona, order_index: i + 1 }]);
+    if (error) { errors.push(`${t.external_id}: no se pudo crear el grupo ${zona} (${error.message})`); continue; }
+    grupoPorZona.set(zona, id);
+    salida.gruposCreados++;
+    salida.tocada = true;
+  }
+
+  // la fase
+  if (faseZona.phase_type !== 'group_stage') {
+    const { error } = await supabase.from('tournament_phases')
+      .update({ phase_type: 'group_stage', updated_at: ahoraIso }).eq('id', faseZona.id);
+    if (error) errors.push(`${t.external_id}: no se pudo pasar la fase a group_stage (${error.message})`);
+    else {
+      salida.faseConvertida = true;
+      salida.tocada = true;
+      const { error: errBorrar } = await supabase.from('tournament_standings')
+        .delete().eq('tournament_id', t.id).eq('phase_id', faseZona.id).is('group_id', null);
+      if (errBorrar) errors.push(`${t.external_id}: no se pudo limpiar la tabla sin grupo (${errBorrar.message})`);
+    }
+  }
+
+  // participantes de fase
+  const { data: partsRaw, error: errParts } = await supabase
+    .from('tournament_participants').select('id, club_id').eq('tournament_id', t.id).limit(500);
+  if (errParts) { errors.push(`${t.external_id}: no se pudieron leer los participantes (${errParts.message})`); return salida; }
+  const clubPorParticipante = new Map(((partsRaw ?? []) as { id: string; club_id: string }[]).map((p) => [p.id, p.club_id]));
+  const { data: asigRaw, error: errAsig } = await supabase
+    .from('tournament_phase_participants').select('id, participant_id, group_id').eq('phase_id', faseZona.id).limit(500);
+  if (errAsig) { errors.push(`${t.external_id}: no se pudieron leer las asignaciones de fase (${errAsig.message})`); return salida; }
+  for (const a of (asigRaw ?? []) as { id: string; participant_id: string; group_id: string | null }[]) {
+    const zona = zonaPorClub.get(clubPorParticipante.get(a.participant_id) ?? '');
+    const grupoId = zona ? grupoPorZona.get(zona) ?? null : null;
+    if (!grupoId || a.group_id === grupoId) continue;
+    const { error } = await supabase.from('tournament_phase_participants').update({ group_id: grupoId }).eq('id', a.id);
+    if (error) { errors.push(`${t.external_id}: no se pudo asignar el grupo a ${a.participant_id} (${error.message})`); continue; }
+    salida.asignaciones++;
+    salida.tocada = true;
+  }
+
+  // partidos de zona (se releen: los de esta corrida recién se crearon)
+  const { data: msRaw, error: errMs } = await supabase
+    .from('matches').select('id, external_id, group_id').eq('tournament_id', t.id).eq('phase_id', faseZona.id).limit(2000);
+  if (errMs) { errors.push(`${t.external_id}: no se pudieron releer los partidos (${errMs.message})`); return salida; }
+  for (const m of (msRaw ?? []) as { id: string; external_id: string | null; group_id: string | null }[]) {
+    const zona = m.external_id ? zonaPorPartido.get(m.external_id) : undefined;
+    const grupoId = zona ? grupoPorZona.get(zona) ?? null : null;
+    if (!grupoId || m.group_id === grupoId) continue;
+    const { error } = await supabase.from('matches').update({ group_id: grupoId }).eq('id', m.id);
+    if (error) { errors.push(`${m.external_id}: no se pudo asignar el grupo (${error.message})`); continue; }
+    salida.asignaciones++;
+    salida.tocada = true;
+  }
+
+  return salida;
 }

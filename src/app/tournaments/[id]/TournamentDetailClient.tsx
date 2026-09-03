@@ -5179,6 +5179,7 @@ export default function TournamentDetailPage({
                             topScorers={topScorers}
                             tournamentName={tournamentData?.name}
                             tournamentLogo={tournamentLogo}
+                            sportId={tournamentData?.sportId}
                         />
                     );
                 })()}

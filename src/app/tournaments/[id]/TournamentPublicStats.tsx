@@ -12,6 +12,7 @@ import {
     isContestLostDetail,
 } from '@/lib/matchEventStats';
 import { formatDifference } from '@/lib/utils/formatDifference';
+import { isRugbySport } from '@/lib/externalProviderPolicy';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import TeamLogo from '@/components/TeamLogo';
 import TournamentTopStats, { type TarjetaDeTop } from './TournamentTopStats';
@@ -39,6 +40,15 @@ interface TournamentPublicStatsProps {
     // Solo para el export: el nombre va al subtitulo de la placa y el logo al modal.
     tournamentName?: string;
     tournamentLogo?: string;
+    /**
+     * El deporte decide el vocabulario. Sin él (o con rugby) la pestaña es la de
+     * siempre: tries, tackles, patadas. Con otro deporte —hockey, fútbol— los
+     * partidos traen un marcador y nada más, así que se muestran goles, balance
+     * y diferencia, y se esconden las columnas y el podio que sólo existen por
+     * evento de rugby: una tabla de "TRIES+ 0 · TACK 0" en un torneo de hockey
+     * no informa, confunde.
+     */
+    sportId?: string | null;
 }
 
 const MOBILE_BREAKPOINT = 640;
@@ -137,6 +147,30 @@ const PLAYER_TOP_CARDS: TarjetaDeTop[] = [
     { metric: 'penalty_goals', title: 'Más penales' },
     { metric: 'tackles', title: 'Más tackles' },
     { metric: 'kick_meters', title: 'Más metros de patada' },
+];
+
+/* ── Deportes sin eventos de rugby (hockey, fútbol) ──────────────────────────
+   Lo único que llega es el marcador: partidos, balance, goles a favor y en
+   contra. Las columnas y las tarjetas de tries, tackles y patadas se quedan
+   afuera porque en estos torneos serían todas cero. */
+const GENERIC_TEAM_COLUMNS: StatColumn[] = [
+    { id: 'entity', label: 'Equipo' },
+    { id: 'matches_played', label: 'PJ', title: 'Partidos jugados' },
+    { id: 'wins', label: 'PG', title: 'Partidos ganados' },
+    { id: 'draws', label: 'PE', title: 'Partidos empatados' },
+    { id: 'losses', label: 'PP', title: 'Partidos perdidos' },
+    { id: 'points_for', label: 'GF', title: 'Goles a favor', accent: true, tone: 'attack' },
+    { id: 'points_against', label: 'GC', title: 'Goles en contra', tone: 'defense' },
+    { id: 'points_difference', label: 'DIF', title: 'Diferencia de gol', accent: true, format: 'signed' },
+    { id: 'points_for_per_match', label: 'GF/PJ', title: 'Goles a favor por partido', format: 'decimal', tone: 'attack' },
+    { id: 'points_against_per_match', label: 'GC/PJ', title: 'Goles en contra por partido', format: 'decimal', tone: 'defense' },
+];
+
+const GENERIC_TEAM_TOP_CARDS: TarjetaDeTop[] = [
+    { metric: 'points_for', title: 'Más goles' },
+    { metric: 'points_for_per_match', title: 'Goles por partido', decimals: 1 },
+    { metric: 'points_difference', title: 'Mejor diferencia', signed: true },
+    { metric: 'points_against_per_match', title: 'Menos goles en contra', lowerIsBetter: true, decimals: 1 },
 ];
 
 /**
@@ -270,8 +304,10 @@ function useIsMobile() {
     return isMobile;
 }
 
-export default function TournamentPublicStats({ matches, topScorers, tournamentName, tournamentLogo }: TournamentPublicStatsProps) {
+export default function TournamentPublicStats({ matches, topScorers, tournamentName, tournamentLogo, sportId }: TournamentPublicStatsProps) {
     const isMobile = useIsMobile();
+    // Sin deporte declarado se asume rugby: es lo que la pestaña siempre fue.
+    const esRugby = !sportId || isRugbySport(sportId);
     const [activeSubTab, setActiveSubTab] = useState<StatsSubTab>('teams');
     const [teamStatsView, setTeamStatsView] = useState<TeamStatsView>('summary');
     const [sortKey, setSortKey] = useState('points_for');
@@ -565,7 +601,7 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
         return Array.from(byId.values());
     }, [finalMatches]);
 
-    const teamColumns = TEAM_COLUMNS[teamStatsView];
+    const teamColumns = esRugby ? TEAM_COLUMNS[teamStatsView] : GENERIC_TEAM_COLUMNS;
     const playerColumns = PLAYER_COLUMNS;
 
     const currentRows = activeSubTab === 'teams' ? teamRows : playerRows;
@@ -845,9 +881,11 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                     <h2 className={styles.pageTitle}>Estadísticas</h2>
                     {!showTopScorersFallback && (
                         <p className={styles.statsSubtitle}>
-                            {activeSubTab === 'teams'
-                                ? TEAM_STATS_VIEW_OPTIONS.find((view) => view.id === teamStatsView)?.description
-                                : 'Ranking individual con puntos, tries, patadas y defensa.'}
+                            {!esRugby
+                                ? 'Partidos, goles y balance de cada equipo.'
+                                : activeSubTab === 'teams'
+                                    ? TEAM_STATS_VIEW_OPTIONS.find((view) => view.id === teamStatsView)?.description
+                                    : 'Ranking individual con puntos, tries, patadas y defensa.'}
                         </p>
                     )}
                 </div>
@@ -861,13 +899,15 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                             >
                                 Equipos
                             </button>
-                            <button
-                                type="button"
-                                className={`${styles.statsSubTab} ${activeSubTab === 'players' ? styles.statsSubTabActive : ''}`}
-                                onClick={() => handleSubTabChange('players')}
-                            >
-                                Jugadores
-                            </button>
+                            {esRugby && (
+                                <button
+                                    type="button"
+                                    className={`${styles.statsSubTab} ${activeSubTab === 'players' ? styles.statsSubTabActive : ''}`}
+                                    onClick={() => handleSubTabChange('players')}
+                                >
+                                    Jugadores
+                                </button>
+                            )}
                         </div>
                         {hasStats && displayRows.length > 0 && (
                             <ExportImage
@@ -880,7 +920,7 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                 )}
             </div>
 
-            {!showTopScorersFallback && activeSubTab === 'teams' && (
+            {!showTopScorersFallback && esRugby && activeSubTab === 'teams' && (
                 <div className={styles.statsModeBar} aria-label="Vista de estadísticas por equipo">
                     {TEAM_STATS_VIEW_OPTIONS.map((view) => (
                         <button
@@ -899,7 +939,7 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             {!showTopScorersFallback && hasStats && (
                 <TournamentTopStats
                     rows={currentRows}
-                    cards={activeSubTab === 'teams' ? TEAM_TOP_CARDS : PLAYER_TOP_CARDS}
+                    cards={!esRugby ? GENERIC_TEAM_TOP_CARDS : activeSubTab === 'teams' ? TEAM_TOP_CARDS : PLAYER_TOP_CARDS}
                     unmeasured={unmeasuredMetrics}
                     kind={activeSubTab}
                     onPick={(metric, direction) => {
