@@ -2188,6 +2188,19 @@
     color: var(--color-text-secondary);
     font-weight: 500;
     font-size: 0.95rem;
+    /* Sin min-width: 0 el ancho mínimo de la fila es el del nombre completo
+       ("Federacion Amateur de Hockey Sobre Cesped Union del Centro") y el
+       marcador se va del borde. El nombre se corta con puntos suspensivos;
+       el resultado se ve siempre. */
+    flex: 1;
+    min-width: 0;
+}
+
+.teamInfoName {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .teamLogoSmall {
@@ -2213,6 +2226,7 @@
     font-weight: 700;
     color: var(--color-text-primary);
     font-family: var(--font-mono, monospace);
+    flex-shrink: 0;
 }
 
 .matchMeta {
