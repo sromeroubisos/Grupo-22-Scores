@@ -48,6 +48,8 @@ const ESCUDOS: Record<string, { clubes: string[]; recorte?: Recorte; nota?: stri
   'BONAERENSE': { clubes: ['federacion-bonaerense-cah-hockey'], nota: 'FBH: no jugó el 2026 todavía, se crea el club para que el próximo import lo encuentre' },
   'BUENOS AIRES': { clubes: ['asociacion-amateur-de-hockey-sobre-cesped-de-buenos-aires-cah-hockey'] },
   'CHACO': { clubes: ['federacion-chaquena-cah-hockey'] },
+  // Chile es invitada al Argentino de Selecciones y presenta A y B: mismo escudo
+  'Chilena': { clubes: ['federacion-chilena-de-hockey-cah-hockey', 'federacion-chilena-de-hockey-a-cah-hockey', 'federacion-chilena-de-hockey-b-cah-hockey'] },
   'CORDOBESA': { clubes: ['federacion-cordobesa-cah-hockey'], nota: 'FCH actual; CÓRDOBA.png es el escudo viejo (FACHSC) y se deja afuera' },
   // 684×270 con el escudo en el medio: se recorta el cuadrado central
   'ENTRE RIOS': { clubes: ['federacion-entrerriana-cah-hockey'], recorte: { left: 207, top: 0, width: 270, height: 270 } },
