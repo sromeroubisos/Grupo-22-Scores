@@ -79,3 +79,7 @@ graphify-out/
 # Caché de descargas de rugbyarchive.net (derivado, se rebaja solo)
 .rugbyarchive-cache/
 RUGBYARCHIVE_HISTORICO_LOG.jsonl
+
+# cosechas de los scrapers de hockey (decenas de MB): se regeneran
+scripts/cahockey/out/
+scripts/atahockey/out/

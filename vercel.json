@@ -6,6 +6,14 @@
       "schedule": "* * * * *"
     },
     {
+      "path": "/api/cron/cahockey-sync",
+      "schedule": "*/15 11-23 * * *"
+    },
+    {
+      "path": "/api/cron/cahockey-sync",
+      "schedule": "*/15 0-2 * * *"
+    },
+    {
       "path": "/api/cron/push-notifications",
       "schedule": "* * * * *"
     },

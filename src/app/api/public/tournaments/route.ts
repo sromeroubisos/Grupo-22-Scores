@@ -44,6 +44,8 @@ const SELECT_WITHOUT_LEGACY_SPORT_REVIEW = `${SELECT_WITHOUT_LEGACY_SPORT}, revi
 const FLAT_CACHE_CONTROL = 'public, max-age=300, stale-while-revalidate=600';
 const CATALOG_CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300';
 const PUBLIC_TOURNAMENTS_DB_QUERY_LIMIT = 3000;
+/** Tamaño de página: PostgREST no devuelve más de 1000 filas por request. */
+const PUBLIC_TOURNAMENTS_DB_PAGE_SIZE = 1000;
 
 // La lectura de `tournaments` es la MISMA para todos los scopes y para todos los
 // paises: el recorte por deporte, audiencia y pais se hace despues, en memoria.
@@ -1269,19 +1271,41 @@ async function queryVisiblePublicTournaments(
     ];
 
     for (const attempt of attempts) {
-        let query = supabase
-            .from('tournaments')
-            .select(attempt.select)
-            .neq('is_visible', false);
+        // PostgREST corta en 1000 filas y `limit(3000)` no lo cambia: con 1112
+        // torneos visibles, 112 quedaban afuera de la lista pública —entre
+        // ellos los juveniles de hockey, que son los que se juegan hoy—. Se
+        // pagina por lo que llegó, desempatando por `id` para que el orden sea
+        // total y ninguna fila se repita ni se pierda entre páginas.
+        const filas: unknown[] = [];
+        let error: PublicTournamentQueryResult['error'] = null;
 
-        if (attempt.usesPriority) {
-            query = query.order('priority', { ascending: false, nullsFirst: false });
+        for (let desde = 0; desde < PUBLIC_TOURNAMENTS_DB_QUERY_LIMIT; desde += PUBLIC_TOURNAMENTS_DB_PAGE_SIZE) {
+            let query = supabase
+                .from('tournaments')
+                .select(attempt.select)
+                .neq('is_visible', false);
+
+            if (attempt.usesPriority) {
+                query = query.order('priority', { ascending: false, nullsFirst: false });
+            }
+
+            const pagina = await query
+                .order('display_name', { ascending: true })
+                .order('name', { ascending: true })
+                .order('id', { ascending: true })
+                .range(desde, desde + PUBLIC_TOURNAMENTS_DB_PAGE_SIZE - 1) as unknown as PublicTournamentQueryResult;
+
+            if (pagina.error) {
+                error = pagina.error;
+                break;
+            }
+
+            const lote = pagina.data ?? [];
+            filas.push(...lote);
+            if (lote.length < PUBLIC_TOURNAMENTS_DB_PAGE_SIZE) break;
         }
 
-        const result = await query
-            .order('display_name', { ascending: true })
-            .order('name', { ascending: true })
-            .limit(PUBLIC_TOURNAMENTS_DB_QUERY_LIMIT) as unknown as PublicTournamentQueryResult;
+        const result = { data: filas, error } as unknown as PublicTournamentQueryResult;
 
         if (!result.error) {
             return result;
