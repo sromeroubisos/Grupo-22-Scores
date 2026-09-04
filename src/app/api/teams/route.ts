@@ -118,6 +118,10 @@ type NormalizedInternalMatch = {
     match_status: string;
     timestamp: number;
     tournament_name: string;
+    // Id de torneo navegable cuando se conoce. Los partidos del Mundial que
+    // suma una seleccion vinculada lo traen (fih-wc-1867); los de la base, no
+    // siempre.
+    tournament_id?: string | null;
     sport_id: string | null;
 };
 type InternalSquadState = {
