@@ -977,6 +977,12 @@
 .matchesListWrapper {
     display: grid;
     grid-template-rows: 1fr;
+    /* La columna implícita de una grilla es `auto`, y auto toma como mínimo el
+       min-content del hijo: un nombre en nowrap ("Club Banco Provincia de Mar
+       del Plata - Damas") ensanchaba la lista más allá de la tarjeta y el
+       overflow: hidden se comía el marcador y la estrella. Con minmax(0, 1fr)
+       la lista mide lo que mide la tarjeta y el nombre se corta con puntos. */
+    grid-template-columns: minmax(0, 1fr);
     transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
     overflow: hidden;
     opacity: 1;
@@ -990,6 +996,7 @@
 
 .matchesList {
     min-height: 0;
+    min-width: 0;
 }
 
 .motorsportMatchesList {
