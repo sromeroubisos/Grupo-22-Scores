@@ -985,6 +985,68 @@ export type Database = {
           { foreignKeyName: "tournament_rounds_phase_id_fkey"; columns: ["phase_id"]; referencedRelation: "tournament_phases"; referencedColumns: ["id"] }
         ]
       }
+      tournament_sponsors: {
+        Row: {
+          amount: number | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          ends_at: string | null
+          id: string
+          logo_url: string | null
+          metadata: Json
+          name: string
+          placement: string | null
+          sort_order: number
+          starts_at: string | null
+          status: string
+          tier: string | null
+          tournament_id: string
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          ends_at?: string | null
+          id?: string
+          logo_url?: string | null
+          metadata?: Json
+          name: string
+          placement?: string | null
+          sort_order?: number
+          starts_at?: string | null
+          status?: string
+          tier?: string | null
+          tournament_id: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          ends_at?: string | null
+          id?: string
+          logo_url?: string | null
+          metadata?: Json
+          name?: string
+          placement?: string | null
+          sort_order?: number
+          starts_at?: string | null
+          status?: string
+          tier?: string | null
+          tournament_id?: string
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          { foreignKeyName: "tournament_sponsors_tournament_id_fkey"; columns: ["tournament_id"]; referencedRelation: "tournaments"; referencedColumns: ["id"] }
+        ]
+      }
       tournament_standings: {
         Row: {
           bonus_points: number

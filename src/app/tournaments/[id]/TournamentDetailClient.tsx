@@ -15,6 +15,8 @@ import RadialBracketPredictor from '@/components/RadialBracketPredictor';
 import TournamentPublicStats from './TournamentPublicStats';
 import TournamentScoresPanel, { hasRatedLineups, sondaDePuntajes } from './TournamentScoresPanel';
 import TournamentChampionsTab, { ClubCrest, type ChampionRef } from './TournamentChampionsTab';
+import TournamentSponsorsSection from './TournamentSponsorsSection';
+import type { PublicTournamentSponsor } from '@/lib/tournament/sponsors';
 import TournamentSofascoreStats from './TournamentSofascoreStats';
 import TournamentNavigation from './TournamentNavigation';
 import { resolveSofascoreLeague } from '@/lib/sofascoreLeagueMap';
@@ -1849,6 +1851,12 @@ interface TournamentDetailPageProps {
     initialData?: TournamentInitialData | null;
     renderTodayKey: string;
     renderYear: number;
+    /**
+     * Sponsors activos resueltos en el servidor (solo lo comercial, sin monto).
+     * `null` = torneo externo, sin sponsors propios. `undefined` = la sección
+     * los pide sola.
+     */
+    initialSponsors?: PublicTournamentSponsor[] | null;
 }
 
 export default function TournamentDetailPage({
@@ -1856,6 +1864,7 @@ export default function TournamentDetailPage({
     initialData,
     renderTodayKey,
     renderYear,
+    initialSponsors,
 }: TournamentDetailPageProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -5238,6 +5247,17 @@ export default function TournamentDetailPage({
                 )}
 
               </div>
+
+              {/*
+                SPONSORS: al pie, debajo de la pestaña activa, visible en todas.
+                Solo los activos, solo logo y nombre. Si el torneo no tiene
+                sponsors la sección no existe (no reserva espacio vacío).
+              */}
+              <TournamentSponsorsSection
+                tournamentId={id}
+                initialSponsors={initialSponsors}
+                enabled={initialSponsors !== null}
+              />
 
               {/*
                 Al pie del torneo, no encima: el que está mirando un fixture ya

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
     ChevronDown,
     FileText,
+    Handshake,
     Layers,
     LayoutDashboard,
     MoreHorizontal,
@@ -26,6 +27,7 @@ export const TOURNAMENT_TABS = [
     { id: 'estructura', label: 'Estructura', icon: Layers, description: 'Fases, reglas y formato competitivo' },
     { id: 'participantes', label: 'Participantes', icon: Users, description: 'Altas, filtros y control de equipos' },
     { id: 'operacion', label: 'Operación', icon: Zap, description: 'Fixture, resultados y tabla operativa' },
+    { id: 'sponsors', label: 'Sponsors', icon: Handshake, description: 'Marcas que acompañan el torneo' },
 ];
 
 // Mobile-only: 4 primary tabs always visible in the bottom bar.

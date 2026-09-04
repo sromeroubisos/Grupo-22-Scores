@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation';
 import { fetchTournamentData } from '@/lib/server/fetchTournamentData';
+import { fetchPublicTournamentSponsors } from '@/lib/server/tournamentSponsors';
+import type { PublicTournamentSponsor } from '@/lib/tournament/sponsors';
 import { APP_TIMEZONE, getTodayKey } from '@/lib/timezone';
 import { isBlockedTournamentId } from '@/lib/utils/blockedTournaments';
 import TournamentDetailPage from './TournamentDetailClient';
@@ -37,6 +39,9 @@ export default async function TournamentPage({
         id.toLowerCase().startsWith('fih-wc-');
     const isDbTournament = !isExternalTournament;
     let initialData = undefined;
+    // Sponsors activos del torneo (solo logo/nombre/link, nunca el monto).
+    // `undefined` deja que la sección los pida sola si el snapshot falló.
+    let initialSponsors: PublicTournamentSponsor[] | undefined = undefined;
 
     if (isDbTournament) {
         try {
@@ -48,6 +53,10 @@ export default async function TournamentPage({
             // Use any successful snapshot, even if partial, and let the client refresh it.
             if (data?.ok) {
                 initialData = data;
+                const resolvedTournamentId = (data.tournament as { id?: unknown } | null)?.id;
+                if (typeof resolvedTournamentId === 'string' && resolvedTournamentId) {
+                    initialSponsors = await fetchPublicTournamentSponsors(resolvedTournamentId);
+                }
             }
         } catch {
             // Fallback: client component will fetch on its own
@@ -60,6 +69,7 @@ export default async function TournamentPage({
             initialData={initialData}
             renderTodayKey={renderTodayKey}
             renderYear={renderYear}
+            initialSponsors={isDbTournament ? initialSponsors : null}
         />
     );
 }

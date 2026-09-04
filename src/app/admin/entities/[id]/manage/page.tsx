@@ -15,6 +15,7 @@ import { TournamentStructureTab } from '@/components/admin/entities/tournament/T
 import { ClubManagerShell } from '@/components/admin/club-manager/ClubManagerShell';
 import { TournamentParticipantsTab } from '@/components/admin/entities/tournament/TournamentParticipantsTab';
 import { TournamentOperationTab } from '@/components/admin/entities/tournament/TournamentOperationTab';
+import { TournamentSponsorsTab } from '@/components/admin/entities/tournament/TournamentSponsorsTab';
 import { Database } from '@/lib/database.types';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 import { resolveTournamentAdminScope } from '@/lib/auth/tournamentAdminScope';
@@ -551,6 +552,12 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                         )}
                     {effectiveTab === 'medios' && (
                         <TournamentMediaTab
+                            data={result.data as TournamentRow}
+                            id={id}
+                        />
+                    )}
+                    {effectiveTab === 'sponsors' && (
+                        <TournamentSponsorsTab
                             data={result.data as TournamentRow}
                             id={id}
                         />
