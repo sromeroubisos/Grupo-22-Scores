@@ -1856,7 +1856,19 @@ export default function TournamentDetailPage({
 }: TournamentDetailPageProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const routeSearch = searchParams.toString();
+    /* La pestaña activa vive en la URL (`?tab=`, más abajo) y se escribe con
+       `history.pushState` nativo. Desde Next 14.1 `useSearchParams` refleja
+       también esos pushState, así que cada cambio de solapa cambiaba
+       `routeSearch` y con él re-corría el efecto de carga entero: aborto de
+       lo que estaba en vuelo, `loading` en true y todas las tandas de nuevo.
+       Medido en un torneo externo (FISU): cada solapa era una recarga. La
+       clave de datos sale de la URL SIN la pestaña; la pestaña la lee su
+       propio efecto directo de `window.location`. */
+    const routeSearch = useMemo(() => {
+        const query = new URLSearchParams(searchParams.toString());
+        query.delete("tab");
+        return query.toString();
+    }, [searchParams]);
     const { isLeagueFavorite, toggleLeagueFavorite } = useFavorites();
     const { user, isLoading: authLoading } = useAuth();
 
@@ -2608,8 +2620,14 @@ export default function TournamentDetailPage({
         // Deep link a Campeones: el tab recién existe cuando llegó la lista de
         // temporadas — no lo patees a Resumen mientras el fetch está en vuelo.
         if (activeTab === 'champions' && !seasonOptionsLoaded) return;
+        /* Mismo criterio para todo lo que depende de los datos del torneo:
+           Clasificación no existe hasta que llega la tabla, y en un torneo
+           externo (sin snapshot del servidor) eso tarda un fetch entero. Patear
+           antes de tiempo perdía el deep link: `?tab=standings` abría en
+           Resumen y encima reescribía la URL. Con los datos en vuelo, se espera. */
+        if (loading) return;
         setActiveTab(navigationTabs[0]?.id || 'summary');
-    }, [activeTab, navigationTabs, seasonOptionsLoaded]);
+    }, [activeTab, loading, navigationTabs, seasonOptionsLoaded]);
 
     /* ── La pestaña vive en la URL ────────────────────────────────────────
        Antes el estado era sólo del componente: las ocho solapas compartían la
