@@ -953,6 +953,17 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const usesManagedDesign = Boolean(resolveAdminPanel(user?.role, user?.memberships));
     const [isExporting, setIsExporting] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    /* Los presets guardados solo se ven adentro del modal, pero se hidrataban al
+       montar: en la pagina de partido son tres instancias, y cada una bajaba la
+       coleccion entera —23 MB medidos, con las fotos de gradiente embebidas en
+       base64—, la parseaba y la clonaba a IndexedDB. En un iPhone eso es la
+       pestaña congelada antes de tocar nada. Ahora se piden la primera vez que
+       se abre el modal, y una sola vez por pagina (ver
+       hydrateSavedPresetCollectionsShared). */
+    const [presetsRequested, setPresetsRequested] = useState(false);
+    useEffect(() => {
+        if (showModal) setPresetsRequested(true);
+    }, [showModal]);
     // El modal trabaja con una FOTO de los datos, tomada al abrirlo. Las paginas arman
     // `data` inline en cada render (y la ficha de un partido en vivo se vuelve a
     // renderizar cada segundo por el reloj), asi que con la prop viva el preview
@@ -1289,11 +1300,12 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     }, [data, template]);
 
     useEffect(() => {
+        if (!presetsRequested) return undefined;
         let isMounted = true;
         let hydrateInFlight = false;
         let hydrateQueued = false;
 
-        const hydrateSavedPresets = async () => {
+        const hydrateSavedPresets = async (force = false) => {
             // Coalesce overlapping invocations (mount + rapid auth events).
             // Concurrent hydrate/upsert batches for the same user were the
             // root cause of the connection-pool exhaustion: at most one runs
@@ -1307,7 +1319,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                 do {
                     hydrateQueued = false;
                     const { editorialPresets, gradientPresets, platePresets, storageMode, plateStorageMode } =
-                        await hydrateSavedPresetCollections(supabase);
+                        await hydrateSavedPresetCollectionsShared(supabase, force);
 
                     if (!isMounted) return;
                     setSavedEditorialPresets(editorialPresets);
@@ -1328,14 +1340,15 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             // keyed by user_id don't need re-hydration; re-running on every
             // tick was a multiplier on the preset-sync / token storms.
             if (event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION' || event === 'USER_UPDATED') return;
-            void hydrateSavedPresets();
+            // Cambio de usuario: la coleccion compartida es de otro, se vuelve a pedir.
+            void hydrateSavedPresets(true);
         });
 
         return () => {
             isMounted = false;
             subscription.unsubscribe();
         };
-    }, [supabase]);
+    }, [presetsRequested, supabase]);
 
     useEffect(() => {
         if (template !== 'matchStats') return;
@@ -4726,6 +4739,29 @@ function mergeSavedGradientPresetCollections(
     );
 }
 
+// Un gradiente guardado es un PNG en base64 de alrededor de 1 MB. Meterlo entero
+// en la firma obligaba a serializar decenas de MB por comparacion, varias veces
+// por hidratacion. Con el largo y una muestra de 512 posiciones alcanza para
+// detectar que cambio la foto; el nombre del preset es la clave de conflicto.
+function fingerprintLargeString(value: string): string {
+    if (value.length <= 4096) return value;
+    const step = Math.max(1, Math.floor(value.length / 512));
+    let hash = 0;
+    for (let index = 0; index < value.length; index += step) {
+        hash = (hash * 31 + value.charCodeAt(index)) | 0;
+    }
+    return `len:${value.length}:h:${hash}`;
+}
+
+function fingerprintPresetImage(value: unknown): unknown {
+    if (!value || typeof value !== 'object') return value ?? null;
+    const image = value as { name?: unknown; src?: unknown };
+    return {
+        name: typeof image.name === 'string' ? image.name : null,
+        src: typeof image.src === 'string' ? fingerprintLargeString(image.src) : null,
+    };
+}
+
 function buildStablePresetSignatureEntry(value: unknown): string {
     const preset = asPresetPayload(value);
     const name = typeof preset.name === 'string' ? preset.name : '';
@@ -4738,7 +4774,7 @@ function buildStablePresetSignatureEntry(value: unknown): string {
         preset.layoutPresetId ?? null,
         preset.gradientLeftColor ?? null,
         preset.gradientRightColor ?? null,
-        preset.gradientImage ?? null,
+        fingerprintPresetImage(preset.gradientImage),
         preset.sponsors ?? null,
         preset.field ?? null,
         preset.fieldEnd ?? null,
@@ -5017,6 +5053,44 @@ async function deleteRemotePresetByName(
     }
 }
 
+type HydratedPresetCollections = {
+    editorialPresets: SavedMatchEditorialPreset[];
+    gradientPresets: SavedMatchGradientPreset[];
+    platePresets: SavedMatchPlatePreset[];
+    storageMode: ExportPresetStorageMode;
+    plateStorageMode: ExportPresetStorageMode;
+};
+
+// Una hidratacion por pagina, no por instancia. La pagina de partido monta tres
+// ExportImage (marcador, formacion, reporte) y cada uno pedia la coleccion
+// entera a Supabase y la volvia a clonar al storage local: con 23 MB de fotos
+// embebidas eran 69 MB por visita. Se comparte la promesa mientras esta en
+// vuelo y el resultado por un rato corto; toda escritura la invalida.
+const SHARED_PRESET_HYDRATION_TTL_MS = 30_000;
+let sharedPresetHydration: { promise: Promise<HydratedPresetCollections>; startedAt: number } | null = null;
+
+function invalidateSharedPresetHydration() {
+    sharedPresetHydration = null;
+}
+
+function hydrateSavedPresetCollectionsShared(
+    supabase: SupabaseBrowserClient,
+    force = false,
+): Promise<HydratedPresetCollections> {
+    const now = Date.now();
+    if (!force && sharedPresetHydration && now - sharedPresetHydration.startedAt < SHARED_PRESET_HYDRATION_TTL_MS) {
+        return sharedPresetHydration.promise;
+    }
+    const promise = hydrateSavedPresetCollections(supabase);
+    const entry = { promise, startedAt: now };
+    sharedPresetHydration = entry;
+    promise.catch(() => {
+        // Un fallo no se cachea: la proxima instancia vuelve a intentar.
+        if (sharedPresetHydration === entry) sharedPresetHydration = null;
+    });
+    return promise;
+}
+
 async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): Promise<{
     editorialPresets: SavedMatchEditorialPreset[];
     gradientPresets: SavedMatchGradientPreset[];
@@ -5054,17 +5128,29 @@ async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): P
         const mergedGradientPresets = mergeSavedGradientPresetCollections(remoteGradientPresets, localGradientPresets);
         const mergedPlatePresets = mergeSavedPlatePresetCollections(remotePlatePresets, localPlatePresets);
 
+        const mergedEditorialSignature = getPresetComparableSignature(mergedEditorialPresets);
+        const mergedGradientSignature = getPresetComparableSignature(mergedGradientPresets);
+        const mergedPlateSignature = getPresetComparableSignature(mergedPlatePresets);
+
+        // Escribir el storage local es clonar la coleccion entera (fotos incluidas)
+        // en el hilo principal: solo cuando lo remoto trajo algo distinto.
         await Promise.all([
-            persistLocalSavedEditorialPresets(mergedEditorialPresets),
-            persistLocalSavedGradientPresets(mergedGradientPresets),
-            persistLocalSavedPlatePresets(mergedPlatePresets),
+            mergedEditorialSignature !== getPresetComparableSignature(localEditorialPresets)
+                ? persistLocalSavedEditorialPresets(mergedEditorialPresets)
+                : Promise.resolve(),
+            mergedGradientSignature !== getPresetComparableSignature(localGradientPresets)
+                ? persistLocalSavedGradientPresets(mergedGradientPresets)
+                : Promise.resolve(),
+            mergedPlateSignature !== getPresetComparableSignature(localPlatePresets)
+                ? persistLocalSavedPlatePresets(mergedPlatePresets)
+                : Promise.resolve(),
         ]);
 
-        if (getPresetComparableSignature(mergedEditorialPresets) !== getPresetComparableSignature(remoteEditorialPresets)) {
+        if (mergedEditorialSignature !== getPresetComparableSignature(remoteEditorialPresets)) {
             await upsertRemoteEditorialPresets(supabase, userId, mergedEditorialPresets);
         }
 
-        if (getPresetComparableSignature(mergedGradientPresets) !== getPresetComparableSignature(remoteGradientPresets)) {
+        if (mergedGradientSignature !== getPresetComparableSignature(remoteGradientPresets)) {
             await upsertRemoteGradientPresets(supabase, userId, mergedGradientPresets);
         }
 
@@ -5074,7 +5160,7 @@ async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): P
         // gradiente, que ya sincronizan bien. Las placas siguen vivas en el
         // dispositivo y la biblioteca lo dice.
         let plateStorageMode: ExportPresetStorageMode = 'cloud';
-        if (getPresetComparableSignature(mergedPlatePresets) !== getPresetComparableSignature(remotePlatePresets)) {
+        if (mergedPlateSignature !== getPresetComparableSignature(remotePlatePresets)) {
             try {
                 await upsertRemotePlatePresets(supabase, userId, mergedPlatePresets);
             } catch (error) {
@@ -5107,6 +5193,7 @@ async function persistSavedEditorialPreset(
     preset: SavedMatchEditorialPreset,
     supabase: SupabaseBrowserClient,
 ): Promise<ExportPresetStorageMode> {
+    invalidateSharedPresetHydration();
     await persistLocalSavedEditorialPresets(presets);
 
     const userId = await getAuthenticatedPresetUserId(supabase);
@@ -5121,6 +5208,7 @@ async function persistSavedGradientPreset(
     preset: SavedMatchGradientPreset,
     supabase: SupabaseBrowserClient,
 ): Promise<ExportPresetStorageMode> {
+    invalidateSharedPresetHydration();
     await persistLocalSavedGradientPresets(presets);
 
     const userId = await getAuthenticatedPresetUserId(supabase);
@@ -5135,6 +5223,7 @@ async function deleteSavedEditorialPreset(
     presetName: string,
     supabase: SupabaseBrowserClient,
 ): Promise<ExportPresetStorageMode> {
+    invalidateSharedPresetHydration();
     await persistLocalSavedEditorialPresets(presets);
 
     const userId = await getAuthenticatedPresetUserId(supabase);
@@ -5149,6 +5238,7 @@ async function deleteSavedGradientPreset(
     presetName: string,
     supabase: SupabaseBrowserClient,
 ): Promise<ExportPresetStorageMode> {
+    invalidateSharedPresetHydration();
     await persistLocalSavedGradientPresets(presets);
 
     const userId = await getAuthenticatedPresetUserId(supabase);
@@ -5163,6 +5253,7 @@ async function persistSavedPlatePreset(
     preset: SavedMatchPlatePreset,
     supabase: SupabaseBrowserClient,
 ): Promise<ExportPresetStorageMode> {
+    invalidateSharedPresetHydration();
     await persistLocalSavedPlatePresets(presets);
 
     const userId = await getAuthenticatedPresetUserId(supabase);
@@ -5186,6 +5277,7 @@ async function deleteSavedPlatePreset(
     presetName: string,
     supabase: SupabaseBrowserClient,
 ): Promise<ExportPresetStorageMode> {
+    invalidateSharedPresetHydration();
     await persistLocalSavedPlatePresets(presets);
 
     const userId = await getAuthenticatedPresetUserId(supabase);
