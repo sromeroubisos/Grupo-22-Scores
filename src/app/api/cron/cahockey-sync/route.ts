@@ -47,6 +47,12 @@
  *    `POST /api/tournaments/[id]/phase-participants`; una sola de las dos deja
  *    a la otra mitad del sistema viendo un torneo sin zonas.
  *
+ * Esa reparación no depende de SICAH, así que la pasada completa la hace
+ * sobre TODOS los torneos vinculados y no sólo sobre los de la ventana: los
+ * seis de agosto ya terminaron, nadie los va a forzar con `?torneo=`, y
+ * seguían mostrando una tabla mezclada. Son dos consultas chicas por corrida y
+ * en régimen no escriben nada.
+ *
  * Todo lo que no se entiende viaja en la respuesta (`omitidos`, `errors`): un
  * scraper caído que responde "sin novedades" es peor que uno que grita.
  */
@@ -166,8 +172,13 @@ export async function sincronizarCahockey(opts: {
     activos = todos.filter((t) => ids.has(t.id));
   }
 
+  // ── reparación de grupos de todos los torneos (no necesita la fuente) ────
+  const reparacion = !enSeco && !enJuego && !torneoPedido
+    ? await repararGruposDeTodos({ supabase, torneos: todos, errors })
+    : null;
+
   if (!activos.length) {
-    return responder({ ok: true, dry: enSeco, modo: enJuego ? 'en-juego' : 'completa', torneos: [], sinActividad: true, ventanaDias: dias, errors });
+    return responder({ ok: errors.length === 0, dry: enSeco, modo: enJuego ? 'en-juego' : 'completa', torneos: [], sinActividad: true, ventanaDias: dias, ...(reparacion && { reparacion }), errors });
   }
 
   // ── alias y clubes conocidos (una sola vez para todos los torneos) ───────
@@ -378,6 +389,8 @@ export async function sincronizarCahockey(opts: {
     });
   }
 
+  if (reparacion) escrituras += reparacion.gruposConTemporada + reparacion.participantesConGrupo;
+
   if (escrituras > 0) {
     try {
       const { invalidateMatchesFeedCaches } = await import('@/lib/server/matchesFeedInvalidation');
@@ -394,9 +407,98 @@ export async function sincronizarCahockey(opts: {
     ventanaDias: dias,
     torneosActivos: activos.map((t) => t.external_id),
     torneos: resumen,
+    ...(reparacion && { reparacion }),
     escrituras,
     errors,
   });
+}
+
+/**
+ * Deja consistentes los grupos de TODOS los torneos vinculados sin tocar
+ * SICAH: el grupo sin `season_id` recibe el de su fase, y el `group_id` viejo
+ * de `tournament_participants` se iguala al de la asignación de fase. Un
+ * torneo tocado recalcula la tabla de esa fase, porque la de grupo pudo no
+ * haberse armado nunca. En régimen no escribe nada.
+ */
+async function repararGruposDeTodos(args: {
+  supabase: ClienteAdmin;
+  torneos: TorneoFila[];
+  errors: string[];
+}): Promise<{ gruposConTemporada: number; participantesConGrupo: number; torneosReparados: string[] }> {
+  const { supabase, torneos, errors } = args;
+  const salida = { gruposConTemporada: 0, participantesConGrupo: 0, torneosReparados: [] as string[] };
+  if (!torneos.length) return salida;
+  const torneoPorId = new Map(torneos.map((t) => [t.id, t]));
+
+  const { data: fasesRaw, error: errFases } = await supabase
+    .from('tournament_phases')
+    .select('id, tournament_id, season_id')
+    .eq('phase_type', 'group_stage')
+    .in('tournament_id', torneos.map((t) => t.id))
+    .limit(1000);
+  if (errFases) { errors.push(`reparación: no se pudieron leer las fases de grupos (${errFases.message})`); return salida; }
+  const fases = (fasesRaw ?? []) as { id: string; tournament_id: string; season_id: string | null }[];
+  if (!fases.length) return salida;
+  const fasePorId = new Map(fases.map((f) => [f.id, f]));
+  const tocados = new Set<string>();
+
+  // grupos sin temporada
+  const { data: gruposRaw, error: errGrupos } = await supabase
+    .from('tournament_groups')
+    .select('id, name, phase_id, season_id')
+    .in('phase_id', fases.map((f) => f.id))
+    .is('season_id', null)
+    .limit(1000);
+  if (errGrupos) { errors.push(`reparación: no se pudieron leer los grupos (${errGrupos.message})`); return salida; }
+  for (const g of (gruposRaw ?? []) as { id: string; name: string; phase_id: string; season_id: string | null }[]) {
+    const fase = fasePorId.get(g.phase_id);
+    const seasonId = fase?.season_id ?? (fase ? torneoPorId.get(fase.tournament_id)?.current_season_id : null) ?? null;
+    if (!fase || !seasonId) continue;
+    const { error } = await supabase.from('tournament_groups').update({ season_id: seasonId }).eq('id', g.id);
+    if (error) { errors.push(`reparación: no se pudo poner la temporada al grupo ${g.name} (${error.message})`); continue; }
+    salida.gruposConTemporada++;
+    tocados.add(fase.id);
+  }
+
+  // el group_id viejo del participante, igualado al de su asignación de fase
+  const { data: asigRaw, error: errAsig } = await supabase
+    .from('tournament_phase_participants')
+    .select('phase_id, participant_id, group_id')
+    .in('phase_id', fases.map((f) => f.id))
+    .not('group_id', 'is', null)
+    .limit(2000);
+  if (errAsig) { errors.push(`reparación: no se pudieron leer las asignaciones de fase (${errAsig.message})`); return salida; }
+  const asignaciones = (asigRaw ?? []) as { phase_id: string; participant_id: string; group_id: string }[];
+  if (asignaciones.length) {
+    const { data: partsRaw, error: errParts } = await supabase
+      .from('tournament_participants')
+      .select('id, group_id')
+      .in('id', asignaciones.map((a) => a.participant_id))
+      .limit(2000);
+    if (errParts) { errors.push(`reparación: no se pudieron leer los participantes (${errParts.message})`); return salida; }
+    const grupoViejo = new Map(((partsRaw ?? []) as { id: string; group_id: string | null }[]).map((p) => [p.id, p.group_id]));
+    for (const a of asignaciones) {
+      if (!grupoViejo.has(a.participant_id) || grupoViejo.get(a.participant_id) === a.group_id) continue;
+      const { error } = await supabase.from('tournament_participants').update({ group_id: a.group_id }).eq('id', a.participant_id);
+      if (error) { errors.push(`reparación: no se pudo asignar el grupo al participante ${a.participant_id} (${error.message})`); continue; }
+      salida.participantesConGrupo++;
+      tocados.add(a.phase_id);
+    }
+  }
+
+  if (tocados.size) {
+    const { recalculatePhaseStandingsScopes } = await import('@/lib/server/recalculateStandings');
+    for (const faseId of tocados) {
+      const fase = fasePorId.get(faseId);
+      if (!fase) continue;
+      const r = await recalculatePhaseStandingsScopes(fase.tournament_id, faseId, 'general');
+      const externalId = torneoPorId.get(fase.tournament_id)?.external_id ?? fase.tournament_id;
+      if (!r.ok) errors.push(`reparación: recálculo de la fase ${faseId} de ${externalId} falló`);
+      if (!salida.torneosReparados.includes(externalId)) salida.torneosReparados.push(externalId);
+    }
+    salida.torneosReparados.sort();
+  }
+  return salida;
 }
 
 type ClienteAdmin = ReturnType<typeof createAdminClient>;
