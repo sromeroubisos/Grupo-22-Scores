@@ -3323,6 +3323,7 @@ export default function TournamentDetailPage({
         if (standingsColumnMode === 'circuit-global') {
             return {
                 pos: row.position || (idx + 1),
+                teamFull: getStandingsTeamName(row) || 'Equipo',
                 team: getPreferredExportTeamName(
                     getStandingsTeamName(row) || 'Equipo',
                     row.team?.short_name,
@@ -3350,6 +3351,7 @@ export default function TournamentDetailPage({
 
         return {
             pos: row.position || (idx + 1),
+            teamFull: getStandingsTeamName(row) || 'Equipo',
             team: getPreferredExportTeamName(
                 getStandingsTeamName(row) || 'Equipo',
                 row.team?.short_name,
@@ -3408,6 +3410,8 @@ export default function TournamentDetailPage({
                 return {
                     homeTeam: getMatchExportTeamName(match, 'home', isEspnTournament),
                     awayTeam: getMatchExportTeamName(match, 'away', isEspnTournament),
+                    homeTeamFull: getMatchExportTeamName(match, 'home', true),
+                    awayTeamFull: getMatchExportTeamName(match, 'away', true),
                     homeLogo: getTeamLogo(match.home_team) || match.home_team_logo || '',
                     awayLogo: getTeamLogo(match.away_team) || match.away_team_logo || '',
                     homeScore: mode === 'results'
@@ -4863,6 +4867,8 @@ export default function TournamentDetailPage({
                                     matches: results.map(m => ({
                                         homeTeam: getMatchExportTeamName(m, 'home', isEspnTournament),
                                         awayTeam: getMatchExportTeamName(m, 'away', isEspnTournament),
+                                        homeTeamFull: getMatchExportTeamName(m, 'home', true),
+                                        awayTeamFull: getMatchExportTeamName(m, 'away', true),
                                         homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
                                         awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
                                         homeScore: m.scores?.home ?? m.scores?.home_score ?? m.home_score,
@@ -4910,6 +4916,8 @@ export default function TournamentDetailPage({
                                     matches: fixtures.map(m => ({
                                         homeTeam: getMatchExportTeamName(m, 'home', isEspnTournament),
                                         awayTeam: getMatchExportTeamName(m, 'away', isEspnTournament),
+                                        homeTeamFull: getMatchExportTeamName(m, 'home', true),
+                                        awayTeamFull: getMatchExportTeamName(m, 'away', true),
                                         homeLogo: getTeamLogo(m.home_team) || m.home_team_logo || '',
                                         awayLogo: getTeamLogo(m.away_team) || m.away_team_logo || '',
                                         time: fechaEnZonaDelVisitante(new Date((m.timestamp || m.start_time || m.time) * 1000), { hour: '2-digit', minute: '2-digit', hour12: false }) + ' ' +
