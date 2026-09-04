@@ -1105,6 +1105,12 @@ function isPhaseCarryOverEnabled(settings: any): boolean {
  *
  * Si la fase no declara equipos —lo normal en un torneo de fase única— se
  * devuelve el plantel completo, que es lo que se hacía siempre.
+ *
+ * El grupo también sale de la asignación de fase cuando la trae: es la misma
+ * fuente con la que el servidor arma la tabla por grupo. El `group_id` del
+ * plantel es el modelo viejo y queda de respaldo; si sólo se leyera ese, un
+ * torneo con zonas cargadas por fase (el Argentino de Selecciones de hockey)
+ * se dibuja como una tabla única con las zonas mezcladas.
  */
 function participantsForPhase(
     participants: any[],
@@ -1113,19 +1119,26 @@ function participantsForPhase(
 ): any[] {
     if (!phaseId) return participants;
 
-    const delaFase = new Set(
-        phaseParticipants
-            .filter((row: any) => String(row?.phase_id ?? '') === String(phaseId))
-            .filter((row: any) => {
-                const estado = String(row?.status ?? '').toLowerCase();
-                return estado !== 'withdrawn' && estado !== 'disqualified';
-            })
-            .map((row: any) => String(row?.participant_id ?? ''))
-            .filter(Boolean),
-    );
-    if (delaFase.size === 0) return participants;
+    const grupoDeLaFase = new Map<string, string | null>();
+    phaseParticipants
+        .filter((row: any) => String(row?.phase_id ?? '') === String(phaseId))
+        .filter((row: any) => {
+            const estado = String(row?.status ?? '').toLowerCase();
+            return estado !== 'withdrawn' && estado !== 'disqualified';
+        })
+        .forEach((row: any) => {
+            const participantId = String(row?.participant_id ?? '');
+            if (!participantId) return;
+            grupoDeLaFase.set(participantId, row?.group_id ? String(row.group_id) : null);
+        });
+    if (grupoDeLaFase.size === 0) return participants;
 
-    const acotados = participants.filter((participant: any) => delaFase.has(String(participant?.id ?? '')));
+    const acotados = participants
+        .filter((participant: any) => grupoDeLaFase.has(String(participant?.id ?? '')))
+        .map((participant: any) => {
+            const grupo = grupoDeLaFase.get(String(participant?.id ?? ''));
+            return grupo ? { ...participant, group_id: grupo } : participant;
+        });
     return acotados.length > 0 ? acotados : participants;
 }
 

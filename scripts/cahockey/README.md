@@ -63,6 +63,13 @@ de camino no pierde lo ya cosechado; el detalle va en `out/sicah/<id>.json`.
   no contempla el paréntesis nace un club llamado "Jockey Club 2 (3)". Si el
   partido no se jugó, en lugar del marcador hay un guión y el nombre queda como
   "Federación Cordobesa -".
+- **Una tabla de posiciones termina en el próximo título, no en la próxima
+  zona.** Después de la última "ZONA X" vienen el CUADRANGULAR (cuando lo hay),
+  el FAIR PLAY y el fixture, todos con filas `class=texto`. Si la zona sólo se
+  cierra al ver otra "ZONA", la última se traga todo eso y aparece con 24
+  equipos donde tiene 4, con horarios como "10:40" entre ellos. El
+  cuadrangular sí es una tabla de posiciones y sale como una entrada más de
+  `posiciones`, con su nombre.
 - **La mitad de un fixture puede no ser equipos.** El Argentino de Selecciones
   publica la llave entera antes de jugarse, con los cruces por definir escritos
   en el lugar del equipo: "1° Zona A", "Ganador N°13", "Perdedor N°16". Son

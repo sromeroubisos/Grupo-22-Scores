@@ -315,6 +315,24 @@ fuerza uno.
   hay un índice único de una sola fase activa por torneo). Sin eso la tabla de
   la zona sumaba los cruces: el Sub 14 A Damas mostraba 5 jugados donde eran 3.
   Corregido en los seis torneos de agosto.
+- **Las zonas son grupos, y el grupo tiene que llegar a la pantalla.** La
+  primera versión creaba los `tournament_groups` y asignaba el `group_id` en
+  `tournament_phase_participants`, y la página seguía mostrando UNA tabla con
+  las dos zonas mezcladas (el Sub 16 A Damas, la noche del 3/9). Dos causas,
+  las dos del lado nuestro y ninguna de SICAH: el grupo se insertaba **sin
+  `season_id`** y `fetchTournamentData` filtra los grupos por la temporada del
+  torneo, así que para la página no existían; y el cliente recalcula la tabla
+  con el `group_id` viejo de `tournament_participants`, que quedaba en NULL. El
+  cron ahora escribe la temporada en el grupo, repara los que quedaron sin
+  ella, y sincroniza las dos tablas de participantes como hace
+  `POST /api/tournaments/[id]/phase-participants`; el cliente además toma el
+  grupo de la asignación de fase. Los torneos de agosto ya salieron de la
+  ventana: se reparan con `?torneo=<id>`.
+- Verificado con Scrapling contra la fuente (4/9): los 18 torneos de 2026
+  publican sus tablas por zona ("ZONA A"/"ZONA B", cuatro zonas en el Sub 16 D
+  y en el Sub 19 Caballeros, "ZONA UNICA" en el Sub 14 B Caballeros) y el
+  parser TS ya las distinguía; el parser Python de posiciones cerraba la
+  última zona recién al final de la página y la Zona B salía con 24 filas.
 
 Medido el 3/9 a la tarde: el cron encontró los ocho torneos del fin de semana
 activos y cargó los primeros resultados del Sub 16 B Caballeros (8-2 y 6-1) con

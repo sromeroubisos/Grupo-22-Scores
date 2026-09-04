@@ -155,43 +155,74 @@ def parsear_sicah(html: str) -> dict:
     if m:
         datos["director"] = limpiar(m.group(1))
 
-    # ---- posiciones: cada bloque arranca con un titulotabla "ZONA X"
-    # seguido de cabecera Equipo/Pts/J/G/E/P/GF/GC/Dif y filas class=texto
-    zona_actual = None
+    # ---- posiciones: cada tabla arranca con un titulotabla con el nombre
+    # ("ZONA A", "ZONA UNICA", "CUADRANGULAR") seguido de la cabecera
+    # Equipo/Pts/J/G/E/P/GF/GC/Dif y filas class=texto. Cualquier OTRO
+    # titulotabla ("FAIR PLAY", "Jueves", "Posiciones Finales") cierra la tabla
+    # abierta. Sin ese cierre la última zona seguía juntando filas hasta el
+    # final de la página: el fair play, las horas del fixture, todo entraba
+    # como "equipo" y la Zona B terminaba con 24 filas donde tenía 4.
+    #
+    # Las filas de zona traen una celda vacía adelante del nombre; las del
+    # cuadrangular no. Se lee de atrás: 8 números y, antes, el nombre.
+    CABECERA = ("Equipo", "Pts", "J", "G", "E", "P", "GF", "GC", "Dif")
+
+    def num(v: str) -> int:
+        return int(v) if v != "-" and v.lstrip("-").isdigit() else 0
+
+    def es_numero(v: str) -> bool:
+        return v == "-" or v.lstrip("-").isdigit()
+
+    titulo_pendiente: str | None = None
+    zona_actual: str | None = None
     equipos: list[dict] = []
+
+    def cerrar_tabla() -> None:
+        nonlocal zona_actual, equipos
+        if zona_actual and equipos:
+            datos["posiciones"].append({"zona": zona_actual, "equipos": equipos})
+        zona_actual, equipos = None, []
+
     for tr in sel.css("tr"):
         celdas = tr.css("td")
         if not celdas:
             continue
-        primera = limpiar(celdas[0].get_all_text(strip=True))
         clase = celdas[0].attrib.get("class", "")
-        if clase == "titulotabla" and primera.upper().startswith("ZONA"):
-            if zona_actual and equipos:
-                datos["posiciones"].append({"zona": zona_actual, "equipos": equipos})
-            zona_actual, equipos = primera, []
+        textos = [limpiar(c.get_all_text(strip=True)) for c in celdas]
+        if clase == "titulotabla":
+            if textos[0] == "Equipo":
+                # cabecera: abre la tabla del título que la precede, si es de
+                # posiciones; la del fair play (Equipo/V/A/R/FP) no lo es
+                if tuple(textos[:9]) == CABECERA and titulo_pendiente:
+                    zona_actual, equipos = titulo_pendiente, []
+                else:
+                    cerrar_tabla()
+                titulo_pendiente = None
+            else:
+                cerrar_tabla()
+                titulo_pendiente = textos[0] or None
             continue
         if zona_actual is None or clase != "texto":
             continue
-        textos = [limpiar(c.get_all_text(strip=True)) for c in celdas]
-        # fila de equipo: celda vacía + nombre + 8 números (o '-')
-        if len(textos) >= 10 and textos[1] and not textos[1].isdigit():
-            def num(v: str) -> int:
-                return int(v) if v != "-" and v.lstrip("-").isdigit() else 0
-            equipos.append(
-                {
-                    "equipo": textos[1],
-                    "pts": num(textos[2]),
-                    "j": num(textos[3]),
-                    "g": num(textos[4]),
-                    "e": num(textos[5]),
-                    "p": num(textos[6]),
-                    "gf": num(textos[7]),
-                    "gc": num(textos[8]),
-                    "dif": num(textos[9]),
-                }
-            )
-    if zona_actual and equipos:
-        datos["posiciones"].append({"zona": zona_actual, "equipos": equipos})
+        if len(textos) < 9:
+            continue
+        nombre, numeros = textos[-9], textos[-8:]
+        if not nombre or not all(es_numero(v) for v in numeros):
+            continue
+        equipos.append(
+            {
+                "equipo": nombre,
+                "pts": num(numeros[0]),
+                "j": num(numeros[1]),
+                "g": num(numeros[2]),
+                "e": num(numeros[3]),
+                "p": num(numeros[4]),
+                "gf": num(numeros[5]),
+                "gc": num(numeros[6]),
+                "dif": num(numeros[7]),
+            }
+        )
+    cerrar_tabla()
 
     # ---- día de la semana por partido: el titulotabla con el día precede
     # a los modales basic-modal-content<NN> de esa jornada
