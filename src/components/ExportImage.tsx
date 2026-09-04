@@ -39,6 +39,8 @@ type DensityMode = 'comfortable' | 'compact' | 'ultra-compact';
 interface StandingsRowData {
     pos: number;
     team: string;
+    /** Nombre completo cuando `team` es la abreviatura; el modal elige. */
+    teamFull?: string;
     teamLogo?: string;
     labelName?: string;
     zoneColor?: string;
@@ -121,6 +123,10 @@ export interface DailyMatchesData {
     matches: Array<{
         homeTeam: string;
         awayTeam: string;
+        /* Nombre completo del equipo, cuando el corto de arriba es una
+           abreviatura (RSA, NOR). El modal deja elegir cual se dibuja. */
+        homeTeamFull?: string;
+        awayTeamFull?: string;
         homeLogo?: string;
         awayLogo?: string;
         homeScore?: number;
@@ -439,6 +445,7 @@ type ExportImagePreviewProps = {
     lineupExportLayout?: LineupExportLayout;
     standingsExportMode?: StandingsExportMode;
     dailyMatchesTimeMode?: DailyMatchesTimeMode;
+    teamNameMode?: ExportTeamNameMode;
     className?: string;
 };
 
@@ -755,6 +762,73 @@ const LINEUP_EXPORT_LAYOUT_OPTIONS: Array<{ value: LineupExportLayout; label: st
     { value: 'classic', label: 'Clasica', description: 'Un equipo: la lista centrada en serif con los suplentes al pie. Dos equipos: la banda con los escudos y dos columnas numeradas' },
     { value: 'editorial', label: 'Editorial', description: 'La foto del jugador a la izquierda y la lista numerada a la derecha' },
 ];
+/* Fixture, resultados y tabla dibujan el nombre corto del club (Newman, SIC,
+   RSA), que es lo que entra en una fila. Con selecciones la sigla queda pobre
+   en una placa: el que exporta elige, y la eleccion queda en el dispositivo. */
+export type ExportTeamNameMode = 'short' | 'full';
+const EXPORT_TEAM_NAME_MODE_STORAGE_KEY = 'g22-export-team-name-mode-v1';
+const EXPORT_TEAM_NAME_MODE_OPTIONS: Array<{ value: ExportTeamNameMode; label: string; description: string }> = [
+    { value: 'short', label: 'Cortos', description: 'El nombre corto o la sigla de cada equipo (RSA, SIC, Newman)' },
+    { value: 'full', label: 'Completos', description: 'El nombre completo de cada equipo (Sudafrica, San Isidro Club)' },
+];
+
+function readStoredTeamNameMode(): ExportTeamNameMode {
+    if (typeof window === 'undefined') return 'short';
+    try {
+        return window.localStorage.getItem(EXPORT_TEAM_NAME_MODE_STORAGE_KEY) === 'full' ? 'full' : 'short';
+    } catch {
+        return 'short';
+    }
+}
+
+function persistTeamNameMode(mode: ExportTeamNameMode) {
+    if (typeof window === 'undefined') return;
+    try {
+        window.localStorage.setItem(EXPORT_TEAM_NAME_MODE_STORAGE_KEY, mode);
+    } catch {
+        // Sin storage (modo privado, cuota): la eleccion vale para esta sesion.
+    }
+}
+
+function dataHasAlternateTeamNames(template: ExportTemplate, data: ExportData): boolean {
+    if (template === 'dailyMatches') {
+        return (data as DailyMatchesData).matches.some((match) =>
+            (match.homeTeamFull && match.homeTeamFull !== match.homeTeam)
+            || (match.awayTeamFull && match.awayTeamFull !== match.awayTeam));
+    }
+    if (template === 'standings') {
+        const standings = data as StandingsData;
+        const rows = [...standings.rows, ...(standings.groups ?? []).flatMap((group) => group.rows)];
+        return rows.some((row) => Boolean(row.teamFull) && row.teamFull !== row.team);
+    }
+    return false;
+}
+
+function applyTeamNameMode(template: ExportTemplate, data: ExportData, mode: ExportTeamNameMode): ExportData {
+    if (mode !== 'full') return data;
+    if (template === 'dailyMatches') {
+        const matchesData = data as DailyMatchesData;
+        return {
+            ...matchesData,
+            matches: matchesData.matches.map((match) => ({
+                ...match,
+                homeTeam: match.homeTeamFull || match.homeTeam,
+                awayTeam: match.awayTeamFull || match.awayTeam,
+            })),
+        };
+    }
+    if (template === 'standings') {
+        const standings = data as StandingsData;
+        const withFullName = (row: StandingsRowData): StandingsRowData => ({ ...row, team: row.teamFull || row.team });
+        return {
+            ...standings,
+            rows: standings.rows.map(withFullName),
+            groups: standings.groups?.map((group) => ({ ...group, rows: group.rows.map(withFullName) })),
+        };
+    }
+    return data;
+}
+
 const DAILY_MATCHES_TIME_MODE_OPTIONS: Array<{ value: DailyMatchesTimeMode; label: string; description: string }> = [
     { value: 'time', label: 'Horario', description: 'Los partidos sin jugar muestran la hora de inicio' },
     { value: 'vs', label: 'VS', description: 'Los partidos sin jugar muestran VS y la hora queda afuera' },
@@ -999,6 +1073,12 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const [lineupExportMode, setLineupExportMode] = useState<LineupExportMode>('both');
     const [lineupExportLayout, setLineupExportLayout] = useState<LineupExportLayout>('classic');
     const [dailyMatchesTimeMode, setDailyMatchesTimeMode] = useState<DailyMatchesTimeMode>('time');
+    const [teamNameMode, setTeamNameMode] = useState<ExportTeamNameMode>(readStoredTeamNameMode);
+    const hasAlternateTeamNames = useMemo(() => dataHasAlternateTeamNames(template, data), [data, template]);
+    const chooseTeamNameMode = (mode: ExportTeamNameMode) => {
+        setTeamNameMode(mode);
+        persistTeamNameMode(mode);
+    };
     const isRankingPoster = isRankingPosterData(template, data);
     const isPalmares = isPalmaresData(template, data);
     const isLadder = isLadderData(template, data);
@@ -1423,12 +1503,12 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const standingsExportData = useMemo(
         () => template === 'standings'
             ? scopeStandingsDataForExport(
-                buildExportData(template, data, customTournamentName, selectedTimeZonePreset) as StandingsData,
+                buildExportData(template, data, customTournamentName, selectedTimeZonePreset, teamNameMode) as StandingsData,
                 standingsExportMode,
                 selectedStandingsGroupIndex
             )
             : null,
-        [customTournamentName, data, selectedStandingsGroupIndex, selectedTimeZonePreset, standingsExportMode, template]
+        [customTournamentName, data, selectedStandingsGroupIndex, selectedTimeZonePreset, standingsExportMode, teamNameMode, template]
     );
     const standingsSlides = useMemo(
         () => standingsExportData ? buildStandingsSlides(standingsExportData, getStandingsSlideMode(standingsExportMode)) : [],
@@ -1440,9 +1520,9 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     );
     const editorialAutoContextLabel = useMemo(() => {
         if (template !== 'matchStats') return '';
-        const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset) as MatchStatsData;
+        const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset, teamNameMode) as MatchStatsData;
         return buildAutoEditorialContextLabel(applyMatchExportMode(exportData, matchExportMode));
-    }, [customTournamentName, data, matchExportMode, selectedTimeZonePreset, template]);
+    }, [customTournamentName, data, matchExportMode, selectedTimeZonePreset, teamNameMode, template]);
     const supportsEditorialSchedule = template === 'matchStats' && matchExportLayout === 'editorial4x5' && (visualFamily === 'g22Base' || visualFamily === 'posterV3' || visualFamily === 'impactoV4' || visualFamily === 'fanV5');
     const supportsClassicSchedule = template === 'matchStats' && matchExportLayout === 'classic';
     const showMatchModeSelector = template === 'matchStats' && (supportsClassicSchedule || supportsEditorialSchedule);
@@ -1999,7 +2079,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             canvas.height = config.height;
             const ctx = canvas.getContext('2d');
             if (!ctx) throw new Error('No se pudo inicializar el canvas');
-            const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset);
+            const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset, teamNameMode);
 
             if (template === 'matchStats') {
                 const matchData = applyManualMatchScore(
@@ -2227,7 +2307,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const dailyMatches = Array.isArray(dailyMatchesSource) ? dailyMatchesSource : [];
     const hasScheduledDailyMatches = dailyMatches.some((match) => match.status === 'scheduled');
     const modalPreviewData = useMemo<ExportData>(() => {
-        const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset);
+        const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset, teamNameMode);
 
         if (template === 'dailyMatches') {
             const matchesData = exportData as DailyMatchesData;
@@ -2290,6 +2370,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         matchBackgroundUpload?.src,
         matchExportLayout,
         matchExportMode,
+        teamNameMode,
         selectedStandingsGroupIndex,
         selectedMatchIndices,
         selectedTimeZonePreset,
@@ -3264,6 +3345,27 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                 </div>
                             )}
 
+                            {hasAlternateTeamNames && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Nombres de los equipos</label>
+                                    <div className={styles.formatOptions}>
+                                        {EXPORT_TEAM_NAME_MODE_OPTIONS.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                className={`${styles.formatBtn} ${teamNameMode === option.value ? styles.active : ''}`}
+                                                onClick={() => chooseTeamNameMode(option.value)}
+                                                type="button"
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className={styles.modalHint}>
+                                        {EXPORT_TEAM_NAME_MODE_OPTIONS.find((option) => option.value === teamNameMode)?.description}
+                                    </p>
+                                </div>
+                            )}
+
                             {template === 'dailyMatches' && hasScheduledDailyMatches && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Partidos sin jugar</label>
@@ -3803,6 +3905,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                         lineupExportLayout={lineupExportLayout}
                                         standingsExportMode={standingsExportMode}
                                         dailyMatchesTimeMode={dailyMatchesTimeMode}
+                                        teamNameMode={teamNameMode}
                                         className={styles.modalPreviewImage}
                                     />
                                 </div>
@@ -3860,6 +3963,7 @@ export function ExportImagePreview({
     lineupExportLayout = 'classic',
     standingsExportMode = 'table',
     dailyMatchesTimeMode = 'time',
+    teamNameMode = 'short',
     className = '',
 }: ExportImagePreviewProps) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -3884,6 +3988,7 @@ export function ExportImagePreview({
         lineupExportLayout,
         standingsExportMode,
         dailyMatchesTimeMode,
+        teamNameMode,
     };
     const latestOptionsRef = useRef<ExportPreviewRenderOptions>(renderOptions);
     latestOptionsRef.current = renderOptions;
@@ -3951,7 +4056,7 @@ export function ExportImagePreview({
         return () => {
             window.clearTimeout(timer);
         };
-    }, [customizationState, dailyMatchesTimeMode, data, format, lineupExportLayout, lineupExportMode, matchExportLayout, matchExportMode, plateOptions, previewColors, standingsExportMode, template, visualFamily]);
+    }, [customizationState, dailyMatchesTimeMode, teamNameMode, data, format, lineupExportLayout, lineupExportMode, matchExportLayout, matchExportMode, plateOptions, previewColors, standingsExportMode, template, visualFamily]);
 
     // La primera pasada pinta con el lienzo todavia oculto: si el panel toma su alto
     // del propio lienzo (el laboratorio, una tarjeta suelta) mide unos pixeles y el
@@ -5333,6 +5438,7 @@ export type ExportPreviewRenderOptions = {
     lineupExportLayout?: LineupExportLayout;
     standingsExportMode: StandingsExportMode;
     dailyMatchesTimeMode?: DailyMatchesTimeMode;
+    teamNameMode?: ExportTeamNameMode;
 };
 
 // Devuelve el lienzo dibujado, no un PNG: codificar 1080x1350 con toDataURL bloquea el
@@ -5378,6 +5484,7 @@ export async function renderMatchExportPreviewCanvas(
         lineupExportLayout = 'classic',
         standingsExportMode,
         dailyMatchesTimeMode = 'time',
+    teamNameMode = 'short',
     } = options;
 
     applyTypographyConfig(
@@ -5441,7 +5548,7 @@ export async function renderMatchExportPreviewCanvas(
         lines: previewColors?.lineupLinesColor,
     };
 
-    const exportData = buildExportData(template, data, getDefaultTournamentName(template, data), findBestPresetByOffset(DEFAULT_TIMEZONE_OFFSET_MINUTES));
+    const exportData = buildExportData(template, data, getDefaultTournamentName(template, data), findBestPresetByOffset(DEFAULT_TIMEZONE_OFFSET_MINUTES), teamNameMode);
 
     if (template === 'matchStats') {
         const matchData = applyMatchExportMode(exportData as MatchStatsData, matchExportMode);
@@ -5862,11 +5969,13 @@ function formatDateInFixedOffset(
 
 function buildExportData(
     template: ExportTemplate,
-    data: ExportData,
+    sourceData: ExportData,
     customTournamentName: string,
-    timeZonePreset: ExportTimeZonePreset
+    timeZonePreset: ExportTimeZonePreset,
+    teamNameMode: ExportTeamNameMode = 'short',
 ): ExportData {
     const tournamentName = customTournamentName.trim();
+    const data = applyTeamNameMode(template, sourceData, teamNameMode);
 
     if (template === 'standings') {
         const standingsData = data as StandingsData;
