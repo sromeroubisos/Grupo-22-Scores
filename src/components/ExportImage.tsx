@@ -12285,70 +12285,73 @@ async function drawG22BaseLineupsClassic(
             isDark: true,
             showFrame: false,
         });
-        titleLeft = u(70) + u(84) + u(24);
-        ctx.save();
-        ctx.strokeStyle = hexToRGBA(ink, 0.45);
-        ctx.lineWidth = Math.max(1, u(2));
-        ctx.beginPath();
-        ctx.moveTo(u(70) + u(84) + u(6), headerMid - u(56));
-        ctx.lineTo(u(70) + u(84) + u(6), headerMid + u(44));
-        ctx.stroke();
-        ctx.restore();
-        titleLeft += u(18);
+        titleLeft = u(70) + u(84) + u(24) + u(18);
     }
+    // El titulo apilado de la lista de la NRL ("NRL TELSTRA / PREMIERSHIP /
+    // TEAM LISTS"): el torneo en hasta dos renglones grandes y, como ultimo
+    // renglon, lo que es la pieza. `title` lo pisa; si no viene, FORMACIONES.
     const titleText = stripTournamentCountryPrefix(data.tournament || data.title || 'Formaciones').toUpperCase();
+    const titleTail = (data.tournament && data.title ? data.title : 'Formaciones').toUpperCase();
     ctx.save();
     ctx.textBaseline = 'alphabetic';
     ctx.textAlign = 'left';
     ctx.fillStyle = ink;
-    const titleSize = u(50);
+    const titleSize = u(58);
     ctx.font = `900 ${titleSize}px ${FONT_OUTFIT_BLACK}`;
     setCanvasTracking(ctx, -u(1));
-    const titleMax = W - u(400) - titleLeft;
-    let titleLines = wrapLineupNames(ctx, titleText.split(' '), ' ', titleMax).slice(0, 3);
+    const titleMax = W - u(430) - titleLeft;
+    let titleLines = wrapLineupNames(ctx, titleText.split(' '), ' ', titleMax).slice(0, 2);
     if (titleLines.length === 0) titleLines = [titleText];
-    const titlePitch = Math.round(titleSize * 0.92);
-    const titleTop = headerMid - (titleLines.length * titlePitch) / 2 + titleSize * 0.82 - u(6);
+    if (titleLines[titleLines.length - 1] !== titleTail) titleLines.push(titleTail);
+    const titlePitch = Math.round(titleSize * 0.9);
+    const titleBlockHeight = titleSize * 0.72 + titlePitch * (titleLines.length - 1);
+    const titleBlockTop = headerMid - titleBlockHeight / 2 - u(4);
     titleLines.forEach((line, index) => {
-        ctx.fillText(truncateTextToWidth(ctx, line, titleMax), titleLeft, titleTop + titlePitch * index);
+        ctx.fillText(truncateTextToWidth(ctx, line, titleMax), titleLeft, titleBlockTop + titleSize * 0.72 + titlePitch * index);
     });
     setCanvasTracking(ctx, 0);
     ctx.restore();
+    if (tournamentLogo) {
+        // El filete vertical entre el logo y el titulo mide lo que el titulo.
+        ctx.save();
+        ctx.strokeStyle = hexToRGBA(ink, 0.45);
+        ctx.lineWidth = Math.max(1, u(2));
+        ctx.beginPath();
+        ctx.moveTo(u(70) + u(84) + u(6), titleBlockTop);
+        ctx.lineTo(u(70) + u(84) + u(6), titleBlockTop + titleBlockHeight);
+        ctx.stroke();
+        ctx.restore();
+    }
 
-    // Derecha: la firma de G22, la fecha en el acento, la hora y la sede.
+    // Derecha: la firma de G22 arriba y, colgando de la banda como en la
+    // referencia ("ROUND 27 / THURSDAY 7:50PM / ACCOR STADIUM"), la fecha del
+    // torneo en el acento, el dia y la hora en un solo renglon y la sede.
     drawLineupBrandMark(ctx, wordmark, W - u(64), headerMid - u(68), u(150));
     ctx.save();
     ctx.textBaseline = 'alphabetic';
     ctx.textAlign = 'right';
-    const rightMax = u(420);
+    const rightMax = u(430);
     const subtitleLabel = String(data.subtitle || '').trim().toUpperCase();
-    let rightCursor = headerMid - u(6);
-    if (subtitleLabel || dayLabel) {
-        ctx.fillStyle = colors.names;
-        const line = subtitleLabel || dayLabel;
-        setFittedFont(ctx, line, rightMax, '800', u(30), FONT_OUTFIT_BLACK, u(18));
-        ctx.fillText(line, W - u(64), rightCursor);
-        rightCursor += u(34);
-    }
-    const whenLabel = [subtitleLabel ? dayLabel : '', timeLabel ? `${timeLabel} HS` : ''].filter(Boolean).join(' · ');
-    if (whenLabel) {
-        ctx.fillStyle = ink;
-        setFittedFont(ctx, whenLabel, rightMax, '800', u(28), FONT_OUTFIT_BLACK, u(18));
-        ctx.fillText(whenLabel, W - u(64), rightCursor);
-        rightCursor += u(32);
-    }
-    if (venueLabel) {
-        ctx.fillStyle = hexToRGBA(ink, 0.9);
-        setCanvasTracking(ctx, u(2));
-        setFittedFont(ctx, venueLabel.toUpperCase(), rightMax, '400', u(22), FONT_OUTFIT_BLACK, u(14));
-        ctx.fillText(venueLabel.toUpperCase(), W - u(64), rightCursor);
+    const whenLabel = [dayLabel, timeLabel ? `${timeLabel} HS` : ''].filter(Boolean).join(' ');
+    const rightLines: Array<{ text: string; color: string; weight: string; size: number; min: number; tracking: number; pitch: number }> = [];
+    if (subtitleLabel) rightLines.push({ text: subtitleLabel, color: colors.names, weight: '800', size: u(30), min: u(18), tracking: 0, pitch: u(36) });
+    if (whenLabel) rightLines.push({ text: whenLabel, color: ink, weight: '800', size: u(30), min: u(18), tracking: 0, pitch: u(34) });
+    if (venueLabel) rightLines.push({ text: venueLabel.toUpperCase(), color: hexToRGBA(ink, 0.9), weight: '400', size: u(23), min: u(14), tracking: u(2), pitch: u(30) });
+    let rightBaseline = headerHeight - u(58);
+    for (let index = rightLines.length - 1; index >= 0; index -= 1) {
+        const line = rightLines[index];
+        ctx.fillStyle = line.color;
+        setCanvasTracking(ctx, line.tracking);
+        setFittedFont(ctx, line.text, rightMax, line.weight, line.size, FONT_OUTFIT_BLACK, line.min);
+        ctx.fillText(line.text, W - u(64), rightBaseline);
         setCanvasTracking(ctx, 0);
+        rightBaseline -= line.pitch;
     }
     ctx.restore();
 
     // La banda: cada mitad del color dominante de su escudo, partida en flecha.
     const bandTop = headerHeight;
-    const bandHeight = u(150);
+    const bandHeight = u(170);
     const bandBottom = bandTop + bandHeight;
     const fallbackAway = mixHexColors(paletteAccent, '#1f2937', 0.55);
     const homeColor = sampleCrestColor(homeCrest, paletteAccent);
@@ -12357,37 +12360,66 @@ async function drawG22BaseLineupsClassic(
         awayColor = mixHexColors(awayColor, hexLuminance(awayColor) > 0.5 ? '#000000' : '#ffffff', 0.28);
     }
     const teamColors = { home: homeColor, away: awayColor } as const;
+    const bandMid = bandTop + bandHeight / 2;
+    // La mitad de cada equipo, con la punta de la flecha hacia la derecha. Es
+    // el relleno de la banda Y la mascara de recorte de su escudo: el escudo
+    // se dibuja mas grande que la banda y solo se ve lo que cae dentro de su
+    // mitad, como el bulldog y el bronco de la lista de la NRL.
+    const traceHalf = (index: number) => {
+        ctx.beginPath();
+        if (index === 0) {
+            ctx.moveTo(0, bandTop);
+            ctx.lineTo(W / 2, bandTop);
+            ctx.lineTo(W / 2 + u(40), bandMid);
+            ctx.lineTo(W / 2, bandBottom);
+            ctx.lineTo(0, bandBottom);
+        } else {
+            ctx.moveTo(W / 2, bandTop);
+            ctx.lineTo(W, bandTop);
+            ctx.lineTo(W, bandBottom);
+            ctx.lineTo(W / 2, bandBottom);
+            ctx.lineTo(W / 2 + u(40), bandMid);
+        }
+        ctx.closePath();
+    };
     ctx.save();
     ctx.fillStyle = teamColors[teams[1].side];
     ctx.fillRect(0, bandTop, W, bandHeight);
     ctx.fillStyle = teamColors[teams[0].side];
-    ctx.beginPath();
-    ctx.moveTo(0, bandTop);
-    ctx.lineTo(W / 2, bandTop);
-    ctx.lineTo(W / 2 + u(40), bandTop + bandHeight / 2);
-    ctx.lineTo(W / 2, bandBottom);
-    ctx.lineTo(0, bandBottom);
-    ctx.closePath();
+    traceHalf(0);
     ctx.fill();
-    ctx.beginPath();
-    ctx.rect(0, bandTop, W, bandHeight);
-    ctx.clip();
+    ctx.restore();
+    // En la referencia el escudo mide algo mas de dos bandas de alto y la banda
+    // le recorta la cabeza y el menton: queda el centro, a sangre, sin sombra
+    // ni margen. Medido contra el ancho, no contra el alto (story lo agranda).
+    const crestBox = u(400);
     teams.forEach((team, index) => {
         const crest = crestBySide[team.side];
-        if (!crest) return;
-        drawOverflowCrest(ctx, {
-            x: index === 0 ? W * 0.27 : W * 0.75,
-            y: bandTop + bandHeight / 2 + u(10),
-            width: u(210),
-            height: u(210),
-            img: crest,
-            label: team.name,
-            rawLogo: team.logo,
-            isDark: true,
-            showFrame: false,
-        });
+        const crestX = index === 0 ? W * 0.27 : W * 0.75;
+        ctx.save();
+        traceHalf(index);
+        ctx.clip();
+        if (crest) {
+            const placement = getContainedImagePlacement(crest, crestX, bandMid, crestBox, crestBox, 0);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(crest, placement.x, placement.y, placement.width, placement.height);
+        } else {
+            // Sin escudo cargado, las iniciales de siempre, en el tamaño de antes.
+            drawOverflowCrest(ctx, {
+                x: crestX,
+                y: bandMid,
+                width: u(120),
+                height: u(120),
+                img: null,
+                label: team.name,
+                rawLogo: team.logo,
+                isDark: true,
+                showFrame: false,
+            });
+        }
+        ctx.restore();
     });
-    ctx.restore();
 
     // Las dos columnas.
     const listTop = bandBottom + u(56) + Math.round(extra * 0.04);
