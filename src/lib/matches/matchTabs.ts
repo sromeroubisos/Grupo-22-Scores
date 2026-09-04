@@ -34,7 +34,8 @@ export type MatchProvider =
     | 'rugby-api-sports'
     | 'espn-american-football'
     | 'espn-soccer'
-    | 'fih';
+    | 'fih'
+    | 'fisu';
 
 export type MatchStatusKind = 'scheduled' | 'live' | 'final';
 
@@ -103,12 +104,16 @@ const SUPPORTED: Record<MatchProvider, readonly MatchTabId[]> = {
     'espn-american-football': ['previa', 'summary', 'videos', 'lineups', 'h2h', 'standings'],
     'espn-soccer': ['previa', 'summary', 'videos', 'timeline', 'lineups', 'stats', 'h2h', 'standings'],
     fih: ['previa', 'summary', 'videos', 'timeline', 'lineups', 'players', 'stats', 'h2h', 'standings'],
+    // La FISU publica el cronograma, el marcador por tiempo, el plantel de doce
+    // y la tabla del grupo. Nada de cronología ni planilla individual: la
+    // pestaña vacía sería una promesa que la fuente no cumple.
+    fisu: ['previa', 'summary', 'videos', 'lineups', 'standings'],
 };
 
 // Las fuentes que publican el plantel poco antes del inicio. Para el resto,
 // una alineación que no llegó antes del partido no llega nunca.
 const PUBLISHES_LINEUPS_BEFORE_KICKOFF: readonly MatchProvider[] = [
-    'local', 'flashscore', 'espn-soccer', 'rugby-api-sports', 'espn-american-football', 'fih',
+    'local', 'flashscore', 'espn-soccer', 'rugby-api-sports', 'espn-american-football', 'fih', 'fisu',
 ];
 
 // Lo que un administrador carga a mano. El resto se deriva de los eventos, asi

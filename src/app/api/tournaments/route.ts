@@ -49,6 +49,10 @@ import {
     parseFihTournamentId,
 } from '@/lib/services/fihHockey';
 import {
+    getFisuRugbySevensTournamentBundle,
+    parseFisuTournamentId,
+} from '@/lib/services/fisuRugbySevens';
+import {
     isBlockedTournamentId,
 } from '@/lib/utils/blockedTournaments';
 import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
@@ -811,7 +815,8 @@ async function findDbTournamentMeta(id: string) {
         isRugbyApiSportsTournamentId(id) ||
         isEspnAmericanFootballTournamentId(id) ||
         isEspnMotorsportTournamentId(id) ||
-        parseFihTournamentId(id) !== null
+        parseFihTournamentId(id) !== null ||
+        parseFisuTournamentId(id) !== null
     ) {
         return null;
     }
@@ -1165,8 +1170,51 @@ export async function GET(request: Request) {
             : null);
 
     const fihCompetition = parseFihTournamentId(id) || parseFihTournamentId(dbTournamentMeta?.external_id);
+    const fisuCompetition = parseFisuTournamentId(id) || parseFisuTournamentId(dbTournamentMeta?.external_id);
 
     try {
+        // Mundial Universitario de Seven 2026: la fuente es la FISU (Bornan).
+        // Igual que el Mundial de hockey, el id ya dice qué competencia es y el
+        // torneo no vive en FlashScore ni en la base.
+        if (fisuCompetition) {
+            const bundle = await getFisuRugbySevensTournamentBundle(fisuCompetition);
+
+            return perf.json({
+                ok: true,
+                _debug: {
+                    query: { id, url, sport, requestedSeason },
+                    resolvedIds: bundle.ids,
+                    provider: 'fisu',
+                    counts: {
+                        results: bundle.results.length,
+                        fixtures: bundle.fixtures.length,
+                        standings: bundle.standings.length,
+                    },
+                },
+                _cache: {
+                    entityId: bundle.ids.tournamentId,
+                    tabSources: {
+                        details: 'api',
+                        results: 'api',
+                        fixtures: 'api',
+                        standings: 'api',
+                    },
+                },
+                ids: bundle.ids,
+                details: bundle.details,
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                standings: bundle.standings,
+                standingsForm: bundle.standingsForm,
+                standingsHtFt: bundle.standingsHtFt,
+                standingsOverUnder: bundle.standingsOverUnder,
+                teamLabels: bundle.teamLabels,
+                topScorers: bundle.topScorers,
+                draw: bundle.draw,
+                archives: bundle.archives,
+            });
+        }
+
         // Mundial de Hockey 2026: la fuente es la FIH (Altius RT). No pasa por la
         // resolución de IDs de FlashScore porque el torneo no vive en FlashScore:
         // el id ya dice qué competencia es.

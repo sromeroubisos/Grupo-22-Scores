@@ -44,6 +44,10 @@ import {
   parseFihMatchId,
 } from '@/lib/services/fihHockey';
 import {
+  getFisuRugbySevensMatchBundle,
+  parseFisuMatchId,
+} from '@/lib/services/fisuRugbySevens';
+import {
   applyExternalTournamentOverride,
   getExternalTournamentOverride,
   type ExternalTournamentOverrideRecord,
@@ -347,6 +351,18 @@ export async function GET(
 
     if (parseFihMatchId(matchId)) {
       const bundle = await getFihWorldCupMatchBundle(matchId);
+      if (!bundle) {
+        return jsonNoStore(
+          { error: 'Match not found' },
+          { status: 404 }
+        );
+      }
+
+      return jsonNoStore({ ...bundle, videos: await videosPromise });
+    }
+
+    if (parseFisuMatchId(matchId)) {
+      const bundle = await getFisuRugbySevensMatchBundle(matchId);
       if (!bundle) {
         return jsonNoStore(
           { error: 'Match not found' },
