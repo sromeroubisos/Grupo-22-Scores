@@ -80,6 +80,11 @@ function isFihWorldCupTournamentId(id: string): boolean {
     return id.toLowerCase().startsWith('fih-wc-');
 }
 
+/** Mundial Universitario de Seven de la FISU: torneo externo, no vive en la base. */
+function isFisuTournamentId(id: string): boolean {
+    return id.toLowerCase().startsWith('fisu-');
+}
+
 function isExternalCatalogRoute(id: string, search: string): boolean {
     if (UUID_RE.test(id)) return false;
 
@@ -2067,7 +2072,7 @@ export default function TournamentDetailPage({
                 }
 
                 if (!localTournament) {
-                    if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id) || isEspnAmericanFootballTournamentId(id) || isEspnSoccerTournamentId(id) || isFihWorldCupTournamentId(id)) {
+                    if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id) || isEspnAmericanFootballTournamentId(id) || isEspnSoccerTournamentId(id) || isFihWorldCupTournamentId(id) || isFisuTournamentId(id)) {
                         localTournament = {
                             id,
                             name: nameParam || 'Cargando...',
@@ -2225,6 +2230,7 @@ export default function TournamentDetailPage({
                     !isEspnAmericanFootballTournamentId(id) &&
                     !isEspnSoccerTournamentId(id) &&
                     !isFihWorldCupTournamentId(id) &&
+                    !isFisuTournamentId(id) &&
                     !isExternalCatalogRoute(id, routeSearch)
                 ) {
                     try {
@@ -2391,7 +2397,7 @@ export default function TournamentDetailPage({
 
     useEffect(() => {
         // Un torneo externo no tiene temporadas en base: el selector no aplica.
-        if (id.toLowerCase().startsWith('fs-') || isFihWorldCupTournamentId(id) || isExternalCatalogRoute(id, routeSearch)) {
+        if (id.toLowerCase().startsWith('fs-') || isFihWorldCupTournamentId(id) || isFisuTournamentId(id) || isExternalCatalogRoute(id, routeSearch)) {
             setSeasonOptions([]);
             setSeasonOptionsLoaded(true);
             return;

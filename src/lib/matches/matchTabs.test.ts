@@ -42,7 +42,7 @@ test('el piso: la barra nunca queda vacia', () => {
     assert.equal(programado.defaultTab, 'lineups');
 
     // Vale para cualquier fuente, incluso las de cobertura mas pobre.
-    for (const provider of ['rugby-api-sports', 'espn-american-football', 'fih', 'espn-soccer', 'flashscore'] as MatchProvider[]) {
+    for (const provider of ['rugby-api-sports', 'espn-american-football', 'fih', 'fisu', 'espn-soccer', 'flashscore'] as MatchProvider[]) {
         for (const status of ['scheduled', 'live', 'final'] as const) {
             const { tabs } = resolveMatchTabs({ provider, status, counts: EMPTY });
             assert.ok(tabs.length >= 1, `${provider}/${status} se quedo sin pestanas`);
@@ -227,7 +227,7 @@ test('el admin no ve Previa en un partido terminado', () => {
 
 test('videos se dibuja en cualquier fuente y estado si hay links, y no si no hay', () => {
     // Los links son nuestros, no del proveedor: la cobertura de la API no manda.
-    for (const provider of ['local', 'flashscore', 'rugby-api-sports', 'espn-american-football', 'espn-soccer', 'fih'] as MatchProvider[]) {
+    for (const provider of ['local', 'flashscore', 'rugby-api-sports', 'espn-american-football', 'espn-soccer', 'fih', 'fisu'] as MatchProvider[]) {
         for (const status of ['scheduled', 'live', 'final'] as const) {
             assert.ok(ids(provider, status, { videos: 2 }).includes('videos'), `${provider}/${status} con links`);
             assert.ok(!ids(provider, status, { videos: 0, events: 5 }).includes('videos'), `${provider}/${status} sin links`);

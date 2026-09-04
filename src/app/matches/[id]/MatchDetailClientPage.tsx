@@ -151,6 +151,13 @@ function getMotorsportStatusLabel(status: string | null | undefined) {
     if (status === 'cancelled') return 'Cancelado';
     return 'Programado';
 }
+// Mundial Universitario de Seven: `fisu-match-m-PO03-000100`. La `m`/`w` es la
+// competencia, después la fase y la unidad del ResCode de la FISU. Mismo
+// formato que `toFisuMatchId`.
+function isFisuMatchId(value: string) {
+    return /^fisu-match-[mw]-[A-Z0-9_]{4}-\d{6}$/i.test(value);
+}
+
 
 function getMotorsportCompetitorCode(name: unknown) {
     const parts = String(name || '')
@@ -725,7 +732,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isEspnSoccerExternal = isEspnSoccerMatchId(id);
     const isEspnMotorsportExternal = isEspnMotorsportMatchId(id);
     const isFihExternal = isFihMatchId(id);
-    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal;
+    const isFisuExternal = isFisuMatchId(id);
+    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal || isFisuExternal;
 
     const resolvedMatchId =
         typeof state.matchData?.id === 'string' && state.matchData.id.trim()
@@ -793,11 +801,13 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         { id: 'circuit', label: 'Circuito' },
     ]), []);
 
+    const isFisuSource = state.matchData?.externalProvider === 'fisu';
     // Qué fuente atiende este partido. Es el único lugar donde se traduce del
     // formato del id al vocabulario del motor de capacidades.
     const tabProvider: MatchProvider = isMotorsportSource
         ? 'local' // no se usa: el automovilismo no pasa por resolveMatchTabs
         : isFihSource ? 'fih'
+        : isFisuSource ? 'fisu'
         : isEspnSoccerSource ? 'espn-soccer'
         : isRugbyApiSportsSource ? 'rugby-api-sports'
         : isEspnSource ? 'espn-american-football'
@@ -860,7 +870,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     // Mundial de Hockey: el bundle ya viene en el vocabulario de
                     // la pantalla (eventos canonicos, planilla, alineaciones),
                     // asi que no hay nada que normalizar aca.
-                    if (payload?.source === 'fih' && payload?.match) {
+                    if ((payload?.source === 'fih' || payload?.source === 'fisu') && payload?.match) {
                         statusRef.current = payload.match.status || 'scheduled';
                         setState({
                             kind: 'ok',
@@ -1859,7 +1869,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const exportSportId = ((): string | number | undefined => {
         const raw = matchData?.sportId;
         if (raw != null && raw !== '') return raw as string | number;
-        if (isRugbyExternal || isRugbyApiSportsSource) return 'rugby';
+        if (isRugbyExternal || isRugbyApiSportsSource || isFisuExternal || isFisuSource) return 'rugby';
         if (isFihExternal || isFihSource) return 'field-hockey';
         return undefined;
     })();

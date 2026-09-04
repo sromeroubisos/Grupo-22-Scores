@@ -3,12 +3,17 @@ import { apiFetch } from '@/lib/apiFetch';
 import { memoryCache } from '@/lib/cache';
 import { formatDateKey } from '@/lib/timezone';
 import { finalizadoPorTiempo } from '@/lib/utils/matchState';
-import { isFieldHockeySport, isFlashScoreEnabledForSport, isFootballSport } from '@/lib/externalProviderPolicy';
+import { isFieldHockeySport, isFlashScoreEnabledForSport, isFootballSport, isRugbySport } from '@/lib/externalProviderPolicy';
 import {
     getFihWorldCupLiveMatches,
     getFihWorldCupMatches,
     hasFihWorldCupMatchesOnDate,
 } from '@/lib/services/fihHockey';
+import {
+    getFisuRugbySevensLiveMatches,
+    getFisuRugbySevensMatches,
+    hasFisuRugbySevensMatchesOnDate,
+} from '@/lib/services/fisuRugbySevens';
 import { mergeHockeyProviders } from '@/lib/services/hockeyProviderMerge';
 import {
     getEspnAmericanFootballLiveMatches,
@@ -218,7 +223,21 @@ export async function isExternalMatchesListDateSupported(
 ): Promise<boolean> {
     if (isFlashScoreMatchesListDateSupported(targetDateKey, timeZone)) return true;
     if (isFieldHockeySport(sportId)) return hasFihWorldCupMatchesOnDate(targetDateKey, timeZone);
+    if (isRugbySport(sportId)) return hasFisuRugbySevensMatchesOnDate(targetDateKey, timeZone);
     return false;
+}
+
+/**
+ * Rugby: el Mundial Universitario de Seven sale de la FISU (Bornan, donde la
+ * mesa carga el resultado) y el resto del rugby sigue viniendo de FlashScore.
+ *
+ * Entra por `rugby` y por `rugby-union`, nunca por `rugby-league`: el camino
+ * en vivo de `rugby` se abre en union + league, y sumar la FISU en los dos lo
+ * metería dos veces. En el listado diario `rugby` no recurre, así que ahí
+ * alcanza con la misma puerta.
+ */
+export function wantsFisuRugbySevens(sportId: string): boolean {
+    return sportId === 'rugby' || sportId === 'rugby-union';
 }
 
 function getFlashScoreRawTournamentList(data: any): any[] {
@@ -433,6 +452,29 @@ export async function getFlashScoreMatches(
         return mergeHockeyProviders(worldCup, flashScore);
     }
 
+    // Rugby: la FISU trae el Mundial Universitario de Seven, que FlashScore no
+    // cubre, así que no hay copia que descartar: se suman. Un corte de la FISU
+    // no tira el rugby entero; un corte de FlashScore con la FISU vacía sí se
+    // propaga, por el mismo motivo que en hockey.
+    if (wantsFisuRugbySevens(sportId)) {
+        let flashScoreError: unknown = null;
+
+        const [universitario, flashScore] = await Promise.all([
+            getFisuRugbySevensMatches(date, options).catch((error) => {
+                console.warn('[FISU] fixture del Mundial Universitario no disponible:', error?.message);
+                return [] as Match[];
+            }),
+            fetchFlashScoreDailyMatches(date, sportId, options).catch((error) => {
+                flashScoreError = error;
+                return [] as Match[];
+            }),
+        ]);
+
+        if (flashScoreError && universitario.length === 0) throw flashScoreError;
+
+        return [...universitario, ...flashScore];
+    }
+
     return fetchFlashScoreDailyMatches(date, sportId, options);
 }
 
@@ -566,6 +608,20 @@ export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]
         ]);
 
         return mergeHockeyProviders(worldCup, flashScore);
+    }
+
+    // Solo `rugby-union`: el camino de `rugby` llega acá por la recursión de
+    // `getFlashScoreLiveMatchesRaw`, así que la FISU entra una sola vez.
+    if (sportId === 'rugby-union') {
+        const [universitario, flashScore] = await Promise.all([
+            getFisuRugbySevensLiveMatches().catch((error) => {
+                console.warn('[FISU] en vivo del Mundial Universitario no disponible:', error?.message);
+                return [] as Match[];
+            }),
+            getFlashScoreLiveMatchesRaw(sportId).catch(() => [] as Match[]),
+        ]);
+
+        return [...universitario, ...flashScore];
     }
 
     return getFlashScoreLiveMatchesRaw(sportId);

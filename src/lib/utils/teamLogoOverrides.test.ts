@@ -69,13 +69,13 @@ test('cada bandera del mapa existe en disco', () => {
     // Un slug mal escrito no rompe nada: deja un hueco gris en producción. Acá sí
     // rompe.
     const paises = [
-        'Argentina', 'Australia', 'Belgium', 'Brazil', 'Canada', 'Chile', 'China',
+        'Argentina', 'Australia', 'Belgium', 'Botswana', 'Brazil', 'Canada', 'Chile', 'China',
         'Croatia', 'Czechia', 'Denmark', 'England', 'Fiji', 'France', 'Georgia',
         'Germany', 'Guam', 'Hong Kong', 'India', 'Ireland', 'Italy', 'Japan', 'Laos',
-        'Lithuania', 'Malaysia', 'Netherlands', 'New Zealand', 'Peru', 'Philippines',
+        'Lithuania', 'Malaysia', 'Mexico', 'Netherlands', 'New Zealand', 'Norway', 'Peru', 'Philippines',
         'Poland', 'Portugal', 'Romania', 'Samoa', 'Scotland', 'Singapore',
         'South Africa', 'South Korea', 'Spain', 'Sri Lanka', 'Sweden', 'Switzerland',
-        'Taiwan', 'Thailand', 'Tonga', 'Turkey', 'Ukraine', 'United States', 'Uruguay',
+        'Taiwan', 'Thailand', 'Tonga', 'Turkey', 'Uganda', 'Ukraine', 'United States', 'Uruguay',
         'Vietnam', 'Wales', 'Zimbabwe',
     ];
 
