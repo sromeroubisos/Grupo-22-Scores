@@ -18,6 +18,7 @@
  */
 
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { resolveLinkedNationalTeamClub } from '@/lib/services/nationalTeamLinks';
 
 type DbClient = any;
 
@@ -107,7 +108,26 @@ export async function resolveClubIdForTeamKey(
         }
     }
 
-    // 3. La tabla de vínculos por proveedor.
+    // 3. Una selección del feed de la FIH: el vínculo va por (género, país) y no
+    //    por el ref de la edición, así que no lo encuentra la búsqueda literal
+    //    de abajo. Sin esto, cargar el plantel de Las Leonas desde el Mundial
+    //    creaba una segunda ficha en vez de escribir sobre la que ya existe.
+    const seleccion = await resolveLinkedNationalTeamClub(client, key);
+    if (seleccion) {
+        try {
+            const { data } = await client
+                .from('clubs')
+                .select('id, name')
+                .eq('id', seleccion.clubId)
+                .limit(1)
+                .maybeSingle();
+            if (data?.id) return { clubId: data.id as string, clubName: texto(data.name) };
+        } catch {
+            // Sigue.
+        }
+    }
+
+    // 4. La tabla de vínculos por proveedor.
     try {
         const { data, error } = await client
             .from('club_external_ids')

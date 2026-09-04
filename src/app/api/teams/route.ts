@@ -28,7 +28,9 @@ import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { buildTeamLogoProxyUrl, clubLogoVersion } from '@/lib/utils/logoUrl';
 import { applyExternalTeamLogoOverride } from '@/lib/utils/teamLogoOverrides';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
-
+import { getNationalTeamLinksForClub } from '@/lib/services/nationalTeamLinks';
+import { fihTeamId, toFihTeamRef } from '@/lib/services/fihHockeyParser';
+import { getWorldCupTeamProfile, type WorldCupMatchSide } from '@/lib/server/worldCupProfiles';
 type ReadClient = Awaited<ReturnType<typeof getReadClient>>;
 type InternalClubRow = Database['public']['Tables']['clubs']['Row'] & {
     sport?: string | null;
@@ -496,6 +498,115 @@ function flattenFsMatches(raw: unknown): NormalizedInternalMatch[] {
         })
         .flat()
         .filter((m): m is NormalizedInternalMatch => m !== null);
+}
+
+/**
+ * LO QUE LA SELECCIÓN JUEGA EN EL FEED, DENTRO DE SU PROPIA FICHA.
+ *
+ * Las Leonas son un club de la base —con su plantel y la Pro League cargada a
+ * mano— y a la vez una selección del feed de la FIH. Son el mismo equipo (ver
+ * `services/nationalTeamLinks.ts`), así que el Mundial tiene que aparecer en la
+ * ficha del club: si el id del feed redirige acá y esto no existiera, el
+ * fixture y el plantel del Mundial dejarían de verse en ningún lado.
+ *
+ * Devuelve vacío para cualquier club que no sea una selección vinculada, que es
+ * el caso de los 2.976 clubes restantes.
+ */
+async function loadLinkedNationalTeamFeed(
+    client: ReadClient,
+    club: { id: string; sport_id?: string | null; sport?: string | null },
+    options: { includeSquad: boolean; includeMatches: boolean },
+): Promise<{ squad: unknown[]; results: NormalizedInternalMatch[]; fixtures: NormalizedInternalMatch[] }> {
+    const vacio = { squad: [] as unknown[], results: [], fixtures: [] };
+
+    // El feed que se vincula acá es el de la FIH y no hay otro: preguntar por
+    // los 2.585 clubes que no son de hockey es una ida y vuelta a la base por
+    // ficha —250 ms contra una base cross-region— a cambio de nada.
+    //
+    // La comparación va contra el deporte YA canonicalizado de los dos lados:
+    // `canonicalizeSportId('field-hockey')` devuelve 'hockey', así que cotejar
+    // contra la cadena cruda deja afuera justo a las selecciones.
+    const deporte = canonicalizeSportId(club.sport_id || club.sport || null);
+    if (deporte !== canonicalizeSportId('field-hockey')) return vacio;
+
+    const clubId = club.id;
+    const links = await getNationalTeamLinksForClub(client, clubId);
+    if (links.length === 0) return vacio;
+
+    const profiles = await Promise.all(links.map((link) => getWorldCupTeamProfile(link.ref).catch((error) => {
+        // El feed caído no puede vaciar la ficha del club: sus partidos de la
+        // base ya están y el Mundial vuelve cuando el feed vuelva.
+        console.error('[teams] ficha del Mundial no disponible:', error);
+        return null;
+    })));
+
+    const squad: unknown[] = [];
+    const results: NormalizedInternalMatch[] = [];
+    const fixtures: NormalizedInternalMatch[] = [];
+
+    for (const profile of profiles) {
+        if (!profile) continue;
+        for (const entry of profile.competitions) {
+            const { key, name } = entry.competition;
+
+            if (options.includeSquad) {
+                for (const player of entry.squad) {
+                    squad.push({
+                        // El id es el de su ficha del feed: la jugadora sigue
+                        // teniendo página propia aunque el equipo ya no.
+                        id: player.ref,
+                        player_id: player.ref,
+                        name: player.name,
+                        player_name: player.name,
+                        image_path: player.image || '',
+                        photo: player.image || '',
+                        jersey_number: player.number,
+                        shirt_number: player.number,
+                        number: player.number,
+                        position: player.isGoalkeeper ? (key === 'w' ? 'Arquera' : 'Arquero') : null,
+                        status: 'active',
+                        role: 'player',
+                        tab_name: name,
+                        division_name: name,
+                    });
+                }
+            }
+
+            if (!options.includeMatches) continue;
+
+            /** El rival lleva su id del feed CON género: así cae en su propia ficha. */
+            const ladoDelFeed = (side: WorldCupMatchSide) => ({
+                name: side.name,
+                small_image_path: side.flagUrl || '',
+                // Sin código no es un país: es "Ganador 47", un lugar todavía sin dueño.
+                team_id: side.code ? toFihTeamRef(key, side.code) : fihTeamId(null, side.name),
+            });
+            const ladoPropio = (side: WorldCupMatchSide) => ({
+                name: side.name,
+                small_image_path: side.flagUrl || '',
+                team_id: clubId,
+            });
+
+            for (const match of entry.matches) {
+                const fecha = match.dateTime ? Date.parse(match.dateTime) : NaN;
+                const normalizado: NormalizedInternalMatch = {
+                    match_id: match.id,
+                    home_team: match.home.isSelf ? ladoPropio(match.home) : ladoDelFeed(match.home),
+                    away_team: match.away.isSelf ? ladoPropio(match.away) : ladoDelFeed(match.away),
+                    scores: { home: match.score?.home ?? null, away: match.score?.away ?? null },
+                    match_status: match.status,
+                    timestamp: Number.isFinite(fecha) ? Math.floor(fecha / 1000) : 0,
+                    tournament_name: name,
+                    tournament_id: entry.competition.tournamentId,
+                    sport_id: 'field-hockey',
+                };
+                if (match.status === 'final') results.push(normalizado);
+                else fixtures.push(normalizado);
+            }
+        }
+    }
+
+    return { squad, results, fixtures };
 }
 
 function normalizeInternalMatch(m: InternalMatchSource): NormalizedInternalMatch {
@@ -1451,6 +1562,21 @@ export async function GET(request: Request) {
             ]);
             internalSquad = internalSquadState.squad;
             hasInternalSquad = internalSquadState.hasSquad;
+
+            // Si este club es una selección, lo que juega en el feed es suyo y va
+            // en su ficha. El plantel del feed entra SOLO como respaldo: el que
+            // alguien cargó a mano manda, porque es el que se puede corregir.
+            const feedSeleccion = await loadLinkedNationalTeamFeed(readClient, effectiveClub, {
+                includeSquad: !skipSquad && !hasInternalSquad,
+                includeMatches: !onlySquad,
+            });
+            if (!hasInternalSquad && feedSeleccion.squad.length > 0) {
+                internalSquad = feedSeleccion.squad;
+                hasInternalSquad = true;
+            }
+            // El orden no importa: los dos arreglos se ordenan por fecha más abajo.
+            internalResults.push(...feedSeleccion.results);
+            internalFixtures.push(...feedSeleccion.fixtures);
 
             // Fast path para el fetch perezoso del plantel (`only=squad`): la pestaña
             // Plantilla no necesita ni la familia de clubes ni los 600 partidos. Si el
