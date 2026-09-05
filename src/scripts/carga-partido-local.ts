@@ -72,6 +72,7 @@ type EventoJson = {
 };
 type Datos = {
   fecha?: string;
+  sede?: string;
   descripcion?: string;
   marcador?: { local: number; visitante: number };
   local: LadoJson;
@@ -88,6 +89,7 @@ type FilaPartido = {
   home_club_id: string | null;
   away_club_id: string | null;
   status: string | null;
+  venue: string | null;
   score: Record<string, number> | null;
   home_base_points: number | null;
   away_base_points: number | null;
@@ -99,7 +101,7 @@ type FilaPartido = {
 };
 
 const SELECT_PARTIDO =
-  'id, tournament_id, phase_id, season_id, date_time, home_club_id, away_club_id, status, score,'
+  'id, tournament_id, phase_id, season_id, date_time, home_club_id, away_club_id, status, venue, score,'
   + ' home_base_points, away_base_points, home_bonus_points, away_bonus_points,'
   + ' points_autocalculated, points_override_reason, lineups';
 
@@ -293,6 +295,17 @@ async function main() {
     console.log(`  el marcador del partido ${sc.home}-${sc.away} coincide con los eventos`);
   }
 
+  // La sede sólo se escribe si el partido no tiene una. Pisar una sede cargada
+  // a mano por una transcripción es exactamente al revés de lo que conviene.
+  const escribeSede = Boolean(datos.sede) && !fila.venue?.trim();
+  if (datos.sede) {
+    if (escribeSede) {
+      console.log(`  sede a escribir: ${datos.sede} (el partido no tiene ninguna)`);
+    } else if (fila.venue?.trim() !== datos.sede) {
+      console.log(`  sede: el partido ya dice "${fila.venue}" y el JSON "${datos.sede}" — NO se toca`);
+    }
+  }
+
   const escribeMarcador = Boolean(datos.marcador) && !sinMarcador;
   if (escribeMarcador) {
     console.log(`  marcador a escribir: ${datos.marcador!.local}-${datos.marcador!.visitante} · status final`);
@@ -329,7 +342,7 @@ async function main() {
 
   console.log(`\nguardado · ${home ? `${home.length} local` : 'local intacto'} · ${away ? `${away.length} visitante` : 'visitante intacto'} · ${eventos.length} eventos`);
 
-  if (!escribeMarcador) return;
+  if (!escribeMarcador && !escribeSede) return;
 
   // El estado anterior del partido, antes de tocarlo. Acumulativo: repetir
   // --apply no puede pisar el original con lo que ya se escribió.
@@ -339,7 +352,7 @@ async function main() {
   try { previo = JSON.parse(await fsp.readFile(rollback, 'utf8')); } catch { previo = []; }
   if (!previo.some((x) => x.id === fila.id)) {
     previo.push({ id: fila.id, antes: {
-      status: fila.status, score: fila.score,
+      status: fila.status, venue: fila.venue, score: fila.score,
       home_base_points: fila.home_base_points, away_base_points: fila.away_base_points,
       home_bonus_points: fila.home_bonus_points, away_bonus_points: fila.away_bonus_points,
       points_autocalculated: fila.points_autocalculated,
@@ -350,17 +363,21 @@ async function main() {
     console.log(`· estado anterior guardado en ${rollback}`);
   }
 
-  const score = { home: datos.marcador!.local, away: datos.marcador!.visitante };
+  const score = escribeMarcador
+    ? { home: datos.marcador!.local, away: datos.marcador!.visitante }
+    : null;
 
   // Los puntos de tabla salen de la misma cuenta que la Results API, con el
   // ruleset del torneo y los eventos recién escritos. `null` = el partido tiene
   // los puntos puestos a mano y no hay que pisarlos.
   const { deriveClubAdminPointsPatch } = await import('@/lib/services/matchPointsSync');
-  const patch = await deriveClubAdminPointsPatch(supabase, fila.id, { status: 'final', score, events: eventos });
+  const patch = score
+    ? await deriveClubAdminPointsPatch(supabase, fila.id, { status: 'final', score, events: eventos })
+    : null;
 
   const { error: errorUpdate } = await supabase.from('matches').update({
-    status: 'final',
-    score,
+    ...(escribeSede ? { venue: datos.sede } : {}),
+    ...(score ? { status: 'final', score } : {}),
     ...(patch ? {
       home_base_points: patch.homeBasePoints,
       away_base_points: patch.awayBasePoints,
@@ -374,6 +391,12 @@ async function main() {
   if (errorUpdate) {
     console.error('No pude escribir el marcador.', errorUpdate);
     process.exit(1);
+  }
+
+  if (escribeSede) console.log(`· sede ${datos.sede}`);
+  if (!score) {
+    console.log('· sin marcador que escribir: la tabla queda como está');
+    return;
   }
 
   console.log(
