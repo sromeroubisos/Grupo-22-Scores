@@ -12,9 +12,18 @@
  * lee un partido cargado por nosotros. Correr el externo acá deja los datos
  * colgados de una tabla que esa vista no mira.
  *
- * Los dos lados y los eventos van en UNA escritura, no en tres corridas: media
- * carga —los quince sin el minuto a minuto, o al revés— es justo el estado que
- * hay que poder evitar.
+ * Los dos lados, los eventos y el marcador van en UNA corrida, no en tres:
+ * media carga —los quince sin el minuto a minuto, o los 16 eventos en un
+ * partido que sigue mostrando "- - -"— es justo el estado que hay que poder
+ * evitar. El marcador NO se deriva de los eventos: `persistMatchCenterSupple-
+ * mentalData` guarda el minuto a minuto y no toca `matches.score`, así que
+ * cargar sólo eventos deja el partido sin resultado.
+ *
+ * Los puntos de tabla no se declaran a mano: los calcula
+ * `deriveClubAdminPointsPatch` con el ruleset del torneo y los eventos que se
+ * acaban de escribir, que es la misma cuenta que hace la Results API. Y como
+ * un resultado final cambia la tabla, se rehace la de la fase; el estado
+ * anterior del partido queda en un archivo de rollback antes de tocar nada.
  *
  * El PUESTO no se declara: en rugby lo dice el número, y la traducción es la de
  * `lib/server/lineupPayload.ts` —la misma que usa `POST /api/results/lineups`—
@@ -72,22 +81,37 @@ type Datos = {
 
 type FilaPartido = {
   id: string;
+  tournament_id: string | null;
+  phase_id: string | null;
+  season_id: string | null;
   date_time: string | null;
   home_club_id: string | null;
   away_club_id: string | null;
   status: string | null;
   score: Record<string, number> | null;
+  home_base_points: number | null;
+  away_base_points: number | null;
+  home_bonus_points: number | null;
+  away_bonus_points: number | null;
+  points_autocalculated: boolean | null;
+  points_override_reason: string | null;
   lineups: { home?: unknown[]; away?: unknown[] } | null;
 };
+
+const SELECT_PARTIDO =
+  'id, tournament_id, phase_id, season_id, date_time, home_club_id, away_club_id, status, score,'
+  + ' home_base_points, away_base_points, home_bonus_points, away_bonus_points,'
+  + ' points_autocalculated, points_override_reason, lineups';
 
 async function main() {
   const argumentos = process.argv.slice(2);
   const archivo = argumentos.find((a) => !a.startsWith('--'));
   const apply = argumentos.includes('--apply');
   const partidoId = (argumentos.find((a) => a.startsWith('--partido='))?.split('=')[1] ?? '').trim();
+  const sinMarcador = argumentos.includes('--sin-marcador');
 
   if (!archivo) {
-    console.error('uso: carga-partido-local.ts <datos.json> [--partido=<uuid>] [--apply]');
+    console.error('uso: carga-partido-local.ts <datos.json> [--partido=<uuid>] [--apply] [--sin-marcador]');
     process.exit(2);
   }
 
@@ -210,7 +234,7 @@ async function main() {
     // match de nombres.
     const { data: candidatos, error: errorFecha } = await supabase
       .from('matches')
-      .select('id, date_time, home_club_id, away_club_id, status, score, lineups')
+      .select(SELECT_PARTIDO)
       .gte('date_time', `${datos.fecha}T00:00:00`)
       .lte('date_time', `${datos.fecha}T23:59:59`)
       .order('date_time');
@@ -237,7 +261,7 @@ async function main() {
 
   const { data: filaRaw, error } = await supabase
     .from('matches')
-    .select('id, date_time, home_club_id, away_club_id, status, score, lineups')
+    .select(SELECT_PARTIDO)
     .eq('id', partidoId)
     .single();
 
@@ -257,9 +281,9 @@ async function main() {
     process.exit(1);
   }
 
-  // El marcador ya cargado manda: si los eventos no lo dan, o falta uno o el
-  // partido es otro. En cualquiera de los dos casos escribir empeora las cosas.
-  if (eventos.length > 0 && typeof sc.home === 'number' && typeof sc.away === 'number') {
+  // Un marcador ya cargado que NO da los eventos es una contradicción: o falta
+  // un evento o el partido es otro. Escribir encima de eso empeora las cosas.
+  if (eventos.length > 0 && typeof sc.home === 'number' && typeof sc.away === 'number' && (sc.home || sc.away)) {
     if (sc.home !== puntos.local || sc.away !== puntos.visitante) {
       console.error(
         `Los eventos suman ${puntos.local}-${puntos.visitante} pero el partido tiene ${sc.home}-${sc.away}.`,
@@ -267,6 +291,13 @@ async function main() {
       process.exit(1);
     }
     console.log(`  el marcador del partido ${sc.home}-${sc.away} coincide con los eventos`);
+  }
+
+  const escribeMarcador = Boolean(datos.marcador) && !sinMarcador;
+  if (escribeMarcador) {
+    console.log(`  marcador a escribir: ${datos.marcador!.local}-${datos.marcador!.visitante} · status final`);
+  } else if (datos.marcador) {
+    console.log('  --sin-marcador: el resultado y la tabla quedan como están');
   }
 
   if (yaCargados) {
@@ -297,6 +328,71 @@ async function main() {
   }
 
   console.log(`\nguardado · ${home ? `${home.length} local` : 'local intacto'} · ${away ? `${away.length} visitante` : 'visitante intacto'} · ${eventos.length} eventos`);
+
+  if (!escribeMarcador) return;
+
+  // El estado anterior del partido, antes de tocarlo. Acumulativo: repetir
+  // --apply no puede pisar el original con lo que ya se escribió.
+  const fsp = await import('node:fs/promises');
+  const rollback = `ROLLBACK_${fila.id}.json`;
+  let previo: Array<{ id: string; antes: unknown }> = [];
+  try { previo = JSON.parse(await fsp.readFile(rollback, 'utf8')); } catch { previo = []; }
+  if (!previo.some((x) => x.id === fila.id)) {
+    previo.push({ id: fila.id, antes: {
+      status: fila.status, score: fila.score,
+      home_base_points: fila.home_base_points, away_base_points: fila.away_base_points,
+      home_bonus_points: fila.home_bonus_points, away_bonus_points: fila.away_bonus_points,
+      points_autocalculated: fila.points_autocalculated,
+      points_override_reason: fila.points_override_reason,
+      lineups: fila.lineups,
+    } });
+    await fsp.writeFile(rollback, JSON.stringify(previo, null, 2), 'utf8');
+    console.log(`· estado anterior guardado en ${rollback}`);
+  }
+
+  const score = { home: datos.marcador!.local, away: datos.marcador!.visitante };
+
+  // Los puntos de tabla salen de la misma cuenta que la Results API, con el
+  // ruleset del torneo y los eventos recién escritos. `null` = el partido tiene
+  // los puntos puestos a mano y no hay que pisarlos.
+  const { deriveClubAdminPointsPatch } = await import('@/lib/services/matchPointsSync');
+  const patch = await deriveClubAdminPointsPatch(supabase, fila.id, { status: 'final', score, events: eventos });
+
+  const { error: errorUpdate } = await supabase.from('matches').update({
+    status: 'final',
+    score,
+    ...(patch ? {
+      home_base_points: patch.homeBasePoints,
+      away_base_points: patch.awayBasePoints,
+      home_bonus_points: patch.homeBonusPoints,
+      away_bonus_points: patch.awayBonusPoints,
+      points_autocalculated: true,
+      points_override_reason: null,
+    } : {}),
+  }).eq('id', fila.id);
+
+  if (errorUpdate) {
+    console.error('No pude escribir el marcador.', errorUpdate);
+    process.exit(1);
+  }
+
+  console.log(
+    `· marcador ${score.home}-${score.away} · final`
+    + (patch
+      ? ` · puntos ${patch.homeBasePoints}+${patch.homeBonusPoints} / ${patch.awayBasePoints}+${patch.awayBonusPoints}`
+      : ' · puntos a mano: NO se tocaron'),
+  );
+
+  // Un resultado final cambia la tabla. No rehacerla la deja vieja sin avisar.
+  if (fila.tournament_id && fila.phase_id) {
+    const { recalculatePhaseStandingsScopes } = await import('@/lib/server/recalculateStandings');
+    const r = await recalculatePhaseStandingsScopes(
+      fila.tournament_id, fila.phase_id, 'general', fila.season_id ?? undefined,
+    );
+    console.log(`· tabla rehecha: ${r.ok ? 'ok' : 'FALLÓ'} (${r.rows_calculated} filas)`);
+  } else {
+    console.log('· el partido no tiene torneo/fase: no hay tabla que rehacer');
+  }
 }
 
 main().catch((err) => { console.error(err); process.exit(1); });
