@@ -90,6 +90,15 @@ function isFisuTournamentId(id: string): boolean {
     return id.toLowerCase().startsWith('fisu-');
 }
 
+/**
+ * RugbyPass: `rp-comp-208`. Torneo externo — no vive en la base, asi que no hay
+ * que pedirle nada a `/api/db/tournaments/...`, que espera un UUID y contesta
+ * 503. Sus partidos y su tabla salen de `/api/tournaments?id=rp-comp-...`.
+ */
+function isRugbyPassTournamentId(id: string): boolean {
+    return /^rp-comp-\d+$/i.test(id);
+}
+
 function isExternalCatalogRoute(id: string, search: string): boolean {
     if (UUID_RE.test(id)) return false;
 
@@ -2083,7 +2092,7 @@ export default function TournamentDetailPage({
                 }
 
                 if (!localTournament) {
-                    if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id) || isEspnAmericanFootballTournamentId(id) || isEspnSoccerTournamentId(id) || isFihWorldCupTournamentId(id) || isFisuTournamentId(id)) {
+                    if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id) || isEspnAmericanFootballTournamentId(id) || isEspnSoccerTournamentId(id) || isFihWorldCupTournamentId(id) || isFisuTournamentId(id) || isRugbyPassTournamentId(id)) {
                         localTournament = {
                             id,
                             name: nameParam || 'Cargando...',
@@ -2242,6 +2251,7 @@ export default function TournamentDetailPage({
                     !isEspnSoccerTournamentId(id) &&
                     !isFihWorldCupTournamentId(id) &&
                     !isFisuTournamentId(id) &&
+                    !isRugbyPassTournamentId(id) &&
                     !isExternalCatalogRoute(id, routeSearch)
                 ) {
                     try {
@@ -2410,7 +2420,7 @@ export default function TournamentDetailPage({
 
     useEffect(() => {
         // Un torneo externo no tiene temporadas en base: el selector no aplica.
-        if (id.toLowerCase().startsWith('fs-') || isFihWorldCupTournamentId(id) || isFisuTournamentId(id) || isExternalCatalogRoute(id, routeSearch)) {
+        if (id.toLowerCase().startsWith('fs-') || isFihWorldCupTournamentId(id) || isFisuTournamentId(id) || isRugbyPassTournamentId(id) || isExternalCatalogRoute(id, routeSearch)) {
             setSeasonOptions([]);
             setSeasonOptionsLoaded(true);
             return;

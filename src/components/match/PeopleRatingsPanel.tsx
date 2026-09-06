@@ -28,12 +28,47 @@ export interface RateablePlayer {
 
 const RATING_ORDER: PlayerRatingValue[] = [1, 2, 3];
 
+export interface PeopleRatingsSummaryState {
+    summary: MatchPlayerRatingsSummary;
+    /** Sin ningun dato todavia. Una actualizacion con datos viejos a la vista no lo enciende. */
+    loading: boolean;
+    setSummary: (next: MatchPlayerRatingsSummary) => void;
+    /** Vuelve a pedir el resumen sin vaciar lo que ya se ve. */
+    refresh: () => void;
+}
+
+// El resumen se pide desde quien monta el panel, no desde el panel: asi el
+// pedido sale apenas aparece la pestana de jugadores y, cuando alguien toca
+// "Puntaje de la gente", la lista ya esta. Antes el fetch arrancaba recien al
+// abrir el dialogo y la espera entera (validar la sesion + leer la tabla) se
+// veia como un "Cargando" al pie.
+export function usePeopleRatingsSummary(matchId: string): PeopleRatingsSummaryState {
+    const [summary, setSummary] = useState<MatchPlayerRatingsSummary>(createEmptyPlayerRatingsSummary);
+    const [loadedFor, setLoadedFor] = useState<string | null>(null);
+    const [tick, setTick] = useState(0);
+
+    useEffect(() => {
+        let cancelled = false;
+        fetch(`/api/matches/${encodeURIComponent(matchId)}/player-ratings`, { cache: 'no-store' })
+            .then((r) => (r.ok ? r.json() : createEmptyPlayerRatingsSummary()))
+            .then((data) => { if (!cancelled) setSummary(data); })
+            .catch(() => { if (!cancelled) setSummary(createEmptyPlayerRatingsSummary()); })
+            .finally(() => { if (!cancelled) setLoadedFor(matchId); });
+        return () => { cancelled = true; };
+    }, [matchId, tick]);
+
+    const refresh = useCallback(() => setTick((n) => n + 1), []);
+
+    return { summary, loading: loadedFor !== matchId, setSummary, refresh };
+}
+
 export default function PeopleRatingsPanel({
     matchId,
     players,
     homeName,
     awayName,
     canVote,
+    ratings,
 }: {
     matchId: string;
     players: RateablePlayer[];
@@ -41,23 +76,12 @@ export default function PeopleRatingsPanel({
     awayName: string;
     /** Sin sesión el panel se lee pero no se vota. */
     canVote: boolean;
+    ratings: PeopleRatingsSummaryState;
 }) {
-    const [summary, setSummary] = useState<MatchPlayerRatingsSummary>(createEmptyPlayerRatingsSummary);
-    const [loading, setLoading] = useState(true);
+    const { summary, loading, setSummary } = ratings;
     const [saving, setSaving] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [side, setSide] = useState<'home' | 'away'>('home');
-
-    useEffect(() => {
-        let cancelled = false;
-        setLoading(true);
-        fetch(`/api/matches/${encodeURIComponent(matchId)}/player-ratings`, { cache: 'no-store' })
-            .then((r) => (r.ok ? r.json() : createEmptyPlayerRatingsSummary()))
-            .then((data) => { if (!cancelled) setSummary(data); })
-            .catch(() => { if (!cancelled) setSummary(createEmptyPlayerRatingsSummary()); })
-            .finally(() => { if (!cancelled) setLoading(false); });
-        return () => { cancelled = true; };
-    }, [matchId]);
 
     const mine = useMemo(() => {
         const map = new Map<string, { rating: PlayerRatingValue | null; isMvp: boolean }>();
@@ -96,7 +120,7 @@ export default function PeopleRatingsPanel({
         } finally {
             setSaving(null);
         }
-    }, [matchId, canVote]);
+    }, [matchId, canVote, setSummary]);
 
     const rate = (player: RateablePlayer, value: PlayerRatingValue) => {
         const current = mine.get(player.key);

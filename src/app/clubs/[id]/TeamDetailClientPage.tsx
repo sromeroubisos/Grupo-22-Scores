@@ -9,7 +9,7 @@ import { useFavorite } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { SPORTS_BY_ID } from '@/lib/sports';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
-import ExportImage, { type SquadData } from '@/components/ExportImage';
+import type { SquadData } from '@/components/ExportImage';
 import { APP_TIMEZONE, formatDateInTimeZone, formatDateKey, getTodayKey, addDaysToIsoDate } from '@/lib/timezone';
 import { estadoDesdeToken } from '@/lib/matches/providerStatus';
 import { canUseRestrictedContentActions } from '@/lib/auth/roles';
@@ -20,6 +20,13 @@ import HistoryTab from './HistoryTab';
 import QuickSquadModal from './QuickSquadModal';
 import PanelMatchForm, { type PanelFamilyClub } from './PanelMatchForm';
 import PanelCategories from './PanelCategories';
+import dynamic from 'next/dynamic';
+
+// El export es la pieza mas pesada que carga esta pagina y solo hace falta cuando
+// alguien aprieta el boton. Diferido, deja de viajar en la primera carga: en el
+// telefono eso es codigo que no se baja, no se parsea y no se compila.
+const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
+
 
 const SPORT_LABEL: Record<string, string> = Object.fromEntries(
     Object.entries(SPORTS_BY_ID).map(([id, s]) => [id, s.name])
@@ -163,6 +170,16 @@ function isRugbyApiSportsTeamId(value: string) {
 
 function isEspnAmericanFootballTeamId(value: string) {
     return /^espn-team-\d+$/i.test(value);
+}
+
+/**
+ * `rp-team-auckland`. Un equipo de RugbyPass NO vive en `clubs`, asi que su id
+ * no puede caer por el camino del club de la base: sin este predicado,
+ * `adminClubId` tomaba el id del proveedor por un club nuestro y le abria el
+ * panel de gestion a una fila que no existe.
+ */
+function isRugbyPassTeamId(value: string) {
+    return /^rp-team-[a-z0-9-]+$/i.test(value);
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -365,7 +382,8 @@ function TeamDetailInner({ id }: { id: string }) {
                     payload.resolvedClubId !== id &&
                     !id.startsWith('fs-team-') &&
                     !isRugbyApiSportsTeamId(id) &&
-                    !isEspnAmericanFootballTeamId(id)
+                    !isEspnAmericanFootballTeamId(id) &&
+                    !isRugbyPassTeamId(id)
                 ) {
                     const nextParams = new URLSearchParams();
                     if (preferredSport) nextParams.set('sport', preferredSport);
@@ -764,7 +782,13 @@ function TeamDetailInner({ id }: { id: string }) {
     const externalTeamId = getExternalTeamId(rawId, hintTeamUrl);
     const adminClubId = useMemo(() => {
         if (resolvedClubId) return resolvedClubId;
-        if (!externalTeamId && !rawId.startsWith('fs-team-') && !isRugbyApiSportsTeamId(rawId) && !isEspnAmericanFootballTeamId(rawId)) return rawId;
+        if (
+            !externalTeamId &&
+            !rawId.startsWith('fs-team-') &&
+            !isRugbyApiSportsTeamId(rawId) &&
+            !isEspnAmericanFootballTeamId(rawId) &&
+            !isRugbyPassTeamId(rawId)
+        ) return rawId;
         return null;
     }, [externalTeamId, rawId, resolvedClubId]);
     const visibleTabs = useMemo(() => {

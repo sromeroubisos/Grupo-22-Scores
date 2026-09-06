@@ -130,9 +130,10 @@ export default function TournamentNavigation({
 
     useEffect(() => {
         let vivo = true;
-        // Un id externo (fs-, espn-, ras-, fih-wc-, fisu-) no tiene hermanos en la base:
-        // no se pregunta. Preguntar era un 404 en la consola por cada visita.
-        if (!tournamentId || /^(fs-|espn-|ras-|fih-wc-|fisu-)/i.test(tournamentId)) return;
+        // Un id externo (fs-, espn-, ras-, fih-wc-, fisu-, rp-comp-) no tiene
+        // hermanos en la base: no se pregunta. Preguntar era un 404 en la
+        // consola por cada visita.
+        if (!tournamentId || /^(fs-|espn-|ras-|fih-wc-|fisu-|rp-comp-)/i.test(tournamentId)) return;
         fetch(`/api/tournaments/${encodeURIComponent(tournamentId)}/navegacion`)
             .then((r) => (r.ok ? r.json() : null))
             .then((d) => { if (vivo && d) setNav(d); })

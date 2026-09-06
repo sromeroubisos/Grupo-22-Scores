@@ -6,6 +6,8 @@ import { ensureMatchManagementAccess } from '@/lib/server/matchCenterAdmin';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getReadClient } from '@/lib/supabase/read';
+import { getRugbyPassMatchBundle } from '@/lib/services/rugbyPassMatchBundle';
+import { isRugbyPassMatchId } from '@/lib/services/rugbyPassParser';
 import { createClient } from '@/lib/supabase/server';
 import { isUuid } from '@/lib/utils/postgrest';
 import { traceEditRoute, markEditTrace } from '@/lib/perf/editTrace';
@@ -314,6 +316,17 @@ export async function GET(
       console.error('[GET /api/matches/[id]] videos:', error);
       return [];
     });
+
+    // RugbyPass va primero porque su id es inconfundible (`rp-…`) y su ficha
+    // sale de nuestra caché, sin pegarle a ningún proveedor salvo que el
+    // partido esté en juego.
+    if (isRugbyPassMatchId(matchId)) {
+      const bundle = await getRugbyPassMatchBundle(matchId, await getReadClient());
+      if (!bundle) {
+        return jsonNoStore({ error: 'Match not found' }, { status: 404 });
+      }
+      return jsonNoStore({ ...bundle, videos: await videosPromise });
+    }
 
     const espnMatchId = parseEspnAmericanFootballMatchId(matchId);
     const espnMotorsportMatchId = parseEspnMotorsportMatchId(matchId);

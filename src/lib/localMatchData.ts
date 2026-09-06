@@ -80,6 +80,17 @@ export type LocalPlayerStatsRow = {
   yellowCards: number;
   redCards: number;
   events: number;
+  /**
+   * Las metricas que no tienen columna fija porque dependen del proveedor: cada
+   * fuente publica las suyas y la tabla las descubre sola. La clave es el id de
+   * metrica y, cuando pisa una fija (`tackles`), gana esta —es la medida del
+   * proveedor, no el contador derivado de la cronologia.
+   *
+   * Un jugador SIN el dato no lleva la clave, y eso no es lo mismo que un cero:
+   * queda "—" en la tabla, que es lo correcto cuando el proveedor publica solo
+   * a los mejores de cada rubro y del resto no dice nada.
+   */
+  extraMetrics?: Record<string, { value: number | string; label: string }>;
 };
 
 function text(value: unknown) {

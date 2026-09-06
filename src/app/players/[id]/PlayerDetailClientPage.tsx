@@ -25,7 +25,10 @@ const buildTeamHref = (teamId?: string | null) => {
         teamId.startsWith('ras-team-') ||
         teamId.startsWith('espn-soccer-team-') ||
         teamId.startsWith('espn-team-') ||
-        teamId.startsWith('sofa-team-')
+        teamId.startsWith('sofa-team-') ||
+        // RugbyPass. Sin esto el fallback de abajo armaba
+        // `/clubs/fs-team-rp-team-auckland`, que no es ningun club.
+        teamId.startsWith('rp-team-')
     ) {
         return `/clubs/${teamId}`;
     }

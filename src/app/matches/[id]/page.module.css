@@ -1029,14 +1029,60 @@
     text-transform: uppercase;
 }
 
+/*
+ * El escudo del club al lado del jugador.
+ *
+ * Son 46 <img> pero DOS urls distintas: el navegador baja dos y reusa el resto
+ * de cache, asi que no cuesta lo que parece. Va por `TeamLogo`, que resuelve el
+ * escudo por el proxy —nunca base64, que es lo que ya tumbo otras pantallas—,
+ * pide `loading="lazy"` y cae en las iniciales si el club no tiene escudo.
+ */
+.playerCrest {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: 2px;
+}
+
+/*
+ * Aca el escudo va PELADO: sin la pastilla redonda que `TeamLogo` le pone por
+ * defecto. En un listado de veintitres nombres el circulo compite con el pill
+ * del puntaje, que es el que tiene que llevarse la mirada.
+ *
+ * Va por descendencia (`.playerCrest > span`) y no pasando una clase al
+ * componente porque `TeamLogo` concatena la clase propia con la de afuera: dos
+ * clases con la misma especificidad, y quien gana depende del orden en que
+ * salgan las hojas. El selector de descendencia no deja lugar a esa duda.
+ */
+.playerCrest > span {
+    background: none;
+    border: 0;
+    border-radius: 0;
+}
+
+.playerCrest img {
+    padding: 0;
+}
+
+/*
+ * El pill del puntaje se pinta con la rampa de `ratingScale.ts`: el 1 rojo, el
+ * 5 amarillo, el 10 turquesa, y el color se mueve con el numero.
+ *
+ * Es color PLENO, no un tinte: lavado no se leia de un vistazo. Al ser opaco se
+ * ve igual en los dos temas y no necesita una regla por `data-theme`, que es la
+ * unica razon por la que aca no hay una.
+ *
+ * El respaldo verde es el color viejo del pill: cubre a un proveedor que mande
+ * un rating sin pasar por la rampa.
+ */
 .playerRatingMeta {
     flex-shrink: 0;
     min-width: 3.5ch;
     padding: 4px 8px;
     border-radius: 999px;
-    border: 1px solid rgba(16, 185, 129, 0.32);
-    background: rgba(16, 185, 129, 0.12);
-    color: #7ef0c0;
+    border: 1px solid var(--rating-border, rgba(16, 185, 129, 0.32));
+    background: var(--rating-bg, rgba(16, 185, 129, 0.12));
+    color: var(--rating-fg, #7ef0c0);
     font-size: 11px;
     font-weight: 800;
     text-align: center;
@@ -1496,6 +1542,49 @@
 }
 
 /* Player Stats */
+/* El titulo de las estadisticas de jugadores y lo que cuelga de el: el boton
+   que abre el puntaje de la gente va pegado al texto, no al otro extremo de la
+   fila, porque no es una accion de la tabla sino una segunda lectura del mismo
+   plantel. */
+.playerStatsTitleGroup {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.peopleRatingsTrigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--stroke);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.peopleRatingsTrigger:hover {
+    border-color: rgba(var(--color-accent-rgb), 0.35);
+    background: rgba(var(--color-accent-rgb), 0.1);
+    color: var(--accent);
+}
+
+.peopleRatingsTrigger:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.peopleRatingsTriggerIcon {
+    flex: none;
+    color: var(--color-warning, #f59e0b);
+}
+
 .playersStatsView {
     display: flex;
     flex-direction: column;
@@ -4444,11 +4533,6 @@
 
 /* El puntaje de la gente cuelga debajo de la planilla, separado por una regla:
    una cosa es lo que paso en la cancha y otra lo que opina la tribuna. */
-.peopleRatingsWrap {
-    margin-top: 28px;
-    padding-top: 24px;
-    border-top: 1px solid var(--stroke);
-}
 
 /* ── Cara a cara: la lista a todo el ancho ──────────────────────────────── */
 .h2hCount {
