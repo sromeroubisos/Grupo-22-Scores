@@ -22,7 +22,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { requireAdminApiUser } from '@/lib/auth/apiAdmin';
 import { getCountryById } from '@/lib/data/countries';
 import { memoryCache } from '@/lib/cache';
-import { dedupeCrossSourceMatches } from '@/lib/matchFeedDedupe';
+import { dedupeCrossSourceMatches, hasStaleRowsNeedingRepair } from '@/lib/matchFeedDedupe';
 import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
 import { isMatchVisibleToPublic } from '@/lib/matchReview';
 import {
@@ -1797,14 +1797,11 @@ async function computeMatchesPayload(
                     // ese caso se repara con el proveedor en vez de servir un
                     // "scheduled" viejo. El write-through de la reparación la
                     // sana para los próximos requests.
-                    const nowMs = Date.now();
-                    const hasStaleNonTerminal = rowsForDate.some((row) => {
-                        if (row.status === 'final' || row.status === 'cancelled' || row.status === 'postponed') {
-                            return false;
-                        }
-                        const kickoffMs = new Date(row.date_time).getTime();
-                        return !Number.isNaN(kickoffMs) && nowMs - kickoffMs > 3 * 60 * 60 * 1000;
-                    });
+                    // Una fila vencida deja de pedir reparación si otra fuente
+                    // ya trae ese partido cerrado, o si su torneo lo reemplaza
+                    // RugbyPass: en los dos casos la respuesta ya está en la
+                    // caché y reparar tiraba abajo el día entero.
+                    const hasStaleNonTerminal = hasStaleRowsNeedingRepair(rowsForDate, Date.now());
 
                     if (rowsForDate.length > 0) {
                         const enrichCacheStartedAt = Date.now();
@@ -2044,13 +2041,39 @@ async function computeMatchesPayload(
                 if (trace) {
                     addDurationMetric(trace.metrics, 'dedupe_matches_ms', Date.now() - dedupeExternalStartedAt);
                 }
+                // ── LO QUE LA REPARACION NO PUEDE PRODUCIR VUELVE DE LA CACHE ──
+                //
+                // El camino de reparacion reemplaza el dia entero con lo que
+                // contesta FlashScore, y FlashScore NO cubre las competiciones
+                // que ahora trae RugbyPass: ese es justamente el motivo del
+                // reemplazo. Resultado: cualquier dia que pida reparacion perdia
+                // todos los partidos `rp-`.
+                //
+                // Medido el domingo 6/9/2026: la cache tenia tres partidos de
+                // RugbyPass (dos del NPC cerrados y uno del Top 14 por jugar) y
+                // el dia salia con CERO, porque un puñado de filas de FlashScore
+                // quedadas en `scheduled` con el kickoff hace dos a cinco horas
+                // marcaban el dia como reparable. El sabado, sin filas vencidas,
+                // los doce partidos aparecian bien.
+                //
+                // La reparacion es sobre las filas del proveedor que se vuelve a
+                // pedir; no tiene autoridad sobre las de otro. Se reponen las
+                // cacheadas que la reparacion no trajo, comparando por id.
+                const idsReparados = new Set(filteredExternalMatches.map((m) => String(m.id)));
+                const repuestasDeCache = cachedEnriched.filter(
+                    (m) => !idsReparados.has(String(m.id)) && !isBlockedTournamentId(m.tournamentId)
+                );
+
                 const mergeFilteredExternalStartedAt = Date.now();
-                enrichedMatches = [...enrichedMatches, ...filteredExternalMatches];
+                enrichedMatches = [...enrichedMatches, ...filteredExternalMatches, ...repuestasDeCache];
                 if (trace) {
                     addDurationMetric(trace.metrics, 'merge_sources_ms', Date.now() - mergeFilteredExternalStartedAt);
                 }
+                if (repuestasDeCache.length > 0) {
+                    console.log(`[matches] reparacion: ${repuestasDeCache.length} filas repuestas desde la cache para date=${date}`);
+                }
                 fsOk = true;
-                fsCount = filteredExternalMatches.length;
+                fsCount = filteredExternalMatches.length + repuestasDeCache.length;
                 mergedItemsCount = enrichedMatches.length;
                 fsReason = fsCount === 0 ? 'empty_result' : null;
                 fsMessage = fsCount === 0 ? 'No hay partidos de FlashScore para este filtro.' : null;

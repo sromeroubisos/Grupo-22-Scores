@@ -324,7 +324,12 @@ export async function resetStaleLiveMatches(
         .from('external_match_cache')
         .update({ status: 'final' })
         .eq('sport', sport)
-        .eq('status', 'live');
+        .eq('status', 'live')
+        // Cada proveedor cierra SUS partidos. Las filas de RugbyPass (`rp-`) no
+        // aparecen nunca en la lista de FlashScore, asi que sin esta exclusion
+        // un partido que RugbyPass acaba de poner en vivo lo cerraba el minuto
+        // siguiente el sync del otro proveedor. Las cierra `syncRugbyPassLive`.
+        .not('id', 'like', 'rp-%');
 
     if (currentLiveIds.length > 0) {
         query = query.not('id', 'in', `(${currentLiveIds.map(id => `"${id}"`).join(',')})`);

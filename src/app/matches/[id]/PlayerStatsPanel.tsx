@@ -86,9 +86,11 @@ type Props = {
   playerStats: any;
   homeName: string;
   awayName: string;
+  /** Lo que va pegado al titulo: hoy, el boton del puntaje de la gente. */
+  titleAction?: React.ReactNode;
 };
 
-export default function PlayerStatsPanel({ tableData, localPlayerRows, playerStats, homeName, awayName }: Props) {
+export default function PlayerStatsPanel({ tableData, localPlayerRows, playerStats, homeName, awayName, titleAction }: Props) {
   const availableMetricIds = tableData.metricIds;
 
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(() => {
@@ -266,7 +268,12 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
     if (localPlayerRows.length > 0) {
       return (
         <div className={styles.playersStatsView}>
-          <div className={styles.panelTitle}>Estadísticas de Jugadores</div>
+          <div className={styles.panelTitle}>
+            <span className={styles.playerStatsTitleGroup}>
+              Estadísticas de Jugadores
+              {titleAction}
+            </span>
+          </div>
           <div style={{ display: 'grid', gap: '12px' }}>
             {localPlayerRows.map((player) => (
               <div key={player.key} className={styles.playerStatRow} style={{ padding: '14px 16px', display: 'grid', gridTemplateColumns: '1fr auto', gap: '12px', alignItems: 'center' }}>
@@ -305,7 +312,12 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
     if (playerStats?.stat_groups && playerStats.stat_groups.length > 0) {
       return (
         <div className={styles.playersStatsView}>
-          <div className={styles.panelTitle}>Estadísticas de Jugadores</div>
+          <div className={styles.panelTitle}>
+            <span className={styles.playerStatsTitleGroup}>
+              Estadísticas de Jugadores
+              {titleAction}
+            </span>
+          </div>
           {playerStats.stat_groups.map((group: any, i: number) => (
             group && group.stats && Array.isArray(group.stats) && (
               <div key={i} style={{ marginBottom: '24px' }}>
@@ -352,7 +364,12 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
 
     return (
       <div className={styles.playersStatsView}>
-        <div className={styles.panelTitle}>Estadísticas de Jugadores</div>
+        <div className={styles.panelTitle}>
+          <span className={styles.playerStatsTitleGroup}>
+            Estadísticas de Jugadores
+            {titleAction}
+          </span>
+        </div>
         <div className={styles.emptyState}>
           <div style={{ fontSize: '40px', marginBottom: '16px', opacity: 0.3 }}>🏃‍♂️</div>
           <p className={styles.placeholderText} style={{ fontSize: '16px', fontWeight: '600' }}>Estadísticas de jugadores no registradas</p>
@@ -364,7 +381,12 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
 
   return (
     <div className={styles.playersStatsView}>
-      <div className={styles.panelTitle}>Estadísticas de Jugadores</div>
+      <div className={styles.panelTitle}>
+        <span className={styles.playerStatsTitleGroup}>
+          Estadísticas de Jugadores
+          {titleAction}
+        </span>
+      </div>
       <p className={styles.playerStatsSubtitle}>Compara y ordena jugadores por métricas clave</p>
 
       {/* Barra de acciones */}

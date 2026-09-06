@@ -53,6 +53,10 @@ import {
     parseFisuTournamentId,
 } from '@/lib/services/fisuRugbySevens';
 import {
+    getRugbyPassTournamentBundle,
+    parseRugbyPassTournamentId,
+} from '@/lib/services/rugbyPassTournamentBundle';
+import {
     isBlockedTournamentId,
 } from '@/lib/utils/blockedTournaments';
 import { resolveExternalTournamentId } from '@/lib/utils/externalTournamentId';
@@ -1087,8 +1091,63 @@ export async function GET(request: Request) {
 
     const fihCompetition = parseFihTournamentId(id) || parseFihTournamentId(dbTournamentMeta?.external_id);
     const fisuCompetition = parseFisuTournamentId(id) || parseFisuTournamentId(dbTournamentMeta?.external_id);
+    const rugbyPassCompetitionId =
+        parseRugbyPassTournamentId(id) ?? parseRugbyPassTournamentId(dbTournamentMeta?.external_id);
 
     try {
+        // RugbyPass: `rp-comp-208`. Los partidos ya estan en `external_match_cache`
+        // —los deja el cron cada hora— asi que el torneo se dibuja leyendo la base
+        // y sin volver a pedirle el calendario entero al proveedor. La tabla si
+        // se pide, porque no vive en la cache.
+        if (rugbyPassCompetitionId !== null) {
+            const bundle = await getRugbyPassTournamentBundle(
+                rugbyPassCompetitionId,
+                await getReadClient(),
+                // El calendario de la cache tiene la competicion ENTERA, o sea
+                // mas de una temporada. Sin este parametro el Top 14 abria con
+                // los resultados de la pasada.
+                seasonId ?? requestedSeason ?? null
+            );
+            // `null` = competicion no habilitada. Se sigue de largo en vez de
+            // dibujar un torneo vacio con un nombre inventado.
+            if (bundle) {
+                return perf.json({
+                    ok: true,
+                    _debug: {
+                        query: { id, url, sport, requestedSeason },
+                        resolvedIds: bundle.ids,
+                        provider: 'rugbypass',
+                        counts: {
+                            results: bundle.results.length,
+                            fixtures: bundle.fixtures.length,
+                            standings: bundle.standings.length,
+                        },
+                    },
+                    _cache: {
+                        entityId: bundle.ids.tournamentId,
+                        tabSources: {
+                            details: 'api',
+                            results: 'db',
+                            fixtures: 'db',
+                            standings: 'api',
+                        },
+                    },
+                    ids: bundle.ids,
+                    details: bundle.details,
+                    results: bundle.results,
+                    fixtures: bundle.fixtures,
+                    standings: bundle.standings,
+                    standingsForm: bundle.standingsForm,
+                    standingsHtFt: bundle.standingsHtFt,
+                    standingsOverUnder: bundle.standingsOverUnder,
+                    teamLabels: bundle.teamLabels,
+                    topScorers: bundle.topScorers,
+                    draw: bundle.draw,
+                    archives: bundle.archives,
+                });
+            }
+        }
+
         // Mundial Universitario de Seven 2026: la fuente es la FISU (Bornan).
         // Igual que el Mundial de hockey, el id ya dice qué competencia es y el
         // torneo no vive en FlashScore ni en la base.

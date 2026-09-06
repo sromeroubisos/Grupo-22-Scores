@@ -146,18 +146,22 @@ async function resolveUserId() {
     return user?.id ?? null;
 }
 
-async function fetchSummary(admin: LooseAdmin, matchId: string, userId: string | null) {
+async function fetchRows(admin: LooseAdmin, matchId: string): Promise<LooseRow[]> {
     const { data, error } = await admin
         .from(TABLE)
         .select('player_key, player_name, team, rating, is_mvp, user_id')
         .eq('match_id', matchId);
 
     if (error) {
-        if (isMissingTable(error)) return createEmptyPlayerRatingsSummary();
+        if (isMissingTable(error)) return [];
         throw new Error(error.message || 'No se pudo leer el puntaje de la gente.');
     }
 
-    return buildSummary(data || [], userId);
+    return data || [];
+}
+
+async function fetchSummary(admin: LooseAdmin, matchId: string, userId: string | null) {
+    return buildSummary(await fetchRows(admin, matchId), userId);
 }
 
 export async function GET(
@@ -166,9 +170,13 @@ export async function GET(
 ) {
     try {
         const matchId = (await params).id;
-        const userId = await resolveUserId();
         const admin = createAdminClient() as unknown as LooseAdmin;
-        return NextResponse.json(await fetchSummary(admin, matchId, userId));
+        // Quien pregunta y que voto la gente son dos viajes distintos: uno a
+        // Supabase Auth y otro a la tabla. Encadenarlos sumaba los dos tiempos
+        // en cada apertura del panel. La lista no depende del usuario, asi que
+        // salen juntos y el que mira sin sesion no paga la validacion.
+        const [userId, rows] = await Promise.all([resolveUserId(), fetchRows(admin, matchId)]);
+        return NextResponse.json(buildSummary(rows, userId));
     } catch (error) {
         console.error('[GET /api/matches/[id]/player-ratings]', error);
         return NextResponse.json(createEmptyPlayerRatingsSummary());

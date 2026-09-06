@@ -30,6 +30,10 @@ import { applyExternalTeamLogoOverride } from '@/lib/utils/teamLogoOverrides';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { getNationalTeamLinksForClub } from '@/lib/services/nationalTeamLinks';
 import { fihTeamId, toFihTeamRef } from '@/lib/services/fihHockeyParser';
+import {
+    getRugbyPassTeamBundle,
+    parseRugbyPassTeamSlug,
+} from '@/lib/services/rugbyPassProfiles';
 import { getWorldCupTeamProfile, type WorldCupMatchSide } from '@/lib/server/worldCupProfiles';
 type ReadClient = Awaited<ReturnType<typeof getReadClient>>;
 type InternalClubRow = Database['public']['Tables']['clubs']['Row'] & {
@@ -1368,6 +1372,43 @@ export async function GET(request: Request) {
             console.error('Teams API ESPN Soccer error', e);
             return Response.json(
                 { ok: false, error: 'Failed to load ESPN soccer team data', details: message },
+                { status: 500 }
+            );
+        }
+    }
+
+    // RugbyPass: `rp-team-auckland`. Sin esta rama el id caia por el camino de
+    // club de la base y la ficha contestaba 404 con la pagina ya abierta.
+    const rugbyPassTeamSlug = parseRugbyPassTeamSlug(rawTeamId);
+    if (rugbyPassTeamSlug) {
+        try {
+            const bundle = await getRugbyPassTeamBundle(rugbyPassTeamSlug, await getReadClient());
+            if (!bundle) {
+                return Response.json({ ok: false, error: 'Team not found' }, { status: 404 });
+            }
+
+            return Response.json({
+                ok: true,
+                resolvedClubId: null,
+                details: {
+                    ...bundle.details,
+                    supported_tabs: buildSupportedTabs({
+                        hasSquad: bundle.squad.length > 0,
+                        // RugbyPass no publica pases: la pestana no se dibuja en
+                        // vez de dibujarse vacia.
+                        hasTransfers: false,
+                    }),
+                },
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                squad: skipSquad ? [] : bundle.squad,
+                transfers: [],
+            });
+        } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : String(e);
+            console.error('Teams API RugbyPass error', e);
+            return Response.json(
+                { ok: false, error: 'Failed to load RugbyPass team data', details: message },
                 { status: 500 }
             );
         }

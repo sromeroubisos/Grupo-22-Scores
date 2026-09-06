@@ -17,9 +17,97 @@ import {
     upsertMatches,
     resetStaleLiveMatches
 } from '@/lib/services/externalMatchCache';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { getRugbyPassPoll } from '@/lib/services/rugbyPass';
+import { RUGBYPASS_MATCH_ID_PREFIX } from '@/lib/services/rugbyPassParser';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
+
+/**
+ * Un partido de rugby dura unos 80 minutos de juego mas el entretiempo: 100
+ * minutos desde el kickoff es el piso para darlo por terminado.
+ */
+const RUGBY_MATCH_SPAN_MS = 100 * 60 * 1000;
+
+/** Cuanto antes del kickoff empieza a sondearse un partido. */
+const PRE_KICKOFF_MS = 15 * 60 * 1000;
+
+/**
+ * SONDEO EN VIVO DE RUGBYPASS.
+ *
+ * El poll acepta muchos ids en una sola llamada y contesta chico (318 bytes
+ * para cuatro partidos), asi que la ventana entera del dia sale en un request.
+ *
+ * Solo distingue en-vivo de no-en-vivo: NO sabe decir "termino". Por eso un
+ * partido se cierra recien cuando el poll lo da como no-vivo Y ya pasaron
+ * `RUGBY_MATCH_SPAN_MS` desde el kickoff. Sin esa guarda, el entretiempo —donde
+ * el proveedor bien puede contestar 0— cerraria el partido a los 40 minutos.
+ */
+async function syncRugbyPassLive(supabase: SupabaseClient) {
+    const ahora = Date.now();
+    const desde = new Date(ahora - 6 * 60 * 60 * 1000).toISOString();
+    const hasta = new Date(ahora + PRE_KICKOFF_MS).toISOString();
+
+    const { data: filas, error } = await supabase
+        .from('external_match_cache')
+        .select('*')
+        .like('id', `${RUGBYPASS_MATCH_ID_PREFIX}%`)
+        .in('status', ['scheduled', 'live'])
+        .gte('date_time', desde)
+        .lte('date_time', hasta);
+
+    if (error) {
+        console.warn('[live-sync] no se pudieron leer las filas de RugbyPass:', error.message);
+        return { polled: 0, updated: 0 };
+    }
+    if (!filas || filas.length === 0) return { polled: 0, updated: 0 };
+
+    const porGameId = new Map<number, any>();
+    for (const fila of filas) {
+        const gameId = Number(String(fila.id).slice(RUGBYPASS_MATCH_ID_PREFIX.length));
+        if (Number.isFinite(gameId)) porGameId.set(gameId, fila);
+    }
+
+    const resultados = await getRugbyPassPoll([...porGameId.keys()]);
+    const cambiadas: any[] = [];
+
+    for (const r of resultados) {
+        const fila = porGameId.get(r.gameId);
+        if (!fila) continue;
+
+        const kickoffMs = new Date(fila.date_time).getTime();
+        const yaTendriaQueHaberTerminado =
+            !Number.isNaN(kickoffMs) && ahora - kickoffMs > RUGBY_MATCH_SPAN_MS;
+
+        let status = fila.status;
+        if (r.status === 'live') {
+            status = 'live';
+        } else if (fila.status === 'live' && yaTendriaQueHaberTerminado) {
+            status = 'final';
+        }
+
+        const score = { home: r.home, away: r.away, penalties: null };
+        const cambioMarcador =
+            fila.score?.home !== score.home || fila.score?.away !== score.away;
+
+        if (status !== fila.status || cambioMarcador) {
+            cambiadas.push({ ...fila, status, score });
+        }
+    }
+
+    if (cambiadas.length > 0) {
+        const { error: upsertError } = await supabase
+            .from('external_match_cache')
+            .upsert(cambiadas, { onConflict: 'id' });
+        if (upsertError) {
+            console.warn('[live-sync] upsert de RugbyPass falló:', upsertError.message);
+            return { polled: resultados.length, updated: 0 };
+        }
+    }
+
+    return { polled: resultados.length, updated: cambiadas.length };
+}
 
 
 export async function GET(request: NextRequest) {
@@ -73,6 +161,15 @@ export async function GET(request: NextRequest) {
         })
     );
 
+    // RugbyPass va aparte del bucle de FlashScore: es su propio proveedor, con
+    // su propia ventana y su propio criterio de cierre.
+    let rugbyPass = { polled: 0, updated: 0 };
+    try {
+        rugbyPass = await syncRugbyPassLive(adminClient);
+    } catch (e) {
+        console.warn('[live-sync] el sondeo de RugbyPass falló:', e);
+    }
+
     const summary = results.map((r, i) =>
         r.status === 'fulfilled' ? r.value : { sport: activeSports[i].id, error: String(r.reason) }
     );
@@ -83,6 +180,7 @@ export async function GET(request: NextRequest) {
 
     console.log(
         `[live-sync] Done: ${totalSynced} live matches written in ${elapsed}ms` +
+        (rugbyPass.polled > 0 ? ` — RugbyPass: ${rugbyPass.updated}/${rugbyPass.polled}` : '') +
         (storageUnavailable ? ' — CACHÉ NO DISPONIBLE: no se escribió nada' : '')
     );
 
@@ -95,6 +193,7 @@ export async function GET(request: NextRequest) {
             synced: totalSynced,
             elapsed,
             sports: summary,
+            rugbypass: rugbyPass,
             ...(storageUnavailable
                 ? {
                     storage: 'unavailable' as const,

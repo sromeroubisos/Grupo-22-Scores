@@ -4,11 +4,11 @@ import React, { useEffect, useMemo, useRef, useState, type KeyboardEvent as Reac
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ProtectedLink from '@/components/ProtectedLink';
-import ExportImage from '@/components/ExportImage';
 import FavoriteButton from '@/components/FavoriteButton';
 import MatchWinnerVoteCard from '@/components/MatchWinnerVoteCard';
 import MatchTimeline from '@/components/match/MatchTimeline';
-import PeopleRatingsPanel, { type RateablePlayer } from '@/components/match/PeopleRatingsPanel';
+import type { RateablePlayer } from '@/components/match/PeopleRatingsPanel';
+import PeopleRatingsDialog from '@/components/match/PeopleRatingsDialog';
 import styles from './page.module.css';
 import { TopStatRow, TopStatSplit } from './TopStatsRows';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
@@ -42,6 +42,8 @@ import { cruzarEstado, mapMatchStatus } from '@/lib/matches/providerStatus';
 import {
     buildPlayerStatsTableData,
 } from '@/lib/playerStats';
+import { ratingScaleVars } from '@/lib/matches/ratingScale';
+import TeamLogo from '@/components/TeamLogo';
 import {
     resolveMatchTabs,
     toMatchStatusKind,
@@ -55,6 +57,13 @@ import MatchVideosPanel from './MatchVideosPanel';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
 import { useAuth } from '@/context/AuthContext';
+import dynamic from 'next/dynamic';
+
+// El export es la pieza mas pesada que carga esta pagina y solo hace falta cuando
+// alguien aprieta el boton. Diferido, deja de viajar en la primera carga: en el
+// telefono eso es codigo que no se baja, no se parsea y no se compila.
+const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
+
 
 const USER_TZ = APP_TIMEZONE;
 
@@ -144,13 +153,6 @@ function isFihMatchId(value: string) {
     return /^fih-match-[mw]-\d+$/i.test(value);
 }
 
-function getMotorsportStatusLabel(status: string | null | undefined) {
-    if (status === 'live') return 'En vivo';
-    if (status === 'final') return 'Final';
-    if (status === 'postponed') return 'Postergado';
-    if (status === 'cancelled') return 'Cancelado';
-    return 'Programado';
-}
 // Mundial Universitario de Seven: `fisu-match-m-PO03-000100`. La `m`/`w` es la
 // competencia, después la fase y la unidad del ResCode de la FISU. Mismo
 // formato que `toFisuMatchId`.
@@ -158,6 +160,19 @@ function isFisuMatchId(value: string) {
     return /^fisu-match-[mw]-[A-Z0-9_]{4}-\d{6}$/i.test(value);
 }
 
+// RugbyPass: `rp-949624`, el numero de partido del proveedor. El prefijo es el
+// mismo `RUGBYPASS_MATCH_ID_PREFIX` con el que se guardan las filas en la cache.
+function isRugbyPassMatchId(value: string) {
+    return /^rp-\d+$/i.test(value);
+}
+
+function getMotorsportStatusLabel(status: string | null | undefined) {
+    if (status === 'live') return 'En vivo';
+    if (status === 'final') return 'Final';
+    if (status === 'postponed') return 'Postergado';
+    if (status === 'cancelled') return 'Cancelado';
+    return 'Programado';
+}
 
 function getMotorsportCompetitorCode(name: unknown) {
     const parts = String(name || '')
@@ -468,7 +483,7 @@ function getDisplayLineupBadges(
     },
     options?: { isTopRated?: boolean },
 ) {
-    const badges: Array<{ label: string; kind: 'position' | 'rating'; isTopRated?: boolean }> = [];
+    const badges: Array<{ label: string; kind: 'position' | 'rating'; isTopRated?: boolean; value?: number }> = [];
     const position = String(player.position || '').trim();
     if (position && !isGenericLineupRoleLabel(position)) {
         badges.push({ label: position, kind: 'position' });
@@ -479,6 +494,7 @@ function getDisplayLineupBadges(
             label: player.rating.toFixed(1),
             kind: 'rating',
             isTopRated: options?.isTopRated === true,
+            value: player.rating,
         });
     }
 
@@ -712,6 +728,13 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const [activeTab, setActiveTab] = useState('summary');
     const [publicStatsTab, setPublicStatsTab] = useState('marcador');
     const [lineupModalOpen, setLineupModalOpen] = useState(false);
+    // El puntaje de la gente se abre desde el titulo de las estadisticas.
+    const [peopleRatingsOpen, setPeopleRatingsOpen] = useState(false);
+    useEffect(() => {
+        // Al salir de Jugadores el dialogo se cierra: si no, volver a la
+        // pestana lo reabria solo.
+        if (activeTab !== 'players') setPeopleRatingsOpen(false);
+    }, [activeTab]);
     const [lineupReloadKey, setLineupReloadKey] = useState(0);
     // Whether the current user can edit THIS match (super/global/federation
     // admin OR an admin of this match's tournament). Resolved server-side via
@@ -733,7 +756,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isEspnMotorsportExternal = isEspnMotorsportMatchId(id);
     const isFihExternal = isFihMatchId(id);
     const isFisuExternal = isFisuMatchId(id);
-    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal || isFisuExternal;
+    const isRugbyPassExternal = isRugbyPassMatchId(id);
+    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal || isFisuExternal || isRugbyPassExternal;
 
     const resolvedMatchId =
         typeof state.matchData?.id === 'string' && state.matchData.id.trim()
@@ -788,6 +812,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     );
     const isLimitedExternalSource = isRugbyApiSportsSource || (isEspnSource && !isMotorsportSource && !isEspnSoccerSource);
     const isFihSource = state.matchData?.externalProvider === 'fih';
+    const isRugbyPassSource = state.matchData?.externalProvider === 'rugbypass';
+    const isFisuSource = state.matchData?.externalProvider === 'fisu';
     // Quien trae su propia lista de pestanas en vez de la barra completa. El
     // Mundial no tiene comentarios narrados ni sorteo: mostrar la pestana vacia
     // es prometer algo que la fuente no publica.
@@ -801,7 +827,6 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         { id: 'circuit', label: 'Circuito' },
     ]), []);
 
-    const isFisuSource = state.matchData?.externalProvider === 'fisu';
     // Qué fuente atiende este partido. Es el único lugar donde se traduce del
     // formato del id al vocabulario del motor de capacidades.
     const tabProvider: MatchProvider = isMotorsportSource
@@ -881,6 +906,40 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             statsData: Array.isArray(payload.stats) ? payload.stats : [],
                             playerStats: payload.playerStats || null,
                             localPlayerRows: [],
+                            commentaryData: [],
+                            issues: [],
+                            debug: {},
+                        });
+                        return;
+                    }
+
+                    // RugbyPass: el bundle ya viene en el vocabulario de la
+                    // pantalla (eventos canonicos, alineaciones, planilla), como
+                    // el del Mundial de Hockey. Sin esta rama el id `rp-` caia
+                    // por el camino de partido local y la cabecera salia
+                    // "Local vs Visitante", 0:0 y con la fecha invalida, aunque
+                    // el endpoint devolviera el partido entero.
+                    if (payload?.source === 'rugbypass' && payload?.match) {
+                        statusRef.current = payload.match.status || 'scheduled';
+                        setState({
+                            kind: 'ok',
+                            secondaryReady: true,
+                            matchData: {
+                                ...payload.match,
+                                home: {
+                                    ...payload.match.home,
+                                    logo: resolveMatchTeamLogo(payload.match.home, null, payload.match.home?.logo),
+                                },
+                                away: {
+                                    ...payload.match.away,
+                                    logo: resolveMatchTeamLogo(payload.match.away, null, payload.match.away?.logo),
+                                },
+                            },
+                            videosData: normalizeMatchVideoLinks(payload?.videos),
+                            eventsData: Array.isArray(payload.events) ? payload.events : [],
+                            statsData: Array.isArray(payload.stats) ? payload.stats : [],
+                            playerStats: null,
+                            localPlayerRows: Array.isArray(payload.localPlayerRows) ? payload.localPlayerRows : [],
                             commentaryData: [],
                             issues: [],
                             debug: {},
@@ -2952,11 +3011,14 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                             <div key={`home-starter-${i}`} className={styles.playerItem}>
                                                                 <span className={styles.playerMain}>
                                                                     <span className={styles.playerNumber}>{pNumber}</span>
+                                    <span className={styles.playerCrest} aria-hidden="true">
+                                        <TeamLogo name={matchData.home.name} logoUrl={matchData.home.logo} size={16} />
+                                    </span>
                                                                     {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
                                                                 </span>
                                                                 <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                     {pBadges.map((badge) => (
-                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>
+                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta} style={badge.kind === 'rating' && typeof badge.value === 'number' ? ratingScaleVars(badge.value) as React.CSSProperties : undefined}>
                                                                             {badge.label}
                                                                             {badge.kind === 'rating' && badge.isTopRated ? <span aria-label="Mejor puntuación" title="Mejor puntuación del partido" style={{ marginLeft: '4px' }}>⭐</span> : null}
                                                                         </span>
@@ -2982,11 +3044,14 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                                 <div key={`home-finisher-${i}`} className={styles.playerItem}>
                                                                     <span className={styles.playerMain}>
                                                                         <span className={styles.playerNumber}>{pNumber}</span>
+                                    <span className={styles.playerCrest} aria-hidden="true">
+                                        <TeamLogo name={matchData.home.name} logoUrl={matchData.home.logo} size={16} />
+                                    </span>
                                                                         {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
                                                                     </span>
                                                                     <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                         {pBadges.map((badge) => (
-                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>
+                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta} style={badge.kind === 'rating' && typeof badge.value === 'number' ? ratingScaleVars(badge.value) as React.CSSProperties : undefined}>
                                                                                 {badge.label}
                                                                                 {badge.kind === 'rating' && badge.isTopRated ? <span aria-label="Mejor puntuación" title="Mejor puntuación del partido" style={{ marginLeft: '4px' }}>⭐</span> : null}
                                                                             </span>
@@ -3015,11 +3080,14 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                             <div key={`away-starter-${i}`} className={styles.playerItem}>
                                                                 <span className={styles.playerMain}>
                                                                     <span className={styles.playerNumber}>{pNumber}</span>
+                                    <span className={styles.playerCrest} aria-hidden="true">
+                                        <TeamLogo name={matchData.away.name} logoUrl={matchData.away.logo} size={16} />
+                                    </span>
                                                                     {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
                                                                 </span>
                                                                 <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                     {pBadges.map((badge) => (
-                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>
+                                                                        <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta} style={badge.kind === 'rating' && typeof badge.value === 'number' ? ratingScaleVars(badge.value) as React.CSSProperties : undefined}>
                                                                             {badge.label}
                                                                             {badge.kind === 'rating' && badge.isTopRated ? <span aria-label="Mejor puntuación" title="Mejor puntuación del partido" style={{ marginLeft: '4px' }}>⭐</span> : null}
                                                                         </span>
@@ -3045,11 +3113,14 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                                 <div key={`away-finisher-${i}`} className={styles.playerItem}>
                                                                     <span className={styles.playerMain}>
                                                                         <span className={styles.playerNumber}>{pNumber}</span>
+                                    <span className={styles.playerCrest} aria-hidden="true">
+                                        <TeamLogo name={matchData.away.name} logoUrl={matchData.away.logo} size={16} />
+                                    </span>
                                                                         {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
                                                                     </span>
                                                                     <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                         {pBadges.map((badge) => (
-                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta}>
+                                                                            <span key={`${badge.kind}-${badge.label}`} className={badge.kind === 'rating' ? styles.playerRatingMeta : styles.playerMeta} style={badge.kind === 'rating' && typeof badge.value === 'number' ? ratingScaleVars(badge.value) as React.CSSProperties : undefined}>
                                                                                 {badge.label}
                                                                                 {badge.kind === 'rating' && badge.isTopRated ? <span aria-label="Mejor puntuación" title="Mejor puntuación del partido" style={{ marginLeft: '4px' }}>⭐</span> : null}
                                                                             </span>
@@ -3126,8 +3197,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
                         {/* La planilla del proveedor manda sobre la derivada de
                             los eventos: en hockey trae la efectividad de corner
-                            corto, que no se puede reconstruir contando goles. */}
-                        {activeTab === 'stats' && (isEspnSoccerSource || isFihSource) && (
+                            corto, que no se puede reconstruir contando goles.
+                            En RugbyPass son 26 filas —scrums, lines, tackles,
+                            patadas— que la cronologia no tiene de donde sacar. */}
+                        {activeTab === 'stats' && (isEspnSoccerSource || isFihSource || isRugbyPassSource) && (
                             <div className={styles.publicStatsPanel}>
                                 <div className={styles.panelTitle}>Estadísticas del partido</div>
                                 {statsData.length === 0 ? (
@@ -3534,17 +3607,33 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     playerStats={state.playerStats}
                                     homeName={matchData.home?.name || 'Local'}
                                     awayName={matchData.away?.name || 'Visitante'}
+                                    titleAction={rateablePlayers.length > 0 ? (
+                                        <button
+                                            type="button"
+                                            className={styles.peopleRatingsTrigger}
+                                            onClick={() => setPeopleRatingsOpen(true)}
+                                            aria-haspopup="dialog"
+                                            aria-expanded={peopleRatingsOpen}
+                                        >
+                                            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"
+                                                 className={styles.peopleRatingsTriggerIcon}
+                                                 fill="currentColor" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
+                                                <path d="m12 3 2.7 5.5 6 .9-4.3 4.2 1 6-5.4-2.8-5.4 2.8 1-6L3.3 9.4l6-.9L12 3Z" />
+                                            </svg>
+                                            Puntaje de la gente
+                                        </button>
+                                    ) : null}
                                 />
                                 {rateablePlayers.length > 0 && (
-                                    <div className={styles.peopleRatingsWrap}>
-                                        <PeopleRatingsPanel
-                                            matchId={matchData.id || id}
-                                            players={rateablePlayers}
-                                            homeName={matchData.home?.name || 'Local'}
-                                            awayName={matchData.away?.name || 'Visitante'}
-                                            canVote={Boolean(user?.id)}
-                                        />
-                                    </div>
+                                    <PeopleRatingsDialog
+                                        open={peopleRatingsOpen}
+                                        onClose={() => setPeopleRatingsOpen(false)}
+                                        matchId={matchData.id || id}
+                                        players={rateablePlayers}
+                                        homeName={matchData.home?.name || 'Local'}
+                                        awayName={matchData.away?.name || 'Visitante'}
+                                        canVote={Boolean(user?.id)}
+                                    />
                                 )}
                             </>
                         )}

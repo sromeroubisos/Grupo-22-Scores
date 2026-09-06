@@ -89,6 +89,13 @@ export async function GET(request: NextRequest) {
                 }
             }
 
+            /**
+             * FlashScore SIGUE escribiendo los torneos que trae RugbyPass, a
+             * proposito. El reemplazo se decide al LEER y no al escribir: si se
+             * cortara acá, un dia sin datos de RugbyPass dejaria la pantalla en
+             * blanco en vez de caer al proveedor viejo. La caché guarda las dos
+             * y el feed elige — ver `dropSupersededMatches`.
+             */
             sportResults[sport.id] = skipped > 0 ? { synced, errors, skipped } : { synced, errors };
             totalSynced += synced;
         })

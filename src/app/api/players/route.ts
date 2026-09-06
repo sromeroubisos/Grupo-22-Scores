@@ -10,6 +10,10 @@ import {
 } from '@/lib/services/espnFootball';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+import {
+    getRugbyPassPlayerBundle,
+    parseRugbyPassPlayerSlug,
+} from '@/lib/services/rugbyPassProfiles';
 
 function isUuidLike(value: string) {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -34,6 +38,23 @@ export async function GET(request: Request) {
     const playerUrl = searchParams.get('player_url') || `/player/p/${playerId}/`;
 
     try {
+        // RugbyPass: `rp-player-pablo-matera`. Va ANTES que el camino de
+        // FlashScore, que para un id asi arma `/player/p/rp-player-.../` y
+        // contesta cualquier cosa menos este jugador.
+        const rugbyPassPlayerSlug = parseRugbyPassPlayerSlug(playerId);
+        if (rugbyPassPlayerSlug) {
+            const bundle = await getRugbyPassPlayerBundle(rugbyPassPlayerSlug);
+            if (!bundle) {
+                return Response.json({ ok: false, error: 'Player not found' }, { status: 404 });
+            }
+            return Response.json({
+                ok: true,
+                source: 'rugbypass',
+                details: bundle.details,
+                career: bundle.career,
+            });
+        }
+
         const espnFootballPlayer = parseEspnFootballPlayerId(playerId);
         if (espnFootballPlayer) {
             const bundle = await getEspnFootballPlayerBundle(

@@ -30,6 +30,10 @@
       "schedule": "0 * * * *"
     },
     {
+      "path": "/api/cron/rugbypass-sync",
+      "schedule": "20 * * * *"
+    },
+    {
       "path": "/api/cron/prode-scoring",
       "schedule": "*/5 * * * *"
     },

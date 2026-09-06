@@ -318,6 +318,14 @@ export function buildPlayerStatsTableData(args: {
     if (typeof player.rating === 'number') {
       setMetric(row, 'rating', player.rating, 'Rating');
     }
+
+    // Lo que publica el proveedor va ULTIMO, para que le gane al contador que
+    // sale de la cronologia cuando los dos hablan de lo mismo: los tackles
+    // medidos valen mas que los tackles contados a partir de los eventos, que
+    // en rugby no se registran y dan cero siempre.
+    Object.entries(player.extraMetrics ?? {}).forEach(([metricId, metric]) => {
+      setMetric(row, metricId, metric.value, metric.label);
+    });
   });
 
   const playerArray = Array.isArray(args.playerStats?.players) ? args.playerStats.players : [];
