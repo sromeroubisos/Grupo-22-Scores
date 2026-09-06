@@ -52,17 +52,19 @@ async function syncRugbyPassLive(supabase: SupabaseClient) {
 
     const { data: filas, error } = await supabase
         .from('external_match_cache')
-        .select('*')
+        // Solo lo que hace falta para decidir. `select('*')` invitaba a
+        // devolver la fila entera al escribir, y ahi estaba el bug.
+        .select('id, status, date_time, score')
         .like('id', `${RUGBYPASS_MATCH_ID_PREFIX}%`)
         .in('status', ['scheduled', 'live'])
         .gte('date_time', desde)
         .lte('date_time', hasta);
 
     if (error) {
-        console.warn('[live-sync] no se pudieron leer las filas de RugbyPass:', error.message);
-        return { polled: 0, updated: 0 };
+        console.error('[live-sync] no se pudieron leer las filas de RugbyPass:', error.message);
+        return { polled: 0, updated: 0, failed: 0 };
     }
-    if (!filas || filas.length === 0) return { polled: 0, updated: 0 };
+    if (!filas || filas.length === 0) return { polled: 0, updated: 0, failed: 0 };
 
     const porGameId = new Map<number, any>();
     for (const fila of filas) {
@@ -88,26 +90,59 @@ async function syncRugbyPassLive(supabase: SupabaseClient) {
             status = 'final';
         }
 
-        const score = { home: r.home, away: r.away, penalties: null };
+        // UN MARCADOR QUE NO VINO NO ES UN 0-0.
+        //
+        // El poll devuelve `null` cuando no publica el tanteador. Escribir eso
+        // encima de un marcador bueno lo borra, y en la pantalla un `null` se
+        // lee igual que un cero: el partido queda 0-0 en el peor momento, con
+        // el "En vivo" al lado. Sin dato, el marcador guardado no se toca.
+        const traeMarcador = typeof r.home === 'number' && typeof r.away === 'number';
+        const score = traeMarcador
+            ? { home: r.home, away: r.away, penalties: null }
+            : fila.score;
         const cambioMarcador =
-            fila.score?.home !== score.home || fila.score?.away !== score.away;
+            traeMarcador && (fila.score?.home !== r.home || fila.score?.away !== r.away);
 
         if (status !== fila.status || cambioMarcador) {
-            cambiadas.push({ ...fila, status, score });
+            cambiadas.push({ id: fila.id, status, score });
         }
     }
 
-    if (cambiadas.length > 0) {
-        const { error: upsertError } = await supabase
+    /**
+     * SE ESCRIBEN LAS DOS COLUMNAS QUE CAMBIAN, NO LA FILA ENTERA.
+     *
+     * La primera version leia con `select('*')` y devolvia `{ ...fila }` al
+     * upsert. `external_match_cache` tiene columnas GENERADAS —`home_team_id`
+     * entre ellas—, y Postgres rechaza el insert entero con 428C9: «cannot
+     * insert a non-DEFAULT value into column». O sea que el sondeo en vivo de
+     * RugbyPass no escribio nunca.
+     *
+     * Y no se veia: el error se registraba con un `console.warn` y la funcion
+     * contestaba `updated: 0`, que es indistinguible de "no habia nada que
+     * actualizar". En la pantalla el sintoma era un partido en vivo clavado en
+     * 0-0 que, al abrirlo, mostraba el marcador de verdad — porque la ficha,
+     * cuando el partido esta en juego, le pregunta al proveedor en vez de leer
+     * la cache.
+     *
+     * Por eso ahora el fallo se CUENTA y viaja en la respuesta del cron: un
+     * sondeo que no pudo escribir tiene que poder verse sin abrir la pantalla.
+     */
+    let updated = 0;
+    let fallidas = 0;
+    for (const cambio of cambiadas) {
+        const { error: updateError } = await supabase
             .from('external_match_cache')
-            .upsert(cambiadas, { onConflict: 'id' });
-        if (upsertError) {
-            console.warn('[live-sync] upsert de RugbyPass falló:', upsertError.message);
-            return { polled: resultados.length, updated: 0 };
+            .update({ status: cambio.status, score: cambio.score })
+            .eq('id', cambio.id);
+        if (updateError) {
+            fallidas += 1;
+            console.error(`[live-sync] RugbyPass ${cambio.id} no se pudo actualizar:`, updateError.message);
+            continue;
         }
+        updated += 1;
     }
 
-    return { polled: resultados.length, updated: cambiadas.length };
+    return { polled: resultados.length, updated, failed: fallidas };
 }
 
 
@@ -172,7 +207,7 @@ export async function GET(request: NextRequest) {
 
     // RugbyPass va aparte del bucle de FlashScore: es su propio proveedor, con
     // su propia ventana y su propio criterio de cierre.
-    let rugbyPass = { polled: 0, updated: 0 };
+    let rugbyPass = { polled: 0, updated: 0, failed: 0 };
     try {
         rugbyPass = await syncRugbyPassLive(adminClient);
     } catch (e) {
@@ -191,6 +226,7 @@ export async function GET(request: NextRequest) {
     console.log(
         `[live-sync] Done: ${totalSynced} live matches written in ${elapsed}ms` +
         (rugbyPass.polled > 0 ? ` — RugbyPass: ${rugbyPass.updated}/${rugbyPass.polled}` : '') +
+        (rugbyPass.failed > 0 ? ` — RugbyPass NO ESCRIBIO ${rugbyPass.failed}` : '') +
         (gatedCount > 0 ? ` (${gatedCount} sports gated, sin request al proveedor)` : '') +
         (storageUnavailable ? ' — CACHÉ NO DISPONIBLE: no se escribió nada' : '')
     );
