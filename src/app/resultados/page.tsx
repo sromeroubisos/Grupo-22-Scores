@@ -242,6 +242,10 @@ export default function ResultadosPage() {
                                     data={{
                                         date: selectedDate,
                                         tournament: selectedTournamentLabel || selectedSport.nameEs,
+                                        // Con un torneo elegido, la placa puede
+                                        // pedir su logo aunque el feed no lo
+                                        // traiga: el proxy lo resuelve por id.
+                                        tournamentId: selectedTournament === 'all' ? null : selectedTournament,
                                         matches: exportMatches,
                                     }}
                                     filename={`resultados-${selectedSport.id}-${selectedDate}`}

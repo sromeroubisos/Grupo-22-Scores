@@ -119,6 +119,12 @@ export interface StandingsData {
 export interface DailyMatchesData {
     date: string;
     tournament: string;
+    /**
+     * Id del torneo, cuando la placa es de uno solo. Sin logo explicito, es con
+     * lo que el proxy lo busca (`entity=tournament`), y asi aparece el de una
+     * competencia externa —RugbyPass, por ejemplo— que no vive en la base.
+     */
+    tournamentId?: string | number | null;
     tournamentLogo?: string;
     matches: Array<{
         homeTeam: string;
