@@ -91,6 +91,47 @@ test('la roja hunde el puntaje y la amarilla pesa menos', () => {
 });
 
 /**
+ * LA SANCION NO SE PESA POR PUESTO, y es la unica excepcion a la regla de que
+ * todo se lee segun la camiseta.
+ *
+ * El resto del modelo se pesa porque mide RENDIMIENTO, y a cada puesto se le
+ * pide otra cosa. Una tarjeta no mide rendimiento: mide una infraccion, y no
+ * hay puesto al que se le permita infringir mas. Pesada, lo permitia: con
+ * `disciplina` en 15 en la primera linea y en 7 en el 13, la misma amarilla
+ * costaba 1,4 a un pilar y 0,6 a un centro.
+ *
+ * Se recorren los quince y no dos de muestra: el sintoma es una diferencia
+ * entre puestos, y con dos se elige justo el par que empata.
+ */
+test('la tarjeta cuesta lo mismo en los quince puestos', () => {
+    const costo = (metricId: string, numero: number) => {
+        const sin = rateRugbyPlayer({ stats: PROMEDIO, minutes: 80, number: numero })!.value;
+        const con = rateRugbyPlayer({ stats: { ...PROMEDIO, [metricId]: 1 }, minutes: 80, number: numero })!.value;
+        return Math.round((sin - con) * 10) / 10;
+    };
+
+    for (const metricId of ['yellowCards', 'redCards']) {
+        const costos = new Set(Object.keys(PESOS_POR_PUESTO).map((n) => costo(metricId, Number(n))));
+        assert.equal(costos.size, 1, `${metricId} cuesta distinto segun el puesto: ${[...costos].join(', ')}`);
+        // El costo es el aporte del rubro, sin nada en el medio. Se lee de
+        // RUBROS y no se transcribe: el numero se recalibra, el invariante no.
+        assert.equal([...costos][0], RUBROS[metricId].aporte);
+    }
+});
+
+/**
+ * Lo que la exencion NO toca. El rendimiento se sigue leyendo por camiseta, que
+ * es lo que hace que el puntaje hable de rugby: un 7 vive del tackle y un 10,
+ * del juego. Si alguien "universaliza" de mas, esto salta.
+ */
+test('el rendimiento si se sigue pesando por puesto', () => {
+    const stats = { ...PROMEDIO, tackles: RUBROS.tackles.referencia * 1.8 };
+    const siete = rateRugbyPlayer({ stats, minutes: 80, number: 7 })!.value;
+    const diez = rateRugbyPlayer({ stats, minutes: 80, number: 10 })!.value;
+    assert.ok(siete > diez, `el mismo volumen de tackles dio ${siete} en el 7 y ${diez} en el 10`);
+});
+
+/**
  * Los rubros de bonus NO castigan por ausencia: la enorme mayoria de un plantel
  * termina el partido sin un try, y eso es lo normal, no una falla.
  */

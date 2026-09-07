@@ -22,8 +22,18 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { mapExternalMatchToCached, upsertMatches } from '@/lib/services/externalMatchCache';
-import { getRugbyPassEventsFor, getRugbyPassFixtures } from '@/lib/services/rugbyPass';
-import { RUGBYPASS_COMPETITIONS, rugbyPassTeamSlugOf, type RugbyPassMatch } from '@/lib/services/rugbyPassParser';
+import {
+    getRugbyPassEventsFor,
+    getRugbyPassFixtures,
+    getRugbyPassSeasonFixtures,
+    getRugbyPassSeasons,
+} from '@/lib/services/rugbyPass';
+import {
+    RUGBYPASS_COMPETITIONS,
+    RUGBYPASS_SEASON_PAGES,
+    rugbyPassTeamSlugOf,
+    type RugbyPassMatch,
+} from '@/lib/services/rugbyPassParser';
 import { competitionsWithoutSupersede } from '@/lib/services/rugbyPassSupersedes';
 
 export const dynamic = 'force-dynamic';
@@ -68,6 +78,60 @@ function toCached(match: RugbyPassMatch) {
         dateTime: match.kickoff as string,
         roundLabel: match.roundLabel,
     });
+}
+
+/**
+ * CUANTAS TEMPORADAS SE REFRESCAN de cada pagina de competicion.
+ *
+ * Dos: la que se esta jugando y la siguiente, que el proveedor publica con
+ * meses de anticipacion (el Seis Naciones 2027 ya esta cargado en septiembre de
+ * 2026). Con una sola, el fixture del ano que viene no entraria hasta enero y
+ * la pantalla de proximos partidos se quedaria corta justo cuando la miran.
+ *
+ * Las temporadas VIEJAS no se piden nunca acá: no cambian, y bajarlas cada hora
+ * seria pagar cuarenta requests para reescribir lo mismo. Esas entran una vez,
+ * con `src/scripts/rugbypass-temporadas.ts`.
+ */
+const TEMPORADAS_POR_PAGINA = 2;
+
+/**
+ * LOS PARTIDOS QUE NO ESTAN EN EL CALENDARIO.
+ *
+ * `load-init-fixtures-data` trae seis competiciones y nada mas — medido: de sus
+ * 1498 partidos, cero son del Seis Naciones o de las copas europeas. El resto
+ * sale de la pagina de cada competicion, que ademas acepta temporada.
+ *
+ * Una pagina que falla no puede voltear la corrida: el calendario ya se escribio
+ * y estas son un agregado. Se cuenta y se sigue.
+ */
+async function syncPaginasDeCompeticion(): Promise<{
+    matches: RugbyPassMatch[];
+    pages: number;
+    failed: string[];
+}> {
+    const matches: RugbyPassMatch[] = [];
+    const failed: string[] = [];
+    let pages = 0;
+
+    for (const pagina of RUGBYPASS_SEASON_PAGES) {
+        try {
+            const temporadas = (await getRugbyPassSeasons(pagina)).slice(0, TEMPORADAS_POR_PAGINA);
+            // Sin lista de temporadas no se adivina un ano: pedir uno inventado
+            // devuelve vacio y quedaria como "esta competicion no tiene partidos".
+            if (temporadas.length === 0) {
+                failed.push(`${pagina}: sin lista de temporadas`);
+                continue;
+            }
+            for (const temporada of temporadas) {
+                matches.push(...(await getRugbyPassSeasonFixtures(pagina, temporada)));
+                pages++;
+            }
+        } catch (e) {
+            failed.push(`${pagina}: ${e instanceof Error ? e.message : String(e)}`);
+        }
+    }
+
+    return { matches, pages, failed };
 }
 
 /** Cuantas fichas se abren por corrida. Cada una es un request aparte. */
@@ -197,8 +261,22 @@ export async function GET(request: NextRequest) {
      * todavia (Top 14 83%, Pro D2 89%, y 0% en los partidos ya jugados), y este
      * cron corre cada hora, asi que entran solos cuando el horario aparece.
      */
-    const conHora = fixtures.filter((m) => m.kickoffKnown);
-    const sinHora = fixtures.length - conHora.length;
+    // Las competiciones que no viajan en el calendario. Van al MISMO upsert: son
+    // partidos iguales a los otros, solo que entraron por otra puerta.
+    const paginas = await syncPaginasDeCompeticion();
+    if (paginas.failed.length > 0) {
+        console.warn('[rugbypass-sync] páginas de competición con problemas:', paginas.failed.join(' · '));
+    }
+
+    // El mismo partido puede venir por las dos puertas —los test matches estan
+    // en el calendario Y en la pagina de `internationals`—, y un upsert con la
+    // clave repetida en la misma tanda lo rechaza entero. Gana el calendario,
+    // que es la fuente con la que ya se venia escribiendo.
+    const delCalendario = new Set(fixtures.map((m) => m.id));
+    const todos = [...fixtures, ...paginas.matches.filter((m) => !delCalendario.has(m.id))];
+
+    const conHora = todos.filter((m) => m.kickoffKnown);
+    const sinHora = todos.length - conHora.length;
 
     let written = 0;
     let storageUnavailable = false;
@@ -214,14 +292,14 @@ export async function GET(request: NextRequest) {
     // la fila del partido tiene que existir antes que sus eventos.
     let eventos = { fetched: 0, written: 0, skipped: false };
     try {
-        eventos = await syncRugbyPassEvents(adminClient, fixtures);
+        eventos = await syncRugbyPassEvents(adminClient, todos);
     } catch (e) {
         console.warn('[rugbypass-sync] la sincronización de eventos falló:', e);
     }
 
     const porTorneo: Record<string, { total: number; guardados: number; sinHora: number }> = {};
     for (const c of RUGBYPASS_COMPETITIONS) {
-        const propios = fixtures.filter((m) => m.competitionId === c.id);
+        const propios = todos.filter((m) => m.competitionId === c.id);
         porTorneo[c.name] = {
             total: propios.length,
             guardados: propios.filter((m) => m.kickoffKnown).length,
@@ -231,7 +309,8 @@ export async function GET(request: NextRequest) {
 
     const elapsed = Date.now() - startedAt;
     console.log(
-        `[rugbypass-sync] ${written} partidos escritos de ${fixtures.length} en ${elapsed}ms` +
+        `[rugbypass-sync] ${written} partidos escritos de ${todos.length} ` +
+        `(${fixtures.length} del calendario + ${todos.length - fixtures.length} de ${paginas.pages} páginas) en ${elapsed}ms` +
         (sinHora ? ` — ${sinHora} sin horario confirmado, no se publican` : '') +
         (eventos.fetched ? ` — eventos: ${eventos.written} de ${eventos.fetched} fichas` : '') +
         (eventos.skipped ? ' — eventos SALTEADOS: falta la migración external_match_events' : '') +
@@ -242,13 +321,17 @@ export async function GET(request: NextRequest) {
         {
             ok: !storageUnavailable,
             written,
-            fetched: fixtures.length,
+            fetched: todos.length,
+            fromCalendar: fixtures.length,
+            fromCompetitionPages: todos.length - fixtures.length,
+            competitionPagesFailed: paginas.failed,
             skippedNoKickoffTime: sinHora,
             events: eventos,
             elapsed,
             tournaments: porTorneo,
-            // Si esto trae algo que no sea Internationals, alguien sumo una
-            // competicion y se olvido de apagar la de FlashScore.
+            // Si esto trae algo que no sean Internationals (3) y el Rugby Europe
+            // Championship (269), alguien sumo una competicion y se olvido de
+            // apagar la de FlashScore.
             competitionsWithoutSupersede: competitionsWithoutSupersede(),
             ...(storageUnavailable
                 ? {

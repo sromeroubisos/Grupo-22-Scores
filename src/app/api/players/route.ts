@@ -43,7 +43,10 @@ export async function GET(request: Request) {
         // contesta cualquier cosa menos este jugador.
         const rugbyPassPlayerSlug = parseRugbyPassPlayerSlug(playerId);
         if (rugbyPassPlayerSlug) {
-            const bundle = await getRugbyPassPlayerBundle(rugbyPassPlayerSlug);
+            // El cliente va para leer los puntajes por partido de
+            // `external_match_player_ratings`. Sin él la ficha sale igual, con
+            // la columna de puntaje vacía.
+            const bundle = await getRugbyPassPlayerBundle(rugbyPassPlayerSlug, createAdminClient());
             if (!bundle) {
                 return Response.json({ ok: false, error: 'Player not found' }, { status: 404 });
             }
@@ -52,6 +55,10 @@ export async function GET(request: Request) {
                 source: 'rugbypass',
                 details: bundle.details,
                 career: bundle.career,
+                // Los otros proveedores no las mandan y la pantalla las lee
+                // vacias: es una pestana de menos, no una pantalla rota.
+                seasons: bundle.seasons,
+                matches: bundle.matches,
             });
         }
 
@@ -156,12 +163,22 @@ export async function GET(request: Request) {
 
         const details = normalize(settled[0]);
         const career = normalize(settled[1]);
+        const trayectoria = Array.isArray(career) ? career : (career ? [career] : []);
 
-        return Response.json({
-            ok: true,
-            details,
-            career: Array.isArray(career) ? career : (career ? [career] : [])
-        });
+        // NI FICHA NI TRAYECTORIA ES UN 404, NO UN `ok: true` VACIO.
+        //
+        // Este es el ultimo escalon, el de FlashScore, y le llega todo lo que
+        // los de arriba no reconocieron. A un id sin prefijo —`tommaso-
+        // menoncello` en vez de `rp-player-tommaso-menoncello`— contestaba
+        // `{ok: true, details: null}`, y con eso la pantalla dibujaba una ficha
+        // con el slug de titulo y "El proveedor no publica datos personales":
+        // parecia un jugador sin datos y era un id mal armado. Un error que no
+        // llega a la pantalla se busca durante horas en el lugar equivocado.
+        if (!details && trayectoria.length === 0) {
+            return Response.json({ ok: false, error: 'Player not found' }, { status: 404 });
+        }
+
+        return Response.json({ ok: true, details, career: trayectoria });
     } catch (e: any) {
         console.error('Players API error', e);
         return Response.json(

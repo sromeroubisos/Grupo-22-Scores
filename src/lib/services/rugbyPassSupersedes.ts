@@ -23,6 +23,10 @@
  * Paraguay vs Brazil. No hay UN torneo de FlashScore que le corresponda, y
  * apagar los test matches en bloque perderia partidos que RugbyPass no trae.
  * Para esos, la red de seguridad es el pliegue por identidad del feed.
+ *
+ * El Rugby Europe Championship (269) queda sin mapear por el motivo contrario:
+ * no hay a quien apagar. No tiene ficha en `data/tournaments/rugby.ts`, asi que
+ * FlashScore no lo publica por este sitio y no hay con que duplicarlo.
  */
 
 import { RUGBYPASS_COMPETITIONS, RUGBYPASS_MATCH_ID_PREFIX } from './rugbyPassParser.ts';
@@ -86,6 +90,62 @@ export const RUGBYPASS_SUPERSEDES: readonly SupersededTournament[] = [
         urlFragments: ['/world/united-rugby-championship/'],
         names: ['united rugby championship', 'urc'],
         countries: ['international', 'internacional', 'europe', 'world', 'europa', 'mundo'],
+    },
+
+    // ── Las que entran por la pagina de su competicion ──────────────────────
+    {
+        rugbyPassCompetitionId: 209,
+        tournamentIds: ['rugby-six-nations', 'oi2gtjwp', 'faepan8o'],
+        urlFragments: ['/europe/six-nations/'],
+        // 'six nations' a secas tambien es el femenino y el U20, que RugbyPass
+        // publica aparte (248 y 217) y este conector NO trae. Por eso los
+        // nombres van completos y el pais acompana.
+        names: ['six nations'],
+        countries: ['europe', 'europa', 'international', 'internacional'],
+    },
+    {
+        rugbyPassCompetitionId: 214,
+        tournamentIds: ['rugby-championship', 'm54dknqe', 'xxwsbyzh'],
+        urlFragments: ['/world/rugby-championship/'],
+        // OJO: 'rugby championship' es tambien el final de 'united rugby
+        // championship' y de 'u20 rugby championship'. El match es por nombre
+        // COMPLETO, no por fragmento, asi que estas dos no se tocan; el id
+        // opaco es igual la via principal.
+        names: ['rugby championship', 'the rugby championship'],
+        countries: ['international', 'internacional', 'world', 'mundo'],
+    },
+    {
+        rugbyPassCompetitionId: 219,
+        tournamentIds: ['rugby-pacific-nations-cup'],
+        urlFragments: ['/world/pacific-nations-cup/'],
+        names: ['pacific nations cup'],
+        countries: ['oceania', 'international', 'internacional', 'world', 'mundo'],
+    },
+    {
+        rugbyPassCompetitionId: 114,
+        tournamentIds: ['rugby-nations-championship'],
+        urlFragments: ['/world/nations-championship/'],
+        names: ['nations championship'],
+        countries: ['international', 'internacional', 'world', 'mundo'],
+    },
+    {
+        rugbyPassCompetitionId: 242,
+        // No tiene ficha en `data/tournaments/rugby.ts`: va por URL y nombre.
+        tournamentIds: [],
+        urlFragments: ['/europe/champions-cup/', '/europe/european-champions-cup/'],
+        names: ['champions cup', 'european champions cup', 'investec champions cup', 'heineken champions cup'],
+        countries: ['europe', 'europa', 'international', 'internacional'],
+    },
+    {
+        rugbyPassCompetitionId: 243,
+        // MISMA TRAMPA QUE EL TOP 14: en el catalogo hay una
+        // `rugby-wales-challenge-cup` que es la copa GALESA, otra competicion
+        // que RugbyPass no trae. Por eso el pais es obligatorio y la URL apunta
+        // a `/europe/`: sin eso, sumar la copa europea apagaba la galesa.
+        tournamentIds: [],
+        urlFragments: ['/europe/challenge-cup/', '/europe/european-challenge-cup/'],
+        names: ['challenge cup', 'european challenge cup', 'epcr challenge cup'],
+        countries: ['europe', 'europa', 'international', 'internacional'],
     },
 ] as const;
 

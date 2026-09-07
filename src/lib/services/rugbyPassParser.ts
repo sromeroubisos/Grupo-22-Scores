@@ -72,6 +72,17 @@ export interface RugbyPassCompetition {
      * cualquier otro mes cruza el ano y se rotula con dos ("2025-26").
      */
     seasonStartMonth: number | null;
+    /**
+     * Si llega en el calendario general (`load-init-fixtures-data`) o hay que
+     * ir a buscarla a la pagina de su competicion.
+     */
+    viaCalendario: boolean;
+    /**
+     * El slug de la pagina que la trae, cuando no viene por el calendario. NO
+     * siempre es su propio slug: las cinco internacionales salen todas de
+     * `internationals`.
+     */
+    paginaDeTemporada?: string;
 }
 
 /**
@@ -80,15 +91,48 @@ export interface RugbyPassCompetition {
  * no llena `match_status`, asi que un partido terminado llega como programado).
  *
  * Sumar uno es agregarlo aca; el resto del conector no se toca.
+ *
+ * ── DOS PUERTAS, NO UNA ─────────────────────────────────────────────────────
+ * Las seis primeras vienen del CALENDARIO (`load-init-fixtures-data`), que es
+ * una sola llamada y trae exactamente esas seis y nada mas: medido, el feed de
+ * 1498 partidos no tiene una sola fila de las otras.
+ *
+ * Las de abajo NO estan en ese feed. Salen de la pagina de cada competicion
+ * (`/<slug>/fixtures-results/`), que ademas acepta temporada — ver
+ * `rugbyPassSeasonFixtures.ts`. Por eso la lista lleva `viaCalendario`: dice por
+ * cual de las dos puertas entra cada una, y sin eso el cron pediria al pedote
+ * paginas de las que ya tiene todo, o daria por vacias a las que nunca pide.
  */
 export const RUGBYPASS_COMPETITIONS: readonly RugbyPassCompetition[] = [
-    { id: 208, slug: 'bunnings-npc', name: 'Hilux NPC', country: 'Nueva Zelanda', seasonStartMonth: 1 },
-    { id: 203, slug: 'top-14', name: 'Top 14', country: 'Francia', seasonStartMonth: 7 },
-    { id: 211, slug: 'pro-d2', name: 'Pro D2', country: 'Francia', seasonStartMonth: 7 },
-    { id: 201, slug: 'premiership', name: 'Gallagher Premiership', country: 'Inglaterra', seasonStartMonth: 7 },
-    { id: 204, slug: 'united-rugby-championship', name: 'United Rugby Championship', country: 'Internacional', seasonStartMonth: 7 },
-    { id: 3, slug: 'internationals', name: 'Internationals', country: 'Internacional', seasonStartMonth: null },
+    { id: 208, slug: 'bunnings-npc', name: 'Hilux NPC', country: 'Nueva Zelanda', seasonStartMonth: 1, viaCalendario: true },
+    { id: 203, slug: 'top-14', name: 'Top 14', country: 'Francia', seasonStartMonth: 7, viaCalendario: true },
+    { id: 211, slug: 'pro-d2', name: 'Pro D2', country: 'Francia', seasonStartMonth: 7, viaCalendario: true },
+    { id: 201, slug: 'premiership', name: 'Gallagher Premiership', country: 'Inglaterra', seasonStartMonth: 7, viaCalendario: true },
+    { id: 204, slug: 'united-rugby-championship', name: 'United Rugby Championship', country: 'Internacional', seasonStartMonth: 7, viaCalendario: true },
+    { id: 3, slug: 'internationals', name: 'Internationals', country: 'Internacional', seasonStartMonth: null, viaCalendario: true },
+
+    // ── Solo por la pagina de la competicion ────────────────────────────────
+    //
+    // Las cinco internacionales llegan TODAS en la misma respuesta, la de
+    // `internationals`: esa pagina es un cajon que devuelve los partidos con su
+    // `optaCompId` propio. Por eso comparten `paginaDeTemporada`.
+    { id: 209, slug: 'six-nations', name: 'Six Nations', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
+    { id: 214, slug: 'the-rugby-championship', name: 'The Rugby Championship', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
+    { id: 219, slug: 'pacific-nations-cup', name: 'Pacific Nations Cup', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
+    { id: 269, slug: 'rugby-europe-championship', name: 'Rugby Europe Championship', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'internationals' },
+    { id: 114, slug: 'nations-championship', name: 'Nations Championship', country: 'Internacional', seasonStartMonth: 1, viaCalendario: false, paginaDeTemporada: 'nations-championship' },
+
+    // Las dos copas europeas de clubes tienen pagina propia.
+    { id: 242, slug: 'european-champions-cup', name: 'Investec Champions Cup', country: 'Europa', seasonStartMonth: 7, viaCalendario: false, paginaDeTemporada: 'european-champions-cup' },
+    { id: 243, slug: 'challenge-cup', name: 'Challenge Cup', country: 'Europa', seasonStartMonth: 7, viaCalendario: false, paginaDeTemporada: 'challenge-cup' },
 ] as const;
+
+/** Las paginas de competicion que hay que pedir, sin repetir. */
+export const RUGBYPASS_SEASON_PAGES: readonly string[] = [
+    ...new Set(
+        RUGBYPASS_COMPETITIONS.filter((c) => !c.viaCalendario).map((c) => c.paginaDeTemporada as string)
+    ),
+];
 
 /**
  * Competiciones que RugbyPass publica pero NO hay que importar, con el motivo.
@@ -256,7 +300,12 @@ export function decodeRugbyPassEntities(value: string): string {
         .replace(/&quot;/g, '"')
         .replace(/&#0?39;/g, "'")
         .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>');
+        .replace(/&gt;/g, '>')
+        // Los acentos llegan en UTF-8 crudo; la unica entidad con nombre que las
+        // paginas emiten es `&nbsp;` (medido: 21 veces en una ficha de jugador,
+        // cero de cualquier otra). Sin traducirla, un nombre partido por un
+        // espacio duro llega a la pantalla escrito "Stade&nbsp;Francais".
+        .replace(/&nbsp;/g, ' ');
 }
 
 // ── Estado y hora ───────────────────────────────────────────────────────────
@@ -413,6 +462,166 @@ export function parseRugbyPassFeed(feed: RawFeed): RugbyPassMatch[] {
             }
         }
     }
+    return salida;
+}
+
+// ── Fixtures por competicion y temporada ────────────────────────────────────
+
+/**
+ * LA SEGUNDA PUERTA: `/<slug>/fixtures-results/`, con `action=filter-fixtures`.
+ *
+ * El calendario general trae seis competiciones y nada mas. El Seis Naciones,
+ * las dos copas europeas, el Rugby Championship y compania NO estan ahi — estan
+ * en la pagina de su competicion, que ademas acepta `season` y devuelve
+ * temporadas viejas. De ahi sale la historia que el calendario no tiene.
+ *
+ * ── ES OTRA FORMA, NO LA MISMA COMPRIMIDA ───────────────────────────────────
+ * El calendario manda claves de una letra (`h`, `a`, `gmt`, `sts`); esta manda
+ * los nombres largos (`homeTeam`, `epoch`, `status`). Por eso tiene parser
+ * propio y no se puede reusar `parseRugbyPassGame`.
+ *
+ * ── LA HORA: `epoch` SI SE PUEDE USAR ───────────────────────────────────────
+ * Es la pregunta que hay que hacerle a cualquier campo de tiempo de este
+ * proveedor, porque `t`, `tsm`, `st` y `k` salen en la zona del visitante
+ * resuelta por geo-IP. `epoch` no: comparado contra el `gmt` del calendario en
+ * los 17 partidos que aparecen en las dos fuentes, coincide al segundo en los
+ * 17. Igual se respeta la regla de la medianoche: epoch a las 00:00:00 UTC
+ * exactas es "sabemos el dia, no la hora".
+ *
+ * ── UNA RESPUESTA TRAE VARIAS COMPETICIONES ─────────────────────────────────
+ * `internationals` es un cajon: en la temporada 2025 devuelve cinco
+ * competiciones distintas (Seis Naciones, Rugby Championship, Pacific Nations
+ * Cup, Rugby Europe Championship y los test sueltos), cada partido con su
+ * `optaCompId`. Por eso la competicion se lee del PARTIDO y no de la pagina que
+ * se pidio; una fila de una competicion que no esta habilitada se descarta,
+ * igual que en el calendario.
+ */
+interface RawSeasonTeam {
+    name?: unknown;
+    baseUri?: unknown;
+    logo?: unknown;
+}
+
+interface RawSeasonGame {
+    id?: unknown;
+    epoch?: unknown;
+    homeTeam?: RawSeasonTeam;
+    awayTeam?: RawSeasonTeam;
+    homeScore?: unknown;
+    awayScore?: unknown;
+    round?: unknown;
+    venue?: unknown;
+    url?: unknown;
+    optaCompId?: unknown;
+    status?: unknown;
+    live?: unknown;
+}
+
+interface RawSeasonPayload {
+    currentGameDays?: unknown;
+    currentFinalGameDays?: unknown;
+}
+
+function parseSeasonTeam(raw: RawSeasonTeam | undefined): RugbyPassTeam | null {
+    const slug = String(raw?.baseUri ?? '').trim();
+    const name = decodeRugbyPassEntities(String(raw?.name ?? '').trim());
+    if (!slug || !name) return null;
+    return {
+        id: rugbyPassTeamId(slug),
+        slug,
+        name,
+        // Aca el logo ya viene absoluto, al reves que en el calendario.
+        logo: decodeRugbyPassEntities(String(raw?.logo ?? '').trim()),
+        score: null,
+    };
+}
+
+export function parseRugbyPassSeasonGame(raw: RawSeasonGame): RugbyPassMatch | null {
+    const gameId = Number(raw.id);
+    const epoch = Number(raw.epoch);
+    if (!Number.isFinite(gameId) || !Number.isFinite(epoch) || epoch <= 0) return null;
+
+    const competitionId = Number(raw.optaCompId);
+    const competition = rugbyPassCompetition(competitionId);
+    if (!competition) return null;
+
+    const home = parseSeasonTeam(raw.homeTeam);
+    const away = parseSeasonTeam(raw.awayTeam);
+    // Los cruces de playoff todavia sin definir vienen con la ronda y la hora
+    // pero SIN equipos. No son un partido: son un casillero.
+    if (!home || !away) return null;
+
+    const fecha = new Date(epoch * 1000);
+    if (Number.isNaN(fecha.getTime())) return null;
+    const iso = fecha.toISOString();
+    const kickoffKnown = !iso.endsWith('T00:00:00.000Z');
+
+    const enVivo = raw.live === true || raw.live === 1;
+    const status: MatchStatus = enVivo
+        ? 'live'
+        : String(raw.status) === 'Result'
+            ? 'final'
+            : 'scheduled';
+
+    const marcador = (valor: unknown, jugado: boolean) =>
+        jugado && typeof valor === 'number' ? valor : null;
+    const jugado = status === 'final' || enVivo;
+
+    return {
+        id: rugbyPassMatchId(gameId),
+        gameId,
+        competitionId,
+        competitionName: competition.name,
+        country: competition.country,
+        tournamentId: rugbyPassTournamentId(competitionId),
+        kickoff: kickoffKnown ? iso : null,
+        dayUtc: iso.slice(0, 10),
+        kickoffKnown,
+        status,
+        home: { ...home, score: marcador(raw.homeScore, jugado) },
+        away: { ...away, score: marcador(raw.awayScore, jugado) },
+        venue: decodeRugbyPassEntities(String(raw.venue ?? '').trim()) || null,
+        roundLabel: decodeRugbyPassEntities(String(raw.round ?? '').trim()) || null,
+        matchUrl: decodeRugbyPassEntities(String(raw.url ?? '')) || `${RUGBYPASS_URL}/live/?g=${gameId}`,
+    };
+}
+
+/**
+ * Los partidos de una respuesta de `filter-fixtures`.
+ *
+ * `tournaments` llega a veces como ARRAY y a veces como OBJETO indexado por
+ * slug —los dos en la misma respuesta: los dias jugados de una forma y las
+ * llaves finales de la otra—. Leer solo el array pierde los playoffs sin avisar.
+ */
+export function parseRugbyPassSeasonFixtures(payload: RawSeasonPayload): RugbyPassMatch[] {
+    const salida: RugbyPassMatch[] = [];
+    const vistos = new Set<string>();
+
+    for (const clave of ['currentGameDays', 'currentFinalGameDays'] as const) {
+        const dias = Array.isArray(payload?.[clave]) ? (payload[clave] as unknown[]) : [];
+        for (const dia of dias) {
+            const crudo = (dia as { tournaments?: unknown })?.tournaments;
+            const torneos = Array.isArray(crudo)
+                ? crudo
+                : crudo && typeof crudo === 'object'
+                    ? Object.values(crudo)
+                    : [];
+            for (const torneo of torneos) {
+                const juegos = Array.isArray((torneo as { games?: unknown })?.games)
+                    ? ((torneo as { games: unknown[] }).games)
+                    : [];
+                for (const juego of juegos) {
+                    const partido = parseRugbyPassSeasonGame(juego as RawSeasonGame);
+                    // El mismo partido aparece en los dias Y en las llaves.
+                    if (partido && !vistos.has(partido.id)) {
+                        vistos.add(partido.id);
+                        salida.push(partido);
+                    }
+                }
+            }
+        }
+    }
+
     return salida;
 }
 
