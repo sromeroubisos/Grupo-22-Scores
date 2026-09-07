@@ -12,10 +12,10 @@
  * SECO POR DEFECTO. Son decenas de miles de filas de produccion: la escritura
  * se pide a proposito, nunca por omision.
  */
-import { createReadStream } from 'node:fs';
-import { createInterface } from 'node:readline';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+
+import { partidosDeLaCosecha } from './lados.mjs';
 
 const ENTRADA = process.argv[2];
 const ESCRIBIR = process.argv.includes('--escribir');
@@ -32,32 +32,39 @@ const env = Object.fromEntries(readFileSync('.env.local', 'utf8').split(/\r?\n/)
     .map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()]));
 const URL_SB = env.NEXT_PUBLIC_SUPABASE_URL, KEY = env.SUPABASE_SERVICE_ROLE_KEY;
 
+const { partidos } = await partidosDeLaCosecha(ENTRADA);
 const filas = [];
 const vistos = new Set();
-const rl = createInterface({ input: createReadStream(ENTRADA), crlfDelay: Infinity });
-for await (const linea of rl) {
-    if (!linea.trim()) continue;
-    let f;
-    try { f = JSON.parse(linea); } catch { continue; }
-    if (f.marca || !f.slug) continue;
+for (const partido of partidos) {
+    for (const { jugadores, totales } of partido.planteles) {
+        for (const jugador of jugadores) {
+            if (!jugador.slug) continue;
+            // Un slug repetido dentro del mismo partido volaria el upsert entero
+            // por clave duplicada. Gana el primero, igual que en el cron.
+            const clave = `${jugador.match_id}|${jugador.slug}`;
+            if (vistos.has(clave)) continue;
+            vistos.add(clave);
 
-    // Un slug repetido dentro del mismo partido volaria el upsert entero por
-    // clave duplicada. Gana el primero, igual que en el cron.
-    const clave = `${f.match_id}|${f.slug}`;
-    if (vistos.has(clave)) continue;
-    vistos.add(clave);
-
-    const r = rateRugbyPlayer({ stats: f.stats ?? {}, minutes: f.minutes, number: f.number });
-    if (!r) continue;
-    filas.push({
-        match_id: f.match_id,
-        player_slug: f.slug,
-        player_name: f.name,
-        rating: r.value,
-        minutes: r.minutes,
-        position: r.position,
-        kickoff: f.kickoff,
-    });
+            // EL PLANTEL VA SIEMPRE. Sin el, el motor cae al equipo promedio y
+            // el numero que se guarda no es el que produce el sitio.
+            const r = rateRugbyPlayer({
+                stats: jugador.stats ?? {},
+                minutes: jugador.minutes,
+                number: jugador.number,
+                team: totales,
+            });
+            if (!r) continue;
+            filas.push({
+                match_id: jugador.match_id,
+                player_slug: jugador.slug,
+                player_name: jugador.name,
+                rating: r.value,
+                minutes: r.minutes,
+                position: r.position,
+                kickoff: jugador.kickoff,
+            });
+        }
+    }
 }
 
 console.log(`[repuntuar] ${filas.length} filas de ${new Set(filas.map((f) => f.match_id)).size} partidos`);
