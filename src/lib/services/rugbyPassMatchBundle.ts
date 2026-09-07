@@ -315,24 +315,53 @@ export function planillaDelPartido(
         vistos.add(clave);
     }
 
+    // LO QUE HIZO CADA PLANTEL, que es el denominador del puntaje.
+    //
+    // El puntaje mide la PARTE que un jugador se llevo del total de su equipo y
+    // no cuanto hizo, porque el conteo crudo arrastra la posesion: medido sobre
+    // 2.634 planteles, el puntaje medio de un equipo seguia a su volumen de
+    // pases con r = 0,726. Un equipo que elige jugar sin la pelota mandaba a
+    // sus quince jugadores debajo de la vara por ejecutar el plan que ganaba el
+    // partido.
+    //
+    // Se suma por plantel y no de los dos juntos: la parte es del equipo propio.
+    const totalesDe = (alineacion: RugbyPassLineupPlayer[]) => {
+        const totales: Record<string, number> = {};
+        for (const jugador of alineacion) {
+            const extra = rubros.get(claveNombre(jugador.name));
+            if (!extra) continue;
+            for (const [metricId, metrica] of Object.entries(extra)) {
+                totales[metricId] = (totales[metricId] ?? 0) + metrica.value;
+            }
+        }
+        return totales;
+    };
+    const totalesPorLado = [
+        { alineacion: lineups.home, totales: totalesDe(lineups.home) },
+        { alineacion: lineups.away, totales: totalesDe(lineups.away) },
+    ];
+
     const extras = new Map<string, Extras>();
     const puntajes = new Map<string, number>();
-    for (const jugador of [...lineups.home, ...lineups.away]) {
-        const clave = claveNombre(jugador.name);
-        if (repetidos.has(clave)) continue;
-        const extra = rubros.get(clave);
-        if (!extra) continue;
-        extras.set(clave, extra);
+    for (const { alineacion, totales } of totalesPorLado) {
+        for (const jugador of alineacion) {
+            const clave = claveNombre(jugador.name);
+            if (repetidos.has(clave)) continue;
+            const extra = rubros.get(clave);
+            if (!extra) continue;
+            extras.set(clave, extra);
 
-        if (!sePuedePuntuar) continue;
-        const stats: Record<string, number> = {};
-        for (const [metricId, metrica] of Object.entries(extra)) stats[metricId] = metrica.value;
-        const puntaje = rateRugbyPlayer({
-            stats,
-            minutes: minutesFromLineup(jugador),
-            number: jugador.number,
-        });
-        if (puntaje) puntajes.set(clave, puntaje.value);
+            if (!sePuedePuntuar) continue;
+            const stats: Record<string, number> = {};
+            for (const [metricId, metrica] of Object.entries(extra)) stats[metricId] = metrica.value;
+            const puntaje = rateRugbyPlayer({
+                stats,
+                minutes: minutesFromLineup(jugador),
+                number: jugador.number,
+                team: totales,
+            });
+            if (puntaje) puntajes.set(clave, puntaje.value);
+        }
     }
 
     return { extras, puntajes };
