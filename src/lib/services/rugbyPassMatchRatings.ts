@@ -20,7 +20,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import { minutesFromLineup } from '../matches/rugbyPlayerRating.ts';
+import { PUESTO_POR_NUMERO, minutesFromLineup } from '../matches/rugbyPlayerRating.ts';
 import { getRugbyPassMatchDetail, getRugbyPassPlayerStats } from './rugbyPass.ts';
 import { claveNombre, planillaDelPartido, rugbyPassGameIdOf } from './rugbyPassMatchBundle.ts';
 import { rugbyPassTeamSlugOf } from './rugbyPassParser.ts';
@@ -97,7 +97,12 @@ export async function ratePlayersOfMatch(match: RateableMatch): Promise<{
             // La misma cuenta con la que se puntuo, que es la unica que hay: el
             // mapa de puntajes ya dejo afuera al que no entro.
             minutes: minutesFromLineup(jugador),
-            position: jugador.number,
+            // EL PUESTO, no la camiseta. Venia guardando `jugador.number`, asi
+            // que del 16 al 23 la columna decia "23" donde el puntaje habia
+            // leido un centro. Nadie lo notaba porque la ficha no la muestra,
+            // pero cualquier medicion por puesto sobre esta tabla —la que
+            // encontro el sesgo de la v1— salia con el banco contado aparte.
+            position: jugador.number == null ? null : PUESTO_POR_NUMERO[jugador.number] ?? null,
             kickoff: match.dateTime,
         });
     }
