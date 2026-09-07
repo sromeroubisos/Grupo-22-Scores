@@ -18,7 +18,8 @@ import {
     getNextActivePeriodAfterEvent,
     normalizeMatchPeriod,
 } from '../matchPeriods.ts';
-import { getRugbyPassMatchDetail, getRugbyPassPlayerStats } from './rugbyPass.ts';
+import { getRugbyPassMatchDetail, getRugbyPassPlayerStats, getRugbyPassTournamentBranding } from './rugbyPass.ts';
+import { parseRugbyPassTournamentId } from './rugbyPassTournamentBundle.ts';
 import { hayPlanillaParaPuntuar, minutesFromLineup, rateRugbyPlayer } from '../matches/rugbyPlayerRating.ts';
 import {
     RUGBYPASS_MATCH_ID_PREFIX,
@@ -496,6 +497,16 @@ export async function getRugbyPassMatchBundle(matchId: string, supabase: Supabas
         ? toPlayerRows(alineaciones, eventos, hoja, fila.home_team?.name ?? '', fila.away_team?.name ?? '')
         : [];
 
+    // El logo del torneo es el que RugbyPass publica en su grilla: el MISMO que
+    // ya usa la cabecera del torneo, y queda en memoria seis horas, asi que
+    // abrir una ficha no dispara una descarga por visita. Iba vacio, y por eso
+    // la placa de formaciones exportada salia sin logo mientras que la de un
+    // partido de la base lo tenia.
+    const competitionId = parseRugbyPassTournamentId(fila.tournament_id);
+    const tournamentLogo = competitionId === null
+        ? ''
+        : (await getRugbyPassTournamentBranding(competitionId)).logo;
+
     const equipo = (lado: 'home' | 'away') => {
         const t = (lado === 'home' ? fila.home_team : fila.away_team) ?? {};
         return {
@@ -524,7 +535,7 @@ export async function getRugbyPassMatchBundle(matchId: string, supabase: Supabas
                 timeZone: 'America/Argentina/Buenos_Aires',
             }),
             tournament: fila.tournament_name ?? '',
-            tournamentLogo: '',
+            tournamentLogo,
             tournamentId: fila.tournament_id ?? '',
             tournamentSeason: String(kickoff.getUTCFullYear()),
             category: fila.country_name ?? 'Internacional',

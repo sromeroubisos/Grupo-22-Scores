@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
 import { resolveAdminPanel } from '@/lib/auth/roles';
 import { mapDesignSlugToVisualFamily, readActiveExportDesign, type ExportDesignSlug, type ExportVisualFamily } from '@/lib/exports/activeDesign';
+import { ratingScaleColor, TINTA as RATING_INK } from '@/lib/matches/ratingScale';
 import {
     EXPORT_DESIGN_CUSTOMIZATION_EVENT,
     hydrateSavedExportDesignCustomization,
@@ -119,6 +120,12 @@ export interface StandingsData {
 export interface DailyMatchesData {
     date: string;
     tournament: string;
+    /**
+     * Id del torneo, cuando la placa es de uno solo. Sin logo explicito, es con
+     * lo que el proxy lo busca (`entity=tournament`), y asi aparece el de una
+     * competencia externa —RugbyPass, por ejemplo— que no vive en la base.
+     */
+    tournamentId?: string | number | null;
     tournamentLogo?: string;
     matches: Array<{
         homeTeam: string;
@@ -11929,6 +11936,63 @@ function formatLineupShirtNumber(player: LineupExportPlayerData, fallback: numbe
     return String(raw).trim();
 }
 
+/**
+ * EL PILL DEL PUNTAJE, el mismo que la pantalla del partido.
+ *
+ * Color pleno de la rampa de `ratingScale` —1 rojo, 5 naranja, 10 turquesa— con
+ * la tinta oscura unica encima: es la que pasa AA en las cinco bandas, y por ser
+ * opaco se lee igual sobre cualquier fondo de la pieza.
+ *
+ * Se dibuja de derecha a izquierda: `right` es el borde donde cierra la columna
+ * del puntaje. Devuelve el ancho que ocupo, para colgarle la estrella del mejor
+ * del partido a la izquierda.
+ *
+ * TODOS los chips de una lista miden lo MISMO (`width`): un 10,0 y un 6,4 con
+ * anchos distintos dejan el borde izquierdo dentado y la columna deja de leerse
+ * como columna. `maxHeight` es el paso de la fila: sin ese tope, en post —donde
+ * los renglones son la mitad de altos que en story— los chips se tocaban entre
+ * si y la lista se leia como una mancha.
+ *
+ * `outline` marca al mejor del partido sin robarle ancho a la fila: en las
+ * listas apretadas no entra una estrella al lado, y el color solo no alcanza
+ * para decir "este es el mejor".
+ */
+function drawLineupRatingPill(
+    ctx: CanvasRenderingContext2D,
+    options: {
+        right: number;
+        centerY: number;
+        label: string;
+        value: number;
+        size: number;
+        width: number;
+        unit: (value: number) => number;
+        maxHeight?: number;
+        outline?: string;
+    },
+) {
+    const { right, centerY, label, value, size, width, unit, maxHeight, outline } = options;
+    ctx.save();
+    ctx.font = `800 ${size}px ${FONT_OUTFIT_BLACK}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const height = Math.min(Math.round(size * 1.46), maxHeight ?? Number.POSITIVE_INFINITY);
+    const left = right - width;
+    ctx.fillStyle = ratingScaleColor(value);
+    ctx.beginPath();
+    ctx.roundRect(left, centerY - height / 2, width, height, height / 2);
+    ctx.fill();
+    if (outline) {
+        ctx.strokeStyle = outline;
+        ctx.lineWidth = Math.max(1, unit(3));
+        ctx.stroke();
+    }
+    ctx.fillStyle = RATING_INK;
+    ctx.fillText(truncateTextToWidth(ctx, label, width - unit(8)), left + width / 2, centerY + Math.round(size * 0.06));
+    ctx.restore();
+    return width;
+}
+
 function drawLineupBrandMark(
     ctx: CanvasRenderingContext2D,
     image: HTMLImageElement | null,
@@ -12058,6 +12122,12 @@ async function drawG22BaseLineupsClassic(
     const dayLabel = formatLineupDayLabel(data.date);
     const timeLabel = String(data.time || '').trim();
     const venueLabel = String(data.venue || '').trim();
+    // El puntaje de cada jugador. La pieza lo dibuja solo si la planilla lo
+    // trae —un partido por jugarse no tiene ninguno— y el mejor del partido
+    // lleva estrella, como en el resto de los exports. El banco cuenta: un
+    // suplente puede ser la figura.
+    const highestRating = computeHighestLineupRating(teams.map((team) => ({ starters: [...team.starters, ...team.bench] })));
+    const hasRatings = highestRating != null;
 
     if (isSingleTeam) {
         // -------------------------------------------------------------------
@@ -12189,7 +12259,14 @@ async function drawG22BaseLineupsClassic(
         const pitch = Math.max(u(30), Math.min(u(53) + Math.round(extra * 0.05), Math.floor((listBottom - listTop) / rows)));
         const baseNameSize = Math.round(pitch * 0.96);
         const numberSize = Math.round(pitch * 0.48);
-        const maxNameWidth = W - u(220);
+        // El chip del puntaje se mide contra el PASO de la fila, no contra el
+        // nombre: es lo que evita que dos chips se toquen cuando la lista se
+        // aprieta. Va en su propia columna contra el margen derecho, y como el
+        // nombre sigue centrado el ancho se le quita de los DOS lados.
+        const ratingSize = Math.max(u(16), Math.round(pitch * 0.44));
+        const ratingChipWidth = u(104);
+        const ratingColumn = hasRatings ? ratingChipWidth + u(26) : 0;
+        const maxNameWidth = W - u(220) - ratingColumn * 2;
         // Un solo cuerpo para los quince: el mas largo decide. Los NOMBRES van en
         // Articulat CF Heavy (pedido del usuario); el dorsal sigue en la serif.
         const nameSize = getSharedFittedFontSize(
@@ -12220,6 +12297,22 @@ async function drawG22BaseLineupsClassic(
             ctx.font = nameFont;
             ctx.fillStyle = colors.names;
             ctx.fillText(label, startX + numberWidth + gap, baseline);
+            const ratingLabel = formatLineupExportRating(player.rating);
+            const ratingValue = getLineupExportRatingValue(player.rating);
+            if (ratingLabel && ratingValue !== null) {
+                const chipWidth = drawLineupRatingPill(ctx, {
+                    right: W - u(70),
+                    centerY: baseline - Math.round(ratingSize * 0.42),
+                    label: ratingLabel,
+                    value: ratingValue,
+                    size: ratingSize,
+                    width: ratingChipWidth,
+                    unit: u,
+                    maxHeight: pitch - u(8),
+                    outline: ratingValue === highestRating ? ink : undefined,
+                });
+                void chipWidth;
+            }
         });
         ctx.restore();
 
@@ -12431,6 +12524,12 @@ async function drawG22BaseLineupsClassic(
     const anyExtras = teams.some((team) => team.bench.length > 8);
     const extrasBlock = anyExtras ? u(30) + u(24) * 2 : 0;
     const labelBlock = anyBench ? u(78) : 0;
+    // El puntaje cierra cada renglon contra el borde de su columna; el nombre
+    // se queda con lo que sobra. La columna es angosta a proposito: cada punto
+    // que se le da al chip se lo saca al nombre, y una lista entera en iniciales
+    // por un chip mas ancho es un mal negocio.
+    const ratingChipWidth = u(72);
+    const ratingColumn = hasRatings ? ratingChipWidth + u(14) : 0;
     // En story sobra alto: las columnas se abren hasta un paso mas generoso.
     const pitch = Math.max(u(20), Math.min(u(30) + Math.round(extra * 0.035), Math.floor((listBottom - listTop - labelBlock - extrasBlock) / maxRows)));
     const baseNameSize = Math.round(pitch * 0.96);
@@ -12443,7 +12542,7 @@ async function drawG22BaseLineupsClassic(
         ctx,
         teams.flatMap((team, teamIndex) => [...team.starters, ...team.bench.slice(0, 8)].map((player) => ({
             text: `${useInitials ? abbreviateLineupGivenNames(player.name) : player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase(),
-            maxWidth: columnRight[teamIndex] - (columnStarts[teamIndex] + u(25)),
+            maxWidth: columnRight[teamIndex] - (columnStarts[teamIndex] + u(25)) - ratingColumn,
         }))),
         '800',
         baseNameSize,
@@ -12457,7 +12556,7 @@ async function drawG22BaseLineupsClassic(
     teams.forEach((team, teamIndex) => {
         const numberRight = columnStarts[teamIndex];
         const nameX = numberRight + u(25);
-        const nameMax = columnRight[teamIndex] - nameX;
+        const nameMax = columnRight[teamIndex] - nameX - ratingColumn;
         const teamColor = normalizeHexColor(colorOverrides.names) || liftColorForDark(teamColors[team.side]);
         const lineColor = colors.lines || teamColor;
         const bench = team.bench.slice(0, 8);
@@ -12475,6 +12574,25 @@ async function drawG22BaseLineupsClassic(
             const label = `${useInitials ? abbreviateLineupGivenNames(player.name) : player.name}${player.isCaptain ? ' (C)' : ''}`.toUpperCase();
             ctx.font = `800 ${nameSize}px ${FONT_OUTFIT_BLACK}`;
             ctx.fillText(truncateTextToWidth(ctx, label, nameMax), nameX, baseline);
+            const ratingLabel = formatLineupExportRating(player.rating);
+            const ratingValue = getLineupExportRatingValue(player.rating);
+            if (ratingLabel && ratingValue !== null) {
+                // El cuerpo del chip sale del paso de la fila con un piso: con 23
+                // por equipo el renglon se achica, pero un puntaje ilegible no es
+                // un puntaje.
+                const ratingSize = Math.max(u(17), Math.round(Math.min(nameSize * 0.76, pitch * 0.6)));
+                drawLineupRatingPill(ctx, {
+                    right: columnRight[teamIndex],
+                    centerY: baseline - Math.round(nameSize * 0.34),
+                    label: ratingLabel,
+                    value: ratingValue,
+                    size: ratingSize,
+                    width: ratingChipWidth,
+                    unit: u,
+                    maxHeight: pitch - u(4),
+                    outline: ratingValue === highestRating ? ink : undefined,
+                });
+            }
         };
         team.starters.forEach((player, index) => {
             drawRow(player, index + 1, cursor + nameSize + pitch * index);
@@ -12553,13 +12671,19 @@ async function drawG22BaseLineupsEditorial(
 
     const teams = getSelectedLineupTeams(data, lineupExportMode).map((team) => ({ ...team, ...splitLineupTeamPlayers(team) }));
     const isSingleTeam = teams.length === 1;
-    const [photo, homeCrest, awayCrest, sportMark] = await Promise.all([
+    const [photo, homeCrest, awayCrest, sportMark, tournamentLogo] = await Promise.all([
         loadImage(data.backgroundImage || ''),
         loadImage(data.homeTeam.logo || ''),
         loadImage(data.awayTeam.logo || ''),
         loadImage(resolvePlateBrandSource('auto', data.sport)),
+        loadImage(getTournamentLogoImageSource(data)),
     ]);
     const crestBySide = { home: homeCrest, away: awayCrest } as const;
+    // Como en la clasica: el puntaje solo si la planilla lo trae, y estrella
+    // para el mejor del partido.
+    const highestRating = computeHighestLineupRating(teams.map((team) => ({ starters: [...team.starters, ...team.bench] })));
+    const ratingChipWidth = u(76);
+    const ratingColumn = highestRating != null ? ratingChipWidth + u(14) : 0;
 
     const field = ctx.createLinearGradient(0, 0, 0, H);
     field.addColorStop(0, mixHexColors(base, glow, 0.06));
@@ -12680,6 +12804,23 @@ async function drawG22BaseLineupsEditorial(
     // Marca del medio abajo a la derecha, como el sello de la referencia.
     drawLineupBrandMark(ctx, sportMark, contentRight, H - u(48), u(190));
 
+    // El logo del torneo cierra abajo a la izquierda, sobre la foto ya fundida
+    // en el fondo: la derecha la ocupa la marca del medio y el titular llena el
+    // ancho de la columna.
+    if (tournamentLogo) {
+        drawOverflowCrest(ctx, {
+            x: u(118),
+            y: H - u(112),
+            width: u(120),
+            height: u(120),
+            img: tournamentLogo,
+            label: data.tournament,
+            rawLogo: getTournamentLogoImageSource(data),
+            isDark: true,
+            showFrame: false,
+        });
+    }
+
     const listTop = titleBaseline + u(20);
     const listBottom = cardTop - u(40);
 
@@ -12714,7 +12855,7 @@ async function drawG22BaseLineupsEditorial(
         // Un solo cuerpo para toda la lista: el mas largo decide.
         const measureNames = (useInitials: boolean) => getSharedFittedFontSize(
             ctx,
-            starters.map((player) => ({ text: `${useInitials ? abbreviateLineupGivenNames(player.name) : player.name}${player.isCaptain ? ' (C)' : ''}`, maxWidth: x + width - nameX })),
+            starters.map((player) => ({ text: `${useInitials ? abbreviateLineupGivenNames(player.name) : player.name}${player.isCaptain ? ' (C)' : ''}`, maxWidth: x + width - nameX - ratingColumn })),
             '900',
             baseNameSize,
             FONT_ARTICULAT,
@@ -12733,7 +12874,23 @@ async function drawG22BaseLineupsEditorial(
             ctx.textAlign = 'left';
             const label = `${useInitials ? abbreviateLineupGivenNames(player.name) : player.name}${player.isCaptain ? ' (C)' : ''}`;
             ctx.font = `900 ${nameSize}px ${FONT_ARTICULAT}`;
-            ctx.fillText(truncateTextToWidth(ctx, label, x + width - nameX), nameX, baseline);
+            ctx.fillText(truncateTextToWidth(ctx, label, x + width - nameX - ratingColumn), nameX, baseline);
+            const ratingLabel = formatLineupExportRating(player.rating);
+            const ratingValue = getLineupExportRatingValue(player.rating);
+            if (ratingLabel && ratingValue !== null) {
+                const ratingSize = Math.max(u(17), Math.round(Math.min(nameSize * 0.72, pitch * 0.56)));
+                drawLineupRatingPill(ctx, {
+                    right: x + width,
+                    centerY: baseline - Math.round(nameSize * 0.32),
+                    label: ratingLabel,
+                    value: ratingValue,
+                    size: ratingSize,
+                    width: ratingChipWidth,
+                    unit: u,
+                    maxHeight: pitch - u(5),
+                    outline: ratingValue === highestRating ? ink : undefined,
+                });
+            }
         });
         cursor += pitch * starters.length;
 

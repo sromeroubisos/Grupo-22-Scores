@@ -9,6 +9,8 @@ import {
 } from '@/lib/server/externalTeamLogoOverrides';
 import { getExternalTournamentOverride } from '@/lib/server/externalTournamentOverrides';
 import { getPlayerDetails, getTeamDetails } from '@/lib/services/flashscore';
+import { getRugbyPassTournamentBranding } from '@/lib/services/rugbyPass';
+import { parseRugbyPassTournamentId } from '@/lib/services/rugbyPassTournamentBundle';
 import { isUuid } from '@/lib/utils/postgrest';
 
 const LOGO_DIR = path.join(process.cwd(), 'public', 'logos', 'clubs');
@@ -353,6 +355,28 @@ async function findExternalTournamentLogo(candidates: string[], tournamentName: 
     return null;
 }
 
+/**
+ * El logo de una competicion de RugbyPass (`rp-comp-208`).
+ *
+ * No vive en ninguna tabla: RugbyPass lo publica en su grilla de torneos y el
+ * catalogo queda en memoria seis horas. Por eso lo resuelve el proxy y no el
+ * feed — `external_match_cache` guarda `tournament_id` y `tournament_name` y
+ * nada mas, y meter el logo en cada fila serian megas de la misma URL repetida
+ * en la portada. Con esta puerta alcanza con que la placa sepa el id del torneo:
+ * lo dibujan igual el export de la ficha, el de la fecha y cualquiera que venga.
+ */
+async function findRugbyPassTournamentLogo(candidates: string[]): Promise<string | null> {
+    for (const candidate of candidates) {
+        const competitionId = parseRugbyPassTournamentId(candidate);
+        if (competitionId === null) continue;
+
+        const { logo } = await getRugbyPassTournamentBranding(competitionId);
+        if (logo) return logo;
+    }
+
+    return null;
+}
+
 /** Lo que el proxy aprendio sobre el escudo mientras lo buscaba. */
 type LogoOrigin = { inherited: boolean };
 
@@ -596,6 +620,13 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string, en
             const externalTournamentLogo = await findExternalTournamentLogo(candidates, teamName);
             if (externalTournamentLogo) {
                 return externalTournamentLogo;
+            }
+
+            // Despues del override a proposito: una correccion cargada a mano le
+            // gana al catalogo del proveedor.
+            const rugbyPassLogo = await findRugbyPassTournamentLogo(candidates);
+            if (rugbyPassLogo) {
+                return rugbyPassLogo;
             }
 
             return null;
