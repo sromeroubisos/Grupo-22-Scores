@@ -635,25 +635,36 @@ export interface RugbyPassMatchView {
 }
 
 /**
- * EL CRUCE ENTRE LA FICHA Y EL PUNTAJE GUARDADO ES POR CERCANIA, NO POR IGUALDAD.
+ * LA HORA DE LA FICHA DEL JUGADOR VIENE EN LA ZONA DEL VISITANTE.
  *
- * La ficha del jugador publica sus partidos SIN id, asi que la unica llave
- * posible es la fecha. Y las dos fuentes del MISMO proveedor no coinciden: el
- * calendario —de donde sale `external_match_cache`— dice una hora y la ficha del
- * jugador dice otra TRES HORAS MAS TARDE. Medido sobre un partido de cada una de
- * las seis competiciones: +3,0 h en las seis, sin excepcion.
+ * Es la misma trampa que ya tenian `t`, `tsm`, `st` y `k` del calendario, y hay
+ * que asumirla en CUALQUIER campo de tiempo de este proveedor. Medido sobre el
+ * mismo partido (`rp-952476`, Stade Rochelais vs Toulouse, que el calendario
+ * pone a las 19:05 UTC del 6 de septiembre):
  *
- * Por eso no se cruza ni por instante (no coincide nunca) ni por dia (un partido
- * de 21:00 UTC cae al dia siguiente en la ficha, y ahi se perderia el puntaje de
- * media Europa: es justo el caso de Internationals que se midio). Se cruza por
- * el puntaje MAS CERCANO dentro de una ventana de doce horas.
+ *     desde Argentina (UTC-3)   la ficha dice 22:05 UTC del 6   (+3 h)
+ *     desde el server de Vercel la ficha dice 00:05 UTC del 7   (+5 h)
  *
- * La ventana es el dato del deporte: nadie juega dos partidos de rugby con menos
- * de doce horas de diferencia, asi que adentro de la ventana hay uno o ninguno.
- * Y se arregla solo el dia que el proveedor empareje sus dos relojes, cosa que
- * restar tres horas a mano no haria.
+ * O sea: la ficha publica la hora LOCAL del que mira, con el numero leido como
+ * si fuera UTC. No es un desfase fijo del proveedor —eso creimos al medirlo una
+ * sola vez desde una sola maquina— sino el huso del que pregunta.
+ *
+ * ── QUE SE HACE CON ESO ─────────────────────────────────────────────────────
+ * 1. El CRUCE contra el puntaje guardado es por cercania, no por igualdad ni
+ *    por dia UTC. Por instante no coincide nunca; por dia se pierde todo
+ *    partido que el corrimiento empuja al dia siguiente, que en produccion es
+ *    justo el caso de arriba.
+ * 2. La FECHA QUE SE MUESTRA sale del calendario, no de la ficha, cuando el
+ *    partido cruzo — ver `partidosVista`. El calendario guarda el `gmt`, que es
+ *    el unico campo invariante del proveedor.
+ *
+ * La ventana son catorce horas: es el huso mas extremo que existe (UTC+14), asi
+ * que cubre cualquier lugar desde donde corra el server. Y sigue siendo segura
+ * porque es el dato del deporte: en estas competiciones nadie juega dos partidos
+ * con menos de un dia de diferencia, asi que adentro de la ventana hay uno o
+ * ninguno.
  */
-const VENTANA_DE_CRUCE_MS = 12 * 60 * 60 * 1000;
+const VENTANA_DE_CRUCE_MS = 14 * 60 * 60 * 1000;
 
 export function puntajeMasCercano<T extends { ms: number }>(
     kickoffMs: number,
@@ -705,16 +716,30 @@ function partidosVista(
     puntajes: readonly StoredPlayerRating[] = []
 ): RugbyPassMatchView[] {
     const conFecha = puntajes
-        .map((p) => ({ ms: new Date(p.kickoff).getTime(), rating: p.rating, matchId: p.matchId }))
+        .map((p) => ({
+            ms: new Date(p.kickoff).getTime(),
+            rating: p.rating,
+            matchId: p.matchId,
+            kickoff: p.kickoff,
+        }))
         .filter((p) => Number.isFinite(p.ms));
 
     return sinRepetidos(matches).map((m) => {
         const guardado = m.kickoff !== null ? puntajeMasCercano(m.kickoff * 1000, conFecha) : null;
         return {
         title: m.title,
-        // El `time` del proveedor son segundos epoch; la pantalla necesita algo
-        // que `new Date()` entienda sin adivinar la unidad.
-        date: m.kickoff !== null ? new Date(m.kickoff * 1000).toISOString() : null,
+        // LA FECHA SALE DEL CALENDARIO SI LA TENEMOS.
+        //
+        // El `time` de la ficha son segundos epoch pero en la zona del que mira
+        // (ver arriba), asi que en produccion corre partidos al dia siguiente.
+        // `guardado.kickoff` viene de `external_match_cache`, que guarda el
+        // `gmt` — el unico campo de hora invariante del proveedor.
+        //
+        // Cuando el partido no cruzo no hay con que corregirlo y queda lo que
+        // dice la ficha, que es lo que habia antes: una fecha aproximada es
+        // mejor que ninguna.
+        date: guardado?.kickoff
+            ?? (m.kickoff !== null ? new Date(m.kickoff * 1000).toISOString() : null),
         competition_name: m.competitionName,
         competition_logo: m.competitionLogo,
         opponent_name: m.opponentName,
