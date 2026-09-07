@@ -12,6 +12,7 @@ import {
   getPlayerMetricMeta,
   parseNumericStat,
 } from '@/lib/playerStats';
+import type { PlayerSheetIdentity } from './PlayerMatchSheet';
 
 import styles from './page.module.css';
 
@@ -67,6 +68,20 @@ function hasAnyRecord(row: PlayerStatsTableRow, metricIds: string[]) {
  * Numerar por indice mentiria: dos jugadores con un gol cada uno no son el
  * primero y el segundo goleador.
  */
+/** Lo que la ficha necesita saber de una fila para abrirse. */
+function identityOf(row: PlayerStatsTableRow): PlayerSheetIdentity {
+  return {
+    playerId: row.playerId,
+    name: row.name,
+    team: row.team,
+    teamName: row.teamName,
+    number: row.number,
+    position: row.position,
+    rating: row.rating,
+    isCaptain: row.isCaptain,
+  };
+}
+
 function rankRows(rows: PlayerStatsTableRow[], metricId: string) {
   let previousValue: number | null = null;
   let previousRank = 0;
@@ -88,9 +103,16 @@ type Props = {
   awayName: string;
   /** Lo que va pegado al titulo: hoy, el boton del puntaje de la gente. */
   titleAction?: React.ReactNode;
+  /**
+   * Abrir la ficha del jugador dentro del partido. El nombre dejo de ser un
+   * enlace al perfil: cliquearlo contesta primero "que hizo hoy", y el perfil
+   * queda a un boton de la ficha. La pantalla del partido es la duena de la
+   * ficha porque tambien la abren la alineacion y la cronologia.
+   */
+  onOpenPlayer: (identity: PlayerSheetIdentity) => void;
 };
 
-export default function PlayerStatsPanel({ tableData, localPlayerRows, playerStats, homeName, awayName, titleAction }: Props) {
+export default function PlayerStatsPanel({ tableData, localPlayerRows, playerStats, homeName, awayName, titleAction, onOpenPlayer }: Props) {
   const availableMetricIds = tableData.metricIds;
 
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(() => {
@@ -600,13 +622,15 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
                 <td className={styles.playerStatsColPlayer}>
                   <div className={styles.playerStatsNameWrapEnhanced}>
                     <div className={styles.playerStatsPrimaryEnhanced}>
-                      {player.playerId ? (
-                        <Link href={`/players/${player.playerId}`} className={styles.playerStatsNameLink}>
-                          {player.name}
-                        </Link>
-                      ) : (
-                        <span>{player.name}</span>
-                      )}
+                      <button
+                        type="button"
+                        className={`${styles.playerStatsNameLink} ${styles.pmNameButton}`}
+                        onClick={() => onOpenPlayer(identityOf(player))}
+                        aria-haspopup="dialog"
+                        aria-label={`Ficha de ${player.name} en el partido`}
+                      >
+                        {player.name}
+                      </button>
                       {player.isCaptain && <span className={styles.playerStatsBadgeCaptain}>C</span>}
                     </div>
                     <div className={styles.playerStatsSecondaryEnhanced}>
@@ -714,17 +738,15 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
                           {rank}
                         </span>
 
-                        {row.playerId ? (
-                          <Link
-                            href={`/players/${row.playerId}`}
-                            className={styles.pIdentityLink}
-                            aria-label={row.name}
-                          >
-                            {identity}
-                          </Link>
-                        ) : (
-                          <span className={styles.pIdentity}>{identity}</span>
-                        )}
+                        <button
+                          type="button"
+                          className={`${styles.pIdentityLink} ${styles.pmNameButton}`}
+                          onClick={() => onOpenPlayer(identityOf(row))}
+                          aria-haspopup="dialog"
+                          aria-label={`Ficha de ${row.name} en el partido`}
+                        >
+                          {identity}
+                        </button>
 
                         <span className={styles.pChips}>
                           {secondaryMetricIds.map((metricId) => {
@@ -787,13 +809,15 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
                   <ul className={styles.pBlankRows} aria-label={`Jugadores de ${group.name} sin registro`}>
                     {group.blank.map((row) => (
                       <li key={row.key} className={styles.pBlankRow}>
-                        {row.playerId ? (
-                          <Link href={`/players/${row.playerId}`} className={styles.pBlankLink}>
-                            {row.name}
-                          </Link>
-                        ) : (
-                          <span className={styles.pBlankName}>{row.name}</span>
-                        )}
+                        <button
+                          type="button"
+                          className={`${styles.pBlankLink} ${styles.pmNameButton}`}
+                          onClick={() => onOpenPlayer(identityOf(row))}
+                          aria-haspopup="dialog"
+                          aria-label={`Ficha de ${row.name} en el partido`}
+                        >
+                          {row.name}
+                        </button>
                         <span className={styles.pBlankMeta}>
                           {row.position ? row.position : 'Sin posición'}
                           {row.number != null && ` · #${row.number}`}

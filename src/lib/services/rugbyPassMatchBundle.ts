@@ -18,8 +18,11 @@ import {
     getNextActivePeriodAfterEvent,
     normalizeMatchPeriod,
 } from '../matchPeriods.ts';
-import { getRugbyPassMatchDetail, getRugbyPassPlayerStats } from './rugbyPass.ts';
+import { getRugbyPassMatchDetail, getRugbyPassPlayerStats, getRugbyPassTournamentBranding } from './rugbyPass.ts';
+import { parseRugbyPassTournamentId } from './rugbyPassTournamentBundle.ts';
 import { hayPlanillaParaPuntuar, minutesFromLineup, rateRugbyPlayer } from '../matches/rugbyPlayerRating.ts';
+import { rugbyPassPlayerId } from './rugbyPassCatalog.ts';
+import { getRugbyPassPlayers } from './rugbyPass.ts';
 import {
     RUGBYPASS_MATCH_ID_PREFIX,
     RUGBYPASS_PROVIDER,
@@ -33,6 +36,54 @@ import {
     type RugbyPassMatchStat,
     type RugbyPassPlayerStat,
 } from './rugbyPassParser.ts';
+
+/**
+ * EL ID CON EL QUE LA PANTALLA ABRE LA FICHA, no el slug pelado.
+ *
+ * La formacion, la cronologia y la planilla salian con `tommaso-menoncello` a
+ * secas, y la pantalla arma el link con lo que le den: `/players/<id>`. Con el
+ * slug pelado la ficha abria igual —no daba 404— pero VACIA, con el slug de
+ * titulo, porque la API no lo reconocia como de RugbyPass y se lo pasaba a
+ * FlashScore. Es la misma falla de prefijos que ya mordio en la ficha del
+ * partido y en la del torneo: un proveedor nuevo se declara en varios lugares y
+ * con uno solo la pantalla no falla, MIENTE.
+ *
+ * `null` se conserva: un evento de reloj no tiene jugador, y `rp-player-null`
+ * seria un link a ninguna parte.
+ */
+export function idDeJugador(slug: string | null | undefined): string | null {
+    return slug ? rugbyPassPlayerId(slug) : null;
+}
+
+/**
+ * EL PUESTO DE CADA JUGADOR DEL PARTIDO, por slug.
+ *
+ * La ficha del partido no lo trae: la alineacion publica el numero y el nombre,
+ * y nada mas. El puesto SI esta, pero en el catalogo de jugadores de la
+ * competicion (`filter-players`), donde cada uno viene con su `p` — "Prop",
+ * "Outside Back", "Fly Half".
+ *
+ * Es UNA llamada y ya esta cacheada seis horas, compartida con la ficha del
+ * jugador. Y alcanza: medido sobre Sudafrica-Nueva Zelanda, el catalogo de la
+ * competicion cubre los 46 de la alineacion, titulares y banco.
+ *
+ * Se cruza por SLUG y no por nombre. Dentro de un mismo proveedor el nombre
+ * seria sano, pero el slug es la identidad y no tiene homonimos.
+ *
+ * Si el catalogo se cae, el puesto vuelve vacio y la pantalla dibuja lo que
+ * dibujaba antes: una columna de menos, no un partido roto.
+ */
+async function puestosDelPartido(tournamentId: string | null): Promise<Map<string, string>> {
+    const oid = Number(String(tournamentId ?? '').replace(/^rp-comp-/, ''));
+    if (!Number.isFinite(oid)) return new Map();
+    try {
+        const jugadores = await getRugbyPassPlayers([oid]);
+        return new Map(jugadores.filter((j) => j.position).map((j) => [j.slug, j.position as string]));
+    } catch {
+        // Sin catalogo, sin puesto. No es motivo para voltear la ficha.
+        return new Map();
+    }
+}
 
 /** Como se lee cada evento en la linea de tiempo. */
 const ETIQUETA: Readonly<Record<string, string>> = {
@@ -121,7 +172,7 @@ export function toTimelineEvent(
         // pero no lleva jugador, asi que la pantalla no lo atribuye a nadie.
         team: evento.side === 'away' ? 'away' : 'home',
         player: evento.playerName ?? '',
-        playerId: evento.playerSlug,
+        playerId: idDeJugador(evento.playerSlug),
         description: descripcion,
         minute: evento.minute !== null ? `${evento.minute}'` : '',
         time: evento.minute !== null ? `${evento.minute}'` : '',
@@ -163,7 +214,7 @@ const PUNTOS_POR_EVENTO: Readonly<Record<string, number>> = {
  * suerte los dos textos salen del mismo proveedor y coinciden al caracter; el
  * plegado esta por las dudas, no porque hoy haga falta.
  */
-function claveNombre(valor: string) {
+export function claveNombre(valor: string) {
     return valor
         .normalize('NFD')
         .replace(/[̀-ͯ]/g, '')
@@ -292,7 +343,8 @@ export function toPlayerRows(
     eventos: RugbyPassEvent[],
     planilla: PlanillaDelPartido,
     homeName: string,
-    awayName: string
+    awayName: string,
+    puestos: Map<string, string> = new Map()
 ) {
     const porSlug = new Map<string, { tries: number; puntos: number; amarillas: number; rojas: number; total: number }>();
     for (const evento of eventos) {
@@ -316,14 +368,12 @@ export function toPlayerRows(
             const extra = planilla.extras.get(clave);
             filas.push({
                 key: `${lado}:${jugador.slug ?? jugador.name}`,
-                playerId: jugador.slug,
+                playerId: idDeJugador(jugador.slug),
                 name: jugador.name,
                 team: lado,
                 teamName: lado === 'home' ? homeName : awayName,
                 number: jugador.number,
-                // RugbyPass no publica el puesto en la planilla; el numero de
-                // camiseta ya lo dice en rugby y no hay que inventarlo.
-                position: null,
+                position: (jugador.slug ? puestos.get(jugador.slug) : null) ?? null,
                 rating: planilla.puntajes.get(clave) ?? null,
                 isCaptain: false,
                 // Un suplente que nunca entro no jugo el partido.
@@ -350,12 +400,18 @@ export function toPlayerRows(
  * El puntaje viaja aca y no solo en la tabla: la alineacion es donde el hincha
  * mira primero, y un 8,4 al lado del nombre dice mas que cualquier columna.
  */
-function toLineup(jugadores: RugbyPassLineupPlayer[], puntajes: Map<string, number>) {
+function toLineup(
+    jugadores: RugbyPassLineupPlayer[],
+    puntajes: Map<string, number>,
+    puestos: Map<string, string>
+) {
     return jugadores.map((j) => ({
-        id: j.slug,
+        id: idDeJugador(j.slug),
         number: j.number,
         name: j.name,
-        position: null,
+        // El puesto sale del catalogo de la competicion; la alineacion no lo
+        // trae. Ver `puestosDelPartido`.
+        position: (j.slug ? puestos.get(j.slug) : null) ?? null,
         role: j.role,
         rating: puntajes.get(claveNombre(j.name)) ?? null,
         isCaptain: false,
@@ -489,11 +545,28 @@ export async function getRugbyPassMatchBundle(matchId: string, supabase: Supabas
     const rubrosDelPartido = planilla.length > 0 ? planilla : detalle?.playerStats ?? [];
     const hoja = planillaDelPartido(alineaciones, rubrosDelPartido);
 
+    // Solo si hay a quien ponerle el puesto: sin alineacion, la llamada al
+    // catalogo no tendria a quien servir.
+    const puestos = hayAlineaciones ? await puestosDelPartido(fila.tournament_id) : new Map<string, string>();
+
+    // El logo del torneo es el que RugbyPass publica en su grilla: el MISMO que
+    // ya usa la cabecera del torneo, y queda en memoria seis horas, asi que
+    // abrir una ficha no dispara una descarga por visita. Iba vacio, y por eso
+    // la placa de formaciones exportada salia sin logo mientras que la de un
+    // partido de la base lo tenia.
+    const competitionId = parseRugbyPassTournamentId(fila.tournament_id);
+    const tournamentLogo = competitionId === null
+        ? ''
+        : (await getRugbyPassTournamentBranding(competitionId)).logo;
+
     const lineups = hayAlineaciones
-        ? { home: toLineup(alineaciones.home, hoja.puntajes), away: toLineup(alineaciones.away, hoja.puntajes) }
+        ? {
+              home: toLineup(alineaciones.home, hoja.puntajes, puestos),
+              away: toLineup(alineaciones.away, hoja.puntajes, puestos),
+          }
         : null;
     const localPlayerRows = hayAlineaciones
-        ? toPlayerRows(alineaciones, eventos, hoja, fila.home_team?.name ?? '', fila.away_team?.name ?? '')
+        ? toPlayerRows(alineaciones, eventos, hoja, fila.home_team?.name ?? '', fila.away_team?.name ?? '', puestos)
         : [];
 
     const equipo = (lado: 'home' | 'away') => {
@@ -524,7 +597,7 @@ export async function getRugbyPassMatchBundle(matchId: string, supabase: Supabas
                 timeZone: 'America/Argentina/Buenos_Aires',
             }),
             tournament: fila.tournament_name ?? '',
-            tournamentLogo: '',
+            tournamentLogo,
             tournamentId: fila.tournament_id ?? '',
             tournamentSeason: String(kickoff.getUTCFullYear()),
             category: fila.country_name ?? 'Internacional',

@@ -98,10 +98,43 @@ test('un torneo que nadie reemplaza pasa de largo', () => {
     assert.equal(isSupersededByRugbyPass({ id: 'ra-761228' }), false);
 });
 
-test('Internationals es la unica competicion habilitada sin reemplazo', () => {
+test('solo dos competiciones habilitadas van sin reemplazo, y las dos con motivo', () => {
     // Si esto crece, alguien sumo una competicion y se olvido de apagar la de
     // FlashScore — que es justo lo que produce el partido duplicado.
-    assert.deepEqual(competitionsWithoutSupersede(), [3]);
+    //
+    // Las dos que estan son a proposito y por motivos OPUESTOS, escritos en el
+    // encabezado de `rugbyPassSupersedes.ts`:
+    //   3   Internationals: es un cajon de sastre, no hay UN torneo que apagar.
+    //   269 Rugby Europe Championship: no hay a QUIEN apagar, FlashScore no lo
+    //       publica por este sitio (no tiene ficha en el catalogo).
+    assert.deepEqual(competitionsWithoutSupersede().sort((a, b) => a - b), [3, 269]);
+});
+
+test('la Challenge Cup GALESA no se apaga con la europea', () => {
+    // Misma trampa que el Top 14 argentino: dos competiciones distintas con el
+    // mismo nombre. La europea entro por RugbyPass (243); la galesa no la cubre
+    // nadie y tiene que seguir saliendo.
+    assert.equal(
+        isSupersededByRugbyPass({ tournamentName: 'Challenge Cup', countryName: 'Wales' }),
+        false
+    );
+    assert.equal(
+        isSupersededByRugbyPass({ tournamentName: 'Challenge Cup', countryName: 'Europe' }),
+        true
+    );
+});
+
+test('el U20 Six Nations y el femenino no se apagan con el Seis Naciones', () => {
+    // RugbyPass los publica aparte (217 y 248) y este conector no los trae: si
+    // se apagaran, desaparecerian de la pantalla sin reemplazo.
+    assert.equal(
+        isSupersededByRugbyPass({ tournamentName: 'U20 Six Nations', countryName: 'Europe' }),
+        false
+    );
+    assert.equal(
+        isSupersededByRugbyPass({ tournamentName: "Women's Six Nations", countryName: 'Europe' }),
+        false
+    );
 });
 
 test('los nombres se comparan sin acentos ni puntuacion', () => {

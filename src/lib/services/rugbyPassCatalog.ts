@@ -67,6 +67,23 @@ function numeroDe(valor: unknown): number | null {
     return Number.isFinite(n) ? n : null;
 }
 
+/**
+ * Un numero que PUEDE NO ESTAR. `null` cuando el campo falta o viene vacio.
+ *
+ * `numeroDe` no sirve para esto: `Number('')` es 0, asi que un campo ausente
+ * sale como un cero AFIRMADO. En la ficha de un jugador eso es una mentira
+ * medible — una temporada sin puntos publicados quedaria con "0 puntos", que es
+ * lo mismo que dice la de un jugador que jugo y no anoto. `numeroDe` se queda
+ * como esta porque sus llamadores le pasan campos que siempre vienen.
+ */
+function numeroOpcional(valor: unknown): number | null {
+    if (valor === null || valor === undefined) return null;
+    const texto = String(valor).trim();
+    if (texto === '') return null;
+    const n = Number(texto);
+    return Number.isFinite(n) ? n : null;
+}
+
 /** Para meter una URL adentro de una expresion regular. */
 function escaparRegex(valor: string): string {
     return valor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -756,4 +773,541 @@ export function rugbyPassZonesFor(
         }
     }
     return salida;
+}
+
+// ── La ficha individual del jugador ─────────────────────────────────────────
+
+/**
+ * `/players/<slug>/` — LA FUENTE COMPLETA, y la unica que hay.
+ *
+ * `filter-players` da una LISTA: nombre, puesto, foto y los clubes por los que
+ * paso. La ficha individual da al jugador entero, y todo server-rendered:
+ *
+ *   nacionalidad (con bandera) · edad · puesto · altura · peso · club actual
+ *   la trayectoria CON slug —no cruzada por nombre, escrita en el propio link—
+ *   y las estadisticas por competicion y temporada, hasta diez, con los siete
+ *   rubros que RugbyPass elige SEGUN EL PUESTO del jugador
+ *
+ * Por eso la ficha se pide aca y no se arma con el catalogo: el catalogo cuesta
+ * seis llamadas de cientos de KB (las seis competiciones enteras) para devolver
+ * menos, y encima solo alcanza a los planteles vigentes — 5045 de los 14262
+ * jugadores que RugbyPass publica (medido 2026-09-06, `squad=1` contra
+ * `squad=0` en las seis competiciones).
+ *
+ * ── UN SLUG QUE NO EXISTE DA 404, PERO UNO VIEJO DA 200 VACIO ───────────────
+ * `no-existe-este-jugador-xyz` contesta 404, asi que el estado sirve. Pero
+ * `danny-grewcock` —retirado— contesta 200 con la pagina ARMADA y sin un solo
+ * dato: sin nombre, sin puesto, sin equipos, sin estadisticas. Por eso el
+ * parser devuelve `null` cuando no hay nombre: un 200 no alcanza para decir que
+ * el jugador esta.
+ */
+
+/**
+ * El unico puesto donde patear a los palos es la NORMA y no la excepcion.
+ *
+ * Medido sobre 24 jugadores de los ocho puestos: 3 de 3 aperturas anotaron
+ * penales o drops, y 0 de los 21 restantes. Es el rotulo tal cual lo escribe
+ * RugbyPass, que no traduce los puestos.
+ */
+const PUESTO_PATEADOR = 'Fly Half';
+
+/** `<div class="detail"> <h3>Height</h3> <div>192cm</div> </div>` */
+const RE_DETALLE = /<div class="detail">\s*<h3>([^<]+)<\/h3>\s*<div>([\s\S]*?)<\/div>\s*<\/div>/gi;
+
+/** El `<h1>` del encabezado, con el id de pagina del jugador al lado. */
+const RE_ENCABEZADO = /<div class="title-inner" id="(\d+)">\s*<h1>\s*([\s\S]*?)\s*<\/h1>/i;
+
+/** El link al club actual, en la barra fija de arriba. */
+const RE_CLUB_ACTUAL = new RegExp(
+    '<a href="' + escaparRegex(RUGBYPASS_URL) +
+    '/teams/([a-z0-9-]+)/" class="team">\\s*([^<]+?)\\s*</a>',
+    'i'
+);
+
+/** Cada club de la seccion "Teams", que ya trae el slug escrito en el link. */
+const RE_CLUB_TRAYECTORIA = new RegExp(
+    '<a href="' + escaparRegex(RUGBYPASS_URL) +
+    '/teams/([a-z0-9-]+)/" role="button"[\\s\\S]{0,300}?logos/png/(\\d+)\\.png' +
+    '[\\s\\S]{0,400}?<span class="name">\\s*([^<]+?)\\s*</span>',
+    'gi'
+);
+
+export interface RugbyPassPlayerTeamLink {
+    name: string;
+    slug: string;
+    logo: string;
+}
+
+export interface RugbyPassPlayerSeasonStat {
+    /** La clave opta (`lineout_takes`), que es por donde se rotula en castellano. */
+    key: string;
+    /** El titulo tal cual lo publica RugbyPass ("Lineout Takes"). */
+    title: string;
+    value: number | string;
+}
+
+export interface RugbyPassPlayerSeason {
+    /** El **oid** de la competicion. `null` si la ficha no lo trae. */
+    competitionId: number | null;
+    competitionName: string;
+    /** `2025`, `2025/2026`. Tal como lo rotula el proveedor. */
+    seasonLabel: string;
+    logo: string;
+    /** Minutos jugados en esa temporada. `null` si no los publica. */
+    minutes: number | null;
+    /**
+     * Los PUNTOS de la temporada, completos.
+     *
+     * Es el unico lugar donde estan bien: el bloque por partido trae `tries` y
+     * `conversions` y NADA MAS —ni penales ni drops—, y con eso los puntos no
+     * cierran. Medido: Boffelli hizo 67 en el Mundial 2023 y `tries*5 +
+     * conversiones*2` da 28, porque le faltan trece penales. Por eso los puntos
+     * se muestran por TEMPORADA y nunca por partido.
+     */
+    points: number | null;
+    /**
+     * Los SIETE rubros que RugbyPass elige por PUESTO: a un octavo le muestra
+     * lineouts y carries, a un medio-scrum pases y precision. No es una planilla
+     * fija y no hay que tratarla como tal. Medido sobre 60 temporadas de 23
+     * jugadores: sale de un vocabulario cerrado de dieciseis rubros.
+     */
+    stats: RugbyPassPlayerSeasonStat[];
+    /**
+     * LA PLANILLA CRUDA DE OPTA de esa temporada, tal como la manda el
+     * proveedor: sesenta claves, de `carries` a `ruck_arrivals_within_1st_3`.
+     *
+     * `stats` son los siete rubros que RugbyPass ELIGE mostrar segun el puesto;
+     * esto es todo lo que midio. De aca sale el puntaje de la temporada, que
+     * necesita cuatro que el resumen no siempre trae — `carries`, `metres`,
+     * `tackles` y `passes`.
+     *
+     * Se guardan solo los valores NUMERICOS: la planilla mezcla cuentas con
+     * porcentajes y con ids (`player_id`, `player_team_id`), y un id metido en
+     * una cuenta seria un carry de diecinueve mil.
+     */
+    rawStats: Readonly<Record<string, number>>;
+}
+
+export interface RugbyPassPlayerMatch {
+    /** `Argentina vs South Africa`, como lo rotula el proveedor. */
+    title: string;
+    /** Segundos epoch del comienzo. `null` si no se entiende. */
+    kickoff: number | null;
+    competitionName: string;
+    competitionLogo: string;
+    opponentName: string;
+    opponentLogo: string;
+    /** `win` | `loss` | `draw`. Sale de dos banderas, no de un marcador. */
+    result: 'win' | 'loss' | 'draw';
+    minutes: number | null;
+    /**
+     * LOS PUNTOS DEL JUGADOR EN ESE PARTIDO: `tries * 5 + conversiones * 2`.
+     *
+     * Es la unica cuenta posible con lo que el proveedor publica por partido, y
+     * es EXACTA para el que no patea a los palos — medido: 14 de 17 jugadores no
+     * anotaron un solo penal ni un drop en ninguna temporada publicada.
+     *
+     * Para el pateador se queda corta, porque los penales y los drops no vienen
+     * por partido: Boffelli hizo 67 puntos en el Mundial 2023 y esta cuenta da
+     * 28. Por eso el perfil marca `goalKicker`, para que la pantalla lo diga en
+     * vez de afirmar un numero que no es. El total exacto vive en la temporada.
+     */
+    points: number | null;
+    tries: number | null;
+    conversions: number | null;
+    yellowCards: number | null;
+    redCards: number | null;
+}
+
+export interface RugbyPassPlayerProfile {
+    slug: string;
+    /** El id interno de la pagina (`19761`). No es el numero de camiseta. */
+    pageId: number | null;
+    name: string;
+    photo: string;
+    position: string | null;
+    nationality: string | null;
+    /** La bandera del CDN. Vacia cuando la ficha no publica nacionalidad. */
+    nationalityFlag: string;
+    /** RugbyPass publica la EDAD, no la fecha de nacimiento. */
+    age: number | null;
+    /** `192cm`, tal como lo escribe el proveedor. */
+    height: string | null;
+    /** `109kg`. */
+    weight: string | null;
+    currentTeam: RugbyPassPlayerTeamLink | null;
+    /** La trayectoria, en el orden en que la publica. */
+    teams: RugbyPassPlayerTeamLink[];
+    /**
+     * Si hay que dar por hecho que patea a los palos.
+     *
+     * Decide si los puntos por partido son el numero completo o apenas los de
+     * try y conversion, porque los penales y los drops no vienen por partido.
+     *
+     * ── SALE DE DOS COSAS, Y HACEN FALTA LAS DOS ────────────────────────────
+     *
+     * 1. LO MEDIDO: que alguna temporada publicada le cuente un penal o un drop.
+     *    Es la evidencia mas fuerte y no depende del puesto — Boffelli es
+     *    Outside Back y lleva 29 penales, y una regla por puesto lo perderia.
+     *
+     * 2. EL PUESTO, pero SOLO el apertura. Medido sobre 24 jugadores de los ocho
+     *    puestos que rotula RugbyPass: patean 3 de 3 aperturas y 0 de los otros
+     *    21. En el apertura patear es la norma, asi que a uno cuyas temporadas
+     *    publicadas no muestren un penal —porque es joven, o porque esas
+     *    temporadas no traen planilla— igual NO se le puede afirmar que la
+     *    cuenta es su total.
+     *
+     * El punto 2 es un piso, no un reemplazo: sin el 1 se pierde al wing que
+     * patea, y sin el 2 se le miente al apertura del que todavia no hay dato.
+     */
+    goalKicker: boolean;
+    seasons: RugbyPassPlayerSeason[];
+    /**
+     * PARTIDO POR PARTIDO, del mas nuevo al mas viejo y sin separar por
+     * competicion: el proveedor los agrupa, pero la pantalla los lee como una
+     * sola linea de tiempo y el nombre de la competicion viaja en cada uno.
+     */
+    matches: RugbyPassPlayerMatch[];
+}
+
+/**
+ * Un array JSON embebido en el HTML, leido BALANCEANDO CORCHETES y respetando
+ * las comillas.
+ *
+ * Una expresion regular se corta en el primer `]` anidado, y un balanceo que
+ * ignore las cadenas se corta en el primer `]` que aparezca DENTRO de un nombre.
+ * Los dos fallan sin dar error: devuelven un JSON truncado que no parsea, y la
+ * ficha se queda sin estadisticas sin que nadie sepa por que.
+ */
+function arrayJsonEmbebido(texto: string, marcaId: string): unknown[] {
+    const marca = texto.indexOf(`id="${marcaId}"`);
+    if (marca < 0) return [];
+    const inicio = texto.indexOf('[', marca);
+    if (inicio < 0) return [];
+
+    let profundidad = 0;
+    let enCadena = false;
+    let escapado = false;
+
+    for (let i = inicio; i < texto.length; i++) {
+        const c = texto[i];
+        if (enCadena) {
+            if (escapado) escapado = false;
+            else if (c === '\\') escapado = true;
+            else if (c === '"') enCadena = false;
+            continue;
+        }
+        if (c === '"') enCadena = true;
+        else if (c === '[') profundidad++;
+        else if (c === ']') {
+            profundidad--;
+            if (profundidad === 0) {
+                try {
+                    const leido = JSON.parse(texto.slice(inicio, i + 1));
+                    return Array.isArray(leido) ? leido : [];
+                } catch {
+                    // Un bundle distinto no puede voltear la ficha entera.
+                    return [];
+                }
+            }
+        }
+    }
+    return [];
+}
+
+interface RawSeasonBlock {
+    competition?: {
+        oid?: unknown;
+        name?: unknown;
+        logoCircle?: unknown;
+        logo?: unknown;
+        season?: { label?: unknown } | null;
+        /** La planilla cruda de opta: de aca salen los puntos y si patea. */
+        stats?: {
+            stats?: {
+                points?: unknown;
+                penalty_goals?: unknown;
+                drop_goals?: unknown;
+            } | null;
+        } | null;
+    } | null;
+    main?: {
+        totalMinsPlayed?: unknown;
+        main?: unknown;
+        profile?: unknown;
+    } | null;
+}
+
+/** El texto de un nodo, sin etiquetas y con las entidades ya resueltas. */
+function textoPlano(html: string): string {
+    return decodeRugbyPassEntities(String(html ?? '').replace(/<[^>]*>/g, ' '))
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+/**
+ * Los rubros de una temporada, uniendo el VALOR (`main.main`) con la CLAVE
+ * (`main.profile`).
+ *
+ * Los dos arrays traen los mismos rubros en el mismo orden, pero solo `profile`
+ * lleva la clave opta (`lineout_takes`) y solo `main` lleva el valor absoluto —
+ * `profile` publica el percentil contra el resto del puesto ("67%"), que es otra
+ * cosa. Se parean por TITULO y no por indice: el indice coincide hoy, pero si
+ * algun dia deja de coincidir, el pareo por indice cruza el valor de un rubro
+ * con la clave de otro, y eso no se ve.
+ */
+function rubrosDe(bloque: RawSeasonBlock): RugbyPassPlayerSeasonStat[] {
+    const valores = Array.isArray(bloque?.main?.main) ? bloque.main.main : [];
+    const perfiles = Array.isArray(bloque?.main?.profile) ? bloque.main.profile : [];
+
+    const claves = new Map<string, string>();
+    for (const p of perfiles as { title?: unknown; key?: unknown }[]) {
+        const titulo = String(p?.title ?? '').trim();
+        const clave = String(p?.key ?? '').trim();
+        if (titulo && clave && !claves.has(titulo)) claves.set(titulo, clave);
+    }
+
+    const salida: RugbyPassPlayerSeasonStat[] = [];
+    for (const v of valores as { title?: unknown; value?: unknown }[]) {
+        const title = decodeRugbyPassEntities(String(v?.title ?? '').trim());
+        if (!title) continue;
+        const valor = v?.value;
+        if (typeof valor !== 'number' && typeof valor !== 'string') continue;
+        salida.push({ key: claves.get(title) ?? '', title, value: valor });
+    }
+    return salida;
+}
+
+interface RawMatchBlock {
+    games?: unknown;
+}
+
+interface RawMatch {
+    title?: unknown;
+    time?: unknown;
+    compTitle?: unknown;
+    compLogo?: unknown;
+    opposition?: { name?: unknown; logo?: unknown } | null;
+    win?: unknown;
+    draw?: unknown;
+    stats?: {
+        mins?: unknown;
+        tries?: unknown;
+        conversions?: unknown;
+        yellow_cards?: unknown;
+        red_cards?: unknown;
+    } | null;
+}
+
+/**
+ * Los puntos de un jugador en un partido, con la tabla del rugby: el try vale 5
+ * y la conversion 2.
+ *
+ * `null` cuando el proveedor no publica ni tries ni conversiones — ahi no hay
+ * cero, hay ausencia, y un "0" seria una afirmacion que nadie hizo.
+ */
+function puntosDe(tries: number | null, conversiones: number | null): number | null {
+    if (tries === null && conversiones === null) return null;
+    return (tries ?? 0) * 5 + (conversiones ?? 0) * 2;
+}
+
+/**
+ * PARTIDO POR PARTIDO, de `app-competitions`.
+ *
+ * ── LO QUE ESTE BLOQUE NO TIENE ─────────────────────────────────────────────
+ * No trae el MARCADOR del partido —solo si se gano, se perdio o se empato— y de
+ * lo que hizo el jugador trae `mins`, `tries`, `conversions` y las dos tarjetas.
+ * Medido sobre 584 partidos de cuatro jugadores de puestos distintos: esas cinco
+ * claves y ninguna mas, en el 100% de los casos.
+ *
+ * Por eso aca NO se calculan puntos. `tries * 5 + conversiones * 2` parece la
+ * cuenta y no lo es: le faltan los penales y los drops, que son la mitad de lo
+ * que hace un pateador. Boffelli hizo 67 puntos en el Mundial 2023 y esa cuenta
+ * da 28. Los puntos van por temporada, que es donde el proveedor los publica
+ * completos.
+ *
+ * ── EL RESULTADO SON DOS BANDERAS, NO UN MARCADOR ───────────────────────────
+ * `win` y `draw`. Empatado es `draw: true`; perdido es `win: false` con `draw`
+ * en falso. Leerlo al reves —tomar `win: false` como derrota sin mirar `draw`—
+ * convierte todos los empates en derrotas y nadie lo ve hasta que un hincha
+ * cuenta los partidos.
+ */
+function partidosDeLaFicha(html: string): RugbyPassPlayerMatch[] {
+    const salida: RugbyPassPlayerMatch[] = [];
+
+    for (const bloque of arrayJsonEmbebido(html, 'app-competitions') as RawMatchBlock[]) {
+        const juegos = Array.isArray(bloque?.games) ? (bloque.games as RawMatch[]) : [];
+        for (const g of juegos) {
+            const title = decodeRugbyPassEntities(String(g?.title ?? '').trim());
+            if (!title) continue;
+            const st = g?.stats ?? null;
+
+            salida.push({
+                title,
+                kickoff: numeroOpcional(g?.time),
+                competitionName: decodeRugbyPassEntities(String(g?.compTitle ?? '').trim()),
+                competitionLogo: cdnUrl(String(g?.compLogo ?? '')),
+                opponentName: decodeRugbyPassEntities(String(g?.opposition?.name ?? '').trim()),
+                opponentLogo: cdnUrl(String(g?.opposition?.logo ?? '')),
+                result: g?.draw === true ? 'draw' : g?.win === true ? 'win' : 'loss',
+                minutes: numeroOpcional(st?.mins),
+                points: puntosDe(numeroOpcional(st?.tries), numeroOpcional(st?.conversions)),
+                tries: numeroOpcional(st?.tries),
+                conversions: numeroOpcional(st?.conversions),
+                yellowCards: numeroOpcional(st?.yellow_cards),
+                redCards: numeroOpcional(st?.red_cards),
+            });
+        }
+    }
+
+    // El proveedor los agrupa por competicion; la pantalla los lee como una sola
+    // linea de tiempo. Del mas nuevo al mas viejo, y los sin fecha al final:
+    // colarlos adelante pondria un partido sin dia arriba del ultimo jugado.
+    return salida.sort((a, b) => (b.kickoff ?? -Infinity) - (a.kickoff ?? -Infinity));
+}
+
+/** Solo las claves con valor numerico de la planilla cruda. */
+function numerosDe(planilla: unknown): Record<string, number> {
+    const salida: Record<string, number> = {};
+    if (!planilla || typeof planilla !== 'object') return salida;
+    for (const [k, v] of Object.entries(planilla as Record<string, unknown>)) {
+        if (typeof v === 'number' && Number.isFinite(v)) salida[k] = v;
+    }
+    return salida;
+}
+
+/**
+ * La ficha individual. `null` cuando la pagina no publica NI el nombre, que es
+ * el 200 vacio de los retirados.
+ */
+export function parseRugbyPassPlayerProfile(
+    html: string,
+    slug: string
+): RugbyPassPlayerProfile | null {
+    const texto = String(html ?? '');
+
+    const encabezado = texto.match(RE_ENCABEZADO);
+    const name = decodeRugbyPassEntities(encabezado?.[2] ?? '').trim();
+    if (!name) return null;
+
+    // Los detalles se leen como PARES etiqueta -> valor y no por posicion: la
+    // pagina dibuja SOLO los campos que tiene. Will Reilly trae dos ("Position",
+    // "Weight") y Pablo Matera cinco; leerlos por indice le pondria el peso en
+    // la altura al primero, y una altura de "89kg" no la ve nadie hasta que la
+    // ve un usuario.
+    const detalles = new Map<string, string>();
+    RE_DETALLE.lastIndex = 0;
+    for (let m = RE_DETALLE.exec(texto); m; m = RE_DETALLE.exec(texto)) {
+        const etiqueta = textoPlano(m[1]);
+        if (etiqueta) detalles.set(etiqueta, m[2]);
+    }
+
+    // La nacionalidad viene SOLO como bandera: el nombre del pais esta en el
+    // `alt` de la imagen y no hay texto al lado.
+    const crudoNacionalidad = detalles.get('Nationality') ?? '';
+    const bandera = crudoNacionalidad.match(/<img[^>]+src="([^"]+)"/i)?.[1] ?? '';
+    const nacionalidad = decodeRugbyPassEntities(
+        crudoNacionalidad.match(/<img[^>]+alt="([^"]*)"/i)?.[1] ?? ''
+    ).trim() || textoPlano(crudoNacionalidad);
+
+    const edad = numeroOpcional(textoPlano(detalles.get('Age') ?? ''));
+
+    const clubActual = texto.match(RE_CLUB_ACTUAL);
+    const logoActual = texto.match(/top-team-logo[^>]+logos\/png\/(\d+)\.png/i)?.[1] ?? '';
+
+    // La seccion "Teams" se acota antes de recorrerla: el mismo patron de link
+    // aparece arriba, en el encabezado, y sin acotar el club actual entraria dos
+    // veces en la trayectoria.
+    const desdeTeams = texto.indexOf('<div class="player-teams">');
+    const seccion = desdeTeams < 0 ? '' : texto.slice(desdeTeams);
+
+    const trayectoria: RugbyPassPlayerTeamLink[] = [];
+    const vistos = new Set<string>();
+    RE_CLUB_TRAYECTORIA.lastIndex = 0;
+    for (let m = RE_CLUB_TRAYECTORIA.exec(seccion); m; m = RE_CLUB_TRAYECTORIA.exec(seccion)) {
+        const s = m[1];
+        if (vistos.has(s)) continue;
+        const nombre = decodeRugbyPassEntities(m[3] ?? '').trim();
+        if (!nombre) continue;
+        vistos.add(s);
+        trayectoria.push({
+            name: nombre,
+            slug: s,
+            logo: cdnUrl(`webp-images/images/team-images/logos/png/${m[2]}.png.webp`),
+        });
+    }
+
+    const seasons: RugbyPassPlayerSeason[] = [];
+    let goalKicker = false;
+    for (const crudo of arrayJsonEmbebido(texto, 'app-comp-stats') as RawSeasonBlock[]) {
+        const competicion = crudo?.competition;
+        const competitionName = decodeRugbyPassEntities(String(competicion?.name ?? '').trim());
+        if (!competitionName) continue;
+
+        const planilla = crudo?.competition?.stats?.stats;
+        if ((numeroOpcional(planilla?.penalty_goals) ?? 0) > 0 ||
+            (numeroOpcional(planilla?.drop_goals) ?? 0) > 0) {
+            goalKicker = true;
+        }
+
+        const stats = rubrosDe(crudo);
+        const minutes = numeroOpcional(crudo?.main?.totalMinsPlayed);
+        // Una temporada sin minutos y sin un solo rubro no es una temporada: es
+        // una fila vacia que ensucia la pantalla.
+        if (stats.length === 0 && minutes === null) continue;
+
+        seasons.push({
+            competitionId: numeroOpcional(competicion?.oid),
+            competitionName,
+            seasonLabel: String(competicion?.season?.label ?? '').trim(),
+            logo: cdnUrl(String(competicion?.logoCircle ?? competicion?.logo ?? '')),
+            minutes,
+            points: numeroOpcional(crudo?.competition?.stats?.stats?.points),
+            stats,
+            rawStats: numerosDe(planilla),
+        });
+    }
+
+    // La foto se busca DENTRO del encabezado del jugador y no en la pagina
+    // entera. Suelta, la expresion pegaba en el primer `players/head/<n>.png`
+    // que apareciera, y ese es el de un jugador RELACIONADO del carrusel de
+    // noticias: los tres primeros que se probaron devolvian la misma cara —la de
+    // Dupont, 452— y hasta Will Reilly, que no tiene foto, "tenia" la de el.
+    const foto = texto.match(/head-shot-mobile[\s\S]{0,400}?images\/players\/head\/(\d+)\.png/i)?.[1] ?? '';
+
+    const puesto = textoPlano(detalles.get('Position') ?? '') || null;
+
+    return {
+        slug,
+        pageId: numeroOpcional(encabezado?.[1]),
+        name,
+        // El `maxw` es el que pide la propia ficha de RugbyPass para este mismo
+        // avatar. Sin el, el CDN manda el original: 307 KB contra 106 KB, por
+        // una imagen que se dibuja adentro de un circulo de 72 px.
+        photo: foto ? cdnUrl(`webp-images/images/players/head/${foto}.png.webp?maxw=300`) : '',
+        position: puesto,
+        nationality: nacionalidad || null,
+        nationalityFlag: bandera,
+        // Una edad en `0` es "sin dato", no un recien nacido.
+        age: edad !== null && edad > 0 ? edad : null,
+        height: textoPlano(detalles.get('Height') ?? '') || null,
+        weight: textoPlano(detalles.get('Weight') ?? '') || null,
+        // El escudo del club actual sale del encabezado, pero no todas las fichas
+        // lo dibujan (Will Reilly no lo trae). Cuando falta se toma el del mismo
+        // club en la trayectoria, que es el MISMO slug y por lo tanto el mismo
+        // escudo: no es una adivinanza, es el mismo dato escrito dos veces.
+        currentTeam: clubActual
+            ? {
+                  name: decodeRugbyPassEntities(clubActual[2]).trim(),
+                  slug: clubActual[1],
+                  logo: logoActual
+                      ? cdnUrl(`webp-images/images/team-images/logos/png/${logoActual}.png.webp`)
+                      : trayectoria.find((t) => t.slug === clubActual[1])?.logo ?? '',
+              }
+            : null,
+        teams: trayectoria,
+        goalKicker: goalKicker || puesto === PUESTO_PATEADOR,
+        seasons,
+        matches: partidosDeLaFicha(texto),
+    };
 }

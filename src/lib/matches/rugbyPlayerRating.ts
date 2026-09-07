@@ -185,15 +185,28 @@ const TOPE_POR_EJE = 1.8;
 const TOPE_DEL_FACTOR = 1.8;
 
 /**
- * Las tarjetas quedan FUERA del tope del eje.
+ * LA SANCION NO SE PESA NI SE TOPEA. Las tarjetas salen de las dos cañerias que
+ * valen para todo lo demas, y cada exencion tiene su motivo.
  *
- * Lo encontro un test: con el tope puesto, una amarilla y una roja daban el
- * mismo 4,2 —las dos se pasaban de 1,8 y quedaban planchadas contra el techo—.
- * Y una roja tiene que hundir mas que una amarilla siempre, en cualquier
- * partido y en cualquier puesto. El tope existe para que ningun eje GANE el
- * partido solo; una expulsion si puede perderlo sola, que es como se juega.
+ * FUERA DEL TOPE DEL EJE. Lo encontro un test: con el tope puesto, una amarilla
+ * y una roja daban el mismo 4,2 —las dos se pasaban de 1,8 y quedaban planchadas
+ * contra el techo—. Y una roja tiene que hundir mas que una amarilla siempre. El
+ * tope existe para que ningun eje GANE el partido solo; una expulsion si puede
+ * perderlo sola, que es como se juega.
+ *
+ * FUERA DEL PESO DEL PUESTO. Aca la sancion se aparta del resto del modelo, y a
+ * proposito. Todo lo demas se pesa por camiseta porque MIDE RENDIMIENTO, y el
+ * rendimiento se juzga contra lo que se le pide a ese puesto: ocho tackles de un
+ * pilar y ocho de un wing no cuentan la misma historia. Una tarjeta no mide
+ * rendimiento: mide una infraccion, y no hay puesto al que se le permita
+ * infringir mas. Pesada, lo permitia —`disciplina` vale 15 en la primera linea
+ * y 7 en el 13, asi que la MISMA amarilla costaba 1,4 a un pilar y 0,6 a un
+ * centro, el doble por jugar donde juega—.
+ *
+ * Con la exencion, la amarilla vale 1,0 y la roja 2,4 en los quince puestos. Un
+ * test lo fija: si alguien vuelve a pasarlas por el factor, salta.
  */
-const FUERA_DEL_TOPE = new Set(['yellowCards', 'redCards']);
+const SANCIONES = new Set(['yellowCards', 'redCards']);
 
 /**
  * El piso de la referencia prorrateada.
@@ -330,7 +343,8 @@ export function rateRugbyPlayer(input: RugbyRatingInput): RugbyRating | null {
         const factor = pesos
             ? Math.min(TOPE_DEL_FACTOR, pesos[rubro.componente] / PROMEDIO_DEL_EJE[rubro.componente])
             : 1;
-        if (FUERA_DEL_TOPE.has(metricId)) tarjetas += bruto_aporte * factor;
+        // La sancion entra cruda: sin el peso del puesto y, mas abajo, sin el tope.
+        if (SANCIONES.has(metricId)) tarjetas += bruto_aporte;
         else components[rubro.componente] += bruto_aporte * factor;
     }
 

@@ -34,6 +34,10 @@
       "schedule": "20 * * * *"
     },
     {
+      "path": "/api/cron/rugbypass-ratings",
+      "schedule": "40 */6 * * *"
+    },
+    {
       "path": "/api/cron/prode-scoring",
       "schedule": "*/5 * * * *"
     },
