@@ -7,25 +7,35 @@ import type { RugbyPassPlayerMatch } from './rugbyPassCatalog.ts';
 /**
  * EL CRUCE ENTRE LA FICHA DEL JUGADOR Y EL PUNTAJE GUARDADO.
  *
- * La ficha publica sus partidos sin id, asi que la llave es la fecha — y las dos
- * fuentes del mismo proveedor no coinciden: el calendario dice una hora y la
- * ficha dice otra tres horas mas tarde. Medido sobre un partido de cada una de
- * las seis competiciones: +3,0 h en las seis.
+ * La ficha publica sus partidos sin id, asi que la llave es la fecha — y la hora
+ * que publica viene EN LA ZONA DEL QUE MIRA. Medido sobre el mismo partido
+ * (`rp-952476`, que el calendario pone 19:05 UTC del 6 de septiembre): desde
+ * Argentina la ficha dice 22:05 del 6, y desde el server de Vercel 00:05 del 7.
  *
  * Estos casos son los que rompian las dos alternativas obvias: cruzar por
- * instante (no coincide nunca) y cruzar por dia UTC (el partido de 21:00 se
- * corre al dia siguiente).
+ * instante (no coincide nunca) y cruzar por dia UTC (el corrimiento empuja el
+ * partido al dia siguiente, que es lo que pasaba en produccion).
  */
 
 const ms = (iso: string) => new Date(iso).getTime();
 
-test('el desfase de tres horas del proveedor cruza igual', () => {
-    // Lo que dice la cache del calendario.
+test('el corrimiento por huso cruza igual, lo mire quien lo mire', () => {
+    // Lo que dice la cache del calendario: la hora de verdad.
     const guardado = [{ ms: ms('2026-08-30T05:05:00Z'), rating: 7.5 }];
-    // Lo que dice la ficha del jugador para EL MISMO partido.
-    const enLaFicha = ms('2026-08-30T08:05:00Z');
 
-    assert.equal(puntajeMasCercano(enLaFicha, guardado)?.rating, 7.5);
+    // La misma ficha leida desde husos distintos. Ninguno puede fallar.
+    for (const desde of ['2026-08-30T08:05:00Z', '2026-08-30T10:05:00Z', '2026-08-29T17:05:00Z']) {
+        assert.equal(puntajeMasCercano(ms(desde), guardado)?.rating, 7.5, `falló leyendo ${desde}`);
+    }
+});
+
+test('la ventana cubre el huso mas extremo que existe', () => {
+    // UTC+14 (Kiribati) es el corrimiento maximo posible. Trece horas tienen que
+    // cruzar; veinte, que ya no es un huso sino otro partido, no.
+    const guardado = [{ ms: ms('2026-08-30T05:05:00Z'), rating: 7.5 }];
+
+    assert.equal(puntajeMasCercano(ms('2026-08-30T18:05:00Z'), guardado)?.rating, 7.5);
+    assert.equal(puntajeMasCercano(ms('2026-08-31T01:05:00Z'), guardado), null);
 });
 
 test('un partido de la noche europea no se pierde por caer al dia siguiente', () => {
@@ -52,12 +62,13 @@ test('gana el partido mas cercano, no el primero de la lista', () => {
     assert.equal(puntajeMasCercano(ms('2026-09-12T17:00:00Z'), guardado)?.rating, 4.2);
 });
 
-test('fuera de la ventana de doce horas no hay puntaje', () => {
+test('fuera de la ventana de catorce horas no hay puntaje', () => {
     const guardado = [{ ms: ms('2026-09-05T21:00:00Z'), rating: 6.8 }];
 
-    // Un partido del dia siguiente por la tarde: diecinueve horas. No es el
-    // mismo partido, y adjudicarle ese puntaje seria peor que dejarlo vacio.
-    assert.equal(puntajeMasCercano(ms('2026-09-06T16:00:00Z'), guardado), null);
+    // Un partido del dia siguiente por la noche: veinticuatro horas. Ya no es un
+    // huso, es otro partido, y adjudicarle ese puntaje seria peor que dejarlo
+    // vacio.
+    assert.equal(puntajeMasCercano(ms('2026-09-06T21:00:00Z'), guardado), null);
 });
 
 test('sin puntajes guardados la columna queda vacia', () => {
