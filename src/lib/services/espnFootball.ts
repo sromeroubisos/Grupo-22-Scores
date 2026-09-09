@@ -240,7 +240,10 @@ function parseEspnLiveEvents(competition: Record<string, any> | null, leagueSlug
     const events: MatchLiveEvent[] = [];
     for (const d of details) {
         if (!d || typeof d !== 'object') continue;
-        const text = normalizeString(d?.type?.text).toLowerCase();
+        // La ficha (summary) publica los hechos sin `type` (gol = `scoringPlay`
+        // solo); el scoreboard sí lo trae. Sin este guardado la ficha entera
+        // caía con "Cannot read properties of null (reading 'toLowerCase')".
+        const text = normalizeKey(d?.type?.text) || normalizeKey(d?.type) || '';
         let kind: MatchLiveEvent['kind'] = 'other';
         if (d.scoringPlay === true || text.includes('goal')) {
             kind = d.ownGoal === true || text.includes('own goal') ? 'own-goal'
@@ -1928,9 +1931,18 @@ const SOCCER_STAT_LABELS_ES: Record<string, string> = {
     yellowcards: 'Tarjetas amarillas',
     redcards: 'Tarjetas rojas',
     saves: 'Atajadas',
-    effectivetackles: 'Entradas',
+    crosspct: 'Precisión de centros (%)',
+    totallongballs: 'Pelotazos',
+    accuratelongballs: 'Pelotazos precisos',
+    longballpct: 'Precisión de pelotazos (%)',
+    effectivetackles: 'Entradas efectivas',
+    totaltackles: 'Entradas',
+    tacklepct: 'Efectividad de entradas (%)',
     interceptions: 'Intercepciones',
+    effectiveclearance: 'Despejes efectivos',
+    totalclearance: 'Despejes',
     penaltykickgoals: 'Goles de penal',
+    penaltykickshots: 'Penales ejecutados',
 };
 
 const SOCCER_STAT_ORDER = [
@@ -1949,6 +1961,14 @@ const SOCCER_STAT_ORDER = [
     'effectivetackles',
     'interceptions',
 ];
+
+const SOCCER_PCT_FROM_PARTS: Record<string, [string, string]> = {
+    shotpct: ['shotsontarget', 'totalshots'],
+    passpct: ['accuratepasses', 'totalpasses'],
+    crosspct: ['accuratecrosses', 'totalcrosses'],
+    longballpct: ['accuratelongballs', 'totallongballs'],
+    tacklepct: ['effectivetackles', 'totaltackles'],
+};
 
 function buildTeamStatsFromSummary(summary: EspnSummaryPayload) {
     const teams = Array.isArray(summary?.boxscore?.teams) ? summary.boxscore.teams : [];
@@ -1974,6 +1994,27 @@ function buildTeamStatsFromSummary(summary: EspnSummaryPayload) {
     };
     for (const stat of homeStats) ingest(stat, 'home');
     for (const stat of awayStats) ingest(stat, 'away');
+
+    // ESPN publica los porcentajes como fracción redondeada a un decimal
+    // (`shotPct: 0.2` para 3 de 16), así que en pantalla salía "0.2" bajo un
+    // rótulo que dice "(%)". Se recalculan desde sus partes cuando están, y si
+    // no, se escala la fracción; la posesión ya viene en 0-100 y no se toca.
+    for (const [pctKey, [partKey, totalKey]] of Object.entries(SOCCER_PCT_FROM_PARTS)) {
+        const entry = statMap.get(pctKey);
+        if (!entry) continue;
+        for (const side of ['home', 'away'] as const) {
+            const part = Number(statMap.get(partKey)?.[side]);
+            const total = Number(statMap.get(totalKey)?.[side]);
+            const raw = Number(entry[side]);
+            let pct: number | null = null;
+            if (Number.isFinite(part) && Number.isFinite(total) && total > 0) {
+                pct = Math.round((part / total) * 100);
+            } else if (Number.isFinite(raw) && raw >= 0 && raw <= 1) {
+                pct = Math.round(raw * 100);
+            }
+            if (pct !== null) entry[side] = String(pct);
+        }
+    }
 
     const orderedKeys = [...SOCCER_STAT_ORDER, ...Array.from(statMap.keys()).filter((k) => !SOCCER_STAT_ORDER.includes(k))];
 
