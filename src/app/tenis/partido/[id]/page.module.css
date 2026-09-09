@@ -1,0 +1,928 @@
+/*
+ * Ficha de partido de tenis.
+ *
+ * La página NO pinta su propio fondo: el del sitio pasa por debajo, y los
+ * colores salen de tokens locales declarados acá arriba que apuntan a los
+ * `--color-*` globales. Con eso el tema claro y el oscuro salen solos, sin un
+ * bloque `[data-theme="light"]` que haya que mantener en paralelo.
+ */
+.page {
+    --ink: var(--color-text-primary);
+    --ink-soft: var(--color-text-secondary);
+    /* Los rótulos chicos (roles, encabezados, nombres de estadística) NO usan
+       el terciario: medido en el navegador da 3,5:1 sobre la tarjeta oscura y
+       3,9:1 sobre el fondo, o sea que no llega a AA. El escalón de jerarquía lo
+       ponen el cuerpo de 10px, la versalita y el interletrado, no un gris más
+       flojo. El terciario queda para lo que no es texto que se lee. */
+    --ink-dim: var(--color-text-secondary);
+    --ink-faint: var(--color-text-tertiary);
+    --edge: var(--color-border);
+    --raised: var(--color-bg-secondary);
+    --raised-2: var(--color-bg-tertiary);
+    --accent: var(--color-accent);
+    --accent-ink: var(--color-accent-ink);
+    --accent-rgb: var(--color-accent-rgb);
+    /* El segundo lado tiene color propio, no un gris. Con un gris de "perdedor"
+       el visitante se ve flojo en TODAS las filas, incluso en las que gana. */
+    --rival: var(--color-info);
+    --live: var(--color-error);
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    color: var(--ink);
+    padding: 20px 0 64px;
+}
+
+.shell {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+/* --- Contexto --- */
+
+.contextBar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    min-width: 0;
+}
+
+.back {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-left: -10px;
+    border-radius: 999px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: background-color 160ms ease, color 160ms ease;
+}
+
+.back:hover,
+.back:focus-visible {
+    background: var(--raised-2);
+    color: var(--ink);
+}
+
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    overflow: hidden;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-dim);
+    white-space: nowrap;
+}
+
+.crumb {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.crumb:not(:last-child)::after {
+    content: '/';
+    margin-left: 10px;
+    opacity: 0.4;
+}
+
+.crumbStrong {
+    color: var(--ink-soft);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.title {
+    margin: 0 0 16px;
+    font-size: clamp(1.25rem, 3.4vw, 1.9rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+}
+
+.titleVs {
+    color: var(--ink-faint);
+    font-weight: 500;
+}
+
+/* --- Tarjeta de marcador --- */
+
+.scoreboard {
+    position: relative;
+    border: 1px solid var(--edge);
+    border-radius: 20px;
+    background: var(--raised);
+    padding: 20px 18px;
+    overflow: hidden;
+}
+
+/* El hilo de acento arriba es la firma de la tarjeta de marcador del resto
+   del sitio; acá se repite para que la ficha se reconozca como la misma. */
+.scoreboard::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.5), transparent);
+}
+
+.statusRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--edge);
+    background: var(--raised-2);
+    color: var(--ink-soft);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+/* El rojo pinta el borde, el tinte y el punto — pero NO el texto. Medido: el
+   `--color-error` del tema claro sobre su propio tinte da 3,96:1 y no llega a
+   AA. Lo que dice "en vivo" es el punto que late, no el color de la palabra. */
+.statusLive {
+    border-color: rgba(239, 68, 68, 0.35);
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--ink);
+}
+
+.pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--live);
+    animation: tenisPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes tenisPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.7); }
+}
+
+.gamePoint {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--ink-dim);
+}
+
+.gamePointLabel {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+}
+
+.gamePointValue {
+    font-family: var(--mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.gamePointSep {
+    margin: 0 6px;
+    color: var(--ink-faint);
+}
+
+/* --- El duelo --- */
+
+.duel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px 16px;
+}
+
+.player {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.portraitWrap {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid var(--edge);
+    background: var(--raised-2);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+.playerWinner .portraitWrap {
+    border-color: rgba(var(--accent-rgb), 0.55);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.14);
+}
+
+.portrait {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.portraitEmpty {
+    display: grid;
+    place-items: center;
+    color: var(--ink-faint);
+    opacity: 0.7;
+}
+
+/* La cadena de `min-width: 0` llega hasta el nombre: sin esto un nombre de
+   dobles ("Lammons N / Withrow J") ensancha la grilla y empuja los sets fuera
+   de la tarjeta. */
+.playerMeta {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.playerRole {
+    margin: 0 0 2px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-dim);
+}
+
+.playerName {
+    margin: 0;
+    font-size: clamp(1rem, 2vw, 1.35rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--ink-soft);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.playerWinner .playerName {
+    color: var(--ink);
+}
+
+.playerNameSep {
+    color: var(--ink-dim);
+    font-weight: 400;
+}
+
+.playerTags {
+    margin: 5px 0 0;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    font-size: 11px;
+    color: var(--ink-dim);
+}
+
+.playerCountry {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+}
+
+.playerSeed {
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--edge);
+    font-weight: 600;
+}
+
+/* Quién saca, como TEXTO: una pelotita sola no es un dato para el lector de
+   pantalla ni para el que no sabe la convención. */
+.playerServing {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--live, #16a34a);
+    color: #fff;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+/* Mismo motivo que la ficha del rail: el acento como texto sobre su propio
+   tinte no llega a AA en claro. Fondo sólido y filo de acento. */
+.playerWon {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--color-bg-elevated);
+    box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.45);
+    color: var(--accent-ink);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* --- Sets ganados --- */
+
+.setsWon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    padding-left: 12px;
+}
+
+.setsWonPair {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.setsWonNum {
+    font-family: var(--mono);
+    font-size: clamp(2.4rem, 8vw, 4rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+}
+
+.setsWonLeads {
+    color: var(--ink);
+}
+
+.setsWonSep {
+    font-family: var(--mono);
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    color: var(--ink-faint);
+}
+
+.setsWonCaption {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink-dim);
+}
+
+/* --- Games por set --- */
+
+/* Scrollea sola: un partido a cinco sets no puede empujar la página a lo
+   ancho ni sacar el marcador de la vista. */
+.lineWrap {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--edge);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+}
+
+.line {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.lineCaption {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-dim);
+    padding-bottom: 10px;
+}
+
+/* El encabezado de la columna del nombre es para el lector de pantalla: en
+   pantalla el nombre ya está arriba, repetirlo sería ruido. */
+.lineNameHead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.lineName {
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+    padding: 7px 12px 7px 0;
+}
+
+.lineRowWinner .lineName {
+    color: var(--ink);
+    font-weight: 800;
+}
+
+.lineCell {
+    width: 44px;
+    padding: 7px 4px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+.lineHeadCell {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--ink-dim);
+    padding-bottom: 4px;
+}
+
+.lineCellWon {
+    color: var(--ink);
+    font-weight: 800;
+}
+
+.lineCellLive {
+    background: rgba(var(--accent-rgb), 0.1);
+    border-radius: 8px;
+    color: var(--accent-ink);
+}
+
+.lineTiebreak {
+    font-size: 9px;
+    font-weight: 700;
+    margin-left: 1px;
+    vertical-align: super;
+    opacity: 0.75;
+}
+
+/* --- Fichas de datos --- */
+
+.chips {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--edge);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 7px;
+    padding: 7px 12px;
+    border: 1px solid var(--edge);
+    border-radius: 10px;
+    background: var(--raised-2);
+    font-size: 12px;
+    min-width: 0;
+}
+
+.chipLabel {
+    color: var(--ink-dim);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.chipValue {
+    color: var(--ink);
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* --- Planilla --- */
+
+.statsSection {
+    margin-top: 24px;
+}
+
+.statsHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-bottom: 12px;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.statsLegend {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: var(--ink-dim);
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.legendHome,
+.legendAway {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.legendHome {
+    background: var(--accent);
+}
+
+.legendAway {
+    background: var(--rival);
+}
+
+.legendSep {
+    width: 1px;
+    height: 12px;
+    background: var(--edge);
+    margin: 0 3px;
+    flex-shrink: 0;
+}
+
+/* El rail de sets: mismo gesto que la tira de pestañas del resto del sitio. */
+.rail {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    padding: 4px;
+    border: 1px solid var(--edge);
+    border-radius: 12px;
+    background: var(--raised);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+}
+
+.rail::-webkit-scrollbar {
+    display: none;
+}
+
+.railItem {
+    flex: 1 0 auto;
+    min-height: 40px;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--ink-dim);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 160ms ease, background-color 160ms ease;
+}
+
+.railItem:hover {
+    color: var(--ink);
+}
+
+/* La ficha elegida se levanta con fondo sólido y un filo de acento, no con un
+   tinte. Medido: el acento como texto sobre su propio tinte al 14% da 4,49:1 en
+   claro, y no llega a AA; sobre el fondo elevado sube a 5,9:1. */
+.railItemActive,
+.railItemActive:hover {
+    background: var(--color-bg-elevated);
+    box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.4);
+    color: var(--accent-ink);
+}
+
+/* Columnas y no grilla: los bloques tienen alturas muy distintas (el saque
+   trae ocho filas y los games tres), y en una grilla el bloque corto se estira
+   hasta el alto del largo dejando media tarjeta vacía. Con `columns` cada uno
+   mide lo suyo y el siguiente arranca ahí. */
+.statGrid {
+    columns: 1;
+    column-gap: 14px;
+}
+
+.statGroup {
+    min-width: 0;
+    break-inside: avoid;
+    margin-bottom: 12px;
+    border: 1px solid var(--edge);
+    border-radius: 16px;
+    background: var(--raised);
+    padding: 16px;
+}
+
+.statGroupName {
+    margin: 0 0 12px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink-dim);
+}
+
+.statItem {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 7px 0;
+}
+
+.statRow {
+    display: grid;
+    grid-template-columns: minmax(4.5rem, auto) minmax(0, 1fr) minmax(4.5rem, auto);
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.statVal {
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.statVal:last-child {
+    text-align: right;
+}
+
+.statValLeads {
+    color: var(--ink);
+    font-weight: 700;
+}
+
+.statLabel {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-dim);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Dos pistas espejadas: la del local crece hacia la izquierda desde el centro,
+   la del visitante hacia la derecha. Una sola barra partida daría a entender
+   un reparto sobre el total, y con porcentajes (43% y 52%) no hay tal reparto. */
+.statTrack {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    height: 5px;
+}
+
+.statTrackSide {
+    display: flex;
+    height: 100%;
+    background: var(--raised-2);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.statTrackSide:first-child {
+    justify-content: flex-end;
+}
+
+.statBar {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.statBarHome {
+    background: var(--accent);
+}
+
+.statBarAway {
+    background: var(--rival);
+}
+
+/* --- Avisos --- */
+
+.notice {
+    margin: 14px 0 0;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    line-height: 1.55;
+}
+
+.backLink {
+    display: inline-block;
+    margin-top: 16px;
+    min-height: 44px;
+    line-height: 44px;
+    color: var(--accent-ink);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.backLink:hover {
+    text-decoration: underline;
+}
+
+/* --- Teléfono ---
+   El duelo deja de ser tres columnas: cada jugador es una fila con el marcador
+   de sets a la derecha, que es como se lee un partido en la mano. */
+
+@media (max-width: 719px) {
+    .duel {
+        gap: 0;
+    }
+
+    .player {
+        grid-column: 1;
+        padding: 10px 0;
+    }
+
+    .player + .setsWon + .player {
+        border-top: 1px solid var(--edge);
+    }
+
+    .setsWon {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        justify-content: center;
+        padding-left: 14px;
+    }
+
+    .setsWonPair {
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+    }
+
+    .setsWonNum {
+        font-size: 2rem;
+        line-height: 1.35;
+    }
+
+    .setsWonSep {
+        display: none;
+    }
+
+    .portraitWrap {
+        width: 46px;
+        height: 46px;
+    }
+
+    .statRow {
+        grid-template-columns: minmax(3.9rem, auto) minmax(0, 1fr) minmax(3.9rem, auto);
+        font-size: 12px;
+    }
+
+    .chip {
+        flex: 1 1 calc(50% - 4px);
+    }
+}
+
+/* --- Escritorio --- */
+
+@media (min-width: 720px) {
+    .page {
+        padding-top: 28px;
+    }
+
+    .shell {
+        padding: 0 24px;
+    }
+
+    .duel {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 24px;
+        align-items: center;
+    }
+
+    .setsWon {
+        padding: 0;
+    }
+
+    /* El visitante se lee espejado, igual que en la ficha del resto del
+       sitio: el retrato queda contra el borde y el nombre mira al centro. */
+    .duel > .player:last-of-type {
+        flex-direction: row-reverse;
+        text-align: right;
+    }
+
+    .duel > .player:last-of-type .playerTags {
+        justify-content: flex-end;
+    }
+
+    .portraitWrap {
+        width: 76px;
+        height: 76px;
+    }
+
+    /* El rail deja de repartirse el ancho: cuatro sets estirados a pantalla
+       completa hacen que el set elegido sea una mancha de 300px en vez de una
+       ficha. Se agrupan a la izquierda con su ancho natural. */
+    .rail {
+        align-self: flex-start;
+        width: fit-content;
+        max-width: 100%;
+    }
+
+    .railItem {
+        flex: 0 0 auto;
+    }
+
+    /* La planilla se centra bajo el marcador en vez de estirarse de punta a
+       punta: al 100% de ancho la columna del nombre empuja los games contra el
+       borde derecho y quedan a media pantalla del jugador al que pertenecen. */
+    .lineWrap {
+        display: flex;
+        justify-content: center;
+    }
+
+    .line {
+        width: auto;
+    }
+
+    .lineCaption {
+        text-align: center;
+    }
+
+    .lineCell {
+        width: 52px;
+        font-size: 16px;
+    }
+
+    .lineName {
+        max-width: 260px;
+        font-size: 14px;
+        padding-right: 20px;
+    }
+}
+
+/* --- Tablet: la banda que no alcanza ninguna de las dos ---
+   Un iPad vertical (810) y uno apaisado (1024-1366) caen entre el teléfono y
+   el escritorio. El layout ancho ya lo tienen; lo que se les saca es la
+   segunda columna de grupos, que a ese ancho aprieta las filas. */
+
+@media (min-width: 720px) and (max-width: 1023px) {
+    .scoreboard {
+        padding: 24px 22px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .scoreboard {
+        padding: 28px 32px;
+        border-radius: 24px;
+    }
+
+    .statGrid {
+        columns: 2;
+    }
+}
+
+/* Objetivos táctiles en tablet: ninguna media query de ancho alcanza a un
+   iPad apaisado, así que el mínimo se pide por tipo de puntero. */
+@media (pointer: coarse) {
+    .railItem {
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pulse {
+        animation: none;
+    }
+
+    .statBar {
+        transition: none;
+    }
+}
