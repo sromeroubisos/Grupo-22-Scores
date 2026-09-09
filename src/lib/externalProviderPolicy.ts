@@ -38,6 +38,17 @@ const FIELD_HOCKEY_SPORT_KEYS = new Set([
     '/field-hockey/',
 ]);
 
+// El tenis lo sirve ESPN (`src/lib/services/tennis.ts`), nunca FlashScore. El
+// `'2'` es el id con el que FlashScore mapea tenis en su `SPORT_MAPPING`: está
+// acá para reconocer la clave que llega de afuera, no para pedirle nada.
+const TENNIS_SPORT_KEYS = new Set([
+    'tennis',
+    'tenis',
+    '2',
+    '/tennis/',
+    '/tenis/',
+]);
+
 const FOOTBALL_SPORT_KEYS = new Set([
     'football',
     'soccer',
@@ -89,11 +100,40 @@ export function isFieldHockeySport(value: unknown): boolean {
     return FIELD_HOCKEY_SPORT_KEYS.has(normalized);
 }
 
+export function isTennisSport(value: unknown): boolean {
+    const normalized = normalizeSportKey(value);
+    if (!normalized) return false;
+    return TENNIS_SPORT_KEYS.has(normalized);
+}
+
 export function isFootballSport(value: unknown): boolean {
     const normalized = normalizeSportKey(value);
     if (!normalized) return false;
     return FOOTBALL_SPORT_KEYS.has(normalized);
 }
+
+/**
+ * Deportes ACTIVOS que todavía no tienen fuente externa declarada.
+ *
+ * No es lo mismo que "deporte apagado": un deporte de acá está a la vista y se
+ * le pueden crear torneos y cargar partidos a mano. Lo que no tiene es
+ * sincronismo. La distinción hace falta porque FlashScore mapea más deportes de
+ * los que la plataforma sigue: sin esta puerta, `fixture-sync` y `live-sync`
+ * traerían el deporte entero del mundo y la portada mostraría partidos que
+ * nadie de la plataforma cargó.
+ *
+ * Para darle fuente: sacarlo de acá y mapear el proveedor en
+ * `getPreferredExternalProviderForSport`.
+ */
+export const SPORTS_WITHOUT_EXTERNAL_PROVIDER = new Set<string>([
+    // El tenis está acá por lo contrario que un deporte sin fuente: le sobra —ESPN
+    // sirve vivo, día, ranking y cuadro con modelo propio (`TennisMatch`)—
+    // pero NO pasa por `Match`, así que `fixture-sync` y `live-sync` no tienen
+    // nada que sincronizar. Sin esta puerta resolverían tenis por el camino de
+    // FlashScore (deporte 2) y la portada se llenaría de ITF y futures del
+    // mundo entero.
+    'tennis',
+]);
 
 export function isFlashScoreEnabledForSport(value?: unknown): boolean {
     // Despite the name, this gates whether an *external* listing should run
@@ -101,7 +141,13 @@ export function isFlashScoreEnabledForSport(value?: unknown): boolean {
     // flashscore.ts delegates to the SofaScore microservice (or short-circuits
     // to an empty payload when the bridge is unavailable — it never falls
     // back to a real FlashScore HTTP call).
-    void value;
+    // El set compara contra la clave canónica, así que por sí solo dejaría
+    // pasar los alias ('tenis', '2', '/tennis/'). Para el tenis la puerta
+    // tiene que cerrar por CUALQUIER alias: basta que un llamador pase el id
+    // numérico para que el sync se vaya a buscar el deporte 2 a FlashScore.
+    if (isTennisSport(value)) return false;
+    const normalized = normalizeSportKey(value);
+    if (normalized && SPORTS_WITHOUT_EXTERNAL_PROVIDER.has(normalized)) return false;
     return true;
 }
 
@@ -109,6 +155,7 @@ export function getPreferredExternalProviderForSport(value: unknown) {
     if (isAmericanFootballSport(value)) return ESPN_PROVIDER;
     if (isMotorsportSport(value)) return ESPN_PROVIDER;
     if (isFootballSport(value)) return ESPN_PROVIDER;
+    if (isTennisSport(value)) return ESPN_PROVIDER;
     return FLASHSCORE_PROVIDER;
 }
 

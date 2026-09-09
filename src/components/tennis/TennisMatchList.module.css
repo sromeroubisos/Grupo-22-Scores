@@ -1,0 +1,347 @@
+/* Panel de tenis del feed.
+   Un partido de tenis se lee como una planilla: dos filas de jugador y una
+   columna por set. No hay escudo ni marcador único, así que no reusa las
+   clases de MatchRow. */
+
+.wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.tournament {
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--color-surface, rgba(255, 255, 255, 0.02));
+}
+
+.tournamentHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 0 6px 0 14px;
+    background: var(--color-surface-2, rgba(255, 255, 255, 0.04));
+    border-bottom: 1px solid var(--color-border, rgba(255, 255, 255, 0.08));
+}
+
+/* El nombre ocupa todo lo que sobra, así que el área clickeable para entrar al
+   torneo es grande; el chevron se queda con su propio botón al costado. */
+.tournamentLink {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    padding: 10px 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+.tournamentLink:hover .tournamentName,
+.tournamentLink:focus-visible .tournamentName {
+    text-decoration: underline;
+}
+
+.tournamentLink:focus-visible,
+.toggle:focus-visible {
+    outline: 2px solid var(--accent, #10b981);
+    outline-offset: -2px;
+    border-radius: 6px;
+}
+
+.toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.toggle:hover {
+    background: var(--color-surface, rgba(255, 255, 255, 0.06));
+}
+
+.tour {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: var(--accent-soft, rgba(16, 185, 129, 0.14));
+    color: var(--accent, #10b981);
+}
+
+.tournamentName {
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.count {
+    margin-left: auto;
+    margin-right: 2px;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: var(--color-text-dim, rgba(255, 255, 255, 0.5));
+}
+
+.matches {
+    display: flex;
+    flex-direction: column;
+}
+
+.match {
+    display: grid;
+    color: inherit;
+    text-decoration: none;
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.06));
+}
+
+.match:first-child {
+    border-top: 0;
+}
+
+.match:hover,
+.match:focus-visible {
+    background: var(--color-surface-2, rgba(255, 255, 255, 0.04));
+}
+
+/* El foco tiene que verse: la fila entera es el destino del teclado. */
+.match:focus-visible {
+    outline: 2px solid var(--accent, #10b981);
+    outline-offset: -2px;
+}
+
+.state {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.72rem;
+    color: var(--color-text-dim, rgba(255, 255, 255, 0.5));
+}
+
+.live {
+    font-weight: 700;
+    color: var(--color-live, #ef4444);
+}
+
+.round {
+    font-size: 0.64rem;
+    opacity: 0.75;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Los dos lados. `min-width: 0` para que el nombre largo corte con ellipsis
+   y nunca empuje los sets fuera de la fila. */
+.sides {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.side {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    font-size: 0.85rem;
+    color: var(--color-text-dim, rgba(255, 255, 255, 0.62));
+}
+
+.winner {
+    color: var(--color-text, #fff);
+    font-weight: 650;
+}
+
+.country {
+    flex-shrink: 0;
+    font-size: 0.62rem;
+    letter-spacing: 0.03em;
+    opacity: 0.6;
+    width: 2.2em;
+}
+
+.names {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.seed {
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    opacity: 0.55;
+}
+
+/* La pelotita del que saca. Solo en vivo. */
+.serving {
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--live, #16a34a);
+}
+
+/* La cara del jugador. Redonda porque es una persona, no un escudo. */
+.avatar {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--color-surface-2, rgba(255, 255, 255, 0.06));
+}
+
+.avatarFlag {
+    flex-shrink: 0;
+    border-radius: 2px;
+}
+
+.avatarFallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--color-surface-2, rgba(255, 255, 255, 0.06));
+    opacity: 0.45;
+}
+
+.chevron {
+    flex-shrink: 0;
+    opacity: 0.55;
+    transition: transform 0.15s ease;
+    transform: rotate(-90deg);
+}
+
+.chevronOpen {
+    transform: rotate(0deg);
+}
+
+/* La planilla: una columna por set, más los sets ganados al final. */
+.score {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.scoreRow {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: flex-end;
+}
+
+.setsWon {
+    min-width: 1.4em;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.games {
+    min-width: 1.5em;
+    text-align: center;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-dim, rgba(255, 255, 255, 0.55));
+}
+
+.gamesWon {
+    color: var(--color-text, #fff);
+    font-weight: 600;
+}
+
+.tiebreak {
+    font-size: 0.6rem;
+    vertical-align: super;
+    opacity: 0.7;
+}
+
+.point {
+    min-width: 1.8em;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-live, #ef4444);
+    font-variant-numeric: tabular-nums;
+}
+
+.walkover {
+    font-size: 0.72rem;
+    color: var(--color-text-dim, rgba(255, 255, 255, 0.5));
+    font-style: italic;
+}
+
+.empty {
+    padding: 40px 16px;
+    text-align: center;
+    color: var(--color-text-dim, rgba(255, 255, 255, 0.55));
+}
+
+.empty h2 {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+}
+
+.empty p {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+@media (max-width: 560px) {
+    .match {
+        grid-template-columns: 46px minmax(0, 1fr) auto;
+        gap: 8px;
+        padding: 8px 10px;
+    }
+
+    .side {
+        font-size: 0.8rem;
+    }
+
+    .country {
+        display: none;
+    }
+}
+
+/* Destello del dato que acaba de llegar. Es un fondo que se apaga, no un
+   movimiento: una fila que salta corre a las de abajo mientras se las lee. */
+@keyframes tenisDestello {
+    from { background: var(--accent-soft, rgba(16, 185, 129, 0.18)); }
+    to { background: transparent; }
+}
+
+.flash {
+    animation: tenisDestello 1.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .flash {
+        animation: none;
+    }
+}

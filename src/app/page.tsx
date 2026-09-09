@@ -21,6 +21,8 @@ import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
 import TickerTitulares from '@/components/ticker/TickerTitulares';
 import GanaConTuClubBanner from '@/components/marcas/GanaConTuClubBanner';
+import TennisMatchList from '@/components/tennis/TennisMatchList';
+import TennisTournamentList from '@/components/tennis/TennisTournamentList';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
 import { AUDIENCE_LABELS, isDualAudienceTournament, matchesTournamentAudience, resolveTournamentAudience, type TournamentAudience } from '@/lib/utils/tournamentAudience';
 import { compareTournamentsByPriority, getTournamentPriority } from '@/lib/utils/tournamentOrdering';
@@ -768,6 +770,10 @@ export default function HomePage() {
   const [selectedAudience, setSelectedAudience] = useState<TournamentAudience>('mayores');
 
   const { selectedSport, setSelectedSport, activeSports } = useSport();
+  // El tenis no pasa por `useMatchesStore`: tiene su propia ruta y su
+  // propio modelo (ver src/types/tennis.ts). El feed genérico se apaga
+  // entero para este deporte en vez de intentar traducirlo.
+  const esTenis = selectedSport?.id === 'tennis';
   const { favoriteSportIds } = useUserPreferences();
   // Sort active sports: favorites first, then rest in original order
   const sortedActiveSports = useMemo(() => {
@@ -1820,6 +1826,14 @@ export default function HomePage() {
 
             {/* Tournament List with Accordion */}
             <div className={styles.accordionList}>
+              {/* En tenis la lista sale del bridge de SofaScore, igual que el
+                  feed. El catálogo viejo agrupaba por país y listaba "ATP
+                  Singles (203)" como una liga con temporada: es el modelo del
+                  rugby, y en tenis el torneo es la unidad. */}
+              {esTenis ? (
+                <TennisTournamentList dateKey={selectedDate} liveOnly={showLiveOnly} filtro={searchQuery} />
+              ) : (
+              <>
               {/* International Section */}
               {filteredInternational.length > 0 && (
                 <div className={styles.accordionItem}>
@@ -2053,6 +2067,8 @@ export default function HomePage() {
                     : 'No hay torneos disponibles para este deporte.'}
                 </div>
               )}
+              </>
+              )}
             </div>
           </div>
         </aside>
@@ -2162,7 +2178,10 @@ export default function HomePage() {
             )}
 
             <div className={styles.matchesContainer}>
-              {sourceError?.message && (
+              {/* El tenis no pasa por FlashScore ni por `useMatchesStore`, así que
+                  un error de esas fuentes no dice nada sobre él: mostrarlo arriba
+                  de una lista que cargó bien es avisar de una caída que no hubo. */}
+              {!esTenis && sourceError?.message && (
                 <div style={{
                   display: 'flex',
                   gap: '8px',
@@ -2219,7 +2238,11 @@ export default function HomePage() {
                 </div>
               )}
 
-              {loading && (
+              {esTenis && (
+                <TennisMatchList dateKey={selectedDate} liveOnly={showLiveOnly} />
+              )}
+
+              {!esTenis && loading && (
                 <div className={styles.noMatches}>
                   <div
                     style={{
@@ -2241,7 +2264,7 @@ export default function HomePage() {
                 </div>
               )}
 
-              {!loading && displayedMatchesByLeague.length === 0 && displayedFavoriteClubMatches.length === 0 && !sourceError && (
+              {!esTenis && !loading && displayedMatchesByLeague.length === 0 && displayedFavoriteClubMatches.length === 0 && !sourceError && (
                 <div className={styles.noMatches}>
                   <div className={styles.noMatchesIcon}></div>
                   <h2>
@@ -2261,7 +2284,7 @@ export default function HomePage() {
                 </div>
               )}
 
-              {!loading && displayedMatchesByLeague.length === 0 && displayedFavoriteClubMatches.length === 0 && sourceError && (
+              {!esTenis && !loading && displayedMatchesByLeague.length === 0 && displayedFavoriteClubMatches.length === 0 && sourceError && (
                 <div className={styles.noMatches}>
                   <div className={styles.noMatchesIcon}></div>
                   <h2>No se pudieron cargar los partidos</h2>
@@ -2270,7 +2293,7 @@ export default function HomePage() {
                 </div>
               )}
 
-              {!loading && displayedFavoriteClubMatches.length > 0 && (
+              {!esTenis && !loading && displayedFavoriteClubMatches.length > 0 && (
                 <div className={styles.leagueSection} style={getLeagueColorStyle(0)}>
                   <div
                     className={`${styles.leagueSectionHeader} ${collapsedLeagues.has(FAVORITE_TEAMS_SECTION_ID) ? styles.collapsed : ''}`}
@@ -2321,7 +2344,7 @@ export default function HomePage() {
                 </div>
               )}
 
-              {!loading && displayedMatchesByLeague.map((league, leagueIndex) => {
+              {!esTenis && !loading && displayedMatchesByLeague.map((league, leagueIndex) => {
                 const isCollapsed = collapsedLeagues.has(league.leagueId);
                 const isFavoriteLeague = isLeagueGroupFavorite(league);
                 const leagueColorStyle = getLeagueColorStyle(
