@@ -274,7 +274,9 @@ function MovementChip({ current, previous }: { current: number | null | undefine
 
     const change = getRankingPositionChange(current, previous);
 
-    if (!change) {
+    // Sin cambio de puesto: `getRankingPositionChange` devuelve null en la rama y
+    // un objeto neutro con valor 0 en main. Las dos formas son "se quedo".
+    if (!change || change.value === 0) {
         return (
             <span className={`${styles.move} ${styles.moveSame}`} aria-label="Mismo puesto que la semana anterior">
                 <Minus size={12} aria-hidden="true" />
