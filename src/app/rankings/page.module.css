@@ -1,424 +1,31 @@
+/*
+ * /rankings — la pantalla publica del ranking.
+ *
+ * Tres decisiones que la hoja anterior no tomaba:
+ *
+ * 1. No pinta su propio fondo. Todo sale de los tokens del sitio
+ *    (--color-bg-*, --color-text-*, --color-border, --color-accent), asi que
+ *    anda en claro y en oscuro sin una linea por tema.
+ * 2. Un solo sistema tipografico: --font-primary, escala 12/13/14/16/20/32 y
+ *    numeros tabulares donde se comparan cifras. Nada de monospace decorativo.
+ * 3. El color significa una sola cosa. Verde = subio, rojo = bajo, el acento
+ *    del sitio = seleccionado. La fila del lider y las zonas (ascenso, descenso)
+ *    van con el color que define el ranking en sus etiquetas.
+ *
+ * Movimiento: 150 ms, solo transform y opacity/color, respuesta en el press
+ * (:active) y no solo en el release, y todo apagado con prefers-reduced-motion.
+ */
+
 .page {
-    --bg: #030506;
-    --surface: #0a0c0e;
-    --surface-accent: #111418;
-    --border: rgba(255, 255, 255, 0.08);
-    --text-main: #e2e8f0;
-    --text-muted: #8e96a3;
-    --grid-line: rgba(255, 255, 255, 0.03);
-    --mono: 'JetBrains Mono', monospace;
-    --sans: 'Inter', sans-serif;
-    --radius-sm: 4px;
-    --radius-md: 12px;
     min-height: 100vh;
-    padding-top: 80px;
-    padding-bottom: 72px;
-    background-color: var(--bg);
-    background-image:
-        linear-gradient(var(--grid-line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: 40px 40px;
-    color: var(--text-main);
-    font-family: var(--sans);
+    /* El <main> del sitio ya compensa la barra fija; aca solo va aire propio. */
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-3xl);
+    color: var(--color-text-primary);
+    font-family: var(--font-primary);
 }
 
-.hero {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 48px;
-    padding: 60px 0 40px;
-    align-items: center;
-}
-
-.heroContent .label {
-    font-family: var(--mono);
-    color: var(--rankings-accent);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.label {
-    font-family: var(--mono);
-    color: var(--rankings-accent);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.labelDot {
-    width: 8px;
-    height: 8px;
-    background: var(--rankings-accent);
-    border-radius: 999px;
-}
-
-.heroContent h1 {
-    font-size: clamp(32px, 5vw, 64px);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    line-height: 0.95;
-    margin-bottom: 16px;
-    color: #fff;
-}
-
-.heroContent p {
-    font-size: 17px;
-    color: var(--text-muted);
-    max-width: 520px;
-    margin-bottom: 24px;
-}
-
-.heroActions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.btn {
-    padding: 12px 24px;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-family: var(--mono);
-    text-transform: uppercase;
-    border: 1px solid transparent;
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-}
-
-.btnPrimary {
-    background: var(--rankings-accent);
-    color: #000;
-    border-color: var(--rankings-accent);
-}
-
-.btnSecondary {
-    background: transparent;
-    color: var(--text-main);
-    border-color: var(--border);
-}
-
-.techBorder {
-    border: 1px solid var(--border);
-    position: relative;
-    background: var(--surface);
-}
-
-.techBorder::before {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: -1px;
-    width: 10px;
-    height: 10px;
-    border-top: 2px solid var(--rankings-accent);
-    border-left: 2px solid var(--rankings-accent);
-}
-
-.summaryCard {
-    padding: 24px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-}
-
-.summaryCardHeader {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: start;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.summaryCardHeader h2 {
-    font-size: 24px;
-    line-height: 1.1;
-    margin-top: 4px;
-}
-
-.summaryCardKicker {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.statusBadge {
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-family: var(--mono);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.04);
-}
-
-.statusPublished {
-    color: var(--rankings-accent);
-}
-
-.statusWarning {
-    color: #ffd166;
-}
-
-.statusLoading,
-.statusIdle {
-    color: var(--text-muted);
-}
-
-.summaryMetrics {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-}
-
-.metric {
-    border-left: 1px solid var(--border);
-    padding-left: 16px;
-}
-
-.metricValue {
-    display: block;
-    font-family: var(--mono);
-    font-size: 17px;
-    font-weight: 600;
-    color: #fff;
-}
-
-.metricLabel {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.topThree {
-    grid-column: span 2;
-    margin-top: 4px;
-    padding-top: 16px;
-    border-top: 1px dashed var(--border);
-}
-
-.topThreeHeader {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 10px;
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-}
-
-.topThreeList {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    align-items: center;
-}
-
-.topClub {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-}
-
-.topClubLogo {
-    width: 28px;
-    height: 28px;
-}
-
-.topRank {
-    font-family: var(--mono);
-    color: var(--rankings-accent);
-    font-size: 12px;
-}
-
-.topName {
-    font-size: 13px;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.topThreeEmpty {
-    font-size: 13px;
-    color: var(--text-muted);
-}
-
-.sectionBlock {
-    padding-top: 14px;
-}
-
-.leadersSection {}
-
-.tableSection {}
-
-.sectionBlock + .sectionBlock {
-    margin-top: 18px;
-}
-
-.sectionHeader {
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 12px;
-}
-
-.sectionTitle {
-    font-family: var(--mono);
-    font-size: 14px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.sectionMeta {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--rankings-accent);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.sportSelector,
-.rankingSelector {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding-bottom: 12px;
-    scrollbar-width: none;
-}
-
-.sportSelector::-webkit-scrollbar,
-.rankingSelector::-webkit-scrollbar {
-    display: none;
-}
-
-.sportChip {
-    flex: 0 0 auto;
-    min-width: 140px;
-    padding: 16px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--surface);
-    color: var(--text-main);
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-.sportChipActive {
-    border-color: var(--rankings-accent);
-    background: var(--rankings-plate);
-}
-
-/* `display: block` porque el nombre del deporte dejo de ser un <h4> (metia seis
-   encabezados falsos en el esquema de la pagina) y <strong> es en linea. */
-.sportChip strong {
-    display: block;
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 2px;
-}
-
-.sportChip span {
-    display: block;
-    font-size: 10px;
-    font-family: var(--mono);
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
-
-.rankingChip {
-    flex: 0 0 auto;
-    min-width: 220px;
-    padding: 14px 16px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--surface);
-    color: var(--text-main);
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-.rankingChipActive {
-    border-color: var(--rankings-accent);
-    background: var(--rankings-plate);
-}
-
-.rankingChipHead {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    align-items: flex-start;
-}
-
-.rankingChipHead strong {
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.rankingChipHead span {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--rankings-accent);
-    text-transform: uppercase;
-}
-
-.rankingChip small {
-    display: block;
-    margin-top: 8px;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
-
-.inlineState,
-.errorState {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 16px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--surface);
-    color: var(--text-muted);
-}
-
-.errorState {
-    border-color: rgba(255, 118, 117, 0.28);
-    color: #ffb2b1;
-}
-
-/* La tabla ya esta titulada visualmente por el <h3> de la seccion, asi que el
-   <caption> es solo para lectores de pantalla: les dice de que ranking es la
-   tabla y cuantas filas tiene antes de entrar a recorrerla. */
-.tableCaption {
+.srOnly {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -430,907 +37,883 @@
     border: 0;
 }
 
-/* Aviso de ranking pendiente de recalculo: es una advertencia, no un error —
-   la tabla que sigue es valida, solo puede estar atrasada. */
-.staleNote {
+/* ── 1. Que estoy viendo ─────────────────────────────────────────────────── */
+
+.header {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-    padding: 12px 16px;
-    border: 1px solid rgba(245, 158, 11, 0.32);
-    border-radius: var(--radius-sm);
-    background: rgba(245, 158, 11, 0.08);
-    color: #f3c164;
-    font-size: 0.85rem;
-    line-height: 1.45;
-}
-
-.staleNote svg {
-    flex-shrink: 0;
-}
-
-.topGrid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 16px;
-    margin-bottom: 8px;
-}
-
-.rankCard {
-    padding: 20px;
-    background: var(--surface-accent);
-    border: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-}
-
-.rankCard::after {
-    content: attr(data-rank);
-    position: absolute;
-    right: -10px;
-    top: -10px;
-    font-size: 60px;
-    font-weight: 800;
-    color: rgba(255, 255, 255, 0.03);
-    font-family: var(--mono);
-}
-
-.rankBadge {
-    width: 24px;
-    height: 24px;
-    background: var(--rankings-accent);
-    color: #000;
-    font-family: var(--mono);
-    font-weight: 800;
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
-    position: relative;
-    z-index: 1;
-}
-
-.rankName {
-    position: relative;
-    z-index: 1;
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 1.2;
-}
-
-.rankHeader {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 4px;
-}
-
-.rankLogo {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-}
-
-.rankMeta {
-    position: relative;
-    z-index: 1;
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-bottom: 16px;
-}
-
-.rankStats {
-    position: relative;
-    z-index: 1;
-    display: flex;
+    align-items: flex-start;
     justify-content: space-between;
-    align-items: baseline;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
+    gap: var(--spacing-xl);
+    padding: var(--spacing-md) 0 var(--spacing-lg);
 }
 
-.rankOvr {
-    font-family: var(--mono);
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--rankings-accent);
+.headerText {
+    max-width: 62ch;
+    min-width: 0;
 }
 
-.deltaPositive,
-.deltaNegative,
-.deltaNeutral {
-    font-family: var(--mono);
-    font-size: 11px;
+.title {
+    margin: 0 0 var(--spacing-sm);
+    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
 }
 
-.deltaPositive {
-    color: #55efc4;
+.lead {
+    margin: 0 0 var(--spacing-md);
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
 }
 
-.deltaNegative {
-    color: #ff7675;
-}
-
-.deltaNeutral {
-    color: var(--text-muted);
-}
-
-.tableActions {
+.meta {
     display: flex;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs) var(--spacing-md);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
 }
 
-.mobileTableActions {
+.meta li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.meta li + li::before {
+    content: '';
+    width: 3px;
+    height: 3px;
+    border-radius: var(--radius-full);
+    background: currentColor;
+    opacity: 0.6;
+}
+
+.headerActions {
+    flex-shrink: 0;
+    padding-top: var(--spacing-xs);
+}
+
+.exportAction {
+    display: inline-flex;
+}
+
+/* ── Controles ───────────────────────────────────────────────────────────── */
+
+.toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--spacing-lg);
+}
+
+.tabs {
+    display: flex;
+    gap: var(--spacing-xs);
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 2px;
+    margin: -2px;
+    /* El degrade del borde derecho dice que hay mas para el costado. */
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+}
+
+.tabs::-webkit-scrollbar {
     display: none;
 }
 
-.mobileExportAction {
-    flex: 1 1 auto;
-}
-
-.exportSection {
-    padding: 18px 0 28px;
-}
-
-.exportSectionInner {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.exportSectionAction {
+.tab {
     flex-shrink: 0;
+    min-height: 40px;
+    padding: 0 var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.tableContainer {
-    width: 100%;
-    overflow-x: auto;
-    background: var(--surface);
+.tab:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-border-light);
 }
 
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
+.tab:active {
+    transform: scale(0.97);
 }
 
-.table thead {
-    background: rgba(255, 255, 255, 0.02);
-    border-bottom: 1px solid var(--border);
+.tab:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
 }
 
-.table th {
-    padding: 16px;
-    text-align: left;
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 1px;
+.tabActive,
+.tabActive:hover {
+    background: var(--color-text-primary);
+    border-color: var(--color-text-primary);
+    color: var(--color-bg-primary);
 }
 
-.table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+.tabSecondary {
+    min-height: 34px;
+    font-weight: 500;
 }
 
-.table tr:hover td {
-    background: rgba(255, 255, 255, 0.01);
+.tabSecondary.tabActive,
+.tabSecondary.tabActive:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
 }
 
-.positionLabeledRow td {
-    background: color-mix(in srgb, var(--position-label-color, #3b82f6) 9%, transparent);
+.toolbarRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding-top: var(--spacing-xs);
 }
 
-.positionLabeledRow td:first-child {
-    box-shadow: inset 3px 0 0 var(--position-label-color, #3b82f6);
-}
-
-.positionLabeledRow:hover td {
-    background: color-mix(in srgb, var(--position-label-color, #3b82f6) 14%, transparent);
-}
-
-/* Selector de semana — solo en los rankings con fotos semanales (World Rugby).
-   Va arriba de la tabla y no en la cabecera porque la cabecera se esconde en
-   mobile, y en el telefono es justo donde mas se usa. */
-.weekPicker {
+.search {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 14px;
+    flex: 1 1 260px;
+    max-width: 380px;
 }
 
-.weekPickerLabel {
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-muted);
+.searchIcon {
+    position: absolute;
+    left: 12px;
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+}
+
+.searchInput {
+    width: 100%;
+    min-height: 44px;
+    padding: 0 40px 0 38px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 0.9375rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.searchInput::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.searchInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.2);
+}
+
+.searchInput::-webkit-search-cancel-button {
+    display: none;
+}
+
+.searchClear {
+    position: absolute;
+    right: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.searchClear:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+/* Semana (solo World Rugby) */
+
+.weekPicker {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
 }
 
 .weekPickerStep {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-    border-radius: var(--radius-sm);
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
     cursor: pointer;
+    transition: transform var(--transition-fast), background-color var(--transition-fast);
 }
 
 .weekPickerStep:hover:not(:disabled) {
-    border-color: var(--rankings-accent);
-    color: var(--rankings-accent);
+    background: var(--color-bg-hover);
+}
+
+.weekPickerStep:active:not(:disabled) {
+    transform: scale(0.95);
 }
 
 .weekPickerStep:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
+    opacity: 0.4;
+    cursor: default;
 }
 
 .weekPickerInput {
-    font-family: var(--mono);
-    font-size: 13px;
-    padding: 6px 10px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text);
-    border-radius: var(--radius-sm);
-    /* El icono nativo del calendario es negro sobre negro en el tema oscuro. */
+    min-height: 44px;
+    padding: 0 var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
     color-scheme: light dark;
 }
 
 .weekPickerInput:focus-visible {
-    outline: 2px solid var(--rankings-accent);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
 }
 
-.weekPickerNow {
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--rankings-accent);
-}
-
 .weekPickerReset {
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 6px 10px;
-    border: 1px solid var(--rankings-accent);
-    background: var(--rankings-plate);
-    color: var(--rankings-accent);
-    border-radius: var(--radius-sm);
+    min-height: 44px;
+    padding: 0 var(--spacing-md);
+    border: 0;
+    border-radius: var(--radius-lg);
+    background: transparent;
+    color: var(--color-accent-ink);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
     cursor: pointer;
 }
 
-/* Subrayado por movimiento — SOLO en el ranking de World Rugby.
-   Oro para el lider, verde para el que subio, rojo para el que bajo.
-
-   El gradiente va sobre la FILA y no sobre cada celda: puesto en el `td` se
-   reinicia seis veces y la tabla queda a rayas. Por eso las celdas de esta fila
-   van transparentes, incluso en hover.
-
-   Arranca a la izquierda, donde esta el puesto, y se apaga antes de llegar a
-   las cifras: tiñe sin comerse la legibilidad del numero.
-   `--movement-strength` la calcula RankingsClient con el tamanio del salto. */
-.movementRow {
-    background-image: linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--movement-color, #2fbf71) calc(var(--movement-strength, 1) * 22%), transparent) 0%,
-        transparent 68%
-    );
+.weekPickerReset:hover {
+    text-decoration: underline;
 }
 
-.movementRow:hover {
-    background-image: linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--movement-color, #2fbf71) calc(var(--movement-strength, 1) * 32%), transparent) 0%,
-        transparent 74%
-    );
-}
+/* ── Estados ─────────────────────────────────────────────────────────────── */
 
-.movementRow td,
-.movementRow:hover td {
-    background: transparent;
-}
-
-.movementRow td:first-child {
-    box-shadow: inset 3px 0 0 var(--movement-color, #2fbf71);
-}
-
-.posCell {
-    font-family: var(--mono);
-    font-weight: 600;
-    width: 70px;
-}
-
-.posWrap {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.positionUp,
-.positionDown,
-.positionSame {
-    font-family: var(--mono);
-    font-size: 10px;
-    line-height: 1;
-}
-
-.positionUp {
-    color: #55efc4;
-}
-
-.positionDown {
-    color: #ff7675;
-}
-
-.positionSame {
-    color: var(--text-muted);
-}
-
-.clubCell {
+.inlineState,
+.errorState,
+.staleNote {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
-    font-weight: 600;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+    margin-bottom: var(--spacing-lg);
 }
 
-.clubLogo {
-    width: 28px;
-    height: 28px;
+.errorState {
+    border-color: color-mix(in srgb, var(--color-error) 40%, transparent);
+    color: var(--color-error);
+}
+
+.staleNote {
+    border-color: color-mix(in srgb, var(--color-warning) 45%, transparent);
+    color: var(--color-text-primary);
+}
+
+.staleNote svg {
+    color: var(--color-warning);
     flex-shrink: 0;
 }
 
-.clubLogoFallbackText {
-    font-size: 0.6rem;
+.linkBtn {
+    border: 0;
+    padding: 0;
+    background: none;
+    color: var(--color-accent-ink);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-.clubCopy {
+.linkBtn:hover {
+    text-decoration: underline;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── El contenido que cambia con las pestanias ───────────────────────────── */
+
+/* Mientras llega la tabla nueva, la anterior queda en pantalla atenuada: la
+   altura no se mueve y el pie no salta. Sin clics sobre datos que ya no son. */
+.content {
+    transition: opacity var(--transition-fast);
+}
+
+.contentStale {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* La tabla nueva entra con un fundido corto y un leve empuje hacia arriba:
+   alcanza para que el cambio se lea como cambio y no como un parpadeo. */
+.fadeIn {
+    animation: fadeIn 180ms ease-out both;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* ── 2. Movimientos de la semana ─────────────────────────────────────────── */
+
+.sectionTitle {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+}
+
+.movers {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.moversGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-md);
+}
+
+.moverCard {
+    --mover-color: var(--color-text-secondary);
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-secondary);
+}
+
+.moverUp { --mover-color: var(--color-success); }
+.moverDown { --mover-color: var(--color-error); }
+
+.moverTitle {
+    margin: 0 0 var(--spacing-sm);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--mover-color);
+}
+
+.moverList {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.moverRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-height: 48px;
+    padding: var(--spacing-xs) 0;
+}
+
+.moverRow + .moverRow {
+    border-top: 1px solid var(--color-border);
+}
+
+.moverLogo {
+    flex-shrink: 0;
+}
+
+.moverName {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    flex: 1;
+    line-height: 1.25;
 }
 
-.clubCopy strong,
-.clubCopy span {
+.moverName strong {
+    font-size: 0.9375rem;
+    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.clubCopy span {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-family: var(--mono);
+.moverName span {
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
 }
 
-.clubMetaMobile {
-    display: none;
+.moverEmpty {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--color-text-tertiary);
 }
 
-.ovrCell {
-    font-family: var(--mono);
-    font-weight: 600;
-    color: #fff;
-}
+/* La ficha de movimiento: la misma en la tabla y en las tarjetas. */
 
-.positionLegend {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 14px 0 0;
-}
-
-.positionLegendTitle {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.positionLegendItem {
+.move {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    min-height: 28px;
-    padding: 0 10px;
-    border: 1px solid color-mix(in srgb, var(--position-label-color, #3b82f6) 38%, transparent);
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--position-label-color, #3b82f6) 12%, transparent);
-    color: var(--text-main);
-    font-family: var(--mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    gap: 2px;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
 }
 
-.positionLegendItem strong {
-    color: color-mix(in srgb, var(--position-label-color, #3b82f6) 72%, white);
+.moveUp {
+    color: var(--color-success);
+    background: color-mix(in srgb, var(--color-success) 14%, transparent);
 }
 
-.positionLegendSwatch {
-    width: 8px;
-    height: 8px;
-    border-radius: 999px;
-    background: var(--position-label-color, #3b82f6);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--position-label-color, #3b82f6) 16%, transparent);
+.moveDown {
+    color: var(--color-error);
+    background: color-mix(in srgb, var(--color-error) 14%, transparent);
 }
 
-.paginationBar {
+.moveSame {
+    color: var(--color-text-muted);
+    padding: 0 4px;
+}
+
+/* ── 3. La tabla ─────────────────────────────────────────────────────────── */
+
+.tableSection {
+    scroll-margin-top: 84px;
+}
+
+.tableHead {
     display: flex;
+    align-items: baseline;
     justify-content: space-between;
-    align-items: center;
-    gap: 14px;
-    padding-top: 14px;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
 }
 
-.paginationMeta,
-.paginationPage {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-muted);
+.tableMeta {
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
+.tableWrap {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-secondary);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+}
+
+.table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    color: var(--color-text-tertiary);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
 }
 
-.paginationControls {
+.table th abbr {
+    text-decoration: none;
+    cursor: help;
+    border-bottom: 1px dotted currentColor;
+}
+
+.thPos { width: 88px; }
+.thNum { text-align: right; }
+
+.table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.table tbody tr {
+    transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.posCell {
+    white-space: nowrap;
+}
+
+.posNumber {
+    display: inline-block;
+    min-width: 2ch;
+    margin-right: var(--spacing-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+}
+
+.clubCell {
+    min-width: 0;
+}
+
+/* El nombre nunca tapa el resultado: ellipsis en el nombre, min-width 0. */
+.clubCell,
+.clubCopy {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: var(--spacing-sm);
+}
+
+.clubLogo {
+    flex-shrink: 0;
+}
+
+.clubLogoFallbackText {
+    font-size: 0.6875rem;
+    font-weight: 700;
+}
+
+.clubCopy {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.clubCopy strong {
+    font-weight: 600;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* La region va en su columna en escritorio y debajo del nombre en el telefono. */
+.clubRegionMobile {
+    display: none;
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+}
+
+.regionCell {
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.pointsCell {
+    text-align: right;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.varCell {
+    text-align: right;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.varPositive { color: var(--color-success); }
+.varNegative { color: var(--color-error); }
+.varNeutral { color: var(--color-text-muted); font-weight: 400; }
+
+/* Fila con zona (ascenso, descenso, podio): borde a la izquierda y tinte suave. */
+.positionLabeledRow {
+    box-shadow: inset 3px 0 0 var(--position-label-color);
+    background: color-mix(in srgb, var(--position-label-color) 7%, transparent);
+}
+
+.table tbody .positionLabeledRow:hover {
+    background: color-mix(in srgb, var(--position-label-color) 13%, transparent);
+}
+
+/* Fila con movimiento (World Rugby): el tinte crece con el salto. */
+.movementRow {
+    box-shadow: inset 3px 0 0 var(--movement-color);
+    background: color-mix(in srgb, var(--movement-color) calc(var(--movement-strength) * 12%), transparent);
+}
+
+.table tbody .movementRow:hover {
+    background: color-mix(in srgb, var(--movement-color) calc(var(--movement-strength) * 18%), transparent);
+}
+
+/* Leyenda de zonas */
+
+.legend {
+    display: flex;
     flex-wrap: wrap;
+    gap: var(--spacing-xs) var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+}
+
+.legendItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legendItem strong {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.legendSwatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--position-label-color);
+}
+
+/* Paginacion */
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-md);
 }
 
 .paginationBtn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    min-height: 36px;
-    padding: 0 12px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text-main);
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
+    gap: 4px;
+    min-height: 44px;
+    padding: 0 var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
     cursor: pointer;
+    transition: transform var(--transition-fast), background-color var(--transition-fast);
+}
+
+.paginationBtn:hover:not(:disabled) {
+    background: var(--color-bg-hover);
+}
+
+.paginationBtn:active:not(:disabled) {
+    transform: scale(0.97);
 }
 
 .paginationBtn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    opacity: 0.4;
+    cursor: default;
 }
 
-.readoutSection {
-    margin-top: 30px;
-    border-top: 1px solid var(--border);
-    padding-top: 22px;
+.paginationPage {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
 }
 
-.readoutRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-}
+/* ── Responsive ──────────────────────────────────────────────────────────── */
 
-.readoutText {
-    margin-top: 10px;
-    color: var(--text-muted);
-    font-size: 14px;
-}
-
-.readoutMeta {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.readoutChip {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 36px;
-    padding: 0 12px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-}
-
-.spin {
-    animation: spin 0.9s linear infinite;
-}
-
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
+@media (max-width: 900px) {
+    .header {
+        flex-direction: column;
+        gap: var(--spacing-md);
     }
 
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@media (max-width: 1024px) {
-    .hero {
-        grid-template-columns: 1fr;
-        gap: 32px;
-        padding-top: 40px;
-    }
-
-    .topGrid {
-        grid-template-columns: repeat(3, 1fr);
+    .headerActions {
+        padding-top: 0;
     }
 }
 
 @media (max-width: 768px) {
     .page {
-        padding-top: 68px;
-        padding-bottom: 40px;
+        padding-top: var(--spacing-sm);
+        padding-bottom: calc(var(--spacing-3xl) + 64px);
     }
 
-    .hero {
-        grid-template-columns: 1fr;
-        gap: 0;
-        padding: 22px 0 10px;
+    .header {
+        padding-top: var(--spacing-md);
     }
 
-    .heroContent h1 {
-        font-size: clamp(30px, 8vw, 38px);
-        margin-bottom: 0;
-    }
-
-    /* La tarjeta de resumen SI se muestra en mobile: es la unica que trae la
-       ultima corrida, cuantos clubes tiene el ranking y el estado. Esconderla
-       no era adaptar, era perder datos que no estan en ningun otro lado.
-       "Lideres de division" queda afuera porque su Top 5 en una columna empuja
-       la tabla fuera de pantalla y el Top 3 de la tarjeta ya dice quien manda. */
-    .label,
-    .heroContent p,
-    .heroActions,
-    .leadersSection,
-    .readoutSection,
-    .sectionMeta,
-    .tableActions,
-    .paginationMeta {
-        display: none;
-    }
-
-    .mobileTableActions {
-        display: flex;
-        width: 100%;
-        margin-bottom: 12px;
-    }
-
-    .mobileExportAction {
-        width: 100%;
-    }
-
-    .mobileExportAction > button {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .exportSection {
-        padding-top: 12px;
-        padding-bottom: 8px;
-    }
-
-    .exportSectionInner {
-        justify-content: stretch;
-    }
-
-    .exportSectionAction {
-        width: 100%;
-    }
-
-    .exportSectionAction > button {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .sectionBlock {
-        padding-top: 10px;
-    }
-
-    .sectionBlock + .sectionBlock {
-        margin-top: 12px;
-    }
-
-    .sectionHeader {
-        margin-bottom: 12px;
-    }
-
-    .summaryCard {
-        gap: 16px;
-        padding: 18px;
-    }
-
-    .summaryMetrics {
-        gap: 14px;
-    }
-
-    .topThreeList {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .topGrid {
+    .moversGrid {
         grid-template-columns: 1fr;
     }
 
-    .sportSelector,
-    .rankingSelector {
-        gap: 8px;
-        padding-bottom: 8px;
-    }
-
-    .sportChip,
-    .rankingChip {
-        min-width: 160px;
-        padding: 12px;
-    }
-
-    .rankingChipHead strong,
-    .sportChip strong {
-        font-size: 14px;
-    }
-
-    .tableContainer {
-        border: none;
-        background: transparent;
-    }
-
-    .table,
-    .table thead,
-    .table tbody,
-    .table th,
-    .table td,
-    .table tr {
-        display: block;
-    }
-
+    /* La tabla se vuelve una lista: cada fila es una tarjeta con el puesto y la
+       flecha a la izquierda, el club al medio y los puntos a la derecha con su
+       variacion debajo. Sin numeros sueltos sin rotulo. */
     .table thead {
         display: none;
     }
 
-    .table tr {
+    .table,
+    .table tbody {
+        display: block;
+    }
+
+    .table tbody tr {
         display: grid;
-        grid-template-columns: 52px minmax(0, 1fr) 54px 48px 58px;
+        grid-template-columns: 56px minmax(0, 1fr) auto;
+        grid-template-areas:
+            'pos club pts'
+            'pos club var';
         align-items: center;
-        column-gap: 8px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        margin-bottom: 12px;
-        padding: 10px 10px;
-        border-radius: var(--radius-sm);
+        column-gap: var(--spacing-sm);
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--color-border);
     }
 
-    .positionLabeledRow {
-        background: color-mix(in srgb, var(--position-label-color, #3b82f6) 12%, var(--surface));
-        border-color: color-mix(in srgb, var(--position-label-color, #3b82f6) 32%, var(--border));
-        box-shadow: inset 3px 0 0 var(--position-label-color, #3b82f6);
-    }
-
-    /* En mobile la fila es una tarjeta con fondo propio, y el `background` de
-       `.table tr` de arriba borraria el gradiente. Va la tarjeta entera teñida,
-       que ademas se lee mejor en una grilla de cinco columnas angostas. */
-    .movementRow {
-        background:
-            linear-gradient(
-                90deg,
-                color-mix(in srgb, var(--movement-color, #2fbf71) calc(var(--movement-strength, 1) * 24%), transparent) 0%,
-                transparent 78%
-            ),
-            var(--surface);
-        border-color: color-mix(in srgb, var(--movement-color, #2fbf71) calc(var(--movement-strength, 1) * 42%), var(--border));
-        box-shadow: inset 3px 0 0 var(--movement-color, #2fbf71);
-    }
-
-    .movementRow td,
-    .movementRow:hover td {
-        background: transparent;
-    }
-
-    .movementRow td:first-child {
-        box-shadow: none;
-    }
-
-    .positionLabeledRow td,
-    .positionLabeledRow:hover td {
-        background: transparent;
-    }
-
-    .positionLabeledRow td:first-child {
-        box-shadow: none;
+    .table tbody tr:last-child {
+        border-bottom: 0;
     }
 
     .table td {
-        border: none;
         padding: 0;
-        display: block;
-        min-width: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 11px;
-    }
-
-    .table td[data-label="Region"] {
-        display: none;
-    }
-
-    .table td::before {
-        display: none;
-    }
-
-    .clubCell {
-        justify-content: flex-start;
-        flex-wrap: nowrap;
-        gap: 8px;
-        min-width: 0;
-    }
-
-    .clubCopy {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 6px;
-        min-width: 0;
-    }
-
-    .clubCopy span {
-        display: none;
-    }
-
-    .clubCopy strong {
-        font-size: 10px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        line-height: 1.1;
-    }
-
-    .clubMetaMobile {
-        display: inline-flex;
-        align-items: center;
-        max-width: 72px;
-        padding: 2px 6px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.05);
-        color: var(--text-muted);
-        font-family: var(--mono);
-        font-size: 8px;
-        line-height: 1;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        flex-shrink: 0;
-    }
-
-    .clubLogo {
-        width: 18px;
-        height: 18px;
-    }
-
-    .posCell,
-    .ovrCell {
-        font-family: var(--mono);
-        font-size: 10px;
-        font-weight: 700;
-    }
-
-    .table td[data-label="Anterior"],
-    .table td[data-label="Delta"] {
-        font-family: var(--mono);
-        font-size: 9px;
-        font-weight: 700;
-        text-align: right;
-    }
-
-    .table td[data-label="Anterior"] {
-        color: var(--text-muted);
+        border: 0;
     }
 
     .posCell {
-        width: auto;
-        text-align: left;
-    }
-
-    .ovrCell {
-        text-align: right;
-    }
-
-    .posWrap {
+        grid-area: pos;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
         gap: 4px;
     }
 
-    .positionUp,
-    .positionDown,
-    .positionSame {
-        font-size: 8px;
+    .posNumber {
+        margin: 0;
+        font-size: 1.0625rem;
     }
 
-    .paginationBar,
-    .readoutRow {
-        flex-direction: column;
-        align-items: flex-start;
+    .clubCell {
+        grid-area: club;
     }
 
-    .readoutMeta {
-        justify-content: flex-start;
+    .clubRegionMobile {
+        display: block;
+    }
+
+    .regionCell {
+        display: none;
+    }
+
+    .pointsCell {
+        grid-area: pts;
+        align-self: end;
+        font-size: 1.125rem;
+    }
+
+    .varCell {
+        grid-area: var;
+        align-self: start;
+        font-size: 0.8125rem;
+    }
+
+    .positionLabeledRow,
+    .movementRow {
+        box-shadow: inset 3px 0 0 var(--position-label-color, var(--movement-color));
     }
 }
 
-@media (max-width: 560px) {
-    .sectionHeader {
-        flex-direction: column;
-        align-items: flex-start;
+@media (max-width: 480px) {
+    .search {
+        flex-basis: 100%;
+        max-width: none;
     }
 
-    .hero {
-        padding-top: 18px;
+    .pagination {
+        justify-content: space-between;
+    }
+}
+
+/* ── Movimiento reducido ─────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    .tab,
+    .weekPickerStep,
+    .paginationBtn,
+    .table tbody tr,
+    .searchInput,
+    .searchClear {
+        transition: none;
     }
 
-    .sportChip,
-    .rankingChip {
-        min-width: 148px;
+    .tab:active,
+    .weekPickerStep:active,
+    .paginationBtn:active {
+        transform: none;
     }
 
-    .table tr {
-        grid-template-columns: 46px minmax(0, 1fr) 48px 44px 52px;
-        column-gap: 6px;
-        padding: 8px 9px;
+    .spin,
+    .fadeIn {
+        animation: none;
     }
 
-    .table td {
-        font-size: 10px;
-    }
-
-    .clubLogo {
-        width: 16px;
-        height: 16px;
-    }
-
-    .clubCopy strong,
-    .posCell,
-    .ovrCell {
-        font-size: 9px;
-    }
-
-    .table td[data-label="Anterior"],
-    .table td[data-label="Delta"] {
-        font-size: 8px;
-    }
-
-    .clubMetaMobile {
-        max-width: 58px;
-        padding: 2px 5px;
-        font-size: 7px;
-    }
-
-    .positionUp,
-    .positionDown,
-    .positionSame {
-        font-size: 7px;
+    .content {
+        transition: none;
     }
 }

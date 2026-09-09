@@ -1,19 +1,19 @@
 'use client';
 
-import Link from 'next/link';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState, useTransition } from 'react';
 import type { CSSProperties } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import {
     AlertCircle,
-    ArrowRight,
     ChevronLeft,
     ChevronRight,
     Layers3,
+    Minus,
     RefreshCw,
-    Shield,
-    Sparkles,
-    Trophy,
+    Search,
+    TrendingDown,
+    TrendingUp,
+    X,
 } from 'lucide-react';
 import styles from './page.module.css';
 import { useSport } from '@/context/SportContext';
@@ -38,31 +38,37 @@ import {
     normalizeRankingPositionLabels,
     type RankingPositionLabel,
 } from '@/lib/rankings/rankingTable';
+import { formatRankingWeekLabel } from '@/lib/rankings/rankingWeek';
 import dynamic from 'next/dynamic';
 
 // El export es la pieza mas pesada que carga esta pagina y solo hace falta cuando
-// alguien aprieta el boton. Diferido, deja de viajar en la primera carga: en el
-// telefono eso es codigo que no se baja, no se parsea y no se compila.
+// alguien aprieta el boton. Diferido, deja de viajar en la primera carga.
 const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
 
-
-// El nombre del deporte NO vive aca: sale del catalogo (`nameEs`). Este mapa es
-// solo la piel visual, y por eso su default es aceptable — un acento generico se
-// banca, un deporte titulado "Deporte" no. Antes `field-hockey` y `motorsport`
-// caian al default y aparecian los dos como "Deporte / Catalogo activo".
-type SportSurface = {
-    accent: string;
-    glow: string;
-    plate: string;
-    selectorMeta: string;
-};
-
 /**
- * Que se esta rankeando. Los rankings de clubes los calcula esta casa; el de
- * selecciones lo publica World Rugby y entra por `publicRankings.ts`. La
- * pantalla no necesita saber nada mas de esa diferencia que como nombrar a lo
- * que esta listando.
+ * La pantalla publica del ranking, pensada para el hincha y no para el panel.
+ *
+ * Lo que habia antes mezclaba el vocabulario de administracion ("publicado",
+ * "rankings guardados", "ultima corrida", "OVR rating", "delta") con una
+ * jerarquia al reves: una cabecera que describia el ranking elegido, DESPUES el
+ * selector de deporte y de ranking, DESPUES cinco tarjetas que repetian las
+ * cinco primeras filas, y al final la tabla. Cada fila traia tres numeros
+ * (anterior, delta, puntaje) y en el telefono iban sin rotulo.
+ *
+ * Ahora la pagina responde, en orden, las preguntas que trae el que entra:
+ *
+ *   1. Que estoy viendo — el nombre del ranking, una frase que dice como se
+ *      calcula y cuando se actualizo.
+ *   2. Que paso esta semana — quienes subieron y quienes bajaron.
+ *   3. Donde esta mi club — buscador, y una tabla con UN numero (los puntos) y
+ *      UN movimiento (los puestos que subio o bajo), con la variacion de puntos
+ *      como dato secundario.
+ *
+ * Los controles (deporte, ranking, semana, busqueda) van juntos y arriba de la
+ * tabla, que es lo que modifican. La pagina no pinta su propio fondo: usa los
+ * tokens del sitio y anda en claro y en oscuro.
  */
+
 type RankingEntity = 'club' | 'seleccion';
 
 type RankingNouns = {
@@ -70,34 +76,38 @@ type RankingNouns = {
     entidad: string;
     /** Como se cuenta en plural: "114 uniones". */
     plural: string;
-    /** El plural ya concordado: el genero no se puede deducir de la palabra. */
-    publicados: string;
     /** Encabezado de la columna de procedencia. */
     procedencia: string;
     /** Encabezado de la columna del puntaje. */
     puntaje: string;
     /** Titulo por omision del afiche exportado. */
     tituloExport: string;
+    /** Que busca el buscador. */
+    buscar: string;
+    /** Como se explica el puntaje, en una frase. */
+    comoSeCalcula: string;
 };
 
 const RANKING_NOUNS: Record<RankingEntity, RankingNouns> = {
     club: {
         entidad: 'Club',
         plural: 'clubes',
-        publicados: 'Clubes publicados',
         procedencia: 'Region',
-        puntaje: 'OVR Rating',
+        puntaje: 'Puntos',
         tituloExport: 'Ranking de Clubes',
+        buscar: 'Buscar un club',
+        comoSeCalcula: 'Cada partido mueve puntos del que pierde al que gana, mas cuanto mas parejo era el cruce o mas amplio el margen. Se actualiza los martes con los resultados del fin de semana.',
     },
     // "Union" y no "Seleccion": es el rotulo que usa el propio World Rugby, y es
     // el correcto para los que no son paises (Chinese Taipei, Hong Kong China).
     seleccion: {
         entidad: 'Union',
         plural: 'uniones',
-        publicados: 'Uniones publicadas',
         procedencia: 'Continente',
-        puntaje: 'Puntos WR',
+        puntaje: 'Puntos',
         tituloExport: 'Ranking de World Rugby',
+        buscar: 'Buscar una union',
+        comoSeCalcula: 'El ranking oficial de World Rugby. Se publica los lunes con los tests del fin de semana ya computados.',
     },
 };
 
@@ -127,6 +137,8 @@ type PublicRankingSummary = {
     // importados los traen; con los dos se dibuja el selector de semana.
     snapshot_date?: string | null;
     history_from?: string | null;
+    // Solo el ranking de clubes: el martes contra el que se miden las flechas.
+    movement_baseline_week?: string | null;
     stale_from_match_id?: string | null;
     stale_reason?: string | null;
     initial_imported_at?: string | null;
@@ -160,63 +172,8 @@ type PublicRankingDetail = {
     entries: PublicRankingEntry[];
 };
 
-const DEFAULT_SURFACE: SportSurface = {
-    accent: '#00ff88',
-    glow: 'rgba(0, 255, 136, 0.15)',
-    plate: 'rgba(0, 255, 136, 0.12)',
-    selectorMeta: 'Catalogo activo',
-};
-
 const PUBLIC_RANKING_PAGE_SIZE = 20;
-
-const SPORT_SURFACES: Record<string, SportSurface> = {
-    rugby: {
-        accent: '#00ff88',
-        glow: 'rgba(0, 255, 136, 0.15)',
-        plate: 'rgba(0, 255, 136, 0.12)',
-        selectorMeta: 'Union / 7s',
-    },
-    football: {
-        accent: '#2f7df6',
-        glow: 'rgba(47, 125, 246, 0.16)',
-        plate: 'rgba(47, 125, 246, 0.12)',
-        selectorMeta: 'Profesional',
-    },
-    basketball: {
-        accent: '#ff8a00',
-        glow: 'rgba(255, 138, 0, 0.16)',
-        plate: 'rgba(255, 138, 0, 0.12)',
-        selectorMeta: 'Liga nacional',
-    },
-    tennis: {
-        accent: '#c4a500',
-        glow: 'rgba(196, 165, 0, 0.16)',
-        plate: 'rgba(196, 165, 0, 0.12)',
-        selectorMeta: 'Circuito',
-    },
-    hockey: {
-        accent: '#00a9c7',
-        glow: 'rgba(0, 169, 199, 0.16)',
-        plate: 'rgba(0, 169, 199, 0.12)',
-        selectorMeta: 'Metropolitano',
-    },
-    volleyball: {
-        accent: '#ff5d73',
-        glow: 'rgba(255, 93, 115, 0.16)',
-        plate: 'rgba(255, 93, 115, 0.12)',
-        selectorMeta: 'Aclav',
-    },
-    'american-football': {
-        accent: '#d18b00',
-        glow: 'rgba(209, 139, 0, 0.16)',
-        plate: 'rgba(209, 139, 0, 0.12)',
-        selectorMeta: 'Tackle / flag',
-    },
-};
-
-function getSportSurface(sportId: string) {
-    return SPORT_SURFACES[sportId] ?? DEFAULT_SURFACE;
-}
+const MOVERS_LIMIT = 3;
 
 function getSportLabel(sport: Sport) {
     return sport.nameEs || sport.name || sport.id;
@@ -229,6 +186,26 @@ function buildRankingsHref(sportId: string, rankingId?: string | null, fecha?: s
     // y sobreviva a un F5. Sin fecha = la vigente.
     if (fecha) params.set('fecha', fecha);
     return `/rankings?${params.toString()}`;
+}
+
+/**
+ * Cambia la URL sin pasar por el router de Next.
+ *
+ * `router.replace` con otros search params vuelve a pedir la pagina al
+ * servidor —y esta pagina consulta la base para sembrar la tabla—, asi que
+ * cada toque en una pestania esperaba 400 a 800 ms sin ninguna respuesta
+ * visual, y en el telefono mas. Con el historial nativo el cambio es
+ * inmediato: `useSearchParams` lo refleja igual (Next lo escucha desde 14.1) y
+ * los datos ya llegan por los fetch del cliente. Mismo criterio que el gestor
+ * de torneos: pushState nativo, nunca router.push para estado de UI.
+ */
+function replaceUrl(href: string) {
+    if (typeof window === 'undefined') return;
+    // El estado va en `null` a proposito: si se le pasa el `history.state` que
+    // ya tiene (con las marcas internas de Next), el parche del router lo toma
+    // como una navegacion propia y NO sincroniza `useSearchParams`. Medido: la
+    // URL cambiaba y la pestania seguia sin marcarse.
+    window.history.replaceState(null, '', href);
 }
 
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -254,19 +231,27 @@ async function readJson(response: Response) {
     return payload;
 }
 
-function formatDateTime(value: string | null | undefined) {
-    if (!value) return '-';
+/** "8 de septiembre" desde un instante ISO, en hora argentina. */
+function formatDayLabel(value: string | null | undefined) {
+    if (!value) return null;
     try {
-        // Zona horaria explicita: el backend guarda en UTC y sin esto la hora sale
-        // en la del entorno que renderiza, que en el server no es la del lector.
         return new Intl.DateTimeFormat('es-AR', {
-            dateStyle: 'short',
-            timeStyle: 'short',
-            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Argentina/Buenos_Aires',
+            day: 'numeric',
+            month: 'long',
+            timeZone: 'America/Argentina/Buenos_Aires',
         }).format(new Date(value));
     } catch {
-        return value;
+        return null;
     }
+}
+
+/** Sin tildes ni mayusculas: "Cordoba" encuentra "Córdoba" y al reves. */
+function foldText(value: string | null | undefined) {
+    return String(value ?? '')
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .trim();
 }
 
 function getPositionLabelStyle(label: Pick<RankingPositionLabel, 'color'>) {
@@ -279,15 +264,41 @@ function formatLegendPosition(position: number) {
     return `#${String(position).padStart(2, '0')}`;
 }
 
-function RankingsPageFallback() {
-    const pageStyle = {
-        '--rankings-accent': DEFAULT_SURFACE.accent,
-        '--rankings-glow': DEFAULT_SURFACE.glow,
-        '--rankings-plate': DEFAULT_SURFACE.plate,
-    } as CSSProperties;
+/**
+ * La flecha de puesto de una fila: cuantos lugares subio o bajo respecto de la
+ * semana anterior. Con puesto previo igual al actual devuelve el "=" mudo; sin
+ * puesto previo (club nuevo, primera semana) no devuelve nada.
+ */
+function MovementChip({ current, previous }: { current: number | null | undefined; previous: number | null | undefined }) {
+    if (!Number.isFinite(Number(current)) || previous === null || previous === undefined) return null;
+
+    const change = getRankingPositionChange(current, previous);
+
+    if (!change) {
+        return (
+            <span className={`${styles.move} ${styles.moveSame}`} aria-label="Mismo puesto que la semana anterior">
+                <Minus size={12} aria-hidden="true" />
+            </span>
+        );
+    }
+
+    const places = Math.abs(change.value);
+    const sube = change.tone === 'positive';
 
     return (
-        <div className={styles.page} style={pageStyle}>
+        <span
+            className={`${styles.move} ${sube ? styles.moveUp : styles.moveDown}`}
+            aria-label={`${sube ? 'Sube' : 'Baja'} ${places} ${places === 1 ? 'puesto' : 'puestos'}`}
+        >
+            {sube ? <TrendingUp size={12} aria-hidden="true" /> : <TrendingDown size={12} aria-hidden="true" />}
+            {places}
+        </span>
+    );
+}
+
+function RankingsPageFallback() {
+    return (
+        <div className={styles.page}>
             <div className="container">
                 <div className={styles.inlineState}>
                     <RefreshCw size={16} className={styles.spin} />
@@ -317,10 +328,9 @@ export default function RankingsClient(props: RankingsClientProps) {
 }
 
 function RankingsPageContent({ initialSportId, initialRankings, initialDetail }: RankingsClientProps) {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const { selectedSport, activeSports, setSelectedSport } = useSport();
-    const { user, isLoading: authLoading } = useAuth();
+    const { isLoading: authLoading } = useAuth();
     const [rankingList, setRankingList] = useState<PublicRankingSummary[]>(initialRankings ?? []);
     const [rankingDetail, setRankingDetail] = useState<PublicRankingDetail | null>(initialDetail ?? null);
     // Marcar como ya cargado lo que vino del servidor evita que la primera pintura
@@ -333,6 +343,13 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
     );
     const [publicError, setPublicError] = useState<string | null>(null);
     const [tablePageState, setTablePageState] = useState({ rankingId: '', page: 1 });
+    const [busqueda, setBusqueda] = useState('');
+    // La pastilla responde al toque en el acto; el resto (URL, contexto, tabla)
+    // va en una transicion. Sin esto la pastilla se marcaba recien cuando toda
+    // la pagina terminaba de volver a dibujarse, 200 ms despues del toque.
+    const [, startTransition] = useTransition();
+    const [pendingSportId, setPendingSportId] = useState<string | null>(null);
+    const [pendingRankingId, setPendingRankingId] = useState<string | null>(null);
 
     const sportParam = searchParams.get('sport');
     const rankingParam = searchParams.get('ranking');
@@ -342,12 +359,17 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
 
     useEffect(() => {
         if (!sportParam) return;
+        // Con un toque pendiente, una URL que todavia dice el deporte anterior es
+        // solo un rezago: sincronizarla pisaba el toque (dos pestanias seguidas
+        // dejaban la URL en un deporte, la pastilla en otro y el titulo en un
+        // tercero). El efecto queda para la carga inicial y para una URL ajena.
+        if (pendingSportId && sportParam !== pendingSportId) return;
 
         const nextSport = activeSports.find((sport) => sport.id === sportParam);
         if (!nextSport || nextSport.id === selectedSport.id) return;
 
         setSelectedSport(nextSport);
-    }, [activeSports, selectedSport.id, setSelectedSport, sportParam]);
+    }, [activeSports, pendingSportId, selectedSport.id, setSelectedSport, sportParam]);
 
     useEffect(() => {
         let cancelled = false;
@@ -388,15 +410,15 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
 
         if (!rankingList.length) {
             if (rankingParam) {
-                router.replace(buildRankingsHref(selectedSport.id), { scroll: false });
+                replaceUrl(buildRankingsHref(selectedSport.id));
             }
             return;
         }
 
         if (!rankingParam || !rankingList.some((ranking) => ranking.id === rankingParam)) {
-            router.replace(buildRankingsHref(selectedSport.id, rankingList[0].id, selectedDate), { scroll: false });
+            replaceUrl(buildRankingsHref(selectedSport.id, rankingList[0].id, selectedDate));
         }
-    }, [rankingList, rankingParam, router, selectedDate, selectedSport.id]);
+    }, [rankingList, rankingParam, selectedDate, selectedSport.id]);
 
     const detailKey = selectedRankingId ? `${selectedRankingId}|${selectedDate}` : '';
 
@@ -433,7 +455,6 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [detailKey, selectedDate, selectedRankingId]);
 
-    const surface = getSportSurface(selectedSport.id);
     const sportLabel = getSportLabel(selectedSport);
     const activeRankingDetail = rankingDetail?.ranking.id === selectedRankingId ? rankingDetail : null;
     const loadingList = loadedSportId !== selectedSport.id;
@@ -447,8 +468,10 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
     );
     // Para MOSTRAR manda la foto; mientras carga, lo del catalogo alcanza.
     const selectedRanking = activeRankingDetail?.ranking ?? rankingDelCatalogo;
+    const esSeleccion = selectedRanking?.entity === 'seleccion';
     // El subrayado por movimiento es exclusivo del ranking de World Rugby.
-    const subrayaMovimiento = selectedRanking?.entity === 'seleccion';
+    const subrayaMovimiento = esSeleccion;
+    const nouns = getRankingNouns(selectedRanking?.entity);
     const rankingPositionLabels = useMemo(
         () => normalizeRankingPositionLabels(activeRankingDetail?.ranking.metadata?.positionLabels ?? selectedRanking?.metadata?.positionLabels),
         [activeRankingDetail?.ranking.metadata?.positionLabels, selectedRanking?.metadata?.positionLabels],
@@ -478,20 +501,82 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                 : `${formatLegendPosition(item.start)}-${formatLegendPosition(item.end)}`,
         }));
     }, [rankingPositionLabels]);
-    const topEntries = activeRankingDetail?.entries.slice(0, 5) ?? [];
-    const topThree = topEntries.slice(0, 3);
-    const hasEntries = topEntries.length > 0;
+
+    // Mientras llega la tabla nueva se sigue mostrando la anterior, atenuada.
+    // Desmontarla y poner "Cargando" hacia que la pagina se achicara y el pie
+    // saltara en cada toque; con el contenido viejo en pantalla la altura no se
+    // mueve y el cambio es un fundido, no un salto.
+    const shownDetail = activeRankingDetail ?? (loadingDetail ? rankingDetail : null);
+    const refrescando = loadingList || loadingDetail;
+    const entries = useMemo(() => shownDetail?.entries ?? [], [shownDetail?.entries]);
+    const hasEntries = entries.length > 0;
+    // Los encabezados de la tabla describen lo que hay EN la tabla, que durante
+    // el fundido todavia es el ranking anterior; la cabecera de la pagina ya
+    // habla del nuevo.
+    const nounsTabla = getRankingNouns(shownDetail?.ranking.entity ?? selectedRanking?.entity);
+
+    // Que pastilla se pinta como activa: la que se acaba de tocar, hasta que el
+    // estado real la alcance.
+    const activeSportId = pendingSportId ?? selectedSport.id;
+    const activeRankingId = pendingRankingId ?? selectedRankingId;
+    useEffect(() => {
+        if (pendingSportId && pendingSportId === selectedSport.id) setPendingSportId(null);
+    }, [pendingSportId, selectedSport.id]);
+    useEffect(() => {
+        if (pendingRankingId && pendingRankingId === selectedRankingId) setPendingRankingId(null);
+    }, [pendingRankingId, selectedRankingId]);
+
+    // El buscador filtra en memoria: son 158 filas, no hace falta ir al servidor.
+    // El puesto se conserva (es el del ranking, no el del resultado de busqueda).
+    const busquedaPlegada = foldText(busqueda);
+    const entradasFiltradas = useMemo(() => {
+        if (!busquedaPlegada) return entries;
+        return entries.filter((entry) => (
+            foldText(getRankingClubName(entry)).includes(busquedaPlegada)
+            || foldText(entry.clubs?.short_name).includes(busquedaPlegada)
+            || foldText(entry.source_region).includes(busquedaPlegada)
+        ));
+    }, [busquedaPlegada, entries]);
+
+    // Quienes subieron y quienes bajaron mas puestos esta semana. Empata por
+    // puntos ganados. Si nadie tiene puesto previo (ranking recien importado) la
+    // seccion no tiene nada que decir y no se dibuja.
+    const movimientos = useMemo(() => {
+        const conPrevio = entries.filter((entry) => (
+            entry.source_previous_position !== null && entry.source_previous_position !== undefined
+        ));
+        const movidos = conPrevio
+            .map((entry) => ({
+                entry,
+                puestos: Number(entry.source_previous_position) - Number(entry.current_position ?? 0),
+                puntos: getRankingDelta(entry.current_rating, getRankingPreviousRating(entry)).value,
+            }))
+            .filter((item) => Number.isFinite(item.puestos) && item.puestos !== 0);
+
+        return {
+            hayReferencia: conPrevio.length > 0,
+            suben: movidos
+                .filter((item) => item.puestos > 0)
+                .sort((a, b) => b.puestos - a.puestos || b.puntos - a.puntos)
+                .slice(0, MOVERS_LIMIT),
+            bajan: movidos
+                .filter((item) => item.puestos < 0)
+                .sort((a, b) => a.puestos - b.puestos || a.puntos - b.puntos)
+                .slice(0, MOVERS_LIMIT),
+        };
+    }, [entries]);
+
     const tablePage = tablePageState.rankingId === selectedRankingId ? tablePageState.page : 1;
     const paginatedEntries = useMemo(
-        () => paginateRankingEntries(activeRankingDetail?.entries ?? [], tablePage, PUBLIC_RANKING_PAGE_SIZE),
-        [activeRankingDetail?.entries, tablePage],
+        () => paginateRankingEntries(entradasFiltradas, tablePage, PUBLIC_RANKING_PAGE_SIZE),
+        [entradasFiltradas, tablePage],
     );
     const visibleEntries = paginatedEntries.items;
     const rankingExportRows = useMemo(
-        () => buildRankingExportRows(activeRankingDetail?.entries ?? [], rankingPositionLabels, {
+        () => buildRankingExportRows(entries, rankingPositionLabels, {
             movementHighlight: subrayaMovimiento,
         }),
-        [activeRankingDetail?.entries, rankingPositionLabels, subrayaMovimiento],
+        [entries, rankingPositionLabels, subrayaMovimiento],
     );
     const rankingExportSubtitle = selectedRanking?.description?.trim()
         || `Base ${selectedRanking?.season || '-'} / resultados ${selectedRanking?.results_season || '-'}`;
@@ -502,51 +587,11 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
     // servidor la omite (ahi la sesion siempre esta cargando), pero este arbol
     // cuelga de un <Suspense> —lo pide `useSearchParams`— asi que hidrata TARDE,
     // cuando el efecto de AuthContext ya resolvio la sesion desde el cache y
-    // `authLoading` es false. React comparaba un HTML sin seccion contra un
-    // cliente con seccion. Con `montado` el primer render del cliente es
+    // `authLoading` es false. Con `montado` el primer render del cliente es
     // identico al del servidor y la seccion entra recien en el segundo.
     const [montado, setMontado] = useState(false);
     useEffect(() => { setMontado(true); }, []);
     const canExportPublicRanking = montado && !authLoading;
-
-    const rankingStatusLabel = loadingList || loadingDetail
-        ? 'Cargando'
-        : selectedRanking?.stale_from_match_id
-            ? 'Revision'
-            : hasEntries
-                ? 'Publicado'
-                : 'Sin datos';
-    const rankingStatusTone = loadingList || loadingDetail
-        ? styles.statusLoading
-        : selectedRanking?.stale_from_match_id
-            ? styles.statusWarning
-            : hasEntries
-                ? styles.statusPublished
-                : styles.statusIdle;
-    const nouns = getRankingNouns(selectedRanking?.entity);
-    const heroDescription = hasEntries
-        ? `${selectedRanking?.name || 'Ranking activo'} ya esta publicado con ${activeRankingDetail?.entries.length ?? 0} ${nouns.plural} y base ${selectedRanking?.season || '-'}.`
-        : 'Esta vista publica muestra el ranking guardado para el deporte activo. Cuando no aparece la tabla, es porque todavia no hay una version publicada.';
-    const lastRun = formatDateTime(selectedRanking?.backfill_completed_at || selectedRanking?.updated_at);
-    const summaryTitle = selectedRanking?.description || `Vista publica de ${sportLabel}`;
-    const readoutLabel = topEntries[0] ? getRankingClubShortName(topEntries[0]) : 'Sin lider publicado';
-    const pageStyle = {
-        '--rankings-accent': surface.accent,
-        '--rankings-glow': surface.glow,
-        '--rankings-plate': surface.plate,
-    } as CSSProperties;
-
-    const handleSportChange = (sport: Sport) => {
-        if (sport.id !== selectedSport.id) {
-            setSelectedSport(sport);
-        }
-
-        router.replace(buildRankingsHref(sport.id), { scroll: false });
-    };
-
-    const handleRankingChange = (rankingId: string) => {
-        router.replace(buildRankingsHref(selectedSport.id, rankingId, selectedDate), { scroll: false });
-    };
 
     // La foto que se esta mirando y los dos bordes del historico. `semanaTope` es
     // la vigente: no hay ranking despues del ultimo publicado.
@@ -556,15 +601,42 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
     const tieneHistorico = Boolean(historyFrom && semanaTope);
     const enLaSemanaVigente = !selectedDate || semanaMostrada >= semanaTope;
 
+    // Las dos fechas que le importan al lector: cuando se actualizo la tabla y
+    // contra que semana se miden las flechas.
+    const actualizadoEl = esSeleccion
+        ? formatDayLabel(semanaMostrada ? `${semanaMostrada}T12:00:00Z` : null)
+        : formatDayLabel(selectedRanking?.backfill_completed_at || selectedRanking?.updated_at);
+    const semanaDeReferencia = esSeleccion
+        ? null
+        : formatRankingWeekLabel(selectedRanking?.movement_baseline_week);
+
     const irASemana = (fecha: string) => {
         if (!tieneHistorico) return;
         const destino = clampIsoDate(fecha, historyFrom, semanaTope);
-        router.replace(
-            // Volver a la vigente es sacar la fecha de la URL, no fijar la de hoy:
-            // asi la pagina sigue mostrando la ultima aunque pase una semana.
-            buildRankingsHref(selectedSport.id, selectedRankingId, destino >= semanaTope ? '' : destino),
-            { scroll: false },
-        );
+        // Volver a la vigente es sacar la fecha de la URL, no fijar la de hoy:
+        // asi la pagina sigue mostrando la ultima aunque pase una semana.
+        replaceUrl(buildRankingsHref(selectedSport.id, selectedRankingId, destino >= semanaTope ? '' : destino));
+    };
+
+    // La URL se escribe en el acto y fuera de la transicion: el router de Next ya
+    // procesa el replaceState como transicion propia, y anidarla dentro de otra
+    // desordenaba dos toques seguidos. Lo que va en transicion es el estado
+    // pesado (el contexto de deporte y, con el, la tabla).
+    const handleSportChange = (sport: Sport) => {
+        setPendingSportId(sport.id);
+        setBusqueda('');
+        replaceUrl(buildRankingsHref(sport.id));
+        startTransition(() => {
+            if (sport.id !== selectedSport.id) {
+                setSelectedSport(sport);
+            }
+        });
+    };
+
+    const handleRankingChange = (rankingId: string) => {
+        setPendingRankingId(rankingId);
+        setBusqueda('');
+        replaceUrl(buildRankingsHref(selectedSport.id, rankingId, selectedDate));
     };
 
     const setTablePage = (page: number) => {
@@ -581,347 +653,313 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
         });
     };
 
+    const handleBusqueda = (valor: string) => {
+        setBusqueda(valor);
+        // Buscar te lleva a la primera pagina del resultado, sin scroll: el foco
+        // esta en el campo y moverle la pantalla al que escribe es una agresion.
+        setTablePageState({ rankingId: selectedRankingId, page: 1 });
+    };
+
+    const titulo = selectedRanking?.name || `Rankings de ${sportLabel}`;
+    const totalLabel = hasEntries ? `${entries.length} ${nouns.plural}` : null;
+
     return (
-        <div className={styles.page} style={pageStyle}>
-            <header className="container">
+        <div className={styles.page}>
+            <div className="container">
                 <MobileSectionTabs
                     activeTab="rankings"
                     rankingsHref={buildRankingsHref(selectedSport.id, selectedRankingId || undefined)}
                 />
-                <div className={styles.hero}>
-                    <div className={styles.heroContent}>
-                        <div className={styles.label}>
-                            <span className={styles.labelDot} />
-                            G22 Analytics Core
-                        </div>
-                        <h1>Rankings de {sportLabel}</h1>
-                        <p>{heroDescription}</p>
-                        <div className={styles.heroActions}>
-                            {hasEntries ? (
-                                <>
-                                    <a href="#tabla-ranking" className={`${styles.btn} ${styles.btnPrimary}`}>
-                                        Ver tabla
-                                        <ArrowRight size={16} />
-                                    </a>
-                                    <Link href="/clubs" className={`${styles.btn} ${styles.btnSecondary}`}>
-                                        Ver clubes
-                                    </Link>
-                                </>
-                            ) : (
-                                // Sin tabla no hay dos destinos que ofrecer: antes se
-                                // repetia "Ver clubes" en los dos botones.
-                                <Link href="/clubs" className={`${styles.btn} ${styles.btnPrimary}`}>
-                                    Ver clubes
-                                    <ArrowRight size={16} />
-                                </Link>
-                            )}
-                        </div>
+
+                {/* 1. Que estoy viendo */}
+                <header className={styles.header}>
+                    <div className={styles.headerText}>
+                        <h1 className={styles.title}>{titulo}</h1>
+                        {/* La descripcion del ranking de clubes la escribe el panel y
+                            dice de que ranking se trata; la de World Rugby la genera
+                            el servidor y ya cuenta lo mismo que la frase fija, asi
+                            que ahi va solo la frase. */}
+                        <p className={styles.lead}>
+                            {!esSeleccion && selectedRanking?.description?.trim()
+                                ? `${selectedRanking.description.trim().replace(/[.!?]$/, '')}. `
+                                : ''}
+                            {nouns.comoSeCalcula}
+                        </p>
+                        <ul className={styles.meta} aria-label="Datos del ranking">
+                            {totalLabel ? <li>{totalLabel}</li> : null}
+                            {actualizadoEl ? <li>Actualizado el {actualizadoEl}</li> : null}
+                            {semanaDeReferencia ? <li>Flechas respecto del {semanaDeReferencia}</li> : null}
+                            {esSeleccion ? <li>Flechas respecto de la publicacion anterior</li> : null}
+                        </ul>
                     </div>
-
-                    <aside className={`${styles.techBorder} ${styles.summaryCard}`}>
-                        <div className={styles.summaryCardHeader}>
-                            <div>
-                                <span className={styles.summaryCardKicker}>{selectedRanking?.name || 'Sin ranking cargado'}</span>
-                                <h2>{summaryTitle}</h2>
-                            </div>
-                            <span className={`${styles.statusBadge} ${rankingStatusTone}`}>{rankingStatusLabel}</span>
+                    {/* El afiche se arma con la tabla que se esta mirando: mientras
+                        llega la nueva, el boton espera. */}
+                    {hasEntries && canExportPublicRanking && !refrescando ? (
+                        <div className={styles.headerActions}>
+                            <ExportImage
+                                className={styles.exportAction}
+                                template="standings"
+                                filename={`ranking-${selectedRanking?.name || selectedSport.id}`}
+                                data={{
+                                    title: selectedRanking?.name || nouns.tituloExport,
+                                    subtitle: rankingExportSubtitle,
+                                    rows: rankingExportRows,
+                                    columnLabels: subrayaMovimiento
+                                        ? WORLD_RUGBY_EXPORT_COLUMN_LABELS
+                                        : RANKING_EXPORT_COLUMN_LABELS,
+                                    plainDiff: true,
+                                    showPositionDelta: true,
+                                    variant: 'rankingPoster',
+                                }}
+                            />
                         </div>
+                    ) : null}
+                </header>
 
-                        <div className={styles.summaryMetrics}>
-                            <div className={styles.metric}>
-                                <span className={styles.metricValue}>{sportLabel}</span>
-                                <span className={styles.metricLabel}>Deporte</span>
-                            </div>
-                            <div className={styles.metric}>
-                                <span className={styles.metricValue}>{rankingList.length}</span>
-                                <span className={styles.metricLabel}>Rankings guardados</span>
-                            </div>
-                            <div className={styles.metric}>
-                                <span className={styles.metricValue}>{activeRankingDetail?.entries.length ?? 0}</span>
-                                <span className={styles.metricLabel}>{nouns.publicados}</span>
-                            </div>
-                            <div className={styles.metric}>
-                                <span className={styles.metricValue}>{lastRun}</span>
-                                <span className={styles.metricLabel}>Ultima corrida</span>
-                            </div>
-                        </div>
-
-                        <div className={styles.topThree}>
-                            <div className={styles.topThreeHeader}>
-                                <span>Top 3</span>
-                                <span>{selectedRanking?.season || '-'}</span>
-                            </div>
-                            {topThree.length ? (
-                                <div className={styles.topThreeList}>
-                                    {topThree.map((entry) => (
-                                        <div key={entry.id} className={styles.topClub}>
-                                            <TeamLogo
-                                                name={getRankingClubName(entry)}
-                                                shortName={getRankingClubShortName(entry)}
-                                                teamId={entry.club_id}
-                                                logoUrl={entry.clubs?.logo_url}
-                                                className={styles.topClubLogo}
-                                                size={28}
-                                            />
-                                            <span className={styles.topRank}>
-                                                {String(entry.current_position || '-').padStart(2, '0')}
-                                            </span>
-                                            <span className={styles.topName}>
-                                                {entry.clubs?.short_name || entry.clubs?.name || entry.source_name}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className={styles.topThreeEmpty}>
-                                    Todavia no hay una tabla publicada para este deporte.
-                                </div>
-                            )}
-                        </div>
-                    </aside>
-                </div>
-            </header>
-
-            <div className="container">
-                <section className={styles.sectionBlock}>
-                    <div className={styles.sectionHeader}>
-                        <h3 className={styles.sectionTitle}>Seleccionar deporte</h3>
-                        <span className={styles.sectionMeta}>
-                            {activeSports.length} deporte{activeSports.length === 1 ? '' : 's'} activo{activeSports.length === 1 ? '' : 's'}
-                        </span>
-                    </div>
-                    <div className={styles.sportSelector}>
+                {/* Los controles, juntos y arriba de lo que controlan */}
+                <div className={styles.toolbar}>
+                    <div className={styles.tabs} role="group" aria-label="Deporte">
                         {activeSports.map((sport) => {
-                            const isActive = sport.id === selectedSport.id;
-                            const sportSurface = getSportSurface(sport.id);
-
+                            const isActive = sport.id === activeSportId;
                             return (
                                 <button
                                     key={sport.id}
                                     type="button"
-                                    className={`${styles.sportChip} ${isActive ? styles.sportChipActive : ''}`}
+                                    className={`${styles.tab} ${isActive ? styles.tabActive : ''}`}
                                     onClick={() => handleSportChange(sport)}
                                     aria-pressed={isActive}
                                 >
-                                    <strong>{getSportLabel(sport)}</strong>
-                                    <span>{sportSurface.selectorMeta}</span>
+                                    {getSportLabel(sport)}
                                 </button>
                             );
                         })}
                     </div>
-                </section>
 
-                <section className={styles.sectionBlock}>
-                    <div className={styles.sectionHeader}>
-                        <h3 className={styles.sectionTitle}>Rankings disponibles</h3>
-                        <span className={styles.sectionMeta}>
-                            {loadingList ? 'Cargando versiones' : `${rankingList.length} publicados`}
-                        </span>
-                    </div>
-
-                    {loadingList ? (
-                        <div className={styles.inlineState}>
-                            <RefreshCw size={16} className={styles.spin} />
-                            <span>Cargando rankings publicados...</span>
-                        </div>
-                    ) : rankingList.length ? (
-                        <div className={styles.rankingSelector}>
-                            {rankingList.map((ranking) => (
-                                <button
-                                    key={ranking.id}
-                                    type="button"
-                                    className={`${styles.rankingChip} ${ranking.id === selectedRankingId ? styles.rankingChipActive : ''}`}
-                                    onClick={() => handleRankingChange(ranking.id)}
-                                    aria-pressed={ranking.id === selectedRankingId}
-                                >
-                                    <div className={styles.rankingChipHead}>
-                                        <strong>{ranking.name}</strong>
-                                        <span>{ranking.stale_from_match_id ? 'Revision' : 'Publicado'}</span>
-                                    </div>
-                                    <small>
-                                        Base {ranking.season} / resultados {ranking.results_season || '-'}
-                                    </small>
-                                </button>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className={styles.inlineState}>
-                            <Shield size={16} />
-                            <span>No hay rankings publicados todavia para {sportLabel}.</span>
-                        </div>
-                    )}
-                </section>
-
-                <section className={`${styles.sectionBlock} ${styles.leadersSection}`}>
-                    <div className={styles.sectionHeader}>
-                        <h3 className={styles.sectionTitle}>Lideres de division</h3>
-                        <span className={styles.sectionMeta}>Top 5 publicado</span>
-                    </div>
-
-                    {publicError && !loadingDetail ? (
-                        <div className={styles.errorState}>
-                            <AlertCircle size={16} />
-                            <span>{publicError}</span>
-                        </div>
-                    ) : null}
-
-                    {loadingDetail && !activeRankingDetail ? (
-                        <div className={styles.inlineState}>
-                            <RefreshCw size={16} className={styles.spin} />
-                            <span>Cargando tabla del ranking...</span>
-                        </div>
-                    ) : null}
-
-                    {!loadingDetail && hasEntries ? (
-                        <div className={styles.topGrid}>
-                            {topEntries.map((entry, index) => {
-                                const delta = getRankingDelta(entry.current_rating, getRankingPreviousRating(entry));
-                                const position = entry.current_position || index + 1;
-
+                    {/* Con un solo ranking en el deporte no hay nada que elegir. La
+                        fila no se esconde mientras se recarga la lista: desaparecer
+                        y volver era uno de los saltos. */}
+                    {rankingList.length > 1 ? (
+                        <div className={styles.tabs} role="group" aria-label="Ranking">
+                            {rankingList.map((ranking) => {
+                                const isActive = ranking.id === activeRankingId;
                                 return (
-                                    <article
-                                        key={entry.id}
-                                        className={styles.rankCard}
-                                        data-rank={String(position)}
+                                    <button
+                                        key={ranking.id}
+                                        type="button"
+                                        className={`${styles.tab} ${styles.tabSecondary} ${isActive ? styles.tabActive : ''}`}
+                                        onClick={() => handleRankingChange(ranking.id)}
+                                        aria-pressed={isActive}
                                     >
-                                        <div className={styles.rankBadge}>{position}</div>
-                                        <div className={styles.rankHeader}>
-                                            <TeamLogo
-                                                name={getRankingClubName(entry)}
-                                                shortName={getRankingClubShortName(entry)}
-                                                teamId={entry.club_id}
-                                                logoUrl={entry.clubs?.logo_url}
-                                                className={styles.rankLogo}
-                                                size={42}
-                                            />
-                                            <div className={styles.rankName}>
-                                                {entry.clubs?.short_name || entry.clubs?.name || entry.source_name}
-                                            </div>
-                                        </div>
-                                        <div className={styles.rankMeta}>
-                                            {entry.source_region || selectedRanking?.scope || 'Sin region informada'}
-                                        </div>
-                                        <div className={styles.rankStats}>
-                                            <span className={styles.rankOvr}>{formatRankingRating(entry.current_rating)}</span>
-                                            <span
-                                                className={
-                                                    delta.tone === 'positive'
-                                                        ? styles.deltaPositive
-                                                        : delta.tone === 'negative'
-                                                            ? styles.deltaNegative
-                                                            : styles.deltaNeutral
-                                                }
-                                            >
-                                                {delta.label}
-                                            </span>
-                                        </div>
-                                    </article>
+                                        {ranking.name}
+                                    </button>
                                 );
                             })}
                         </div>
-                    ) : !loadingDetail ? (
-                        <div className={styles.inlineState}>
-                            <Layers3 size={16} />
-                            <span>
-                                {rankingList.length
-                                    ? `Este ranking todavia no tiene ${nouns.plural} publicad${nouns.publicados.endsWith('as') ? 'a' : 'o'}s.`
-                                    : 'Cuando guardes un ranking en el panel, va a aparecer aca automaticamente.'}
-                            </span>
+                    ) : null}
+
+                    {hasEntries || tieneHistorico ? (
+                        <div className={styles.toolbarRow}>
+                            {hasEntries ? (
+                                <div className={styles.search}>
+                                    <label htmlFor="buscar-ranking" className={styles.srOnly}>{nouns.buscar}</label>
+                                    <Search size={16} className={styles.searchIcon} aria-hidden="true" />
+                                    <input
+                                        id="buscar-ranking"
+                                        type="search"
+                                        className={styles.searchInput}
+                                        placeholder={nouns.buscar}
+                                        value={busqueda}
+                                        onChange={(event) => handleBusqueda(event.target.value)}
+                                        autoComplete="off"
+                                    />
+                                    {busqueda ? (
+                                        <button
+                                            type="button"
+                                            className={styles.searchClear}
+                                            onClick={() => handleBusqueda('')}
+                                            aria-label="Borrar la busqueda"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    ) : null}
+                                </div>
+                            ) : null}
+
+                            {/* Solo los rankings con fotos semanales tienen pasado que
+                                mirar. El de clubes guarda un estado, no una serie. */}
+                            {tieneHistorico ? (
+                                <div className={styles.weekPicker}>
+                                    <button
+                                        type="button"
+                                        className={styles.weekPickerStep}
+                                        onClick={() => irASemana(shiftIsoDate(semanaMostrada, -7))}
+                                        disabled={semanaMostrada <= historyFrom}
+                                        aria-label="Semana anterior"
+                                    >
+                                        <ChevronLeft size={16} />
+                                    </button>
+                                    <input
+                                        type="date"
+                                        className={styles.weekPickerInput}
+                                        value={semanaMostrada}
+                                        min={historyFrom}
+                                        max={semanaTope}
+                                        onChange={(event) => irASemana(event.target.value)}
+                                        aria-label="Elegir la semana del ranking"
+                                    />
+                                    <button
+                                        type="button"
+                                        className={styles.weekPickerStep}
+                                        onClick={() => irASemana(shiftIsoDate(semanaMostrada, 7))}
+                                        disabled={enLaSemanaVigente}
+                                        aria-label="Semana siguiente"
+                                    >
+                                        <ChevronRight size={16} />
+                                    </button>
+                                    {!enLaSemanaVigente ? (
+                                        <button
+                                            type="button"
+                                            className={styles.weekPickerReset}
+                                            onClick={() => irASemana(semanaTope)}
+                                        >
+                                            Volver al vigente
+                                        </button>
+                                    ) : null}
+                                </div>
+                            ) : null}
                         </div>
                     ) : null}
-                </section>
-            </div>
+                </div>
 
-            <div className="container">
-                <section className={`${styles.sectionBlock} ${styles.tableSection}`} id="tabla-ranking">
-                    <div className={styles.sectionHeader}>
-                        <h3 className={styles.sectionTitle}>Tabla completa de posiciones</h3>
+                {publicError && !loadingDetail ? (
+                    <div className={styles.errorState} role="alert">
+                        <AlertCircle size={16} />
+                        <span>{publicError}</span>
+                    </div>
+                ) : null}
+
+                {/* El motivo del "en revision" ya viaja en la API; sin pintarlo, el
+                    lector no sabe por que la tabla puede estar atrasada. */}
+                {selectedRanking?.stale_from_match_id ? (
+                    <div className={styles.staleNote}>
+                        <AlertCircle size={16} />
+                        <span>
+                            {selectedRanking.stale_reason
+                                || 'Este ranking espera una actualizacion, asi que puede no reflejar los ultimos resultados.'}
+                        </span>
+                    </div>
+                ) : null}
+
+                {/* "Cargando" solo cuando no hay NADA que mostrar (primera visita a un
+                    deporte). Si hay una tabla anterior, se queda atenuada abajo. */}
+                {refrescando && !shownDetail ? (
+                    <div className={styles.inlineState}>
+                        <RefreshCw size={16} className={styles.spin} />
+                        <span>Cargando la tabla...</span>
+                    </div>
+                ) : null}
+
+                <div
+                    className={`${styles.content} ${refrescando ? styles.contentStale : ''}`}
+                    aria-busy={refrescando}
+                >
+                {/* 2. Que paso esta semana */}
+                {hasEntries && movimientos.hayReferencia ? (
+                    <section className={styles.movers} aria-labelledby="movimientos-titulo">
+                        <h2 id="movimientos-titulo" className={styles.sectionTitle}>Movimientos de la semana</h2>
+                        {movimientos.suben.length || movimientos.bajan.length ? (
+                            <div key={shownDetail?.ranking.id} className={`${styles.moversGrid} ${styles.fadeIn}`}>
+                                {[
+                                    { titulo: 'Subieron', vacio: 'Nadie subio de puesto.', items: movimientos.suben, tono: styles.moverUp },
+                                    { titulo: 'Bajaron', vacio: 'Nadie bajo de puesto.', items: movimientos.bajan, tono: styles.moverDown },
+                                ].map((grupo) => (
+                                    <div key={grupo.titulo} className={`${styles.moverCard} ${grupo.tono}`}>
+                                        <h3 className={styles.moverTitle}>{grupo.titulo}</h3>
+                                        {grupo.items.length ? (
+                                            <ol className={styles.moverList}>
+                                                {grupo.items.map(({ entry, puntos }) => (
+                                                    <li key={entry.id} className={styles.moverRow}>
+                                                        <TeamLogo
+                                                            name={getRankingClubName(entry)}
+                                                            shortName={getRankingClubShortName(entry)}
+                                                            teamId={entry.club_id}
+                                                            logoUrl={entry.clubs?.logo_url}
+                                                            className={styles.moverLogo}
+                                                            size={28}
+                                                        />
+                                                        <span className={styles.moverName}>
+                                                            <strong>{getRankingClubName(entry)}</strong>
+                                                            <span>
+                                                                Puesto {entry.current_position}
+                                                                {puntos !== 0 ? ` · ${puntos > 0 ? '+' : ''}${puntos.toFixed(2)} pts` : ''}
+                                                            </span>
+                                                        </span>
+                                                        <MovementChip
+                                                            current={entry.current_position}
+                                                            previous={entry.source_previous_position}
+                                                        />
+                                                    </li>
+                                                ))}
+                                            </ol>
+                                        ) : (
+                                            <p className={styles.moverEmpty}>{grupo.vacio}</p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className={styles.moverEmpty}>
+                                Sin cambios de puesto respecto de la semana anterior.
+                            </p>
+                        )}
+                    </section>
+                ) : null}
+
+                {/* 3. Donde esta mi club */}
+                <section className={styles.tableSection} id="tabla-ranking" aria-labelledby="tabla-titulo">
+                    <div className={styles.tableHead}>
+                        <h2 id="tabla-titulo" className={styles.sectionTitle}>
+                            {busquedaPlegada
+                                ? `${entradasFiltradas.length} ${entradasFiltradas.length === 1 ? 'resultado' : 'resultados'} para "${busqueda.trim()}"`
+                                : 'Tabla completa'}
+                        </h2>
+                        {hasEntries && !busquedaPlegada ? (
+                            <span className={styles.tableMeta}>
+                                {paginatedEntries.start + 1}–{paginatedEntries.start + visibleEntries.length} de {entries.length}
+                            </span>
+                        ) : null}
                     </div>
 
-                    {/* Solo los rankings con fotos semanales tienen pasado que
-                        mirar. El de clubes guarda un estado, no una serie. */}
-                    {tieneHistorico ? (
-                        <div className={styles.weekPicker}>
-                            <span className={styles.weekPickerLabel}>Semana</span>
-                            <button
-                                type="button"
-                                className={styles.weekPickerStep}
-                                onClick={() => irASemana(shiftIsoDate(semanaMostrada, -7))}
-                                disabled={semanaMostrada <= historyFrom}
-                                aria-label="Semana anterior"
-                            >
-                                <ChevronLeft size={16} />
-                            </button>
-                            <input
-                                type="date"
-                                className={styles.weekPickerInput}
-                                value={semanaMostrada}
-                                min={historyFrom}
-                                max={semanaTope}
-                                onChange={(event) => irASemana(event.target.value)}
-                                aria-label="Elegir la semana del ranking"
-                            />
-                            <button
-                                type="button"
-                                className={styles.weekPickerStep}
-                                onClick={() => irASemana(shiftIsoDate(semanaMostrada, 7))}
-                                disabled={enLaSemanaVigente}
-                                aria-label="Semana siguiente"
-                            >
-                                <ChevronRight size={16} />
-                            </button>
-                            {enLaSemanaVigente ? (
-                                <span className={styles.weekPickerNow}>Ranking vigente</span>
-                            ) : (
-                                <button
-                                    type="button"
-                                    className={styles.weekPickerReset}
-                                    onClick={() => irASemana(semanaTope)}
-                                >
-                                    Volver al vigente
-                                </button>
-                            )}
-                        </div>
-                    ) : null}
-
-                    {/* El motivo del "Revision" ya viaja en la API; sin pintarlo, el
-                        lector ve la chapa y no sabe de que. Va aca y no en la cabecera
-                        porque la cabecera se esconde en mobile. */}
-                    {selectedRanking?.stale_from_match_id ? (
-                        <div className={styles.staleNote}>
-                            <AlertCircle size={16} />
-                            <span>
-                                {selectedRanking.stale_reason
-                                    || 'Este ranking espera un recalculo, asi que puede no reflejar los ultimos resultados.'}
-                            </span>
-                        </div>
-                    ) : null}
-
-                    {hasEntries ? (
+                    {hasEntries && visibleEntries.length ? (
                         <>
-                            <div className={`${styles.techBorder} ${styles.tableContainer}`}>
+                            {/* La clave cambia con el ranking y la pagina: cada tabla nueva
+                                entra con un fundido corto en vez de aparecer de golpe. */}
+                            <div
+                                key={`${shownDetail?.ranking.id ?? ''}|${paginatedEntries.page}`}
+                                className={`${styles.tableWrap} ${styles.fadeIn}`}
+                            >
                                 <table className={styles.table}>
-                                    <caption className={styles.tableCaption}>
-                                        {selectedRanking?.name || nouns.tituloExport} — {activeRankingDetail?.entries.length ?? 0} {nouns.plural}, base {selectedRanking?.season || '-'}
+                                    <caption className={styles.srOnly}>
+                                        {shownDetail?.ranking.name ?? titulo}. {nounsTabla.puntaje} y movimiento de puesto de cada {nounsTabla.entidad.toLowerCase()}
+                                        {semanaDeReferencia ? ` respecto del ${semanaDeReferencia}` : ''}.
                                     </caption>
                                     <thead>
                                         <tr>
-                                            <th scope="col">Pos</th>
-                                            <th scope="col">{nouns.entidad}</th>
-                                            <th scope="col">{nouns.procedencia}</th>
-                                            <th scope="col">Anterior</th>
-                                            <th scope="col">Delta</th>
-                                            <th scope="col">{nouns.puntaje}</th>
+                                            <th scope="col" className={styles.thPos}>Pos</th>
+                                            <th scope="col">{nounsTabla.entidad}</th>
+                                            <th scope="col" className={styles.thRegion}>{nounsTabla.procedencia}</th>
+                                            <th scope="col" className={styles.thNum}>{nounsTabla.puntaje}</th>
+                                            <th scope="col" className={styles.thNum}>
+                                                <abbr title="Puntos ganados o perdidos desde la semana anterior">Var.</abbr>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {visibleEntries.map((entry, index) => {
                                             const previousRating = getRankingPreviousRating(entry);
                                             const delta = getRankingDelta(entry.current_rating, previousRating);
-                                            const absoluteIndex = paginatedEntries.start + index + 1;
                                             const clubName = getRankingClubName(entry);
-                                            const position = entry.current_position || absoluteIndex;
-                                            const positionChange = getRankingPositionChange(entry.current_position, entry.source_previous_position);
+                                            const position = entry.current_position || paginatedEntries.start + index + 1;
                                             const positionLabel = getRankingPositionLabel(rankingPositionLabels, position);
                                             // La zona manda sobre el movimiento: si la fila ya tiene
                                             // color por ascenso o descenso, no se le encima un segundo.
@@ -947,23 +985,14 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                                                                 : undefined
                                                     }
                                                 >
-                                                    <td className={styles.posCell} data-label="Pos">
-                                                        <span className={styles.posWrap}>
-                                                            <span>#{String(position).padStart(2, '0')}</span>
-                                                            {positionChange ? (
-                                                                <span
-                                                                    className={
-                                                                        positionChange.tone === 'positive'
-                                                                            ? styles.positionUp
-                                                                            : styles.positionDown
-                                                                    }
-                                                                >
-                                                                    {positionChange.label}
-                                                                </span>
-                                                            ) : null}
-                                                        </span>
+                                                    <td className={styles.posCell}>
+                                                        <span className={styles.posNumber}>{position}</span>
+                                                        <MovementChip
+                                                            current={entry.current_position}
+                                                            previous={entry.source_previous_position}
+                                                        />
                                                     </td>
-                                                    <td className={styles.clubCell} data-label="Club">
+                                                    <td className={styles.clubCell}>
                                                         <TeamLogo
                                                             name={clubName}
                                                             shortName={getRankingClubShortName(entry)}
@@ -971,31 +1000,30 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                                                             logoUrl={entry.clubs?.logo_url}
                                                             className={styles.clubLogo}
                                                             fallbackClassName={styles.clubLogoFallbackText}
-                                                            size={28}
-                                                            title={`Logo de ${clubName}`}
+                                                            size={32}
+                                                            title={`Escudo de ${clubName}`}
                                                         />
-                                                        <div className={styles.clubCopy}>
+                                                        <span className={styles.clubCopy}>
                                                             <strong>{clubName}</strong>
-                                                            <span>{getRankingClubShortName(entry)}</span>
-                                                            <span className={styles.clubMetaMobile}>{entry.source_region || '-'}</span>
-                                                        </div>
+                                                            <span className={styles.clubRegionMobile}>
+                                                                {entry.source_region || getRankingClubShortName(entry)}
+                                                            </span>
+                                                        </span>
                                                     </td>
-                                                    <td data-label={nouns.procedencia}>{entry.source_region || '-'}</td>
-                                                    <td data-label="Anterior">{formatRankingRating(previousRating)}</td>
-                                                    <td
-                                                        data-label="Delta"
-                                                        className={
-                                                            delta.tone === 'positive'
-                                                                ? styles.deltaPositive
-                                                                : delta.tone === 'negative'
-                                                                    ? styles.deltaNegative
-                                                                    : styles.deltaNeutral
-                                                        }
-                                                    >
-                                                        {delta.label}
-                                                    </td>
-                                                    <td className={styles.ovrCell} data-label={nouns.puntaje}>
+                                                    <td className={styles.regionCell}>{entry.source_region || '-'}</td>
+                                                    <td className={styles.pointsCell}>
                                                         {formatRankingRating(entry.current_rating)}
+                                                    </td>
+                                                    <td
+                                                        className={`${styles.varCell} ${
+                                                            delta.tone === 'positive'
+                                                                ? styles.varPositive
+                                                                : delta.tone === 'negative'
+                                                                    ? styles.varNegative
+                                                                    : styles.varNeutral
+                                                        }`}
+                                                    >
+                                                        {delta.tone === 'neutral' ? '0.00' : delta.label}
                                                     </td>
                                                 </tr>
                                             );
@@ -1005,15 +1033,14 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                             </div>
 
                             {rankingLegendItems.length ? (
-                                <div className={styles.positionLegend} aria-label="Leyenda de puestos">
-                                    <span className={styles.positionLegendTitle}>Leyenda</span>
+                                <div className={styles.legend} aria-label="Leyenda de puestos">
                                     {rankingLegendItems.map((item) => (
                                         <div
                                             key={`${item.rangeLabel}-${item.label}-${item.color}`}
-                                            className={styles.positionLegendItem}
+                                            className={styles.legendItem}
                                             style={getPositionLabelStyle(item)}
                                         >
-                                            <span className={styles.positionLegendSwatch} />
+                                            <span className={styles.legendSwatch} />
                                             <strong>{item.rangeLabel}</strong>
                                             <span>{item.label}</span>
                                         </div>
@@ -1021,22 +1048,19 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                                 </div>
                             ) : null}
 
-                            <div className={styles.paginationBar}>
-                                <span className={styles.paginationMeta}>
-                                    Mostrando {visibleEntries.length ? paginatedEntries.start + 1 : 0}-{paginatedEntries.start + visibleEntries.length} de {activeRankingDetail?.entries.length ?? 0}
-                                </span>
-                                <div className={styles.paginationControls}>
+                            {paginatedEntries.totalPages > 1 ? (
+                                <nav className={styles.pagination} aria-label="Paginas de la tabla">
                                     <button
                                         type="button"
                                         className={styles.paginationBtn}
                                         onClick={() => setTablePage(Math.max(1, paginatedEntries.page - 1))}
                                         disabled={paginatedEntries.page <= 1}
                                     >
-                                        <ChevronLeft size={14} />
+                                        <ChevronLeft size={16} />
                                         Anterior
                                     </button>
                                     <span className={styles.paginationPage}>
-                                        Pagina {paginatedEntries.page} de {paginatedEntries.totalPages}
+                                        {paginatedEntries.page} de {paginatedEntries.totalPages}
                                     </span>
                                     <button
                                         type="button"
@@ -1045,73 +1069,32 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                                         disabled={paginatedEntries.page >= paginatedEntries.totalPages}
                                     >
                                         Siguiente
-                                        <ChevronRight size={14} />
+                                        <ChevronRight size={16} />
                                     </button>
-                                </div>
-                            </div>
+                                </nav>
+                            ) : null}
                         </>
-                    ) : (
+                    ) : hasEntries ? (
+                        <div className={styles.inlineState}>
+                            <Search size={16} />
+                            <span>Ningun {nouns.entidad.toLowerCase()} coincide con &ldquo;{busqueda.trim()}&rdquo;.</span>
+                            <button type="button" className={styles.linkBtn} onClick={() => handleBusqueda('')}>
+                                Ver todos
+                            </button>
+                        </div>
+                    ) : !loadingList && !loadingDetail ? (
                         <div className={styles.inlineState}>
                             <Layers3 size={16} />
-                            <span>No hay tabla publica disponible para este ranking.</span>
-                        </div>
-                    )}
-                </section>
-            </div>
-
-            <section className={styles.readoutSection}>
-                <div className="container">
-                    <div className={styles.readoutRow}>
-                        <div>
-                            <span className={styles.sectionTitle}>Lectura rapida</span>
-                            <p className={styles.readoutText}>
+                            <span>
                                 {rankingList.length
-                                    ? `${rankingList.length} ranking${rankingList.length === 1 ? '' : 's'} cargado${rankingList.length === 1 ? '' : 's'} y ${activeRankingDetail?.entries.length ?? 0} ${nouns.publicados.toLowerCase()}.`
-                                    : 'Sin rankings cargados para este deporte.'}
-                            </p>
+                                    ? `Este ranking todavia no tiene ${nouns.plural} publicados.`
+                                    : `Todavia no hay un ranking publicado de ${sportLabel}.`}
+                            </span>
                         </div>
-                        <div className={styles.readoutMeta}>
-                            <div className={styles.readoutChip}>
-                                <Trophy size={14} />
-                                <span>{readoutLabel}</span>
-                            </div>
-                            <div className={styles.readoutChip}>
-                                <Sparkles size={14} />
-                                <span>{selectedRanking?.season || '-'}</span>
-                            </div>
-                            <div className={styles.readoutChip}>
-                                <Shield size={14} />
-                                <span>{rankingStatusLabel}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {hasEntries && canExportPublicRanking ? (
-                <section className={styles.exportSection}>
-                    <div className="container">
-                        <div className={styles.exportSectionInner}>
-                            <ExportImage
-                                className={styles.exportSectionAction}
-                                template="standings"
-                                filename={`ranking-${selectedRanking?.name || selectedSport.id}`}
-                                data={{
-                                    title: selectedRanking?.name || nouns.tituloExport,
-                                    subtitle: rankingExportSubtitle,
-                                    rows: rankingExportRows,
-                                    columnLabels: subrayaMovimiento
-                                        ? WORLD_RUGBY_EXPORT_COLUMN_LABELS
-                                        : RANKING_EXPORT_COLUMN_LABELS,
-                                    plainDiff: true,
-                                    showPositionDelta: true,
-                                    variant: 'rankingPoster',
-                                }}
-                            />
-                        </div>
-                    </div>
+                    ) : null}
                 </section>
-            ) : null}
+                </div>
+            </div>
         </div>
     );
 }
