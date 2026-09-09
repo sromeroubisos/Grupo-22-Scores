@@ -1,6 +1,6 @@
 import { apiFetch } from '@/lib/apiFetch';
 import { memoryCache } from '@/lib/cache';
-import type { Match, MatchStatus } from '@/types/match';
+import type { MatchLiveEvent, Match, MatchStatus } from '@/types/match';
 
 export type EspnFootballLeagueSlug = string;
 
@@ -225,6 +225,53 @@ function getMatchMinute(statusType: any): string | undefined {
     if (detail.toLowerCase().includes('half')) return 'HT';
     if (/\d+'/.test(detail)) return detail;
     return undefined;
+}
+
+/**
+ * Los hechos del partido que ESPN publica junto al marcador (`details`): cada
+ * uno con su tipo, su reloj, su club y los jugadores involucrados. Es lo que
+ * hace posible avisar quién hizo el gol sin pedir la ficha del partido.
+ *
+ * Los ids del club se llevan al formato del sitio para que el consumidor pueda
+ * compararlos con `homeTeamId` / `awayTeamId` sin saber de ESPN.
+ */
+function parseEspnLiveEvents(competition: Record<string, any> | null, leagueSlug: string): MatchLiveEvent[] {
+    const details = Array.isArray(competition?.details) ? competition!.details : [];
+    const events: MatchLiveEvent[] = [];
+    for (const d of details) {
+        if (!d || typeof d !== 'object') continue;
+        const text = normalizeString(d?.type?.text).toLowerCase();
+        let kind: MatchLiveEvent['kind'] = 'other';
+        if (d.scoringPlay === true || text.includes('goal')) {
+            kind = d.ownGoal === true || text.includes('own goal') ? 'own-goal'
+                : d.penaltyKick === true || text.includes('penalty') ? 'penalty-goal'
+                : 'goal';
+        } else if (d.redCard === true || text.includes('red card')) {
+            kind = 'red-card';
+        } else if (d.yellowCard === true || text.includes('yellow card')) {
+            kind = 'yellow-card';
+        }
+        // Un penal errado también viene con `penaltyKick`: sin `scoringPlay` no es gol.
+        if (kind === 'penalty-goal' && d.scoringPlay !== true) kind = 'other';
+        if (kind === 'other') continue;
+
+        const minute = normalizeString(d?.clock?.displayValue) || normalizeString(d?.clock) || '';
+        const minuteMatch = /(\d+)(?:'\s*\+\s*(\d+)|\s*\+\s*(\d+))?/.exec(minute);
+        const minuteNumber = minuteMatch
+            ? Number(minuteMatch[1]) + Number(minuteMatch[2] || minuteMatch[3] || 0)
+            : null;
+        const teamRaw = normalizeString(d?.team?.id);
+        const athletes = Array.isArray(d?.athletesInvolved) ? d.athletesInvolved : [];
+        const player = normalizeString(athletes[0]?.displayName) || normalizeString(athletes[0]?.shortName) || null;
+        events.push({
+            kind,
+            minute,
+            minuteNumber: minuteNumber !== null && Number.isFinite(minuteNumber) ? minuteNumber : null,
+            teamId: teamRaw ? toEspnFootballTeamId(teamRaw, leagueSlug) : null,
+            playerName: player,
+        });
+    }
+    return events;
 }
 
 function getLeagueLogo(payload: Record<string, any> | null | undefined) {
@@ -933,6 +980,7 @@ function normalizeEspnEventCore(event: Record<string, any>, league: EspnFootball
         kickoff,
         round: roundNumber,
         minute,
+        liveEvents: parseEspnLiveEvents(competition, league.slug),
         venue,
         season: typeof event?.season?.year === 'number' ? event.season.year : null,
         tournament: {
@@ -1056,6 +1104,7 @@ function buildMatchFromNormalized(n: NonNullable<ReturnType<typeof normalizeEspn
         status: n.status,
         score: n.score,
         currentMinute: n.minute,
+        liveEvents: n.liveEvents.length > 0 ? n.liveEvents : undefined,
         result: {
             isComplete: n.status === 'final',
             updatedAt: new Date(),

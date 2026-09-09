@@ -125,6 +125,11 @@ function getNotificationTarget(notification) {
     return `/matches/${notification.match_id}`;
   }
 
+  // Partido externo: sin fila propia, el id viaja en entity_id.
+  if (notification && notification.entity_type === 'match' && notification.entity_id) {
+    return `/matches/${notification.entity_id}`;
+  }
+
   if (notification && notification.entity_type === 'club') {
     return `/clubs/${notification.entity_id}`;
   }
