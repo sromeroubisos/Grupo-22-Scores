@@ -33,6 +33,21 @@ export interface MatchResult {
 
 
 
+/**
+ * Un hecho del partido tal cual lo publica el proveedor junto con el marcador
+ * en vivo: gol, tarjeta. Es lo que permite avisar "gol de X" sin pedir la
+ * ficha completa. Hoy lo trae solo el fútbol de ESPN.
+ */
+export interface MatchLiveEvent {
+    kind: 'goal' | 'own-goal' | 'penalty-goal' | 'red-card' | 'yellow-card' | 'other';
+    /** El minuto como lo escribe el proveedor: "45'", "90'+3". */
+    minute: string;
+    minuteNumber: number | null;
+    /** El id externo del club del hecho (con prefijo del proveedor). */
+    teamId: string | null;
+    playerName: string | null;
+}
+
 export interface Match {
     id: string;
     tournamentId: string;
@@ -78,6 +93,8 @@ export interface Match {
     createdFrom: MatchCreatedFrom;
     lockedByPhase?: boolean;      // si quer----s bloquear equipos/estructura
     currentMinute?: string;       // For live matches (e.g. "45'", "HT")
+    /** Goles y tarjetas publicados con el marcador en vivo. Solo proveedores que los dan. */
+    liveEvents?: MatchLiveEvent[];
 
     createdAt: Date;
     updatedAt: Date;

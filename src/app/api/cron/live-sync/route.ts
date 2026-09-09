@@ -11,7 +11,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getFlashScoreLiveMatches } from '@/lib/services/flashscore';
 import { getActiveSports } from '@/lib/data/sports';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { isFlashScoreEnabledForSport } from '@/lib/externalProviderPolicy';
+import { isFlashScoreEnabledForSport, isFootballSport } from '@/lib/externalProviderPolicy';
+import { getEspnFootballMatches } from '@/lib/services/espnFootball';
+import {
+    detectFootballChanges,
+    notifyFootballChanges,
+    type FootballNotifyResult,
+    type PreviousLiveState,
+} from '@/lib/notifications/footballLiveNotifications';
+import type { Match } from '@/types/match';
 import {
     mapFlashScoreMatchToCached,
     upsertMatches,
@@ -23,6 +31,63 @@ import { RUGBYPASS_MATCH_ID_PREFIX } from '@/lib/services/rugbyPassParser';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
+
+/**
+ * AVISOS DE FÚTBOL.
+ *
+ * El fútbol externo no pasa por `matches`, así que los triggers que avisan
+ * "partido finalizado" y "evento del club" no lo ven. Acá se hace lo mismo
+ * desde el cron: la fila guardada en `external_match_cache` es el estado
+ * anterior, lo que ESPN trae ahora es el nuevo, y la diferencia son los hechos
+ * (comienzo, gol, expulsión, final). Ver `footballLiveNotifications.ts`.
+ *
+ * Corre ANTES de escribir la caché —si no, el estado anterior ya sería el
+ * nuevo— y nunca tumba el sync: un aviso que falla se registra y el marcador
+ * se escribe igual.
+ *
+ * Devuelve además los partidos que estaban en vivo y terminaron, con su
+ * marcador final según ESPN, para que la caché no se quede con el último
+ * marcador visto en vivo.
+ */
+async function notificarFutbol(
+    supabase: SupabaseClient,
+    liveMatches: Match[],
+): Promise<{ result: FootballNotifyResult; finished: Match[] }> {
+    const liveIds = liveMatches.map((m) => m.id);
+    const idList = liveIds.length > 0
+        ? `,id.in.(${liveIds.map((id) => `"${id.replace(/"/g, '')}"`).join(',')})`
+        : '';
+
+    const { data, error } = await supabase
+        .from('external_match_cache')
+        .select('id, status, score')
+        .eq('sport', 'football')
+        .or(`status.eq.live${idList}`);
+    if (error) throw error;
+
+    const previous = new Map<string, PreviousLiveState>();
+    for (const row of data ?? []) {
+        previous.set(String(row.id), {
+            id: String(row.id),
+            status: String(row.status ?? ''),
+            score: row.score && typeof row.score === 'object'
+                ? {
+                    home: typeof row.score.home === 'number' ? row.score.home : null,
+                    away: typeof row.score.away === 'number' ? row.score.away : null,
+                }
+                : null,
+        });
+    }
+
+    // Mismo request que el de vivo (memoryCache): no cuesta otro viaje a ESPN.
+    const liveSet = new Set(liveIds);
+    const finished = (await getEspnFootballMatches(new Date()))
+        .filter((m) => m.status === 'final' && !liveSet.has(m.id) && previous.get(m.id)?.status === 'live');
+
+    const changes = detectFootballChanges(previous, liveMatches, finished);
+    const result = await notifyFootballChanges(changes, supabase);
+    return { result, finished };
+}
 
 /**
  * Un partido de rugby dura unos 80 minutos de juego mas el entretiempo: 100
@@ -174,13 +239,29 @@ export async function GET(request: NextRequest) {
                 return { sport: sport.id, synced: 0, error: 'api_failed' };
             }
 
+            let notifications: FootballNotifyResult | { error: string } | null = null;
+            let finishedNow: Match[] = [];
+            if (isFootballSport(sport.id)) {
+                try {
+                    const out = await notificarFutbol(adminClient, liveMatches);
+                    notifications = out.result;
+                    finishedNow = out.finished;
+                } catch (e) {
+                    notifications = { error: e instanceof Error ? e.message : String(e) };
+                    console.warn('[live-sync] los avisos de fútbol fallaron:', e);
+                }
+            }
+
             // `synced` es lo que se ESCRIBIÓ, no lo que trajo el proveedor: si la
             // caché no existe, informar liveMatches.length sería inventar trabajo.
             let written = 0;
             let storageSkipped = false;
 
-            if (liveMatches.length > 0) {
-                const cached = liveMatches.map(m => mapFlashScoreMatchToCached(m, sport.id));
+            // Los que terminaron entran con su marcador final: la fila en vivo
+            // tenía el último visto, y `resetStaleLiveMatches` solo cambia el estado.
+            const toWrite = [...liveMatches, ...finishedNow];
+            if (toWrite.length > 0) {
+                const cached = toWrite.map(m => mapFlashScoreMatchToCached(m, sport.id));
                 const result = await upsertMatches(cached, adminClient);
                 written = result.written;
                 storageSkipped = result.skipped;
@@ -190,9 +271,10 @@ export async function GET(request: NextRequest) {
             const currentLiveIds = liveMatches.map(m => m.id);
             await resetStaleLiveMatches(currentLiveIds, sport.id, adminClient);
 
+            const extra = notifications ? { notifications } : {};
             return storageSkipped
-                ? { sport: sport.id, synced: written, fetched: liveMatches.length, storage: 'unavailable' as const }
-                : { sport: sport.id, synced: written };
+                ? { sport: sport.id, synced: written, fetched: liveMatches.length, storage: 'unavailable' as const, ...extra }
+                : { sport: sport.id, synced: written, ...extra };
         })
     );
 

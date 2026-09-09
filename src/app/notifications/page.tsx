@@ -24,6 +24,12 @@ function getNotificationHref(notification: UserNotification) {
         return `/matches/${notification.match_id}`;
     }
 
+    // Un partido externo (fútbol de ESPN) no tiene fila en `matches`: viaja
+    // solo en `entity_id`, y el Match Center lo resuelve por su prefijo.
+    if (notification.entity_type === 'match' && notification.entity_id) {
+        return `/matches/${notification.entity_id}`;
+    }
+
     if (notification.entity_type === 'club') {
         return `/clubs/${notification.entity_id}`;
     }
@@ -35,7 +41,13 @@ function getNotificationHref(notification: UserNotification) {
     return '/notifications';
 }
 
-function getTypeLabel(type: UserNotification['type']) {
+function getTypeLabel(type: UserNotification['type'], metadata?: Record<string, unknown>) {
+    // El fútbol externo dice qué pasó en `metadata.eventType`; el rótulo lo
+    // nombra en vez de decir "Evento", que no es un dato.
+    const eventType = typeof metadata?.eventType === 'string' ? metadata.eventType : null;
+    if (eventType === 'goal') return 'Gol';
+    if (eventType === 'red-card') return 'Expulsión';
+    if (eventType === 'kickoff') return 'Comienzo';
     if (type === 'match_finished') return 'Resultado';
     if (type === 'team_event') return 'Evento';
     return 'Notificacion';
@@ -170,7 +182,7 @@ export default function NotificationsPage() {
                         <span className={styles.itemMain}>
                             <span className={styles.itemTop}>
                                 <strong>{notification.title}</strong>
-                                <span>{getTypeLabel(notification.type)}</span>
+                                <span>{getTypeLabel(notification.type, notification.metadata)}</span>
                             </span>
                             <span className={styles.itemBody}>{notification.body}</span>
                             <time>{formatFullDate(notification.created_at)}</time>

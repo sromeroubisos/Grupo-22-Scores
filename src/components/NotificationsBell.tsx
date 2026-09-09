@@ -27,6 +27,12 @@ function getNotificationHref(notification: UserNotification) {
         return `/matches/${notification.match_id}`;
     }
 
+    // Un partido externo (fútbol de ESPN) no tiene fila en `matches`: viaja
+    // solo en `entity_id`, y el Match Center lo resuelve por su prefijo.
+    if (notification.entity_type === 'match' && notification.entity_id) {
+        return `/matches/${notification.entity_id}`;
+    }
+
     if (notification.entity_type === 'club') {
         return `/clubs/${notification.entity_id}`;
     }
