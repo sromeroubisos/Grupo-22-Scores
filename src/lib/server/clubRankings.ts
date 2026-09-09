@@ -1,5 +1,12 @@
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
+import {
+    getRankingWeekKey,
+    isNewRankingWeek,
+    legacyWeeklyBaselineMark,
+    readWeeklyBaselineMark,
+    resolveWeeklyBaseline,
+} from '@/lib/rankings/rankingWeek';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
 import { isUuid } from '@/lib/utils/postgrest';
@@ -778,6 +785,8 @@ const RANKING_ENTRIES_HARD_LIMIT = 5000;
 // posiciones—, o sea 2 × (cantidad de clubes) round-trips seriales antes y
 // después del trabajo real. Con 151 clubes eran ~300 viajes de puro preámbulo.
 const RANKING_WRITE_CHUNK = 200;
+/** Tope de filas por respuesta de PostgREST (`db-max-rows`); la lectura de partidos pagina con este paso. */
+const MATCH_PAGE_SIZE = 1000;
 
 /**
  * La fila tal como la acepta `club_ranking_entries`, y nada mas.
@@ -1263,20 +1272,17 @@ async function recomputeEntryPositions(
 
     // Igual que el reset: en lote. Era un UPDATE por club, y esto corre al final
     // de CADA rebuild y de cada aplicación incremental.
+    //
+    // Solo se reescribe el puesto ACTUAL. El anterior (`source_previous_position`)
+    // es la referencia de la semana y la toma únicamente la corrida semanal:
+    // pisarlo acá con el puesto de un minuto atrás —que es lo que se hacía— dejaba
+    // sin flecha a los 150 clubes que no se movieron por el ajuste, y con una
+    // flecha que medía "desde el ajuste" al que sí.
     const conPosicion = sorted.map((entry, index) => {
         const nextPosition = index + 1;
-        const previousPosition =
-            entry.current_position === null || entry.current_position === undefined
-                ? null
-                : Number(entry.current_position);
-
-        entry.source_previous_position = previousPosition;
         entry.current_position = nextPosition;
 
-        return toEntryRow(entry, {
-            current_position: nextPosition,
-            source_previous_position: previousPosition,
-        });
+        return toEntryRow(entry, { current_position: nextPosition });
     });
 
     for (let desde = 0; desde < conPosicion.length; desde += RANKING_WRITE_CHUNK) {
@@ -1415,14 +1421,20 @@ export async function actualizarRankingSemanal(rankingId: string) {
         activeEntries.map((entry) => entry.club_id),
     );
 
-    // El puntaje con el que cada club TERMINÓ la semana pasada, antes de que el
-    // reset de abajo lo pise. Es lo que la tabla muestra como "anterior" y contra
-    // lo que se calcula la variación de la fila: sin guardarlo acá se pierde, y
-    // la columna queda comparando el puntaje nuevo contra sí mismo — 0,00 en las
-    // 151 filas, todas las semanas.
-    const ratingDeLaSemanaPasada = new Map(
-        entries.map((entry) => [entry.club_id, roundRating(toNumber(entry.current_rating))]),
-    );
+    // El "anterior" de cada fila —puesto y puntaje— es la tabla tal como quedó
+    // publicada la SEMANA pasada, y se toma una sola vez por semana: en la
+    // primera corrida (el cron del martes). Si el panel vuelve a recalcular el
+    // jueves, o se corrige un resultado, la referencia se conserva; tomarla de
+    // nuevo dejaba la variación en 0,00 y las flechas apagadas hasta el martes
+    // siguiente, y la tabla "semana a semana" medía en realidad "desde la
+    // última vez que alguien tocó el panel". La decisión vive en rankingWeek.ts.
+    const semana = getRankingWeekKey();
+    // Sin marca (rankings que corrieron con la lógica anterior), la última corrida
+    // hace de marca: si fue esta misma semana, lo guardado ya es la referencia.
+    const marcaPrevia = readWeeklyBaselineMark(ranking.metadata)
+        ?? legacyWeeklyBaselineMark(ranking.backfill_completed_at);
+    const referenciaRenovada = isNewRankingWeek(marcaPrevia, semana);
+    const referencia = resolveWeeklyBaseline(entries, marcaPrevia, semana);
 
     // Desde cero, con el puntaje inicial de cada club.
     const porClub = new Map<string, RankingEntryRow>();
@@ -1491,22 +1503,23 @@ export async function actualizarRankingSemanal(rankingId: string) {
     });
 
     // Las posiciones salen de ordenar por puntaje acá mismo. La posición anterior
-    // —la que dibuja la flechita de subió/bajó— es la que estaba guardada antes
-    // de esta corrida, o sea la de la semana pasada.
+    // —la que dibuja la flechita de subió/bajó— y el puntaje anterior son la
+    // referencia de la semana, resuelta arriba.
     const ordenadas = [...entries].sort(compareRankingEntries);
     const filas = ordenadas.map((entry, index) => {
-        const posicionPrevia =
-            entry.current_position === null || entry.current_position === undefined
-                ? null
-                : Number(entry.current_position);
+        const base = referencia.get(entry.club_id);
+        const posicionPrevia = base?.position ?? null;
+        const ratingPrevio = base?.rating ?? toNumber(entry.current_rating);
+
+        entry.current_position = index + 1;
+        entry.source_previous_position = posicionPrevia;
+        entry.source_payload = withPreviousRating(entry.source_payload, ratingPrevio);
+        entry.previous_rating = roundRating(ratingPrevio);
 
         return toEntryRow(entry, {
             current_position: index + 1,
             source_previous_position: posicionPrevia,
-            source_payload: withPreviousRating(
-                entry.source_payload,
-                ratingDeLaSemanaPasada.get(entry.club_id) ?? toNumber(entry.current_rating),
-            ),
+            source_payload: entry.source_payload,
         });
     });
 
@@ -1536,20 +1549,44 @@ export async function actualizarRankingSemanal(rankingId: string) {
         }
     }
 
-    await supabase
+    // La marca de la semana va en `metadata`, que ya existe: agregar una columna
+    // obligaría a migrar a mano en la base viva. Se mezcla con lo que hay
+    // (positionLabels y demás), nunca se pisa entero.
+    const ahora = new Date().toISOString();
+    const metadata = {
+        ...(ranking.metadata && typeof ranking.metadata === 'object' ? ranking.metadata : {}),
+        weeklyBaseline: referenciaRenovada
+            ? { weekKey: semana, capturedAt: ahora }
+            : marcaPrevia,
+        lastWeeklyRunAt: ahora,
+    };
+
+    const { error: errorRanking } = await supabase
         .from('club_rankings')
         .update({
-            backfill_completed_at: new Date().toISOString(),
+            backfill_completed_at: ahora,
             last_incremental_match_id: null,
             stale_from_match_id: null,
             stale_from_match_date: null,
             stale_reason: null,
+            metadata,
         })
         .eq('id', rankingId);
 
+    if (errorRanking) {
+        throw createClubRankingQueryError(errorRanking, 'No se pudo cerrar la corrida semanal del ranking.');
+    }
+
     const puntero = await escribirVersionDelRanking(supabase, ranking, ordenadas);
 
-    return { aplicados, ajustes: ajustesAplicados.length, clubes: filas.length, puntero };
+    return {
+        aplicados,
+        ajustes: ajustesAplicados.length,
+        clubes: filas.length,
+        puntero,
+        semana,
+        referenciaRenovada,
+    };
 }
 
 /**
@@ -1874,10 +1911,9 @@ async function applyMatchToRanking(
         );
     }
 
-    homeEntry.previous_rating = homeRatingBefore;
-    awayEntry.previous_rating = awayRatingBefore;
-    homeEntry.source_payload = withPreviousRating(homeEntry.source_payload, homeRatingBefore);
-    awayEntry.source_payload = withPreviousRating(awayEntry.source_payload, awayRatingBefore);
+    // El puntaje anterior de la fila NO se toca: es la referencia semanal, no el
+    // puntaje previo al último partido. Escribirlo acá por partido dejaba la
+    // columna de variación midiendo el último intercambio en vez de la semana.
     homeEntry.current_rating = homeRatingAfter;
     awayEntry.current_rating = awayRatingAfter;
     homeEntry.last_applied_match_id = match.id;
@@ -1888,7 +1924,6 @@ async function applyMatchToRanking(
             .from('club_ranking_entries')
             .update({
                 current_rating: homeRatingAfter,
-                source_payload: homeEntry.source_payload,
                 last_applied_match_id: match.id,
             })
             .eq('ranking_id', ranking.id)
@@ -1897,7 +1932,6 @@ async function applyMatchToRanking(
             .from('club_ranking_entries')
             .update({
                 current_rating: awayRatingAfter,
-                source_payload: awayEntry.source_payload,
                 last_applied_match_id: match.id,
             })
             .eq('ranking_id', ranking.id)
@@ -1941,26 +1975,39 @@ async function listEligibleSeasonMatches(
 ) {
     if (clubIds.length === 0) return [];
 
+    // PostgREST corta en 1000 filas y no avisa. Con 158 clubes la temporada pasa
+    // esa marca en agosto: medido el 2026-09-09, la consulta sin paginar devolvía
+    // 1000 partidos con el último del 22/8 cuando había 1121 elegibles, 45 de
+    // ellos de la semana anterior. El ranking rehacía cada martes los mismos
+    // 1000 y quedaba idéntico —cero flechas, cero variación— sin ningún error.
+    // Se pagina con `range` sobre el mismo orden estable (fecha, id) hasta que
+    // una tanda venga incompleta.
     const range = getSeasonRange(ranking.results_season);
-    const { data, error } = await supabase
-        .from('matches')
-        .select(MATCH_SELECT)
-        .eq('status', 'final')
-        .gte('date_time', range.start)
-        .lt('date_time', range.end)
-        .in('home_club_id', clubIds)
-        .in('away_club_id', clubIds)
-        .order('date_time', { ascending: true })
-        .order('id', { ascending: true });
+    const rows: MatchSnapshot[] = [];
 
-    if (error) {
-        throw createClubRankingQueryError(error, 'No se pudieron cargar los partidos del ranking.');
+    for (let desde = 0; ; desde += MATCH_PAGE_SIZE) {
+        const { data, error } = await supabase
+            .from('matches')
+            .select(MATCH_SELECT)
+            .eq('status', 'final')
+            .gte('date_time', range.start)
+            .lt('date_time', range.end)
+            .in('home_club_id', clubIds)
+            .in('away_club_id', clubIds)
+            .order('date_time', { ascending: true })
+            .order('id', { ascending: true })
+            .range(desde, desde + MATCH_PAGE_SIZE - 1);
+
+        if (error) {
+            throw createClubRankingQueryError(error, 'No se pudieron cargar los partidos del ranking.');
+        }
+
+        const tanda = (data || []) as MatchSnapshot[];
+        rows.push(...tanda);
+        if (tanda.length < MATCH_PAGE_SIZE) break;
     }
 
-    return enrichMatchesWithTournamentSport(
-        supabase,
-        ((data || []) as MatchSnapshot[]),
-    );
+    return enrichMatchesWithTournamentSport(supabase, rows);
 }
 
 async function rebuildRankingInternal(
@@ -1981,20 +2028,20 @@ async function rebuildRankingInternal(
     // el conflicto por `id` siempre ocurre —las filas existen—, pero el tuple que
     // se arma tiene que satisfacer igual los NOT NULL de la tabla, así que no se
     // puede mandar sólo el parche.
+    //
+    // Se resetea el puntaje y el puesto actuales, NO la referencia semanal
+    // (`source_previous_position` y `source_payload.previous_rating`): esa la
+    // toma la corrida del martes y es lo que la tabla pública compara. Borrarla
+    // acá dejaba el ranking sin flechas hasta la semana siguiente.
     const entradasReseteadas = entries.map((entry) => {
         const resetRating = roundRating(toNumber(entry.initial_rating));
-        entry.previous_rating = resetRating;
         entry.current_rating = resetRating;
         entry.current_position = null;
-        entry.source_previous_position = null;
         entry.last_applied_match_id = null;
-        entry.source_payload = withPreviousRating(entry.source_payload, resetRating);
 
         return toEntryRow(entry, {
             current_rating: resetRating,
             current_position: null,
-            source_previous_position: null,
-            source_payload: entry.source_payload,
             last_applied_match_id: null,
         });
     });
@@ -2650,12 +2697,13 @@ export async function applyManualClubRankingAdjustment(
         );
     }
 
+    // Solo el puntaje actual. El anterior sigue siendo la referencia semanal,
+    // así el ajuste se ve en la variación de esta semana (junto con los
+    // partidos) y desaparece solo cuando el martes renueve la referencia:
+    // una vez, la semana en que se cargó, que es lo que corresponde.
     const { error: entryError } = await supabase
         .from('club_ranking_entries')
-        .update({
-            current_rating: nextRating,
-            source_payload: withPreviousRating(entry.source_payload, currentRating),
-        })
+        .update({ current_rating: nextRating })
         .eq('ranking_id', rankingId)
         .eq('club_id', input.clubId);
 

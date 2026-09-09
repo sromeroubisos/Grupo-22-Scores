@@ -19,6 +19,7 @@
  * mapeo copiado; ahora vive una sola vez, aca.
  */
 import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
+import { readWeeklyBaselineMark } from '@/lib/rankings/rankingWeek';
 import { getClubRankingDetail, listClubRankings } from '@/lib/server/clubRankings';
 import { getWorldRugbySnapshot } from '@/lib/server/worldRugbyRankings';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
@@ -48,6 +49,13 @@ export type PublicRankingSummary = {
      */
     snapshot_date: string | null;
     history_from: string | null;
+    /**
+     * Solo en los rankings de clubes: la semana (martes, ISO corto) contra la que
+     * se miden las flechas y la variacion de la tabla. Null hasta la primera
+     * corrida semanal, y siempre en los de selecciones, que traen su propio
+     * "anterior" de World Rugby.
+     */
+    movement_baseline_week: string | null;
     stale_from_match_id: string | null;
     stale_reason: string | null;
     initial_imported_at: string | null;
@@ -118,6 +126,7 @@ function snapshotToSummary(snapshot: WorldRugbySnapshot): PublicRankingSummary {
         entity: 'seleccion',
         snapshot_date: snapshot.effectiveDate,
         history_from: WORLD_RUGBY_FIRST_RANKING_DATE,
+        movement_baseline_week: null,
         // Un ranking importado no espera recalculo ni backfill: esos campos
         // describen nuestro motor, y este ranking no pasa por el.
         stale_from_match_id: null,
@@ -186,6 +195,9 @@ function clubRowToSummary(ranking: Awaited<ReturnType<typeof listClubRankings>>[
         // actual, y mirar "la tabla de hace un mes" pediria guardar historico.
         snapshot_date: null,
         history_from: null,
+        // Lo que si tiene es la referencia de la semana: contra que martes se
+        // miden las flechas. Es lo que la pantalla rotula debajo de la tabla.
+        movement_baseline_week: readWeeklyBaselineMark(ranking.metadata)?.weekKey ?? null,
         stale_from_match_id: ranking.stale_from_match_id,
         stale_reason: ranking.stale_reason,
         initial_imported_at: ranking.initial_imported_at,

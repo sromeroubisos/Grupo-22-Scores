@@ -30,7 +30,6 @@ import {
     type RankingClubMatch,
     type RankingExpectedField,
 } from '@/lib/rankings/rankingWorkbookAnalysis';
-import ExportImage from '@/components/ExportImage';
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import {
     buildRankingExportRows,
@@ -45,8 +44,16 @@ import {
     normalizeRankingPositionLabels,
     type RankingPositionLabel,
 } from '@/lib/rankings/rankingTable';
+import { formatRankingWeekLabel } from '@/lib/rankings/rankingWeek';
 import baseStyles from '../page.module.css';
 import styles from './page.module.css';
+import dynamic from 'next/dynamic';
+
+// El export es la pieza mas pesada que carga esta pagina y solo hace falta cuando
+// alguien aprieta el boton. Diferido, deja de viajar en la primera carga: en el
+// telefono eso es codigo que no se baja, no se parsea y no se compila.
+const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
+
 
 type SheetRows = Record<string, string>[];
 type WorkbookPreview = {
@@ -1059,11 +1066,28 @@ export default function SuperRankingsPage() {
         try {
             const payload = await readJson(await fetch(`/api/admin/super/rankings/${encodeURIComponent(selectedRanking.id)}/recalcular`, { method: 'POST' }));
             applyDetail(payload.data as RankingDetail);
-            const resumen = payload.resumen as { aplicados?: number; ajustes?: number; clubes?: number; puntero?: string | null } | undefined;
+            const resumen = payload.resumen as {
+                aplicados?: number;
+                ajustes?: number;
+                clubes?: number;
+                puntero?: string | null;
+                semana?: string;
+                referenciaRenovada?: boolean;
+            } | undefined;
+            // Decir que paso con la referencia semanal: si este Recalcular abrio la
+            // semana (las flechas ahora miden desde hoy) o si la conservo (miden
+            // desde el martes, como la tabla publica). Antes cada recalculo la
+            // pisaba en silencio y dejaba la variacion en cero.
+            const semana = resumen?.semana ? formatRankingWeekLabel(resumen.semana) : null;
+            const referencia = semana
+                ? resumen?.referenciaRenovada
+                    ? ` Abre la semana del ${semana}: las flechas miden desde esta corrida.`
+                    : ` Conserva la referencia del ${semana}: las flechas siguen midiendo la semana.`
+                : '';
             setFeedback({
                 tone: 'success',
                 text: resumen
-                    ? `Ranking recalculado: ${resumen.aplicados ?? 0} partidos y ${resumen.ajustes ?? 0} ajustes manuales sobre ${resumen.clubes ?? 0} clubes.${resumen.puntero ? ` Puntero: ${resumen.puntero}.` : ''}`
+                    ? `Ranking recalculado: ${resumen.aplicados ?? 0} partidos y ${resumen.ajustes ?? 0} ajustes manuales sobre ${resumen.clubes ?? 0} clubes.${resumen.puntero ? ` Puntero: ${resumen.puntero}.` : ''}${referencia}`
                     : 'Ranking recalculado.',
             });
         } catch (error) {
