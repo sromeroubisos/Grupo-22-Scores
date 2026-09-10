@@ -23,8 +23,10 @@ import {
 import { isGoalKickAttemptEvent } from '@/lib/matchEventStats';
 import {
     buildMatchEventDefinitionMap,
-    getDefaultMatchEventDefinitions,
+    getBaseMatchEventDefinitions,
 } from '@/lib/matchEventCatalog';
+import type { PeriodSportRef } from '@/lib/matchPeriods';
+import { readAmericanFootballRuleset, toPeriodRules } from '@/lib/americanFootballRules';
 import {
     buildCompleteMatchStats,
     buildCompleteStatTabs,
@@ -36,7 +38,7 @@ import { SPORTS } from '@/lib/data/sports';
 import { findCountryRecord } from '@/lib/data/countries';
 import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { APP_TIMEZONE } from '@/lib/timezone';
-import { computeElapsedSeconds, formatClockSeconds, normalizeStoredClock } from '@/lib/matchClock';
+import { computeElapsedSeconds, formatClockSeconds, getClockDisplaySeconds, normalizeStoredClock } from '@/lib/matchClock';
 import { calculateVirtualMatchTime } from '@/lib/virtualClock';
 import { cruzarEstado, mapMatchStatus } from '@/lib/matches/providerStatus';
 import {
@@ -67,9 +69,20 @@ const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: fal
 
 const USER_TZ = APP_TIMEZONE;
 
+/**
+ * El deporte MAS el reglamento del torneo, para leer el reloj como lo lee la
+ * consola: un torneo de futbol americano con cuartos de 12 descuenta desde
+ * 12, no desde los 15 del deporte a secas.
+ */
+function buildPublicSportRef(sportId: string | null | undefined, tournamentRuleset: unknown): PeriodSportRef {
+    const rules = readAmericanFootballRuleset(tournamentRuleset);
+    return rules ? { sportId: sportId ?? null, periodRules: toPeriodRules(rules) } : (sportId ?? null);
+}
+
 function formatClockLabel(
     clock: { minute?: number | null; seconds?: number | null; period?: string | null; running?: boolean | null; syncedAt?: string | null } | null | undefined,
     syncedAt?: string | null,
+    sportRef?: PeriodSportRef,
 ) {
     if (!clock) return '';
 
@@ -77,9 +90,14 @@ function formatClockLabel(
     // accumulated_seconds + (now - period_started_at). Es la fuente de verdad;
     // el espejo minute/seconds queda solo para relojes guardados con la forma
     // vieja o para proveedores externos.
+    //
+    // La LECTURA es la del deporte: el futbol americano cuenta para atras
+    // (lo que queda del cuarto), el resto para arriba. Misma funcion que usa
+    // la consola, para que el hincha y el operador vean el mismo numero.
     if (Object.prototype.hasOwnProperty.call(clock, 'accumulated_seconds')) {
         const normalized = normalizeStoredClock(clock);
-        const time = formatClockSeconds(computeElapsedSeconds(normalized, Date.now()));
+        const elapsed = computeElapsedSeconds(normalized, Date.now());
+        const time = formatClockSeconds(getClockDisplaySeconds(sportRef ?? null, normalized.period, elapsed).seconds);
         const period = normalized.period && normalized.period !== 'PRE' ? normalized.period : '';
         return period ? `${time} - ${period}` : time;
     }
@@ -99,10 +117,8 @@ function formatClockLabel(
         }
     }
 
-    const safeMinute = Math.floor(totalSeconds / 60);
-    const safeSeconds = totalSeconds % 60;
     const period = String(clock.period || '').trim();
-    const time = `${String(safeMinute).padStart(2, '0')}:${String(safeSeconds).padStart(2, '0')}`;
+    const time = formatClockSeconds(getClockDisplaySeconds(sportRef ?? null, period || 'PRE', totalSeconds).seconds);
     return period ? `${time} - ${period}` : time;
 }
 
@@ -112,11 +128,12 @@ function resolvePublicMatchTime(
     status: string | null | undefined,
     clock: { minute?: number | null; seconds?: number | null; period?: string | null; running?: boolean | null; syncedAt?: string | null } | null | undefined,
     syncedAt?: string | null,
+    tournamentRuleset?: unknown,
 ) {
     const normalizedStatus = String(status || '').toLowerCase();
 
     if (normalizedStatus === 'live') {
-        const clockLabel = formatClockLabel(clock, syncedAt);
+        const clockLabel = formatClockLabel(clock, syncedAt, buildPublicSportRef(sportId, tournamentRuleset));
         if (clockLabel) return clockLabel;
 
         const sport = SPORTS[(sportId || 'football') as keyof typeof SPORTS] || SPORTS.football;
@@ -783,7 +800,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const publicCompleteStatTabs = useMemo(() => {
         if (state.kind !== 'ok' || !state.matchData) return [];
         const sportId = state.matchData.sportId ?? null;
-        const defMap = buildMatchEventDefinitionMap(getDefaultMatchEventDefinitions(sportId));
+        // El catalogo del TORNEO, no del deporte: un partido de flag tiene
+        // flag pulls y no field goals, y sus pestanas son otras.
+        const tournamentRuleset = state.matchData.tournamentRuleset ?? null;
+        const defMap = buildMatchEventDefinitionMap(getBaseMatchEventDefinitions(sportId, tournamentRuleset));
         const homeName = state.matchData.home?.name || 'Local';
         const awayName = state.matchData.away?.name || 'Visitante';
         const evs: AggregatableMatchEvent[] = (state.eventsData || []).map((evt: Record<string, unknown>) => {
@@ -796,7 +816,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
             return { type: rawType, team, detail };
         });
         const stats = buildCompleteMatchStats(evs, defMap);
-        return buildCompleteStatTabs(stats, homeName, awayName, { sportId });
+        return buildCompleteStatTabs(stats, homeName, awayName, {
+            sportId,
+            discipline: readAmericanFootballRuleset(tournamentRuleset)?.discipline ?? null,
+        });
     }, [state.kind, state.matchData, state.eventsData]);
     const isSuperAdminUser = !authLoading && canUseRestrictedContentActions(user?.role);
     const isRugbyApiSportsSource = state.matchData?.externalProvider === 'rugby-api-sports';
@@ -1333,7 +1356,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 status: matchData.status || 'scheduled',
                                 sportId,
                                 date: matchData.dateTime,
-                                time: resolvePublicMatchTime(matchData.dateTime, sportId, matchData.status, matchData.clock, matchData.updatedAt || matchData.updated_at || null),
+                                time: resolvePublicMatchTime(matchData.dateTime, sportId, matchData.status, matchData.clock, matchData.updatedAt || matchData.updated_at || null, matchData.tournament?.ruleset ?? null),
                                 clock: matchData.clock || null,
                                 updatedAt: matchData.updatedAt || matchData.updated_at || null,
                                 phaseId: phaseId || null,
@@ -1342,6 +1365,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 tournamentLogo: resolveTournamentLogo(matchData.tournament),
                                 tournamentId,
                                 tournamentUrl: matchData.tournament?.url || null,
+                                // El reglamento del torneo (futbol americano: tackle o flag,
+                                // cuartos, suplementario). null en los demas deportes.
+                                tournamentRuleset: matchData.tournament?.ruleset ?? null,
                                 category: matchData.category || 'General',
                                 round: matchData.roundLabel || matchData.roundId || '',
                                 venue: matchData.venue || 'Por definir',
@@ -1482,7 +1508,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 status: matchData.status || 'scheduled',
                                 sportId,
                                 date: matchData.dateTime,
-                                time: resolvePublicMatchTime(matchData.dateTime, sportId, matchData.status, matchData.clock, matchData.updatedAt || matchData.updated_at || null),
+                                time: resolvePublicMatchTime(matchData.dateTime, sportId, matchData.status, matchData.clock, matchData.updatedAt || matchData.updated_at || null, matchData.tournament?.ruleset ?? null),
                                 clock: matchData.clock || null,
                                 updatedAt: matchData.updatedAt || matchData.updated_at || null,
                                 phaseId: phaseId || null,
@@ -1491,6 +1517,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 tournamentLogo: resolveTournamentLogo(matchData.tournament),
                                 tournamentId,
                                 tournamentUrl: matchData.tournament?.url || null,
+                                // El reglamento del torneo (futbol americano: tackle o flag,
+                                // cuartos, suplementario). null en los demas deportes.
+                                tournamentRuleset: matchData.tournament?.ruleset ?? null,
                                 category: matchData.category || 'General',
                                 round: matchData.roundLabel || matchData.roundId || '',
                                 venue: matchData.venue || 'Por definir',
@@ -2073,6 +2102,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         matchData.status,
         matchData.clock,
         matchData.updatedAt || matchData.updated_at || null,
+        matchData.tournamentRuleset ?? null,
     );
     void liveClockTick;
     const matchTimerText = liveDisplayTime || matchTimeText;
@@ -2913,6 +2943,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 homeTeam={timelineHomeTeam}
                                 awayTeam={timelineAwayTeam}
                                 sportId={matchData.sportId}
+                                tournamentRuleset={matchData.tournamentRuleset ?? null}
                             />
                         )}
 

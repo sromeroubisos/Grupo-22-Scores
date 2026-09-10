@@ -956,9 +956,10 @@ function AmericanFootballRulesEditor({
             )}
 
             <p className="field-help">
-                Estos números viajan con el torneo. El panel de partido arma con ellos el reloj, los períodos,
-                los eventos disponibles, la planilla y los tiempos muertos. Downs, play clock, no-run zone y blitz
-                quedan guardados para cuando el panel lleve el drive jugada por jugada.
+                Estos números viajan con el torneo. El panel de partido arma con ellos el reloj en cuenta regresiva,
+                los períodos y el suplementario, los eventos disponibles, la planilla, los tiempos muertos y el drive
+                (posesión, down y yardas por recorrer). La tabla ordena por porcentaje de victorias, con el empate
+                como media victoria. Play clock, no-run zone y blitz quedan guardados como referencia.
             </p>
         </div>
     );

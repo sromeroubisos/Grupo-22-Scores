@@ -60,6 +60,15 @@ export interface StandingsGenerateOptions {
   carryOverRows?: StandingsCarryOverRow[];
 }
 
+export type StandingsRankingMode = 'points' | 'win_percentage';
+
+/** (ganados + empatados / 2) / jugados, con tres decimales. 0 sin partidos. */
+export function calculateWinPercentage(won: number, drawn: number, played: number): number {
+  if (!Number.isFinite(played) || played <= 0) return 0;
+  const value = ((Number(won) || 0) + (Number(drawn) || 0) / 2) / played;
+  return Math.round(value * 1000) / 1000;
+}
+
 export class StandingsEngine {
   private static toFiniteNumber(value: unknown): number | null {
     const normalized = typeof value === 'string' && value.trim() === '' ? Number.NaN : Number(value);
@@ -95,6 +104,35 @@ export class StandingsEngine {
     if (!tb) return '';
     if (typeof tb === 'string') return tb;
     return tb?.key || tb?.metric || tb?.id || tb?.value || '';
+  }
+
+  /**
+   * Como se ORDENA la tabla.
+   *
+   * `points` es lo de siempre: la suma de puntos de tabla. `win_percentage`
+   * es la del futbol americano: (ganados + empatados/2) / jugados, que es la
+   * unica forma de comparar dos clubes con distinta cantidad de partidos y de
+   * que un empate valga media victoria y no cero. Con 1-0-0 por victoria, un
+   * 3-0 quedaba abajo de un 4-3 y un 5-0-2 empatado con un 5-2-0.
+   *
+   * Se declara explicito en `standings.ranking` / `pointsSystem.ranking`; si
+   * nadie lo declara, un torneo con reglamento de futbol americano
+   * (`ruleset.americanFootball`) rankea por porcentaje, porque es lo que el
+   * deporte hace en todas sus ligas.
+   */
+  static resolveRankingMode(phaseSettings: any, tournamentRuleset: any): StandingsRankingMode {
+    const declared =
+      phaseSettings?.standings?.ranking ??
+      phaseSettings?.pointsSystem?.ranking ??
+      tournamentRuleset?.standings?.ranking ??
+      tournamentRuleset?.pointsSystem?.ranking ??
+      tournamentRuleset?.ranking ??
+      null;
+    if (declared === 'win_percentage' || declared === 'points') return declared;
+    if (tournamentRuleset?.americanFootball && typeof tournamentRuleset.americanFootball === 'object') {
+      return 'win_percentage';
+    }
+    return 'points';
   }
 
   /**
@@ -150,8 +188,16 @@ export class StandingsEngine {
         tournamentPointsSystem?.bonusLoss ?? tournamentRuleset?.pointsBonusLoss,
         'defensive',
       );
+    const ranking = this.resolveRankingMode(phaseSettings, tournamentRuleset);
+    // Con ranking por porcentaje de victorias (futbol americano) el desempate
+    // de fabrica es el del deporte: enfrentamientos entre si, despues la
+    // diferencia de puntos y los puntos a favor. Con el ranking por puntos
+    // todo sigue como estaba.
+    const defaultTiebreakers = ranking === 'win_percentage'
+      ? ['head_to_head', 'points_difference', 'points_for']
+      : ['points_difference'];
     const rawTiebreakers =
-      phaseSettings?.tiebreakers ?? tournamentRuleset?.tiebreakers ?? ['points_difference'];
+      phaseSettings?.tiebreakers ?? tournamentRuleset?.tiebreakers ?? defaultTiebreakers;
 
     const tiebreakers = Array.isArray(rawTiebreakers)
       ? rawTiebreakers
@@ -166,9 +212,10 @@ export class StandingsEngine {
             const pb = (typeof b === 'object' && b !== null ? (b as any).priority : 0) ?? 0;
             return pa - pb;
           })
-      : ['points_difference'];
+      : defaultTiebreakers;
 
     return {
+      ranking,
       points_for_win:
         phaseSettings?.points?.win ??
         phasePointsSystem?.win ??
@@ -295,6 +342,9 @@ export class StandingsEngine {
     if (['triesdiff', 'triesdifference', 'triesdifferential'].includes(compact)) {
       return 'tries_difference';
     }
+    if (['winpercentage', 'winpct', 'pct', 'percentage', 'winningpercentage'].includes(compact)) {
+      return 'win_percentage';
+    }
     if (['won', 'wins'].includes(compact)) return 'won';
     if (['lost', 'losses'].includes(compact)) return 'lost';
     if (['drawn', 'draws'].includes(compact)) return 'drawn';
@@ -308,6 +358,9 @@ export class StandingsEngine {
     const key = this.normalizeTiebreakerMetricKey(rawKey);
 
     if (key === 'points') return Number(row.total_points ?? 0);
+    if (key === 'win_percentage') {
+      return Number(row.win_percentage ?? calculateWinPercentage(row.won, row.drawn, row.played));
+    }
     if (key === 'points_difference') return Number(row.difference ?? 0);
     if (key === 'points_for') return Number(row.points_for ?? 0);
     if (key === 'points_against') return Number(row.points_against ?? 0);
@@ -590,6 +643,7 @@ export class StandingsEngine {
       stats.tries_difference = stats.tries_for - stats.tries_against;
       stats.total_points =
         stats.base_points + stats.bonus_offensive + stats.bonus_defensive + stats.adjustments;
+      stats.win_percentage = calculateWinPercentage(stats.won, stats.drawn, stats.played);
       if (stats.form.length > 5) stats.form = stats.form.slice(-5);
       return stats;
     });
@@ -668,7 +722,7 @@ export class StandingsEngine {
 
         const groupedByHeadToHead = this.groupRowsByMetric(
           rows,
-          'points',
+          rules?.ranking === 'win_percentage' ? 'win_percentage' : 'points',
           direction,
           headToHeadSource.statsByTeamId,
         );
@@ -707,15 +761,24 @@ export class StandingsEngine {
     rules: any,
     tableType: string,
   ): any[] {
+    // La clave primaria de la tabla: puntos, o porcentaje de victorias en los
+    // deportes que rankean asi (futbol americano). Todo lo demas (grupos de
+    // empate, desempates) es igual para las dos.
+    const rankBy = (row: any) => (
+      rules?.ranking === 'win_percentage'
+        ? Number(row.win_percentage ?? calculateWinPercentage(row.won, row.drawn, row.played))
+        : Number(row.total_points ?? 0)
+    );
     const base = [...rows].sort((a, b) => {
-      if (b.total_points !== a.total_points) return b.total_points - a.total_points;
+      const diff = rankBy(b) - rankBy(a);
+      if (diff !== 0) return diff;
       return this.compareStableRows(a, b);
     });
 
     const groupedByPoints: any[][] = [];
     base.forEach((row) => {
       const lastGroup = groupedByPoints[groupedByPoints.length - 1];
-      if (!lastGroup || Number(lastGroup[0]?.total_points ?? 0) !== Number(row.total_points ?? 0)) {
+      if (!lastGroup || rankBy(lastGroup[0]) !== rankBy(row)) {
         groupedByPoints.push([row]);
         return;
       }

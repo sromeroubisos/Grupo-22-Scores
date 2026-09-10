@@ -3197,6 +3197,58 @@
     letter-spacing: 0.12em;
 }
 
+/* El drive (futbol americano): posesion, down y distancia. Ocupa su propia
+   fila de la barra del reloj porque es el estado del partido, no un adorno. */
+.live-drive-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    flex-basis: 100%;
+    min-height: 40px;
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.24);
+    color: #9ca3af;
+    font-size: 0.72rem;
+}
+
+.live-drive-possession {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+}
+
+.live-drive-down {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+.live-drive-strip[data-phase="conversion"] .live-drive-down {
+    color: #fbbf24;
+}
+
+.live-drive-strip[data-phase="open"] .live-drive-down {
+    color: #9ca3af;
+    font-weight: 700;
+}
+
+.live-drive-suggest {
+    margin-left: auto;
+    min-height: 36px;
+    border-color: var(--accent);
+    color: #6ee7b7;
+}
+
+.live-clock-manual-hint {
+    margin: 6px 0 8px;
+    color: #9ca3af;
+    font-size: 0.74rem;
+    line-height: 1.4;
+}
+
 .live-clock-bar[data-running="true"] .live-clock-readout {
     border-color: rgba(0, 208, 132, 0.5);
     background: rgba(0, 93, 58, 0.28);

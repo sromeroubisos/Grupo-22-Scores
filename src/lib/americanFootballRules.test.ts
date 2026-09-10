@@ -5,6 +5,7 @@ import {
   AMERICAN_FOOTBALL_PRESETS,
   buildAmericanFootballEventDefinitions,
   createAmericanFootballRuleset,
+  allowsDraw,
   describeAmericanFootballRuleset,
   getAmericanFootballQuickActions,
   normalizeAmericanFootballRuleset,
@@ -13,8 +14,8 @@ import {
 } from './americanFootballRules.ts';
 import { buildMatchEventDefinitionMap, formatOutcomeTag, getDefaultMatchEventDefinitions, resolveMatchEventDefinitions } from './matchEventCatalog.ts';
 import { buildCompleteMatchStats, buildCompleteStatTabs } from './matchStatsFromEvents.ts';
-import { getClockPeriodOptions, getNextActivePeriodAfterEvent, getPeriodSequence } from './matchPeriods.ts';
-import { getPeriodOffsetSeconds } from './matchClock.ts';
+import { getClockPeriodOptions, getEventPeriodOptions, getNextActivePeriodAfterEvent, getPeriodSequence } from './matchPeriods.ts';
+import { getClockDisplaySeconds, getPeriodOffsetSeconds } from './matchClock.ts';
 
 /**
  * El reglamento de futbol americano por torneo. Lo que se prueba:
@@ -172,4 +173,66 @@ test('el catalogo resuelto de un partido sale del reglamento del torneo', () => 
 test('la descripcion corta dice disciplina, reglamento y formato', () => {
   assert.equal(describeAmericanFootballRuleset(createAmericanFootballRuleset('nfl')), 'Tackle · NFL · temporada regular · 4×15′');
   assert.equal(describeAmericanFootballRuleset(createAmericanFootballRuleset('ifaf-flag-5v5')), 'Flag · IFAF 5v5 · 2×20′');
+});
+
+/* ─── reloj en cuenta regresiva ─── */
+
+test('el reloj del futbol americano se LEE para atras: Q2 con 22:26 acumulados es 07:34', () => {
+  const ref = { sportId: 'american-football', periodRules: toPeriodRules(createAmericanFootballRuleset('nfl')) };
+  assert.deepEqual(getClockDisplaySeconds(ref, 'Q2', 22 * 60 + 26), { seconds: 7 * 60 + 34, countdown: true });
+  // Sin reglamento, el deporte a secas lee igual (cuartos de 15).
+  assert.deepEqual(getClockDisplaySeconds('american-football', 'Q1', 65), { seconds: 900 - 65, countdown: true });
+  // Y un cuarto de 12 del secundario descuenta desde 12.
+  const hs = { sportId: 'american-football', periodRules: toPeriodRules(createAmericanFootballRuleset('high-school')) };
+  assert.deepEqual(getClockDisplaySeconds(hs, 'Q3', 24 * 60 + 30), { seconds: 11 * 60 + 30, countdown: true });
+});
+
+test('previa, entretiempo y final: el cuarto entero, cero y cero', () => {
+  const ref = { sportId: 'american-football', periodRules: toPeriodRules(createAmericanFootballRuleset('nfl')) };
+  assert.equal(getClockDisplaySeconds(ref, 'PRE', 0).seconds, 900);
+  assert.equal(getClockDisplaySeconds(ref, 'HT', 1800).seconds, 0);
+  assert.equal(getClockDisplaySeconds(ref, 'FT', 3600).seconds, 0);
+  // Nunca negativo, aunque el reloj se haya pasado del cuarto.
+  assert.equal(getClockDisplaySeconds(ref, 'Q4', 3700).seconds, 0);
+});
+
+test('el suplementario sigue su formato: la NFL descuenta 10, las series de posesion cuentan para arriba', () => {
+  const nfl = { sportId: 'american-football', periodRules: toPeriodRules(createAmericanFootballRuleset('nfl')) };
+  assert.deepEqual(getClockDisplaySeconds(nfl, 'ET', 3600 + 90), { seconds: 600 - 90, countdown: true });
+
+  const ncaa = { sportId: 'american-football', periodRules: toPeriodRules(createAmericanFootballRuleset('ncaa')) };
+  assert.deepEqual(getClockDisplaySeconds(ncaa, 'ET', 3600 + 90), { seconds: 90, countdown: false });
+});
+
+test('rugby, futbol y hockey no se enteran: siguen leyendo el acumulado', () => {
+  assert.deepEqual(getClockDisplaySeconds('rugby', '2T', 2500), { seconds: 2500, countdown: false });
+  assert.deepEqual(getClockDisplaySeconds('field-hockey', 'Q2', 1000), { seconds: 1000, countdown: false });
+  assert.deepEqual(getClockDisplaySeconds(undefined, '1T', 10), { seconds: 10, countdown: false });
+});
+
+/* ─── suplementario y empate ─── */
+
+test('un reglamento sin tiempo extra no ofrece ET; los demas si', () => {
+  const sinExtra = createAmericanFootballRuleset('nfl');
+  sinExtra.overtime = { ...sinExtra.overtime, format: 'none' };
+  const ref = { sportId: 'american-football', periodRules: toPeriodRules(sinExtra) };
+  assert.deepEqual(getClockPeriodOptions(ref), ['PRE', 'Q1', 'Q2', 'HT', 'Q3', 'Q4', 'FT']);
+  assert.deepEqual(getEventPeriodOptions(ref), ['Q1', 'Q2', 'Q3', 'Q4', 'FT']);
+  assert.equal(getNextActivePeriodAfterEvent('end_period', 'Q4', ref), 'FT');
+
+  const nfl = { sportId: 'american-football', periodRules: toPeriodRules(createAmericanFootballRuleset('nfl')) };
+  assert.ok(getClockPeriodOptions(nfl).includes('ET'));
+  // Y el deporte a secas, y los demas deportes, siguen ofreciendo ET.
+  assert.ok(getClockPeriodOptions('american-football').includes('ET'));
+  assert.ok(getClockPeriodOptions('rugby').includes('ET'));
+});
+
+test('el empate existe donde el reglamento lo admite', () => {
+  assert.equal(allowsDraw(createAmericanFootballRuleset('nfl')), true, 'NFL regular: un OT y puede quedar empate');
+  assert.equal(allowsDraw(createAmericanFootballRuleset('nfl-postseason')), false, 'postemporada: hasta que haya ganador');
+  assert.equal(allowsDraw(createAmericanFootballRuleset('ncaa')), false);
+  const sinExtra = createAmericanFootballRuleset('ifaf');
+  sinExtra.overtime = { ...sinExtra.overtime, format: 'none' };
+  assert.equal(allowsDraw(sinExtra), true);
+  assert.equal(allowsDraw(null), true);
 });

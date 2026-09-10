@@ -183,7 +183,22 @@ type StandingsScopeView = {
     phase?: any | null;
 };
 
-type StandingsColumnMode = 'standard' | 'circuit-global';
+/**
+ * `win-percentage` es la tabla del futbol americano: sin puntos de tabla, con
+ * el porcentaje de victorias (el empate vale media) y los puntos a favor y en
+ * contra, que es como el deporte la lee en todas sus ligas.
+ */
+type StandingsColumnMode = 'standard' | 'circuit-global' | 'win-percentage';
+
+/** ".750", "1.000", ".000": la forma en que el deporte escribe el porcentaje. */
+function formatWinPercentage(row: any): string {
+    const played = Number(row.matches_total ?? row.matches_played ?? row.played ?? 0) || 0;
+    const wins = Number(row.wins_total ?? row.wins ?? row.won ?? 0) || 0;
+    const draws = Number(row.draws_total ?? row.draws ?? row.drawn ?? 0) || 0;
+    const pct = played > 0 ? (wins + draws / 2) / played : 0;
+    const text = pct.toFixed(3);
+    return pct >= 1 ? text : text.replace(/^0/, '');
+}
 
 function getTeamLogo(team: any): string {
     return resolveTeamLogo(team);
@@ -2979,6 +2994,63 @@ export default function TournamentDetailPage({
                     value: (row: any) => row.points_total ?? row.points ?? 0,
                 },
             ]
+            : mode === 'win-percentage'
+            ? [
+                {
+                    key: 'played',
+                    label: 'J',
+                    className: `${styles.colVal} ${styles.colValPJ}`,
+                    value: (row: any) => row.matches_total || row.matches_played || 0,
+                },
+                {
+                    key: 'wins',
+                    label: 'G',
+                    className: styles.colVal,
+                    value: (row: any) => row.wins_total || row.wins || 0,
+                },
+                {
+                    key: 'draws',
+                    label: 'E',
+                    className: styles.colVal,
+                    value: (row: any) => row.draws_total || row.draws || 0,
+                },
+                {
+                    key: 'losses',
+                    label: 'P',
+                    className: styles.colVal,
+                    value: (row: any) => row.losses_total || row.losses || 0,
+                },
+                {
+                    key: 'points_for',
+                    label: 'PF',
+                    className: styles.colVal,
+                    value: (row: any) => row.goals_for ?? 0,
+                },
+                {
+                    key: 'points_against',
+                    label: 'PC',
+                    className: styles.colVal,
+                    value: (row: any) => row.goals_against ?? 0,
+                },
+                {
+                    key: 'diff',
+                    label: 'DIF',
+                    className: `${styles.colVal} ${styles.colValDG}`,
+                    value: (row: any) => formatDifference(
+                        typeof row.goal_difference === 'number'
+                            ? row.goal_difference
+                            : (typeof row.goals_for === 'number' && typeof row.goals_against === 'number')
+                                ? row.goals_for - row.goals_against
+                                : 0,
+                    ),
+                },
+                {
+                    key: 'pct',
+                    label: 'PCT',
+                    className: styles.colPts,
+                    value: (row: any) => formatWinPercentage(row),
+                },
+            ]
             : [
                 {
                     key: 'played',
@@ -3032,10 +3104,13 @@ export default function TournamentDetailPage({
                 },
             ]
     );
-    const standingsColumnMode: StandingsColumnMode = isCircuitGlobalTable ? 'circuit-global' : 'standard';
+    const isWinPercentageSport = tournamentData?.sportId === 'american-football';
+    const standingsColumnMode: StandingsColumnMode = isCircuitGlobalTable
+        ? 'circuit-global'
+        : isWinPercentageSport ? 'win-percentage' : 'standard';
     const standingsColumns = buildStandingsColumns(standingsColumnMode, hasBonus);
     const previewStandingsColumns = buildStandingsColumns(
-        isCircuitTournament ? 'circuit-global' : 'standard',
+        isCircuitTournament ? 'circuit-global' : isWinPercentageSport ? 'win-percentage' : 'standard',
         overallRows.some((row: any) => (row.bonus_points ?? 0) > 0),
     );
     const teamMap = new Map<string, { id: string | null; name: string; shortName: string | null; logo: string; href: string | null }>();
@@ -3317,7 +3392,15 @@ export default function TournamentDetailPage({
             diff: 'POD',
             points: 'PTS',
         }
-        : undefined;
+        : standingsColumnMode === 'win-percentage'
+            ? {
+                played: 'J',
+                won: 'G',
+                lost: 'P',
+                diff: 'DIF',
+                points: 'PCT',
+            }
+            : undefined;
 
     const mapStandingsRowForExport = (row: any, idx: number) => {
         const fallbackTeam = resolveTeamFallback(row);
@@ -3382,7 +3465,10 @@ export default function TournamentDetailPage({
             won: row.wins_total || row.wins || 0,
             lost: row.losses_total || row.losses || 0,
             diff: String(goalDifference),
-            points: row.points_total || row.points || 0,
+            // En la tabla por porcentaje la ultima columna ES el porcentaje.
+            points: standingsColumnMode === 'win-percentage'
+                ? formatWinPercentage(row)
+                : (row.points_total || row.points || 0),
         };
     };
     const standingsExportRows = activeFlatRows.map((row: any, idx: number) => mapStandingsRowForExport(row, idx));
