@@ -1,0 +1,473 @@
+/* ================================================================
+   FirstVisitSportPicker — invitación de primera visita
+   Hoja inferior en el celular, tarjeta centrada en escritorio.
+   Usa los tokens globales: funciona en tema oscuro y claro.
+   ================================================================ */
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    /* Por encima de la barra inferior móvil (999): la hoja tapa todo el chrome. */
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+    background: rgba(6, 8, 12, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 260ms ease;
+}
+
+.backdrop.open {
+    opacity: 1;
+}
+
+.sheet {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-bottom: none;
+    border-radius: 24px 24px 0 0;
+    padding: 12px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.45);
+    font-family: var(--font-primary, 'Outfit', 'Inter', system-ui, sans-serif);
+    transform: translateY(24px);
+    opacity: 0;
+    transition:
+        transform 320ms cubic-bezier(0.23, 1, 0.32, 1),
+        opacity 240ms ease;
+    will-change: transform, opacity;
+}
+
+.sheet.open {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.reduceMotion,
+.reduceMotion.sheet {
+    transition: opacity 120ms ease;
+    transform: none;
+}
+
+/* Un halo de acento apenas visible arriba, como cabecera. */
+.sheet::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 160px;
+    pointer-events: none;
+    background: radial-gradient(
+        120% 80% at 50% 0%,
+        rgba(var(--color-accent-rgb), 0.16) 0%,
+        rgba(var(--color-accent-rgb), 0) 70%
+    );
+    border-radius: inherit;
+}
+
+.grip {
+    width: 40px;
+    height: 4px;
+    margin: 0 auto 14px;
+    border-radius: 99px;
+    background: var(--color-border-light);
+}
+
+.close {
+    position: absolute;
+    /* Encima del cuerpo del paso (que es relative y viene después en el DOM). */
+    z-index: 2;
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.close:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-light);
+}
+
+.sheet:focus {
+    outline: none;
+}
+
+.close:focus-visible,
+.option:focus-visible,
+.ghost:focus-visible,
+.primary:focus-visible,
+.secondary:focus-visible,
+.footnoteLink:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.stepBody {
+    position: relative;
+    animation: stepIn 260ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.reduceMotion .stepBody {
+    animation: none;
+}
+
+@keyframes stepIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Texto ─────────────────────────────────────────────────── */
+
+.eyebrow {
+    margin: 4px 0 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-accent-ink);
+}
+
+.title {
+    margin: 0 44px 8px 0;
+    font-size: clamp(1.35rem, 4.6vw, 1.7rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+}
+
+.subtitle {
+    margin: 0 0 20px;
+    font-size: 0.93rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    max-width: 44ch;
+}
+
+/* ── Opciones ──────────────────────────────────────────────── */
+
+/* Cuatro por fila desde 360 px: ocho deportes cierran en dos filas sin hueco
+   y la hoja queda más baja, que en el celular es lo que importa. */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+@media (min-width: 360px) {
+    .grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+    }
+}
+
+.option {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 88px;
+    padding: 14px 3px 12px;
+    background: var(--color-bg-tertiary);
+    border: 1.5px solid var(--color-border);
+    border-radius: 16px;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    transition:
+        transform 160ms ease,
+        border-color 160ms ease,
+        background 160ms ease,
+        color 160ms ease,
+        opacity 200ms ease,
+        box-shadow 160ms ease;
+    animation: optionIn 360ms cubic-bezier(0.23, 1, 0.32, 1) both;
+    animation-delay: calc(var(--i, 0) * 28ms);
+}
+
+.reduceMotion .option {
+    animation: none;
+}
+
+@keyframes optionIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (hover: hover) {
+    .option:hover {
+        transform: translateY(-2px);
+        border-color: var(--color-border-light);
+        color: var(--color-text-primary);
+        background: var(--color-bg-elevated);
+    }
+}
+
+.option:active {
+    transform: scale(0.97);
+}
+
+.optionPicked,
+.optionPicked:hover {
+    background: rgba(var(--color-accent-rgb), 0.14);
+    border-color: var(--color-accent);
+    color: var(--color-text-primary);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.22);
+    transform: none;
+}
+
+.optionDimmed {
+    opacity: 0.45;
+}
+
+.optionIcon {
+    font-size: 1.75rem;
+    line-height: 1;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+}
+
+.optionName {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.15;
+    text-align: center;
+    max-width: 100%;
+    hyphens: auto;
+    overflow-wrap: anywhere;
+}
+
+/* "Automovilismo" no entra en una celda de 80 px a la talla normal. */
+.optionNameLong {
+    font-size: 0.66rem;
+    letter-spacing: -0.01em;
+}
+
+@media (min-width: 700px) {
+    .optionName,
+    .optionNameLong {
+        font-size: 0.82rem;
+        letter-spacing: 0;
+    }
+}
+
+.optionCheck {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #fff;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 160ms ease, transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.optionPicked .optionCheck {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ── Acciones ──────────────────────────────────────────────── */
+
+.ghost {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+    color: var(--color-text-tertiary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 150ms ease, background 150ms ease;
+}
+
+.ghost:hover {
+    color: var(--color-text-primary);
+    background: var(--color-bg-tertiary);
+}
+
+.pickedBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0 16px;
+    padding: 8px 14px 8px 10px;
+    border-radius: 99px;
+    background: rgba(var(--color-accent-rgb), 0.12);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.35);
+    color: var(--color-text-primary);
+    font-size: 0.88rem;
+    max-width: 100%;
+}
+
+.pickedIcon {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.pickedText strong {
+    font-weight: 800;
+    color: var(--color-accent-ink);
+}
+
+.actions {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+@media (min-width: 480px) {
+    .actions {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.primary,
+.secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 12px 18px;
+    border-radius: 14px;
+    font-size: 0.97rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 150ms ease, background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.primary {
+    background: var(--color-accent);
+    border: 1.5px solid var(--color-accent);
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(var(--color-accent-rgb), 0.28);
+}
+
+.primary:hover {
+    background: var(--color-accent-dark);
+    border-color: var(--color-accent-dark);
+    transform: translateY(-1px);
+}
+
+.secondary {
+    background: transparent;
+    border: 1.5px solid var(--color-border-light);
+    color: var(--color-text-primary);
+}
+
+.secondary:hover {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-text-tertiary);
+}
+
+.primary:active,
+.secondary:active {
+    transform: scale(0.98);
+}
+
+.footnote {
+    margin: 0;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--color-text-tertiary);
+}
+
+.footnoteLink {
+    color: var(--color-accent-ink);
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.footnoteLink:hover {
+    text-decoration: underline;
+}
+
+/* ── Escritorio: tarjeta centrada ──────────────────────────── */
+
+@media (min-width: 700px) {
+    .backdrop {
+        align-items: center;
+        padding: 24px;
+    }
+
+    .sheet {
+        max-height: calc(100vh - 48px);
+        border-bottom: 1px solid var(--color-border);
+        border-radius: 24px;
+        padding: 28px 32px 28px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+        transform: translateY(12px) scale(0.97);
+    }
+
+    .sheet.open {
+        transform: translateY(0) scale(1);
+    }
+
+    .reduceMotion.sheet {
+        transform: none;
+    }
+
+    .grip {
+        display: none;
+    }
+
+    .close {
+        top: 18px;
+        right: 18px;
+    }
+
+    .grid {
+        gap: 12px;
+    }
+
+    .option {
+        min-height: 100px;
+    }
+
+    .ghost {
+        width: auto;
+        margin: 0 auto;
+        padding: 10px 16px;
+    }
+}
