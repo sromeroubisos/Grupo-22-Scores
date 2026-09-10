@@ -186,7 +186,7 @@ const MATCH_CENTER_MATCH_SELECT = `
   away_team_id,
   homeClub:home_club_id (id, name, short_name, primary_color, updated_at),
   awayClub:away_club_id (id, name, short_name, primary_color, updated_at),
-  tournament:tournament_id (id, name, display_name, slug, sport_id, external_id, logo_url, banner_url)
+  tournament:tournament_id (id, name, display_name, slug, sport_id, external_id, logo_url, banner_url, ruleset)
 `;
 // Columns that historically may be missing depending on schema version / PostgREST cache.
 const MATCH_CENTER_FRAGILE_COLUMNS = ['clock', 'lineups', 'broadcast_url', 'stream_url', 'replay_url'] as const;
@@ -222,7 +222,7 @@ const MATCH_CENTER_MATCH_SELECT_REDUCED = `
   away_team_id,
   homeClub:home_club_id (id, name, short_name, primary_color, updated_at),
   awayClub:away_club_id (id, name, short_name, primary_color, updated_at),
-  tournament:tournament_id (id, name, display_name, slug, sport_id, external_id, logo_url, banner_url)
+  tournament:tournament_id (id, name, display_name, slug, sport_id, external_id, logo_url, banner_url, ruleset)
 `;
 const PERSIST_MATCH_SELECT_BASE = `
   id,

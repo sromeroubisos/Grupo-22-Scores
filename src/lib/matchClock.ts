@@ -68,6 +68,20 @@ export interface SportClockConfig {
   periods: string[];
   /** offset CUMULATIVO en segundos al que rebasa el arranque de cada periodo */
   offsets: Record<string, number>;
+  /**
+   * El deporte LEE el reloj para atras (futbol americano, basquet). El
+   * acumulado guardado sigue siendo ascendente; solo cambia la lectura, ver
+   * `getClockDisplaySeconds`. Sin esta marca la lectura es el acumulado.
+   */
+  countdown?: boolean;
+  /** Duracion de cada periodo jugable, en segundos. Solo tiene sentido con `countdown`. */
+  periodSeconds?: number;
+  /**
+   * Duracion del suplementario, en segundos: `null` = no hay suplementario,
+   * `0` = lo hay pero sin reloj (series de posesion), `n` = cronometrado.
+   * `undefined` = el deporte no dice nada y ET se trata como siempre.
+   */
+  overtimeSeconds?: number | null;
 }
 
 export const DEFAULT_CLOCK_SPORT = 'rugby';
@@ -142,6 +156,12 @@ const SPORT_CLOCK_CONFIG: Record<string, SportClockConfig> = {
       '1T': 0,
       '2T': 1800,
     },
+    // Sin reglamento de torneo se lee como la NFL: cuartos de 15' en cuenta
+    // regresiva y un overtime de 10'. El torneo que juegue otra cosa lo dice
+    // en su reglamento y `buildClockConfigFromPeriodRules` manda.
+    countdown: true,
+    periodSeconds: 900,
+    overtimeSeconds: 600,
   },
 };
 
@@ -166,6 +186,15 @@ export function normalizeClockSportBucket(sportId?: string | null) {
  */
 export function buildClockConfigFromPeriodRules(rules: MatchPeriodRules): SportClockConfig {
   const period = Math.max(1, Math.trunc(rules.periodDurationMinutes)) * 60;
+  const presentation = {
+    countdown: rules.countdown === true,
+    periodSeconds: period,
+    overtimeSeconds: rules.overtimeDurationMinutes === undefined
+      ? undefined
+      : rules.overtimeDurationMinutes === null
+        ? null
+        : Math.max(0, Math.trunc(rules.overtimeDurationMinutes)) * 60,
+  };
   if (rules.periods === 4) {
     return {
       periods: ['PRE', 'Q1', 'Q2', 'Q3', 'Q4', 'ET', 'FT'],
@@ -181,11 +210,13 @@ export function buildClockConfigFromPeriodRules(rules: MatchPeriodRules): SportC
         '1T': 0,
         '2T': period * 2,
       },
+      ...presentation,
     };
   }
   return {
     periods: ['PRE', '1T', '2T', 'ET', 'FT'],
     offsets: { PRE: 0, '1T': 0, HT: period, '2T': period, ET: period * 2, FT: period * 2 },
+    ...presentation,
   };
 }
 
@@ -200,6 +231,54 @@ export function getPeriodOffsetSeconds(sportId: PeriodSportRef, period: unknown)
   const config = getSportClockConfig(sportId);
   const normalized = normalizeMatchPeriod(period);
   return Math.max(0, config.offsets[normalized] ?? 0);
+}
+
+/** Lo que se muestra del reloj, ya resuelto para el deporte. */
+export interface ClockDisplay {
+  /** Segundos a formatear. */
+  seconds: number;
+  /** true cuando `seconds` es lo que QUEDA del periodo; false cuando es lo transcurrido. */
+  countdown: boolean;
+}
+
+/**
+ * Traduce el acumulado del partido a lo que el deporte muestra.
+ *
+ * Para rugby, futbol, hockey y handball es la identidad: el acumulado hacia
+ * arriba de siempre. Para los deportes que cuentan para atras (futbol
+ * americano) devuelve lo que QUEDA del periodo activo:
+ *
+ *   Q2 con 1.346" acumulados y cuartos de 900" -> 900 + 900 - 1346 = 454 (07:34)
+ *
+ * En la previa muestra el cuarto entero (15:00), en el entretiempo y el final
+ * muestra 00:00, y en el suplementario sigue su propia duracion: si es
+ * cronometrado cuenta para atras desde ella; si es por series de posesion (sin
+ * reloj) cuenta para arriba dentro del periodo, que es lo unico honesto.
+ *
+ * Es SOLO lectura. El acumulado guardado, el minuto de los eventos y el espejo
+ * legacy siguen ascendentes: un evento cargado en Q2 07:34 sigue diciendo
+ * minuto 22, que es lo que ordena la cronologia.
+ */
+export function getClockDisplaySeconds(ref: PeriodSportRef, period: unknown, elapsedSeconds: number): ClockDisplay {
+  const config = getSportClockConfig(ref);
+  const elapsed = Math.max(0, Math.trunc(elapsedSeconds));
+  const ascending: ClockDisplay = { seconds: elapsed, countdown: false };
+  if (!config.countdown || !config.periodSeconds) return ascending;
+
+  const normalized = normalizeMatchPeriod(period, 'PRE');
+  if (normalized === 'PRE') return { seconds: config.periodSeconds, countdown: true };
+  if (normalized === 'HT' || normalized === 'FT') return { seconds: 0, countdown: true };
+
+  const offset = config.offsets[normalized];
+  if (offset === undefined) return ascending;
+
+  if (normalized === 'ET') {
+    const overtime = config.overtimeSeconds;
+    if (!overtime) return { seconds: Math.max(0, elapsed - offset), countdown: false };
+    return { seconds: Math.max(0, offset + overtime - elapsed), countdown: true };
+  }
+
+  return { seconds: Math.max(0, offset + config.periodSeconds - elapsed), countdown: true };
 }
 
 /* ─── normalizacion / lectura ─── */

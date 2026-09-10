@@ -48,12 +48,15 @@ import {
     type PeriodSportRef,
 } from '@/lib/matchPeriods';
 import {
+    createAmericanFootballRuleset,
+    DEFAULT_AMERICAN_FOOTBALL_PRESET_ID,
     getAmericanFootballQuickActions,
     readAmericanFootballRuleset,
     toPeriodRules,
     type AmericanFootballRuleset,
 } from '@/lib/americanFootballRules';
-import { formatClockSeconds, getPeriodOffsetSeconds, type MatchClockTransition } from '@/lib/matchClock';
+import { deriveDriveSituation, formatDownAndDistance, suggestedDriveEventType } from '@/lib/americanFootballDrive';
+import { formatClockSeconds, getClockDisplaySeconds, getPeriodOffsetSeconds, type MatchClockTransition } from '@/lib/matchClock';
 import { getSportLineupSize, getSportMatchProfile, isGoalCountingSport } from '@/lib/sportMatchProfile';
 import { useMatchClock } from '@/hooks/useMatchClock';
 import {
@@ -3829,8 +3832,19 @@ export default function MatchCenterClient({
     const dateTimeDirty = dateTimeDraft !== toDateTimeLocalInput(persistedMatchRef.current.date_time);
     const officialSheetDirty = officialSheetDraft.trim() !== officialSheetPersistedRef.current.trim();
     const hasUnsavedMatchParameters = scoreDirty || statusDirty || venueDirty || notesDirty || dateTimeDirty || officialSheetDirty;
+    /**
+     * Lo que se LEE del reloj. En rugby, futbol, hockey y handball es el
+     * acumulado de siempre; en futbol americano es lo que queda del cuarto,
+     * que es como el deporte lo cuenta (Q2 07:34, no 22:26). El acumulado
+     * guardado y el minuto de los eventos no cambian.
+     */
+    const clockDisplay = getClockDisplaySeconds(sportRef, clock.period, clock.elapsedSeconds);
+    const clockDisplayTime = formatClockSeconds(clockDisplay.seconds);
     // La cabecera muestra el reloj junto al estado EN VIVO.
-    const liveClockLabel = clock.label;
+    const liveClockLabel = (() => {
+        const period = normalizeMatchPeriod(clock.period, 'PRE');
+        return period !== 'PRE' ? `${clockDisplayTime} - ${period}` : clockDisplayTime;
+    })();
     const canPauseClock = clock.isRunning;
     const canResumeClock = !clock.isRunning && clock.hasProgress;
     // El reloj ya no tiene estado "sin guardar": cada transicion se persiste sola
@@ -3937,6 +3951,23 @@ export default function MatchCenterClient({
             half: inSecondHalf ? 'segunda' : 'primera',
         };
     }, [events, clock.period, matchSportId, timeoutsPerHalf]);
+    /**
+     * El drive: quien tiene la pelota, en que down y cuanto le falta. Derivado
+     * de los eventos y del reglamento del torneo, nunca guardado. Solo en
+     * futbol americano; sin reglamento propio se lee con el de la NFL, que es
+     * el mismo con el que se arma el catalogo del deporte.
+     */
+    const driveRules = useMemo(() => (
+        normalizeSportBucket(matchSportId) === 'american-football'
+            ? (matchRules ?? createAmericanFootballRuleset(DEFAULT_AMERICAN_FOOTBALL_PRESET_ID))
+            : null
+    ), [matchRules, matchSportId]);
+    const driveSituation = useMemo(
+        () => (driveRules ? deriveDriveSituation(events, driveRules) : null),
+        [events, driveRules],
+    );
+    const driveSuggestedType = driveSituation ? suggestedDriveEventType(driveSituation) : null;
+    const driveSuggestedDefinition = driveSuggestedType ? (eventDefinitionMap[driveSuggestedType] ?? null) : null;
     // Lo ultimo que el operador CARGO (mayor `order`), no lo ultimo cronologico.
     const lastLoadedEvent = useMemo(() => events.reduce<{ event: MatchEvent; order: number } | null>((acc, event, index) => {
         const order = getEventOrder(event, index);
@@ -4810,7 +4841,13 @@ export default function MatchCenterClient({
                             <div className="live-clock-bar" data-running={clock.isRunning ? 'true' : 'false'}>
                                 <div className="live-clock-readout" role="status" aria-live="off">
                                     <Clock size={16} aria-hidden="true" />
-                                    <span className="live-clock-time">{formatClockSeconds(clock.elapsedSeconds)}</span>
+                                    <span
+                                        className="live-clock-time"
+                                        data-countdown={clockDisplay.countdown ? 'true' : 'false'}
+                                        title={clockDisplay.countdown ? 'Lo que queda del período' : 'Tiempo transcurrido'}
+                                    >
+                                        {clockDisplayTime}
+                                    </span>
                                     <span className="live-clock-period">{getMatchPeriodLabel(normalizeMatchPeriod(clock.period, 'PRE'))}</span>
                                     <span className="live-clock-state">
                                         {clock.isRunning ? 'En juego' : clock.hasProgress ? 'Pausado' : 'Sin iniciar'}
@@ -4828,6 +4865,29 @@ export default function MatchCenterClient({
                                         </span>
                                     ) : null}
                                 </div>
+                                {driveSituation && driveRules ? (
+                                    /* El drive, al lado del reloj: es el estado del partido en este
+                                     * deporte. La sugerencia mira lo cargado: con las yardas del primer
+                                     * down alcanzadas pide el primer down; con el ultimo down jugado,
+                                     * la perdida en downs. */
+                                    <div className="live-drive-strip" role="status" aria-live="polite" data-phase={driveSituation.phase}>
+                                        <span className="live-drive-possession">
+                                            {driveSituation.possession
+                                                ? (driveSituation.possession === 'home' ? homeName : awayName)
+                                                : 'Pelota en el aire'}
+                                        </span>
+                                        <strong className="live-drive-down">{formatDownAndDistance(driveSituation, driveRules)}</strong>
+                                        {driveSuggestedDefinition ? (
+                                            <button
+                                                type="button"
+                                                className="mc-btn live-drive-suggest"
+                                                onClick={() => openGuidedEvent(driveSuggestedDefinition)}
+                                            >
+                                                Cargar {getEventButtonLabel(driveSuggestedDefinition, matchSportId).toLowerCase()}
+                                            </button>
+                                        ) : null}
+                                    </div>
+                                ) : null}
                                 {/* El periodo activo, imposible de confundir: una tira con
                                   * todos los del deporte y el actual encendido. Tocar uno
                                   * re-rotula el reloj igual que el select de ajuste. */}
@@ -4919,6 +4979,15 @@ export default function MatchCenterClient({
                               */}
                             <details className="live-clock-manual" ref={manualClockRef}>
                                 <summary>Ajustar el reloj a mano</summary>
+                                {clockDisplay.countdown ? (
+                                    // El acumulado se guarda hacia arriba en todos los deportes; lo
+                                    // que se lee en la barra es lo que queda del cuarto. Sin esta
+                                    // linea el operador tipea "7:34" queriendo decir Q2 07:34.
+                                    <p className="live-clock-manual-hint">
+                                        Min y Seg son el tiempo transcurrido del partido, acumulado desde el inicio.
+                                        La barra muestra lo que queda del período.
+                                    </p>
+                                ) : null}
                                 <div className="live-match-clock-editor">
                                     <label>
                                         <span>Periodo</span>
@@ -5007,7 +5076,8 @@ export default function MatchCenterClient({
                                                             className="live-event-button live-quick-button"
                                                             data-tone={getEventButtonTone(definition)}
                                                             data-event-type={definition.type}
-                                                            aria-label={`Cargar ${definition.label}`}
+                                                            data-suggested={driveSuggestedType === definition.type ? 'true' : 'false'}
+                                                            aria-label={`Cargar ${definition.label}${driveSuggestedType === definition.type ? ' (sugerido ahora)' : ''}`}
                                                             onClick={() => openGuidedEvent(definition)}
                                                         >
                                                             <span className="live-event-glyph">{getEventButtonGlyph(definition.type)}</span>
@@ -5032,7 +5102,8 @@ export default function MatchCenterClient({
                                                             className="live-event-button live-quick-button"
                                                             data-tone={getEventButtonTone(definition)}
                                                             data-event-type={definition.type}
-                                                            aria-label={`Cargar ${definition.label}`}
+                                                            data-suggested={driveSuggestedType === definition.type ? 'true' : 'false'}
+                                                            aria-label={`Cargar ${definition.label}${driveSuggestedType === definition.type ? ' (sugerido ahora)' : ''}`}
                                                             onClick={() => openGuidedEvent(definition)}
                                                         >
                                                             <span className="live-event-glyph">{getEventButtonGlyph(definition.type)}</span>
@@ -5418,7 +5489,7 @@ export default function MatchCenterClient({
                                         // confirmar, para que "Fin de cuarto" nunca sea sorpresa.
                                         const type = guidedEvent.definition.type;
                                         const next = getNextActivePeriodAfterEvent(type, clock.period, sportRef);
-                                        const at = formatClockSeconds(clock.elapsedSeconds);
+                                        const at = clockDisplayTime;
                                         const nextLabel = getMatchPeriodLabel(next).toLowerCase();
                                         let effect: string;
                                         if (type === 'match_start' || type === 'start_period') {

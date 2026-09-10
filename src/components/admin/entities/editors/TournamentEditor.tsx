@@ -6,6 +6,7 @@ import { createEntitySafe, updateEntitySafe } from '@/app/admin/entities/actions
 import { Database } from '@/lib/database.types';
 import { getTournamentCountryOptions, type TournamentCountryOption } from '@/lib/data/countries';
 import { getAllSports } from '@/lib/data/sports';
+import { describeAmericanFootballRuleset, readAmericanFootballRuleset } from '@/lib/americanFootballRules';
 import { DEFAULT_OFFENSIVE_BONUS_THRESHOLD, type OffensiveBonusMode } from '@/lib/bonusRuleMetrics';
 import { useLeaveConfirm } from '@/hooks/useLeaveConfirm';
 import { useAdminConsole } from '@/app/admin/AdminContext';
@@ -864,6 +865,10 @@ export function TournamentEditor({
         } as TournamentRulesetEditorState;
     });
     const isCircuitCompetition = normalizeTournamentFormat(form.format) === 'circuit';
+    const americanFootballSummary = useMemo(() => {
+        const rules = readAmericanFootballRuleset(rawInitialRuleset);
+        return rules ? describeAmericanFootballRuleset(rules) : null;
+    }, [rawInitialRuleset]);
 
     useLeaveConfirm(isDirty);
 
@@ -1852,6 +1857,32 @@ export function TournamentEditor({
                                 </select>
                             </div>
                         </div>
+                        {/* El reglamento de futbol americano (tackle o flag, cuartos, patadas,
+                          * suplementario) se edita en el creador, que tiene el formulario
+                          * entero. Aca se dice cual esta cargado y como ordena la tabla,
+                          * para que nadie busque un campo de "puntos por empate" que en
+                          * este deporte no decide nada. */}
+                        {form.sport_id === 'american-football' && (
+                            <div style={{ marginTop: '1.25rem', padding: '0.9rem 1rem', border: `1px solid ${T.border}`, borderRadius: 10 }}>
+                                <div style={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.04em' }}>
+                                    Reglamento de fútbol americano
+                                </div>
+                                <p style={{ color: T.textDim, fontSize: '0.88rem', margin: '0.35rem 0 0.6rem' }}>
+                                    {americanFootballSummary
+                                        ? `Cargado: ${americanFootballSummary}.`
+                                        : 'Sin reglamento propio: el panel de partido usa el de la NFL (tackle, 4 cuartos de 15′).'}
+                                    {' '}La tabla ordena por porcentaje de victorias y el empate vale media victoria.
+                                </p>
+                                {!isCreate && (
+                                    <a
+                                        href={`/admin/super/torneos/crear?tournamentId=${id}`}
+                                        style={{ color: T.neon, fontSize: '0.88rem', fontWeight: 700 }}
+                                    >
+                                        Editar el reglamento en el creador de torneos
+                                    </a>
+                                )}
+                            </div>
+                        )}
                     </section>
 
                     {/* ════════════════════════════════════════════════════

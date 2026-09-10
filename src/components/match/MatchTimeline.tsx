@@ -4,7 +4,7 @@ import React, { memo, useMemo, useState } from 'react';
 import Link from 'next/link';
 import styles from './MatchTimeline.module.css';
 import { type LocalPublicEvent } from '@/lib/localMatchData';
-import { buildMatchEventDefinitionMap, getDefaultMatchEventDefinitions, type MatchEventDefinition } from '@/lib/matchEventCatalog';
+import { buildMatchEventDefinitionMap, getBaseMatchEventDefinitions, type MatchEventDefinition } from '@/lib/matchEventCatalog';
 import { getConfiguredEventPoints } from '@/lib/matchStatsFromEvents';
 import { isGoalKickAttemptEvent, parseSubstitutionIncomingPlayer } from '@/lib/matchEventStats';
 import { compareMatchPeriodValues, getMatchPeriodLabel } from '@/lib/matchPeriods';
@@ -30,6 +30,12 @@ type Props = {
   homeTeam: TeamInfo;
   awayTeam: TeamInfo;
   sportId?: string | number | null;
+  /**
+   * Reglamento del torneo, cuando el deporte lo tiene (futbol americano:
+   * tackle o flag). Con el, un flag pull resuelve su definicion en vez de caer
+   * al rotulo generico. Sin el, el catalogo del deporte, como siempre.
+   */
+  tournamentRuleset?: Record<string, unknown> | null;
 };
 
 /* ------------------------------------------------------------------ */
@@ -470,11 +476,11 @@ function EventTypeIcon({ type, className }: { type: string; className?: string }
 // con SVG por evento) 60 veces por minuto sin que cambie nada.
 export default memo(MatchTimeline);
 
-function MatchTimeline({ events, homeTeam, awayTeam, sportId }: Props) {
+function MatchTimeline({ events, homeTeam, awayTeam, sportId, tournamentRuleset }: Props) {
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
   const definitionMap = useMemo(
-    () => buildMatchEventDefinitionMap(getDefaultMatchEventDefinitions(String(sportId || 'rugby'))),
-    [sportId],
+    () => buildMatchEventDefinitionMap(getBaseMatchEventDefinitions(String(sportId || 'rugby'), tournamentRuleset ?? null)),
+    [sportId, tournamentRuleset],
   );
   const chronologicalEvents = useMemo(() => sortTimelineEvents(events), [events]);
 

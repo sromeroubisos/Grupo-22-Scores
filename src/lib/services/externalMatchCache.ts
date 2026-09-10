@@ -12,6 +12,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Match } from '@/types/match';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { getEspnAmericanFootballLeague, parseEspnAmericanFootballTournamentId } from '@/lib/services/espnAmericanFootball';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -166,7 +167,30 @@ export function mapExternalMatchToCached(match: {
 
 // ── Mapper: CachedExternalMatch → enriched match shape used by matches/route.ts ──
 
+/**
+ * Nombre y pais de la liga de una fila de cache que no los trae.
+ *
+ * Las filas de futbol americano de ESPN se escribieron un tiempo sin
+ * `tournament_name` (el servicio no lo mandaba) y el feed las mostraba como
+ * "Internacional: Liga (caché)". El id de la liga (`espn-league-nfl`) alcanza
+ * para recuperar el nombre del catalogo, asi que las filas viejas se leen
+ * bien sin esperar a que el proximo sync las pise.
+ */
+function resolveCachedLeagueIdentity(m: CachedExternalMatch): { name: string; country: string } {
+    const name = String(m.tournament_name || '').trim();
+    const country = String(m.country_name || '').trim();
+    if (name && country) return { name, country };
+
+    const espnLeague = parseEspnAmericanFootballTournamentId(m.tournament_id);
+    if (espnLeague) {
+        const league = getEspnAmericanFootballLeague(espnLeague);
+        return { name: name || league.shortName, country: country || league.countryName };
+    }
+    return { name: name || 'Liga', country: country || 'Internacional' };
+}
+
 export function mapCachedToEnrichedMatch(m: CachedExternalMatch, sport: string) {
+    const league = resolveCachedLeagueIdentity(m);
     return {
         id: m.id,
         tournamentId: m.tournament_id || `fs-unknown`,
@@ -186,10 +210,10 @@ export function mapCachedToEnrichedMatch(m: CachedExternalMatch, sport: string) 
         awayTeam: normalizeCachedTeam(m.away_team),
         tournament: {
             id: m.tournament_id || 'ext-cache',
-            name: m.tournament_name || 'Liga (caché)',
+            name: league.name,
             sport: sport as any,
             status: 'published' as const,
-            country: m.country_name || 'Internacional'
+            country: league.country
         },
         liveEnabled: m.status === 'live',
         source: 'cache' as const

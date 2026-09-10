@@ -669,3 +669,90 @@ test('con el clásico el mismo 4-2 sí cobra: los dos modos se separan donde tie
     const table = StandingsEngine.generateTable(AB, matches, clasico, 'general');
     assert.equal(rowOf(table, 'b').bonus_offensive, 1);
 });
+
+// ---------------------------------------------------------------------------
+// F · Ranking por porcentaje de victorias (futbol americano)
+// ---------------------------------------------------------------------------
+
+const AMFOOT_RULESET = { americanFootball: { version: 1, preset: 'nfl', discipline: 'tackle' } };
+
+test('un torneo con reglamento de futbol americano rankea por porcentaje; el resto por puntos', () => {
+    assert.equal(StandingsEngine.resolveRules({}, AMFOOT_RULESET).ranking, 'win_percentage');
+    assert.equal(StandingsEngine.resolveRules({}, {}).ranking, 'points');
+    assert.equal(StandingsEngine.resolveRules({}, { pointsWin: 4 }).ranking, 'points');
+    // Lo declarado manda sobre el deporte, en los dos sentidos.
+    assert.equal(StandingsEngine.resolveRules({ standings: { ranking: 'points' } }, AMFOOT_RULESET).ranking, 'points');
+    assert.equal(StandingsEngine.resolveRules({}, { pointsSystem: { ranking: 'win_percentage' } }).ranking, 'win_percentage');
+});
+
+test('con porcentaje, un 3-0 le gana a un 4-3 aunque tenga menos puntos de tabla', () => {
+    const parts = [participant('a'), participant('b'), participant('c')];
+    // a: 3-0 (3 pts). b: 4-3 (4 pts). c: lo que quede.
+    const jornada = [
+        match({ id: '1', home_club_id: 'a', away_club_id: 'c', score: { home: 21, away: 7 } }),
+        match({ id: '2', home_club_id: 'a', away_club_id: 'c', score: { home: 14, away: 7 } }),
+        match({ id: '3', home_club_id: 'a', away_club_id: 'c', score: { home: 10, away: 3 } }),
+        match({ id: '4', home_club_id: 'b', away_club_id: 'c', score: { home: 21, away: 7 } }),
+        match({ id: '5', home_club_id: 'b', away_club_id: 'c', score: { home: 21, away: 7 } }),
+        match({ id: '6', home_club_id: 'b', away_club_id: 'c', score: { home: 21, away: 7 } }),
+        match({ id: '7', home_club_id: 'b', away_club_id: 'c', score: { home: 21, away: 7 } }),
+        match({ id: '8', home_club_id: 'c', away_club_id: 'b', score: { home: 21, away: 7 } }),
+        match({ id: '9', home_club_id: 'c', away_club_id: 'b', score: { home: 21, away: 7 } }),
+        match({ id: '10', home_club_id: 'c', away_club_id: 'b', score: { home: 21, away: 7 } }),
+    ];
+    const porPuntos = rules({ points_for_win: 1, points_for_draw: 0, ranking: 'points' });
+    const porPorcentaje = rules({ points_for_win: 1, points_for_draw: 0, ranking: 'win_percentage' });
+
+    assert.deepEqual(order(StandingsEngine.generateTable(parts, jornada, porPuntos)), ['b', 'a', 'c']);
+    const table = StandingsEngine.generateTable(parts, jornada, porPorcentaje);
+    assert.deepEqual(order(table), ['a', 'b', 'c']);
+    assert.equal(rowOf(table, 'a').win_percentage, 1);
+    assert.equal(rowOf(table, 'b').win_percentage, 0.571);
+    // Los puntos de tabla no cambian: solo el orden.
+    assert.equal(rowOf(table, 'b').total_points, 4);
+});
+
+test('el empate vale media victoria: 5-0-2 arriba de 5-2-0', () => {
+    const parts = [participant('a'), participant('b'), participant('c')];
+    const win = (id: string, home: string, away: string) => match({ id, home_club_id: home, away_club_id: away, score: { home: 20, away: 10 } });
+    const tie = (id: string, home: string, away: string) => match({ id, home_club_id: home, away_club_id: away, score: { home: 10, away: 10 } });
+    const jornada = [
+        win('1', 'a', 'c'), win('2', 'a', 'c'), win('3', 'a', 'c'), win('4', 'a', 'c'), win('5', 'a', 'c'),
+        tie('6', 'a', 'c'), tie('7', 'a', 'c'),
+        win('8', 'b', 'c'), win('9', 'b', 'c'), win('10', 'b', 'c'), win('11', 'b', 'c'), win('12', 'b', 'c'),
+        win('13', 'c', 'b'), win('14', 'c', 'b'),
+    ];
+    const table = StandingsEngine.generateTable(parts, jornada, rules({ points_for_win: 1, points_for_draw: 0, ranking: 'win_percentage' }));
+    assert.deepEqual(order(table).slice(0, 2), ['a', 'b']);
+    assert.equal(rowOf(table, 'a').win_percentage, 0.857);
+    assert.equal(rowOf(table, 'b').win_percentage, 0.714);
+});
+
+test('a igual porcentaje decide el enfrentamiento entre si, como en el deporte', () => {
+    const parts = [participant('a'), participant('b'), participant('c'), participant('d')];
+    const jornada = [
+        // a y b: 2-2 cada uno; b le gano a a. c: 3-0. d: 0-3.
+        match({ id: '1', home_club_id: 'b', away_club_id: 'a', score: { home: 17, away: 14 } }),
+        match({ id: '2', home_club_id: 'a', away_club_id: 'd', score: { home: 40, away: 0 } }),
+        match({ id: '3', home_club_id: 'c', away_club_id: 'a', score: { home: 3, away: 0 } }),
+        match({ id: '4', home_club_id: 'd', away_club_id: 'a', score: { home: 0, away: 3 } }),
+        match({ id: '5', home_club_id: 'c', away_club_id: 'b', score: { home: 7, away: 3 } }),
+        match({ id: '6', home_club_id: 'b', away_club_id: 'c', score: { home: 0, away: 30 } }),
+        match({ id: '7', home_club_id: 'b', away_club_id: 'd', score: { home: 7, away: 0 } }),
+    ];
+    // Sin desempate declarado: el de fabrica del porcentaje arranca por head-to-head.
+    const resolved = StandingsEngine.resolveRules({}, AMFOOT_RULESET);
+    assert.deepEqual(keysOf(resolved.tiebreakers), ['head_to_head', 'points_difference', 'points_for']);
+    const table = StandingsEngine.generateTable(parts, jornada, { ...resolved, points_for_win: 1, points_for_draw: 0, points_for_loss: 0 });
+    assert.equal(rowOf(table, 'a').win_percentage, 0.5);
+    assert.equal(rowOf(table, 'b').win_percentage, 0.5);
+    // a tiene mucha mejor diferencia, pero b le gano el partido entre ellos.
+    assert.deepEqual(order(table), ['c', 'b', 'a', 'd']);
+});
+
+test('el ranking por puntos no se movio: el rugby sigue ordenando por puntos de tabla', () => {
+    const table = StandingsEngine.generateTable(AB, IDA_Y_VUELTA, rules(), 'general');
+    assert.equal(StandingsEngine.resolveRules({}, {}).ranking, 'points');
+    assert.deepEqual(order(table), ['b', 'a']);
+    assert.equal(rowOf(table, 'a').win_percentage, 0.5);
+});

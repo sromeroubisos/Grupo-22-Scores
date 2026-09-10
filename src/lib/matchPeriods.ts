@@ -187,12 +187,27 @@ function secondHalfOpener(sequence: readonly string[]) {
 export function getClockPeriodOptions(sportId?: PeriodSportRef): string[] {
   const sequence = getPeriodSequence(sportId);
   const half = Math.floor(sequence.length / 2);
-  return ['PRE', ...sequence.slice(0, half), 'HT', ...sequence.slice(half), 'ET', 'FT'];
+  return ['PRE', ...sequence.slice(0, half), 'HT', ...sequence.slice(half), ...overtimeOptions(sportId), 'FT'];
 }
 
 /** Periodos en los que puede vivir un evento: los jugables, el suplementario y el cierre. */
 export function getEventPeriodOptions(sportId?: PeriodSportRef): string[] {
-  return [...getPeriodSequence(sportId), 'ET', 'FT'];
+  return [...getPeriodSequence(sportId), ...overtimeOptions(sportId), 'FT'];
+}
+
+/**
+ * El suplementario se ofrece salvo que el reglamento del torneo diga que NO
+ * hay (`overtimeDurationMinutes === null`: un torneo de futbol americano que
+ * admite el empate). Un reglamento que no dice nada, o un deporte sin
+ * reglamento, lo sigue ofreciendo como siempre.
+ */
+export function hasOvertimePeriod(ref?: PeriodSportRef): boolean {
+  const { periodRules } = unpackPeriodSportRef(ref);
+  return periodRules?.overtimeDurationMinutes !== null;
+}
+
+function overtimeOptions(ref?: PeriodSportRef): string[] {
+  return hasOvertimePeriod(ref) ? ['ET'] : [];
 }
 
 function stripAccents(value: string) {

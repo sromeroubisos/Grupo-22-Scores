@@ -824,6 +824,13 @@ export async function getEspnAmericanFootballMatches(
             .map((event) => ({
                 id: event.id,
                 tournamentId: event.tournament.id,
+                // Denormalizado para el feed y para la fila de cache: sin esto
+                // el partido de la NFL se agrupaba como "Internacional: Liga
+                // (cache)" en vez de "USA: NFL".
+                leagueName: event.tournament.name,
+                countryName: event.tournament.countryName,
+                leagueUrl: event.tournament.url,
+                leagueLogo: event.tournament.logo || undefined,
                 phaseId: 'group',
                 round: event.round,
                 homeTeamId: event.home.id || 'espn-team-home',

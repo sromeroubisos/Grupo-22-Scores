@@ -303,6 +303,9 @@ export async function recalculateAndPersistStandings(
         form: (row.form || []).join(''),
         stats: {
             difference: row.difference,
+            // Solo dice algo en los deportes que rankean por porcentaje (futbol
+            // americano); en el resto viaja igual y nadie lo lee.
+            win_percentage: row.win_percentage ?? null,
             bonus_offensive: row.bonus_offensive,
             bonus_defensive: row.bonus_defensive,
             adjustments: row.adjustments,

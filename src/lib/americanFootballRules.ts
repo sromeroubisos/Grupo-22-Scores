@@ -454,15 +454,48 @@ export function readAmericanFootballRuleset(tournamentRuleset: unknown): America
 
 /* ─── derivados ─── */
 
-/** Lo que el reloj y los periodos necesitan saber: cuantos y de cuanto. */
+/**
+ * Lo que el reloj y los periodos necesitan saber: cuantos, de cuanto, y que
+ * pasa despues del ultimo.
+ *
+ * `overtimeDurationMinutes` tiene tres valores con tres significados:
+ *   - `undefined`: el reglamento no dice nada (deportes sin reglamento propio);
+ *     el suplementario se ofrece como siempre.
+ *   - `null`: NO hay tiempo extra (el partido puede terminar empatado); el
+ *     periodo ET no se ofrece en ningun selector.
+ *   - `0`: hay tiempo extra pero SIN reloj (series de posesion NCAA/IFAF/flag):
+ *     el periodo existe y el reloj corre hacia arriba dentro de el.
+ *   - `n > 0`: overtime cronometrado de n minutos (NFL).
+ *
+ * `countdown` es presentacion: el acumulado del partido se sigue guardando
+ * hacia arriba, como en todos los deportes; lo que cambia es lo que se LEE.
+ */
 export interface MatchPeriodRules {
   periods: 2 | 4;
   periodDurationMinutes: number;
+  overtimeDurationMinutes?: number | null;
+  countdown?: boolean;
 }
 
 export function toPeriodRules(rules: AmericanFootballRuleset | null | undefined): MatchPeriodRules | null {
   if (!rules) return null;
-  return { periods: rules.periods, periodDurationMinutes: rules.periodDurationMinutes };
+  return {
+    periods: rules.periods,
+    periodDurationMinutes: rules.periodDurationMinutes,
+    overtimeDurationMinutes: rules.overtime.format === 'none' ? null : rules.overtime.periodDurationMinutes,
+    // El reloj de este deporte cuenta para atras: Q2 07:34 son siete minutos
+    // y medio que QUEDAN, no que pasaron.
+    countdown: true,
+  };
+}
+
+/** El reglamento admite el empate: sin tiempo extra el partido puede terminar igualado. */
+export function allowsDraw(rules: AmericanFootballRuleset | null | undefined): boolean {
+  if (!rules) return true;
+  // NFL temporada regular: un solo periodo extra y si nadie gana, empate.
+  if (rules.overtime.format === 'none') return true;
+  if (rules.overtime.format === 'nfl-regular') return true;
+  return rules.overtime.maxPeriods !== null;
 }
 
 /** Una linea para la cabecera o el resumen: "Flag · IFAF 5v5 · 2×20′". */
