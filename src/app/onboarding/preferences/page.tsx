@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import { useAuth } from '@/context/AuthContext'
 import { setOnboardingStorageStatus } from '@/lib/onboardingStatus'
+import { getDeviceSportId, setDeviceSportId } from '@/lib/deviceSportPreference'
+import type { SportId } from '@/lib/types'
 import { sanitizeReturnTo } from '@/app/login/redirects'
 
 import styles from './onboarding.module.css'
@@ -92,6 +94,13 @@ function OnboardingPreferencesContent() {
 
                 if (isEditMode && user) {
                     setSelectedSportIds(payload.favoriteSports || [])
+                } else {
+                    // Primera vez: si ya eligió un deporte en este dispositivo
+                    // antes de registrarse, viene marcado. No se pregunta dos veces.
+                    const deviceSportId = getDeviceSportId()
+                    if (deviceSportId && mapped.some(sport => sport.id === deviceSportId)) {
+                        setSelectedSportIds([deviceSportId])
+                    }
                 }
             } catch (err: unknown) {
                 console.error('[Onboarding] loadSports error:', err)
@@ -166,6 +175,9 @@ function OnboardingPreferencesContent() {
 
             await readJson<{ ok: boolean }>(response)
             setOnboardingStorageStatus(user.id, { skipped: false })
+            // El dispositivo también se acuerda: si cierra sesión, sigue viendo
+            // su deporte, y la invitación de primera visita no vuelve a aparecer.
+            if (selectedSportIds[0]) setDeviceSportId(selectedSportIds[0] as SportId)
             await refreshOnboardingStatus()
 
             if (isEditMode) {

@@ -6,6 +6,7 @@ import { SPORTS, getSportById } from '@/lib/data/sports';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { getFavoriteSports } from '@/lib/services/preferencesService';
+import { getDeviceSportId } from '@/lib/deviceSportPreference';
 
 interface SportContextType {
     selectedSport: Sport;
@@ -44,6 +45,35 @@ export function SportProvider({ children }: { children: ReactNode }) {
             ?? (Object.values(SPORTS)[0] as Sport)
     );
     const hasAutoSelectedRef = useRef<string | null>(null);
+    // Deporte pedido por URL (?sport=field-hockey). Es la puerta por la que un
+    // dominio satelite (cornercorto.com -> hockey) aterriza en su deporte sin
+    // pasar por el menu. Se lee en un efecto y no en el useState inicial para
+    // que el HTML del servidor y el del cliente coincidan (window no existe en SSR).
+    const urlSportRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        let requested: string | null = null;
+        try {
+            requested = new URLSearchParams(window.location.search).get('sport');
+        } catch {
+            return;
+        }
+        if (requested) {
+            const sport = getSportById(requested as SportId);
+            if (sport && sport.isActive !== false && !sport.groupKey) {
+                urlSportRef.current = sport.id;
+                setSelectedSport(sport);
+                return;
+            }
+        }
+        // Sin deporte en la URL: el que el visitante eligió en este dispositivo
+        // (FirstVisitSportPicker). Si después hay login con favoritos, el
+        // efecto de abajo lo pisa; si no, esto es lo que ve.
+        const deviceSportId = getDeviceSportId();
+        if (!deviceSportId) return;
+        const deviceSport = getSportById(deviceSportId);
+        if (deviceSport) setSelectedSport(deviceSport);
+    }, []);
 
     // Filter visible sports and sort by display order.
     // Sports with a groupKey (e.g. rugby-union, rugby-league) are managed
@@ -110,6 +140,9 @@ export function SportProvider({ children }: { children: ReactNode }) {
         if (!user || allSports.length === 0) return;
         if (hasAutoSelectedRef.current === user.id) return;
         hasAutoSelectedRef.current = user.id;
+        // Si el deporte vino por URL, el favorito del usuario no lo pisa: el que
+        // entro por cornercorto.com quiere ver hockey aunque su favorito sea rugby.
+        if (urlSportRef.current) return;
 
         getFavoriteSports(supabase, user.id).then(favoriteIds => {
             if (favoriteIds.length === 0) return;

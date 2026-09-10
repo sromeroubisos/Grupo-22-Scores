@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import MobileBottomNav, { BOTTOM_NAV_HIDDEN_PREFIXES } from '@/components/MobileBottomNav';
 import WorldCupTicker from '@/components/WorldCupTicker';
 import ProdeWorldCupBanner from '@/components/ProdeWorldCupBanner';
+import FirstVisitSportPicker from '@/components/FirstVisitSportPicker';
 import { SportProvider } from '@/context/SportContext';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect } from 'react';
@@ -126,6 +127,9 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
             <Footer />
             <MobileBottomNav />
             <ProdeWorldCupBanner />
+            {/* Primera visita sin cuenta: elegir deporte. Se muestra solo en `/`
+                y una vez por dispositivo; el componente decide por sí mismo. */}
+            <FirstVisitSportPicker />
         </SportProvider>
     );
 }
