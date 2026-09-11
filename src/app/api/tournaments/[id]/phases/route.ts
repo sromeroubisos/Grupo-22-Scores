@@ -8,6 +8,7 @@ import {
   ensurePlayoffBracketMatches,
   getPlayoffTeamsCount,
   isPlayoffPhaseType,
+  readPlayoffBracketMode,
   resolvePlayoffStagesForTeams,
   syncPlayoffStagesToRounds,
 } from '@/lib/server/playoffStages';
@@ -264,7 +265,10 @@ export async function POST(
       }, { status: 500 });
     }
 
-    if (phase && isPlayoffPhaseType(phaseType)) {
+    // Llaves automáticas: las rondas y los partidos los crea el constructor
+    // (con reglas de avance). Armar acá los slots vacíos del modo manual
+    // dejaría dos cuadros conviviendo en la misma fase.
+    if (phase && isPlayoffPhaseType(phaseType) && readPlayoffBracketMode(phase.settings) !== 'auto') {
       const syncResult = await perf.measureStep(
         'sync_playoff_stages',
         async () => syncPlayoffStagesToRounds(supabase, phase.id, scopedSeasonId, playoffStages),

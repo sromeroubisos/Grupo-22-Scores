@@ -50,6 +50,7 @@ import { useAnimatedDisclosure } from './useAnimatedDisclosure';
 import { Crest } from './Crest';
 import './fixture-management.css';
 import './operation-console.css';
+import { readPlayoffBracketMode } from '@/lib/utils/playoffStages';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 type MethodId = 'manual_match' | 'structure_only' | 'berger_algorithm' | 'import_fixture';
@@ -693,6 +694,9 @@ export function TournamentOperationFixtureWorkspace({
     [selectedPhase],
   );
   const isSelectedPhasePlayoff = selectedPhase?.phaseType === 'playoff' || selectedPhase?.phaseType === 'knockout';
+  // Llaves automáticas: el cuadro (rondas, partidos, avance) lo genera el
+  // constructor en Estructura. Acá no hay slots que completar.
+  const isAutoBracket = isSelectedPhasePlayoff && readPlayoffBracketMode(selectedPhase?.settings) === 'auto';
   const playoffTeamsCount = Number((selectedPhase?.settings as { teamsCount?: number } | undefined)?.teamsCount || 0);
   const playoffBracketColumns = useMemo(
     () => realRounds.map((round) => ({
@@ -1879,13 +1883,13 @@ export function TournamentOperationFixtureWorkspace({
                   <div>
                     <span className="operation-fixture-kicker">Estructura base</span>
                     <h4>{isSelectedPhasePlayoff ? 'Armar cuadro playoff' : 'Generar jornadas vacias'}</h4>
-                    <p>{isSelectedPhasePlayoff ? 'Crea los partidos vacios del bracket segun los equipos y etapas definidos en la fase.' : 'Crea bloques de jornadas para completar despues desde la sub-tab de gestion.'}</p>
+                    <p>{isAutoBracket ? 'Esta fase tiene llaves automaticas: el cuadro se genera desde Estructura, en el panel Cuadro de llaves.' : isSelectedPhasePlayoff ? 'Crea los partidos vacios del bracket segun los equipos y etapas definidos en la fase.' : 'Crea bloques de jornadas para completar despues desde la sub-tab de gestion.'}</p>
                   </div>
                 </div>
                 {isSelectedPhasePlayoff ? (
                   <div className="operation-inline-note">
                     <LayoutGrid size={16} />
-                    <span>{playoffTeamsCount || 0} equipos configurados · {realRounds.length} etapas disponibles · se completaran los slots faltantes sin equipos asignados.</span>
+                    <span>{isAutoBracket ? `${realRounds.length} rondas generadas · los cruces avanzan solos al cerrar cada resultado.` : `${playoffTeamsCount || 0} equipos configurados · ${realRounds.length} etapas disponibles · se completaran los slots faltantes sin equipos asignados.`}</span>
                   </div>
                 ) : (
                   <div className="operation-form-grid">
@@ -2032,12 +2036,14 @@ export function TournamentOperationFixtureWorkspace({
                   <div>
                     <span className="operation-fixture-kicker">Bracket playoff</span>
                     <h4>Cuadro completo</h4>
-                    <p>{playoffTeamsCount || 0} equipos configurados · {playoffBracketColumns.length} etapas</p>
+                    <p>{isAutoBracket ? `Llaves automaticas · ${playoffBracketColumns.length} rondas` : `${playoffTeamsCount || 0} equipos configurados · ${playoffBracketColumns.length} etapas`}</p>
                   </div>
-                  <button type="button" className="basalt-btn basalt-btn-primary" disabled={busyAction === 'structure'} onClick={() => void handleGenerateStructure()}>
-                    {busyAction === 'structure' ? <RefreshCw size={15} className="spin" /> : <LayoutGrid size={15} />}
-                    Completar slots
-                  </button>
+                  {!isAutoBracket && (
+                    <button type="button" className="basalt-btn basalt-btn-primary" disabled={busyAction === 'structure'} onClick={() => void handleGenerateStructure()}>
+                      {busyAction === 'structure' ? <RefreshCw size={15} className="spin" /> : <LayoutGrid size={15} />}
+                      Completar slots
+                    </button>
+                  )}
                 </div>
                 <div className="operation-playoff-bracket-grid">
                   {playoffBracketColumns.map(({ round, matches }) => (

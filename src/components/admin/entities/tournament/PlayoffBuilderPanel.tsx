@@ -8,18 +8,12 @@ import {
   AlertTriangle,
   Plus,
   Check,
+  Link2,
   Rocket,
 } from 'lucide-react';
 import PlayoffBracketBoard, { type PlayoffBracketBoardData } from './PlayoffBracketBoard';
 import { buildBracketTemplate, resolveCupName } from '@/lib/playoff/templates';
 import styles from './PlayoffBuilderPanel.module.css';
-
-const CUP_DOT: Record<number, string> = {
-  0: '#f5c542',
-  1: '#c0c5ce',
-  2: '#c8803c',
-  3: '#7fb3d5',
-};
 
 type TemplateId = 'single_elimination' | 'oro_plata' | 'oro_plata_bronce_estimulo' | 'custom';
 
@@ -37,6 +31,8 @@ interface Props {
   phaseId: string;
   phaseName: string;
   settings: any;
+  /** Abrir desplegado (una fase automática que todavía no generó su cuadro). */
+  defaultOpen?: boolean;
   onChanged: () => void;
 }
 
@@ -203,11 +199,23 @@ function StepBlock({
   );
 }
 
+/** Quiénes entran al cuadro: de dónde salen los sembrados de la primera ronda. */
+type ParticipantsMode = 'seed' | 'random' | 'zones';
+
+/**
+ * Paneles que el gestor dejó abiertos, por fase. Vive fuera del componente
+ * porque la lista de fases se desmonta entera mientras recarga: después de
+ * generar o sincronizar, el panel volvía plegado y con el aviso perdido.
+ */
+const OPEN_PANELS = new Set<string>();
+const LAST_NOTICE = new Map<string, string>();
+
 export default function PlayoffBuilderPanel({
   tournamentId,
   phaseId,
   phaseName,
   settings,
+  defaultOpen = false,
   onChanged,
 }: Props) {
   const saved = settings?.bracketBuilder as
@@ -230,27 +238,52 @@ export default function PlayoffBuilderPanel({
         venues?: string[];
       }
     | undefined;
+  const savedSeeding = settings?.playoffSeeding as
+    | { sourcePhaseId?: string; format?: 'overall' | 'zone_rank'; locked?: boolean }
+    | undefined;
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpenState] = useState(defaultOpen || OPEN_PANELS.has(phaseId));
+  const setOpen = (next: boolean | ((prev: boolean) => boolean)) =>
+    setOpenState((prev) => {
+      const value = typeof next === 'function' ? next(prev) : next;
+      if (value) OPEN_PANELS.add(phaseId);
+      else OPEN_PANELS.delete(phaseId);
+      return value;
+    });
   const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNoticeState] = useState<string | null>(() => LAST_NOTICE.get(phaseId) ?? null);
+  const setNotice = (value: string | null) => {
+    if (value) LAST_NOTICE.set(phaseId, value);
+    else LAST_NOTICE.delete(phaseId);
+    setNoticeState(value);
+  };
   const [confirmForce, setConfirmForce] = useState<null | 'generate' | 'clear'>(null);
   const [templates, setTemplates] = useState<TemplateMeta[]>([]);
   const [board, setBoard] = useState<PlayoffBracketBoardData>({ hasBracket: false, cups: [] });
 
-  const [templateId, setTemplateId] = useState<TemplateId>(saved?.templateId ?? 'oro_plata_bronce_estimulo');
-  const [teamCount, setTeamCount] = useState<number>(saved?.teamCount ?? 16);
+  const [templateId, setTemplateId] = useState<TemplateId>(saved?.templateId ?? 'single_elimination');
+  const [teamCount, setTeamCount] = useState<number>(saved?.teamCount ?? 8);
   const [thirdPlace, setThirdPlace] = useState<boolean>(saved?.thirdPlace ?? true);
-  const [seedMode, setSeedMode] = useState<'seed' | 'random'>(saved?.seedMode ?? 'seed');
   const [cupNames, setCupNames] = useState<Record<string, string>>(saved?.cupNames ?? {});
 
-  // ── Clasificación desde zonas (seeding from group-stage standings) ────
+  // ── Quiénes juegan ────────────────────────────────────────────────────
+  // Antes eran dos bloques separados: "cruces por seed / aleatorios" acá y
+  // "clasificación desde zonas" arriba, con su propio botón de guardar. Si
+  // el gestor elegía la zona y generaba sin guardar, el cuadro salía sembrado
+  // por la lista de participantes sin avisar. Ahora es una sola pregunta y
+  // viaja con el generate.
   type SeedingCfg = { sourcePhaseId: string; format: 'overall' | 'zone_rank'; locked: boolean };
+  const [participants, setParticipants] = useState<ParticipantsMode>(
+    savedSeeding?.sourcePhaseId ? 'zones' : saved?.seedMode === 'random' ? 'random' : 'seed',
+  );
   const [sourcePhases, setSourcePhases] = useState<{ id: string; name: string }[]>([]);
   const [seeding, setSeeding] = useState<SeedingCfg | null>(null);
-  const [seedSourceId, setSeedSourceId] = useState<string>('');
-  const [seedFormat, setSeedFormat] = useState<'overall' | 'zone_rank'>('overall');
+  const [seedSourceId, setSeedSourceId] = useState<string>(savedSeeding?.sourcePhaseId ?? '');
+  const [seedFormat, setSeedFormat] = useState<'overall' | 'zone_rank'>(
+    savedSeeding?.format === 'zone_rank' ? 'zone_rank' : 'overall',
+  );
 
   // ── Custom builder state ──────────────────────────────────────────────
   const [customCups, setCustomCups] = useState<CCup[]>(
@@ -348,6 +381,8 @@ export default function PlayoffBuilderPanel({
     })),
   });
 
+  const seedMode: 'seed' | 'random' = participants === 'random' ? 'random' : 'seed';
+
   // Live preview of what the chosen config will generate (no backend call).
   const preview = useMemo(() => {
     try {
@@ -361,10 +396,7 @@ export default function PlayoffBuilderPanel({
       });
       const cups = [...tpl.cups]
         .sort((a, b) => a.orderIndex - b.orderIndex)
-        .map((c) => ({
-          name: resolveCupName(tpl, c.key, cupNames),
-          color: CUP_DOT[c.orderIndex] ?? '#8e9aa7',
-        }));
+        .map((c) => resolveCupName(tpl, c.key, cupNames));
       const firstRound = [...tpl.rounds].sort((a, b) => a.orderIndex - b.orderIndex)[0];
       const fm = firstRound
         ? tpl.matches
@@ -380,6 +412,7 @@ export default function PlayoffBuilderPanel({
         stage: firstRound?.stageName ?? 'Primera ronda',
         pairs,
         random: seedMode === 'random' && fm.every((m) => m.home.type === 'seed'),
+        rounds: tpl.rounds.length,
         total: tpl.matches.length,
       };
     } catch (e: any) {
@@ -416,6 +449,15 @@ export default function PlayoffBuilderPanel({
     };
   }
 
+  const applySeeding = useCallback((next: SeedingCfg | null) => {
+    setSeeding(next);
+    if (next) {
+      setSeedSourceId(next.sourcePhaseId);
+      setSeedFormat(next.format);
+      setParticipants('zones');
+    }
+  }, []);
+
   const fetchState = useCallback(async () => {
     try {
       const res = await fetch(`/api/tournaments/${tournamentId}/playoff?phaseId=${phaseId}`);
@@ -423,19 +465,13 @@ export default function PlayoffBuilderPanel({
       if (json.templates) setTemplates(json.templates);
       if (json.board) setBoard(json.board);
       if (Array.isArray(json.sourcePhases)) setSourcePhases(json.sourcePhases);
-      if ('seeding' in json) {
-        setSeeding(json.seeding ?? null);
-        if (json.seeding) {
-          setSeedSourceId(json.seeding.sourcePhaseId);
-          setSeedFormat(json.seeding.format);
-        }
-      }
+      if ('seeding' in json) applySeeding(json.seeding ?? null);
     } catch {
       /* non-fatal: panel still usable to (re)generate */
     } finally {
       setLoaded(true);
     }
-  }, [tournamentId, phaseId]);
+  }, [tournamentId, phaseId, applySeeding]);
 
   useEffect(() => {
     if (open && !loaded) fetchState();
@@ -443,15 +479,20 @@ export default function PlayoffBuilderPanel({
 
   const cupFields = templateId === 'custom' ? [] : CUP_KEYS[templateId];
   const teamCountOptions =
-    templates.find((t) => t.id === templateId)?.teamCounts ?? [16];
+    templates.find((t) => t.id === templateId)?.teamCounts ?? [2, 4, 8, 16, 32, 64];
   const teamCountLocked = templateId === 'oro_plata_bronce_estimulo';
 
   async function runAction(
-    action: 'generate' | 'regenerate' | 'clear' | 'reschedule',
+    action: 'generate' | 'regenerate' | 'clear' | 'reschedule' | 'syncAdvancement',
     force = false,
   ) {
+    if ((action === 'generate' || action === 'regenerate') && participants === 'zones' && !seedSourceId) {
+      setError('Elegí de qué fase de grupos salen los clasificados.');
+      return;
+    }
     setBusy(true);
     setError(null);
+    setNotice(null);
     try {
       const res = await fetch(`/api/tournaments/${tournamentId}/playoff`, {
         method: 'POST',
@@ -464,6 +505,10 @@ export default function PlayoffBuilderPanel({
           thirdPlace,
           cupNames,
           seedMode,
+          seeding:
+            participants === 'zones'
+              ? { sourcePhaseId: seedSourceId, format: seedFormat }
+              : null,
           customSpec: templateId === 'custom' ? buildCustomSpec() : undefined,
           schedule: buildSchedule(),
           force,
@@ -487,7 +532,23 @@ export default function PlayoffBuilderPanel({
       setConfirmForce(null);
       if (json.board) setBoard(json.board);
       else await fetchState();
-      onChanged();
+      if ('seeding' in json) applySeeding(json.seeding ?? null);
+      if (action === 'syncAdvancement') {
+        const synced = Number(json.synced ?? 0);
+        const warn = Array.isArray(json.warnings) && json.warnings.length > 0
+          ? ` ${json.warnings[0]}`
+          : '';
+        setNotice(
+          synced === 0
+            ? `Las llaves ya estaban al día.${warn}`
+            : `Se actualizaron ${synced} llave${synced === 1 ? '' : 's'}.${warn}`,
+        );
+      }
+      if (action === 'clear') setNotice('Cuadro borrado.');
+      // La lista de fases sólo cambia cuando cambia el cuadro en sí (modo,
+      // plantilla): sincronizar o reprogramar no la toca, y recargarla
+      // desmonta este panel.
+      if (action === 'generate' || action === 'regenerate' || action === 'clear') onChanged();
     } catch (e: any) {
       setError(e?.message || 'Error de red.');
     } finally {
@@ -495,11 +556,10 @@ export default function PlayoffBuilderPanel({
     }
   }
 
-  async function seedingPost(
-    payload: Record<string, unknown>,
-  ): Promise<void> {
+  async function seedingPost(payload: Record<string, unknown>): Promise<void> {
     setBusy(true);
     setError(null);
+    setNotice(null);
     try {
       const res = await fetch(`/api/tournaments/${tournamentId}/playoff`, {
         method: 'POST',
@@ -511,15 +571,14 @@ export default function PlayoffBuilderPanel({
         setError(json.error || 'No se pudo actualizar la clasificación.');
         return;
       }
-      if ('seeding' in json) {
-        setSeeding(json.seeding ?? null);
-        if (json.seeding) {
-          setSeedSourceId(json.seeding.sourcePhaseId);
-          setSeedFormat(json.seeding.format);
-        }
-      }
+      if ('seeding' in json) applySeeding(json.seeding ?? null);
       if (json.board) setBoard(json.board);
-      onChanged();
+      if (payload.action === 'reseed') {
+        const n = Number(json.reseeded ?? 0);
+        setNotice(n === 0 ? 'Los cruces ya reflejaban la tabla.' : `Se recalcularon ${n} cruce${n === 1 ? '' : 's'}.`);
+      }
+      if (payload.action === 'closeZones') setNotice('Fase de zonas cerrada: el cuadro queda congelado.');
+      if (payload.action === 'reopenZones') setNotice('Fase de zonas reabierta: los cruces vuelven a seguir la tabla.');
     } catch (e: any) {
       setError(e?.message || 'Error de red.');
     } finally {
@@ -528,6 +587,7 @@ export default function PlayoffBuilderPanel({
   }
 
   const cupsCount = templateId === 'custom' ? customCups.length : cupFields.length || 1;
+  const zonesAvailable = sourcePhases.length > 0;
 
   return (
     <div className={styles.wrap}>
@@ -535,11 +595,12 @@ export default function PlayoffBuilderPanel({
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={`${styles.header} ${open ? styles.headerOpen : ''}`}
+        aria-expanded={open}
       >
         <span className={styles.titleGroup}>
           <span className={styles.titleText}>
-            <span className={styles.title}>Constructor de Playoff</span>
-            <span className={styles.sub}>{phaseName}</span>
+            <span className={styles.title}>Cuadro de llaves</span>
+            <span className={styles.sub}>{phaseName} · automático</span>
           </span>
         </span>
         <span className={styles.headerRight}>
@@ -557,129 +618,21 @@ export default function PlayoffBuilderPanel({
 
       {open && (
         <div className={styles.body}>
-          {/* Top summary bar */}
-          <div className={styles.summaryBar}>
-            <div className={styles.summaryItem}>
-              <strong>{templateId === 'custom' ? customCups.length : teamCount}</strong>{' '}
-              {templateId === 'custom' ? 'COPAS' : 'EQUIPOS'}
-            </div>
-            <div className={styles.dot} />
-            <div className={styles.summaryItem}>PARTIDO ÚNICO</div>
-            <div className={styles.dot} />
-            <div className={styles.summaryItem}>
-              CRUCES: {seedMode === 'random' ? 'ALEATORIOS' : 'POR SEED'}
-            </div>
-            <div className={styles.dot} />
-            <div className={styles.summaryItem}>
-              <strong>{cupsCount}</strong> {cupsCount === 1 ? 'COPA' : 'COPAS'}
-            </div>
-            <div className={styles.dot} />
-            <div className={styles.summaryItem}>
-              HORARIOS: {schedMode === 'auto' ? 'AUTOMÁTICOS' : 'MANUALES'}
-            </div>
-            {preview.ok && (
-              <>
-                <div className={styles.dot} />
-                <div className={styles.summaryItem}>
-                  <strong>{preview.total}</strong> PARTIDOS DE CUADRO
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Clasificación automática desde zonas */}
           <div className={styles.builderCard}>
             <p className={styles.introText}>
-              <strong>Clasificación desde zonas.</strong> Si elegís una fase de grupos como origen,
-              el cuadro se siembra automáticamente con la tabla de posiciones de esas zonas. Al
-              corregir un resultado de zona, los cruces se recalculan solos hasta que cierres la fase.
-            </p>
-            {sourcePhases.length === 0 ? (
-              <p className={styles.introText} style={{ opacity: 0.7 }}>
-                No hay fases de grupos en este torneo. Sembrá el cuadro por seed manual o aleatorio.
-              </p>
-            ) : (
-              <div className={styles.customRow} style={{ flexWrap: 'wrap', gap: 10 }}>
-                <select
-                  className={styles.miniSelect}
-                  value={seedSourceId}
-                  disabled={busy || seeding?.locked}
-                  onChange={(e) => setSeedSourceId(e.target.value)}
-                >
-                  <option value="">— Sin clasificación automática —</option>
-                  {sourcePhases.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
-                <select
-                  className={styles.miniSelect}
-                  value={seedFormat}
-                  disabled={busy || seeding?.locked || !seedSourceId}
-                  onChange={(e) => setSeedFormat(e.target.value as 'overall' | 'zone_rank')}
-                >
-                  <option value="overall">Tabla general (puesto 1..N)</option>
-                  <option value="zone_rank">Cruce entre zonas (1.º A vs 2.º B…)</option>
-                </select>
-                <button
-                  type="button"
-                  className={`${styles.secondaryBtn} ${busy ? styles.btnDisabled : ''}`}
-                  disabled={busy || seeding?.locked}
-                  onClick={() =>
-                    seedingPost({
-                      action: 'setSeeding',
-                      sourcePhaseId: seedSourceId,
-                      format: seedFormat,
-                    })
-                  }
-                >
-                  Guardar clasificación
-                </button>
-                {seeding && !seeding.locked && (
-                  <button
-                    type="button"
-                    className={`${styles.secondaryBtn} ${busy ? styles.btnDisabled : ''}`}
-                    disabled={busy}
-                    onClick={() => seedingPost({ action: 'reseed' })}
-                  >
-                    Recalcular cruces ahora
-                  </button>
-                )}
-                {seeding && (
-                  <button
-                    type="button"
-                    className={`${styles.secondaryBtn} ${seeding.locked ? '' : styles.dangerBtn} ${busy ? styles.btnDisabled : ''}`}
-                    disabled={busy}
-                    onClick={() =>
-                      seedingPost({ action: seeding.locked ? 'reopenZones' : 'closeZones' })
-                    }
-                  >
-                    {seeding.locked ? 'Reabrir fase de zonas' : 'Cerrar fase de zonas'}
-                  </button>
-                )}
-                {seeding?.locked && (
-                  <span className={styles.summaryItem} style={{ color: 'var(--status-active)' }}>
-                    Zonas cerradas · cuadro congelado
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Main builder card */}
-          <div className={styles.builderCard}>
-            <p className={styles.introText}>
-              Elegí una plantilla y el sistema crea todas las rondas, copas y reglas de avance.
-              Al cargar resultados, los equipos avanzan solos a la copa que corresponde.
+              Tres decisiones: el formato del cuadro, quiénes entran y cuándo se juega. Al
+              generar, cada resultado que cierres empuja solo al ganador (y al perdedor, si hay
+              copa de consuelo) a la llave siguiente.
             </p>
 
             <div className={styles.steps}>
-              {/* Step 1 — template selector */}
-              <StepBlock n={1} title="Plantilla" hint="Estructura del cuadro. Podés regenerarla cuando quieras.">
+              {/* Paso 1 — Formato */}
+              <StepBlock n={1} title="Formato" hint="Cuántas copas y cuántos equipos.">
                 <div className={styles.cardGrid}>
                   {(templates.length
                     ? templates
                     : ([
-                        { id: 'oro_plata_bronce_estimulo', label: 'Oro / Plata / Bronce / Estímulo', description: '16 equipos, 4 copas.', teamCounts: [16], defaultTeamCount: 16, available: true },
+                        { id: 'single_elimination', label: 'Eliminación simple', description: 'Una sola copa. El que pierde queda afuera.', teamCounts: [2, 4, 8, 16, 32, 64], defaultTeamCount: 8, available: true },
                       ] as TemplateMeta[])
                   ).map((t) => (
                     <OptionCard
@@ -696,30 +649,9 @@ export default function PlayoffBuilderPanel({
                     />
                   ))}
                 </div>
-              </StepBlock>
 
-              {/* Step 2 — crossings */}
-              <StepBlock n={2} title="Cruces de la primera ronda" hint="Cómo se arman los enfrentamientos de la ronda inicial.">
-                <div className={styles.cardGrid}>
-                  <OptionCard
-                    selected={seedMode === 'seed'}
-                    title="Por seed"
-                    desc="1 vs 16, 2 vs 15, 3 vs 14…"
-                    onClick={() => setSeedMode('seed')}
-                  />
-                  <OptionCard
-                    selected={seedMode === 'random'}
-                    title="Aleatorios"
-                    desc="Sorteo al azar (se re-sortea al regenerar)"
-                    onClick={() => setSeedMode('random')}
-                  />
-                </div>
-              </StepBlock>
-
-              {/* Step 3 — config or custom builder */}
-              <StepBlock n={3} title="Configuración" hint="Equipos, definición de puestos y nombres de las copas.">
                 {templateId !== 'custom' ? (
-                  <div className={styles.configRow}>
+                  <div className={styles.configRow} style={{ marginTop: 20 }}>
                     <div>
                       <span className={styles.inputGroupLabel}>Equipos</span>
                       <div className={styles.teamsBlock}>
@@ -731,6 +663,7 @@ export default function PlayoffBuilderPanel({
                             onChange={(e) => setTeamCount(Number(e.target.value))}
                             className={styles.selectInput}
                             style={{ width: 'auto' }}
+                            aria-label="Cantidad de equipos del cuadro"
                           >
                             {teamCountOptions.map((n) => (
                               <option key={n} value={n}>
@@ -749,11 +682,11 @@ export default function PlayoffBuilderPanel({
                           <span className={styles.checkboxCustom} aria-hidden>
                             <Check size={11} strokeWidth={3.5} />
                           </span>
-                          Incluir partido por el 3.º y 4.º puesto
+                          Partido por el tercer puesto
                         </label>
                       </div>
                     </div>
-                    {cupFields.length > 0 && (
+                    {cupFields.length > 1 && (
                       <div>
                         <span className={styles.inputGroupLabel}>Nombres de las copas</span>
                         <div className={styles.cupsGrid}>
@@ -776,7 +709,7 @@ export default function PlayoffBuilderPanel({
                     )}
                   </div>
                 ) : (
-                  <div className={styles.customBox}>
+                  <div className={styles.customBox} style={{ marginTop: 20 }}>
                     <p className={styles.customNote}>
                       Definí copas, rondas y partidos. En cada slot elegí un sembrado o el
                       ganador/perdedor de un partido de una <strong>ronda anterior</strong>; las
@@ -894,20 +827,83 @@ export default function PlayoffBuilderPanel({
                 )}
               </StepBlock>
 
-              {/* Step 4 — scheduling */}
-              <StepBlock n={4} title="Programación de horarios" hint="Manual o automática para todas las rondas.">
+              {/* Paso 2 — Quiénes juegan */}
+              <StepBlock n={2} title="Quiénes juegan" hint="De dónde salen los cruces de la primera ronda.">
+                <div className={styles.cardGrid}>
+                  <OptionCard
+                    selected={participants === 'seed'}
+                    disabled={seeding?.locked}
+                    title="Por seed"
+                    desc="El orden de la lista de participantes: 1 vs último, 2 vs anteúltimo…"
+                    onClick={() => setParticipants('seed')}
+                  />
+                  <OptionCard
+                    selected={participants === 'random'}
+                    disabled={seeding?.locked}
+                    title="Sorteo"
+                    desc="Cruces al azar. Se vuelve a sortear al regenerar."
+                    onClick={() => setParticipants('random')}
+                  />
+                  <OptionCard
+                    selected={participants === 'zones'}
+                    disabled={!zonesAvailable || seeding?.locked}
+                    title="Desde una fase de grupos"
+                    desc={
+                      zonesAvailable
+                        ? 'Los clasificados salen de la tabla de las zonas y se actualizan solos hasta que cierres la fase.'
+                        : 'Este torneo no tiene fases de grupos.'
+                    }
+                    onClick={() => setParticipants('zones')}
+                  />
+                </div>
+
+                {participants === 'zones' && zonesAvailable && (
+                  <div className={styles.customRow} style={{ flexWrap: 'wrap', gap: 10, marginTop: 16 }}>
+                    <select
+                      className={styles.miniSelect}
+                      value={seedSourceId}
+                      disabled={busy || seeding?.locked}
+                      onChange={(e) => setSeedSourceId(e.target.value)}
+                      aria-label="Fase de grupos de origen"
+                    >
+                      <option value="">— Elegí la fase de grupos —</option>
+                      {sourcePhases.map((p) => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                    <select
+                      className={styles.miniSelect}
+                      value={seedFormat}
+                      disabled={busy || seeding?.locked || !seedSourceId}
+                      onChange={(e) => setSeedFormat(e.target.value as 'overall' | 'zone_rank')}
+                      aria-label="Cómo se ordenan los clasificados"
+                    >
+                      <option value="overall">Tabla general (puesto 1 al N)</option>
+                      <option value="zone_rank">Cruce entre zonas (1.º A vs 2.º B…)</option>
+                    </select>
+                    {seeding?.locked && (
+                      <span className={styles.summaryItem} style={{ color: 'var(--status-active)' }}>
+                        Zonas cerradas · cuadro congelado
+                      </span>
+                    )}
+                  </div>
+                )}
+              </StepBlock>
+
+              {/* Paso 3 — Horarios */}
+              <StepBlock n={3} title="Horarios" hint="Opcional. Sin fecha, los partidos quedan a programar desde Fixture.">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                   <div className={styles.cardGrid}>
                     <OptionCard
                       selected={schedMode === 'manual'}
-                      title="Manual"
-                      desc="Cargás vos fecha, hora y cancha"
+                      title="Los cargo yo"
+                      desc="Fecha, hora y cancha de cada partido desde Fixture."
                       onClick={() => setSchedMode('manual')}
                     />
                     <OptionCard
                       selected={schedMode === 'auto'}
-                      title="Automática"
-                      desc="Todas las rondas con horario asignado"
+                      title="Automáticos"
+                      desc="Todas las rondas con fecha y cancha asignadas."
                       onClick={() => setSchedMode('auto')}
                     />
                   </div>
@@ -970,7 +966,7 @@ export default function PlayoffBuilderPanel({
                         className={styles.customNote}
                         style={{ gridColumn: '1 / -1' }}
                       >
-                        Los partidos editados manualmente no se sobrescriben al reprogramar la fase.
+                        Los partidos editados a mano no se pisan al reprogramar la fase.
                       </p>
                     </div>
                   )}
@@ -991,63 +987,28 @@ export default function PlayoffBuilderPanel({
               </StepBlock>
             </div>
 
-            {/* Live preview */}
-            <div className={styles.previewPanel} style={{ marginTop: 48 }}>
-              <div className={styles.previewHead}>
-                <span className={styles.previewTitle}>Vista previa</span>
-                <span className={styles.previewSub}>
-                  Qué se genera con esta configuración (antes de crear el cuadro).
-                </span>
-              </div>
+            {/* Resumen de lo que se genera */}
+            <div className={styles.previewLine} style={{ marginTop: 40 }}>
               {preview.ok ? (
-                <div className={styles.previewBody}>
-                  <div className={styles.previewCol}>
-                    <span className={styles.previewColLabel}>Copas generadas</span>
-                    {preview.cups.length === 0 && (
-                      <div className={styles.cupRow}>Una sola copa.</div>
-                    )}
-                    {preview.cups.map((c) => (
-                      <div key={c.name} className={styles.cupRow}>
-                        <span
-                          className={styles.cupDot}
-                          style={{ background: c.color }}
-                          aria-hidden
-                        />
-                        {c.name}
-                      </div>
-                    ))}
-                  </div>
-                  <div className={styles.previewCol}>
-                    <span className={styles.previewColLabel}>
-                      {preview.stage} · primeros cruces
-                    </span>
-                    {preview.random ? (
-                      <p className={styles.cardDesc}>
-                        Los enfrentamientos se sortean al azar al generar el cuadro.
-                      </p>
-                    ) : (
-                      <div className={styles.pairList}>
-                        {preview.pairs.slice(0, 8).map((p, i) => (
-                          <span key={i}>{p}</span>
-                        ))}
-                        {preview.pairs.length > 8 && (
-                          <span className={styles.pairMore}>
-                            +{preview.pairs.length - 8} cruces más…
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div className={styles.previewColNarrow}>
-                    <span className={styles.previewColLabel}>Total</span>
-                    <p>
-                      <span className={styles.totalNum}>{preview.total}</span>
-                      <span className={styles.totalLabel}>partidos en el cuadro</span>
-                    </p>
-                  </div>
-                </div>
+                <>
+                  <span>
+                    <strong>{preview.total}</strong> partidos · <strong>{preview.rounds}</strong>{' '}
+                    ronda{preview.rounds === 1 ? '' : 's'} · <strong>{cupsCount}</strong>{' '}
+                    {cupsCount === 1 ? 'copa' : 'copas'}
+                    {preview.cups.length > 1 ? ` (${preview.cups.join(', ')})` : ''}
+                  </span>
+                  <span className={styles.previewPairs}>
+                    {preview.stage}:{' '}
+                    {preview.random
+                      ? 'cruces sorteados al generar'
+                      : participants === 'zones'
+                        ? 'según la tabla de la fase de grupos'
+                        : preview.pairs.slice(0, 4).join(' · ') +
+                          (preview.pairs.length > 4 ? ` · +${preview.pairs.length - 4}` : '')}
+                  </span>
+                </>
               ) : (
-                <p className={styles.previewError}>{preview.error}</p>
+                <span className={styles.previewError}>{preview.error}</span>
               )}
             </div>
 
@@ -1055,6 +1016,12 @@ export default function PlayoffBuilderPanel({
               <div className={styles.errorBanner} style={{ marginTop: 24 }}>
                 <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
                 <span>{error}</span>
+              </div>
+            )}
+            {notice && !error && (
+              <div className={styles.noticeBanner} style={{ marginTop: 24 }} role="status">
+                <Check size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+                <span>{notice}</span>
               </div>
             )}
           </div>
@@ -1069,7 +1036,7 @@ export default function PlayoffBuilderPanel({
                   onClick={() => runAction('regenerate', true)}
                   className={`${styles.generateBtn} ${busy ? styles.btnDisabled : ''}`}
                 >
-                  Sí, regenerar y borrar resultados
+                  Sí, regenerar y borrar lo cargado
                 </button>
                 <button
                   type="button"
@@ -1118,15 +1085,51 @@ export default function PlayoffBuilderPanel({
                     {board.hasBracket ? (
                       <>
                         <strong>Cuadro generado</strong> · {TEMPLATE_SHORT[templateId] ?? templateId}
+                        {seeding ? (seeding.locked ? ' · zonas cerradas' : ' · sigue la tabla de zonas') : ''}
                       </>
                     ) : (
                       <>
-                        <strong>Vista previa del cuadro</strong> · Etapa de diseño
+                        <strong>Sin generar</strong> · los partidos aparecen al generar
                       </>
                     )}
                   </span>
                 </div>
                 <div className={styles.footerActions}>
+                  {board.hasBracket && seeding && !seeding.locked && (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => seedingPost({ action: 'reseed' })}
+                      className={`${styles.secondaryBtn} ${busy ? styles.btnDisabled : ''}`}
+                      title="Vuelve a leer la tabla de la fase de grupos y acomoda los cruces que todavía no se jugaron"
+                    >
+                      Recalcular cruces
+                    </button>
+                  )}
+                  {board.hasBracket && seeding && (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() =>
+                        seedingPost({ action: seeding.locked ? 'reopenZones' : 'closeZones' })
+                      }
+                      className={`${styles.secondaryBtn} ${busy ? styles.btnDisabled : ''}`}
+                    >
+                      {seeding.locked ? 'Reabrir zonas' : 'Cerrar zonas'}
+                    </button>
+                  )}
+                  {board.hasBracket && (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => runAction('syncAdvancement')}
+                      className={`${styles.secondaryBtn} ${busy ? styles.btnDisabled : ''}`}
+                      title="Vuelve a empujar ganadores y perdedores de todos los partidos terminados. Para resultados que entraron por fuera del gestor."
+                    >
+                      <Link2 size={14} />
+                      Sincronizar llaves
+                    </button>
+                  )}
                   {board.hasBracket && (
                     <button
                       type="button"

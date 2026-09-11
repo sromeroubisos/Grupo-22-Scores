@@ -30,10 +30,11 @@ import {
   ensurePlayoffBracketMatches,
   getPlayoffTeamsCount,
   isPlayoffPhaseType,
+  readPlayoffBracketMode,
   resolvePlayoffStagesForTeams,
   syncPlayoffStagesToRounds,
 } from '@/lib/server/playoffStages';
-import { generatePlayoffBracket } from '@/lib/server/playoffBracket';
+import { generatePlayoffBracket, loadPlayoffBracket } from '@/lib/server/playoffBracket';
 import { resolveMatchAdvancement } from '@/lib/server/resolveMatchAdvancement';
 import { reseedPlayoffBracket } from '@/lib/server/playoffBracket';
 import { readPlayoffSeedingConfig } from '@/lib/playoff/seedingFromStandings';
@@ -1644,6 +1645,10 @@ export class FixtureService {
         | (PlayoffBuilderConfig & { generatedAt?: string })
         | undefined;
       if (builderConfig?.templateId) {
+        // "Completar slots" sobre un cuadro ya generado no tiene nada que
+        // completar: antes regeneraba con force y borraba los resultados.
+        const existing = await loadPlayoffBracket(supabase, phaseId);
+        if (existing.hasBracket) return true;
         const result = await generatePlayoffBracket(supabase, {
           tournamentId: phaseContext.tournament_id,
           phaseId,
@@ -1657,13 +1662,18 @@ export class FixtureService {
             customSpec: builderConfig.customSpec,
           },
           schedule: (phaseContext?.settings as any)?.bracketSchedule ?? { mode: 'manual' },
-          force: true,
+          force: false,
         });
         if (!result.ok) {
           console.error('Error generating playoff bracket (builder):', result.error);
           return false;
         }
         return true;
+      }
+
+      if (readPlayoffBracketMode(phaseContext?.settings) === 'auto') {
+        console.error('Error generating playoff bracket: la fase es de llaves automáticas y todavía no tiene cuadro. Se genera desde el constructor.');
+        return false;
       }
 
       const playoffTeamsCount = getPlayoffTeamsCount(phaseContext?.settings);

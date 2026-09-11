@@ -9,8 +9,10 @@ export {
   getPlayoffTeamsCount,
   isPlayoffPhaseType,
   normalizePlayoffStageNames,
+  readPlayoffBracketMode,
   resolvePlayoffStagesForTeams,
   resolvePlayoffStageNamesForTeams,
+  type PlayoffBracketMode,
   type PlayoffStageConfig,
 } from '@/lib/utils/playoffStages';
 
