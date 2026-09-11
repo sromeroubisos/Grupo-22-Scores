@@ -182,6 +182,15 @@ function isRugbyPassTeamId(value: string) {
     return /^rp-team-[a-z0-9-]+$/i.test(value);
 }
 
+/**
+ * `us7-team-4730`: una rama de franquicia de Ultimate Sevens. Tampoco vive en
+ * `clubs`, por el mismo motivo que RugbyPass: sin esto se le abría el panel de
+ * gestión a una fila que no existe.
+ */
+function isUltimateSevensTeamId(value: string) {
+    return /^us7-team-[A-Za-z0-9_]+$/i.test(value);
+}
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
@@ -219,6 +228,9 @@ const POSITION_ORDER: Record<string, number> = {
     midfielder: 2, midfielders: 2, mediocampista: 2, m: 2,
     forward: 3, forwards: 3, striker: 3, strikers: 3, delantero: 3, f: 3,
     coach: 4, manager: 4, entrenador: 4,
+    // Rugby: los que no son forwards. Sin esto el seven de Ultimate Sevens
+    // mandaba centros, medios y wings a "Otros".
+    back: 6, backs: 6, 'tres cuartos': 6,
 };
 
 const POSITION_LABELS: Record<number, string> = {
@@ -228,6 +240,7 @@ const POSITION_LABELS: Record<number, string> = {
     3: 'Delanteros',
     4: 'Cuerpo Tecnico',
     5: 'Otros',
+    6: 'Tres cuartos',
 };
 
 type PublicRelatedClub = {
@@ -383,7 +396,8 @@ function TeamDetailInner({ id }: { id: string }) {
                     !id.startsWith('fs-team-') &&
                     !isRugbyApiSportsTeamId(id) &&
                     !isEspnAmericanFootballTeamId(id) &&
-                    !isRugbyPassTeamId(id)
+                    !isRugbyPassTeamId(id) &&
+                    !isUltimateSevensTeamId(id)
                 ) {
                     const nextParams = new URLSearchParams();
                     if (preferredSport) nextParams.set('sport', preferredSport);
@@ -787,7 +801,8 @@ function TeamDetailInner({ id }: { id: string }) {
             !rawId.startsWith('fs-team-') &&
             !isRugbyApiSportsTeamId(rawId) &&
             !isEspnAmericanFootballTeamId(rawId) &&
-            !isRugbyPassTeamId(rawId)
+            !isRugbyPassTeamId(rawId) &&
+            !isUltimateSevensTeamId(rawId)
         ) return rawId;
         return null;
     }, [externalTeamId, rawId, resolvedClubId]);

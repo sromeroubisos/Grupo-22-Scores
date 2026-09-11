@@ -24,14 +24,19 @@ import {
     US7_PROVIDER,
     US7_SITE_URL,
     buildUs7Brackets,
+    parseUs7Clubs,
     parseUs7Fixtures,
     parseUs7MatchId,
     parseUs7Players,
+    parseUs7TeamId,
     resolveUs7Roster,
+    us7CountryName,
+    us7PositionGroup,
     us7MatchIdOf,
     us7RefreshTtlSeconds,
     us7StageLabel,
     us7TeamIdOf,
+    type Us7Club,
     type Us7CompetitionKey,
     type Us7Fixture,
     type Us7Player,
@@ -42,6 +47,7 @@ export {
     US7_COMPETITIONS,
     US7_PROVIDER,
     parseUs7MatchId,
+    parseUs7TeamId,
     parseUs7TournamentId,
     type Us7CompetitionKey,
 } from '@/lib/services/ultimateSevensParser';
@@ -50,6 +56,8 @@ const CACHE_PREFIX = 'us7';
 const FETCH_TIMEOUT_MS = 15000;
 /** Los planteles cambian con un fichaje, no durante la etapa. */
 const TTL_PLAYERS_SECONDS = 3600;
+/** Las seis franquicias no cambian en una temporada. */
+const TTL_CLUBS_SECONDS = 3600;
 
 // --------------------------------------------------------------------------
 // Cliente HTTP + caché
@@ -139,6 +147,10 @@ async function getAllFixtures(): Promise<Us7Fixture[]> {
 
 async function getPlayers(): Promise<Map<number, Us7Player>> {
     return parseUs7Players(await readResource(`${CACHE_PREFIX}:players`, '/players', () => TTL_PLAYERS_SECONDS));
+}
+
+async function getClubs(): Promise<Us7Club[]> {
+    return parseUs7Clubs(await readResource(`${CACHE_PREFIX}:teams`, '/teams', () => TTL_CLUBS_SECONDS));
 }
 
 /**
@@ -386,6 +398,166 @@ export async function getUltimateSevensTournamentBundle(key: Us7CompetitionKey) 
         draw: active ? active.rounds : [],
         brackets,
         archives: [] as unknown[],
+    };
+}
+
+// --------------------------------------------------------------------------
+// Ficha del club
+// --------------------------------------------------------------------------
+
+/**
+ * Una fila del plantel, con la forma que ya renderiza la pestaña. Sin id a
+ * propósito: la fila linkea a `/players/<id>` cuando lo tiene, y los jugadores
+ * de la liga no tienen ficha propia. Un link a un 404 es peor que un nombre
+ * quieto.
+ */
+function toSquadRow(player: Us7Player) {
+    const nationality = us7CountryName(player.countryCode);
+    return {
+        id: '',
+        player_id: '',
+        name: player.name,
+        short_name: player.name,
+        position: player.position,
+        type: player.position,
+        jersey_number: player.number ?? '',
+        nationality,
+        country: nationality ? { name: nationality } : null,
+        image_path: player.photo,
+        photo: player.photo,
+        provider: US7_PROVIDER,
+        source: US7_PROVIDER,
+    };
+}
+
+/**
+ * El plantel en bloques, con la forma agrupada que ya lee la pestaña
+ * (`[{ tab_name, list: [{ name, players }] }]`). Agrupado y no plano porque la
+ * agrupación plana sale del PUESTO de cada fila, y el puesto de un seven
+ * ("Centro", "Medio") no es un bloque: iba todo a "Otros". Cada jugador
+ * conserva su puesto; el bloque es forwards o tres cuartos.
+ */
+function toSquadTabs(tabName: string, players: Us7Player[]) {
+    const groups = [
+        { key: 'forwards', name: 'forwards' },
+        { key: 'backs', name: 'backs' },
+        { key: 'otros', name: 'otros' },
+    ] as const;
+    const list = groups
+        .map((group) => ({
+            name: group.name,
+            players: players.filter((player) => us7PositionGroup(player.position) === group.key).map(toSquadRow),
+        }))
+        .filter((group) => group.players.length > 0);
+    return list.length > 0 ? [{ team_name: tabName, tab_name: tabName, list }] : [];
+}
+
+export interface UltimateSevensTeamBundle {
+    details: Record<string, unknown>;
+    results: ReturnType<typeof toTournamentViewMatch>[];
+    fixtures: ReturnType<typeof toTournamentViewMatch>[];
+    squad: ReturnType<typeof toSquadTabs>;
+    /** Jugadores del plantel: `squad` viene en bloques y su largo no los cuenta. */
+    squadSize: number;
+}
+
+/**
+ * La ficha de una rama de franquicia (`us7-team-4730` = Foudre Bleue
+ * masculino). Una por rama y no una por club: los partidos, el plantel y la
+ * competencia son de la rama, y los dos planteles juntos no son el plantel de
+ * nadie. La otra rama va en "Clubes relacionados".
+ *
+ * El nombre lleva la rama ("Foudre Bleue · Masculino"): la liga usa el MISMO
+ * nombre para las dos, y dos fichas con el mismo título no se distinguen.
+ *
+ * `null` cuando el id no es de ninguna rama publicada ni juega ningún partido,
+ * para que el endpoint conteste 404 en vez de dibujar un club vacío.
+ */
+export async function getUltimateSevensTeamBundle(rawTeamId: string): Promise<UltimateSevensTeamBundle | null> {
+    const teamId = parseUs7TeamId(rawTeamId);
+    if (!teamId) return null;
+
+    // El directorio y los jugadores van por su cuenta: la ficha sale con lo que
+    // conteste. Sin `/teams` la identidad se arma con lo que dicen los partidos.
+    const [clubs, fixtures, players] = await Promise.all([
+        getClubs().catch(() => [] as Us7Club[]),
+        getAllFixtures().catch(() => [] as Us7Fixture[]),
+        getPlayers().catch(() => new Map<number, Us7Player>()),
+    ]);
+
+    const club = clubs.find((candidate) => candidate.branches.some((branch) => branch.teamId === teamId)) ?? null;
+    const branch = club?.branches.find((candidate) => candidate.teamId === teamId) ?? null;
+
+    const own = fixtures.filter((fixture) => fixture.home.teamId === teamId || fixture.away.teamId === teamId);
+    const sideInFixture = own
+        .map((fixture) => (fixture.home.teamId === teamId ? fixture.home : fixture.away))
+        .find((side) => side.name);
+
+    if (!club && own.length === 0) return null;
+
+    const key: Us7CompetitionKey | null = branch?.key ?? own[0]?.key ?? null;
+    const competition = key ? US7_COMPETITIONS[key] : null;
+    const clubName = club?.name || sideInFixture?.name || 'Ultimate Sevens';
+    const logo = club?.logo || sideInFixture?.logo || '';
+    const name = competition ? `${clubName} · ${competition.genderLabel}` : clubName;
+
+    const views = own.map((fixture) => ({ fixture, view: toTournamentViewMatch(fixture) }));
+    const results = views
+        .filter(({ fixture }) => fixture.state === 'final')
+        .sort((left, right) => (right.view.timestamp || 0) - (left.view.timestamp || 0))
+        .map(({ view }) => view);
+    const upcoming = views
+        .filter(({ fixture }) => fixture.state !== 'final')
+        .sort((left, right) => (left.view.timestamp || 0) - (right.view.timestamp || 0))
+        .map(({ view }) => view);
+
+    const playerIds = branch?.playerIds.length ? branch.playerIds : (sideInFixture?.playerIds ?? []);
+    const roster = resolveUs7Roster(playerIds, players);
+    const squad = toSquadTabs(competition?.name ?? 'Plantel', roster);
+
+    // La otra rama del mismo club. El vínculo es de la franquicia, no de la
+    // competencia: por eso va aunque todavía no haya jugado.
+    const relatedClubs = (club?.branches ?? [])
+        .filter((candidate) => candidate.teamId !== teamId)
+        .map((candidate) => ({
+            id: us7TeamIdOf({ teamId: candidate.teamId, name: club?.name ?? '' }),
+            name: `${club?.name ?? ''} · ${US7_COMPETITIONS[candidate.key].genderLabel}`,
+            short_name: club?.name ?? null,
+            logo_url: logo || null,
+            sport: 'rugby',
+            sport_id: 'rugby',
+            city: null,
+            region: null,
+            country: null,
+            is_base: false,
+            is_current: false,
+        }));
+
+    const id = us7TeamIdOf({ teamId, name: clubName });
+    const webUrl = club?.webUrl || '';
+
+    return {
+        details: {
+            id,
+            team_id: id,
+            name,
+            short_name: clubName,
+            logo,
+            image_path: logo,
+            country: { name: 'Internacional' },
+            sport_id: 'rugby',
+            sport: { sport_id: 'rugby', name: 'Rugby' },
+            current_league: competition?.name ?? '',
+            team_url: webUrl,
+            website_url: webUrl,
+            related_clubs: relatedClubs,
+            provider: US7_PROVIDER,
+            source: US7_PROVIDER,
+        },
+        results,
+        fixtures: upcoming,
+        squad,
+        squadSize: roster.length,
     };
 }
 

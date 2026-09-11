@@ -10,11 +10,15 @@ import {
     parseUs7Fixture,
     parseUs7Fixtures,
     parseUs7MatchId,
+    parseUs7Clubs,
     parseUs7Players,
+    parseUs7TeamId,
     parseUs7TournamentId,
     resolveUs7Roster,
     us7MatchIdOf,
     us7RefreshTtlSeconds,
+    us7CountryName,
+    us7PositionGroup,
     us7ShortPosition,
     us7StageLabel,
     us7TeamIdOf,
@@ -181,12 +185,62 @@ test('el plantel se arma con el wpid de /players, en orden de camiseta', () => {
     assert.equal(roster[2].number, null);
 });
 
+test('el jugador trae su foto y su país, y el país se dice en castellano', () => {
+    const players = parseUs7Players([
+        { name: 'Aaron Cummings', shirtNumber: '1', position: 'Prop/Hooker (Middle forward)', country: 'US', mugshot: 'https://x/Aaron.png', wpid: 42 },
+        { name: 'Sin País', shirtNumber: '3', position: '', country: '', mugshot: null, wpid: 43 },
+    ]);
+    assert.equal(players.get(42)?.photo, 'https://x/Aaron.png');
+    assert.equal(players.get(42)?.countryCode, 'US');
+    assert.equal(us7CountryName('US'), 'Estados Unidos');
+    assert.equal(players.get(43)?.countryCode, null);
+    assert.equal(us7CountryName(null), '');
+});
+
+test('las franquicias salen de /teams con sus dos ramas, y las ramas sueltas no son clubes', () => {
+    const clubs = parseUs7Clubs([
+        {
+            id: '123', name: 'Foudre Bleue', logo: 'https://x/fb.png',
+            webUrl: 'https://www.ultimatesevens.com/match-centre/clubs/foudre-bleue/',
+            subTeams: [
+                { id: '4731', category: 'women', teamPlayers: [51, 52] },
+                { id: '4730', category: 'men', teamPlayers: [40, 41, '48'] },
+            ],
+        },
+        // la rama suelta, tal como viene repetida en la misma lista
+        { id: '4730', name: 'Foudre Bleue Men', category: 'men', subTeams: null, parentTeam: 1982, teamPlayers: [40] },
+        { id: '1234', name: 'Sol Feroz', logo: '', webUrl: '', subTeams: [{ id: '4757', category: 'men', teamPlayers: [] }] },
+    ]);
+    assert.deepEqual(clubs.map((club) => club.name), ['Foudre Bleue', 'Sol Feroz']);
+    assert.deepEqual(clubs[0].branches, [
+        { teamId: '4730', key: 'm', playerIds: [40, 41, 48] },
+        { teamId: '4731', key: 'w', playerIds: [51, 52] },
+    ]);
+    assert.deepEqual(parseUs7Clubs({ error: true }), []);
+});
+
+test('el id de un plantel', () => {
+    assert.equal(parseUs7TeamId('us7-team-4730'), '4730');
+    assert.equal(parseUs7TeamId('us7-match-31176'), null);
+    assert.equal(parseUs7TeamId('rp-team-auckland'), null);
+    assert.equal(parseUs7TeamId(4730), null);
+});
+
 test('el puesto se acorta al primero, en castellano de seven', () => {
     assert.equal(us7ShortPosition('Prop/Hooker (Edge forward), Prop/Hooker (Middle forward)'), 'Forward');
     assert.equal(us7ShortPosition('Playmaker (9/10), Centre'), 'Medio');
     assert.equal(us7ShortPosition('Centre, Wing'), 'Centro');
     assert.equal(us7ShortPosition('Wing, Centre, Playmaker (9/10)'), 'Wing');
     assert.equal(us7ShortPosition(''), '');
+});
+
+test('el plantel se parte en forwards y tres cuartos; sin puesto no se inventa', () => {
+    assert.equal(us7PositionGroup('Forward'), 'forwards');
+    assert.equal(us7PositionGroup('Medio'), 'backs');
+    assert.equal(us7PositionGroup('Centro'), 'backs');
+    assert.equal(us7PositionGroup('Wing'), 'backs');
+    assert.equal(us7PositionGroup(''), 'otros');
+    assert.equal(us7PositionGroup('Utility'), 'otros');
 });
 
 test('ida y vuelta de los ids', () => {

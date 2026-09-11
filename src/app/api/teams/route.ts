@@ -35,6 +35,8 @@ import {
     parseRugbyPassTeamSlug,
 } from '@/lib/services/rugbyPassProfiles';
 import { getWorldCupTeamProfile, type WorldCupMatchSide } from '@/lib/server/worldCupProfiles';
+import { getUltimateSevensTeamBundle, parseUs7TeamId } from '@/lib/services/ultimateSevens';
+
 type ReadClient = Awaited<ReturnType<typeof getReadClient>>;
 type InternalClubRow = Database['public']['Tables']['clubs']['Row'] & {
     sport?: string | null;
@@ -1409,6 +1411,42 @@ export async function GET(request: Request) {
             console.error('Teams API RugbyPass error', e);
             return Response.json(
                 { ok: false, error: 'Failed to load RugbyPass team data', details: message },
+                { status: 500 }
+            );
+        }
+    }
+
+    // Ultimate Sevens: `us7-team-4730`, una rama de franquicia. No vive en
+    // `clubs`: sin esta rama el id caía por el camino del club de la base y la
+    // ficha contestaba 404 con la página ya abierta.
+    if (parseUs7TeamId(rawTeamId)) {
+        try {
+            const bundle = await getUltimateSevensTeamBundle(rawTeamId);
+            if (!bundle) {
+                return Response.json({ ok: false, error: 'Team not found' }, { status: 404 });
+            }
+
+            return Response.json({
+                ok: true,
+                resolvedClubId: null,
+                details: {
+                    ...bundle.details,
+                    supported_tabs: buildSupportedTabs({
+                        hasSquad: bundle.squadSize > 0,
+                        // La liga no publica pases: la pestaña no se dibuja vacía.
+                        hasTransfers: false,
+                    }),
+                },
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                squad: skipSquad ? [] : bundle.squad,
+                transfers: [],
+            });
+        } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : String(e);
+            console.error('Teams API Ultimate Sevens error', e);
+            return Response.json(
+                { ok: false, error: 'Failed to load Ultimate Sevens team data', details: message },
                 { status: 500 }
             );
         }
