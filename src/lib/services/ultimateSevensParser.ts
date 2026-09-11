@@ -112,6 +112,27 @@ export type Us7Player = {
     name: string;
     number: string | null;
     position: string;
+    /** Retrato del jugador (`mugshot`), o vacío. */
+    photo: string;
+    /** Código ISO de dos letras del país (`US`), o null. */
+    countryCode: string | null;
+};
+
+/** Una rama de una franquicia: el plantel masculino o el femenino. */
+export type Us7Branch = {
+    /** Id del plantel, el mismo que viaja en los partidos (`4730`). */
+    teamId: string;
+    key: Us7CompetitionKey;
+    playerIds: number[];
+};
+
+/** Una franquicia de la liga, con sus dos ramas. */
+export type Us7Club = {
+    id: string;
+    name: string;
+    logo: string;
+    webUrl: string;
+    branches: Us7Branch[];
 };
 
 // --------------------------------------------------------------------------
@@ -311,6 +332,17 @@ export function us7ShortPosition(raw: string): string {
     return first;
 }
 
+/**
+ * El bloque del plantel en el que va un puesto ya acortado: forwards o tres
+ * cuartos. Es la división que se lee en un plantel de rugby; sin puesto
+ * publicado, el jugador no se inventa en ninguno de los dos.
+ */
+export function us7PositionGroup(shortPosition: string): 'forwards' | 'backs' | 'otros' {
+    if (shortPosition === 'Forward') return 'forwards';
+    if (shortPosition === 'Medio' || shortPosition === 'Centro' || shortPosition === 'Wing') return 'backs';
+    return 'otros';
+}
+
 /** Los jugadores de `/players`, por `wpid` (la llave de `teamPlayers`). */
 export function parseUs7Players(json: unknown): Map<number, Us7Player> {
     const players = new Map<number, Us7Player>();
@@ -321,14 +353,72 @@ export function parseUs7Players(json: unknown): Map<number, Us7Player> {
         const name = asString(record?.name).trim();
         if (!record || wpid === null || !name) continue;
         const number = asString(record.shirtNumber).trim();
+        const country = asString(record.country).trim().toUpperCase();
         players.set(wpid, {
             wpid,
             name,
             number: number || null,
             position: us7ShortPosition(asString(record.position)),
+            photo: asString(record.mugshot).trim(),
+            countryCode: /^[A-Z]{2}$/.test(country) ? country : null,
         });
     }
     return players;
+}
+
+/**
+ * El país en castellano, desde el código ISO que publica la liga. La API lo
+ * escribe en inglés (`countryName: "United States"`); `Intl` lo da en el
+ * idioma de la pantalla sin mantener una tabla a mano.
+ */
+export function us7CountryName(code: string | null): string {
+    if (!code) return '';
+    try {
+        return new Intl.DisplayNames(['es'], { type: 'region' }).of(code) ?? code;
+    } catch {
+        return code;
+    }
+}
+
+/**
+ * Las franquicias de `/teams`. La API mezcla en la misma lista los clubes
+ * (con `subTeams`) y cada rama suelta (con `parentTeam`); acá cuentan solo los
+ * clubes, y las ramas salen de sus `subTeams`.
+ */
+export function parseUs7Clubs(json: unknown): Us7Club[] {
+    if (!Array.isArray(json)) return [];
+    const clubs: Us7Club[] = [];
+    for (const item of json) {
+        const record = asRecord(item);
+        if (!record || !Array.isArray(record.subTeams)) continue;
+        const name = asString(record.name).trim();
+        if (!name) continue;
+
+        const branches: Us7Branch[] = [];
+        for (const sub of record.subTeams) {
+            const branch = asRecord(sub);
+            const teamId = asString(branch?.id).trim();
+            const key = competitionOfCategory(asString(branch?.category));
+            if (!branch || !teamId || !key) continue;
+            branches.push({
+                teamId,
+                key,
+                playerIds: Array.isArray(branch.teamPlayers)
+                    ? branch.teamPlayers.map(toInt).filter((id): id is number => id !== null)
+                    : [],
+            });
+        }
+
+        clubs.push({
+            id: asString(record.id).trim(),
+            name,
+            logo: asString(record.logo).trim(),
+            webUrl: asString(record.webUrl).trim(),
+            // Masculino primero: el mismo orden que las competencias.
+            branches: branches.sort((left, right) => US7_COMPETITION_KEYS.indexOf(left.key) - US7_COMPETITION_KEYS.indexOf(right.key)),
+        });
+    }
+    return clubs.sort((left, right) => left.name.localeCompare(right.name));
 }
 
 /** El plantel de un lado, en el orden de la camiseta. Los ids sin jugador se saltean. */
@@ -554,6 +644,13 @@ export function parseUs7MatchId(value: unknown): { gameId: string } | null {
     if (typeof value !== 'string') return null;
     const match = /^us7-match-([A-Za-z0-9_]+)$/i.exec(value.trim());
     return match ? { gameId: match[1] } : null;
+}
+
+/** El id del plantel dentro de `us7-team-4730`. `null` si no es de la liga. */
+export function parseUs7TeamId(value: unknown): string | null {
+    if (typeof value !== 'string') return null;
+    const match = /^us7-team-([A-Za-z0-9_]+)$/i.exec(value.trim());
+    return match ? match[1] : null;
 }
 
 export function parseUs7TournamentId(value: unknown): Us7CompetitionKey | null {
