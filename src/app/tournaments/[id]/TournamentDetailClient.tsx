@@ -3297,6 +3297,10 @@ export default function TournamentDetailPage({
         title: bracketTitle,
         subtitle: bracketPhase?.name || details?.season || 'Cuadro eliminatorio',
         tournamentLogo,
+        tournamentName,
+        // Esquinas del afiche: deporte y pais a la izquierda, temporada a la derecha.
+        kickerLeft: [sportLabel, countryName].filter(Boolean).join(' '),
+        kickerRight: yearDisplay ? `Temporada ${yearDisplay}` : '',
         rounds: draw,
     };
 

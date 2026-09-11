@@ -317,6 +317,11 @@ export interface PlayoffBracketData {
     title: string;
     subtitle?: string;
     tournamentLogo?: string;
+    /** Nombre del torneo para la linea en versalitas; si falta se saca del titulo ("<fase> - <torneo>"). */
+    tournamentName?: string;
+    /** Textos de las esquinas del afiche, una palabra por linea (deporte y pais; temporada). */
+    kickerLeft?: string;
+    kickerRight?: string;
     rounds: PlayoffBracketRoundData[];
 }
 
@@ -999,6 +1004,16 @@ const LADDER_COLOR_DEFAULTS: ExportColorDefaults = {
     editorialGradientRightColor: '#3ddc5a',
 };
 
+// El cuadro playoff nace en el navy y el celeste de la referencia; Fondo y
+// Acento del modal lo recolorean como a cualquier otra pieza.
+const BRACKET_COLOR_DEFAULTS: ExportColorDefaults = {
+    selectedPaletteId: DEFAULT_PALETTE.id,
+    bgColor: '#071a36',
+    accentColor: '#3db5ff',
+    editorialGradientLeftColor: '#df255c',
+    editorialGradientRightColor: '#3db5ff',
+};
+
 function isPalmaresData(template: ExportTemplate, data: ExportData): boolean {
     return template === 'standings' && (data as StandingsData).variant === 'palmares';
 }
@@ -1089,6 +1104,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const isRankingPoster = isRankingPosterData(template, data);
     const isPalmares = isPalmaresData(template, data);
     const isLadder = isLadderData(template, data);
+    const isBracket = template === 'playoffBracket';
     const groupedStandings = useMemo(
         () => (template === 'standings' ? getExportableStandingsGroups(data as StandingsData) : []),
         [data, template]
@@ -1334,7 +1350,9 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             ? RANKING_POSTER_COLOR_DEFAULTS
             : isLadder
                 ? LADDER_COLOR_DEFAULTS
-                : defaultExportColorsRef.current;
+                : isBracket
+                    ? BRACKET_COLOR_DEFAULTS
+                    : defaultExportColorsRef.current;
         setHasSessionColorOverrides(false);
         setImpactoFieldColor('');
         setImpactoInkColor('');
@@ -1352,17 +1370,17 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             setRankingPanelColor(combo.panel);
             setRankingGoldColor(combo.gold);
         }
-    }, [isLadder, isRankingPoster, showModal]);
+    }, [isBracket, isLadder, isRankingPoster, showModal]);
 
     useEffect(() => {
-        if (!showModal || hasSessionColorOverrides || isRankingPoster || isLadder) return;
+        if (!showModal || hasSessionColorOverrides || isRankingPoster || isLadder || isBracket) return;
 
         setSelectedPaletteId(defaultExportColors.selectedPaletteId);
         setBgColor(defaultExportColors.bgColor);
         setAccentColor(defaultExportColors.accentColor);
         setEditorialGradientLeftColor(defaultExportColors.editorialGradientLeftColor);
         setEditorialGradientRightColor(defaultExportColors.editorialGradientRightColor);
-    }, [defaultExportColors, hasSessionColorOverrides, isLadder, isRankingPoster, showModal]);
+    }, [defaultExportColors, hasSessionColorOverrides, isBracket, isLadder, isRankingPoster, showModal]);
 
     useEffect(() => {
         setIsPortalReady(true);
@@ -1595,7 +1613,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     }, [dailyMatchesTimeMode, isPalmares, lineupExportMode, matchExportLayout, matchExportMode, selectedStandingsGroupLabel, standingsExportMode, template]);
     const exportSummaryChips = useMemo(() => {
         const chips = [selectedFormatConfig.label];
-        chips.push(isRankingPoster ? 'Poster Ranking' : isLadder ? 'Placa Ladder' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily));
+        chips.push(isRankingPoster ? 'Poster Ranking' : isLadder ? 'Placa Ladder' : isBracket ? 'Cuadro Playoff' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily));
         if (template === 'matchStats') {
             chips.push(getMatchExportLayoutLabel(matchExportLayout));
         } else if (template === 'standings') {
@@ -1626,6 +1644,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     }, [
         customTournamentName,
         data,
+        isBracket,
         isLadder,
         isPalmares,
         isRankingPoster,
@@ -1646,6 +1665,10 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
 
         if (isLadder) {
             return 'En la placa ladder, Fondo es la placa entera (nace negra) y Acento pinta el remate del subtitulo, los numeros de zona y la flecha del que sube. La flecha del que baja es roja siempre.';
+        }
+
+        if (isBracket) {
+            return 'En el cuadro playoff, Fondo es el navy del afiche (con sus haces de luz) y Acento pinta PLAYOFF, las cabeceras de cada cruce y las lineas que unen las llaves.';
         }
 
         if (isPalmares) {
@@ -1677,7 +1700,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         }
 
         return 'La marca de agua G22 se mantiene en todas las exportaciones.';
-    }, [isLadder, isPalmares, isRankingPoster, template, visualFamily]);
+    }, [isBracket, isLadder, isPalmares, isRankingPoster, template, visualFamily]);
 
     const toggleMatch = (index: number) => {
         setSelectedMatchIndices((previous) => {
@@ -2280,13 +2303,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             } else if (template === 'teamOfWeek') {
                 await drawG22BaseTeamOfWeek(ctx, canvas, exportData as TeamOfWeekData, config, accentColor, bgColor, brandLogo);
             } else if (template === 'playoffBracket') {
-                if (visualFamily === 'posterV3') {
-                    await drawPosterV3PlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo);
-                } else if (visualFamily === 'momentumV2') {
-                    await drawMomentumPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo);
-                } else {
-                    await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo);
-                }
+                // El cuadro tiene un solo afiche, sea cual sea la familia activa.
+                await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo);
             } else {
                 if (visualFamily === 'posterV3') {
                     await drawPosterV3PlayerStats(ctx, canvas, exportData as PlayerStatsData, config, accentColor, bgColor, brandLogo);
@@ -2497,12 +2515,14 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                 <label className={styles.modalLabel}>Diseno activo</label>
                                 <div className={styles.activeDesignCard}>
                                     <div className={styles.activeDesignCopy}>
-                                        <strong>{isRankingPoster ? 'Poster Ranking' : isLadder ? 'Placa Ladder' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily)}</strong>
+                                        <strong>{isRankingPoster ? 'Poster Ranking' : isLadder ? 'Placa Ladder' : isBracket ? 'Cuadro Playoff' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily)}</strong>
                                         <span>
                                             {isRankingPoster
                                                 ? 'Afiche dedicado del ranking: banda vertical con el titulo, tabla P/Equipo/PTS/VAR y fila del lider destacada.'
                                                 : isLadder
                                                     ? 'Placa dedicada de la tabla: titulo grande, una fila por club con escudo, valor principal, dato secundario y flecha de tendencia.'
+                                                : isBracket
+                                                    ? 'Afiche dedicado del cuadro: logo del torneo, CUADRO PLAYOFF gigante y el arbol espejado con cuartos en las esquinas, semis en el centro y la final abajo.'
                                                 : isPalmares
                                                     ? 'Afiche dedicado del palmares: podio 2-1-3 con el escudo grande y el resto de los campeones como listado.'
                                                     : (
@@ -4164,7 +4184,7 @@ function paintPreviewCanvas(target: HTMLCanvasElement | null, rendered: HTMLCanv
 
 function getDefaultTournamentName(template: ExportTemplate, data: ExportData): string {
     if (template === 'standings') return (data as StandingsData).title || '';
-    if (template === 'playoffBracket') return (data as PlayoffBracketData).title || '';
+    if (template === 'playoffBracket') return bracketTournamentNameOf(data as PlayoffBracketData);
     if (template === 'dailyMatches' || template === 'matchStats' || template === 'lineups' || template === 'squad' || template === 'teamOfWeek') {
         return (data as DailyMatchesData | MatchStatsData | LineupsData | SquadData | TeamOfWeekData).tournament || '';
     }
@@ -5700,13 +5720,7 @@ export async function renderMatchExportPreviewCanvas(
             await drawG22BaseSquad(ctx, canvas, squadData, firstPage, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupColors);
         }
     } else if (template === 'playoffBracket') {
-        if (visualFamily === 'posterV3') {
-            await drawPosterV3PlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
-        } else if (visualFamily === 'momentumV2') {
-            await drawMomentumPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
-        } else {
-            await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
-        }
+        await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
     } else {
         if (visualFamily === 'posterV3') {
             await drawPosterV3PlayerStats(ctx, canvas, exportData as PlayerStatsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
@@ -5997,6 +6011,7 @@ function buildExportData(
         return {
             ...bracketData,
             title: tournamentName || bracketData.title,
+            tournamentName: tournamentName || bracketData.tournamentName,
         };
     }
 
@@ -7547,12 +7562,6 @@ function getStatusLabel(status?: string) {
     if (status === 'live') return 'EN VIVO';
     if (status === 'finished' || status === 'final') return 'FINAL';
     return 'PROGRAMADO';
-}
-
-function getStatusColor(status: string | undefined, accentColor: string, isDark: boolean) {
-    if (status === 'live') return '#ef4444';
-    if (status === 'finished' || status === 'final') return accentColor;
-    return isDark ? '#cbd5e1' : '#475569';
 }
 
 // ============================================================================
@@ -13536,23 +13545,281 @@ function getBracketMatchWinner(match: PlayoffBracketMatchData, side: 'home' | 'a
     return side === 'home' ? homeScore > awayScore : awayScore > homeScore;
 }
 
+// ─── Cuadro playoff: el afiche del bracket ────────────────────────────────────
+// Copia la referencia del Torneo del Interior: logo del torneo arriba, el nombre
+// en versalitas, CUADRO / PLAYOFF gigante, una capsula blanca con el subtitulo y
+// el arbol ESPEJADO —cuartos en las esquinas, semis en el centro, final abajo—
+// unido por lineas de acento. Fondo y Acento salen del modal, que para esta
+// pieza nacen en navy y celeste (BRACKET_COLOR_DEFAULTS). Con un cuadro que no
+// es un arbol limpio de 4 u 8 (byes, revalida, tercer puesto) cae a columnas
+// de izquierda a derecha con las mismas tarjetas.
+
+type BracketPalette = {
+    bg: string;
+    deep: string;
+    accent: string;
+    accentSoft: string;
+    ink: string;
+    inkMuted: string;
+    headerInk: string;
+    isDark: boolean;
+};
+
+type BracketCardSpec = {
+    x: number;
+    y: number;
+    width: number;
+    headerHeight: number;
+    rowHeight: number;
+    title: string;
+    match: PlayoffBracketMatchData;
+    homeLogo: HTMLImageElement | null;
+    awayLogo: HTMLImageElement | null;
+    dense: boolean;
+};
+
+function bracketTournamentNameOf(data: PlayoffBracketData): string {
+    const explicit = (data.tournamentName || '').trim();
+    if (explicit) return explicit;
+    // El titulo del cliente es "<fase> - <torneo>" o "Cuadro - <torneo>".
+    const title = (data.title || '').trim();
+    const separator = title.indexOf(' - ');
+    return separator >= 0 ? title.slice(separator + 3).trim() : title;
+}
+
+function isBracketTbd(name: string): boolean {
+    const normalized = name.trim().toLowerCase();
+    return !normalized || normalized === 'tbd' || normalized === 'a definir' || normalized === 'por definir';
+}
+
+function drawBracketBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, palette: BracketPalette) {
+    const W = canvas.width;
+    const H = canvas.height;
+    const base = ctx.createLinearGradient(0, 0, 0, H);
+    base.addColorStop(0, mixHexColors(palette.bg, palette.accent, 0.12));
+    base.addColorStop(0.5, palette.bg);
+    base.addColorStop(1, palette.deep);
+    ctx.fillStyle = base;
+    ctx.fillRect(0, 0, W, H);
+
+    // Haces diagonales: bandas verticales dibujadas con el plano inclinado.
+    ctx.save();
+    const shear = 0.62;
+    ctx.transform(1, 0, shear, 1, 0, 0);
+    const localLeft = -shear * H;
+    const span = W - localLeft;
+    const bands: Array<[number, number, number]> = [
+        [0.02, 0.1, 0.09],
+        [0.2, 0.05, 0.05],
+        [0.36, 0.16, 0.1],
+        [0.62, 0.07, 0.06],
+        [0.78, 0.13, 0.08],
+        [0.96, 0.05, 0.05],
+    ];
+    bands.forEach(([start, width, alpha]) => {
+        const x0 = localLeft + span * start;
+        const bw = span * width;
+        const grad = ctx.createLinearGradient(x0, 0, x0 + bw, 0);
+        grad.addColorStop(0, 'rgba(255,255,255,0)');
+        grad.addColorStop(0.5, hexToRGBA(palette.accentSoft, alpha));
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x0, -H, bw, H * 3);
+    });
+    ctx.restore();
+
+    const topGlow = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, H * 0.55);
+    topGlow.addColorStop(0, hexToRGBA(palette.accent, palette.isDark ? 0.26 : 0.14));
+    topGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topGlow;
+    ctx.fillRect(0, 0, W, H);
+
+    const vignette = ctx.createLinearGradient(0, H * 0.72, 0, H);
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(1, hexToRGBA(palette.deep, 0.7));
+    ctx.fillStyle = vignette;
+    ctx.fillRect(0, 0, W, H);
+}
+
+function drawBracketCrest(
+    ctx: CanvasRenderingContext2D,
+    centerX: number,
+    centerY: number,
+    size: number,
+    img: HTMLImageElement | null,
+    rawLogo: string,
+    label: string,
+    palette: BracketPalette,
+    isTbd: boolean,
+) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, size / 2, 0, Math.PI * 2);
+    if (isTbd) {
+        // Cupo vacio: el circulo se queda hueco, como en la referencia.
+        ctx.fillStyle = hexToRGBA(palette.accent, 0.08);
+        ctx.fill();
+        ctx.strokeStyle = hexToRGBA(palette.accent, 0.55);
+        ctx.lineWidth = Math.max(1, size * 0.05);
+        ctx.stroke();
+        ctx.restore();
+        return;
+    }
+    // El escudo va solo, sin recuadro circular: se apoya en el fondo de la tarjeta.
+    if (img) {
+        const placement = getContainedImagePlacement(img, centerX, centerY, size, size, 0);
+        ctx.drawImage(img, placement.x, placement.y, placement.width, placement.height);
+    } else {
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = palette.ink;
+        ctx.font = `800 ${Math.round(size * 0.3)}px ${FONT_BODY}`;
+        ctx.fillText(getFallbackLogoText(rawLogo, label), centerX, centerY + 1);
+    }
+    ctx.restore();
+}
+
+function drawBracketCard(ctx: CanvasRenderingContext2D, spec: BracketCardSpec, palette: BracketPalette, u: (value: number) => number) {
+    const { x, y, width, headerHeight, rowHeight, title, match, homeLogo, awayLogo, dense } = spec;
+    const height = headerHeight + rowHeight * 2;
+    const radius = u(10);
+    const scoreWidth = u(dense ? 40 : 54);
+    const scoreX = x + width - scoreWidth;
+
+    ctx.save();
+    ctx.shadowColor = hexToRGBA(palette.accent, 0.32);
+    ctx.shadowBlur = u(22);
+    ctx.fillStyle = hexToRGBA(palette.deep, 0.9);
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, radius);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, radius);
+    ctx.clip();
+    const headerGrad = ctx.createLinearGradient(x, y, x + width, y);
+    headerGrad.addColorStop(0, palette.accentSoft);
+    headerGrad.addColorStop(1, palette.accent);
+    ctx.fillStyle = headerGrad;
+    ctx.fillRect(x, y, width, headerHeight);
+    // La columna del resultado lleva su propia banda: el numero es el dato del cruce.
+    ctx.fillStyle = hexToRGBA(palette.accent, 0.16);
+    ctx.fillRect(scoreX, y + headerHeight, scoreWidth, height - headerHeight);
+    ctx.fillStyle = palette.headerInk;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `800 ${u(dense ? 11 : 13)}px ${FONT_BODY}`;
+    setCanvasTracking(ctx, u(dense ? 2 : 3));
+    ctx.fillText(truncateTextToWidth(ctx, title.toUpperCase(), width - u(20)), x + width / 2 + u(1), y + headerHeight / 2 + u(1));
+    setCanvasTracking(ctx, 0);
+    ctx.strokeStyle = hexToRGBA(palette.accent, 0.4);
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x + u(8), y + headerHeight + rowHeight);
+    ctx.lineTo(x + width - u(8), y + headerHeight + rowHeight);
+    ctx.moveTo(scoreX, y + headerHeight + u(8));
+    ctx.lineTo(scoreX, y + height - u(8));
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(palette.accent, 0.78);
+    ctx.lineWidth = Math.max(1.5, u(1.5));
+    ctx.beginPath();
+    ctx.roundRect(x, y, width, height, radius);
+    ctx.stroke();
+    ctx.restore();
+
+    const rows = [
+        {
+            name: getBracketParticipantName(match.home_team || null, match.home_participant || null),
+            rawLogo: getBracketParticipantLogo(match.home_team || null, match.home_participant || null),
+            logo: homeLogo,
+            score: match.score_home,
+            winner: getBracketMatchWinner(match, 'home'),
+        },
+        {
+            name: getBracketParticipantName(match.away_team || null, match.away_participant || null),
+            rawLogo: getBracketParticipantLogo(match.away_team || null, match.away_participant || null),
+            logo: awayLogo,
+            score: match.score_away,
+            winner: getBracketMatchWinner(match, 'away'),
+        },
+    ];
+
+    // Las dos filas comparten cuerpo: se ajusta al nombre mas largo de la tarjeta,
+    // asi el rival corto no queda mas grande que el largo.
+    const labels = rows.map((row) => (isBracketTbd(row.name) ? 'A DEFINIR' : row.name.toUpperCase()));
+    const crestProbe = Math.min(u(dense ? 28 : 40), rowHeight - u(10));
+    const nameMaxShared = scoreX - (x + u(dense ? 10 : 14) + crestProbe + u(dense ? 8 : 12)) - u(8);
+    // setFittedFont baja de a 2px y se frena ANTES del minimo: con 15 -> 13 -> 11 el
+    // piso real es 11, que es lo que hace entrar ESTUDIANTES DE PARANA sin puntos.
+    const nameSize = Math.min(...labels.map((label) => setFittedFont(ctx, label, nameMaxShared, '800', u(dense ? 12 : 15), FONT_BODY, u(dense ? 7 : 9))));
+
+    rows.forEach((row, index) => {
+        const centerY = y + headerHeight + rowHeight * index + rowHeight / 2;
+        const isTbd = isBracketTbd(row.name);
+        const crest = Math.min(u(dense ? 28 : 40), rowHeight - u(10));
+        const crestX = x + u(dense ? 10 : 14) + crest / 2;
+        drawBracketCrest(ctx, crestX, centerY, crest, row.logo, row.rawLogo, row.name, palette, isTbd);
+
+        const nameX = crestX + crest / 2 + u(dense ? 8 : 12);
+        const nameMax = scoreX - nameX - u(8);
+        const label = labels[index];
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = row.winner ? palette.accentSoft : isTbd ? palette.inkMuted : palette.ink;
+        ctx.font = `800 ${nameSize}px ${FONT_BODY}`;
+        ctx.fillText(truncateTextToWidth(ctx, label, nameMax), nameX, centerY + u(1));
+
+        // El resultado manda: cuerpo grande, blanco (o celeste si gano) y con brillo.
+        const hasScore = !(row.score == null || row.score === '');
+        ctx.textAlign = 'center';
+        ctx.fillStyle = row.winner ? palette.accentSoft : hasScore ? palette.ink : palette.inkMuted;
+        ctx.font = `900 ${u(dense ? 28 : 36)}px ${BASE_FONT_DHARMA}`;
+        if (hasScore) {
+            ctx.shadowColor = hexToRGBA(palette.accent, 0.55);
+            ctx.shadowBlur = u(10);
+        }
+        ctx.fillText(hasScore ? String(row.score) : '-', scoreX + scoreWidth / 2, centerY + u(2));
+        ctx.restore();
+    });
+}
+
 async function drawPlayoffBracket(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     data: PlayoffBracketData,
-    format: CanvasFormat,
+    _format: CanvasFormat,
     accentColor: string,
     bgColor: string,
     brandLogo: HTMLImageElement | null
 ) {
     const rounds = Array.isArray(data.rounds) ? data.rounds.filter((round) => Array.isArray(round?.matches) && round.matches.length > 0) : [];
+    const W = canvas.width;
+    const H = canvas.height;
+    const isStory = H > 1500;
+    // La referencia esta medida sobre 1024 de ancho; todo escala desde ahi.
+    const u = (value: number) => Math.round(value * (W / 1024));
     const isDark = getContrastColor(bgColor) === '#ffffff';
-    const textColor = getTextColor(isDark);
-    const mutedColor = getMutedColor(isDark, 0.7);
-    const safe = getSafeArea(canvas);
-    const isStory = format.height > format.width;
-    const logoLoads = await Promise.all([
+    const deep = mixHexColors(bgColor, '#000000', isDark ? 0.42 : 0.1);
+    const palette: BracketPalette = {
+        bg: bgColor,
+        deep,
+        accent: accentColor,
+        accentSoft: mixHexColors(accentColor, '#ffffff', 0.45),
+        ink: isDark ? '#ffffff' : '#0b1a33',
+        inkMuted: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(11,26,51,0.7)',
+        headerInk: getContrastColor(accentColor) === '#ffffff' ? '#ffffff' : deep,
+        isDark,
+    };
+
+    const [tournamentLogo, wordmark, ...participantLogos] = await Promise.all([
         loadImage(getTournamentLogoImageSource(data)),
+        loadImage('/header-logo.png'),
         ...rounds.flatMap((round) =>
             round.matches.flatMap((match) => [
                 loadImage(getBracketParticipantLogo(match.home_team || null, match.home_participant || null)),
@@ -13560,267 +13827,368 @@ async function drawPlayoffBracket(
             ]),
         ),
     ]);
-    const tournamentLogo = logoLoads[0];
+    const logoOffsets: number[] = [];
+    rounds.reduce((offset, round) => {
+        logoOffsets.push(offset);
+        return offset + round.matches.length * 2;
+    }, 0);
+    const logosFor = (roundIndex: number, matchIndex: number) => {
+        const base = logoOffsets[roundIndex] + matchIndex * 2;
+        return { homeLogo: participantLogos[base] || null, awayLogo: participantLogos[base + 1] || null };
+    };
 
-    drawBackdrop(ctx, canvas, bgColor, accentColor, isDark);
-    drawCenteredPill(
-        ctx,
-        safe.centerX,
-        isStory ? 74 : 56,
-        'CUADRO PLAYOFF',
-        accentColor,
-        getContrastColor(accentColor),
-        `800 ${isStory ? 24 : 20}px ${FONT_BODY}`,
-        26,
-        isStory ? 48 : 42,
-    );
-    drawTournamentRibbon(ctx, canvas, data.title, tournamentLogo, data.tournamentLogo, accentColor, isDark, isStory ? 166 : 138, isStory ? 34 : 30, {
-        maxWidth: canvas.width - (isStory ? 120 : 112),
-        titleDefaultSize: 102,
-        logoDefaultSize: 58,
-        maxFontSize: isStory ? 38 : 34,
-        minFontSize: isStory ? 18 : 16,
-        maxLogoSize: isStory ? 58 : 50,
-    });
+    drawBracketBackdrop(ctx, canvas, palette);
 
-    if (data.subtitle) {
+    // Esquinas: una palabra por linea, como el "RUGBY ARGENTINO CLUBES" de la referencia.
+    const kickerTop = u(60);
+    const drawKicker = (text: string | undefined, align: 'left' | 'right') => {
+        const lines = (text || '').trim().toUpperCase().split(/\s+/).filter(Boolean).slice(0, 3);
+        if (!lines.length) return;
+        const tracking = u(4);
+        const x = align === 'left' ? u(40) : W - u(40) + tracking;
         ctx.save();
-        ctx.textAlign = 'center';
-        ctx.fillStyle = mutedColor;
-        ctx.font = `600 ${isStory ? 22 : 18}px ${FONT_BODY}`;
-        ctx.fillText(truncateTextToWidth(ctx, data.subtitle, canvas.width - 120), safe.centerX, isStory ? 208 : 178);
+        ctx.textAlign = align;
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = palette.accentSoft;
+        ctx.font = `800 ${u(13)}px ${FONT_BODY}`;
+        setCanvasTracking(ctx, tracking);
+        lines.forEach((line, index) => ctx.fillText(line, x, kickerTop + index * u(21)));
+        setCanvasTracking(ctx, 0);
+        const ruleY = kickerTop + lines.length * u(21) + u(6);
+        ctx.fillStyle = palette.accent;
+        ctx.fillRect(align === 'left' ? u(40) : W - u(40) - u(56), ruleY, u(56), u(2));
+        ctx.restore();
+    };
+    drawKicker(data.kickerLeft, 'left');
+    drawKicker(data.kickerRight, 'right');
+
+    const logoCenterY = u(92);
+    if (tournamentLogo) {
+        ctx.save();
+        const glow = ctx.createRadialGradient(W / 2, logoCenterY, 0, W / 2, logoCenterY, u(120));
+        glow.addColorStop(0, 'rgba(255,255,255,0.14)');
+        glow.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(W / 2 - u(140), logoCenterY - u(120), u(280), u(240));
+        const placement = getContainedImagePlacement(tournamentLogo, W / 2, logoCenterY, u(180), u(132), 0);
+        ctx.drawImage(tournamentLogo, placement.x, placement.y, placement.width, placement.height);
         ctx.restore();
     }
 
-    const panelX = isStory ? 38 : 42;
-    const panelY = isStory ? 248 : 220;
-    const panelWidth = canvas.width - panelX * 2;
-    const panelHeight = safe.bottom - panelY - (isStory ? 18 : 10);
-    drawSurfacePanel(ctx, panelX, panelY, panelWidth, panelHeight, 34, isDark);
+    const tournamentName = bracketTournamentNameOf(data);
+    if (tournamentName) {
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = palette.ink;
+        ctx.font = `700 ${u(21)}px ${FONT_BODY}`;
+        setCanvasTracking(ctx, u(5));
+        ctx.fillText(truncateTextToWidth(ctx, tournamentName.toUpperCase(), W - u(260)), W / 2 + u(2), u(184));
+        setCanvasTracking(ctx, 0);
+        ctx.restore();
+    }
+
+    // CUADRO / PLAYOFF: la palabra mas ancha fija el cuerpo de las dos.
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    setFittedFont(ctx, 'PLAYOFF', W - u(160), '900', u(118), BASE_FONT_DHARMA, u(64));
+    const titleFont = ctx.font;
+    ctx.shadowColor = hexToRGBA(palette.accent, 0.45);
+    ctx.shadowBlur = u(28);
+    ctx.fillStyle = palette.ink;
+    ctx.fillText('CUADRO', W / 2, u(318));
+    const playoffGrad = ctx.createLinearGradient(0, u(326), 0, u(410));
+    playoffGrad.addColorStop(0, palette.accentSoft);
+    playoffGrad.addColorStop(1, palette.accent);
+    ctx.fillStyle = playoffGrad;
+    ctx.font = titleFont;
+    ctx.fillText('PLAYOFF', W / 2, u(408));
+    ctx.restore();
+
+    const pillLabel = (data.subtitle || 'Cuadro eliminatorio').trim().toUpperCase();
+    if (pillLabel) {
+        const pillCenterY = u(456);
+        const pillHeight = u(44);
+        ctx.save();
+        ctx.font = `900 ${u(30)}px ${BASE_FONT_DHARMA}`;
+        setCanvasTracking(ctx, u(2));
+        const pillText = truncateTextToWidth(ctx, pillLabel, W - u(240));
+        const pillWidth = ctx.measureText(pillText).width + u(48);
+        ctx.shadowColor = hexToRGBA(palette.accent, 0.35);
+        ctx.shadowBlur = u(18);
+        ctx.fillStyle = isDark ? '#ffffff' : deep;
+        ctx.beginPath();
+        ctx.roundRect(W / 2 - pillWidth / 2, pillCenterY - pillHeight / 2, pillWidth, pillHeight, u(8));
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = isDark ? deep : '#ffffff';
+        ctx.fillText(pillText, W / 2 + u(1), pillCenterY + u(2));
+        setCanvasTracking(ctx, 0);
+        ctx.restore();
+    }
+
+    // La firma cierra abajo; el arbol ocupa lo que queda entre la capsula y ella.
+    const footerBottom = H - (isStory ? u(84) : u(62));
+    const footerTop = footerBottom - u(46);
+    const areaTopMin = u(500);
+    const available = footerTop - u(36) - areaTopMin;
+    const areaHeight = Math.min(available, isStory ? u(820) : available);
+    // En story el arbol sube un poco del centro: pegado a la capsula lee mejor que flotando.
+    const areaTop = areaTopMin + (available - areaHeight) * 0.35;
+    const areaBottom = areaTop + areaHeight;
+
+    const finishWithFooter = () => {
+        const tone: G22PlateTone = {
+            field: palette.bg,
+            fieldEnd: palette.deep,
+            ink: palette.ink,
+            rule: hexToRGBA(palette.ink, 0.3),
+            accent: palette.accent,
+            isDarkField: isDark,
+        };
+        drawG22PlateMark(ctx, canvas, wordmark || brandLogo, tone, {
+            y: footerBottom,
+            anchor: 'bottom',
+            maxHeight: u(46),
+            maxWidth: W * 0.38,
+            fallbackText: 'G22 SCORES',
+        });
+    };
 
     if (rounds.length === 0) {
         ctx.save();
         ctx.textAlign = 'center';
-        ctx.fillStyle = mutedColor;
-        ctx.font = `600 ${isStory ? 24 : 20}px ${FONT_BODY}`;
-        ctx.fillText('No hay cruces cargados para exportar.', safe.centerX, panelY + panelHeight / 2);
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = palette.inkMuted;
+        ctx.font = `600 ${u(22)}px ${FONT_BODY}`;
+        ctx.fillText('No hay cruces cargados para exportar.', W / 2, areaTop + areaHeight / 2);
         ctx.restore();
-        drawBrandFooter(ctx, canvas, brandLogo, isDark);
+        finishWithFooter();
         return;
     }
 
-    const contentTop = panelY + 30;
-    const contentBottom = panelY + panelHeight - 24;
-    const innerHeight = contentBottom - contentTop;
-    const titleHeight = isStory ? 34 : 30;
-    const listTop = contentTop + titleHeight + 18;
-    const listHeight = innerHeight - titleHeight - 18;
-    const rowGap = isStory ? 16 : 12;
-    // Wider gaps between rounds leave room for the bracket connector elbows.
-    const columnGap = isStory ? 26 : 38;
-    const columnWidth = (panelWidth - 32 - columnGap * Math.max(rounds.length - 1, 0)) / rounds.length;
-    const columnXFor = (roundIndex: number) => panelX + 16 + roundIndex * (columnWidth + columnGap);
+    const margin = u(28);
+    const cards: BracketCardSpec[] = [];
+    const isMirrored = rounds.length >= 2
+        && rounds.length <= 3
+        && rounds[rounds.length - 1].matches.length === 1
+        && rounds[0].matches.length === 2 ** (rounds.length - 1)
+        && rounds.every((round, index) => index === 0 || round.matches.length === rounds[index - 1].matches.length / 2);
 
-    // One uniform card height, sized to the densest round so every card matches.
-    // Taller cap on story (1080x1920) so cards fill the much taller canvas
-    // instead of floating as a tiny block.
-    const maxMatchCount = Math.max(...rounds.map((round) => round.matches.length));
-    const cardHeight = Math.max(
-        64,
-        Math.min(
-            isStory ? 168 : 116,
-            (listHeight - rowGap * Math.max(maxMatchCount - 1, 0)) / Math.max(maxMatchCount, 1),
-        ),
-    );
-
-    // Vertical center of every match. Round 0 (and any irregular round) is spread
-    // evenly across the FULL panel height — like a real bracket whose first round
-    // fills the column top-to-bottom — so there are no big empty bands. Each later
-    // round is centered between the pair of matches that feed it, which makes the
-    // columns line up as a tree. When a round is not exactly half of the previous
-    // one (byes, reválida, third place...) it falls back to this even spread.
-    const evenCenters = (count: number): number[] => {
-        if (count <= 0) return [];
-        if (count === 1) return [listTop + listHeight / 2];
-        const first = listTop + cardHeight / 2;
-        const last = listTop + listHeight - cardHeight / 2;
-        const step = (last - first) / (count - 1);
-        return Array.from({ length: count }, (_, i) => first + i * step);
-    };
-    const isTreeStep = (roundIndex: number, prevCount: number) =>
-        roundIndex > 0 && rounds[roundIndex].matches.length === Math.ceil(prevCount / 2);
-
-    const centersByRound: number[][] = [];
-    rounds.forEach((round, roundIndex) => {
-        const count = round.matches.length;
-        if (roundIndex === 0 || !isTreeStep(roundIndex, centersByRound[roundIndex - 1].length)) {
-            centersByRound.push(evenCenters(count));
-            return;
-        }
-        const prev = centersByRound[roundIndex - 1];
-        const fallback = evenCenters(count);
-        centersByRound.push(
-            round.matches.map((_match, j) => {
-                const f1 = prev[2 * j];
-                const f2 = prev[2 * j + 1];
-                if (f1 != null && f2 != null) return (f1 + f2) / 2;
-                return f1 ?? f2 ?? fallback[j];
-            }),
-        );
-    });
-
-    // Pass 1 — connector elbows, drawn behind the cards.
     ctx.save();
-    ctx.strokeStyle = hexToRGBA(accentColor, isDark ? 0.34 : 0.26);
-    ctx.lineWidth = 2;
-    ctx.lineJoin = 'round';
+    ctx.strokeStyle = palette.accent;
+    ctx.lineWidth = Math.max(2, u(3));
     ctx.lineCap = 'round';
-    for (let roundIndex = 1; roundIndex < rounds.length; roundIndex += 1) {
-        const prev = centersByRound[roundIndex - 1];
-        const curr = centersByRound[roundIndex];
-        if (!isTreeStep(roundIndex, prev.length)) continue;
-        const xPrevRight = columnXFor(roundIndex - 1) + columnWidth;
-        const xCurrLeft = columnXFor(roundIndex);
-        const midX = (xPrevRight + xCurrLeft) / 2;
-        curr.forEach((cardCenter, j) => {
-            const f1 = prev[2 * j];
-            const f2 = prev[2 * j + 1];
-            ctx.beginPath();
-            if (f1 != null && f2 != null) {
-                ctx.moveTo(xPrevRight, f1);
-                ctx.lineTo(midX, f1);
-                ctx.moveTo(xPrevRight, f2);
-                ctx.lineTo(midX, f2);
-                ctx.moveTo(midX, f1);
-                ctx.lineTo(midX, f2);
-                ctx.moveTo(midX, cardCenter);
-                ctx.lineTo(xCurrLeft, cardCenter);
-            } else if (f1 != null) {
-                ctx.moveTo(xPrevRight, f1);
-                ctx.lineTo(xCurrLeft, cardCenter);
+    ctx.lineJoin = 'round';
+    ctx.shadowColor = hexToRGBA(palette.accent, 0.5);
+    ctx.shadowBlur = u(10);
+    ctx.beginPath();
+
+    if (isMirrored) {
+        const laneGap = u(30);
+        const sideWidth = u(278);
+        const sideHeader = u(30);
+        const sideRow = u(66);
+        const sideHeight = sideHeader + sideRow * 2;
+        const perSide = rounds[0].matches.length / 2;
+        const sideCenters = perSide === 1
+            ? [areaTop + areaHeight / 2]
+            : [areaTop + sideHeight / 2, areaBottom - sideHeight / 2];
+        const leftX = margin;
+        const rightX = W - margin - sideWidth;
+        const centerLeft = leftX + sideWidth + laneGap;
+        const centerRight = rightX - laneGap;
+        const centerWidth = centerRight - centerLeft;
+        const firstRoundName = getBracketRoundName(rounds[0], 0);
+
+        rounds[0].matches.forEach((match, matchIndex) => {
+            const side = matchIndex < perSide ? 'left' : 'right';
+            const slot = side === 'left' ? matchIndex : matchIndex - perSide;
+            cards.push({
+                x: side === 'left' ? leftX : rightX,
+                y: sideCenters[slot] - sideHeight / 2,
+                width: sideWidth,
+                headerHeight: sideHeader,
+                rowHeight: sideRow,
+                title: firstRoundName,
+                match,
+                ...logosFor(0, matchIndex),
+                dense: false,
+            });
+        });
+
+        const finalRoundIndex = rounds.length - 1;
+        const finalHeader = u(30);
+        const finalRow = u(70);
+        const finalHeight = finalHeader + finalRow * 2;
+        const finalWidth = Math.min(u(265), centerWidth - u(16));
+        const finalX = W / 2 - finalWidth / 2;
+        let finalY = areaTop + areaHeight / 2 - finalHeight / 2;
+
+        let semiSpecs: Array<{ x: number; width: number }> = [];
+        let semiCenterY = 0;
+        let semiHeight = 0;
+        if (rounds.length === 3) {
+            const semiGap = u(22);
+            const semiWidth = (centerWidth - semiGap) / 2;
+            const semiHeader = u(28);
+            const semiRow = u(56);
+            semiHeight = semiHeader + semiRow * 2;
+            finalY = areaBottom - finalHeight;
+            semiCenterY = Math.min(areaTop + areaHeight * 0.44, finalY - u(64) - semiHeight / 2);
+            semiSpecs = [
+                { x: centerLeft, width: semiWidth },
+                { x: centerLeft + semiWidth + semiGap, width: semiWidth },
+            ];
+            const semiName = getBracketRoundName(rounds[1], 1);
+            rounds[1].matches.forEach((match, matchIndex) => {
+                cards.push({
+                    x: semiSpecs[matchIndex].x,
+                    y: semiCenterY - semiHeight / 2,
+                    width: semiWidth,
+                    headerHeight: semiHeader,
+                    rowHeight: semiRow,
+                    title: semiName,
+                    match,
+                    ...logosFor(1, matchIndex),
+                    dense: true,
+                });
+            });
+        }
+
+        cards.push({
+            x: finalX,
+            y: finalY,
+            width: finalWidth,
+            headerHeight: finalHeader,
+            rowHeight: finalRow,
+            title: getBracketRoundName(rounds[finalRoundIndex], finalRoundIndex),
+            match: rounds[finalRoundIndex].matches[0],
+            ...logosFor(finalRoundIndex, 0),
+            dense: false,
+        });
+
+        // Conectores: de cada tarjeta lateral a un bus vertical, y del bus al
+        // centro a la altura de la semi (o de la final si no hay semis).
+        (['left', 'right'] as const).forEach((side) => {
+            const edgeX = side === 'left' ? leftX + sideWidth : rightX;
+            const busX = side === 'left' ? leftX + sideWidth + laneGap / 2 : rightX - laneGap / 2;
+            const hasSemis = semiSpecs.length === 2;
+            const targetX = hasSemis
+                ? (side === 'left' ? semiSpecs[0].x : semiSpecs[1].x + semiSpecs[1].width)
+                : (side === 'left' ? finalX : finalX + finalWidth);
+            const targetY = hasSemis ? semiCenterY : finalY + finalHeight / 2;
+            sideCenters.forEach((centerY) => {
+                ctx.moveTo(edgeX, centerY);
+                ctx.lineTo(busX, centerY);
+            });
+            const ys = [...sideCenters, targetY];
+            ctx.moveTo(busX, Math.min(...ys));
+            ctx.lineTo(busX, Math.max(...ys));
+            ctx.moveTo(busX, targetY);
+            ctx.lineTo(targetX, targetY);
+        });
+        if (semiSpecs.length === 2) {
+            const semiBottom = semiCenterY + semiHeight / 2;
+            const dropY = semiBottom + (finalY - semiBottom) / 2;
+            semiSpecs.forEach((semi) => {
+                const centerX = semi.x + semi.width / 2;
+                ctx.moveTo(centerX, semiBottom);
+                ctx.lineTo(centerX, dropY);
+            });
+            ctx.moveTo(semiSpecs[0].x + semiSpecs[0].width / 2, dropY);
+            ctx.lineTo(semiSpecs[1].x + semiSpecs[1].width / 2, dropY);
+            ctx.moveTo(W / 2, dropY);
+            ctx.lineTo(W / 2, finalY);
+        }
+    } else {
+        // Columnas de izquierda a derecha. La primera ronda se reparte a lo
+        // alto; cada ronda siguiente se centra entre el par que la alimenta.
+        const columnGap = u(28);
+        const columnWidth = (W - margin * 2 - columnGap * (rounds.length - 1)) / rounds.length;
+        const dense = columnWidth < u(230);
+        const headerHeight = u(dense ? 26 : 30);
+        const rowGap = u(14);
+        const maxMatches = Math.max(...rounds.map((round) => round.matches.length));
+        const cardHeight = Math.max(
+            headerHeight + u(dense ? 40 : 48) * 2,
+            Math.min(u(160), (areaHeight - rowGap * (maxMatches - 1)) / maxMatches),
+        );
+        const rowHeight = (cardHeight - headerHeight) / 2;
+        const columnXFor = (roundIndex: number) => margin + roundIndex * (columnWidth + columnGap);
+        const evenCenters = (count: number): number[] => {
+            if (count === 1) return [areaTop + areaHeight / 2];
+            const first = areaTop + cardHeight / 2;
+            const last = areaBottom - cardHeight / 2;
+            const step = (last - first) / (count - 1);
+            return Array.from({ length: count }, (_, index) => first + index * step);
+        };
+        const isTreeStep = (roundIndex: number) =>
+            roundIndex > 0 && rounds[roundIndex].matches.length === Math.ceil(rounds[roundIndex - 1].matches.length / 2);
+        const centersByRound: number[][] = [];
+        rounds.forEach((round, roundIndex) => {
+            if (!isTreeStep(roundIndex)) {
+                centersByRound.push(evenCenters(round.matches.length));
+                return;
             }
-            ctx.stroke();
+            const prev = centersByRound[roundIndex - 1];
+            const fallback = evenCenters(round.matches.length);
+            centersByRound.push(round.matches.map((_match, matchIndex) => {
+                const f1 = prev[2 * matchIndex];
+                const f2 = prev[2 * matchIndex + 1];
+                if (f1 != null && f2 != null) return (f1 + f2) / 2;
+                return f1 ?? f2 ?? fallback[matchIndex];
+            }));
+        });
+
+        rounds.forEach((round, roundIndex) => {
+            const title = getBracketRoundName(round, roundIndex);
+            round.matches.forEach((match, matchIndex) => {
+                cards.push({
+                    x: columnXFor(roundIndex),
+                    y: centersByRound[roundIndex][matchIndex] - cardHeight / 2,
+                    width: columnWidth,
+                    headerHeight,
+                    rowHeight,
+                    title,
+                    match,
+                    ...logosFor(roundIndex, matchIndex),
+                    dense,
+                });
+            });
+            if (!isTreeStep(roundIndex)) return;
+            const prev = centersByRound[roundIndex - 1];
+            const xPrevRight = columnXFor(roundIndex - 1) + columnWidth;
+            const xCurrLeft = columnXFor(roundIndex);
+            const midX = (xPrevRight + xCurrLeft) / 2;
+            centersByRound[roundIndex].forEach((centerY, matchIndex) => {
+                const f1 = prev[2 * matchIndex];
+                const f2 = prev[2 * matchIndex + 1];
+                if (f1 != null && f2 != null) {
+                    ctx.moveTo(xPrevRight, f1);
+                    ctx.lineTo(midX, f1);
+                    ctx.moveTo(xPrevRight, f2);
+                    ctx.lineTo(midX, f2);
+                    ctx.moveTo(midX, f1);
+                    ctx.lineTo(midX, f2);
+                    ctx.moveTo(midX, centerY);
+                    ctx.lineTo(xCurrLeft, centerY);
+                } else if (f1 != null) {
+                    ctx.moveTo(xPrevRight, f1);
+                    ctx.lineTo(xCurrLeft, centerY);
+                }
+            });
         });
     }
+
+    ctx.stroke();
     ctx.restore();
 
-    // Pass 2 — round titles + match cards.
-    let logoIndex = 1;
-    rounds.forEach((round, roundIndex) => {
-        const columnX = columnXFor(roundIndex);
-        const roundMatches = round.matches;
-        const centers = centersByRound[roundIndex];
-
-        ctx.save();
-        ctx.fillStyle = hexToRGBA(accentColor, isDark ? 0.14 : 0.09);
-        ctx.beginPath();
-        ctx.roundRect(columnX, contentTop, columnWidth, titleHeight, 999);
-        ctx.fill();
-        ctx.fillStyle = accentColor;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = `800 ${isStory ? 16 : 14}px ${FONT_BODY}`;
-        ctx.fillText(truncateTextToWidth(ctx, getBracketRoundName(round, roundIndex).toUpperCase(), columnWidth - 26), columnX + columnWidth / 2, contentTop + titleHeight / 2 + 1);
-        ctx.restore();
-
-        roundMatches.forEach((match, matchIndex) => {
-            const cardY = centers[matchIndex] - cardHeight / 2;
-            const cardRadius = 24;
-            const homeName = getBracketParticipantName(match.home_team || null, match.home_participant || null);
-            const awayName = getBracketParticipantName(match.away_team || null, match.away_participant || null);
-            const homeWon = getBracketMatchWinner(match, 'home');
-            const awayWon = getBracketMatchWinner(match, 'away');
-            const homeLogo = logoLoads[logoIndex] || null;
-            const awayLogo = logoLoads[logoIndex + 1] || null;
-            logoIndex += 2;
-            const matchDate = toExportDate(match.match_start_iso);
-            const headerLabel = matchDate
-                ? formatDateInFixedOffset(matchDate, DEFAULT_TIMEZONE_OFFSET_MINUTES, { day: '2-digit', month: '2-digit' })
-                : 'TBD';
-            const statusLabel = getStatusLabel(match.status || match.result || 'scheduled');
-            const teamRowHeight = (cardHeight - 30) / 2;
-            const scoreWidth = Math.max(32, Math.min(44, columnWidth * 0.18));
-            const nameWidth = columnWidth - 36 - scoreWidth - 40;
-
-            ctx.save();
-            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.03)';
-            ctx.beginPath();
-            ctx.roundRect(columnX, cardY, columnWidth, cardHeight, cardRadius);
-            ctx.fill();
-            ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(15,23,42,0.07)';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = mutedColor;
-            ctx.font = `700 ${isStory ? 12 : 11}px ${FONT_BODY}`;
-            ctx.fillText(headerLabel, columnX + 14, cardY + 15);
-
-            ctx.textAlign = 'right';
-            ctx.fillStyle = getStatusColor(match.status || match.result, accentColor, isDark);
-            ctx.fillText(statusLabel, columnX + columnWidth - 14, cardY + 15);
-
-            const drawTeamRow = (
-                y: number,
-                name: string,
-                logo: HTMLImageElement | null,
-                rawLogo: string,
-                score: string | number | null | undefined,
-                winner: boolean,
-            ) => {
-                const logoSize = Math.max(20, Math.min(32, scaleElementSize('teamLogo', Math.max(22, Math.min(28, teamRowHeight - 10)), 28)));
-                ctx.save();
-                if (winner) {
-                    ctx.fillStyle = hexToRGBA(accentColor, isDark ? 0.14 : 0.1);
-                    ctx.beginPath();
-                    ctx.roundRect(columnX + 8, y, columnWidth - 16, teamRowHeight - 4, 18);
-                    ctx.fill();
-                }
-                drawLogoBadge(ctx, {
-                    x: columnX + 24,
-                    y: y + (teamRowHeight - 4) / 2,
-                    size: logoSize,
-                    img: logo,
-                    label: name,
-                    rawLogo,
-                    isDark,
-                    showFrame: false,
-                });
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'middle';
-                ctx.fillStyle = winner ? accentColor : textColor;
-                ctx.font = `800 ${isStory ? 14 : 12}px ${FONT_BODY}`;
-                const clippedName = truncateTextToWidth(ctx, name.toUpperCase(), nameWidth);
-                ctx.fillText(clippedName, columnX + 42, y + (teamRowHeight - 4) / 2 + 1);
-
-                ctx.textAlign = 'right';
-                ctx.font = `800 ${isStory ? 20 : 18}px ${FONT_MONO}`;
-                ctx.fillText(score == null || score === '' ? '-' : String(score), columnX + columnWidth - 14, y + (teamRowHeight - 4) / 2 + 1);
-                ctx.restore();
-            };
-
-            drawTeamRow(
-                cardY + 26,
-                homeName,
-                homeLogo,
-                getBracketParticipantLogo(match.home_team || null, match.home_participant || null),
-                match.score_home,
-                homeWon,
-            );
-            drawTeamRow(
-                cardY + 26 + teamRowHeight,
-                awayName,
-                awayLogo,
-                getBracketParticipantLogo(match.away_team || null, match.away_participant || null),
-                match.score_away,
-                awayWon,
-            );
-            ctx.restore();
-        });
-    });
-
-    drawBrandFooter(ctx, canvas, brandLogo, isDark);
+    cards.forEach((card) => drawBracketCard(ctx, card, palette, u));
+    finishWithFooter();
 }
 
 async function drawPlayerStats(
@@ -15937,108 +16305,6 @@ async function drawMomentumLineups(
                 ctx.restore();
             });
         }
-    });
-
-    drawBrandFooter(ctx, canvas, brandLogo, true);
-}
-
-async function drawMomentumPlayoffBracket(
-    ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement,
-    data: PlayoffBracketData,
-    format: CanvasFormat,
-    accentColor: string,
-    bgColor: string,
-    brandLogo: HTMLImageElement | null
-) {
-    const rounds = Array.isArray(data.rounds) ? data.rounds.filter((round) => round.matches?.length) : [];
-    const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
-    const logos = await Promise.all(
-        rounds.flatMap((round) =>
-            round.matches.flatMap((match) => [
-                loadImage(getBracketParticipantLogo(match.home_team || null, match.home_participant || null)),
-                loadImage(getBracketParticipantLogo(match.away_team || null, match.away_participant || null)),
-            ]),
-        ),
-    );
-
-    drawMomentumBackdrop(ctx, canvas, accentColor, bgColor);
-    drawMomentumHeroTitle(ctx, data.title || 'Playoff', canvas.width / 2, 128, canvas.width - 160, 84, '#ffffff', 'center');
-    if (data.subtitle) {
-        drawMomentumKicker(ctx, canvas.width / 2, 164, data.subtitle, getMutedColor(true, 0.72), 'center');
-    }
-    if (tournamentLogo) {
-        drawLogoBadge(ctx, { x: 90, y: 92, size: 56, img: tournamentLogo, label: data.title, rawLogo: data.tournamentLogo, isDark: true });
-    }
-
-    if (!rounds.length) {
-        ctx.save();
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.font = `700 24px ${FONT_BODY}`;
-        ctx.fillText('No hay cruces cargados para exportar.', canvas.width / 2, canvas.height / 2);
-        ctx.restore();
-        drawBrandFooter(ctx, canvas, brandLogo, true);
-        return;
-    }
-
-    const columnGap = 18;
-    const columnWidth = (canvas.width - 112 - columnGap * Math.max(rounds.length - 1, 0)) / rounds.length;
-    const top = 220;
-    const usableHeight = canvas.height - top - 176;
-    let logoIndex = 0;
-
-    rounds.forEach((round, roundIndex) => {
-        const x = 56 + roundIndex * (columnWidth + columnGap);
-        const titleHeight = 42;
-        const gap = 16;
-        const matchHeight = Math.min(126, (usableHeight - titleHeight - 18 - gap * Math.max(round.matches.length - 1, 0)) / Math.max(round.matches.length, 1));
-
-        ctx.save();
-        ctx.fillStyle = 'rgba(255,255,255,0.08)';
-        ctx.beginPath();
-        ctx.roundRect(x, top, columnWidth, titleHeight, 999);
-        ctx.fill();
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.font = `800 16px ${FONT_BODY}`;
-        ctx.fillText(getBracketRoundName(round, roundIndex).toUpperCase(), x + columnWidth / 2, top + 27);
-        ctx.restore();
-
-        round.matches.forEach((match, matchIndex) => {
-            const y = top + titleHeight + 18 + matchIndex * (matchHeight + gap);
-            const homeName = getBracketParticipantName(match.home_team || null, match.home_participant || null);
-            const awayName = getBracketParticipantName(match.away_team || null, match.away_participant || null);
-            const homeLogo = logos[logoIndex] || null;
-            const awayLogo = logos[logoIndex + 1] || null;
-            logoIndex += 2;
-
-            ctx.save();
-            ctx.fillStyle = 'rgba(9,9,12,0.74)';
-            ctx.strokeStyle = hexToRGBA(accentColor, 0.56);
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.roundRect(x, y, columnWidth, matchHeight, 24);
-            ctx.fill();
-            ctx.stroke();
-            ctx.restore();
-
-            drawLogoBadge(ctx, { x: x + 28, y: y + 40, size: 28, img: homeLogo, label: homeName, rawLogo: getBracketParticipantLogo(match.home_team || null, match.home_participant || null), isDark: true, showFrame: false });
-            drawLogoBadge(ctx, { x: x + 28, y: y + matchHeight - 40, size: 28, img: awayLogo, label: awayName, rawLogo: getBracketParticipantLogo(match.away_team || null, match.away_participant || null), isDark: true, showFrame: false });
-
-            ctx.save();
-            ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'left';
-            setFittedFont(ctx, homeName.toUpperCase(), columnWidth - 110, '800', 14, FONT_BODY, 10);
-            ctx.fillText(homeName.toUpperCase(), x + 52, y + 46);
-            setFittedFont(ctx, awayName.toUpperCase(), columnWidth - 110, '800', 14, FONT_BODY, 10);
-            ctx.fillText(awayName.toUpperCase(), x + 52, y + matchHeight - 34);
-            ctx.textAlign = 'right';
-            ctx.font = `900 26px ${FONT_EDITORIAL_SCORE}`;
-            ctx.fillText(String(match.score_home ?? '-'), x + columnWidth - 20, y + 47);
-            ctx.fillText(String(match.score_away ?? '-'), x + columnWidth - 20, y + matchHeight - 33);
-            ctx.restore();
-        });
     });
 
     drawBrandFooter(ctx, canvas, brandLogo, true);
@@ -19636,103 +19902,6 @@ async function drawPosterV3Lineups(
             isDark: true,
         });
     }
-}
-
-async function drawPosterV3PlayoffBracket(
-    ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement,
-    data: PlayoffBracketData,
-    _format: CanvasFormat,
-    accentColor: string,
-    bgColor: string,
-    brandLogo: HTMLImageElement | null
-) {
-    const rounds = Array.isArray(data.rounds) ? data.rounds.filter((round) => round.matches?.length) : [];
-    const tournamentLogo = await loadImage(getTournamentLogoImageSource(data));
-    const logos = await Promise.all(
-        rounds.flatMap((round) =>
-            round.matches.flatMap((match) => [
-                loadImage(getBracketParticipantLogo(match.home_team || null, match.home_participant || null)),
-                loadImage(getBracketParticipantLogo(match.away_team || null, match.away_participant || null)),
-            ]),
-        ),
-    );
-    const accentPrimary = mixHexColors(accentColor, '#ffffff', 0.12);
-    const accentSoft = mixHexColors(accentColor, bgColor, 0.18);
-    const primaryText = getContrastColor(mixHexColors(bgColor, '#050505', 0.74)) === '#ffffff' ? '#ffffff' : '#f8fafc';
-
-    drawPosterV3Backdrop(ctx, canvas, accentColor, bgColor);
-    drawPosterV3Kicker(ctx, 58, 94, (data.subtitle || 'Eliminacion directa').toUpperCase(), hexToRGBA(accentPrimary, 0.96));
-    drawPosterV3OutlineTitle(ctx, data.title || 'Playoff', 56, 168, canvas.width - 120, 102, hexToRGBA(primaryText, 0.26));
-
-    if (tournamentLogo) {
-        drawLogoBadge(ctx, { x: canvas.width - 88, y: 90, size: 58, img: tournamentLogo, label: data.title, rawLogo: data.tournamentLogo, isDark: true });
-    }
-
-    if (!rounds.length) {
-        ctx.save();
-        ctx.fillStyle = primaryText;
-        ctx.textAlign = 'center';
-        ctx.font = `700 24px ${FONT_BODY}`;
-        ctx.fillText('No hay cruces cargados para exportar.', canvas.width / 2, canvas.height / 2);
-        ctx.restore();
-        drawBrandFooter(ctx, canvas, brandLogo, true);
-        return;
-    }
-
-    const columnGap = 18;
-    const columnWidth = (canvas.width - 112 - columnGap * Math.max(rounds.length - 1, 0)) / rounds.length;
-    const top = 224;
-    const usableHeight = canvas.height - top - 166;
-    let logoIndex = 0;
-
-    rounds.forEach((round, roundIndex) => {
-        const x = 56 + roundIndex * (columnWidth + columnGap);
-        const titleHeight = 42;
-        const gap = 14;
-        const matchHeight = Math.min(124, (usableHeight - titleHeight - 18 - gap * Math.max(round.matches.length - 1, 0)) / Math.max(round.matches.length, 1));
-
-        ctx.save();
-        ctx.fillStyle = accentPrimary;
-        ctx.beginPath();
-        ctx.roundRect(x, top, columnWidth, titleHeight, 12);
-        ctx.fill();
-        ctx.fillStyle = getContrastColor(accentPrimary) === '#ffffff' ? '#05101d' : '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.font = `900 14px ${FONT_MONO}`;
-        ctx.fillText(getBracketRoundName(round, roundIndex).toUpperCase(), x + columnWidth / 2, top + 27);
-        ctx.restore();
-
-        round.matches.forEach((match, matchIndex) => {
-            const y = top + titleHeight + 18 + matchIndex * (matchHeight + gap);
-            const homeName = getBracketParticipantName(match.home_team || null, match.home_participant || null);
-            const awayName = getBracketParticipantName(match.away_team || null, match.away_participant || null);
-            const homeLogo = logos[logoIndex] || null;
-            const awayLogo = logos[logoIndex + 1] || null;
-            logoIndex += 2;
-
-            drawPosterV3Panel(ctx, x, y, columnWidth, matchHeight, hexToRGBA(mixHexColors(bgColor, '#04080f', 0.78), 0.9), hexToRGBA(accentSoft, 0.28), 16, 1.5);
-
-            drawLogoBadge(ctx, { x: x + 28, y: y + 34, size: 28, img: homeLogo, label: homeName, rawLogo: getBracketParticipantLogo(match.home_team || null, match.home_participant || null), isDark: true, showFrame: false });
-            drawLogoBadge(ctx, { x: x + 28, y: y + matchHeight - 34, size: 28, img: awayLogo, label: awayName, rawLogo: getBracketParticipantLogo(match.away_team || null, match.away_participant || null), isDark: true, showFrame: false });
-
-            ctx.save();
-            ctx.fillStyle = primaryText;
-            ctx.textAlign = 'left';
-            setFittedFont(ctx, homeName.toUpperCase(), columnWidth - 112, '800', 14, FONT_BODY, 10);
-            ctx.fillText(homeName.toUpperCase(), x + 52, y + 40);
-            setFittedFont(ctx, awayName.toUpperCase(), columnWidth - 112, '800', 14, FONT_BODY, 10);
-            ctx.fillText(awayName.toUpperCase(), x + 52, y + matchHeight - 28);
-            ctx.textAlign = 'right';
-            ctx.fillStyle = accentPrimary;
-            ctx.font = `900 26px ${FONT_EDITORIAL_SCORE}`;
-            ctx.fillText(String(match.score_home ?? '-'), x + columnWidth - 18, y + 42);
-            ctx.fillText(String(match.score_away ?? '-'), x + columnWidth - 18, y + matchHeight - 26);
-            ctx.restore();
-        });
-    });
-
-    drawBrandFooter(ctx, canvas, brandLogo, true);
 }
 
 async function drawPosterV3PlayerStats(
