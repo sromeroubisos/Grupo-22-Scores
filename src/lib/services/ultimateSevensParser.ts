@@ -14,10 +14,16 @@
  * 11/09. Las tablas NO están en la REST: salen de `admin-ajax.php` con un
  * nonce de la página, y el 11/09 decían "No standings available".
  *
- * Las horas vienen SIN huso y son GMT: la página las rotula "@ 16:35 GMT", el
- * contador cuenta hacia "Sep, 12 2026 16:35:00 GMT" y el WordPress guarda
- * `date` igual a `date_gmt`. Leerlas como hora local de la sede (BST en
- * Cardiff) correría todo el día una hora.
+ * Las horas vienen SIN huso y son la hora LOCAL DE LA SEDE, aunque la página
+ * las rotule "GMT" (en el Reino Unido se le dice GMT a la hora de Londres todo
+ * el año). Medido el 11/09 contra la ticketera, que sí publica el huso:
+ *
+ *   Cardiff   sitio "KICK OFF 15:00 GMT"   Fever: puertas 13:30+01:00, show 15:00
+ *   Londres   sitio 17:30                  Fever: puertas 16:30+01:00, show 17:30
+ *   Biarritz  sitio 18:30                  Fever: puertas 17:00+02:00 (Francia)
+ *
+ * Leerlas como GMT de verdad corría todo Cardiff una hora tarde; leerlas todas
+ * como hora de Londres correría Biarritz otra hora más.
  *
  * Este módulo es PURO: entra JSON, sale dato. Sin red, sin caché, sin DOM. Es
  * lo que se prueba con `node --test` (`ultimateSevensParser.test.ts`).
@@ -157,15 +163,66 @@ function toInt(value: unknown): number | null {
 }
 
 /**
- * `2026-09-12T18:00:00` (o `2026-09-12 18:00:00`) en GMT -> ISO en UTC. Si
- * algún día la API empieza a mandar el huso, se respeta el que venga.
+ * El huso de cada sede, por el nombre de la etapa. Una etapa nueva que no esté
+ * acá cae en Londres: el operador de la liga es británico y su "GMT" es la hora
+ * de Londres. Sumar la sede cuando la liga anuncie una fuera del Reino Unido.
  */
-export function parseUs7DateTime(raw: string): string | null {
+const STAGE_TIME_ZONES: Record<string, string> = {
+    cardiff: 'Europe/London',
+    london: 'Europe/London',
+    biarritz: 'Europe/Paris',
+    madrid: 'Europe/Madrid',
+};
+export const US7_DEFAULT_TIME_ZONE = 'Europe/London';
+
+export function us7StageTimeZone(stageName: string): string {
+    return STAGE_TIME_ZONES[stageName.trim().toLowerCase()] ?? US7_DEFAULT_TIME_ZONE;
+}
+
+/** Cuánto adelanta el reloj de pared de `timeZone` a UTC en ese instante, en ms. */
+function zoneOffsetMs(instantMs: number, timeZone: string): number {
+    const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone,
+        hourCycle: 'h23',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    }).formatToParts(new Date(instantMs));
+    const part = (type: string) => Number(parts.find((entry) => entry.type === type)?.value ?? 0);
+    const wall = Date.UTC(part('year'), part('month') - 1, part('day'), part('hour'), part('minute'), part('second'));
+    return wall - instantMs;
+}
+
+/**
+ * `2026-09-12T16:35:00` (o `2026-09-12 16:35:00`) como hora de pared de la
+ * sede -> ISO en UTC. El huso se recalcula en el instante resultante para no
+ * errarle en el día del cambio de horario. Si algún día la API empieza a mandar
+ * el huso, se respeta el que venga.
+ */
+export function parseUs7DateTime(raw: string, timeZone: string = US7_DEFAULT_TIME_ZONE): string | null {
     const trimmed = raw.trim().replace(' ', 'T');
-    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?/.test(trimmed)) return null;
-    const hasZone = /(Z|[+-]\d{2}:?\d{2})$/i.test(trimmed);
-    const parsed = new Date(hasZone ? trimmed : `${trimmed}Z`);
-    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+    const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/.exec(trimmed);
+    if (!match) return null;
+
+    if (/(Z|[+-]\d{2}:?\d{2})$/i.test(trimmed)) {
+        const parsed = new Date(trimmed);
+        return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+    }
+
+    const [, year, month, day, hour, minute, second] = match;
+    const asUtc = Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second ?? 0));
+    if (Number.isNaN(asUtc)) return null;
+    try {
+        const firstGuess = asUtc - zoneOffsetMs(asUtc, timeZone);
+        const instant = asUtc - zoneOffsetMs(firstGuess, timeZone);
+        return new Date(instant).toISOString();
+    } catch {
+        // Un huso que el runtime no conoce: mejor la hora sin corregir que ninguna.
+        return new Date(asUtc).toISOString();
+    }
 }
 
 function seasonYearOf(seasonName: string): string | null {
@@ -271,7 +328,8 @@ export function parseUs7Fixture(item: unknown, nowMs: number): Us7Fixture | null
     const away = parseSide(record.awayTeam);
     if (!home || !away) return null;
 
-    const startsAtIso = parseUs7DateTime(asString(record.date));
+    const stageName = asString(record.competition).trim();
+    const startsAtIso = parseUs7DateTime(asString(record.date), us7StageTimeZone(stageName));
     const status = asString(record.status).trim();
     const hasScore = home.score !== null && away.score !== null;
     const state = classifyUs7Status(status, hasScore, startsAtIso, nowMs);
@@ -286,7 +344,7 @@ export function parseUs7Fixture(item: unknown, nowMs: number): Us7Fixture | null
         startsAtIso,
         season: seasonYearOf(asString(record.seasonName)),
         stageId: asString(record.competitionId).trim(),
-        stageName: asString(record.competition).trim(),
+        stageName,
         round: toInt(record.round),
         home: { ...home, score: played ? home.score : null },
         away: { ...away, score: played ? away.score : null },
