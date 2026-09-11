@@ -177,6 +177,12 @@ function isFisuMatchId(value: string) {
     return /^fisu-match-[mw]-[A-Z0-9_]{4}-\d{6}$/i.test(value);
 }
 
+// Ultimate Sevens: `us7-match-31176`, el `gameId` de la API de la liga. Mismo
+// formato que `us7MatchIdOf`.
+function isUltimateSevensMatchId(value: string) {
+    return /^us7-match-[A-Za-z0-9_]+$/i.test(value);
+}
+
 // RugbyPass: `rp-949624`, el numero de partido del proveedor. El prefijo es el
 // mismo `RUGBYPASS_MATCH_ID_PREFIX` con el que se guardan las filas en la cache.
 function isRugbyPassMatchId(value: string) {
@@ -773,8 +779,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isEspnMotorsportExternal = isEspnMotorsportMatchId(id);
     const isFihExternal = isFihMatchId(id);
     const isFisuExternal = isFisuMatchId(id);
+    const isUltimateSevensExternal = isUltimateSevensMatchId(id);
     const isRugbyPassExternal = isRugbyPassMatchId(id);
-    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal || isFisuExternal || isRugbyPassExternal;
+    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal || isFisuExternal || isUltimateSevensExternal || isRugbyPassExternal;
 
     const resolvedMatchId =
         typeof state.matchData?.id === 'string' && state.matchData.id.trim()
@@ -837,6 +844,11 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isFihSource = state.matchData?.externalProvider === 'fih';
     const isRugbyPassSource = state.matchData?.externalProvider === 'rugbypass';
     const isFisuSource = state.matchData?.externalProvider === 'fisu';
+    const isUltimateSevensSource = state.matchData?.externalProvider === 'ultimate-sevens';
+    // La fuente puede publicar el plantel de la temporada en vez de la
+    // formación del partido. Rotularlo "Titulares" sería afirmar algo que no dijo.
+    const isSquadLineup = state.matchData?.lineupsKind === 'squad';
+    const lineupSectionLabel = isSquadLineup ? 'Plantel' : 'Titulares';
     // Quien trae su propia lista de pestanas en vez de la barra completa. El
     // Mundial no tiene comentarios narrados ni sorteo: mostrar la pestana vacia
     // es prometer algo que la fuente no publica.
@@ -856,6 +868,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         ? 'local' // no se usa: el automovilismo no pasa por resolveMatchTabs
         : isFihSource ? 'fih'
         : isFisuSource ? 'fisu'
+        : isUltimateSevensSource ? 'ultimate-sevens'
         : isEspnSoccerSource ? 'espn-soccer'
         : isRugbyApiSportsSource ? 'rugby-api-sports'
         : isEspnSource ? 'espn-american-football'
@@ -918,7 +931,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     // Mundial de Hockey: el bundle ya viene en el vocabulario de
                     // la pantalla (eventos canonicos, planilla, alineaciones),
                     // asi que no hay nada que normalizar aca.
-                    if ((payload?.source === 'fih' || payload?.source === 'fisu') && payload?.match) {
+                    if ((payload?.source === 'fih' || payload?.source === 'fisu' || payload?.source === 'ultimate-sevens') && payload?.match) {
                         statusRef.current = payload.match.status || 'scheduled';
                         setState({
                             kind: 'ok',
@@ -1957,7 +1970,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const exportSportId = ((): string | number | undefined => {
         const raw = matchData?.sportId;
         if (raw != null && raw !== '') return raw as string | number;
-        if (isRugbyExternal || isRugbyApiSportsSource || isFisuExternal || isFisuSource) return 'rugby';
+        if (isRugbyExternal || isRugbyApiSportsSource || isFisuExternal || isFisuSource || isUltimateSevensExternal || isUltimateSevensSource) return 'rugby';
         if (isFihExternal || isFihSource) return 'field-hockey';
         return undefined;
     })();
@@ -2976,7 +2989,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     <div className={styles.lineupsGrid}>
                                         <div className={styles.lineupsToolbar}>
                                             <div className={styles.lineupsToolbarCopy}>
-                                                <div className={styles.panelTitle} style={{ marginBottom: 8 }}>Alineaciones confirmadas</div>
+                                                <div className={styles.panelTitle} style={{ marginBottom: 8 }}>{isSquadLineup ? 'Planteles' : 'Alineaciones confirmadas'}</div>
                                                 <p className={styles.lineupsToolbarHint}>
                                                     Exporta una pieza para post o historia con ambos equipos o una sola formacion, sin salir del lenguaje visual que ya usa la vista publica.
                                                 </p>
@@ -3013,13 +3026,13 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                     homeTeam: {
                                                         name: matchData.home.name,
                                                         logo: matchData.home.logo,
-                                                        lineupLabel: 'Titulares',
+                                                        lineupLabel: lineupSectionLabel,
                                                         starters: displayHomeLineup,
                                                     },
                                                     awayTeam: {
                                                         name: matchData.away.name,
                                                         logo: matchData.away.logo,
-                                                        lineupLabel: 'Titulares',
+                                                        lineupLabel: lineupSectionLabel,
                                                         starters: displayAwayLineup,
                                                     },
                                                 }}
@@ -3029,7 +3042,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                         <div className={styles.lineupTeam}>
                                             <div className={styles.panelTitle}>{matchData.home.name}</div>
                                             <div className={styles.lineupSection}>
-                                                <div className={styles.lineupSectionTitle}>Titulares</div>
+                                                <div className={styles.lineupSectionTitle}>{lineupSectionLabel}</div>
                                                 <div className={styles.playerList}>
                                                     {homeLineupGroups.starters.map((p, i: number) => {
                                                         const pId = p.id;
@@ -3098,7 +3111,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                         <div className={styles.lineupTeam}>
                                             <div className={styles.panelTitle}>{matchData.away.name}</div>
                                             <div className={styles.lineupSection}>
-                                                <div className={styles.lineupSectionTitle}>Titulares</div>
+                                                <div className={styles.lineupSectionTitle}>{lineupSectionLabel}</div>
                                                 <div className={styles.playerList}>
                                                     {awayLineupGroups.starters.map((p, i: number) => {
                                                         const pId = p.id;

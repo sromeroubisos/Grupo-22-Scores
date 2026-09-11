@@ -53,6 +53,10 @@ import {
     parseFisuTournamentId,
 } from '@/lib/services/fisuRugbySevens';
 import {
+    getUltimateSevensTournamentBundle,
+    parseUs7TournamentId,
+} from '@/lib/services/ultimateSevens';
+import {
     getRugbyPassTournamentBundle,
     parseRugbyPassTournamentId,
 } from '@/lib/services/rugbyPassTournamentBundle';
@@ -735,7 +739,8 @@ async function findDbTournamentMeta(id: string) {
         isEspnAmericanFootballTournamentId(id) ||
         isEspnMotorsportTournamentId(id) ||
         parseFihTournamentId(id) !== null ||
-        parseFisuTournamentId(id) !== null
+        parseFisuTournamentId(id) !== null ||
+        parseUs7TournamentId(id) !== null
     ) {
         return null;
     }
@@ -1091,6 +1096,7 @@ export async function GET(request: Request) {
 
     const fihCompetition = parseFihTournamentId(id) || parseFihTournamentId(dbTournamentMeta?.external_id);
     const fisuCompetition = parseFisuTournamentId(id) || parseFisuTournamentId(dbTournamentMeta?.external_id);
+    const us7Competition = parseUs7TournamentId(id) || parseUs7TournamentId(dbTournamentMeta?.external_id);
     const rugbyPassCompetitionId =
         parseRugbyPassTournamentId(id) ?? parseRugbyPassTournamentId(dbTournamentMeta?.external_id);
 
@@ -1186,6 +1192,50 @@ export async function GET(request: Request) {
                 teamLabels: bundle.teamLabels,
                 topScorers: bundle.topScorers,
                 draw: bundle.draw,
+                archives: bundle.archives,
+            });
+        }
+
+        // Ultimate Sevens: la fuente es la REST del match centre de la liga.
+        // Igual que la FISU, el id ya dice qué rama es y la liga no vive en
+        // FlashScore ni en la base.
+        if (us7Competition) {
+            const bundle = await getUltimateSevensTournamentBundle(us7Competition);
+
+            return perf.json({
+                ok: true,
+                _debug: {
+                    query: { id, url, sport, requestedSeason },
+                    resolvedIds: bundle.ids,
+                    provider: 'ultimate-sevens',
+                    counts: {
+                        results: bundle.results.length,
+                        fixtures: bundle.fixtures.length,
+                        standings: bundle.standings.length,
+                        brackets: bundle.brackets.length,
+                    },
+                },
+                _cache: {
+                    entityId: bundle.ids.tournamentId,
+                    tabSources: {
+                        details: 'api',
+                        results: 'api',
+                        fixtures: 'api',
+                        standings: 'api',
+                    },
+                },
+                ids: bundle.ids,
+                details: bundle.details,
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                standings: bundle.standings,
+                standingsForm: bundle.standingsForm,
+                standingsHtFt: bundle.standingsHtFt,
+                standingsOverUnder: bundle.standingsOverUnder,
+                teamLabels: bundle.teamLabels,
+                topScorers: bundle.topScorers,
+                draw: bundle.draw,
+                brackets: bundle.brackets,
                 archives: bundle.archives,
             });
         }

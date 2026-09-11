@@ -14,6 +14,11 @@ import {
     getFisuRugbySevensMatches,
     hasFisuRugbySevensMatchesOnDate,
 } from '@/lib/services/fisuRugbySevens';
+import {
+    getUltimateSevensLiveMatches,
+    getUltimateSevensMatches,
+    hasUltimateSevensMatchesOnDate,
+} from '@/lib/services/ultimateSevens';
 import { mergeHockeyProviders } from '@/lib/services/hockeyProviderMerge';
 import {
     getEspnAmericanFootballLiveMatches,
@@ -223,21 +228,64 @@ export async function isExternalMatchesListDateSupported(
 ): Promise<boolean> {
     if (isFlashScoreMatchesListDateSupported(targetDateKey, timeZone)) return true;
     if (isFieldHockeySport(sportId)) return hasFihWorldCupMatchesOnDate(targetDateKey, timeZone);
-    if (isRugbySport(sportId)) return hasFisuRugbySevensMatchesOnDate(targetDateKey, timeZone);
+    if (isRugbySport(sportId)) {
+        const [universitario, ultimate] = await Promise.all([
+            hasFisuRugbySevensMatchesOnDate(targetDateKey, timeZone),
+            hasUltimateSevensMatchesOnDate(targetDateKey, timeZone),
+        ]);
+        return universitario || ultimate;
+    }
     return false;
 }
 
 /**
- * Rugby: el Mundial Universitario de Seven sale de la FISU (Bornan, donde la
- * mesa carga el resultado) y el resto del rugby sigue viniendo de FlashScore.
+ * Rugby: dos torneos de seven que FlashScore no cubre salen de su propia
+ * fuente —el Mundial Universitario de la FISU (Bornan) y la liga Ultimate
+ * Sevens (la REST de su match centre)— y el resto del rugby sigue viniendo de
+ * FlashScore.
  *
- * Entra por `rugby` y por `rugby-union`, nunca por `rugby-league`: el camino
- * en vivo de `rugby` se abre en union + league, y sumar la FISU en los dos lo
+ * Entran por `rugby` y por `rugby-union`, nunca por `rugby-league`: el camino
+ * en vivo de `rugby` se abre en union + league, y sumarlos en los dos los
  * metería dos veces. En el listado diario `rugby` no recurre, así que ahí
  * alcanza con la misma puerta.
  */
-export function wantsFisuRugbySevens(sportId: string): boolean {
+export function wantsVirtualRugbySevens(sportId: string): boolean {
     return sportId === 'rugby' || sportId === 'rugby-union';
+}
+
+/**
+ * Los partidos de los proveedores virtuales de seven para una fecha. Cada uno
+ * cae por su cuenta: un corte de Ultimate Sevens no se lleva a la FISU.
+ */
+export async function getVirtualRugbySevensMatches(
+    date: Date,
+    options?: { timeZone?: string; targetDateKey?: string },
+): Promise<Match[]> {
+    const [universitario, ultimate] = await Promise.all([
+        getFisuRugbySevensMatches(date, options).catch((error) => {
+            console.warn('[FISU] fixture del Mundial Universitario no disponible:', error?.message);
+            return [] as Match[];
+        }),
+        getUltimateSevensMatches(date, options).catch((error) => {
+            console.warn('[Ultimate Sevens] fixture no disponible:', error?.message);
+            return [] as Match[];
+        }),
+    ]);
+    return [...universitario, ...ultimate];
+}
+
+async function getVirtualRugbySevensLiveMatches(): Promise<Match[]> {
+    const [universitario, ultimate] = await Promise.all([
+        getFisuRugbySevensLiveMatches().catch((error) => {
+            console.warn('[FISU] en vivo del Mundial Universitario no disponible:', error?.message);
+            return [] as Match[];
+        }),
+        getUltimateSevensLiveMatches().catch((error) => {
+            console.warn('[Ultimate Sevens] en vivo no disponible:', error?.message);
+            return [] as Match[];
+        }),
+    ]);
+    return [...universitario, ...ultimate];
 }
 
 function getFlashScoreRawTournamentList(data: any): any[] {
@@ -452,27 +500,24 @@ export async function getFlashScoreMatches(
         return mergeHockeyProviders(worldCup, flashScore);
     }
 
-    // Rugby: la FISU trae el Mundial Universitario de Seven, que FlashScore no
-    // cubre, así que no hay copia que descartar: se suman. Un corte de la FISU
-    // no tira el rugby entero; un corte de FlashScore con la FISU vacía sí se
-    // propaga, por el mismo motivo que en hockey.
-    if (wantsFisuRugbySevens(sportId)) {
+    // Rugby: la FISU y Ultimate Sevens traen torneos de seven que FlashScore no
+    // cubre, así que no hay copia que descartar: se suman. Un corte de uno de
+    // ellos no tira el rugby entero; un corte de FlashScore sin nada de los
+    // virtuales sí se propaga, por el mismo motivo que en hockey.
+    if (wantsVirtualRugbySevens(sportId)) {
         let flashScoreError: unknown = null;
 
-        const [universitario, flashScore] = await Promise.all([
-            getFisuRugbySevensMatches(date, options).catch((error) => {
-                console.warn('[FISU] fixture del Mundial Universitario no disponible:', error?.message);
-                return [] as Match[];
-            }),
+        const [sevens, flashScore] = await Promise.all([
+            getVirtualRugbySevensMatches(date, options),
             fetchFlashScoreDailyMatches(date, sportId, options).catch((error) => {
                 flashScoreError = error;
                 return [] as Match[];
             }),
         ]);
 
-        if (flashScoreError && universitario.length === 0) throw flashScoreError;
+        if (flashScoreError && sevens.length === 0) throw flashScoreError;
 
-        return [...universitario, ...flashScore];
+        return [...sevens, ...flashScore];
     }
 
     return fetchFlashScoreDailyMatches(date, sportId, options);
@@ -611,17 +656,14 @@ export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]
     }
 
     // Solo `rugby-union`: el camino de `rugby` llega acá por la recursión de
-    // `getFlashScoreLiveMatchesRaw`, así que la FISU entra una sola vez.
+    // `getFlashScoreLiveMatchesRaw`, así que los virtuales entran una sola vez.
     if (sportId === 'rugby-union') {
-        const [universitario, flashScore] = await Promise.all([
-            getFisuRugbySevensLiveMatches().catch((error) => {
-                console.warn('[FISU] en vivo del Mundial Universitario no disponible:', error?.message);
-                return [] as Match[];
-            }),
+        const [sevens, flashScore] = await Promise.all([
+            getVirtualRugbySevensLiveMatches(),
             getFlashScoreLiveMatchesRaw(sportId).catch(() => [] as Match[]),
         ]);
 
-        return [...universitario, ...flashScore];
+        return [...sevens, ...flashScore];
     }
 
     return getFlashScoreLiveMatchesRaw(sportId);

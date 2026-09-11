@@ -18,6 +18,13 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'hockey-cdn.altius.live',
       },
+      {
+        // Escudos de las franquicias y logo de la liga Ultimate Sevens, servidos
+        // desde el WordPress de su match centre (`wp-content/uploads`).
+        protocol: 'https',
+        hostname: 'www.ultimatesevens.com',
+        pathname: '/wp-content/uploads/**',
+      },
     ],
   },
   typescript: {

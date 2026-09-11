@@ -5,9 +5,9 @@ import {
     getFlashScoreLiveMatches,
     isExternalMatchesListDateSupported,
     isFlashScoreMatchesListDateSupported,
-    wantsFisuRugbySevens,
+    getVirtualRugbySevensMatches,
+    wantsVirtualRugbySevens,
 } from '@/lib/services/flashscore';
-import { getFisuRugbySevensMatches } from '@/lib/services/fisuRugbySevens';
 import { persistFromExternalMatches } from '@/lib/sync/catalog';
 import { recordExternalTournamentsFromMatches } from '@/lib/server/externalTournamentCatalog';
 import {
@@ -1840,33 +1840,31 @@ async function computeMatchesPayload(
                     console.log(`[matches] external cache empty day: no matches for date=${date}`);
                 }
 
-                // ── Proveedor virtual de la FISU ─────────────────────────────
+                // ── Proveedores virtuales de seven (FISU, Ultimate Sevens) ────
                 // La caché la llena fixture-sync cada hora, así que un torneo que
                 // acaba de entrar tarda hasta una hora en aparecer, y un marcador
                 // en juego llega con el retraso de live-sync. Cuando el día se
-                // sirvió desde la caché, el Mundial Universitario de Seven se pide
-                // aparte (es barato: un JSON por día, cacheado 20-120 s) y se suma
-                // lo que la caché todavía no tiene. Si la caché no sirvió, el
-                // camino de reparación de abajo ya lo trae adentro de FlashScore.
-                if ((servedFromExternalCache || emptyDayFromCache) && wantsFisuRugbySevens(sport || 'rugby')) {
-                    const fisuStartedAt = Date.now();
-                    const universitario = await getFisuRugbySevensMatches(localDate, {
+                // sirvió desde la caché, los torneos de seven se piden aparte (es
+                // barato: un JSON por fuente, cacheado 20 s-5 min) y se suma lo
+                // que la caché todavía no tiene. Si la caché no sirvió, el camino
+                // de reparación de abajo ya los trae adentro de FlashScore.
+                if ((servedFromExternalCache || emptyDayFromCache) && wantsVirtualRugbySevens(sport || 'rugby')) {
+                    const sevensStartedAt = Date.now();
+                    // Cada fuente cae por su cuenta adentro: nunca lanza.
+                    const sevens = await getVirtualRugbySevensMatches(localDate, {
                         timeZone,
                         targetDateKey: date || undefined,
-                    }).catch((error) => {
-                        console.warn('[matches] FISU no disponible; sigue la caché sola:', error?.message);
-                        return [];
                     });
-                    if (universitario.length > 0) {
+                    if (sevens.length > 0) {
                         const sportKey = sport || 'rugby';
                         const known = new Set(cachedEnriched.map((match) => String(match.id)));
-                        const extra = universitario
+                        const extra = sevens
                             .filter((match) => !known.has(String(match.id)))
                             .map((match) => mapCachedToEnrichedMatch(mapFlashScoreMatchToCached(match, sportKey), sportKey))
                             .filter((match) => !isBlockedTournamentId(match.tournamentId));
-                        // El marcador y el estado de la FISU son más frescos que
+                        // El marcador y el estado de la fuente son más frescos que
                         // los de la caché: pisan la fila cacheada del mismo partido.
-                        const fresh = new Map(universitario.map((match) => [String(match.id), match] as const));
+                        const fresh = new Map(sevens.map((match) => [String(match.id), match] as const));
                         enrichedMatches = enrichedMatches.map((match) => {
                             const live = fresh.get(String(match.id));
                             if (!live) return match;
@@ -1880,7 +1878,7 @@ async function computeMatchesPayload(
                         }
                     }
                     if (trace) {
-                        addDurationMetric(trace.metrics, 'external_fetch_ms', Date.now() - fisuStartedAt);
+                        addDurationMetric(trace.metrics, 'external_fetch_ms', Date.now() - sevensStartedAt);
                     }
                 }
 
