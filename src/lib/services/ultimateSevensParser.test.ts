@@ -15,6 +15,7 @@ import {
     parseUs7TeamId,
     parseUs7TournamentId,
     resolveUs7Roster,
+    us7StageTimeZone,
     us7MatchIdOf,
     us7RefreshTtlSeconds,
     us7CountryName,
@@ -41,7 +42,8 @@ function equipo(id: string, name: string, score: number | null, teamPlayers: num
 function partido(overrides: Record<string, unknown> = {}) {
     return {
         gameId: '31176',
-        date: '2026-09-12T18:00:00',
+        // hora de Cardiff (BST): son las 18:00 UTC de KICKOFF
+        date: '2026-09-12T19:00:00',
         seasonId: '1',
         category: 'men',
         seasonName: '2026 Season',
@@ -62,12 +64,19 @@ const KICKOFF = Date.parse('2026-09-12T18:00:00Z');
 const UN_DIA_ANTES = KICKOFF - 24 * 60 * 60 * 1000;
 const MINUTO = 60 * 1000;
 
-test('la hora sin huso es GMT: 18:00 de la API son las 18:00 UTC, no las 17:00', () => {
-    assert.equal(parseUs7DateTime('2026-09-12T18:00:00'), '2026-09-12T18:00:00.000Z');
-    // `/tournaments` la escribe con espacio
-    assert.equal(parseUs7DateTime('2026-09-12 15:00:00'), '2026-09-12T15:00:00.000Z');
+test('la hora sin huso es la de la SEDE aunque el sitio diga GMT', () => {
+    // Cardiff: el sitio dice "KICK OFF 15:00 GMT" y la ticketera "show 15:00",
+    // puertas 13:30+01:00. Son las 15:00 de Cardiff = 14:00 UTC.
+    assert.equal(parseUs7DateTime('2026-09-12 15:00:00', 'Europe/London'), '2026-09-12T14:00:00.000Z');
+    assert.equal(parseUs7DateTime('2026-09-12T16:35:00', us7StageTimeZone('Cardiff')), '2026-09-12T15:35:00.000Z');
+    // Biarritz es Francia: 18:30 de allá = 16:30 UTC, no 17:30
+    assert.equal(parseUs7DateTime('2026-09-18 18:30:00', us7StageTimeZone('Biarritz')), '2026-09-18T16:30:00.000Z');
+    // en invierno Londres SÍ es GMT: el huso se calcula en la fecha, no fijo
+    assert.equal(parseUs7DateTime('2026-12-12T15:00:00', 'Europe/London'), '2026-12-12T15:00:00.000Z');
+    // una sede que no está en la tabla cae en Londres
+    assert.equal(us7StageTimeZone('Dublin'), 'Europe/London');
     // si algún día manda el huso, se respeta
-    assert.equal(parseUs7DateTime('2026-09-12T18:00:00+01:00'), '2026-09-12T17:00:00.000Z');
+    assert.equal(parseUs7DateTime('2026-09-12T18:00:00+01:00', 'Europe/Paris'), '2026-09-12T17:00:00.000Z');
     assert.equal(parseUs7DateTime(''), null);
     assert.equal(parseUs7DateTime('pronto'), null);
 });
