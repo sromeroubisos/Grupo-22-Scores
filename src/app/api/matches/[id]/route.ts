@@ -50,6 +50,10 @@ import {
   parseFisuMatchId,
 } from '@/lib/services/fisuRugbySevens';
 import {
+  getUltimateSevensMatchBundle,
+  parseUs7MatchId,
+} from '@/lib/services/ultimateSevens';
+import {
   applyExternalTournamentOverride,
   getExternalTournamentOverride,
   type ExternalTournamentOverrideRecord,
@@ -376,6 +380,18 @@ export async function GET(
 
     if (parseFisuMatchId(matchId)) {
       const bundle = await getFisuRugbySevensMatchBundle(matchId);
+      if (!bundle) {
+        return jsonNoStore(
+          { error: 'Match not found' },
+          { status: 404 }
+        );
+      }
+
+      return jsonNoStore({ ...bundle, videos: await videosPromise });
+    }
+
+    if (parseUs7MatchId(matchId)) {
+      const bundle = await getUltimateSevensMatchBundle(matchId);
       if (!bundle) {
         return jsonNoStore(
           { error: 'Match not found' },

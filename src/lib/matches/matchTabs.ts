@@ -35,7 +35,8 @@ export type MatchProvider =
     | 'espn-american-football'
     | 'espn-soccer'
     | 'fih'
-    | 'fisu';
+    | 'fisu'
+    | 'ultimate-sevens';
 
 export type MatchStatusKind = 'scheduled' | 'live' | 'final';
 
@@ -108,12 +109,16 @@ const SUPPORTED: Record<MatchProvider, readonly MatchTabId[]> = {
     // y la tabla del grupo. Nada de cronología ni planilla individual: la
     // pestaña vacía sería una promesa que la fuente no cumple.
     fisu: ['previa', 'summary', 'videos', 'lineups', 'standings'],
+    // Ultimate Sevens publica el fixture, el marcador y el plantel de la
+    // temporada de cada franquicia. La tabla no está en su REST y no hay
+    // eventos ni estadísticas por partido.
+    'ultimate-sevens': ['previa', 'summary', 'videos', 'lineups'],
 };
 
 // Las fuentes que publican el plantel poco antes del inicio. Para el resto,
 // una alineación que no llegó antes del partido no llega nunca.
 const PUBLISHES_LINEUPS_BEFORE_KICKOFF: readonly MatchProvider[] = [
-    'local', 'flashscore', 'espn-soccer', 'rugby-api-sports', 'espn-american-football', 'fih', 'fisu',
+    'local', 'flashscore', 'espn-soccer', 'rugby-api-sports', 'espn-american-football', 'fih', 'fisu', 'ultimate-sevens',
 ];
 
 // Lo que un administrador carga a mano. El resto se deriva de los eventos, asi
