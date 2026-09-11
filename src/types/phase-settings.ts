@@ -147,6 +147,8 @@ export interface PhaseSettings {
   tableColumns?: Record<string, boolean>;
   groupLabels?: GroupLabel[];
   playoffStages?: PlayoffStageConfig[];
+  /** Cómo se cargan las llaves: a mano o generadas por el constructor. Ver `readPlayoffBracketMode`. */
+  bracketMode?: 'manual' | 'auto';
 
   // High-Fidelity Structure
   groupTags?: string[];

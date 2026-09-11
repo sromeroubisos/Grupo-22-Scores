@@ -112,6 +112,35 @@ export function isPlayoffPhaseType(phaseType: string | null | undefined) {
   return phaseType === 'playoff' || phaseType === 'knockout';
 }
 
+/**
+ * Cómo se cargan las llaves de una fase playoff.
+ *
+ *  - 'manual': el gestor crea las etapas y carga cada cruce a mano. Los
+ *    ganadores NO avanzan solos: son slots vacíos sin reglas de avance.
+ *  - 'auto':   el cuadro lo genera el constructor desde una plantilla, con
+ *    reglas de avance; al cerrar un resultado el ganador pasa solo.
+ *
+ * Existían los dos sistemas sin que nadie eligiera: el formulario de fase
+ * armaba el manual y el constructor —un panel plegado debajo— el automático.
+ * Las fases viejas no tienen `bracketMode`; se las lee como manual, salvo que
+ * ya tengan un cuadro generado por el constructor (`bracketBuilder`).
+ */
+export type PlayoffBracketMode = 'manual' | 'auto';
+
+export function readPlayoffBracketMode(settings: unknown): PlayoffBracketMode {
+  const source = settings && typeof settings === 'object'
+    ? settings as Record<string, unknown>
+    : {};
+  if (source.bracketMode === 'auto' || source.bracketMode === 'manual') {
+    return source.bracketMode;
+  }
+  const builder = source.bracketBuilder;
+  if (builder && typeof builder === 'object' && (builder as Record<string, unknown>).templateId) {
+    return 'auto';
+  }
+  return 'manual';
+}
+
 export function normalizePlayoffStageNames(settingsOrNames: unknown) {
   return normalizeNameList(normalizeStageInputs(settingsOrNames).map((stage) => stage.name));
 }

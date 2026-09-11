@@ -10,6 +10,7 @@ import {
   loadPlayoffBracket,
   reschedulePlayoffBracket,
   reseedPlayoffBracket,
+  syncBracketAdvancement,
 } from '@/lib/server/playoffBracket';
 import { listPlayoffTemplates, type PlayoffTemplateId } from '@/lib/playoff/templates';
 import { readPlayoffSeedingConfig } from '@/lib/playoff/seedingFromStandings';
@@ -32,6 +33,9 @@ export const dynamic = 'force-dynamic';
 /**
  * GET  /api/tournaments/:id/playoff?phaseId=...   -> bracket board + templates
  * POST /api/tournaments/:id/playoff               -> generate | regenerate | clear
+ *                                                    | syncAdvancement | reseed
+ *                                                    | setSeeding | closeZones | reopenZones
+ *                                                    | reschedule
  */
 export async function GET(
   request: NextRequest,
@@ -147,6 +151,19 @@ export async function POST(
       return NextResponse.json({ ok: true, seeding: readPlayoffSeedingConfig(nextSettings), board });
     }
 
+    // Vuelve a empujar ganadores/perdedores de todos los partidos terminados.
+    // Para cuando un resultado entró por fuera del gestor (import, cron).
+    if (action === 'syncAdvancement') {
+      const result = await syncBracketAdvancement(supabase, { phaseId });
+      if (!result.ok) {
+        const status = result.code === 'missing_migration' ? 503 : 400;
+        return NextResponse.json({ ok: false, ...result }, { status });
+      }
+      await invalidateMatchesFeedCaches();
+      const board = await loadPlayoffBracket(supabase, phaseId);
+      return NextResponse.json({ ok: true, synced: result.synced, warnings: result.warnings, board });
+    }
+
     if (action === 'reschedule') {
       const result = await reschedulePlayoffBracket(supabase, {
         phaseId,
@@ -198,6 +215,27 @@ export async function POST(
       );
     }
 
+    // La clasificación desde zonas viaja con el generate: elegir el origen y
+    // generar era antes dos botones, y el segundo sin el primero sembraba
+    // por seed manual sin avisar.
+    if (body.seeding !== undefined) {
+      const sourcePhaseId = String(body.seeding?.sourcePhaseId ?? '').trim();
+      const format = body.seeding?.format === 'zone_rank' ? 'zone_rank' : 'overall';
+      const current = readPlayoffSeedingConfig(baseSettings);
+      const nextSettings = sourcePhaseId
+        ? { ...baseSettings, playoffSeeding: { sourcePhaseId, format, locked: current?.sourcePhaseId === sourcePhaseId ? current.locked : false } }
+        : (() => {
+            const s = { ...baseSettings } as Record<string, unknown>;
+            delete s.playoffSeeding;
+            return s;
+          })();
+      const { error } = await supabase
+        .from('tournament_phases')
+        .update({ settings: nextSettings })
+        .eq('id', phaseId);
+      if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 400 });
+    }
+
     const result = await generatePlayoffBracket(supabase, {
       tournamentId,
       phaseId,
@@ -221,12 +259,16 @@ export async function POST(
     }
 
     await invalidateMatchesFeedCaches();
-    const board = await loadPlayoffBracket(supabase, phaseId);
+    const [board, { data: freshPhase }] = await Promise.all([
+      loadPlayoffBracket(supabase, phaseId),
+      supabase.from('tournament_phases').select('settings').eq('id', phaseId).maybeSingle(),
+    ]);
     return NextResponse.json({
       ok: true,
       matchesCreated: result.matchesCreated,
       rulesCreated: result.rulesCreated,
       board,
+      seeding: readPlayoffSeedingConfig(freshPhase?.settings),
     });
   } catch (error: unknown) {
     return tournamentApiErrorResponse(error);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState, useEffect, useMemo } from 'react';
-import { AlertCircle, ArrowDownUp, Award, CheckCircle, ChevronRight, Edit3, Eye, Globe, Grid3x3, Info, Layers, MoreVertical, Plus, Trash2, TrendingUp, Trophy, Users, X } from 'lucide-react';
+import { AlertCircle, ArrowDownUp, Award, CheckCircle, ChevronRight, Edit3, Eye, GitBranch, Globe, Grid3x3, Hand, Info, Layers, MoreVertical, Plus, Trash2, TrendingUp, Trophy, Users, Wand2, X } from 'lucide-react';
 import './basalt.css';
 import './phase-wizard.css';
 import './tournament-structure.css';
@@ -19,7 +19,9 @@ import {
     getPlayoffMatchCounts,
     getPlayoffTeamsCount,
     normalizePlayoffStageNames,
+    readPlayoffBracketMode,
     resolvePlayoffStagesForTeams,
+    type PlayoffBracketMode,
 } from '@/lib/utils/playoffStages';
 import { useTournamentDirty } from './TournamentContext';
 import PlayoffBuilderPanel from './PlayoffBuilderPanel';
@@ -271,6 +273,14 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const [playoffStageNames, setPlayoffStageNames] = useState<string[]>(DEFAULT_PLAYOFF_STAGE_NAMES);
     const [playoffStageMatchCounts, setPlayoffStageMatchCounts] = useState<number[]>(DEFAULT_PLAYOFF_STAGE_MATCH_COUNTS);
     const [playoffStagesCustomized, setPlayoffStagesCustomized] = useState(false);
+    /**
+     * Cómo se cargan las llaves. Automática es la opción por omisión para una
+     * fase nueva: es la que hace que los ganadores avancen solos. Manual queda
+     * para el que quiere dibujar las etapas y cargar cada cruce.
+     */
+    const [bracketMode, setBracketMode] = useState<PlayoffBracketMode>('auto');
+    /** Fases manuales a las que el gestor abrió el constructor para pasarlas a automáticas. */
+    const [builderRevealedFor, setBuilderRevealedFor] = useState<Record<string, boolean>>({});
 
     // Classification zone labels
     const [groupLabels, setGroupLabels] = useState<GroupLabel[]>([]);
@@ -606,15 +616,16 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         if ((phaseType === 'playoff' || phaseType === 'knockout') && normalizedTeams === null) {
             errors.push('La fase playoff necesita definir cuantos equipos juegan.');
         }
-        if ((phaseType === 'playoff' || phaseType === 'knockout') && activePlayoffStages.length === 0) {
+        const manualBracket = (phaseType === 'playoff' || phaseType === 'knockout') && bracketMode === 'manual';
+        if (manualBracket && activePlayoffStages.length === 0) {
             errors.push('La fase playoff necesita al menos una etapa de eliminacion.');
         }
-        if ((phaseType === 'playoff' || phaseType === 'knockout') && activePlayoffStages.some((_, index) => toPositiveStageMatchCount(playoffStageMatchCounts[index], 0) < 1)) {
+        if (manualBracket && activePlayoffStages.some((_, index) => toPositiveStageMatchCount(playoffStageMatchCounts[index], 0) < 1)) {
             errors.push('Cada etapa playoff necesita al menos 1 partido configurado.');
         }
 
         return errors;
-    }, [advanceCount, groupNames, phaseName, phaseType, playoffStageMatchCounts, playoffStageNames, teamsCount]);
+    }, [advanceCount, bracketMode, groupNames, phaseName, phaseType, playoffStageMatchCounts, playoffStageNames, teamsCount]);
 
     const tiebreakerListItems = useMemo((): TiebreakerItem[] => {
         const activeMetrics = new Set(tiebreakers.map(t => t.metric));
@@ -773,6 +784,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         setPlayoffStageNames(DEFAULT_PLAYOFF_STAGE_NAMES);
         setPlayoffStageMatchCounts(DEFAULT_PLAYOFF_STAGE_MATCH_COUNTS);
         setPlayoffStagesCustomized(false);
+        setBracketMode('auto');
         setPlacementPoints(DEFAULT_PLACEMENT_POINTS);
         resetLabelForm();
         setShowPhaseForm(false);
@@ -795,6 +807,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         setPlayoffStageNames(DEFAULT_PLAYOFF_STAGE_NAMES);
         setPlayoffStageMatchCounts(DEFAULT_PLAYOFF_STAGE_MATCH_COUNTS);
         setPlayoffStagesCustomized(false);
+        setBracketMode(readPlayoffBracketMode(phase.settings));
 
         if (phase.settings) {
             const s = phase.settings;
@@ -965,6 +978,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                             },
                         },
                         group_names: sanitizedGroupNames,
+                        ...((phaseType === 'playoff' || phaseType === 'knockout') ? { bracketMode } : {}),
                         playoffStages: sanitizedPlayoffStages.map((stage, index) => ({
                             id: `playoff_stage_${index + 1}`,
                             name: stage.name,
@@ -1606,12 +1620,17 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                     {(phase.settings as any).group_names.length} grupos
                                                 </span>
                                             )}
-                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && normalizePlayoffStageNames(phase.settings).length > 0 && (
+                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && (
+                                                <span className={`structure-phase-meta-info font-semibold ${readPlayoffBracketMode(phase.settings) === 'auto' ? 'text-[var(--accent-primary)]' : 'text-[var(--text-main)]/70'}`}>
+                                                    {readPlayoffBracketMode(phase.settings) === 'auto' ? 'Llaves automáticas' : 'Llaves manuales'}
+                                                </span>
+                                            )}
+                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && readPlayoffBracketMode(phase.settings) === 'manual' && normalizePlayoffStageNames(phase.settings).length > 0 && (
                                                 <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
                                                     {normalizePlayoffStageNames(phase.settings).length} etapas
                                                 </span>
                                             )}
-                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && resolvePlayoffStagesForTeams(phase.settings, getPlayoffTeamsCount(phase.settings)).length > 0 && (
+                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && readPlayoffBracketMode(phase.settings) === 'manual' && resolvePlayoffStagesForTeams(phase.settings, getPlayoffTeamsCount(phase.settings)).length > 0 && (
                                                 <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
                                                     {(() => {
                                                         const count = resolvePlayoffStagesForTeams(phase.settings, getPlayoffTeamsCount(phase.settings)).reduce((total, stage) => total + stage.matchCount, 0);
@@ -1791,13 +1810,33 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 </div>
                             </div>
                             {!!id && (phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && (
-                                <PlayoffBuilderPanel
-                                    tournamentId={id}
-                                    phaseId={phase.id}
-                                    phaseName={phase.name}
-                                    settings={phase.settings}
-                                    onChanged={() => { loadPhases(); }}
-                                />
+                                readPlayoffBracketMode(phase.settings) === 'auto' || builderRevealedFor[phase.id] ? (
+                                    <PlayoffBuilderPanel
+                                        tournamentId={id}
+                                        phaseId={phase.id}
+                                        phaseName={phase.name}
+                                        settings={phase.settings}
+                                        defaultOpen={!(phase.settings as any)?.bracketBuilder?.generatedAt}
+                                        onChanged={() => { loadPhases(); }}
+                                    />
+                                ) : (
+                                    <div className="structure-bracket-manual-row flex flex-wrap items-center justify-between gap-3 px-5 py-3 rounded-xl border border-dashed border-[var(--border-basalt)] text-xs text-dim">
+                                        <span className="flex items-center gap-2">
+                                            <GitBranch size={14} aria-hidden="true" />
+                                            Llaves manuales: los cruces y los resultados se cargan desde Fixture. Los ganadores no avanzan solos.
+                                        </span>
+                                        {!isApiManaged && (
+                                            <button
+                                                type="button"
+                                                className="basalt-btn"
+                                                onClick={() => setBuilderRevealedFor(prev => ({ ...prev, [phase.id]: true }))}
+                                            >
+                                                <Wand2 size={14} />
+                                                Pasar a automáticas
+                                            </button>
+                                        )}
+                                    </div>
+                                )
                             )}
                             </div>
                         ))}
@@ -2068,6 +2107,43 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
                                             {/* Groups definition — only for group_stage */}
                                             {(phaseType === 'playoff' || phaseType === 'knockout') && (
+                                                <div className="structure-field-panel structure-field-panel-wide structure-basic-type-panel">
+                                                    <label className="structure-field-label block text-xs font-bold text-dim uppercase tracking-widest mb-3">
+                                                        Cómo se cargan las llaves
+                                                    </label>
+                                                    <div className="structure-option-grid grid grid-cols-2 gap-3" role="radiogroup" aria-label="Cómo se cargan las llaves">
+                                                        {([
+                                                            { value: 'auto' as const, label: 'Automática', desc: 'Elegís el formato, el sistema arma el cuadro y los ganadores pasan solos al cargar cada resultado.' },
+                                                            { value: 'manual' as const, label: 'Manual', desc: 'Definís las etapas y cargás cada cruce a mano. Nada avanza solo.' },
+                                                        ]).map(opt => (
+                                                            <button
+                                                                key={opt.value}
+                                                                type="button"
+                                                                role="radio"
+                                                                aria-checked={bracketMode === opt.value}
+                                                                onClick={() => setBracketMode(opt.value)}
+                                                                className={`structure-option-card structure-phase-type-card ${bracketMode === opt.value ? 'is-active' : ''} flex flex-col items-start px-4 py-3 rounded-xl border transition-all duration-150 text-left ${bracketMode === opt.value
+                                                                    ? 'border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 text-[var(--text-main)]'
+                                                                    : 'border-[var(--border-basalt)] bg-[var(--surface-basalt)] text-dim hover:border-[var(--text-dim)]'
+                                                                    }`}
+                                                            >
+                                                                <span className="structure-phase-type-icon" aria-hidden="true">
+                                                                    {opt.value === 'auto' ? <Wand2 size={18} /> : <Hand size={18} />}
+                                                                </span>
+                                                                <span className="text-sm font-bold">{opt.label}</span>
+                                                                <span className="text-[11px] mt-0.5 opacity-70">{opt.desc}</span>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    {bracketMode === 'auto' && (
+                                                        <p className="mt-3 text-xs text-[var(--text-main)]/75">
+                                                            Al guardar, la fase queda lista para generar el cuadro: formato (eliminación simple, Oro / Plata, cuatro copas o personalizado), quiénes juegan y horarios. Los cruces se cargan desde ahí, no desde Fixture.
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {(phaseType === 'playoff' || phaseType === 'knockout') && bracketMode === 'manual' && (
                                                 <div className="structure-field-panel structure-field-panel-wide structure-field-panel-accent structure-basic-groups-panel rounded-xl border border-[var(--accent-primary)]/30 bg-[var(--accent-primary)]/5 p-5">
                                                     <div className="flex items-center justify-between gap-3 mb-4">
                                                         <div>
@@ -2075,7 +2151,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                                 Etapas de eliminacion
                                                             </p>
                                                             <p className="text-sm text-[var(--text-main)] font-semibold">
-                                                                Define las etapas que guiaran el cuadro playoff
+                                                                Cada etapa crea sus partidos vacíos; los cruces se completan desde Fixture
                                                             </p>
                                                         </div>
                                                         <span className="basalt-badge badge-published">
@@ -2085,12 +2161,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                         </span>
                                                     </div>
 
-                                                    <div className="mb-4 rounded-lg border border-[var(--accent-primary)]/40 bg-[var(--accent-primary)]/10 px-3 py-2.5 text-xs text-[var(--text-main)]/85">
-                                                        <strong>¿Querés copas derivadas (Oro / Plata / Bronce / Estímulo), cruces aleatorios u horarios automáticos?</strong>{' '}
-                                                        Esto define solo un cuadro lineal simple. Para subcopas y avance automático: poné un nombre a la fase y guardala; después, en la lista de fases, abrí el panel <strong>“Constructor de Playoff”</strong> de esta fase.
-                                                    </div>
-
-                                                    {playoffStageAdjustment && (
+{playoffStageAdjustment && (
                                                         <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-100" role="status">
                                                             <AlertCircle size={14} className="mt-0.5 flex-shrink-0" />
                                                             <span>

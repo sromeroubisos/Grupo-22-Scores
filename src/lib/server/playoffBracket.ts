@@ -12,6 +12,7 @@
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { resolveMatchAdvancement } from '@/lib/server/resolveMatchAdvancement';
 import {
   buildBracketTemplate,
   resolveCupName,
@@ -181,13 +182,13 @@ export async function clearPlayoffBracket(
   }
 
   const matches = bracketMatches ?? [];
+  const isPlayed = (m: any) => {
+    const score = m.score || {};
+    return m.status === 'final' || m.status === 'live'
+      || Number(score.home) > 0 || Number(score.away) > 0;
+  };
   if (!force) {
-    const hasResults = matches.some((m: any) => {
-      const score = m.score || {};
-      const played = m.status === 'final' || m.status === 'live'
-        || Number(score.home) > 0 || Number(score.away) > 0;
-      return played;
-    });
+    const hasResults = matches.some(isPlayed);
     if (hasResults) {
       return {
         ok: false,
@@ -197,10 +198,31 @@ export async function clearPlayoffBracket(
     }
   }
 
+  // Una fase que pasa de carga manual a automática trae los slots vacíos del
+  // modo manual (sin bracket_match_code). Si están vacíos se van con el resto;
+  // si alguno ya tiene equipos o resultado, es trabajo del gestor y no se
+  // pisa sin confirmación.
+  const { data: legacyRows } = await supabase
+    .from('matches')
+    .select('id, status, score, home_club_id, away_club_id')
+    .eq('phase_id', phaseId)
+    .is('bracket_match_code', null);
+  const legacy = legacyRows ?? [];
+  const legacyWithContent = legacy.filter(
+    (m: any) => m.home_club_id || m.away_club_id || isPlayed(m),
+  );
+  if (!force && legacyWithContent.length > 0) {
+    return {
+      ok: false,
+      code: 'has_results',
+      error: `La fase tiene ${legacyWithContent.length} partido${legacyWithContent.length === 1 ? '' : 's'} cargado${legacyWithContent.length === 1 ? '' : 's'} a mano. Generar el cuadro automático los borra.`,
+    };
+  }
+
   // Rules -> matches -> rounds -> cups (group_id cascades clean up extras).
   await supabase.from(ADVANCEMENT_TABLE).delete().eq('phase_id', phaseId);
 
-  const matchIds = matches.map((m: any) => m.id);
+  const matchIds = [...matches.map((m: any) => m.id), ...legacy.map((m: any) => m.id)];
   if (matchIds.length > 0) {
     const { error: delMatchesError } = await supabase.from('matches').delete().in('id', matchIds);
     if (delMatchesError) return { ok: false, code: 'db_error', error: delMatchesError.message };
@@ -458,6 +480,9 @@ export async function generatePlayoffBracket(
     .maybeSingle();
   const nextSettings = {
     ...(phaseRow?.settings && typeof phaseRow.settings === 'object' ? phaseRow.settings : {}),
+    // Un cuadro generado ES una fase de llaves automáticas: las rutas de fase
+    // leen esto para no meterle slots manuales al editarla.
+    bracketMode: 'auto',
     bracketBuilder: {
       templateId: config.templateId,
       teamCount: template.teamCount || config.teamCount,
@@ -573,6 +598,54 @@ export async function reseedPlayoffBracket(
   }
 
   return { ok: true, reseeded };
+}
+
+/**
+ * Vuelve a correr el avance para todos los partidos terminados del cuadro.
+ *
+ * El avance automático se dispara al guardar desde el gestor. Un resultado que
+ * entra por otro camino —un import, un cron, un script por PostgREST— deja la
+ * llave siguiente con el rival viejo y nadie avisa (pasó en el Uruguayo de
+ * Clubes: el tercer puesto con dos equipos que no eran los perdedores de las
+ * semis). Esto recorre el cuadro en orden de ronda y empuja lo que falte.
+ */
+export async function syncBracketAdvancement(
+  supabase: Supa,
+  params: { phaseId: string },
+): Promise<PlayoffBracketResult & { synced?: number; warnings?: string[] }> {
+  const { phaseId } = params;
+  const { data: bracketMatches, error } = await supabase
+    .from('matches')
+    .select('id, status, round_uuid, bracket_match_code')
+    .eq('phase_id', phaseId)
+    .not('bracket_match_code', 'is', null);
+  if (error) {
+    if (missingMigration(error)) {
+      return { ok: false, code: 'missing_migration', error: 'Falta aplicar la migración del constructor de playoff.' };
+    }
+    return { ok: false, code: 'db_error', error: error.message };
+  }
+  const finals = (bracketMatches ?? []).filter((m: any) => m.status === 'final');
+  if (finals.length === 0) return { ok: true, synced: 0, warnings: [] };
+
+  const { data: rounds } = await supabase
+    .from('tournament_rounds')
+    .select('id, order_index')
+    .eq('phase_id', phaseId);
+  const roundOrder = new Map((rounds ?? []).map((r: any) => [r.id, Number(r.order_index ?? 0)]));
+  finals.sort((a: any, b: any) => {
+    const byRound = (roundOrder.get(a.round_uuid) ?? 0) - (roundOrder.get(b.round_uuid) ?? 0);
+    return byRound !== 0 ? byRound : codeOrder(a.bracket_match_code) - codeOrder(b.bracket_match_code);
+  });
+
+  let synced = 0;
+  const warnings: string[] = [];
+  for (const m of finals as any[]) {
+    const result = await resolveMatchAdvancement(supabase, m.id, { warnings });
+    if (!result.ok) return { ok: false, code: 'db_error', error: result.error ?? 'No se pudo sincronizar la llave.' };
+    synced += result.changed;
+  }
+  return { ok: true, synced, warnings };
 }
 
 // ─── scheduling ─────────────────────────────────────────────────────────

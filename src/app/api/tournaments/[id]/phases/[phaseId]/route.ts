@@ -7,6 +7,7 @@ import {
   ensurePlayoffBracketMatches,
   getPlayoffTeamsCount,
   isPlayoffPhaseType,
+  readPlayoffBracketMode,
   resolvePlayoffStagesForTeams,
   syncPlayoffStagesToRounds,
 } from '@/lib/server/playoffStages';
@@ -191,7 +192,15 @@ export async function PATCH(
       }
     }
 
-    if (phase && isPlayoffPhaseType(phase.phase_type) && (body.phase_type !== undefined || body.settings !== undefined)) {
+    // En modo automático el cuadro es del constructor: sincronizar las etapas
+    // acá renombraba sus rondas ("Cuartos · Copa Oro" pasaba a "Cuartos") y le
+    // metía slots vacíos adentro con sólo editarle el nombre a la fase.
+    if (
+      phase &&
+      isPlayoffPhaseType(phase.phase_type) &&
+      (body.phase_type !== undefined || body.settings !== undefined) &&
+      readPlayoffBracketMode(phase.settings) !== 'auto'
+    ) {
       const stageConfigs = resolvePlayoffStagesForTeams(phase.settings ?? DEFAULT_PLAYOFF_STAGE_NAMES, getPlayoffTeamsCount(phase.settings));
       const syncResult = await syncPlayoffStagesToRounds(supabase, phaseId, phase.season_id ?? null, stageConfigs);
 
