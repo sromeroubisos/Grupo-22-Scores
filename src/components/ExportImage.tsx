@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
 import { resolveAdminPanel } from '@/lib/auth/roles';
 import { mapDesignSlugToVisualFamily, readActiveExportDesign, type ExportDesignSlug, type ExportVisualFamily } from '@/lib/exports/activeDesign';
+import { EXPORT_PALETTES, type ExportPalette } from '@/lib/exports/exportPalettes';
 import { ratingScaleColor, TINTA as RATING_INK } from '@/lib/matches/ratingScale';
 import {
     EXPORT_DESIGN_CUSTOMIZATION_EVENT,
@@ -494,14 +495,6 @@ type OverflowCrestOptions = {
     showFrame?: boolean;
 };
 
-type ExportPalette = {
-    id: string;
-    name: string;
-    description: string;
-    bg: string;
-    accent: string;
-};
-
 type ExportTimeZonePreset = {
     id: string;
     city: string;
@@ -619,15 +612,6 @@ const LOCAL_EXPORT_FONTS: LocalExportFont[] = [
             '/fonts/dharma-gothic-heavy.woff',
         ],
     },
-];
-const EXPORT_PALETTES: ExportPalette[] = [
-    { id: 'g22-dark', name: 'G22 Dark', description: 'Carbono y verde marca', bg: '#0a0a0b', accent: '#00a365' },
-    { id: 'g22-light', name: 'G22 Light', description: 'Claro con acento marca', bg: '#f8fafc', accent: '#00a365' },
-    { id: 'rugby-navy', name: 'Rugby Navy', description: 'Azul profundo y cian', bg: '#0f172a', accent: '#38bdf8' },
-    { id: 'crimson-night', name: 'Crimson Night', description: 'Grafito con rojo intenso', bg: '#111827', accent: '#ef4444' },
-    { id: 'gold-ink', name: 'Gold Ink', description: 'Negro con dorado editorial', bg: '#161616', accent: '#eab308' },
-    { id: 'silver-sky', name: 'Silver Sky', description: 'Blanco con azul limpio', bg: '#ffffff', accent: '#2563eb' },
-    { id: 'ranking-navy', name: 'Ranking Navy', description: 'Azul profundo con puntos dorados', bg: '#050b1f', accent: '#12297d' },
 ];
 const DEFAULT_PALETTE = EXPORT_PALETTES[0];
 

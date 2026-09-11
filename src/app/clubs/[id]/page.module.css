@@ -1070,6 +1070,286 @@
     font-size: 0.7rem;
 }
 
+/* Colores del mano a mano (solo quien gestiona): paleta + fondo/acento propios,
+   con la vista previa real del export al lado. */
+.rivalColorToggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.rivalColorToggle svg {
+    transition: transform var(--mo-fast) var(--mo-ease-quart);
+}
+
+.rivalColorToggle[aria-expanded='true'] {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.rivalColorToggle[aria-expanded='true'] svg {
+    transform: rotate(180deg);
+}
+
+.rivalColorSwatch {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--swatch-bg) 0 55%, var(--swatch-accent) 55% 100%);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-text-primary) 22%, transparent);
+}
+
+.rivalColorPanel {
+    display: grid;
+    grid-template-columns: minmax(170px, 230px) minmax(0, 1fr);
+    align-items: start;
+    gap: 18px;
+    margin: -2px 0 14px;
+    padding: 14px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    animation: rivalColorPanelIn var(--mo-fast) var(--mo-ease-quart);
+}
+
+@keyframes rivalColorPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.rivalColorPreview {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    max-width: 100%;
+    overflow: hidden;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+}
+
+.rivalColorPreview canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transition: opacity var(--mo-fast) var(--mo-ease-quart);
+}
+
+.rivalColorPreview[data-status='loading'] canvas,
+.rivalColorPreview[data-status='error'] canvas {
+    opacity: 0;
+}
+
+.rivalColorPreviewNote {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    color: var(--color-text-secondary);
+    font-size: 0.72rem;
+    text-align: center;
+}
+
+.rivalColorControls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.rivalColorLabel {
+    color: var(--color-text-secondary);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.rivalPaletteGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.rivalPaletteOption {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    min-height: 40px;
+    padding: 0 12px;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color var(--mo-fast) var(--mo-ease-quart),
+                background-color var(--mo-fast) var(--mo-ease-quart),
+                transform var(--mo-fast) var(--mo-ease-quart);
+}
+
+.rivalPaletteOption>span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rivalPaletteOption .rivalColorSwatch {
+    width: 20px;
+    height: 20px;
+}
+
+.rivalPaletteOption:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
+}
+
+.rivalPaletteOption:active {
+    transform: scale(0.97);
+}
+
+.rivalPaletteOption[aria-checked='true'] {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+.rivalPaletteOption:focus-visible,
+.rivalColorInput:focus-within,
+.rivalColorReset:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.rivalColorInputs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.rivalColorInput {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 5px 12px 5px 5px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.rivalColorInput input[type='color'] {
+    width: 34px;
+    height: 34px;
+    flex: none;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.rivalColorInput input[type='color']::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.rivalColorInput input[type='color']::-webkit-color-swatch {
+    border: 1px solid color-mix(in srgb, var(--color-text-primary) 22%, transparent);
+    border-radius: 8px;
+}
+
+.rivalColorInput input[type='color']::-moz-color-swatch {
+    border: 1px solid color-mix(in srgb, var(--color-text-primary) 22%, transparent);
+    border-radius: 8px;
+}
+
+.rivalColorInput>span {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.rivalColorInput strong {
+    font-size: 0.74rem;
+}
+
+.rivalColorInput code {
+    color: var(--color-text-secondary);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.68rem;
+}
+
+.rivalColorFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+}
+
+.rivalColorFooter small {
+    color: var(--color-text-secondary);
+    font-size: 0.7rem;
+}
+
+.rivalColorReset {
+    min-height: 32px;
+    padding: 0 12px;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--history-ink);
+    font: inherit;
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.rivalColorReset:hover:enabled {
+    border-color: var(--color-accent);
+}
+
+.rivalColorReset:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+@media (max-width: 600px) {
+    .rivalColorPanel {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 12px;
+    }
+
+    .rivalColorPreview {
+        width: min(100%, 190px);
+        justify-self: center;
+    }
+
+    .rivalPaletteGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 360px) {
+    .rivalColorInputs {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Los partidos del rival van en su propia tarjeta */
 .rivalDetail>.historySeasonBody {
     padding: 6px 8px;
@@ -1707,8 +1987,15 @@
     .rivalCards>button,
     .rivalTable tbody tr,
     .historyMatchLine,
-    .historySkeleton>div {
+    .historySkeleton>div,
+    .rivalColorPanel {
         animation: none;
+    }
+
+    .rivalColorToggle svg,
+    .rivalColorPreview canvas,
+    .rivalPaletteOption {
+        transition: none;
     }
 
     .historySectionTabs button,

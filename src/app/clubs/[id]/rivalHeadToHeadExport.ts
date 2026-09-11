@@ -13,9 +13,14 @@ import {
     hexToRGBA,
     loadImage,
 } from '@/components/ExportImage';
+import { EXPORT_PALETTES } from '@/lib/exports/exportPalettes';
 import { APP_TIMEZONE } from '@/lib/timezone';
 
 export type RivalExportFormat = '4:5' | '9:16';
+
+/** Fondo y acento del mano a mano. Quien gestiona los elige; el resto exporta
+ * siempre con la paleta G22 Dark. */
+export type RivalExportColors = { bg: string; accent: string };
 
 export type RivalHeadToHeadMatch = {
     date: string;
@@ -38,11 +43,36 @@ export type RivalHeadToHeadData = {
 };
 
 // El mano a mano habla el mismo idioma visual que los exports de posiciones,
-// fixtures y resultados: paleta G22 Dark, píldora de título en el acento,
-// paneles de superficie con filas, y el pie "Info aportada por: G22 Scores".
+// fixtures y resultados: paleta G22 Dark por defecto, píldora de título en el
+// acento, paneles de superficie con filas, y el pie "Info aportada por: G22 Scores".
 // Los datos son NEUTRALES: cada métrica existe para los dos clubes por igual
 // (nada de "a favor / en contra" ni rachas desde la óptica de uno solo).
-const PALETTE = { bg: '#0a0a0b', accent: '#00a365' };
+const DEFAULT_COLORS: RivalExportColors = {
+    bg: EXPORT_PALETTES[0].bg,
+    accent: EXPORT_PALETTES[0].accent,
+};
+
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+
+function resolveColors(colors: RivalExportColors | undefined): RivalExportColors {
+    return {
+        bg: colors && HEX_COLOR.test(colors.bg) ? colors.bg : DEFAULT_COLORS.bg,
+        accent: colors && HEX_COLOR.test(colors.accent) ? colors.accent : DEFAULT_COLORS.accent,
+    };
+}
+
+function relativeLuminance(hex: string): number {
+    const channel = (offset: number) => {
+        const value = parseInt(hex.slice(offset, offset + 2), 16) / 255;
+        return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    };
+    return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
+}
+
+function contrastRatio(a: string, b: string): number {
+    const [light, dark] = [relativeLuminance(a), relativeLuminance(b)].sort((x, y) => y - x);
+    return (light + 0.05) / (dark + 0.05);
+}
 
 function formatLongDate(value: string | undefined): string {
     if (!value) return '—';
@@ -147,6 +177,7 @@ async function drawRivalHeadToHead(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
     data: RivalHeadToHeadData,
+    palette: RivalExportColors,
 ): Promise<void> {
     await ensureExportFonts();
     const [teamLogo, rivalLogo, brandLogo] = await Promise.all([
@@ -169,13 +200,17 @@ async function drawRivalHeadToHead(
     const W = canvas.width;
     const H = canvas.height;
     const isStory = H > 1500;
-    const isDark = getContrastColor(PALETTE.bg) === '#ffffff';
+    const isDark = getContrastColor(palette.bg) === '#ffffff';
     const textColor = getTextColor(isDark);
     const mutedColor = getMutedColor(isDark, 0.68);
     const softColor = getMutedColor(isDark, 0.1);
-    const accent = PALETTE.accent;
+    const accent = palette.accent;
+    // El acento pinta la píldora (que lleva su propio color de texto) y un solo
+    // rótulo sobre el fondo. Con colores a elección, ese rótulo puede quedar
+    // ilegible (acento oscuro sobre fondo oscuro): ahí vuelve al color de texto.
+    const accentInk = contrastRatio(accent, palette.bg) >= 3 ? accent : textColor;
 
-    drawBackdrop(ctx, canvas, PALETTE.bg, accent, isDark);
+    drawBackdrop(ctx, canvas, palette.bg, accent, isDark);
     drawCenteredPill(
         ctx,
         W / 2,
@@ -338,7 +373,7 @@ async function drawRivalHeadToHead(
         ctx.save();
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = accent;
+        ctx.fillStyle = accentInk;
         ctx.font = `800 ${isStory ? 19 : 17}px ${FONT_BODY}`;
         ctx.fillText('ÚLTIMOS CRUCES', panelX + 26, listY + listHeaderH / 2 + 2);
         ctx.strokeStyle = softColor;
@@ -449,23 +484,55 @@ function slugify(value: string): string {
 }
 
 /**
- * Genera el PNG y lo entrega: hoja de compartir del sistema si el navegador
- * puede compartir archivos, descarga directa si no.
+ * Dibuja el mano a mano en un canvas dado, al tamaño real del formato. Lo usa
+ * la vista previa del selector de colores: es el mismo dibujo que se exporta,
+ * así lo que se ve es lo que sale.
  */
-export async function shareRivalHeadToHead(data: RivalHeadToHeadData, format: RivalExportFormat): Promise<'shared' | 'downloaded'> {
-    const canvas = document.createElement('canvas');
+export async function renderRivalHeadToHead(
+    canvas: HTMLCanvasElement,
+    data: RivalHeadToHeadData,
+    format: RivalExportFormat,
+    colors?: RivalExportColors,
+): Promise<void> {
     canvas.width = 1080;
     canvas.height = format === '9:16' ? 1920 : 1350;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('El navegador no permitió dibujar la imagen.');
+    await drawRivalHeadToHead(ctx, canvas, data, resolveColors(colors));
+}
 
-    await drawRivalHeadToHead(ctx, canvas, data);
+// La hoja de compartir es cosa del celular y la tablet, donde la imagen va
+// directo a WhatsApp o Instagram. En la compu `navigator.share` TAMBIÉN existe
+// (Chrome y Edge abren la hoja de Windows, Safari la de macOS) y ahí lo que se
+// espera es el archivo en Descargas. Se decide por el puntero principal —una
+// notebook táctil sigue siendo de mouse— y por el user agent, que cubre al
+// iPad que se presenta como Mac.
+function prefersShareSheet(): boolean {
+    if (typeof window === 'undefined') return false;
+    const coarsePointer = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+    const mobileAgent = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+        || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+    return coarsePointer || mobileAgent;
+}
+
+/**
+ * Genera el PNG y lo entrega: en el celular, hoja de compartir del sistema si
+ * el navegador puede compartir archivos; en la compu (o si no se puede
+ * compartir), descarga directa.
+ */
+export async function shareRivalHeadToHead(
+    data: RivalHeadToHeadData,
+    format: RivalExportFormat,
+    colors?: RivalExportColors,
+): Promise<'shared' | 'downloaded'> {
+    const canvas = document.createElement('canvas');
+    await renderRivalHeadToHead(canvas, data, format, colors);
     const blob = await canvasToBlob(canvas);
     const fileName = `mano-a-mano-${slugify(data.teamName)}-vs-${slugify(data.rivalName)}-${format === '4:5' ? '4x5' : '9x16'}.png`;
     const file = new File([blob], fileName, { type: 'image/png' });
 
     const nav = navigator as Navigator & { canShare?: (payload: ShareData) => boolean };
-    if (typeof nav.share === 'function' && typeof nav.canShare === 'function' && nav.canShare({ files: [file] })) {
+    if (prefersShareSheet() && typeof nav.share === 'function' && typeof nav.canShare === 'function' && nav.canShare({ files: [file] })) {
         try {
             await nav.share({ files: [file] });
             return 'shared';

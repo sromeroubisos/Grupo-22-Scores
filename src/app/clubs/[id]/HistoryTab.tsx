@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import useSWR from 'swr';
@@ -17,7 +17,10 @@ import {
     Trophy,
 } from 'lucide-react';
 import { APP_TIMEZONE } from '@/lib/timezone';
-import { shareRivalHeadToHead, type RivalExportFormat } from './rivalHeadToHeadExport';
+import { useAuth } from '@/context/AuthContext';
+import { resolveAdminPanel } from '@/lib/auth/roles';
+import type { RivalExportFormat, RivalHeadToHeadData } from './rivalHeadToHeadExport';
+import RivalExportColorPanel, { useRivalExportColors } from './RivalExportColorPanel';
 import GuestExportInvite, { useGuestExportInvite } from '@/components/GuestExportInvite';
 import styles from './page.module.css';
 
@@ -234,6 +237,13 @@ export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId
     const [exportingFormat, setExportingFormat] = useState<RivalExportFormat | null>(null);
     const [exportError, setExportError] = useState<string | null>(null);
     const guestInvite = useGuestExportInvite();
+    // Los colores del mano a mano los elige quien gestiona algo, con el mismo
+    // criterio que el resto de los exports (`resolveAdminPanel`). El hincha y el
+    // invitado exportan siempre con G22 Dark.
+    const { user } = useAuth();
+    const canCustomizeExport = Boolean(resolveAdminPanel(user?.role, user?.memberships));
+    const [exportColors, setExportColors] = useRivalExportColors(canCustomizeExport);
+    const [showExportColors, setShowExportColors] = useState(false);
 
     useEffect(() => { setExportError(null); }, [selectedRivalId]);
 
@@ -368,28 +378,37 @@ export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId
 
     const hasFilters = sport !== 'all' || season !== 'all' || tournament !== 'all' || category !== 'all' || venue !== 'all';
 
+    // Lo que dibuja el mano a mano: lo usan el export y la vista previa de
+    // colores, así las dos cosas salen del mismo payload.
+    const rivalExportData = useMemo((): RivalHeadToHeadData | null => {
+        const reference = selectedRival?.matches[0];
+        if (!selectedRival || !reference) return null;
+        return {
+            teamName,
+            teamLogo: reference.isHome ? reference.home.logo : reference.away.logo,
+            rivalName: selectedRival.name,
+            rivalLogo: selectedRival.logo,
+            scoreTerm,
+            matches: selectedRival.matches.map((match) => ({
+                date: match.date,
+                isHome: match.isHome,
+                outcome: match.outcome,
+                pointsFor: match.pointsFor,
+                pointsAgainst: match.pointsAgainst,
+                tournamentName: match.tournamentName,
+            })),
+        };
+    }, [scoreTerm, selectedRival, teamName]);
+
     const handleRivalExport = async (format: RivalExportFormat) => {
-        if (!selectedRival || exportingFormat) return;
-        const reference = selectedRival.matches[0];
-        if (!reference) return;
+        if (!rivalExportData || exportingFormat) return;
         setExportingFormat(format);
         setExportError(null);
         try {
-            await shareRivalHeadToHead({
-                teamName,
-                teamLogo: reference.isHome ? reference.home.logo : reference.away.logo,
-                rivalName: selectedRival.name,
-                rivalLogo: selectedRival.logo,
-                scoreTerm,
-                matches: selectedRival.matches.map((match) => ({
-                    date: match.date,
-                    isHome: match.isHome,
-                    outcome: match.outcome,
-                    pointsFor: match.pointsFor,
-                    pointsAgainst: match.pointsAgainst,
-                    tournamentName: match.tournamentName,
-                })),
-            }, format);
+            // El mano a mano dibuja con el motor del export, que es la pieza mas
+            // pesada del bundle. Se pide recien al apretar, no al abrir la ficha.
+            const { shareRivalHeadToHead } = await import('./rivalHeadToHeadExport');
+            await shareRivalHeadToHead(rivalExportData, format, canCustomizeExport ? exportColors : undefined);
             // El mano a mano tambien lo baja un invitado: mismo cartel que el
             // resto de los exports, y recien cuando la imagen ya salio.
             guestInvite.notifyExportFinished();
@@ -573,8 +592,33 @@ export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId
                                 <button type="button" className={styles.rivalExportButton} disabled={exportingFormat !== null} onClick={() => handleRivalExport('9:16')}>
                                     {exportingFormat === '9:16' ? 'Generando…' : '9:16 · Historia'}
                                 </button>
+                                {canCustomizeExport && (
+                                    <button
+                                        type="button"
+                                        className={`${styles.rivalExportButton} ${styles.rivalColorToggle}`}
+                                        aria-expanded={showExportColors}
+                                        aria-controls="rival-export-colors"
+                                        onClick={() => setShowExportColors((open) => !open)}
+                                    >
+                                        <span
+                                            className={styles.rivalColorSwatch}
+                                            style={{ '--swatch-bg': exportColors.bg, '--swatch-accent': exportColors.accent } as CSSProperties}
+                                            aria-hidden="true"
+                                        />
+                                        Colores
+                                        <ChevronDown size={14} aria-hidden="true" />
+                                    </button>
+                                )}
                                 {exportError && <small role="alert">{exportError}</small>}
                             </div>
+                            {canCustomizeExport && showExportColors && rivalExportData && (
+                                <RivalExportColorPanel
+                                    id="rival-export-colors"
+                                    data={rivalExportData}
+                                    colors={exportColors}
+                                    onChange={setExportColors}
+                                />
+                            )}
                             <GuestExportInvite isOpen={guestInvite.isOpen} onClose={guestInvite.close} />
                             <div className={styles.historySeasonBody}>{selectedRival.matches.map((match) => <MatchLine key={match.id} match={match} />)}</div>
                         </div>
