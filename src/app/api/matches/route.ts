@@ -5,6 +5,7 @@ import {
     getFlashScoreLiveMatches,
     isExternalMatchesListDateSupported,
     isFlashScoreMatchesListDateSupported,
+    getVirtualRugbySevensLiveMatches,
     getVirtualRugbySevensMatches,
     wantsVirtualRugbySevens,
 } from '@/lib/services/flashscore';
@@ -1473,7 +1474,14 @@ async function computeMatchesPayload(
                 }
 
                 const externalFetchStartedAt = Date.now();
-                const liveMatches = livePollGated ? [] : await getFlashScoreLiveMatches(sport);
+                // El gate lee `external_match_cache`, y los proveedores
+                // virtuales de seven no escriben ahí: un 'skip' habla de
+                // FlashScore, nunca de ellos. Gateado, se los pide igual (es un
+                // JSON por fuente, cacheado 10 s-5 min); si no, ya vienen
+                // adentro de getFlashScoreLiveMatches y no se piden dos veces.
+                const liveMatches = livePollGated
+                    ? (wantsVirtualRugbySevens(sport) ? await getVirtualRugbySevensLiveMatches() : [])
+                    : await getFlashScoreLiveMatches(sport);
                 externalItemsCount = liveMatches?.length || 0;
                 if (trace) {
                     const durationMs = trackDuration(trace.metrics, 'external_fetch_ms', externalFetchStartedAt);

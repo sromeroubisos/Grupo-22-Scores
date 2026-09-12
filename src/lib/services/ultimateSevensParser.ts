@@ -241,11 +241,22 @@ function competitionOfCategory(category: string): Us7CompetitionKey | null {
 // --------------------------------------------------------------------------
 
 /**
- * Cuánto antes del horario se acepta un partido "en juego". La mesa arranca
- * un par de minutos antes o después; un partido EN VIVO con el inicio a horas
- * de distancia no es un partido, es la mesa probando el sistema.
+ * Cuánto antes del horario se acepta un partido "en juego". Un partido EN VIVO
+ * con el inicio a horas de distancia no es un partido: es la mesa probando el
+ * sistema.
+ *
+ * La tolerancia arrancó en 30 minutos y se quedó corta en Cardiff (12/09): la
+ * etapa corrió ~40 minutos ADELANTADA al fixture publicado, así que TODO
+ * partido en juego caía afuera de la ventana y la pantalla lo mostraba
+ * programado y sin marcador mientras se jugaba. La jornada entera llegaba con
+ * el atraso del reloj publicado.
+ *
+ * El ensayo que la ventana tiene que filtrar es de OTRO DÍA (el 11/09 la API
+ * publicaba `Clan Taran 22-22 Sol Feroz` en `Live` para un partido del 12/09),
+ * así que tres horas lo siguen dejando afuera y dejan pasar una etapa corrida:
+ * la mesa adelanta minutos, no medio día.
  */
-const EARLY_START_TOLERANCE_MS = 30 * 60 * 1000;
+const EARLY_START_TOLERANCE_MS = 3 * 60 * 60 * 1000;
 /**
  * Un seven dura 14-20 minutos. Con marcador, un estado que no se reconoce y
  * una hora desde el inicio, el partido terminó.
@@ -657,16 +668,25 @@ export function buildUs7Brackets(fixtures: Us7Fixture[]): Us7Bracket[] {
 // Política de refresco
 // --------------------------------------------------------------------------
 
-export const US7_TTL_HOT_SECONDS = 20;
+export const US7_TTL_HOT_SECONDS = 10;
 export const US7_TTL_IDLE_SECONDS = 300;
 
-const HOT_BEFORE_MS = 15 * 60 * 1000;
-const HOT_AFTER_MS = 60 * 60 * 1000;
+/**
+ * La ventana caliente alrededor del horario publicado. Es ANCHA a propósito:
+ * un seven de etapa dura la tarde y el fixture publicado se corre (en Cardiff
+ * la jornada fue ~40 minutos adelantada), así que una ventana ajustada al
+ * horario deja la lista tibia justo mientras se juega. Con esto la etapa entera
+ * queda caliente, que es lo que cuesta poco: un JSON de 17 KB.
+ */
+const HOT_BEFORE_MS = 90 * 60 * 1000;
+const HOT_AFTER_MS = 3 * 60 * 60 * 1000;
 
 /**
- * Cada cuánto releer la lista. Caliente (20 s) con un partido en juego o en la
+ * Cada cuánto releer la lista. Caliente (10 s) con un partido en juego o en la
  * ventana de su horario; tibia (5 min) el resto: fuera de las etapas la liga
- * no se mueve. `nowMs` entra por parámetro para poder probarlo.
+ * no se mueve. Un seven dura 14 minutos y un try cambia el marcador cada dos:
+ * diez segundos es el techo de atraso que la pantalla puede mostrar.
+ * `nowMs` entra por parámetro para poder probarlo.
  */
 export function us7RefreshTtlSeconds(fixtures: Us7Fixture[], nowMs: number): number {
     for (const fixture of fixtures) {

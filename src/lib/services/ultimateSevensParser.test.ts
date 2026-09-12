@@ -131,9 +131,16 @@ test('en el horario, Live con marcador es en juego y el marcador cuenta', () => 
     assert.equal(fixture?.away.score, 0);
 });
 
-test('la mesa puede arrancar unos minutos antes del horario', () => {
-    assert.equal(classifyUs7Status('Live', true, '2026-09-12T18:00:00.000Z', KICKOFF - 10 * MINUTO), 'live');
-    assert.equal(classifyUs7Status('Live', true, '2026-09-12T18:00:00.000Z', KICKOFF - 45 * MINUTO), 'scheduled');
+test('la etapa puede correr adelantada al fixture publicado', () => {
+    const iso = '2026-09-12T18:00:00.000Z';
+    assert.equal(classifyUs7Status('Live', true, iso, KICKOFF - 10 * MINUTO), 'live');
+    // Cardiff (12/09) corrió ~40 minutos adelantada a su propio fixture: con la
+    // tolerancia vieja de 30 minutos, el partido en juego se mostraba
+    // programado y sin marcador mientras se jugaba.
+    assert.equal(classifyUs7Status('Live', true, iso, KICKOFF - 40 * MINUTO), 'live');
+    assert.equal(classifyUs7Status('Result', true, iso, KICKOFF - 40 * MINUTO), 'final');
+    // Tres horas sigue siendo el techo: más lejos que eso es la mesa probando.
+    assert.equal(classifyUs7Status('Live', true, iso, KICKOFF - 4 * 60 * MINUTO), 'scheduled');
 });
 
 test('las formas habituales del cierre se leen como final', () => {
@@ -334,7 +341,11 @@ test('refresco: caliente alrededor del horario, tibio fuera de las etapas', () =
     const fixtures = parseUs7Fixtures([partido()], UN_DIA_ANTES);
     assert.equal(us7RefreshTtlSeconds(fixtures, UN_DIA_ANTES), US7_TTL_IDLE_SECONDS);
     assert.equal(us7RefreshTtlSeconds(fixtures, KICKOFF - 10 * MINUTO), US7_TTL_HOT_SECONDS);
-    assert.equal(us7RefreshTtlSeconds(fixtures, KICKOFF + 2 * 60 * MINUTO), US7_TTL_IDLE_SECONDS);
+    // La ventana cubre la etapa entera, no el partido: con el fixture corrido,
+    // una ventana ajustada dejaba la lista tibia justo mientras se jugaba.
+    assert.equal(us7RefreshTtlSeconds(fixtures, KICKOFF - 60 * MINUTO), US7_TTL_HOT_SECONDS);
+    assert.equal(us7RefreshTtlSeconds(fixtures, KICKOFF + 2 * 60 * MINUTO), US7_TTL_HOT_SECONDS);
+    assert.equal(us7RefreshTtlSeconds(fixtures, KICKOFF + 4 * 60 * MINUTO), US7_TTL_IDLE_SECONDS);
 
     const live = parseUs7Fixtures([partido({
         status: 'Live',
