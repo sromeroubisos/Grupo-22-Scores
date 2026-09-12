@@ -56,14 +56,14 @@ const CARGAS: Record<string, Carga> = {
     uruguay: {
         torneo: '271638cc-3351-42ce-81bd-ef091e82515d',
         fecha: '2026-09-12',
-        razon: 'Clausura - Súper URU de Clubes. El bonus ofensivo va declarado: la fuente da el marcador, no los tries.',
+        razon: 'Parte de Rugby Clubes (Clausura - 1ra Top 12): BO/BD declarados por la fuente.',
         todoAMano: true,
         resultados: [
-            { home: 'psg', away: 'montevideo-c-c', homeScore: 7, awayScore: 33 },
+            { home: 'psg', away: 'montevideo-c-c', homeScore: 7, awayScore: 33, ofensivo: 'away' },
             { home: 'old-christians-club', away: 'carrasco-polo', homeScore: 17, awayScore: 28 },
             { home: 'old-boys-girls-club', away: 'trebol-de-paysandu', homeScore: 15, awayScore: 13 },
-            { home: 'club-seminario', away: 'los-cuervos', homeScore: 24, awayScore: 52 },
-            { home: 'lobos-pde', away: 'circulo-de-tenis', homeScore: 35, awayScore: 7 },
+            { home: 'club-seminario', away: 'los-cuervos', homeScore: 22, awayScore: 52, ofensivo: 'away' },
+            { home: 'lobos-pde', away: 'circulo-de-tenis', homeScore: 35, awayScore: 7, ofensivo: 'home' },
             { home: 'champagnat', away: 'ceibos-club', homeScore: 22, awayScore: 12 },
         ],
     },
