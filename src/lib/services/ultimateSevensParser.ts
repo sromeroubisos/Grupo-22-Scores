@@ -14,16 +14,15 @@
  * 11/09. Las tablas NO están en la REST: salen de `admin-ajax.php` con un
  * nonce de la página, y el 11/09 decían "No standings available".
  *
- * Las horas vienen SIN huso y son la hora LOCAL DE LA SEDE, aunque la página
- * las rotule "GMT" (en el Reino Unido se le dice GMT a la hora de Londres todo
- * el año). Medido el 11/09 contra la ticketera, que sí publica el huso:
+ * Las horas de los partidos vienen SIN huso, y aunque la página las rotule
+ * "GMT" son hora de EUROPA CENTRAL para todas las etapas (ver
+ * `US7_FIXTURE_TIME_ZONE`, medido con Cardiff en juego). Ojo: el horario de
+ * las ETAPAS (`/tournaments`, "KICK OFF 15:00 GMT" en la portada) sí es el de
+ * la sede, como confirma la ticketera (Cardiff show 15:00+01:00). Son dos
+ * cargas distintas y no se pueden leer con la misma regla.
  *
- *   Cardiff   sitio "KICK OFF 15:00 GMT"   Fever: puertas 13:30+01:00, show 15:00
- *   Londres   sitio 17:30                  Fever: puertas 16:30+01:00, show 17:30
- *   Biarritz  sitio 18:30                  Fever: puertas 17:00+02:00 (Francia)
- *
- * Leerlas como GMT de verdad corría todo Cardiff una hora tarde; leerlas todas
- * como hora de Londres correría Biarritz otra hora más.
+ * La cronología y las estadísticas de cada partido no están en la REST: salen
+ * de su página del match centre (`ultimateSevensMatchCentre.ts`).
  *
  * Este módulo es PURO: entra JSON, sale dato. Sin red, sin caché, sin DOM. Es
  * lo que se prueba con `node --test` (`ultimateSevensParser.test.ts`).
@@ -163,21 +162,26 @@ function toInt(value: unknown): number | null {
 }
 
 /**
- * El huso de cada sede, por el nombre de la etapa. Una etapa nueva que no esté
- * acá cae en Londres: el operador de la liga es británico y su "GMT" es la hora
- * de Londres. Sumar la sede cuando la liga anuncie una fuera del Reino Unido.
+ * El huso de las horas de `/fixtures`: Europa central (UTC+2 en septiembre),
+ * para TODAS las etapas, no el de la sede.
+ *
+ * La primera lectura fue "GMT = hora de Londres" y después "hora de la sede",
+ * y las dos corrían Cardiff una hora tarde. Medido el 12/09, con la etapa en
+ * juego:
+ *
+ *   - DAZN arrancó la transmisión "at 3.30pm BST" y la noticia del sorteo pone
+ *     el primer partido (Clan Taran v Sol Feroz) a las "3.30pm": la API lo
+ *     tiene a las 16:35. Es la misma hora, en UTC+2.
+ *   - A las 18:29 UTC la final masculina (API 20:12) ya iba 5-19 y la crónica
+ *     oficial nombraba al campeón. Leída como Londres, faltaban 43 minutos.
+ *   - "La etapa corre 40 minutos adelantada" (lo que se anotó toda la tarde)
+ *     era este error: un seven televisado no se adelanta, se atrasa.
+ *
+ * Las etapas de `/tournaments` (`startDateTime`) sí vienen en hora de la sede
+ * —Cardiff 15:00 = show de Fever 15:00+01:00—: son dos cargas distintas. Ese
+ * endpoint no se usa acá.
  */
-const STAGE_TIME_ZONES: Record<string, string> = {
-    cardiff: 'Europe/London',
-    london: 'Europe/London',
-    biarritz: 'Europe/Paris',
-    madrid: 'Europe/Madrid',
-};
-export const US7_DEFAULT_TIME_ZONE = 'Europe/London';
-
-export function us7StageTimeZone(stageName: string): string {
-    return STAGE_TIME_ZONES[stageName.trim().toLowerCase()] ?? US7_DEFAULT_TIME_ZONE;
-}
+export const US7_FIXTURE_TIME_ZONE = 'Europe/Madrid';
 
 /** Cuánto adelanta el reloj de pared de `timeZone` a UTC en ese instante, en ms. */
 function zoneOffsetMs(instantMs: number, timeZone: string): number {
@@ -202,7 +206,7 @@ function zoneOffsetMs(instantMs: number, timeZone: string): number {
  * errarle en el día del cambio de horario. Si algún día la API empieza a mandar
  * el huso, se respeta el que venga.
  */
-export function parseUs7DateTime(raw: string, timeZone: string = US7_DEFAULT_TIME_ZONE): string | null {
+export function parseUs7DateTime(raw: string, timeZone: string = US7_FIXTURE_TIME_ZONE): string | null {
     const trimmed = raw.trim().replace(' ', 'T');
     const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/.exec(trimmed);
     if (!match) return null;
@@ -245,16 +249,14 @@ function competitionOfCategory(category: string): Us7CompetitionKey | null {
  * con el inicio a horas de distancia no es un partido: es la mesa probando el
  * sistema.
  *
- * La tolerancia arrancó en 30 minutos y se quedó corta en Cardiff (12/09): la
- * etapa corrió ~40 minutos ADELANTADA al fixture publicado, así que TODO
- * partido en juego caía afuera de la ventana y la pantalla lo mostraba
- * programado y sin marcador mientras se jugaba. La jornada entera llegaba con
- * el atraso del reloj publicado.
- *
- * El ensayo que la ventana tiene que filtrar es de OTRO DÍA (el 11/09 la API
- * publicaba `Clan Taran 22-22 Sol Feroz` en `Live` para un partido del 12/09),
- * así que tres horas lo siguen dejando afuera y dejan pasar una etapa corrida:
- * la mesa adelanta minutos, no medio día.
+ * La tolerancia arrancó en 30 minutos y en Cardiff (12/09) tapó la jornada
+ * entera: cada partido en juego parecía 40 minutos adelantado y se mostraba
+ * programado y sin marcador. No era la etapa, era el huso mal leído (ver
+ * `US7_FIXTURE_TIME_ZONE`); con la hora bien leída la etapa corrió unos
+ * minutos ATRASADA. La tolerancia queda ancha igual, porque lo que tiene que
+ * filtrar es de OTRO DÍA (el 11/09 la API publicaba `Clan Taran 22-22 Sol
+ * Feroz` en `Live` para un partido del 12/09): tres horas lo dejan afuera y no
+ * dependen de que el horario publicado se cumpla.
  */
 const EARLY_START_TOLERANCE_MS = 3 * 60 * 60 * 1000;
 /**
@@ -262,11 +264,20 @@ const EARLY_START_TOLERANCE_MS = 3 * 60 * 60 * 1000;
  * una hora desde el inicio, el partido terminó.
  */
 const SETTLED_AFTER_MS = 60 * 60 * 1000;
+/**
+ * Un `Live` vencido. La mesa no siempre cierra el partido: la final masculina
+ * de Cardiff (31717) siguió `Live 5-19` más de media hora después de que la
+ * crónica oficial nombrara al campeón. Diez minutos más golden point y el
+ * atraso de la etapa no llegan a hora y media: pasado eso, con marcador, el
+ * partido terminó y así se muestra.
+ */
+const STALE_LIVE_AFTER_MS = 90 * 60 * 1000;
 
 /**
- * Traduce el `status` de la API. Solo se VIERON `Fixture` y `Live`: el primer
- * partido se va a cerrar en Cardiff. Para el cierre se reconocen las formas
- * habituales, y un estado desconocido con marcador se decide por el reloj.
+ * Traduce el `status` de la API: `Fixture`, `Live` y `Result` (visto en
+ * Cardiff). Para el cierre se reconocen además las formas habituales, un
+ * estado desconocido con marcador se decide por el reloj, y un `Live` que la
+ * mesa se olvidó de cerrar vence a la hora y media.
  *
  * Antes del horario (menos la tolerancia) todo es "programado" y el marcador
  * no cuenta: el 11/09, un día antes de Cardiff, la API publicaba
@@ -287,7 +298,9 @@ export function classifyUs7Status(
     if (!Number.isNaN(startsAt) && nowMs < startsAt - EARLY_START_TOLERANCE_MS) return 'scheduled';
 
     if (/result|full.?time|^ft$|final|complete|finish|played|ended/.test(token)) return 'final';
-    if (/live|in.?play|half|running|progress|^1st|^2nd/.test(token)) return 'live';
+    if (/live|in.?play|half|running|progress|^1st|^2nd/.test(token)) {
+        return hasScore && !Number.isNaN(startsAt) && nowMs >= startsAt + STALE_LIVE_AFTER_MS ? 'final' : 'live';
+    }
     if (token === 'fixture' || token === 'scheduled' || token === 'upcoming' || token === '') {
         return 'scheduled';
     }
@@ -340,7 +353,7 @@ export function parseUs7Fixture(item: unknown, nowMs: number): Us7Fixture | null
     if (!home || !away) return null;
 
     const stageName = asString(record.competition).trim();
-    const startsAtIso = parseUs7DateTime(asString(record.date), us7StageTimeZone(stageName));
+    const startsAtIso = parseUs7DateTime(asString(record.date), US7_FIXTURE_TIME_ZONE);
     const status = asString(record.status).trim();
     const hasScore = home.score !== null && away.score !== null;
     const state = classifyUs7Status(status, hasScore, startsAtIso, nowMs);
@@ -673,9 +686,10 @@ export const US7_TTL_IDLE_SECONDS = 300;
 
 /**
  * La ventana caliente alrededor del horario publicado. Es ANCHA a propósito:
- * un seven de etapa dura la tarde y el fixture publicado se corre (en Cardiff
- * la jornada fue ~40 minutos adelantada), así que una ventana ajustada al
- * horario deja la lista tibia justo mientras se juega. Con esto la etapa entera
+ * un seven de etapa dura la tarde y el fixture publicado se corre (una etapa
+ * se atrasa, y un huso mal leído la corre una hora entera), así que una
+ * ventana ajustada al horario deja la lista tibia justo mientras se juega. Con
+ * esto la etapa entera
  * queda caliente, que es lo que cuesta poco: un JSON de 17 KB.
  */
 const HOT_BEFORE_MS = 90 * 60 * 1000;
