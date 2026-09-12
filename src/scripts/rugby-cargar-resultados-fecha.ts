@@ -23,7 +23,12 @@ dotenv.config({ path: path.join(process.cwd(), '.env.local') });
 
 type Resultado = { home: string; away: string; homeScore: number; awayScore: number; ofensivo?: 'home' | 'away' };
 type Reprogramacion = { home: string; away: string; nuevaFecha: string };
-type Carga = { torneo: string; fecha: string; razon: string; resultados: Resultado[]; reprogramar?: Reprogramacion[] };
+/**
+ * `todoAMano`: para torneos donde el automático no suma bonus (el Uruguayo guarda
+ * las reglas en una forma que el motor no lee). Ahí también el defensivo va
+ * escrito a mano, con la misma cuenta.
+ */
+type Carga = { torneo: string; fecha: string; razon: string; resultados: Resultado[]; reprogramar?: Reprogramacion[]; todoAMano?: boolean };
 
 const CARGAS: Record<string, Carga> = {
     noa: {
@@ -46,6 +51,20 @@ const CARGAS: Record<string, Carga> = {
         reprogramar: [
             { home: 'trelew-r-c', away: 'comodoro-r-c', nuevaFecha: '2026-09-13T15:30:00-03:00' },
             { home: 'chenque-r-c', away: 'draig-goch-r-c', nuevaFecha: '2026-09-13T16:00:00-03:00' },
+        ],
+    },
+    uruguay: {
+        torneo: '271638cc-3351-42ce-81bd-ef091e82515d',
+        fecha: '2026-09-12',
+        razon: 'Clausura - Súper URU de Clubes. El bonus ofensivo va declarado: la fuente da el marcador, no los tries.',
+        todoAMano: true,
+        resultados: [
+            { home: 'psg', away: 'montevideo-c-c', homeScore: 7, awayScore: 33 },
+            { home: 'old-christians-club', away: 'carrasco-polo', homeScore: 17, awayScore: 28 },
+            { home: 'old-boys-girls-club', away: 'trebol-de-paysandu', homeScore: 15, awayScore: 13 },
+            { home: 'club-seminario', away: 'los-cuervos', homeScore: 24, awayScore: 52 },
+            { home: 'lobos-pde', away: 'circulo-de-tenis', homeScore: 35, awayScore: 7 },
+            { home: 'champagnat', away: 'ceibos-club', homeScore: 22, awayScore: 12 },
         ],
     },
 };
@@ -72,7 +91,7 @@ async function main() {
     const clave = process.argv.slice(2).find((a) => !a.startsWith('--')) ?? '';
     const carga = CARGAS[clave];
     if (!carga) { console.error(`Torneo desconocido "${clave}". Opciones: ${Object.keys(CARGAS).join(', ')}`); process.exit(1); }
-    const { torneo, fecha, razon, resultados, reprogramar = [] } = carga;
+    const { torneo, fecha, razon, resultados, reprogramar = [], todoAMano = false } = carga;
 
     const { createAdminClient } = await import('@/lib/supabase/admin');
     const supabase = createAdminClient();
@@ -94,11 +113,11 @@ async function main() {
     const planes = resultados.map((r) => {
         const partido = buscar(r.home, r.away);
         const p = puntos(r);
-        const manual = Boolean(r.ofensivo);
+        const manual = todoAMano || Boolean(r.ofensivo);
         console.log(
             `${r.home} ${r.homeScore}-${r.awayScore} ${r.away}`,
             `| base ${p.home_base_points}/${p.away_base_points} bonus ${p.home_bonus_points}/${p.away_bonus_points}`,
-            manual ? '| MANUAL (ofensivo declarado)' : '| AUTO',
+            r.ofensivo ? '| MANUAL (ofensivo declarado)' : manual ? '| MANUAL' : '| AUTO',
             `| antes: ${partido.status} ${partido.score?.home}-${partido.score?.away}`,
         );
         return { partido, r, p, manual };
