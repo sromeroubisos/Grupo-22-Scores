@@ -601,6 +601,46 @@ test('los ajustes manuales de la fase mueven los puntos del club que nombran', (
     assert.equal(rowOf(table, 'a').total_points, 1, '4 de la victoria menos 3 de quita');
 });
 
+test('el bonus cargado a mano se ve en la columna de bonus, no como ajuste', () => {
+    // Torneo Austral 2026: los partidos entran con `points_autocalculated: false`.
+    // El total cerraba, pero el bonus iba a `adjustments` y la columna BP salía
+    // en 0 para Comodoro, que la Unión publica con 2.
+    const manual = (over: Record<string, unknown>) => match({ points_autocalculated: false, ...over });
+    const table = StandingsEngine.generateTable(
+        [participant('a'), participant('b'), participant('c')],
+        [
+            // a gana 55-31: ofensivo
+            manual({ id: 'm1', home_club_id: 'b', away_club_id: 'a', score: { home: 31, away: 55 }, home_base_points: 0, away_base_points: 4, home_bonus_points: 0, away_bonus_points: 1 }),
+            // c pierde 39-41: defensivo
+            manual({ id: 'm2', home_club_id: 'c', away_club_id: 'b', score: { home: 39, away: 41 }, home_base_points: 0, away_base_points: 4, home_bonus_points: 1, away_bonus_points: 0, date_time: '2026-03-08T18:00:00Z' }),
+            // c pierde por 20 con 2 de bonus: el margen no da defensivo, es ofensivo
+            manual({ id: 'm3', home_club_id: 'a', away_club_id: 'c', score: { home: 40, away: 20 }, home_base_points: 4, away_base_points: 0, home_bonus_points: 0, away_bonus_points: 2, date_time: '2026-03-15T18:00:00Z' }),
+        ],
+        rules({ defensive_bonus_rule: { margin: 7, points: 1 } }),
+    );
+
+    const a = rowOf(table, 'a');
+    assert.equal(a.bonus_offensive, 1);
+    assert.equal(a.adjustments, 0, 'el bonus no es una quita ni un premio de la mesa');
+    assert.equal(a.total_points, 9, '4 + 4 + 1');
+
+    const c = rowOf(table, 'c');
+    assert.equal(c.bonus_defensive, 1, 'perdió 39-41');
+    assert.equal(c.bonus_offensive, 2, 'perdió por 20: el bonus no puede ser defensivo');
+    assert.equal(c.total_points, 3);
+});
+
+test('un bonus manual negativo sigue siendo un ajuste', () => {
+    const table = StandingsEngine.generateTable(
+        AB,
+        [match({ id: 'm1', score: { home: 20, away: 10 }, points_autocalculated: false, home_base_points: 4, away_base_points: 0, home_bonus_points: -2, away_bonus_points: 0 })],
+        rules(),
+    );
+    assert.equal(rowOf(table, 'a').adjustments, -2);
+    assert.equal(rowOf(table, 'a').bonus_offensive, 0);
+    assert.equal(rowOf(table, 'a').total_points, 2);
+});
+
 test('la clasificación marca ascenso y descenso según el reglamento', () => {
     const table = StandingsEngine.generateTable(
         CUATRO,
