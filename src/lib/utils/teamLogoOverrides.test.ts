@@ -1,10 +1,14 @@
 // La bandera de una selección, y sobre todo: DE QUIÉN NO ES.
 //
-// La bandera es del seleccionado MAYOR. "Argentina" la lleva; "Argentina XV",
-// "Argentina 7s" y "Argentina M20" no, porque son equipos distintos —otra
-// categoría, otra rama, otro plantel— y cada uno tiene su propia identidad.
-// La primera versión de esto plegaba los sufijos y le ponía la misma bandera a
-// las once fichas que empiezan con "Argentina": se veía prolijo y era falso.
+// La bandera es del seleccionado MAYOR, de las dos ramas: "Argentina" y
+// "Argentina W" la llevan. "Argentina XV", "Argentina 7s" y "Argentina M20" no,
+// porque son equipos distintos —otra categoría, otro plantel— y cada uno tiene su
+// propia identidad. La primera versión de esto plegaba TODOS los sufijos y le
+// ponía la misma bandera a las once fichas que empiezan con "Argentina": se veía
+// prolijo y era falso.
+//
+// El femenino es la excepción y tiene su propio test, con el caso que la mantiene
+// honesta: "Argentina 7s W" sigue sin bandera, igual que su par de varones.
 //
 // Por eso la mitad de este archivo son casos NEGATIVOS. La coincidencia exacta
 // es la regla, y esto es lo que la mantiene exacta.
@@ -32,9 +36,32 @@ test('un país lleva su bandera, lo escriba quien lo escriba', () => {
 
 test('las ramas de una selección NO se quedan con la bandera del mayor', () => {
     for (const rama of [
-        'Argentina XV', 'Argentina 7s', 'Argentina 7s W', 'Argentina W', 'Argentina A',
+        'Argentina XV', 'Argentina 7s', 'Argentina A',
         'Argentina M20', 'Argentina U21', 'Argentina M18 (1)', 'Argentina FISU',
-        'England XV', 'Wales W', 'Scotland W', 'South Africa 7s', 'New Zealand XV',
+        'England XV', 'South Africa 7s', 'New Zealand XV',
+    ]) {
+        assert.equal(getNationalTeamFlag(rama), null, `${rama} no debería llevar bandera`);
+    }
+});
+
+test('la mayor de mujeres lleva la misma bandera que la de varones', () => {
+    // El femenino no es una rama: es el mismo país. Y llega escrito de cinco
+    // maneras según quién mande el dato.
+    assert.equal(getNationalTeamFlag('Argentina W'), '/logos/selecciones/argentina.png');
+    assert.equal(getNationalTeamFlag('Australia Women'), '/logos/selecciones/australia.png');
+    assert.equal(getNationalTeamFlag('Chile Femenino'), '/logos/selecciones/chile.png');
+    assert.equal(getNationalTeamFlag('España Femenina'), '/logos/selecciones/spain.png');
+    assert.equal(getNationalTeamFlag('Wales (W)'), getNationalTeamFlag('Wales'));
+    assert.equal(getNationalTeamFlag('Sudáfrica Damas'), '/logos/selecciones/south-africa.png');
+    assert.equal(getNationalTeamFlag("New Zealand Women's"), '/logos/selecciones/new-zealand.png');
+});
+
+test('lo que el masculino no tiene, el femenino tampoco lo hereda', () => {
+    // La marca del femenino se saca ANTES de buscar el país, no en lugar de
+    // buscarlo: lo que queda tiene que ser el nombre pelado igual que siempre.
+    for (const rama of [
+        'Argentina 7s W', 'Argentina XV W', 'Argentina M20 W', 'South Africa 7s Women',
+        'New Zealand Warriors W', 'Croatia Dakovo Femenino',
     ]) {
         assert.equal(getNationalTeamFlag(rama), null, `${rama} no debería llevar bandera`);
     }

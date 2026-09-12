@@ -98,12 +98,29 @@ function normalizeNationKey(value: string): string {
 }
 
 /**
- * Solo el nombre PELADO del pais.
+ * LA MARCA DE LA RAMA FEMENINA NO ES UNA RAMA MAS.
  *
- * "Argentina" lleva la bandera. "Argentina XV", "Argentina 7s", "Argentina M20" y
- * "Wales W" no: son equipos distintos —otra categoria, otra rama, otro plantel— y
- * cada uno se queda con la identidad que ya tiene. La bandera es del seleccionado
- * mayor y de nadie mas.
+ * El proveedor escribe el femenino en el nombre del equipo y cambia de forma segun
+ * de donde venga: "Australia W" en FlashScore, "Canada Women" en el fixture de
+ * rugby, "Chile Femenino" cuando el dato entra a mano. Es la misma marca escrita
+ * de cinco maneras, y sola no identifica a nadie: sacarla deja el nombre pelado.
+ *
+ * Se saca UNA marca y del final, nunca del medio.
+ */
+const WOMEN_SUFFIX_RE = /\s+(?:w|women s|womens|women|woman|fem|femenin[oa]s?|damas|mujeres)$/;
+
+/**
+ * Solo el nombre PELADO del pais — la mayor de varones o la de mujeres.
+ *
+ * "Argentina" y "Argentina W" llevan la misma bandera: son la mayor de cada rama y
+ * el pais es uno solo. "Argentina XV", "Argentina 7s" y "Argentina M20" no, porque
+ * son equipos distintos —otra categoria, otro plantel— y cada uno se queda con la
+ * identidad que ya tiene.
+ *
+ * La simetria se sostiene sola porque la marca del femenino se saca ANTES de buscar
+ * el pais, no en lugar de buscarlo: "Argentina 7s W" queda en "Argentina 7s", que
+ * no lleva bandera igual que su par de varones. Lo que el masculino no tiene, el
+ * femenino tampoco lo hereda.
  *
  * Que la coincidencia sea exacta ademas resuelve solo el problema de los clubes que
  * arrancan igual: "New Zealand Warriors" es de la NRL y "Croatia Dakovo" es un club
@@ -112,7 +129,8 @@ function normalizeNationKey(value: string): string {
 export function getNationalTeamFlag(rawName: unknown): string | null {
     if (typeof rawName !== 'string') return null;
 
-    const slug = NATIONAL_TEAM_FLAGS[normalizeNationKey(rawName)];
+    const clave = normalizeNationKey(rawName);
+    const slug = NATIONAL_TEAM_FLAGS[clave] ?? NATIONAL_TEAM_FLAGS[clave.replace(WOMEN_SUFFIX_RE, '')];
     return slug ? `${NATIONAL_TEAM_FLAG_BASE}/${slug}.png` : null;
 }
 
