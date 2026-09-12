@@ -69,6 +69,38 @@ export function calculateWinPercentage(won: number, drawn: number, played: numbe
   return Math.round(value * 1000) / 1000;
 }
 
+/**
+ * El bonus de un partido con puntos cargados a mano es BONUS, no un ajuste.
+ *
+ * Iba a `adjustments` —el mismo lugar que una quita de puntos— y el total
+ * cerraba, pero la columna BP de la tabla (ofensivo + defensivo) quedaba en 0:
+ * el Torneo Austral mostraba a Comodoro con 14 puntos y 0 de bonus cuando la
+ * Unión publica 2. La carga manual no dice de qué bonus se trata, así que se
+ * reparte con la regla: un perdedor dentro del margen lleva el defensivo, y
+ * todo lo demás es ofensivo. Un valor negativo sí es un ajuste.
+ */
+function addManualBonus(
+  stats: { bonus_offensive: number; bonus_defensive: number; adjustments: number },
+  bonus: number,
+  result: string,
+  lostBy: number,
+  rules: any,
+) {
+  if (!Number.isFinite(bonus) || bonus === 0) return;
+  if (bonus < 0) {
+    stats.adjustments += bonus;
+    return;
+  }
+  let defensive = 0;
+  if (result === 'L') {
+    const margin = Number(rules?.defensive_bonus_rule?.margin ?? 7);
+    const perDefensive = Number(rules?.defensive_bonus_rule?.points ?? rules?.defensive_bonus_rule?.value ?? 1) || 1;
+    if (lostBy <= margin) defensive = Math.min(bonus, perDefensive);
+  }
+  stats.bonus_defensive += defensive;
+  stats.bonus_offensive += bonus - defensive;
+}
+
 export class StandingsEngine {
   private static toFiniteNumber(value: unknown): number | null {
     const normalized = typeof value === 'string' && value.trim() === '' ? Number.NaN : Number(value);
@@ -589,7 +621,7 @@ export class StandingsEngine {
           if (offensiveMetric >= threshold) homeStats.bonus_offensive += Number.isFinite(points) ? points : 1;
         }
         if (hasManualPoints) {
-          homeStats.adjustments += Number(m.home_bonus_points ?? 0);
+          addManualBonus(homeStats, Number(m.home_bonus_points ?? 0), homeResult, awayScore - homeScore, rules);
         }
       }
 
@@ -626,7 +658,7 @@ export class StandingsEngine {
           if (offensiveMetric >= threshold) awayStats.bonus_offensive += Number.isFinite(points) ? points : 1;
         }
         if (hasManualPoints) {
-          awayStats.adjustments += Number(m.away_bonus_points ?? 0);
+          addManualBonus(awayStats, Number(m.away_bonus_points ?? 0), awayResult, homeScore - awayScore, rules);
         }
       }
     });
