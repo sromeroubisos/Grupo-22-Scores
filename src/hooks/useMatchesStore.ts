@@ -34,9 +34,20 @@ interface UseMatchesStoreOptions {
 const ERROR_RECOVERY_TTL = 60 * 1000; // 1 minute - retry faster when a source fails
 const PUBLIC_STALE_TTL = 5 * 60 * 1000;     // 5 minutes - shared public cache window
 const PUBLIC_LIVE_POLL_INTERVAL = 60_000;   // 1 minute - live refresh cadence
+const NEXT_KICKOFF_WINDOW = 60 * 60 * 1000; // 1 hora - el sondeo no frena si algo está por arrancar
 const PREFETCH_WINDOW_DAYS = 7;
 const PREFETCH_BATCH_SIZE = 2;
 const MATCHES_STORE_CACHE_VERSION = 'v4';
+
+/** ¿Queda algún partido programado que arranque dentro de `windowMs`? */
+function hasKickoffWithin(matches: any[], windowMs: number): boolean {
+  const now = Date.now();
+  return matches.some(m => {
+    if (m?.status !== 'scheduled') return false;
+    const startsAt = Date.parse(m?.dateTime ?? m?.date ?? '');
+    return !Number.isNaN(startsAt) && startsAt >= now - windowMs && startsAt <= now + windowMs;
+  });
+}
 
 // Module-level cache shared across hook instances
 const matchesCache = new Map<string, any[]>();
@@ -463,9 +474,14 @@ export function useMatchesStore(
         if (liveSnapshot && liveSnapshot.matches.length > 0) lastFetchedAt.set(key, Date.now());
         setMatches(merged);
 
-        // 3. Smart stop — no more live matches visible
+        // 3. Smart stop — no more live matches visible.
+        //    Con una salvedad: si hay un partido que arranca dentro de la hora,
+        //    el sondeo sigue. Un seven dura diez minutos y la etapa encadena uno
+        //    atrás del otro; frenar al primer final dejaba el feed congelado
+        //    hasta que alguien recargara, porque el tick que lo reanuda es el
+        //    mismo que se acaba de apagar.
         const newLiveCount = merged.filter(m => m.status === 'live').length;
-        if (newLiveCount === 0) {
+        if (newLiveCount === 0 && !hasKickoffWithin(merged, NEXT_KICKOFF_WINDOW)) {
           stopLivePolling();
         }
 

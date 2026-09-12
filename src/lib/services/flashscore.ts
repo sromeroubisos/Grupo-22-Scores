@@ -274,7 +274,14 @@ export async function getVirtualRugbySevensMatches(
     return [...universitario, ...ultimate];
 }
 
-async function getVirtualRugbySevensLiveMatches(): Promise<Match[]> {
+/**
+ * Los partidos EN JUEGO de los proveedores virtuales. Se exporta porque el
+ * sondeo en vivo de `api/matches` la necesita aparte: el gate que ahorra
+ * requests mira `external_match_cache`, donde estos torneos nunca escriben, y
+ * sin esta puerta un seven en juego quedaba apagado por la ausencia de una
+ * fila que nadie iba a poner.
+ */
+export async function getVirtualRugbySevensLiveMatches(): Promise<Match[]> {
     const [universitario, ultimate] = await Promise.all([
         getFisuRugbySevensLiveMatches().catch((error) => {
             console.warn('[FISU] en vivo del Mundial Universitario no disponible:', error?.message);
