@@ -2109,14 +2109,19 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                 timeZone: USER_TZ,
             })
     );
-    const liveDisplayTime = resolvePublicMatchTime(
-        matchData.date,
-        matchData.sportId,
-        matchData.status,
-        matchData.clock,
-        matchData.updatedAt || matchData.updated_at || null,
-        matchData.tournamentRuleset ?? null,
-    );
+    // Ultimate Sevens no publica reloj, y el virtual del rugby (80', entretiempo
+    // a los 40) dibujaba "HT" en un partido de diez minutos que no tiene
+    // entretiempo. En vivo va el rotulo del bundle ("En juego").
+    const liveDisplayTime = isUltimateSevensSource && String(matchData.status || '').toLowerCase() === 'live'
+        ? (matchData.currentMinute || 'En juego')
+        : resolvePublicMatchTime(
+            matchData.date,
+            matchData.sportId,
+            matchData.status,
+            matchData.clock,
+            matchData.updatedAt || matchData.updated_at || null,
+            matchData.tournamentRuleset ?? null,
+        );
     void liveClockTick;
     const matchTimerText = liveDisplayTime || matchTimeText;
     // El reloj en vivo se muestra grande, partido en tiempo y periodo. El label
@@ -3243,8 +3248,11 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             los eventos: en hockey trae la efectividad de corner
                             corto, que no se puede reconstruir contando goles.
                             En RugbyPass son 26 filas —scrums, lines, tackles,
-                            patadas— que la cronologia no tiene de donde sacar. */}
-                        {activeTab === 'stats' && (isEspnSoccerSource || isFihSource || isRugbyPassSource) && (
+                            patadas— que la cronologia no tiene de donde sacar.
+                            Ultimate Sevens trae la suya en la pagina del
+                            partido, y derivarla de los eventos contaria con la
+                            tabla del rugby un marcador que no es el de la liga. */}
+                        {activeTab === 'stats' && (isEspnSoccerSource || isFihSource || isRugbyPassSource || isUltimateSevensSource) && (
                             <div className={styles.publicStatsPanel}>
                                 <div className={styles.panelTitle}>Estadísticas del partido</div>
                                 {statsData.length === 0 ? (
@@ -3285,7 +3293,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             </div>
                         )}
 
-                        {activeTab === 'stats' && !isEspnSoccerSource && !isFihSource && (
+                        {activeTab === 'stats' && !isEspnSoccerSource && !isFihSource && !isUltimateSevensSource && (
                             <div className={styles.publicStatsPanel}>
                                 <div className={styles.panelTitle}>Estadísticas completas</div>
                                 {publicCompleteStatTabs.length === 0 ? (

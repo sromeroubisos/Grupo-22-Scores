@@ -15,7 +15,7 @@ import {
     parseUs7TeamId,
     parseUs7TournamentId,
     resolveUs7Roster,
-    us7StageTimeZone,
+    US7_FIXTURE_TIME_ZONE,
     us7MatchIdOf,
     us7RefreshTtlSeconds,
     us7CountryName,
@@ -42,8 +42,8 @@ function equipo(id: string, name: string, score: number | null, teamPlayers: num
 function partido(overrides: Record<string, unknown> = {}) {
     return {
         gameId: '31176',
-        // hora de Cardiff (BST): son las 18:00 UTC de KICKOFF
-        date: '2026-09-12T19:00:00',
+        // hora de Europa central (UTC+2): son las 18:00 UTC de KICKOFF
+        date: '2026-09-12T20:00:00',
         seasonId: '1',
         category: 'men',
         seasonName: '2026 Season',
@@ -64,17 +64,22 @@ const KICKOFF = Date.parse('2026-09-12T18:00:00Z');
 const UN_DIA_ANTES = KICKOFF - 24 * 60 * 60 * 1000;
 const MINUTO = 60 * 1000;
 
-test('la hora sin huso es la de la SEDE aunque el sitio diga GMT', () => {
-    // Cardiff: el sitio dice "KICK OFF 15:00 GMT" y la ticketera "show 15:00",
-    // puertas 13:30+01:00. Son las 15:00 de Cardiff = 14:00 UTC.
+test('la hora de un partido es de Europa central, no de la sede, aunque el sitio diga GMT', () => {
+    // Cardiff (12/09): la transmisión de DAZN arrancó "at 3.30pm BST" con
+    // Clan Taran v Sol Feroz, que la API pone a las 16:35. 16:35 en UTC+2 son
+    // las 15:35 de Cardiff = 14:35 UTC. Leída como hora de la sede daba una
+    // hora tarde.
+    assert.equal(parseUs7DateTime('2026-09-12T16:35:00'), '2026-09-12T14:35:00.000Z');
+    // La final masculina (API 20:12) ya iba 5-19 a las 18:29 UTC: arrancó
+    // 18:12 UTC, no 19:12.
+    assert.equal(parseUs7DateTime('2026-09-12T20:12:00', US7_FIXTURE_TIME_ZONE), '2026-09-12T18:12:00.000Z');
+    // Biarritz y Londres se leen igual: la regla es de la carga, no de la sede
+    assert.equal(parseUs7DateTime('2026-09-18 18:30:00'), '2026-09-18T16:30:00.000Z');
+    assert.equal(parseUs7DateTime('2026-09-24T18:30:00'), '2026-09-24T16:30:00.000Z');
+    // el huso se calcula en la fecha, no fijo: en invierno Europa central es UTC+1
+    assert.equal(parseUs7DateTime('2026-12-12T15:00:00'), '2026-12-12T14:00:00.000Z');
+    // otro huso explícito se respeta (las etapas de /tournaments son hora local)
     assert.equal(parseUs7DateTime('2026-09-12 15:00:00', 'Europe/London'), '2026-09-12T14:00:00.000Z');
-    assert.equal(parseUs7DateTime('2026-09-12T16:35:00', us7StageTimeZone('Cardiff')), '2026-09-12T15:35:00.000Z');
-    // Biarritz es Francia: 18:30 de allá = 16:30 UTC, no 17:30
-    assert.equal(parseUs7DateTime('2026-09-18 18:30:00', us7StageTimeZone('Biarritz')), '2026-09-18T16:30:00.000Z');
-    // en invierno Londres SÍ es GMT: el huso se calcula en la fecha, no fijo
-    assert.equal(parseUs7DateTime('2026-12-12T15:00:00', 'Europe/London'), '2026-12-12T15:00:00.000Z');
-    // una sede que no está en la tabla cae en Londres
-    assert.equal(us7StageTimeZone('Dublin'), 'Europe/London');
     // si algún día manda el huso, se respeta
     assert.equal(parseUs7DateTime('2026-09-12T18:00:00+01:00', 'Europe/Paris'), '2026-09-12T17:00:00.000Z');
     assert.equal(parseUs7DateTime(''), null);
@@ -131,16 +136,35 @@ test('en el horario, Live con marcador es en juego y el marcador cuenta', () => 
     assert.equal(fixture?.away.score, 0);
 });
 
-test('la etapa puede correr adelantada al fixture publicado', () => {
+test('un Live antes del horario se acepta hasta tres horas antes', () => {
     const iso = '2026-09-12T18:00:00.000Z';
     assert.equal(classifyUs7Status('Live', true, iso, KICKOFF - 10 * MINUTO), 'live');
-    // Cardiff (12/09) corrió ~40 minutos adelantada a su propio fixture: con la
-    // tolerancia vieja de 30 minutos, el partido en juego se mostraba
-    // programado y sin marcador mientras se jugaba.
+    // La ventana no depende de que el horario se cumpla: con el huso mal leído
+    // Cardiff pareció 40 minutos adelantada, y con 30 de tolerancia la
+    // pantalla tapó la jornada entera.
     assert.equal(classifyUs7Status('Live', true, iso, KICKOFF - 40 * MINUTO), 'live');
     assert.equal(classifyUs7Status('Result', true, iso, KICKOFF - 40 * MINUTO), 'final');
     // Tres horas sigue siendo el techo: más lejos que eso es la mesa probando.
     assert.equal(classifyUs7Status('Live', true, iso, KICKOFF - 4 * 60 * MINUTO), 'scheduled');
+});
+
+test('un Live que la mesa no cerró vence a la hora y media', () => {
+    // La final masculina de Cardiff (31717) siguió `Live 5-19` después de que
+    // la crónica oficial nombrara al campeón.
+    const iso = '2026-09-12T18:12:00.000Z';
+    const inicio = Date.parse(iso);
+    assert.equal(classifyUs7Status('Live', true, iso, inicio + 30 * MINUTO), 'live', 'golden point y atraso: todavía puede estar en juego');
+    assert.equal(classifyUs7Status('Live', true, iso, inicio + 91 * MINUTO), 'final');
+    // sin marcador no se inventa un resultado
+    assert.equal(classifyUs7Status('Live', false, iso, inicio + 91 * MINUTO), 'live');
+    const vencido = parseUs7Fixture(partido({
+        date: '2026-09-12T20:12:00',
+        status: 'Live',
+        homeTeam: equipo('4730', 'Foudre Bleue', 5),
+        awayTeam: equipo('4742', 'Clan Taran', 19),
+    }), inicio + 2 * 60 * MINUTO);
+    assert.equal(vencido?.state, 'final');
+    assert.equal(vencido?.away.score, 19, 'el marcador queda: es el resultado');
 });
 
 test('las formas habituales del cierre se leen como final', () => {

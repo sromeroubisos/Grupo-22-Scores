@@ -110,9 +110,10 @@ const SUPPORTED: Record<MatchProvider, readonly MatchTabId[]> = {
     // pestaña vacía sería una promesa que la fuente no cumple.
     fisu: ['previa', 'summary', 'videos', 'lineups', 'standings'],
     // Ultimate Sevens publica el fixture, el marcador y el plantel de la
-    // temporada de cada franquicia. La tabla no está en su REST y no hay
-    // eventos ni estadísticas por partido.
-    'ultimate-sevens': ['previa', 'summary', 'videos', 'lineups'],
+    // temporada de cada franquicia por su REST, y la cronología (tries,
+    // conversiones, tarjetas) y las estadísticas por equipo en la página de
+    // cada partido. La tabla no existe: la liga juega eliminación directa.
+    'ultimate-sevens': ['previa', 'summary', 'videos', 'timeline', 'lineups', 'stats'],
 };
 
 // Las fuentes que publican el plantel poco antes del inicio. Para el resto,

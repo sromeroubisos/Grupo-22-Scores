@@ -18,6 +18,12 @@ type FilterKey = 'all' | 'points' | 'fouls' | 'substitutions' | 'cards' | 'kicks
 type TimelineEvent = LocalPublicEvent & {
   subPlayer?: string | null;
   subPlayerId?: string | null;
+  /**
+   * Lo que valio el tanto, cuando la fuente lo publica. Ultimate Sevens cuenta
+   * tries de 7 y conversiones de 1, 2 o 4: con la tabla del deporte el
+   * marcador parcial de la cronologia mentia.
+   */
+  points?: number | null;
 };
 
 type TeamInfo = {
@@ -223,9 +229,11 @@ function eventKey(evt: TimelineEvent): string {
 }
 
 function getEventPoints(
-  evt: Pick<TimelineEvent, 'type' | 'description'>,
+  evt: Pick<TimelineEvent, 'type' | 'description' | 'points'>,
   definitionMap: Record<string, MatchEventDefinition>,
 ): number {
+  // El valor que publica la fuente manda sobre el del catalogo del deporte.
+  if (typeof evt.points === 'number' && Number.isFinite(evt.points)) return evt.points;
   return getConfiguredEventPoints({ type: evt.type, detail: evt.description }, definitionMap);
 }
 

@@ -42,6 +42,12 @@ import {
     type Us7Player,
     type Us7Side,
 } from '@/lib/services/ultimateSevensParser';
+import {
+    parseUs7MatchCentreHtml,
+    toUs7StatRows,
+    toUs7Timeline,
+    type Us7MatchCentre,
+} from '@/lib/services/ultimateSevensMatchCentre';
 
 export {
     US7_COMPETITIONS,
@@ -143,6 +149,52 @@ async function getAllFixtures(): Promise<Us7Fixture[]> {
         (raw) => us7RefreshTtlSeconds(parseUs7Fixtures(raw, Date.now()), Date.now()),
     );
     return parseUs7Fixtures(json, Date.now());
+}
+
+/** Con la pelota en juego la página cambia con cada try; cerrado, ya no cambia. */
+const TTL_MATCH_CENTRE_LIVE_SECONDS = 15;
+const TTL_MATCH_CENTRE_FINAL_SECONDS = 3600;
+const MATCH_CENTRE_PREFIX = `${US7_SITE_URL}/match-centre/fixtures/`;
+
+/**
+ * La cronología y las estadísticas de un partido, leídas de su página del
+ * match centre (la REST no las trae; ver `ultimateSevensMatchCentre.ts`).
+ *
+ * Solo para un partido en juego o terminado: uno programado no tiene nada que
+ * leer, y la página pesa ~280 KB. La URL sale de la API, así que se exige que
+ * sea del match centre de la liga antes de pedirla. Si la página no contesta,
+ * la ficha abre igual, sin cronología: lo que falla es un agregado, no el
+ * partido.
+ */
+async function getMatchCentre(fixture: Us7Fixture): Promise<Us7MatchCentre> {
+    const empty: Us7MatchCentre = { events: [], stats: [] };
+    if (fixture.state !== 'live' && fixture.state !== 'final') return empty;
+    if (!fixture.webUrl.startsWith(MATCH_CENTRE_PREFIX)) return empty;
+
+    const cacheKey = `${CACHE_PREFIX}:match-centre:${fixture.gameId}`;
+    const cached = memoryCache.get<Us7MatchCentre>(cacheKey);
+    if (cached) return cached;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    try {
+        const response = await fetch(fixture.webUrl, {
+            signal: controller.signal,
+            cache: 'no-store',
+            headers: { 'User-Agent': 'G22Scores/1.0 (+https://g22scores.com)', Accept: 'text/html' },
+        });
+        if (!response.ok) throw new Error(`[Ultimate Sevens] ${fixture.webUrl} respondió ${response.status}`);
+        const parsed = parseUs7MatchCentreHtml(await response.text());
+        const ttl = fixture.state === 'live' ? TTL_MATCH_CENTRE_LIVE_SECONDS : TTL_MATCH_CENTRE_FINAL_SECONDS;
+        memoryCache.set(cacheKey, parsed, ttl);
+        lastGood.set(cacheKey, parsed);
+        return parsed;
+    } catch (error) {
+        console.warn('[Ultimate Sevens] match centre no disponible:', error instanceof Error ? error.message : error);
+        return (lastGood.get(cacheKey) as Us7MatchCentre | undefined) ?? empty;
+    } finally {
+        clearTimeout(timeout);
+    }
 }
 
 async function getPlayers(): Promise<Map<number, Us7Player>> {
@@ -605,17 +657,25 @@ export async function getUltimateSevensMatchBundle(matchId: string) {
     const fixture = (await getAllFixtures()).find((candidate) => candidate.gameId === parsed.gameId);
     if (!fixture) return null;
 
-    // Los planteles van por su cuenta: la ficha abre igual si `/players` falla.
-    const players = await getPlayers().catch((error) => {
-        console.warn('[Ultimate Sevens] planteles no disponibles:', error instanceof Error ? error.message : error);
-        return new Map<number, Us7Player>();
-    });
+    // Los planteles y la página del partido van por su cuenta: la ficha abre
+    // igual si alguno falla.
+    const [players, matchCentre] = await Promise.all([
+        getPlayers().catch((error) => {
+            console.warn('[Ultimate Sevens] planteles no disponibles:', error instanceof Error ? error.message : error);
+            return new Map<number, Us7Player>();
+        }),
+        getMatchCentre(fixture),
+    ]);
 
     const competition = US7_COMPETITIONS[fixture.key];
     const kickoff = fixture.startsAtIso ? new Date(fixture.startsAtIso) : null;
     const lineups = buildLineups(fixture, players);
     const stage = us7StageLabel(fixture);
     const empty: unknown[] = [];
+    // Cada tanto lleva lo que valió (`points`): la liga cuenta tries de 7 y
+    // conversiones de 1, 2 o 4, y la tabla del rugby haría mentir al parcial.
+    const events = toUs7Timeline(matchCentre.events);
+    const stats = toUs7StatRows(matchCentre.stats);
 
     return {
         source: US7_PROVIDER,
@@ -672,8 +732,8 @@ export async function getUltimateSevensMatchBundle(matchId: string) {
             lineupsKind: 'squad',
             standings: empty,
             h2h: empty,
-            events: empty,
-            stats: empty,
+            events,
+            stats,
             periods: empty,
             officials: empty,
             draw: empty,
@@ -682,8 +742,8 @@ export async function getUltimateSevensMatchBundle(matchId: string) {
         },
         h2h: empty,
         standings: empty,
-        events: empty,
-        stats: empty,
+        events,
+        stats,
         periods: empty,
         lineups,
         playerStats: null,

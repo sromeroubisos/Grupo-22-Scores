@@ -60,6 +60,13 @@ const PERIOD_ALIAS_MAP: Record<string, string> = {
   'CUARTO 4': 'Q4',
   'CUARTO CUARTO': 'Q4',
   'FOURTH QUARTER': 'Q4',
+  /* ── tiempo único ──
+   * Ultimate Sevens juega diez minutos corridos, sin entretiempo. Con '1T' la
+   * cronologia rotulaba "Primer tiempo" cada minuto de un partido que no tiene
+   * segundo. Aditivo como los cuartos: solo lo emite ese proveedor.
+   */
+  TU: 'TU',
+  'TIEMPO UNICO': 'TU',
   PREVIA: 'PRE',
   PREGAME: 'PRE',
   'PRE MATCH': 'PRE',
@@ -104,6 +111,7 @@ const PERIOD_ORDER: Record<string, number> = {
   // nombre igual.
   Q1: 10,
   '1T': 10,
+  TU: 10,
   Q2: 15,
   HT: 20,
   Q3: 30,
@@ -117,6 +125,7 @@ const PERIOD_LABELS: Record<string, string> = {
   PRE: 'Previa',
   Q1: 'Primer cuarto',
   '1T': 'Primer tiempo',
+  TU: 'Tiempo único',
   Q2: 'Segundo cuarto',
   HT: 'Entretiempo',
   Q3: 'Tercer cuarto',
