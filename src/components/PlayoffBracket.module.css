@@ -401,6 +401,156 @@
     color: var(--color-text-tertiary);
 }
 
+/* ── Árbol con líneas ─────────────────────────────────────────────────────
+   Una fila por partido de la primera ronda, todas iguales (1fr): cada cruce
+   se centra en las filas de sus orígenes y las líneas van en unidades de fila
+   dentro de un SVG estirado, así que no hace falta medir nada. El espacio
+   entre tarjetas lo da el padding de la celda, no el row-gap: con row-gap las
+   filas dejan de ser la unidad del SVG. */
+.tree {
+    --tree-col: 220px;
+    --tree-final-col: 256px;
+    --tree-champion-col: 168px;
+    --tree-gutter: 32px;
+    display: grid;
+    min-width: max-content;
+    gap: 0;
+}
+
+.treeTitle {
+    margin-bottom: 6px;
+}
+
+.treeCell {
+    align-self: center;
+    min-width: 0;
+    padding: 6px 0;
+}
+
+.treeLinks {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.treeLink {
+    fill: none;
+    stroke: var(--color-border);
+    stroke-width: 1.5px;
+    vector-effect: non-scaling-stroke;
+}
+
+/* Del partido ya jugado sale un ganador de verdad: la línea se enciende. */
+.treeLinkDecided {
+    stroke: rgba(var(--color-accent-rgb), 0.55);
+}
+
+.treeLinkChampion {
+    stroke: rgba(212, 167, 44, 0.6);
+}
+
+/* Cruce que la liga todavía no publicó: el lugar se ve, pero no compite. */
+.placeholderCard {
+    border-style: dashed;
+    background: transparent;
+}
+
+.placeholderCard:hover {
+    transform: none;
+    box-shadow: none;
+    background: transparent;
+}
+
+.placeholderCard .name {
+    color: var(--color-text-tertiary);
+    font-weight: 500;
+}
+
+.placeholderCard .matchDate {
+    justify-content: flex-start;
+}
+
+.nameStack {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 1px;
+}
+
+.sourceNote {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-text-tertiary);
+}
+
+.championBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 167, 44, 0.45);
+    background: linear-gradient(180deg, rgba(212, 167, 44, 0.12), rgba(212, 167, 44, 0.03));
+    color: #d4a72c;
+    text-align: center;
+    animation: bracketCardIn 0.42s ease both;
+}
+
+.championBox .championStripTag {
+    margin-left: 0;
+}
+
+.championBoxPending {
+    border-style: dashed;
+    border-color: var(--color-border);
+    background: transparent;
+    color: var(--color-text-tertiary);
+}
+
+.championBoxLogo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.championBoxName {
+    max-width: 100%;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--color-text-primary);
+}
+
+.championBoxPending .championBoxName {
+    color: var(--color-text-tertiary);
+    font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .championBox {
+        animation: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .tree {
+        --tree-col: 176px;
+        --tree-final-col: 204px;
+        --tree-champion-col: 132px;
+        --tree-gutter: 22px;
+    }
+}
+
 .emptyState {
     padding: 3rem;
     text-align: center;

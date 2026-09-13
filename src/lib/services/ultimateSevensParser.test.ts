@@ -311,13 +311,75 @@ test('el cuadro: una etapa, sus rondas en orden, y el partido sin ronda cae en l
     assert.equal(cardiff.stageId, '2222');
     assert.equal(cardiff.name, 'Cardiff');
     assert.equal(cardiff.active, true);
-    assert.deepEqual(cardiff.rounds.map((round) => round.name), ['Ronda 1', 'Ronda 2']);
-    // el ensayo (sin ronda, antes que todos) va a la primera; el de las 18:47, a la segunda
+    // tres cruces, dos, y la final que falta publicar
+    assert.deepEqual(cardiff.rounds.map((round) => round.name), ['Ronda 1', 'Semifinales', 'Final']);
+    // el corte es por horario, no por el número de la mesa: el de las 18:47 va con el de las 18:30
     assert.deepEqual(cardiff.rounds[0].matches.map((match) => match.match_id), ['us7-match-31180', 'us7-match-31181', 'us7-match-31182']);
     assert.deepEqual(cardiff.rounds[1].matches.map((match) => match.match_id), ['us7-match-31190', 'us7-match-31191']);
+    assert.equal(cardiff.rounds[2].matches[0].placeholder, true);
     assert.equal(cardiff.rounds[0].matches[0].status, 'Programado');
     assert.equal(cardiff.rounds[0].matches[0].score_home, null);
     assert.equal(cardiff.rounds[0].matches[0].home_team.id, 'us7-team-4730');
+});
+
+/** La jornada masculina de Cardiff (12/09) tal cual la publicó la API. */
+function cardiffMasculino(ids: string[] | null = null) {
+    const jugado = (gameId: string, date: string, round: string, home: [string, string, number], away: [string, string, number]) =>
+        partido({
+            gameId, date, round, status: 'Result',
+            homeTeam: equipo(home[0], home[1], home[2]),
+            awayTeam: equipo(away[0], away[1], away[2]),
+        });
+    const todos = [
+        jugado('31174', '2026-09-12T17:26:00', '', ['4736', 'Pacific Current', 17], ['4757', 'Sol Feroz', 12]),
+        jugado('31175', '2026-09-12T17:43:00', '', ['4727', 'Albion Athletic', 5], ['4739', 'Atlantic Novas', 7]),
+        jugado('31176', '2026-09-12T18:00:00', '', ['4730', 'Foudre Bleue', 13], ['4742', 'Clan Taran', 14]),
+        // semis y final vienen las tres con round "1"
+        jugado('31715', '2026-09-12T19:07:00', '1', ['4736', 'Pacific Current', 13], ['4730', 'Foudre Bleue', 20]),
+        jugado('31716', '2026-09-12T19:24:00', '1', ['4739', 'Atlantic Novas', 0], ['4742', 'Clan Taran', 13]),
+        jugado('31717', '2026-09-12T20:12:00', '1', ['4730', 'Foudre Bleue', 5], ['4742', 'Clan Taran', 19]),
+    ];
+    return parseUs7Fixtures(ids ? todos.filter((item) => ids.includes(item.gameId)) : todos, KICKOFF + 5 * 60 * MINUTO);
+}
+
+test('el cuadro de Cardiff: tres cruces, semis y final, aunque la mesa numere "1" a las tres últimas', () => {
+    const [{ rounds }] = buildUs7Brackets(cardiffMasculino());
+    assert.deepEqual(rounds.map((round) => round.name), ['Ronda 1', 'Semifinales', 'Final']);
+    assert.deepEqual(rounds.map((round) => round.matches.length), [3, 2, 1]);
+
+    const [semiMejorPerdedor, semi] = rounds[1].matches;
+    // Foudre Bleue perdió 13-14 con Clan Taran y entró como mejor perdedor
+    assert.deepEqual(semiMejorPerdedor.home_source, { match_id: 'us7-match-31174', outcome: 'winner' });
+    assert.deepEqual(semiMejorPerdedor.away_source, { match_id: 'us7-match-31176', outcome: 'loser' });
+    assert.deepEqual(semi.home_source, { match_id: 'us7-match-31175', outcome: 'winner' });
+    assert.deepEqual(semi.away_source, { match_id: 'us7-match-31176', outcome: 'winner' });
+
+    const [final] = rounds[2].matches;
+    assert.deepEqual([final.home_source?.match_id, final.away_source?.match_id], ['us7-match-31715', 'us7-match-31716']);
+    assert.equal(final.winner_id, 'us7-team-4742');
+    assert.equal(rounds.flatMap((round) => round.matches).some((match) => match.placeholder), false);
+});
+
+test('con la primera ronda sola, el cuadro muestra el formato por definir y sin clubes inventados', () => {
+    const [{ rounds }] = buildUs7Brackets(cardiffMasculino(['31174', '31175', '31176']));
+    assert.deepEqual(rounds.map((round) => round.name), ['Ronda 1', 'Semifinales', 'Final']);
+
+    const [arriba, abajo] = rounds[1].matches;
+    assert.equal(arriba.placeholder, true);
+    assert.deepEqual([arriba.home_team.name, arriba.away_team.name], ['Ganador ronda 1', 'Ganador ronda 1']);
+    assert.deepEqual([abajo.home_team.name, abajo.away_team.name], ['Ganador ronda 1', 'Mejor perdedor']);
+    assert.deepEqual(abajo.away_source, { match_id: null, outcome: 'loser' });
+    assert.deepEqual(
+        [rounds[2].matches[0].home_team.name, rounds[2].matches[0].away_team.name],
+        ['Ganador semifinal', 'Ganador semifinal'],
+    );
+
+    // publicada una semi, la otra toma los ganadores que quedan
+    const [{ rounds: conUnaSemi }] = buildUs7Brackets(cardiffMasculino(['31174', '31175', '31176', '31715']));
+    const [publicada, falta] = conUnaSemi[1].matches;
+    assert.equal(publicada.placeholder, false);
+    assert.equal(falta.placeholder, true);
+    assert.deepEqual([falta.home_source?.match_id, falta.away_source?.match_id], ['us7-match-31175', 'us7-match-31176']);
 });
 
 test('el cuadro marca al ganador solo con el partido cerrado y sin empate', () => {

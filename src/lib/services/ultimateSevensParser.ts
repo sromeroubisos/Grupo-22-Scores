@@ -104,6 +104,13 @@ export type Us7Fixture = {
     stageId: string;
     stageName: string;
     round: number | null;
+    /**
+     * La ronda tal cual la escribió la mesa. Es texto libre y llega de las tres
+     * formas: vacía, un número (`"1"`) o un rótulo (`"SF"`, `"Final!"`). `round`
+     * se queda solo con el número; el rótulo sirve para nombrar la ronda del
+     * cuadro, y tirarlo era perder la única etiqueta que publica la liga.
+     */
+    roundLabel: string | null;
     home: Us7Side;
     away: Us7Side;
     status: string;
@@ -370,6 +377,7 @@ export function parseUs7Fixture(item: unknown, nowMs: number): Us7Fixture | null
         stageId: asString(record.competitionId).trim(),
         stageName,
         round: toInt(record.round),
+        roundLabel: asString(record.round).trim() || null,
         home: { ...home, score: played ? home.score : null },
         away: { ...away, score: played ? away.score : null },
         status,
@@ -528,6 +536,16 @@ export function us7StageLabel(fixture: Pick<Us7Fixture, 'stageName' | 'round'>):
 // Cuadro
 // --------------------------------------------------------------------------
 
+/**
+ * De dónde sale un lado del cruce: el ganador o el perdedor de un partido de
+ * la ronda anterior. `match_id` es `null` para el mejor perdedor que todavía no
+ * se sabe de qué partido sale.
+ */
+export type Us7BracketSource = {
+    match_id: string | null;
+    outcome: 'winner' | 'loser';
+};
+
 /** Un partido en la forma que dibuja `PlayoffBracket`. */
 export type Us7BracketMatch = {
     match_id: string;
@@ -540,6 +558,11 @@ export type Us7BracketMatch = {
     winner_id: string | null;
     match_start_iso: string | null;
     status: string;
+    /** Con qué partido de la ronda anterior se une cada lado: son las líneas del cuadro. */
+    home_source: Us7BracketSource | null;
+    away_source: Us7BracketSource | null;
+    /** Un cruce del formato que la liga todavía no publicó. */
+    placeholder: boolean;
 };
 
 export type Us7BracketRound = {
@@ -592,6 +615,9 @@ function toBracketMatch(fixture: Us7Fixture): Us7BracketMatch {
         winner_id: winnerId,
         match_start_iso: fixture.startsAtIso,
         status: bracketStatusOf(fixture.state),
+        home_source: null,
+        away_source: null,
+        placeholder: false,
     };
 }
 
@@ -599,43 +625,280 @@ const byKickoff = (left: Us7Fixture, right: Us7Fixture) =>
     (left.startsAtIso || '').localeCompare(right.startsAtIso || '') || left.gameId.localeCompare(right.gameId);
 
 /**
- * La ronda de cada partido de una etapa. La mesa a veces deja `round` vacío
- * (el ensayo del 11/09 vino así): ese partido va a la última ronda que ya
- * había empezado a su hora, y si es anterior a todas, a la primera.
+ * El hueco que separa dos rondas de una etapa. Medido en Cardiff (12/09): los
+ * partidos de una misma ronda salen cada 17 minutos —un seven dura 14— y entre
+ * ronda y ronda la liga deja de 48 a 77. Con 35 la jornada masculina se parte
+ * en 3 + 2 + 1, que es el cuadro que se jugó.
  */
-function roundsOfStage(stageFixtures: Us7Fixture[]): Map<number, Us7Fixture[]> {
-    const firstKickoff = new Map<number, string>();
-    for (const fixture of stageFixtures) {
-        if (fixture.round === null || !fixture.startsAtIso) continue;
-        const current = firstKickoff.get(fixture.round);
-        if (!current || fixture.startsAtIso < current) firstKickoff.set(fixture.round, fixture.startsAtIso);
-    }
-    const ordered = [...firstKickoff.entries()].sort((left, right) => left[0] - right[0]);
+const US7_ROUND_BREAK_MS = 35 * 60 * 1000;
 
-    const placeOf = (fixture: Us7Fixture): number => {
-        if (fixture.round !== null) return fixture.round;
-        if (ordered.length === 0) return 1;
-        let chosen = ordered[0][0];
-        for (const [round, first] of ordered) {
-            if (fixture.startsAtIso && first <= fixture.startsAtIso) chosen = round;
+/**
+ * El rótulo de la mesa, solo si es un NOMBRE (`"SF"`, `"Final!"`). Un número no
+ * sirve para agrupar: en Cardiff la primera ronda vino con `round` vacío y las
+ * semis y la final, las dos, con `"1"`. Agrupar por ese "1" armaba una ronda de
+ * tres partidos con la final adentro.
+ */
+function nameLabelOf(fixture: Us7Fixture): string | null {
+    const label = fixture.roundLabel;
+    return label !== null && !/^\d+$/.test(label) ? label : null;
+}
+
+/** Los rótulos con nombre de una ronda ya armada. */
+function labelsOf(round: Us7Fixture[]): string[] {
+    return round.map(nameLabelOf).filter((label): label is string => label !== null);
+}
+
+/**
+ * Las rondas de una etapa, en orden de juego.
+ *
+ * El corte sale del HORARIO, no del campo `round`: la mesa lo deja vacío, o le
+ * pone un número, o le pone un rótulo (`"SF"`, `"Final!"`), y leerlo solo como
+ * número mandaba la etapa entera a una "Ronda 1" de seis partidos — el cuadro
+ * quedaba en una columna y no avanzaba nunca. El reloj, en cambio, siempre está.
+ *
+ * Un rótulo con nombre manda cuando existe: dos partidos con el mismo van
+ * juntos aunque el horario los separe, y dos con rótulos distintos se parten
+ * aunque salgan seguidos.
+ */
+function roundsOfStage(stageFixtures: Us7Fixture[]): Us7Fixture[][] {
+    const rounds: Us7Fixture[][] = [];
+
+    for (const fixture of [...stageFixtures].sort(byKickoff)) {
+        const current = rounds[rounds.length - 1];
+        if (!current) {
+            rounds.push([fixture]);
+            continue;
         }
-        return chosen;
-    };
 
-    const rounds = new Map<number, Us7Fixture[]>();
-    for (const fixture of stageFixtures) {
-        const round = placeOf(fixture);
-        rounds.set(round, [...(rounds.get(round) ?? []), fixture]);
+        const labels = labelsOf(current);
+        const label = nameLabelOf(fixture);
+        let breaks: boolean;
+        if (label !== null && labels.length > 0) {
+            breaks = !labels.includes(label);
+        } else {
+            const previous = current[current.length - 1];
+            const gap =
+                fixture.startsAtIso && previous.startsAtIso
+                    ? Date.parse(fixture.startsAtIso) - Date.parse(previous.startsAtIso)
+                    : 0;
+            breaks = Number.isFinite(gap) && gap > US7_ROUND_BREAK_MS;
+        }
+
+        if (breaks) rounds.push([fixture]);
+        else current.push(fixture);
     }
+
     return rounds;
 }
 
 /**
- * El cuadro de cada etapa de una rama. La liga juega "straight knockout" y un
- * campeón por etapa, pero NO publica el cuadro entero: carga los cruces a
- * medida que se definen. Acá se dibuja lo publicado, ronda por ronda, sin
- * inventar las que faltan — seis clubes no arman un cuadro de potencia de dos
- * y la liga no dijo cómo sigue después de la primera ronda.
+ * El rótulo de la liga en castellano. Solo se traducen las abreviaturas que
+ * publica; cualquier otra cosa va tal cual, porque inventarle el nombre a una
+ * fase que no conocemos es peor que repetir el de la mesa.
+ */
+const US7_ROUND_NAMES: Record<string, string> = {
+    f: 'Final',
+    final: 'Final',
+    sf: 'Semifinal',
+    qf: 'Cuartos de final',
+};
+
+/** `"Final!"` -> `Final`, `"SF"` -> `Semifinal`, `"1"` -> `Ronda 1`. */
+export function us7RoundName(round: number | null, label: string | null): string | null {
+    if (round !== null) return `Ronda ${round}`;
+    if (label === null) return null;
+    const clean = label.replace(/[!¡.]+$/, '').trim();
+    if (!clean) return null;
+    return US7_ROUND_NAMES[clean.toLowerCase()] ?? clean;
+}
+
+/**
+ * Cuántos cruces tiene cada ronda, a partir de la primera: la mitad de la
+ * anterior, redondeada para arriba. Si no da par, el lugar que sobra es para el
+ * mejor perdedor — el formato oficial de la liga con seis clubes: tres cruces,
+ * pasan los tres ganadores y el mejor perdedor, semis y final.
+ */
+function knockoutSizes(firstRound: number): number[] {
+    const sizes = [Math.max(firstRound, 1)];
+    while (sizes[sizes.length - 1] > 1) sizes.push(Math.ceil(sizes[sizes.length - 1] / 2));
+    return sizes;
+}
+
+/**
+ * El nombre de una ronda del cuadro. Primero el rótulo de la liga, si todos los
+ * partidos de la ronda traen el mismo; si no, la posición contando desde la
+ * final (un cruce: final; dos antes de ella: semis; cuatro: cuartos). El resto
+ * queda numerado, que es lo único que se puede afirmar.
+ */
+function roundNameOf(fixtures: Us7Fixture[], index: number, total: number, size: number): string {
+    const labels = labelsOf(fixtures);
+    if (fixtures.length > 0 && labels.length === fixtures.length && new Set(labels).size === 1) {
+        const named = us7RoundName(null, labels[0]);
+        if (named) return named;
+    }
+
+    const fromEnd = total - 1 - index;
+    if (total > 1) {
+        if (fromEnd === 0 && size === 1) return 'Final';
+        if (fromEnd === 1 && size === 2) return 'Semifinales';
+        if (fromEnd === 2 && size === 4) return 'Cuartos de final';
+    }
+    return `Ronda ${index + 1}`;
+}
+
+/** Cómo se lee, en un cruce sin publicar, el lado que viene de la ronda anterior. */
+function winnerLabelOf(previousRoundName: string): string {
+    if (/^semifinal/i.test(previousRoundName)) return 'Ganador semifinal';
+    if (/^cuartos/i.test(previousRoundName)) return 'Ganador cuartos';
+    return `Ganador ${previousRoundName.toLowerCase()}`;
+}
+
+const US7_BEST_LOSER_LABEL = 'Mejor perdedor';
+
+/** De qué partido anterior viene un club, y si llegó ganando o como mejor perdedor. */
+function sourceOf(teamId: string, previous: Us7BracketMatch[]): Us7BracketSource | null {
+    if (!teamId) return null;
+    const feeder = previous.find(
+        (match) => !match.placeholder && (match.home_team.id === teamId || match.away_team.id === teamId),
+    );
+    if (!feeder) return null;
+    const lost = feeder.winner_id !== null && feeder.winner_id !== teamId;
+    return { match_id: feeder.match_id, outcome: lost ? 'loser' : 'winner' };
+}
+
+function placeholderMatch(matchId: string): Us7BracketMatch {
+    const pending = { id: '', name: 'Por definir', logo: '' };
+    return {
+        match_id: matchId,
+        home_participant: null,
+        away_participant: null,
+        home_team: { ...pending },
+        away_team: { ...pending },
+        score_home: null,
+        score_away: null,
+        winner_id: null,
+        match_start_iso: null,
+        status: 'Por definir',
+        home_source: null,
+        away_source: null,
+        placeholder: true,
+    };
+}
+
+/**
+ * Une una ronda con la anterior y la completa hasta el formato.
+ *
+ * 1. Lo publicado: cada lado sale del partido anterior donde jugó su club.
+ * 2. Lo que la liga todavía no cargó: cruces "Por definir" hasta `expected`.
+ * 3. Los lados sin origen toman, en orden, los ganadores que nadie reclamó y,
+ *    si el formato deja lugar, el mejor perdedor.
+ *
+ * La liga siembra las semis por el resultado de la primera ronda (el slug de
+ * la semi dice `1group-a-vs-5group-a`), así que un cruce sin publicar no nombra
+ * clubes: dice "Ganador ronda 1", que es lo único cierto antes del sorteo.
+ */
+function linkRound(
+    matches: Us7BracketMatch[],
+    previous: Us7BracketMatch[],
+    expected: number,
+    previousRoundName: string,
+    idPrefix: string,
+): void {
+    const claimed = new Set<string>();
+    let loserSlots = Math.max(0, expected * 2 - previous.length);
+
+    for (const match of matches) {
+        match.home_source = sourceOf(match.home_team.id, previous);
+        match.away_source = sourceOf(match.away_team.id, previous);
+        for (const source of [match.home_source, match.away_source]) {
+            if (source?.outcome === 'winner' && source.match_id) claimed.add(source.match_id);
+            else if (source?.outcome === 'loser') loserSlots -= 1;
+        }
+    }
+
+    while (matches.length < expected) matches.push(placeholderMatch(`${idPrefix}-p${matches.length + 1}`));
+
+    const unclaimed = previous.filter((match) => !claimed.has(match.match_id));
+    let cursor = 0;
+    for (const match of matches) {
+        for (const side of ['home', 'away'] as const) {
+            if (match[`${side}_source`]) continue;
+            let source: Us7BracketSource | null = null;
+            if (cursor < unclaimed.length) {
+                source = { match_id: unclaimed[cursor].match_id, outcome: 'winner' };
+                cursor += 1;
+            } else if (loserSlots > 0) {
+                source = { match_id: null, outcome: 'loser' };
+                loserSlots -= 1;
+            }
+            match[`${side}_source`] = source;
+            if (match.placeholder && source) {
+                const name = source.outcome === 'winner' ? winnerLabelOf(previousRoundName) : US7_BEST_LOSER_LABEL;
+                match[`${side}_team`] = { id: '', name, logo: '' };
+            }
+        }
+    }
+}
+
+/**
+ * Ordena cada ronda para que el árbol no cruce líneas: de la final hacia
+ * atrás, los partidos de una ronda van en el orden de los cruces que alimentan.
+ * Un partido que no alimenta a nadie (el del mejor perdedor no se dibuja) queda
+ * al final, en su orden de juego.
+ */
+function orderForTree(rounds: Us7BracketMatch[][]): void {
+    for (let index = rounds.length - 1; index > 0; index -= 1) {
+        const slot = new Map<string, number>();
+        rounds[index].forEach((match, position) => {
+            [match.home_source, match.away_source].forEach((source, side) => {
+                if (source?.outcome !== 'winner' || !source.match_id || slot.has(source.match_id)) return;
+                slot.set(source.match_id, position * 2 + side);
+            });
+        });
+        const at = (match: Us7BracketMatch) => slot.get(match.match_id) ?? Number.POSITIVE_INFINITY;
+        rounds[index - 1] = [...rounds[index - 1]].sort((left, right) => at(left) - at(right));
+    }
+}
+
+/**
+ * Las rondas de una etapa, unidas y completas. La liga carga los cruces a
+ * medida que se definen, pero el FORMATO es público (straight knockout, un
+ * campeón por etapa): con la primera ronda publicada ya se sabe cuántos
+ * cruces faltan, y el cuadro los muestra por definir en vez de cortarse.
+ * Mientras la última ronda tenga más de un partido, falta al menos una.
+ */
+function stageRounds(stageId: string, stageFixtures: Us7Fixture[]): Us7BracketRound[] {
+    const fixtureRounds = roundsOfStage(stageFixtures);
+    if (fixtureRounds.length === 0) return [];
+
+    const sizes = knockoutSizes(fixtureRounds[0].length);
+    const total = Math.max(sizes.length, fixtureRounds.length);
+    const names = Array.from({ length: total }, (_, index) =>
+        roundNameOf(fixtureRounds[index] ?? [], index, total, Math.max(fixtureRounds[index]?.length ?? 0, sizes[index] ?? 0)),
+    );
+
+    const rounds: Us7BracketMatch[][] = [];
+    for (let index = 0; index < total; index += 1) {
+        const matches = (fixtureRounds[index] ?? []).map(toBracketMatch);
+        if (index > 0) {
+            const expected = Math.max(sizes[index] ?? 0, matches.length);
+            linkRound(matches, rounds[index - 1], expected, names[index - 1], `${stageId}-r${index + 1}`);
+        }
+        rounds.push(matches);
+    }
+    orderForTree(rounds);
+
+    return rounds.map((matches, index) => ({
+        round_id: `${stageId}-r${index + 1}`,
+        name: names[index],
+        matches,
+    }));
+}
+
+/**
+ * El cuadro de cada etapa de una rama, con sus líneas: cada cruce sabe de qué
+ * partido de la ronda anterior sale cada lado (`home_source`/`away_source`), y
+ * los que la liga todavía no publicó van como `placeholder`.
  *
  * Activa: la primera etapa con partidos por jugar; si ya se jugó todo, la última.
  */
@@ -649,13 +912,7 @@ export function buildUs7Brackets(fixtures: Us7Fixture[]): Us7Bracket[] {
     const brackets = [...stages.entries()]
         .map(([stageId, stageFixtures]) => {
             const sorted = [...stageFixtures].sort(byKickoff);
-            const rounds = [...roundsOfStage(sorted).entries()]
-                .sort((left, right) => left[0] - right[0])
-                .map(([round, roundFixtures]) => ({
-                    round_id: `${stageId}-r${round}`,
-                    name: `Ronda ${round}`,
-                    matches: [...roundFixtures].sort(byKickoff).map(toBracketMatch),
-                }));
+            const rounds = stageRounds(stageId, sorted);
             return {
                 stageId,
                 name: sorted[0]?.stageName || 'Ultimate Sevens',
