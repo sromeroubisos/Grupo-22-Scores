@@ -309,6 +309,99 @@ function buildTreeLayout(rounds: ResolvedRound[]): { leaves: number; rounds: Tre
     return { leaves: rounds[0].matches.length, rounds: tree };
 }
 
+type Placement = {
+    position: string;
+    name: string;
+    logo: string;
+    reached: string;
+    champion: boolean;
+};
+
+/**
+ * Dónde terminó cada club: la última ronda en la que jugó. El campeón es el 1;
+ * el que perdió la final, el 2; los que cayeron en semis comparten el 3-4, y
+ * así hacia atrás. No hay partidos de ubicación, así que un empate de puesto
+ * se muestra como tal ("3-4") y no se desempata inventando un criterio.
+ *
+ * Solo con la etapa terminada y todo publicado: antes, un perdedor de la
+ * primera ronda todavía puede ser el mejor perdedor y seguir en carrera.
+ */
+function placementsOf(rounds: TreeRound[]): Placement[] | null {
+    const lastRound = rounds[rounds.length - 1];
+    if (!lastRound || lastRound.nodes.length !== 1) return null;
+    if (rounds.some((round) => round.nodes.some((node) => node.view.placeholder))) return null;
+
+    const final = lastRound.nodes[0].view;
+    const champion = final.finished ? (final.home.won ? final.home : final.away.won ? final.away : null) : null;
+    if (!champion) return null;
+
+    const lastSeen = new Map<string, { roundIdx: number; logo: string }>();
+    rounds.forEach((round, roundIdx) => {
+        for (const node of round.nodes) {
+            for (const side of [node.view.home, node.view.away]) {
+                if (side.name && side.name !== 'TBD') lastSeen.set(side.name, { roundIdx, logo: side.logo });
+            }
+        }
+    });
+
+    const placements: Placement[] = [
+        { position: '1', name: champion.name, logo: champion.logo, reached: 'Campeón', champion: true },
+    ];
+    let next = 2;
+    for (let roundIdx = rounds.length - 1; roundIdx >= 0; roundIdx--) {
+        const out = [...lastSeen.entries()]
+            .filter(([name, seen]) => seen.roundIdx === roundIdx && name !== champion.name)
+            .sort(([left], [right]) => left.localeCompare(right, 'es'));
+        if (out.length === 0) continue;
+        const position = out.length === 1 ? String(next) : `${next}-${next + out.length - 1}`;
+        for (const [name, seen] of out) {
+            placements.push({ position, name, logo: seen.logo, reached: rounds[roundIdx].name, champion: false });
+        }
+        next += out.length;
+    }
+    return placements;
+}
+
+function PlacementsTable({ placements }: { placements: Placement[] }) {
+    return (
+        <section className={styles.placements} aria-label="Posiciones finales">
+            <h3 className={styles.placementsTitle}>Posiciones finales</h3>
+            <table className={styles.placementsTable}>
+                <thead>
+                    <tr>
+                        <th scope="col">Pos.</th>
+                        <th scope="col">Club</th>
+                        <th scope="col">Llegó hasta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {placements.map((placement) => (
+                        <tr key={placement.name} className={placement.champion ? styles.placementChampion : undefined}>
+                            <td className={styles.placementPos}>{placement.position}</td>
+                            <td>
+                                <span className={styles.placementClub}>
+                                    {placement.logo ? (
+                                        <img src={placement.logo} alt="" className={styles.logo} loading="lazy" />
+                                    ) : (
+                                        <span className={`${styles.logo} ${styles.logoPlaceholder}`} />
+                                    )}
+                                    <span className={styles.name}>{placement.name}</span>
+                                </span>
+                            </td>
+                            <td className={styles.placementReached}>
+                                <span className={styles.placementReachedInner}>
+                                    {placement.champion ? <Trophy size={12} aria-hidden="true" /> : null}
+                                    {placement.reached}
+                                </span>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </section>
+    );
+}
+
 /** El codo que une un origen con su cruce, en unidades de fila (x va de 0 a 10). */
 function linkPath(fromY: number, toY: number): string {
     return `M0 ${fromY} H5 V${toY} H10`;
@@ -495,12 +588,14 @@ export default function PlayoffBracket({ data, title = 'Cuadro Final' }: Playoff
     // Sevens). Con 3.er puesto no: esa ronda no cuelga de ningún cruce del árbol.
     const tree = thirdPlaceRounds.length === 0 ? buildTreeLayout(mainRounds) : null;
     if (tree) {
+        const placements = placementsOf(tree.rounds);
         return (
             <div className={styles.container}>
                 <h2 className={styles.title}>{title}</h2>
                 <div className={styles.bracketScroll}>
                     <BracketTree layout={tree} finalIdx={finalIdx} />
                 </div>
+                {placements ? <PlacementsTable placements={placements} /> : null}
             </div>
         );
     }
