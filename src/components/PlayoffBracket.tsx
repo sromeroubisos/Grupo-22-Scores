@@ -61,10 +61,12 @@ function looksLikeFinalRoundName(name: string): boolean {
 
 // "Final por el 5.º puesto" es una final de ubicación, no LA final: define un
 // puesto, no un campeón. Nada de dorado ni de tira de Campeón para esas. El
-// puesto 1 sí es la final por el título ("Final por el 1.er puesto").
+// puesto 1 sí es la final por el título ("Final por el 1.er puesto"). El punto
+// y el ordinal van por separado: "5.º" son dos caracteres, y con uno solo
+// "7.º puesto" se leía como final y se quedaba con la columna héroe.
 function isPlacementRoundName(name: string): boolean {
     const n = name.toLowerCase();
-    const m = n.match(/(\d+)\s*(?:\.|º|°|o)?\s*(?:er|do|to|mo|vo|no)?\s*puesto|(\d+)(?:st|nd|rd|th)[-\s]*place/);
+    const m = n.match(/(\d+)\s*\.?\s*(?:º|°|o)?\s*(?:er|do|to|mo|vo|no)?\s*puesto|(\d+)(?:st|nd|rd|th)[-\s]*place/);
     if (!m) return false;
     const num = Number(m[1] ?? m[2]);
     return Number.isFinite(num) && num > 1;
