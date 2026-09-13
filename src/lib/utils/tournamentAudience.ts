@@ -167,6 +167,11 @@ const BOTH_AUDIENCES_PATTERNS = [
     // el Juvenil de rugby—, y el hincha los busca en la portada. Las dos
     // grafías porque el sitio escribe "Seleccionados" y la gente "Selecciones".
     /\bcampeonatos?\s+argentinos?\s+de\s+seleccion(?:ad[oa]s|es)\b/i,
+    // El M16 Desarrollo de la UAR: Norte y Sur desde 2023, y el Nacional con
+    // Copa de Oro y de Plata hasta 2022. Juegan los seleccionados de las uniones.
+    // Va con la forma exacta del nombre: la URBA tiene decenas de torneos de
+    // CLUBES que dicen "M 16 … Desarrollo" y ninguno puede colarse a la portada.
+    /\bm16\s+desarrollo\s+(?:norte|sur)\b|\bnacional\s+desarrollo\s+m16\b/i,
 ];
 
 /** Si el torneo se muestra en los dos segmentos en vez de en el suyo. */

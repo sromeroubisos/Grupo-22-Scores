@@ -141,6 +141,30 @@ test('los Argentinos de Seleccionados de hockey entran en las dos pestañas sin 
     assert.equal(isDualAudienceTournament({ name: 'Campeonato Argentino de Clubes Sub 16 A Caballeros' }), false);
 });
 
+test('el M16 Desarrollo de seleccionados entra en las dos pestañas y los Desarrollo de clubes no', () => {
+    for (const nombre of [
+        'M16 Desarrollo Norte',
+        'M16 Desarrollo Sur',
+        'Torneo Nacional Desarrollo M16 - Copa de Oro',
+        'Torneo Nacional Desarrollo M16 - Copa de Plata',
+    ]) {
+        assert.equal(isDualAudienceTournament({ name: nombre }), true, nombre);
+        assert.equal(matchesTournamentAudience({ name: nombre }, 'mayores'), true, nombre);
+        assert.equal(matchesTournamentAudience({ name: nombre }, 'juveniles'), true, nombre);
+    }
+
+    // Nombres reales de la URBA: M16 y "Desarrollo" en el mismo nombre, pero son
+    // de clubes y siguen sólo en juveniles.
+    for (const nombre of [
+        'URBA: Juveniles - Segunda rueda - M 16 - Grupo I - Desarrollo',
+        'URBA: Juveniles - Segunda Rueda - M16 - Grupo l - Desarrollo',
+        'URBA: Menores de 16 - Segunda Rueda - G1 Desarrollo',
+        'URBA: Desarrollo - Superior',
+    ]) {
+        assert.equal(isDualAudienceTournament({ name: nombre }), false, nombre);
+    }
+});
+
 test('la puerta no se lleva puesto ningún otro torneo', () => {
     // El resto de los juveniles sigue sólo en su pestaña: si esto se rompe, la
     // portada se llena de M15 y el segmento deja de servir para nada.
