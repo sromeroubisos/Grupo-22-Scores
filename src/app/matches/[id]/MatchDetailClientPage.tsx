@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ProtectedLink from '@/components/ProtectedLink';
@@ -53,6 +53,10 @@ import {
 } from '@/lib/matches/matchTabs';
 import { normalizeMatchVideoLinks, type MatchVideoLink } from '@/lib/matches/videoLinks';
 import PlayerStatsPanel from './PlayerStatsPanel';
+import PlayerMatchSheet, {
+    type PlayerSheetIdentity,
+    resolvePlayerSheetSubject,
+} from './PlayerMatchSheet';
 import MyLineupBuilder from './MyLineupBuilder';
 import LineupRatingEditorModal from './LineupRatingEditorModal';
 import MatchVideosPanel from './MatchVideosPanel';
@@ -1727,6 +1731,32 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         awayName: state.matchData?.away?.name || 'Visitante',
     }), [state.localPlayerRows, state.matchData?.away?.name, state.matchData?.home?.name, state.playerStats]);
 
+    // ── La ficha del jugador ────────────────────────────────────────────────
+    // Se guarda A QUIEN se cliqueó, no la ficha ya armada: con el partido en
+    // vivo llegan tries y tarjetas nuevas cada doce segundos, y una ficha
+    // congelada al abrir se quedaba mostrando el partido de hace un rato.
+    // Resolverla en un memo la deja siguiendo al marcador mientras está abierta.
+    const [playerSheetIdentity, setPlayerSheetIdentity] = useState<PlayerSheetIdentity | null>(null);
+
+    const openPlayerSheet = useCallback((identity: PlayerSheetIdentity) => {
+        setPlayerSheetIdentity(identity);
+    }, []);
+
+    const closePlayerSheet = useCallback(() => {
+        setPlayerSheetIdentity(null);
+    }, []);
+
+    const playerSheetSubject = useMemo(() => {
+        if (!playerSheetIdentity) return null;
+        return resolvePlayerSheetSubject({
+            identity: playerSheetIdentity,
+            table: playerStatsTable,
+            events: Array.isArray(state.eventsData) ? state.eventsData : [],
+            homeName: state.matchData?.home?.name || 'Local',
+            awayName: state.matchData?.away?.name || 'Visitante',
+        });
+    }, [playerSheetIdentity, playerStatsTable, state.eventsData, state.matchData?.home?.name, state.matchData?.away?.name]);
+
     // Props estables para MatchTimeline: construidas inline en el JSX cambiaban
     // de identidad en cada tick del reloj y anulaban su React.memo.
     const timelineHomeTeam = useMemo(() => ({
@@ -3074,7 +3104,24 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     <span className={styles.playerCrest} aria-hidden="true">
                                         <TeamLogo name={matchData.home.name} logoUrl={matchData.home.logo} size={16} />
                                     </span>
-                                                                    {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
+                                                                    <button
+                                                                        type="button"
+                                                                        className={styles.pmNameButton}
+                                                                        onClick={() => openPlayerSheet({
+                                                                            playerId: pId,
+                                                                            name: pName,
+                                                                            team: 'home',
+                                                                            teamName: matchData.home.name,
+                                                                            number: pNumber,
+                                                                            position: p.position,
+                                                                            rating: p.rating,
+                                                                            isCaptain: p.isCaptain,
+                                                                        })}
+                                                                        aria-haspopup="dialog"
+                                                                        aria-label={`Ficha de ${pName} en el partido`}
+                                                                    >
+                                                                        {pName}
+                                                                    </button>
                                                                 </span>
                                                                 <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                     {pBadges.map((badge) => (
@@ -3107,7 +3154,24 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     <span className={styles.playerCrest} aria-hidden="true">
                                         <TeamLogo name={matchData.home.name} logoUrl={matchData.home.logo} size={16} />
                                     </span>
-                                                                        {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
+                                                                        <button
+                                                                            type="button"
+                                                                            className={styles.pmNameButton}
+                                                                            onClick={() => openPlayerSheet({
+                                                                                playerId: pId,
+                                                                                name: pName,
+                                                                                team: 'home',
+                                                                                teamName: matchData.home.name,
+                                                                                number: pNumber,
+                                                                                position: p.position,
+                                                                                rating: p.rating,
+                                                                                isCaptain: p.isCaptain,
+                                                                            })}
+                                                                            aria-haspopup="dialog"
+                                                                            aria-label={`Ficha de ${pName} en el partido`}
+                                                                        >
+                                                                            {pName}
+                                                                        </button>
                                                                     </span>
                                                                     <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                         {pBadges.map((badge) => (
@@ -3143,7 +3207,24 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     <span className={styles.playerCrest} aria-hidden="true">
                                         <TeamLogo name={matchData.away.name} logoUrl={matchData.away.logo} size={16} />
                                     </span>
-                                                                    {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
+                                                                    <button
+                                                                        type="button"
+                                                                        className={styles.pmNameButton}
+                                                                        onClick={() => openPlayerSheet({
+                                                                            playerId: pId,
+                                                                            name: pName,
+                                                                            team: 'away',
+                                                                            teamName: matchData.away.name,
+                                                                            number: pNumber,
+                                                                            position: p.position,
+                                                                            rating: p.rating,
+                                                                            isCaptain: p.isCaptain,
+                                                                        })}
+                                                                        aria-haspopup="dialog"
+                                                                        aria-label={`Ficha de ${pName} en el partido`}
+                                                                    >
+                                                                        {pName}
+                                                                    </button>
                                                                 </span>
                                                                 <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                     {pBadges.map((badge) => (
@@ -3176,7 +3257,24 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     <span className={styles.playerCrest} aria-hidden="true">
                                         <TeamLogo name={matchData.away.name} logoUrl={matchData.away.logo} size={16} />
                                     </span>
-                                                                        {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{pName}</Link> : pName}
+                                                                        <button
+                                                                            type="button"
+                                                                            className={styles.pmNameButton}
+                                                                            onClick={() => openPlayerSheet({
+                                                                                playerId: pId,
+                                                                                name: pName,
+                                                                                team: 'away',
+                                                                                teamName: matchData.away.name,
+                                                                                number: pNumber,
+                                                                                position: p.position,
+                                                                                rating: p.rating,
+                                                                                isCaptain: p.isCaptain,
+                                                                            })}
+                                                                            aria-haspopup="dialog"
+                                                                            aria-label={`Ficha de ${pName} en el partido`}
+                                                                        >
+                                                                            {pName}
+                                                                        </button>
                                                                     </span>
                                                                     <span style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                                                                         {pBadges.map((badge) => (
@@ -3670,6 +3768,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     playerStats={state.playerStats}
                                     homeName={matchData.home?.name || 'Local'}
                                     awayName={matchData.away?.name || 'Visitante'}
+                                    onOpenPlayer={openPlayerSheet}
                                     titleAction={rateablePlayers.length > 0 ? (
                                         <button
                                             type="button"
@@ -3795,6 +3894,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     </aside>
                 </main>
             </div>
+
+            <PlayerMatchSheet subject={playerSheetSubject} onClose={closePlayerSheet} />
 
             {isSuperAdminUser && (
                 <LineupRatingEditorModal
