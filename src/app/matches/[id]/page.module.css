@@ -4949,3 +4949,457 @@
     color: var(--muted);
     font-weight: 600;
 }
+
+/* ── La ficha del jugador dentro del partido ────────────────────────────────
+   Se abre al cliquear un nombre en la alineación, en la cronología o en la
+   tabla de estadísticas, y contesta "qué hizo hoy" sin sacar al lector de la
+   pantalla. El perfil queda a un botón de distancia.
+
+   Los tokens se declaran ACÁ y no se heredan de `.page`: la ficha se monta al
+   final del árbol y, colgada fuera de ese scope, se quedaba sin fondo y sin
+   borde. Salen de las variables globales, así que el tema claro anda igual. */
+.pmSheetOverlay {
+    --panel-solid: var(--color-bg-secondary);
+    --stroke: var(--color-border);
+    --text: var(--color-text-primary);
+    --meta: var(--color-text-secondary);
+    --muted: var(--color-text-tertiary);
+    --accent: var(--color-accent);
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.pmSheet {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 560px;
+    max-height: 88vh;
+    background: var(--panel-solid);
+    border: 1px solid var(--stroke);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+    color: var(--text);
+    animation: pmSheetIn 220ms var(--mo-ease-quart, cubic-bezier(0.25, 1, 0.5, 1));
+}
+
+.pmSheet:focus {
+    outline: none;
+}
+
+@keyframes pmSheetIn {
+    from { transform: translateY(16px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pmSheet { animation: none; }
+}
+
+/* En pantalla grande deja de ser una hoja que sube y pasa a ser un diálogo
+   centrado: pegada abajo en un monitor obliga a bajar la vista. */
+@media (min-width: 640px) {
+    .pmSheetOverlay {
+        align-items: center;
+        padding: 24px;
+    }
+
+    .pmSheet {
+        border-bottom: 1px solid var(--stroke);
+        border-radius: 16px;
+        max-height: 82vh;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    }
+}
+
+.pmSheetHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 18px 14px;
+    border-bottom: 1px solid var(--stroke);
+}
+
+/* La cara del jugador. El círculo está siempre —con foto o con la inicial—
+   para que la cabecera no se corra cuando la imagen llega tarde. */
+.pmSheetAvatar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    overflow: hidden;
+    border: 1px solid var(--stroke);
+    border-radius: 999px;
+    background: rgba(var(--color-accent-rgb), 0.10);
+    color: var(--accent);
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.pmSheetAvatarPhoto {
+    width: 100%;
+    height: 100%;
+    /* `cover` y no `contain`: una foto de plantel viene con el pecho adentro y
+       encogida entera se lee como una estampilla. */
+    object-fit: cover;
+    object-position: top center;
+}
+
+.pmSheetIdentity {
+    /* Crece para empujar el puntaje y la cruz contra el borde: sin esto el
+       `space-between` reparte el sobrante como hueco entre la foto y el nombre. */
+    flex: 1;
+    min-width: 0;
+}
+
+.pmSheetNameRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.pmSheetNumber {
+    flex: none;
+    min-width: 24px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(var(--color-accent-rgb), 0.12);
+    color: var(--accent);
+    font-family: var(--font-mono, monospace);
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+/* El título de la ficha es un h2: el h1 de la pantalla es el partido. */
+.pmSheetName {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--text);
+}
+
+.pmSheetCaptain {
+    flex: none;
+    padding: 0 5px;
+    border-radius: 4px;
+    background: rgba(var(--color-accent-rgb), 0.16);
+    color: var(--color-accent-ink, var(--accent));
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 16px;
+}
+
+.pmSheetMeta {
+    margin: 4px 0 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--meta);
+}
+
+.pmSheetHeaderActions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+}
+
+.pmSheetClose {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--stroke);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--meta);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.pmSheetClose:hover {
+    color: var(--text);
+    border-color: var(--accent);
+}
+
+.pmSheetBody {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 6px 18px 18px;
+    overscroll-behavior: contain;
+}
+
+.pmSheetSection {
+    margin-top: 14px;
+}
+
+.pmSheetSectionTitle {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.pmSheetStats {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Grilla y no flex: el puesto va en un segundo renglon debajo de la etiqueta,
+   y el valor se queda arriba a la derecha, alineado con el nombre del stat. */
+.pmSheetStatRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 16px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--stroke);
+}
+
+.pmSheetStatRanks {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+    margin: 3px 0 0;
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--muted);
+}
+
+.pmSheetRank {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pmSheetRank strong {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--meta);
+}
+
+/* El primero se reconoce por el color del numero; el texto sigue diciendo
+   "1.º", asi que el color nunca es el unico que lo cuenta. */
+.pmSheetRankTop strong {
+    color: var(--color-accent-ink, var(--accent));
+}
+
+.pmSheetStats > .pmSheetStatRow:last-child {
+    border-bottom: none;
+}
+
+/* El cero se apaga entero, etiqueta incluida: la fila sigue estando —el dato
+   existe y dice "no hizo"— pero no compite con lo que sí pasó. */
+.pmSheetStatRowZero {
+    opacity: 0.55;
+}
+
+.pmSheetStatLabel {
+    min-width: 0;
+    font-size: 13px;
+    color: var(--meta);
+}
+
+.pmSheetStatValue {
+    flex: none;
+    margin: 0;
+    font-family: var(--font-mono, monospace);
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+}
+
+/* El tono lo declara la métrica (`PlayerMetricTone`), no la ficha: el deporte
+   que sume su propia tarjeta hereda el color sin tocar esto.
+
+   El tinte va al FONDO y el número se queda en `--text`, igual que las chapas
+   de la tabla: el ámbar como texto da 2,8:1 sobre la hoja clara y no llega a
+   AA. Pintado atrás, el color avisa sin cargar la legibilidad. */
+.pmSheetStatValueCaution,
+.pmSheetStatValueDanger {
+    padding: 1px 7px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+}
+
+.pmSheetStatValueCaution {
+    border-color: rgba(245, 158, 11, 0.34);
+    background: rgba(245, 158, 11, 0.13);
+}
+
+.pmSheetStatValueDanger {
+    border-color: rgba(239, 68, 68, 0.36);
+    background: rgba(239, 68, 68, 0.14);
+}
+
+.pmSheetEmpty {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--meta);
+}
+
+.pmSheetEvents {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pmSheetEvent {
+    display: grid;
+    grid-template-columns: 34px 18px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 7px 0;
+}
+
+.pmSheetEventMinute {
+    font-family: var(--font-mono, monospace);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--meta);
+}
+
+.pmSheetEventIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pmSheetEventIconSvg {
+    width: 14px;
+    height: 14px;
+}
+
+.pmSheetEventText {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+}
+
+.pmSheetEventLabel {
+    flex: none;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.pmSheetEventDetail {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--meta);
+}
+
+.pmSheetFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--stroke);
+}
+
+.pmSheetProfileLink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #04070c;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.pmSheetProfileLink:hover {
+    filter: brightness(1.08);
+}
+
+/* Sin ficha no hay botón apagado: un botón que no se puede apretar obliga a
+   adivinar por qué. Se dice en una línea y listo. */
+.pmSheetNoProfile {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--meta);
+}
+
+.pmSheetCloseText {
+    flex: none;
+    min-height: 40px;
+    padding: 0 16px;
+    border: 1px solid var(--stroke);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--meta);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pmSheetCloseText:hover {
+    color: var(--text);
+    border-color: var(--accent);
+}
+
+/* El nombre cliqueable: mismo aspecto que el enlace que reemplazó, pero es un
+   botón porque abre una ficha, no navega a otra pantalla. */
+.pmNameButton {
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: inherit;
+    cursor: pointer;
+}
+
+.pmNameButton:hover {
+    color: var(--accent);
+}
+
+.pmNameButton:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}

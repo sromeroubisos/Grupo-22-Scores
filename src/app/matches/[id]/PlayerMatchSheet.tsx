@@ -33,6 +33,18 @@ export type PlayerSheetIdentity = {
     isCaptain?: boolean;
 };
 
+/**
+ * Donde queda el jugador en una metrica, con los empates compartiendo puesto
+ * (1, 2, 2, 4) igual que la tabla: dos jugadores con un try cada uno no son el
+ * primero y el segundo.
+ */
+export type PlayerSheetRank = {
+    position: number;
+    /** Entre cuantos se mide: los que tienen el dato cargado, ceros incluidos. */
+    of: number;
+    shared: boolean;
+};
+
 export type PlayerSheetMetric = {
     id: string;
     label: string;
@@ -40,6 +52,8 @@ export type PlayerSheetMetric = {
     tone: PlayerMetricTone;
     /** El cero se muestra apagado: "0 amarillas" no es una marca del partido. */
     isZero: boolean;
+    matchRank: PlayerSheetRank | null;
+    clubRank: PlayerSheetRank | null;
 };
 
 export type PlayerSheetEvent = {
@@ -82,6 +96,33 @@ export type PlayerSheetTableData = {
  *   escribir el mismo numero dos veces con distinto peso.
  */
 const METRICS_HIDDEN_IN_SHEET = new Set(['matchesPlayed', 'rating']);
+
+/**
+ * Si el puesto en una metrica dice algo.
+ *
+ * - Una tarjeta (`tone` caution/danger) no es una carrera: "1.º en amarillas"
+ *   la presenta como una marca.
+ * - El tiempo jugado lo empatan los quince titulares: el puesto es ruido.
+ * - El cero no compite (la fila ya va apagada): "12.º en tries" es decir cero
+ *   con mas letras.
+ */
+function metricIsRankable(meta: { kind: string; tone?: PlayerMetricTone }, value: number | null) {
+    if (value == null || value <= 0) return false;
+    if (meta.tone && meta.tone !== 'neutral') return false;
+    return meta.kind !== 'duration' && meta.kind !== 'rating';
+}
+
+function rankWithin(value: number, pool: number[]): PlayerSheetRank | null {
+    // Contra nadie no hay puesto: "1.º de 1" no es una marca.
+    if (pool.length < 2) return null;
+    let above = 0;
+    let same = 0;
+    pool.forEach((other) => {
+        if (other > value) above += 1;
+        else if (other === value) same += 1;
+    });
+    return { position: above + 1, of: pool.length, shared: same > 1 };
+}
 
 function nameKey(value: unknown) {
     return String(value || '')
@@ -201,6 +242,10 @@ export function resolvePlayerSheetSubject(args: {
         row?.teamName ||
         (team === 'home' ? args.homeName : team === 'away' ? args.awayName : '');
 
+    // El club se mide por el lado de la FILA, no por el que trajo quien abrio:
+    // la fila es la que esta en la tabla contra la que se cuenta.
+    const clubSide = row?.team ?? null;
+
     const metrics: PlayerSheetMetric[] = row
         ? table.metricIds
               .filter((metricId) => !METRICS_HIDDEN_IN_SHEET.has(metricId))
@@ -211,12 +256,31 @@ export function resolvePlayerSheetSubject(args: {
               .map((metricId) => {
                   const meta = getPlayerMetricMeta(metricId, table.metricLabels[metricId]);
                   const raw = row.metrics[metricId];
+                  const numeric = parseNumericStat(raw);
+
+                  let matchRank: PlayerSheetRank | null = null;
+                  let clubRank: PlayerSheetRank | null = null;
+                  if (metricIsRankable(meta, numeric)) {
+                      const matchPool: number[] = [];
+                      const clubPool: number[] = [];
+                      table.rows.forEach((candidate) => {
+                          const candidateValue = parseNumericStat(candidate.metrics[metricId]);
+                          if (candidateValue == null) return;
+                          matchPool.push(candidateValue);
+                          if (clubSide && candidate.team === clubSide) clubPool.push(candidateValue);
+                      });
+                      matchRank = rankWithin(numeric as number, matchPool);
+                      clubRank = clubSide ? rankWithin(numeric as number, clubPool) : null;
+                  }
+
                   return {
                       id: metricId,
                       label: meta.label,
                       value: formatPlayerMetricValue(metricId, raw, table.metricLabels[metricId]),
                       tone: meta.tone ?? 'neutral',
-                      isZero: (parseNumericStat(raw) ?? 0) === 0,
+                      isZero: (numeric ?? 0) === 0,
+                      matchRank,
+                      clubRank,
                   };
               })
         : [];
@@ -284,6 +348,22 @@ type Props = {
     subject: PlayerSheetSubject | null;
     onClose: () => void;
 };
+
+/**
+ * "2.º en el partido". El empate se escribe: sin eso, cuatro jugadores con un
+ * try leerian los cuatro "2.º" y parecería un error de la tabla.
+ */
+function SheetRank({ rank, scope }: { rank: PlayerSheetRank; scope: string }) {
+    return (
+        <span
+            className={`${styles.pmSheetRank} ${rank.position === 1 ? styles.pmSheetRankTop : ''}`}
+            title={`${rank.position}.º de ${rank.of}${rank.shared ? ', empatado' : ''}`}
+        >
+            <strong>{rank.position}.º</strong>
+            {rank.shared ? ' (emp.)' : ''} {scope}
+        </span>
+    );
+}
 
 /**
  * La ficha de un jugador DENTRO del partido: todo lo que el partido dice de el,
@@ -453,6 +533,16 @@ export default function PlayerMatchSheet({ subject, onClose }: Props) {
                                         >
                                             {metric.value}
                                         </dd>
+                                        {(metric.matchRank || metric.clubRank) && (
+                                            <dd className={styles.pmSheetStatRanks}>
+                                                {metric.matchRank && (
+                                                    <SheetRank rank={metric.matchRank} scope="en el partido" />
+                                                )}
+                                                {metric.clubRank && (
+                                                    <SheetRank rank={metric.clubRank} scope={`en ${subject.teamName || 'su club'}`} />
+                                                )}
+                                            </dd>
+                                        )}
                                     </div>
                                 ))}
                             </dl>

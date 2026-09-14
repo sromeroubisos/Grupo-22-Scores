@@ -63,11 +63,6 @@ function hasAnyRecord(row: PlayerStatsTableRow, metricIds: string[]) {
   return metricIds.some((metricId) => metricNumber(row, metricId) !== 0);
 }
 
-/**
- * Puesto dentro del grupo, con los empates compartiendo numero (1, 2, 2, 4).
- * Numerar por indice mentiria: dos jugadores con un gol cada uno no son el
- * primero y el segundo goleador.
- */
 /** Lo que la ficha necesita saber de una fila para abrirse. */
 function identityOf(row: PlayerStatsTableRow): PlayerSheetIdentity {
   return {
@@ -82,6 +77,11 @@ function identityOf(row: PlayerStatsTableRow): PlayerSheetIdentity {
   };
 }
 
+/**
+ * Puesto dentro del grupo, con los empates compartiendo numero (1, 2, 2, 4).
+ * Numerar por indice mentiria: dos jugadores con un gol cada uno no son el
+ * primero y el segundo goleador.
+ */
 function rankRows(rows: PlayerStatsTableRow[], metricId: string) {
   let previousValue: number | null = null;
   let previousRank = 0;
