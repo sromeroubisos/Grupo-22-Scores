@@ -1,11 +1,18 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getAllTournaments } from '@/lib/data/tournaments';
 import { normalizeProdeSourceBinding } from '@/lib/prode/source';
-import { applyScoringRulesToPredictionRows, refreshCompetitionScoreboards, resolveProdeScoringRules } from '@/lib/server/prodeScoring';
+import {
+    applyScoringRulesToPredictionRows,
+    isSameInstant,
+    refreshCompetitionScoreboards,
+    resolveProdeScoringRules,
+    selectAllRows,
+    stableStringify,
+} from '@/lib/server/prodeScoring';
 import { getTournamentFixtures, getTournamentIds } from '@/lib/services/flashscore';
 import { getEspnFootballProdeEvents, inferEspnFootballLeague } from '@/lib/services/espnFootball';
 import { isFootballSport } from '@/lib/externalProviderPolicy';
-import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
+import { buildClubLogoProxyUrl, resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import type {
     ProdeCompetitionStatus,
     ProdePlayEvent,
@@ -32,6 +39,10 @@ interface LooseQueryBuilder extends PromiseLike<QueryResult> {
     eq(column: string, value: string | number | boolean): LooseQueryBuilder;
     in(column: string, values: string[]): LooseQueryBuilder;
     order(column: string, options?: { ascending?: boolean }): LooseQueryBuilder;
+    range(from: number, to: number): LooseQueryBuilder;
+    gte(column: string, value: string): LooseQueryBuilder;
+    lte(column: string, value: string): LooseQueryBuilder;
+    not(column: string, operator: string, value: string): LooseQueryBuilder;
     maybeSingle(): PromiseLike<MaybeSingleResult>;
     single(): PromiseLike<MaybeSingleResult>;
 }
@@ -175,6 +186,25 @@ function resolveStoredLogo(...sources: Array<Record<string, unknown> | null>) {
     }
 
     return null;
+}
+
+// Escudo de un club de la base, pedido al proxy por su id. El sync NO lee
+// `clubs.logo_url`: con los escudos en base64 embebidos en cada partido, la lectura
+// de `matches` de una corrida del cron bajaba 529 MB para quedarse con 1,4 MB
+// (medido el 14/9 sobre las 38 competencias locales). Cada 5 minutos, eso era la
+// meseta de ~120 GB diarios de egress de Supabase. El feed de partidos ya había
+// pasado por lo mismo; esta es la misma salida.
+function toLocalClubLogoUrl(club: Record<string, unknown>): string | null {
+    const id = toNullableString(club.id);
+    if (!id) return null;
+
+    const name = toSafeString(club.name) || toSafeString(club.short_name);
+    return toLogoUrl(resolveTeamLogo({
+        id,
+        name,
+        logo: buildClubLogoProxyUrl(id, name),
+        updated_at: toSafeString(club.updated_at),
+    }));
 }
 
 // Los eventos sincronizados antes de este arreglo tienen el data: URI congelado
@@ -761,11 +791,12 @@ function mapEvents(eventRows: AnyRow[], predictionRows: AnyRow[]) {
 
 async function getCompetitionRows(admin: LooseMutationClient, competitionId: string) {
     const [eventResult, memberResult, rankingResult] = await Promise.all([
-        admin
-        .from('prode_events')
-        .select('id, competition_id, home_label, away_label, starts_at, locks_at, status, scoring_status, official_result, match_snapshot')
-        .eq('competition_id', competitionId)
-        .order('starts_at', { ascending: true }),
+        selectAllRows(() => admin
+            .from('prode_events')
+            .select('id, competition_id, home_label, away_label, starts_at, locks_at, status, scoring_status, official_result, match_snapshot')
+            .eq('competition_id', competitionId)
+            .order('starts_at', { ascending: true })
+            .order('id', { ascending: true })),
         admin
             .from('prode_competition_members')
             .select('user_id, users(name, avatar_url)')
@@ -788,11 +819,12 @@ async function getCompetitionRows(admin: LooseMutationClient, competitionId: str
 }
 
 async function getCompetitionEventRows(admin: LooseMutationClient, competitionId: string) {
-    const eventResult = await admin
+    const eventResult = await selectAllRows(() => admin
         .from('prode_events')
         .select('id, competition_id, home_label, away_label, starts_at, locks_at, status, scoring_status, official_result, match_snapshot')
         .eq('competition_id', competitionId)
-        .order('starts_at', { ascending: true });
+        .order('starts_at', { ascending: true })
+        .order('id', { ascending: true }));
 
     return {
         eventRows: eventResult.data || [],
@@ -835,8 +867,8 @@ async function getLocalBaseMatches(admin: LooseMutationClient, tournamentId: str
             status,
             score,
             round_label,
-            home_club:clubs!matches_home_club_id_fkey(id, name, short_name, logo_url),
-            away_club:clubs!matches_away_club_id_fkey(id, name, short_name, logo_url)
+            home_club:clubs!matches_home_club_id_fkey(id, name, short_name, updated_at),
+            away_club:clubs!matches_away_club_id_fkey(id, name, short_name, updated_at)
         `)
         .eq('tournament_id', tournamentId);
 
@@ -867,8 +899,8 @@ async function getLocalBaseMatches(admin: LooseMutationClient, tournamentId: str
             officialResult: buildOfficialResultFromScores(homeScore, awayScore),
             matchSnapshot: {
                 roundLabel: toNullableString(row.round_label),
-                homeLogoUrl: resolveStoredLogo(homeClub) || toLogoUrl(resolveTeamLogo(homeClub)),
-                awayLogoUrl: resolveStoredLogo(awayClub) || toLogoUrl(resolveTeamLogo(awayClub)),
+                homeLogoUrl: toLocalClubLogoUrl(homeClub),
+                awayLogoUrl: toLocalClubLogoUrl(awayClub),
                 score,
                 sourceMatchStatus: toSafeString(row.status) || 'scheduled',
             },
@@ -1265,35 +1297,103 @@ function isUniqueViolation(error: QueryError) {
     return (error?.message || '').includes('duplicate key value');
 }
 
-async function loadExistingEventIds(admin: LooseMutationClient, competitionId: string) {
-    const result = await admin
+const EVENT_KEY_COLUMNS = 'id, local_match_id, external_provider, external_match_id';
+
+// Lo que el sync escribe, para poder decir si un partido cambió antes de escribirlo.
+const EVENT_DIFF_COLUMNS = `${EVENT_KEY_COLUMNS}, tournament_id, home_label, away_label, starts_at, locks_at, status, scoring_status, official_result, match_snapshot`;
+
+async function loadExistingEvents(admin: LooseMutationClient, competitionId: string, columns: string) {
+    // Paginado: con más de 1000 eventos, los ids que no entraban en la primera
+    // página parecían partidos nuevos, el insert chocaba contra el índice único
+    // (409) y la relectura —cortada igual— nunca los encontraba. La competencia no
+    // se marcaba fresca y el choque se repetía en cada corrida del cron.
+    const result = await selectAllRows(() => admin
         .from('prode_events')
-        .select('id, local_match_id, external_provider, external_match_id')
-        .eq('competition_id', competitionId);
+        .select(columns)
+        .eq('competition_id', competitionId)
+        .order('id', { ascending: true }));
 
     if (result.error) {
         throw new Error(result.error.message || 'No se pudieron cargar los eventos existentes del prode.');
     }
 
-    const local = new Map<string, string>();
-    const external = new Map<string, string>();
+    const local = new Map<string, AnyRow>();
+    const external = new Map<string, AnyRow>();
 
-    for (const row of result.data || []) {
-        const existingId = toSafeString(row.id);
-        if (!existingId) continue;
+    for (const row of result.data) {
+        if (!toSafeString(row.id)) continue;
 
         const localKey = eventKeyOf('local', row);
         if (localKey) {
-            local.set(localKey, existingId);
+            local.set(localKey, row);
         }
 
         const externalKey = eventKeyOf('external', row);
         if (externalKey) {
-            external.set(externalKey, existingId);
+            external.set(externalKey, row);
         }
     }
 
     return { local, external };
+}
+
+function idsByKey(rowsByKey: Map<string, AnyRow>) {
+    return new Map(Array.from(rowsByKey, ([key, row]) => [key, toSafeString(row.id)]));
+}
+
+async function loadExistingEventIds(admin: LooseMutationClient, competitionId: string) {
+    const existing = await loadExistingEvents(admin, competitionId, EVENT_KEY_COLUMNS);
+    return { local: idsByKey(existing.local), external: idsByKey(existing.external) };
+}
+
+/**
+ * Lo que el scoring ya cerró no se reabre. El proveedor dice `final` para siempre;
+ * el prode, una vez puntuado el partido, lo pasa a `scored`. Antes el sync volvía a
+ * escribir `final`/`ready` en cada corrida, el scoring lo volvía a puntuar, y así
+ * cada cinco minutos con todos los partidos jugados. Si el resultado cambió (una
+ * corrección de planilla) sí se reabre: ese es justamente el caso a repuntuar.
+ */
+function preserveScoringState(payload: AnyRow, current: AnyRow): AnyRow {
+    const sameResult = stableStringify(current.official_result ?? null) === stableStringify(payload.official_result ?? null);
+
+    if (payload.status === 'final' && toSafeString(current.status) === 'scored' && sameResult) {
+        return { ...payload, status: 'scored', scoring_status: toSafeString(current.scoring_status) || 'scored' };
+    }
+
+    if (payload.status === 'cancelled' && toSafeString(current.status) === 'cancelled' && toSafeString(current.scoring_status) === 'void') {
+        return { ...payload, scoring_status: 'void' };
+    }
+
+    return payload;
+}
+
+function isEventUnchanged(current: AnyRow, next: AnyRow) {
+    return toSafeString(current.status) === toSafeString(next.status)
+        && toSafeString(current.scoring_status) === toSafeString(next.scoring_status)
+        && toSafeString(current.home_label) === toSafeString(next.home_label)
+        && toSafeString(current.away_label) === toSafeString(next.away_label)
+        && toNullableString(current.tournament_id) === toNullableString(next.tournament_id)
+        && isSameInstant(current.starts_at, next.starts_at)
+        && isSameInstant(current.locks_at, next.locks_at)
+        && stableStringify(current.official_result ?? null) === stableStringify(next.official_result ?? null)
+        && stableStringify(current.match_snapshot ?? null) === stableStringify(next.match_snapshot ?? null);
+}
+
+/**
+ * Deja solo los partidos nuevos o que cambiaron. Un sábado sin resultados nuevos
+ * no escribe nada; antes reescribía los ~5000 eventos del prode cada vez.
+ */
+export function keepChangedEvents(kind: EventKind, payloads: AnyRow[], existingByKey: Map<string, AnyRow>): AnyRow[] {
+    return payloads.flatMap((payload) => {
+        const key = eventKeyOf(kind, payload);
+        const current = key ? existingByKey.get(key) : undefined;
+        if (!current) {
+            return [payload];
+        }
+
+        const next = preserveScoringState(payload, current);
+        return isEventUnchanged(current, next) ? [] : [next];
+    });
 }
 
 /**
@@ -1462,7 +1562,7 @@ async function syncCompetitionBaseEvents(admin: LooseMutationClient, competition
             return;
         }
 
-        const existingEventIds = await loadExistingEventIds(admin, competitionId);
+        const existingEvents = await loadExistingEvents(admin, competitionId, EVENT_DIFF_COLUMNS);
 
         const localPayloads = baseMatches
             .filter((row) => row.sourceType === 'local' && row.localMatchId)
@@ -1513,16 +1613,16 @@ async function syncCompetitionBaseEvents(admin: LooseMutationClient, competition
             admin,
             competitionId,
             'local',
-            localPayloads,
-            existingEventIds.local,
+            keepChangedEvents('local', localPayloads, existingEvents.local),
+            idsByKey(existingEvents.local),
         );
 
         const externalComplete = await writeCompetitionEvents(
             admin,
             competitionId,
             'external',
-            externalPayloads,
-            existingEventIds.external,
+            keepChangedEvents('external', externalPayloads, existingEvents.external),
+            idsByKey(existingEvents.external),
         );
 
         if (!localComplete || !externalComplete) {
@@ -1561,7 +1661,44 @@ function getLeagueLifecycle(leagueRow: AnyRow) {
  * sin disparar llamadas a proveedores externos en cada request. Best-effort por
  * competencia y con concurrencia acotada para no saturar el pool ni los proveedores.
  */
-export async function syncActiveProdeCompetitionsBaseEvents(): Promise<{ total: number; synced: number; errors: number }> {
+// Ventana de un partido "en juego" para el sync liviano: empezó hace menos de seis
+// horas (o empieza en los próximos quince minutos) y el prode todavía no lo tiene
+// como terminado. Un resultado que se carga más tarde lo levanta la pasada
+// completa de la hora en punto.
+const LIVE_WINDOW_BEFORE_MS = 6 * 60 * 60 * 1000;
+const LIVE_WINDOW_AFTER_MS = 15 * 60 * 1000;
+
+async function listCompetitionsWithLiveEvents(admin: LooseMutationClient, competitionIds: string[]) {
+    if (!competitionIds.length) {
+        return new Set<string>();
+    }
+
+    const now = Date.now();
+    const result = await selectAllRows(() => admin
+        .from('prode_events')
+        .select('id, competition_id')
+        .in('competition_id', competitionIds)
+        .gte('starts_at', new Date(now - LIVE_WINDOW_BEFORE_MS).toISOString())
+        .lte('starts_at', new Date(now + LIVE_WINDOW_AFTER_MS).toISOString())
+        .not('status', 'in', '(final,scored,cancelled)')
+        .order('id', { ascending: true }));
+
+    if (result.error) {
+        throw new Error(result.error.message || 'No se pudieron cargar los partidos en juego del prode.');
+    }
+
+    return new Set(result.data.map((row) => toSafeString(row.competition_id)).filter(Boolean));
+}
+
+/**
+ * `onlyLive` es la corrida de cada cinco minutos: solo las competencias con un
+ * partido en la ventana de juego, que son las únicas donde puede aparecer un
+ * resultado. Antes cada corrida repasaba las 45 competencias, cada una contra su
+ * proveedor, aunque no se jugara nada en todo el día.
+ */
+export async function syncActiveProdeCompetitionsBaseEvents(
+    options: { onlyLive?: boolean } = {},
+): Promise<{ total: number; synced: number; errors: number }> {
     const admin = createAdminClient() as unknown as LooseMutationClient;
     const competitionResult = await admin
         .from('prode_competitions')
@@ -1572,7 +1709,11 @@ export async function syncActiveProdeCompetitionsBaseEvents(): Promise<{ total: 
         throw new Error(competitionResult.error.message || 'No se pudieron cargar las competencias activas del prode.');
     }
 
-    const rows = competitionResult.data || [];
+    const activeRows = competitionResult.data || [];
+    const live = options.onlyLive
+        ? await listCompetitionsWithLiveEvents(admin, activeRows.map((row) => toSafeString(row.id)).filter(Boolean))
+        : null;
+    const rows = live ? activeRows.filter((row) => live.has(toSafeString(row.id))) : activeRows;
     let synced = 0;
     let errors = 0;
     const SYNC_CONCURRENCY = 2;

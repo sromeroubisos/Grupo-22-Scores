@@ -12,12 +12,52 @@ interface LooseQueryBuilder extends PromiseLike<QueryResult> {
     eq(column: string, value: string | number | boolean): LooseQueryBuilder;
     in(column: string, values: string[]): LooseQueryBuilder;
     order(column: string, options?: { ascending?: boolean }): LooseQueryBuilder;
+    range(from: number, to: number): LooseQueryBuilder;
+    or(filters: string): LooseQueryBuilder;
+    limit(count: number): LooseQueryBuilder;
     maybeSingle(): PromiseLike<MaybeSingleResult>;
 }
 
 interface LooseMutationBuilder extends PromiseLike<MutationResult> {
     eq(column: string, value: string | number | boolean): LooseMutationBuilder;
     in(column: string, values: string[]): LooseMutationBuilder;
+}
+
+// `db-max-rows` de la base: PostgREST no devuelve más filas que esto por request.
+const POSTGREST_PAGE_SIZE = 1000;
+
+/**
+ * Lee TODAS las filas de una consulta, de a páginas.
+ *
+ * PostgREST corta cada respuesta en 1000 filas sin avisar, y en el prode el corte
+ * se comía los partidos NUEVOS: los eventos se piden por `starts_at` ascendente y,
+ * en una competencia con 1182 eventos (1000 de temporadas viejas + 182 de 2026),
+ * los 1000 que llegaban eran los viejos. El Top 14 de la URBA dejó de puntuar sus
+ * pronósticos así, y el sync —que tampoco veía todos los ids— reinsertaba filas
+ * que ya existían y chocaba con 409 en cada corrida.
+ *
+ * `buildQuery` tiene que ordenar de forma TOTAL (desempate por `id`): con un orden
+ * parcial las páginas se pisan y una fila puede repetirse o perderse. Corta en la
+ * página incompleta porque cada página pide exactamente el techo de la base; si
+ * alguien baja `db-max-rows`, esta constante tiene que bajar con él.
+ */
+export async function selectAllRows<E>(
+    buildQuery: () => { range(from: number, to: number): PromiseLike<{ data: AnyRow[] | null; error: E | null }> },
+): Promise<{ data: AnyRow[]; error: E | null }> {
+    const rows: AnyRow[] = [];
+
+    for (let from = 0; ; from += POSTGREST_PAGE_SIZE) {
+        const { data, error } = await buildQuery().range(from, from + POSTGREST_PAGE_SIZE - 1);
+        if (error) {
+            return { data: rows, error };
+        }
+
+        const page = data || [];
+        rows.push(...page);
+        if (page.length < POSTGREST_PAGE_SIZE) {
+            return { data: rows, error: null };
+        }
+    }
 }
 
 interface LooseMutationClient {
@@ -50,11 +90,11 @@ function isRugbySport(sportId: string | null) {
 const COMPETITION_REFRESH_TTL_MS = 15_000;
 const GLOBAL_REFRESH_TTL_MS = 15_000;
 
-const competitionRefreshInFlight = new Map<string, { promise: Promise<boolean>; version: number }>();
+const competitionRefreshInFlight = new Map<string, { promise: Promise<boolean>; version: number; force: boolean }>();
 const competitionRefreshCompletedAt = new Map<string, number>();
 const competitionRefreshVersion = new Map<string, number>();
 
-let globalRefreshInFlight: { promise: Promise<boolean>; version: number } | null = null;
+let globalRefreshInFlight: { promise: Promise<StoredScoreboardsRefresh | null>; version: number } | null = null;
 let globalRefreshCompletedAt = 0;
 let globalRefreshVersion = 0;
 
@@ -580,13 +620,50 @@ export function applyLeagueScoringEpochs(
     });
 }
 
+/**
+ * JSON con las claves ordenadas, para comparar lo que se leyó de la base contra lo
+ * que se va a escribir. `JSON.stringify` a secas NO sirve: jsonb guarda las claves
+ * en su propio orden (primero las cortas), así que un desglose idéntico vuelve
+ * como otro texto y "cambió" siempre. Por eso cada corrida reescribía todos los
+ * pronósticos del prode.
+ */
+export function stableStringify(value: unknown): string {
+    if (Array.isArray(value)) {
+        return `[${value.map((item) => stableStringify(item)).join(',')}]`;
+    }
+    if (value && typeof value === 'object') {
+        const record = value as Record<string, unknown>;
+        return `{${Object.keys(record)
+            .filter((key) => record[key] !== undefined)
+            .sort()
+            .map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`)
+            .join(',')}}`;
+    }
+    return JSON.stringify(value ?? null);
+}
+
+/** Mismo instante aunque el texto difiera (`...Z` contra `...+00:00`). */
+export function isSameInstant(left: unknown, right: unknown): boolean {
+    const leftText = toNullableString(left);
+    const rightText = toNullableString(right);
+    if (!leftText || !rightText) {
+        return leftText === rightText;
+    }
+
+    const leftMs = new Date(leftText).getTime();
+    const rightMs = new Date(rightText).getTime();
+    return Number.isFinite(leftMs) && Number.isFinite(rightMs) ? leftMs === rightMs : leftText === rightText;
+}
+
+// `scored_at` no entra en la comparación: el motor lo pone en "ahora" cada vez que
+// puntúa, así que compararlo daba "cambió" en todas las corridas. Si cambian los
+// puntos o el desglose, la fila se escribe y ahí sí lleva la hora nueva.
 function isPredictionChanged(originalRow: AnyRow, nextRow: AnyRow) {
     return (
         toFiniteNumber(originalRow.points_awarded) !== toFiniteNumber(nextRow.points_awarded)
         || toSafeString(originalRow.status) !== toSafeString(nextRow.status)
-        || toNullableString(originalRow.locked_at) !== toNullableString(nextRow.locked_at)
-        || toNullableString(originalRow.scored_at) !== toNullableString(nextRow.scored_at)
-        || JSON.stringify(toRecord(originalRow.scoring_breakdown)) !== JSON.stringify(toRecord(nextRow.scoring_breakdown))
+        || !isSameInstant(originalRow.locked_at, nextRow.locked_at)
+        || stableStringify(toRecord(originalRow.scoring_breakdown)) !== stableStringify(toRecord(nextRow.scoring_breakdown))
     );
 }
 
@@ -676,10 +753,11 @@ async function upsertCompetitionRankingScope(
     // Limpieza de filas obsoletas: usuarios que ya no pertenecen a este scope
     // (salieron de la liga/competencia o quedaron sin predicciones) deben dejar de
     // figurar en la tabla. El upsert no las toca, así que las borramos aparte.
-    const existingRowsResult = await admin
+    const existingRowsResult = await selectAllRows(() => admin
         .from('prode_rankings')
         .select('id, user_id, scope_type, private_league_id, round_key')
-        .eq('competition_id', competitionId);
+        .eq('competition_id', competitionId)
+        .order('id', { ascending: true }));
 
     if (existingRowsResult.error) {
         if (isMissingRelationError(existingRowsResult.error)) {
@@ -813,23 +891,81 @@ async function refreshUserTotals(admin: LooseMutationClient, userIds: string[]) 
     }
 }
 
-export async function refreshCompetitionScoreboards(competitionId: string) {
+// Un evento con trabajo de scoring pendiente: terminó con resultado y todavía no
+// se puntuó, o se canceló y sus pronósticos no se anularon. Es la única señal de
+// que los puntos pueden cambiar; si no hay ninguno, recalcular da lo mismo que ya
+// está guardado.
+const PENDING_SCORING_FILTER = [
+    'and(status.eq.final,official_result.not.is.null)',
+    'and(status.eq.scored,scoring_status.neq.scored)',
+    'and(status.eq.cancelled,scoring_status.neq.void)',
+].join(',');
+
+async function hasPendingScoringWork(admin: LooseMutationClient, competitionId: string) {
+    const result = await admin
+        .from('prode_events')
+        .select('id')
+        .eq('competition_id', competitionId)
+        .or(PENDING_SCORING_FILTER)
+        .limit(1);
+
+    // Ante la duda se recalcula: un error acá no puede dejar puntos sin asignar.
+    return Boolean(result.error) || (result.data || []).length > 0;
+}
+
+async function listCompetitionsWithPendingScoring(admin: LooseMutationClient, competitionIds: string[]) {
+    if (!competitionIds.length) {
+        return new Set<string>();
+    }
+
+    const result = await selectAllRows(() => admin
+        .from('prode_events')
+        .select('id, competition_id')
+        .in('competition_id', competitionIds)
+        .or(PENDING_SCORING_FILTER)
+        .order('id', { ascending: true }));
+
+    if (result.error) {
+        return new Set(competitionIds);
+    }
+
+    return new Set(result.data.map((row) => toSafeString(row.competition_id)).filter(Boolean));
+}
+
+/**
+ * Recalcula puntos, rankings y totales de una competencia.
+ *
+ * Sin `force`, primero pregunta si hay algo por puntuar y, si no, no hace nada:
+ * es lo que corre en cada visita a /prode/[slug]. `force` es para lo que cambia
+ * puntos sin que termine un partido — las reglas de una liga, un alta — y para la
+ * pasada diaria de resguardo del cron.
+ */
+export async function refreshCompetitionScoreboards(competitionId: string, options: { force?: boolean } = {}) {
     if (!competitionId) {
         return false;
     }
 
-    if (isFreshEnough(competitionRefreshCompletedAt.get(competitionId), COMPETITION_REFRESH_TTL_MS)) {
+    const force = Boolean(options.force);
+    if (!force && isFreshEnough(competitionRefreshCompletedAt.get(competitionId), COMPETITION_REFRESH_TTL_MS)) {
         return true;
     }
 
     const refreshVersion = competitionRefreshVersion.get(competitionId) || 0;
     const existingRefresh = competitionRefreshInFlight.get(competitionId);
-    if (existingRefresh && existingRefresh.version === refreshVersion) {
+    if (existingRefresh && existingRefresh.version === refreshVersion && (existingRefresh.force || !force)) {
         return existingRefresh.promise;
     }
 
     const refreshPromise = (async () => {
         const admin = createAdminClient() as unknown as LooseMutationClient;
+
+        if (!force && !(await hasPendingScoringWork(admin, competitionId))) {
+            if ((competitionRefreshVersion.get(competitionId) || 0) === refreshVersion) {
+                competitionRefreshCompletedAt.set(competitionId, Date.now());
+            }
+            return true;
+        }
+
         const competitionResult = await admin
             .from('prode_competitions')
             .select('id, active_ruleset_id, sport_id, metadata')
@@ -857,15 +993,17 @@ export async function refreshCompetitionScoreboards(competitionId: string) {
                     .eq('id', activeRulesetId)
                     .maybeSingle()
                 : Promise.resolve({ data: null, error: null }),
-            admin
+            selectAllRows(() => admin
                 .from('prode_events')
                 .select('id, competition_id, status, scoring_status, official_result, match_snapshot, locks_at, scored_at')
                 .eq('competition_id', competitionId)
-                .order('starts_at', { ascending: true }),
-            admin
+                .order('starts_at', { ascending: true })
+                .order('id', { ascending: true })),
+            selectAllRows(() => admin
                 .from('prode_predictions')
                 .select('id, competition_id, event_id, user_id, predicted_outcome, predicted_home_score, predicted_away_score, points_awarded, status, scoring_breakdown, submitted_at, locked_at, scored_at')
-                .eq('competition_id', competitionId),
+                .eq('competition_id', competitionId)
+                .order('id', { ascending: true })),
             admin
                 .from('prode_competition_members')
                 .select('competition_id, user_id, status')
@@ -958,10 +1096,14 @@ export async function refreshCompetitionScoreboards(competitionId: string) {
             const id = toSafeString(row.id);
             if (!id) continue;
 
+            // Solo las transiciones pendientes. Antes se reescribían TODOS los eventos
+            // ya puntuados en cada corrida (con un `scored_at` nuevo): partidos de
+            // 1898 figuraban "puntuados hace un minuto".
+            const scoringStatus = toSafeString(row.scoring_status);
             let payload: AnyRow | null = null;
-            if (status === 'cancelled') {
+            if (status === 'cancelled' && scoringStatus !== 'void') {
                 payload = { scoring_status: 'void', scored_at: nowIso };
-            } else if (officialResult && (status === 'final' || status === 'scored')) {
+            } else if (officialResult && (status === 'final' || (status === 'scored' && scoringStatus !== 'scored'))) {
                 payload = { status: 'scored', scoring_status: 'scored', scored_at: nowIso };
             }
 
@@ -1060,13 +1202,23 @@ export async function refreshCompetitionScoreboards(competitionId: string) {
         competitionRefreshInFlight.delete(competitionId);
     });
 
-    competitionRefreshInFlight.set(competitionId, { promise: refreshPromise, version: refreshVersion });
+    competitionRefreshInFlight.set(competitionId, { promise: refreshPromise, version: refreshVersion, force });
     return refreshPromise;
 }
 
-export async function refreshStoredProdeScoreboards() {
-    if (isFreshEnough(globalRefreshCompletedAt, GLOBAL_REFRESH_TTL_MS)) {
-        return true;
+export type StoredScoreboardsRefresh = { total: number; refreshed: number };
+
+/**
+ * La pasada del cron. Por defecto recalcula SOLO las competencias con algún
+ * partido por puntuar: una corrida sin partidos terminados es una consulta y
+ * nada más. Antes recalculaba las 45 competencias cada cinco minutos, y como el
+ * sync pisaba los partidos puntuados con `final`, nunca estaban "al día".
+ * `full` recalcula todas; el cron lo usa una vez por día como resguardo.
+ */
+export async function refreshStoredProdeScoreboards(options: { full?: boolean } = {}): Promise<StoredScoreboardsRefresh | null> {
+    const full = Boolean(options.full);
+    if (!full && isFreshEnough(globalRefreshCompletedAt, GLOBAL_REFRESH_TTL_MS)) {
+        return { total: 0, refreshed: 0 };
     }
 
     const refreshVersion = globalRefreshVersion;
@@ -1089,19 +1241,22 @@ export async function refreshStoredProdeScoreboards() {
 
         if (competitionResult.error) {
             if (isMissingRelationError(competitionResult.error)) {
-                return false;
+                return null;
             }
 
             throw new Error(competitionResult.error.message || 'No se pudieron cargar las competencias del prode.');
         }
 
+        const activeIds = (competitionResult.data || [])
+            .map((row) => toSafeString(row.id))
+            .filter(Boolean);
+        const pending = full ? null : await listCompetitionsWithPendingScoring(admin, activeIds);
+        const competitionIds = pending ? activeIds.filter((id) => pending.has(id)) : activeIds;
+
         // Limit concurrency: each refreshCompetitionScoreboards already
         // dispatches dozens of queries internally, so refreshing all
         // competitions in parallel was a fast path to exhausting the
         // connection pool. Run them with bounded concurrency instead.
-        const competitionIds = (competitionResult.data || [])
-            .map((row) => toSafeString(row.id))
-            .filter(Boolean);
         const REFRESH_CONCURRENCY = 2;
 
         for (let i = 0; i < competitionIds.length; i += REFRESH_CONCURRENCY) {
@@ -1109,7 +1264,9 @@ export async function refreshStoredProdeScoreboards() {
             await Promise.allSettled(
                 batch.map(async (competitionId) => {
                     try {
-                        await refreshCompetitionScoreboards(competitionId);
+                        // `force`: ya sabemos que hay trabajo (o es la pasada
+                        // completa); no hace falta volver a preguntar.
+                        await refreshCompetitionScoreboards(competitionId, { force: true });
                     } catch (error) {
                         console.error('[prode/scoring] refresh failed for competition', competitionId, error);
                     }
@@ -1120,7 +1277,7 @@ export async function refreshStoredProdeScoreboards() {
         if (globalRefreshVersion === refreshVersion) {
             globalRefreshCompletedAt = Date.now();
         }
-        return true;
+        return { total: activeIds.length, refreshed: competitionIds.length };
     })().finally(() => {
         globalRefreshInFlight = null;
     });

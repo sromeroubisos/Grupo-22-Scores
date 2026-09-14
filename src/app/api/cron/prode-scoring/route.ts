@@ -14,11 +14,24 @@
  *
  * Llamado por Vercel Cron cada 5 minutos: "*\/5 * * * *"
  * Autenticación: header Bearer {CRON_SECRET}.
+ *
+ * No todas las corridas hacen lo mismo. Antes cada una sincronizaba y
+ * recalculaba las 45 competencias, y como el sync reabría los partidos ya
+ * puntuados, el recálculo nunca terminaba de "estar al día": era una factura de
+ * Supabase por reescribir lo mismo cada cinco minutos. Ahora:
+ *   - cada 5 min: sync solo de competencias con un partido en juego, y scoring
+ *     solo de competencias con un partido terminado sin puntuar. Sin partidos,
+ *     la corrida son tres consultas chicas.
+ *   - a la hora en punto: sync de todas (fixture nuevo, fechas movidas,
+ *     resultados cargados tarde).
+ *   - una vez por día (06:00 de Argentina): recálculo completo de puntajes, de
+ *     resguardo.
+ * `?completo=1` fuerza la pasada completa de las dos etapas (a mano, con API key).
  */
 import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import { syncActiveProdeCompetitionsBaseEvents } from '@/lib/server/prodePlay';
-import { refreshStoredProdeScoreboards } from '@/lib/server/prodeScoring';
+import { refreshStoredProdeScoreboards, type StoredScoreboardsRefresh } from '@/lib/server/prodeScoring';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -30,25 +43,34 @@ export async function GET(request: NextRequest) {
     }
 
     const startedAt = Date.now();
+    const now = new Date(startedAt);
+    const forced = request.nextUrl.searchParams.get('completo') === '1';
+    // La corrida de la hora en punto es la primera de la hora: con "*\/5" cae en el
+    // minuto 0, y el margen de cinco absorbe la demora del scheduler.
+    const fullSync = forced || now.getUTCMinutes() < 5;
+    const fullScoring = forced || (fullSync && now.getUTCHours() === 9);
 
     // Cada etapa es best-effort: un fallo de proveedor externo o del motor no debe
     // abortar la otra etapa ni devolver 500 al scheduler.
     let sync: { total: number; synced: number; errors: number } = { total: 0, synced: 0, errors: 0 };
     try {
-        sync = await syncActiveProdeCompetitionsBaseEvents();
+        sync = await syncActiveProdeCompetitionsBaseEvents({ onlyLive: !fullSync });
     } catch (error) {
         console.error('[prode-scoring] sync de eventos base falló:', error);
     }
 
-    let scored = false;
+    let scored: StoredScoreboardsRefresh | null = null;
     try {
-        scored = await refreshStoredProdeScoreboards();
+        scored = await refreshStoredProdeScoreboards({ full: fullScoring });
     } catch (error) {
         console.error('[prode-scoring] refresh de scoreboards falló:', error);
     }
 
     const elapsed = Date.now() - startedAt;
-    console.log(`[prode-scoring] Done: synced ${sync.synced}/${sync.total} competencias, scored=${scored} en ${elapsed}ms`);
+    console.log(
+        `[prode-scoring] Done: sync ${fullSync ? 'completo' : 'en juego'} ${sync.synced}/${sync.total}, `
+        + `scoring ${fullScoring ? 'completo' : 'pendientes'} ${scored?.refreshed ?? 0}/${scored?.total ?? 0} en ${elapsed}ms`,
+    );
 
-    return NextResponse.json({ ok: true, sync, scored, elapsed });
+    return NextResponse.json({ ok: true, fullSync, fullScoring, sync, scored, elapsed });
 }
