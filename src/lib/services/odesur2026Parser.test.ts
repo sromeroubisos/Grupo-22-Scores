@@ -14,7 +14,9 @@ import {
     odesurEventType,
     findOdesurUnit,
     isOdesurCopyLeague,
+    odesurAllDisciplines,
     odesurDisciplineName,
+    odesurEs,
     odesurEventName,
     odesurOrgIso2,
     odesurPersonName,
@@ -27,6 +29,7 @@ import {
     parseOdesurGroups,
     parseOdesurMatchId,
     parseOdesurMedals,
+    parseOdesurRanking,
     parseOdesurResultDetail,
     parseOdesurTournamentId,
     parseOdesurUnit,
@@ -453,12 +456,42 @@ test('el nombre del atleta se lee nombre y apellido, con los apellidos compuesto
     assert.equal(odesurPersonName('Ana Pérez'), 'Ana Pérez');
 });
 
-test('la prueba lleva el género en castellano adelante', () => {
-    assert.equal(odesurEventName("Women's 1m Springboard"), 'Femenino · 1m Springboard');
+test('la prueba lleva el género en castellano adelante y la prueba traducida', () => {
+    assert.equal(odesurEventName("Women's 1m Springboard"), 'Femenino · Trampolín 1 m');
     // En equipo, el deporte ya lo dice la tarjeta: queda la rama sola.
     assert.equal(odesurEventName("Men's Team"), 'Masculino');
     assert.equal(odesurEventName('Mixed Petanque'), 'Mixto · Petanque');
-    assert.equal(odesurEventName('Open 10km'), 'Open 10km');
+    assert.equal(odesurEventName('Open 10km'), 'Open 10 km');
+    // El género escrito al final, en el medio o dos veces.
+    assert.equal(odesurEventName("1X Men's"), 'Masculino · 1X');
+    assert.equal(odesurEventName("Shiai Men's -60 Kg"), 'Masculino · Shiai -60 kg');
+    assert.equal(odesurEventName("Men's EA SPORT FC Men's"), 'Masculino · EA SPORT FC');
+    // "Mixed" en el medio es el equipo, no la rama.
+    assert.equal(odesurEventName('Trap Mixed Team'), 'Trap equipo mixto');
+});
+
+test('el vocabulario de la API sale en castellano y los nombres propios quedan', () => {
+    assert.equal(odesurEs('4 x 100m Medley Relay'), 'Posta 4x100 m combinada');
+    assert.equal(odesurEs('200m Butterfly'), '200 m mariposa');
+    assert.equal(odesurEs('10,000m'), '10.000 m');
+    assert.equal(odesurEs('up to 54 kg'), 'Hasta 54 kg');
+    assert.equal(odesurEs('Kyorugi 49 kg to 57 kg'), 'Kyorugi 49 a 57 kg');
+    // `\b` no ve la "É": la espada tiene que traducirse igual.
+    assert.equal(odesurEs('Épée Individual'), 'Espada individual');
+    assert.equal(odesurEs('Foil Team'), 'Florete por equipos');
+    assert.equal(odesurEs('Team Recurve'), 'Recurvo por equipos');
+    assert.equal(odesurEs('Round of 16'), 'Octavos de final');
+    assert.equal(odesurEs('Table of 32'), '16avos de final');
+    assert.equal(odesurEs('Heat 2'), 'Serie 2');
+    assert.equal(odesurEs('Bout 3'), 'Combate 3');
+    assert.equal(odesurEs('Race 1, 2 and 3'), 'Regatas 1, 2 y 3');
+    assert.equal(odesurEs('Laser Run'), 'Laser run');
+    assert.equal(odesurEs('Fencing Direct Elimination'), 'Eliminación directa');
+    assert.equal(odesurEs('K1 Parallel Slalom'), 'K1 Parallel Slalom');
+    assert.equal(odesurEs(''), '');
+    // "Group Stage" no es la zona "STAGE".
+    assert.equal(odesurStageName('Group Stage', 'Match 1').stageName, 'Fase de grupos');
+    assert.equal(odesurStageName('Quarterfinals', '').stageName, 'Cuartos de final');
 });
 
 test('los 60 deportes y las 15 delegaciones tienen nombre y bandera', () => {
@@ -528,8 +561,127 @@ test('la agenda del día trae todos los deportes y apunta a la ficha de los part
     assert.equal(agenda[0].disciplineName, 'Natación');
     assert.equal(agenda[0].medal, true);
     assert.equal(agenda[0].matchId, null);
-    assert.equal(agenda[0].eventName, 'Femenino · 100m Freestyle');
+    assert.equal(agenda[0].eventName, 'Femenino · 100 m libre');
     assert.equal(agenda[1].matchId, 'odesur-match-hoc-w-GP01-000100');
+    // `ALL/schedule/day` no trae competidores: la fila queda sin ellos.
+    assert.deepEqual(agenda[0].orgs, []);
+    assert.equal(agenda[0].home, null);
+});
+
+test('el cronograma de un deporte dice quién compite: las delegaciones y los dos lados del cruce', () => {
+    const agenda = parseOdesurAgenda([
+        {
+            Disc: 'FEN',
+            Key: 'W.FOIL--------------.GP01.000100--',
+            ResCode: 'W.FOIL--------------.GP01.000100--',
+            isH2H: true,
+            Type: 'A',
+            Status: 'OFFICIAL',
+            DateTimeRaw: '2026-09-13T10:00:00-03:00',
+            EventDesc: "Women's Foil Individual",
+            PhaseDescA: 'Group A',
+            UnitDescA: 'Bout 1',
+            ShowResults: true,
+            Orgs: ['ARG', 'BRA'],
+            Home: { Org: 'ARG', Name: 'ESPINOZA Daniela', Result: '1', Winner: false },
+            Away: { Org: 'BRA', Name: 'DI RENZO Ana', Result: '5', Winner: true },
+        },
+        {
+            Disc: 'SWM',
+            Key: 'W.200MIM------------.HEAT.000200--',
+            ResCode: 'W.200MIM------------.HEAT.000200--',
+            isH2H: false,
+            Type: 'A',
+            Status: 'START_LIST',
+            DateTimeRaw: '2026-09-13T11:00:00-03:00',
+            EventDesc: "Women's 200m Medley",
+            PhaseDescA: 'Heats',
+            UnitDescA: 'Heat 2',
+            ShowResults: true,
+            Orgs: ['URU', 'ARG', 'nope', 'COL'],
+        },
+    ]);
+
+    const [bout, heat] = agenda;
+    assert.equal(bout.eventName, 'Femenino · Florete individual');
+    assert.equal(bout.phaseName, 'Grupo A');
+    assert.equal(bout.unitName, 'Combate 1');
+    assert.equal(bout.state, 'final');
+    // En individual, el lado es la persona, con su país.
+    assert.deepEqual(bout.home, { org: 'ARG', name: 'Daniela Espinoza', result: '1', winner: false });
+    assert.equal(bout.away?.winner, true);
+    assert.deepEqual(bout.orgs, ['ARG', 'BRA']);
+
+    // Una serie: sin cruce, con las delegaciones ordenadas y los códigos raros afuera.
+    assert.equal(heat.isH2H, false);
+    assert.equal(heat.home, null);
+    assert.deepEqual(heat.orgs, ['ARG', 'COL', 'URU']);
+    assert.equal(heat.phaseName, 'Series');
+    assert.equal(heat.unitName, 'Serie 2');
+    assert.equal(heat.hasResults, true);
+    assert.equal(heat.state, 'scheduled');
+});
+
+test('la clasificación de una prueba sale en orden de puesto, con la marca y lo que no es marca', () => {
+    const rows = parseOdesurRanking({
+        Info: { Type: 'A' },
+        Competitors: [
+            { Rk: '', RkPo: 0, Org: 'PER', Name: 'BOEHLKE Eva', Result: '', IRM: 'DNS', StartSortOrder: 3 },
+            { Rk: '2', RkPo: 2, Org: 'ECU', Name: 'FARINANGO David', Result: '1:47:57.2', IRM: 'OK', StartSortOrder: 1 },
+            { Rk: '1', RkPo: 1, Org: 'BRA', OrgDesc: 'Brazil', Name: 'DE FREITAS Matheus', Result: '1:47:53.5', IRM: 'OK', Qualified: 'Q', StartSortOrder: 2 },
+        ],
+    });
+    assert.deepEqual(rows.map((row) => [row.rank, row.name, row.result, row.note]), [
+        [1, 'Matheus De Freitas', '1:47:53.5', ''],
+        [2, 'David Farinango', '1:47:57.2', ''],
+        [null, 'Eva Boehlke', '', 'DNS'],
+    ]);
+    assert.equal(rows[0].qualified, true);
+
+    // En una prueba de equipo, el lado es el país.
+    const relay = parseOdesurRanking({ Info: { Type: 'T' }, Competitors: [{ Rk: '1', Org: 'BRA', Name: 'Brazil', Result: '3:40.1' }] });
+    assert.equal(relay[0].name, 'Brasil');
+    assert.deepEqual(parseOdesurRanking(null), []);
+});
+
+test('una prueba terminada trae su podio en el cronograma, con la marca y la medalla', () => {
+    const [final] = parseOdesurAgenda([{
+        Disc: 'OWS',
+        Key: 'M.10KM--------------.FNL-.000100--',
+        ResCode: 'M.10KM--------------.FNL-.000100--',
+        isH2H: false,
+        Type: 'A',
+        Medal: '1',
+        Status: 'OFFICIAL',
+        DateTimeRaw: '2026-09-13T09:00:00-03:00',
+        EventDesc: "Men's 10km",
+        PhaseDescA: 'Final',
+        UnitDescA: '',
+        ShowResults: true,
+        Counters: { Partics: 14, Orgs: 8 },
+        Results: [
+            { Org: 'BRA', Name: 'RODRIGUES Victor', Result: '1:48:04.1', RkPo: 3, HasData: true, Medal: 'ME_BRONZE' },
+            { Org: 'BRA', Name: 'DE FREITAS Matheus', Result: '1:47:53.5', RkPo: 1, HasData: true, Medal: 'ME_GOLD' },
+            { Org: 'ECU', Name: 'FARINANGO David', Result: '1:47:57.2', RkPo: 2, HasData: true, Medal: 'ME_SILVER' },
+        ],
+    }]);
+    assert.deepEqual(final.podium.map((entry) => [entry.rank, entry.name, entry.org, entry.metal]), [
+        [1, 'Matheus De Freitas', 'BRA', 'gold'],
+        [2, 'David Farinango', 'ECU', 'silver'],
+        [3, 'Victor Rodrigues', 'BRA', 'bronze'],
+    ]);
+    assert.equal(final.podium[0].result, '1:47:53.5');
+    assert.equal(final.participants, 14);
+    // Un cruce no lleva podio: su resultado es el marcador.
+    const [bout] = parseOdesurAgenda([{ Disc: 'FEN', Key: 'W.FOIL--------------.GP01.000100--', isH2H: true, Results: [{ Org: 'ARG', Name: 'X', RkPo: 1 }] }]);
+    assert.deepEqual(bout.podium, []);
+});
+
+test('los 60 deportes salen en orden alfabético en castellano', () => {
+    const all = odesurAllDisciplines();
+    assert.equal(all.length, 60);
+    assert.equal(all[0].name, 'Adiestramiento');
+    assert.ok(all.some((sport) => sport.code === 'SWM' && sport.name === 'Natación'));
 });
 
 test('la copia de los Juegos en otro proveedor se reconoce por el nombre de la liga', () => {
