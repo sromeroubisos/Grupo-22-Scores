@@ -172,6 +172,11 @@ const BOTH_AUDIENCES_PATTERNS = [
     // Va con la forma exacta del nombre: la URBA tiene decenas de torneos de
     // CLUBES que dicen "M 16 … Desarrollo" y ninguno puede colarse a la portada.
     /\bm16\s+desarrollo\s+(?:norte|sur)\b|\bnacional\s+desarrollo\s+m16\b/i,
+    // Los amistosos entre SELECCIONADOS (Argentina M19 vs. la Academia Italiana):
+    // el feed les pone de nombre su `round_label`, y un M19 de selección se busca
+    // en la portada igual que el Juvenil. Va con la forma exacta "amistoso de
+    // seleccionados" para que el amistoso de la M19 de un club no se cuele.
+    /\bamistosos?\s+(?:internacional(?:es)?\s+)?de\s+seleccionad[oa]s\b/i,
 ];
 
 /** Si el torneo se muestra en los dos segmentos en vez de en el suyo. */
