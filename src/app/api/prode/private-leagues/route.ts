@@ -1,15 +1,27 @@
 import { randomBytes } from 'crypto';
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { listUserPrivateLeagues } from '@/lib/server/prodeCompetitions';
-import { invalidateProdeRefresh } from '@/lib/server/prodeScoring';
+import { invalidateProdeRefresh, refreshCompetitionScoreboards } from '@/lib/server/prodeScoring';
 import { normalizeSlug } from '@/lib/utils/normalize';
 import { normalizeProdeSourceBinding } from '@/lib/prode/source';
 import { getPublicShareOrigin } from '@/lib/auth/requestOrigin';
 import type { ProdeSourceBinding } from '@/lib/prode/types';
 
 export const dynamic = 'force-dynamic';
+
+// Unirse, crear una liga o cambiarle las reglas mueve el ranking sin que termine
+// ningún partido, y el scoring ya no recalcula a ciegas cada cinco minutos: se lo
+// pide acá. Va en `after` para que quien tocó no espere el recálculo.
+function requestProdeRescore(competitionId: string) {
+    invalidateProdeRefresh(competitionId);
+    if (!competitionId) return;
+
+    after(() => refreshCompetitionScoreboards(competitionId, { force: true }).catch((error) => {
+        console.error('[prode/private-leagues] recálculo fallido', competitionId, error);
+    }));
+}
 
 export async function GET() {
     try {
@@ -483,7 +495,7 @@ export async function POST(request: Request) {
             }
 
             const leagueSlug = ensureString(leagueResult.data.slug);
-            invalidateProdeRefresh(competitionId);
+            requestProdeRescore(competitionId);
 
             return NextResponse.json({
                 ok: true,
@@ -590,7 +602,7 @@ export async function POST(request: Request) {
         const createdSlug = ensureString(createdLeague.slug);
         const shareUrl = `${normalizedBaseUrl}/prode/ligas/unirse?codigo=${encodeURIComponent(inviteCode)}`;
         const leagueUrl = `${normalizedBaseUrl}/prode/ligas/${encodeURIComponent(createdSlug)}`;
-        invalidateProdeRefresh(competitionId);
+        requestProdeRescore(competitionId);
 
         return NextResponse.json({
             leagueId: createdLeague.id,
@@ -714,7 +726,7 @@ export async function PATCH(request: Request) {
                 return NextResponse.json({ error: updateLeagueError.message || 'No se pudieron actualizar las reglas.' }, { status: 500 });
             }
 
-            invalidateProdeRefresh(ensureString(league.competition_id));
+            requestProdeRescore(ensureString(league.competition_id));
 
             return NextResponse.json({
                 ok: true,
