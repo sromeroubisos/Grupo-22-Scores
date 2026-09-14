@@ -45,7 +45,9 @@ const navItems = [
 function isActive(pathname: string | null, href: string, matchPrefixes: string[]) {
     if (!pathname) return false;
     if (href === '/') return pathname === '/' || pathname.startsWith('/matches');
-    return matchPrefixes.some((prefix) => pathname.startsWith(prefix));
+    // Un prefijo vale como segmento entero: `/juegos-odesur` empieza con
+    // "/juegos" y no es la sección de minijuegos.
+    return matchPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
 function NavIcon({ name, active }: { name: string; active?: boolean }) {

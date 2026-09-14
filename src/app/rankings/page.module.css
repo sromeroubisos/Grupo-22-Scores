@@ -917,3 +917,130 @@
         transition: none;
     }
 }
+
+/* ── Medallero de los Juegos Suramericanos ───────────────────────────────── */
+
+/* El metal se lee por el punto de color, no por un emoji: Windows no dibuja
+   algunos y el color funciona igual en claro y en oscuro. */
+.medalDot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+    flex-shrink: 0;
+}
+
+.medal_gold { background: #d4a017; }
+.medal_silver { background: #aeb4bc; }
+.medal_bronze { background: #b8733e; }
+
+.thMedal {
+    white-space: nowrap;
+}
+
+.thMedal .medalDot {
+    margin-right: 6px;
+    vertical-align: 1px;
+}
+
+.medalCell {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.medalCounts {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-variant-numeric: tabular-nums;
+}
+
+.medalCount {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.breakdownSection {
+    margin-top: var(--spacing-2xl, 32px);
+}
+
+.breakdownGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: var(--spacing-md);
+}
+
+.breakdownCard {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-secondary);
+    padding: 14px 16px;
+    min-width: 0;
+}
+
+.breakdownTitle {
+    margin: 0 0 10px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.breakdownList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.breakdownRow {
+    display: grid;
+    grid-template-columns: 18px 20px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+}
+
+.breakdownPos {
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.breakdownLogo {
+    width: 20px;
+    height: 20px;
+}
+
+.breakdownName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    /* En el telefono la fila del medallero es una tarjeta de una sola línea:
+       el puesto, la delegación con sus tres metales debajo y el total. */
+    .table tbody .medalRow {
+        grid-template-areas: 'pos club pts';
+    }
+
+    .medalRow .pointsCell {
+        align-self: center;
+    }
+
+    .medalCell {
+        display: none;
+    }
+}
+
+.metaLink {
+    font-weight: 600;
+    color: var(--color-accent-ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}

@@ -54,6 +54,10 @@ import {
   parseUs7MatchId,
 } from '@/lib/services/ultimateSevens';
 import {
+  getOdesurMatchBundle,
+  parseOdesurMatchId,
+} from '@/lib/services/odesur2026';
+import {
   applyExternalTournamentOverride,
   getExternalTournamentOverride,
   type ExternalTournamentOverrideRecord,
@@ -368,6 +372,20 @@ export async function GET(
 
     if (parseFihMatchId(matchId)) {
       const bundle = await getFihWorldCupMatchBundle(matchId);
+      if (!bundle) {
+        return jsonNoStore(
+          { error: 'Match not found' },
+          { status: 404 }
+        );
+      }
+
+      return jsonNoStore({ ...bundle, videos: await videosPromise });
+    }
+
+    // Juegos Suramericanos Santa Fe 2026: siete deportes, una sola fuente
+    // (Bornan). El id dice disciplina, rama, fase y partido.
+    if (parseOdesurMatchId(matchId)) {
+      const bundle = await getOdesurMatchBundle(matchId);
       if (!bundle) {
         return jsonNoStore(
           { error: 'Match not found' },

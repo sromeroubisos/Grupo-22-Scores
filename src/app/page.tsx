@@ -21,6 +21,7 @@ import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
 import TickerTitulares from '@/components/ticker/TickerTitulares';
 import GanaConTuClubBanner from '@/components/marcas/GanaConTuClubBanner';
+import SantaFe2026Acceso from '@/components/odesur/SantaFe2026Acceso';
 import TennisMatchList from '@/components/tennis/TennisMatchList';
 import TennisTournamentList from '@/components/tennis/TennisTournamentList';
 import { toLocalMatch, generateLocalDateKeys } from '@/lib/timezone';
@@ -2080,6 +2081,10 @@ export default function HomePage() {
 
           {/* La placa de Ganá con tu club: entre los titulares y el selector de día. */}
           <GanaConTuClubBanner />
+
+          {/* Juegos Suramericanos Santa Fe 2026: solo en el teléfono, donde el nav
+              no tiene el link. Se apaga solo al día siguiente del cierre. */}
+          <SantaFe2026Acceso />
 
           <div className={styles.mobileTopControls}>
             {/* Sport Selector (Mobile) */}

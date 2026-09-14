@@ -1,0 +1,807 @@
+/* Apartado de los Juegos Suramericanos Santa Fe 2026 (`/juegos-odesur`). */
+
+.page {
+    padding-top: var(--spacing-lg);
+    padding-bottom: calc(var(--spacing-3xl) + 32px);
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ── Cabecera ──────────────────────────────────────────────────────────── */
+
+.header {
+    padding-top: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.kicker {
+    margin: 0 0 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent-ink);
+}
+
+.title {
+    margin: 0;
+    font-size: clamp(1.625rem, 4vw, 2.25rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--color-text-primary);
+}
+
+.lead {
+    margin: 8px 0 0;
+    max-width: 60ch;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+}
+
+.metaLive {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+/* ── Pestañas y selectores ─────────────────────────────────────────────── */
+
+.tabs {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--spacing-lg);
+    scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tab {
+    flex-shrink: 0;
+    padding: 10px 14px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tab:hover {
+    color: var(--color-text-primary);
+}
+
+.tabActive {
+    color: var(--color-text-primary);
+    border-bottom-color: var(--color-accent);
+}
+
+.tab:focus-visible,
+.pill:focus-visible,
+.dayPill:focus-visible,
+.matchRow:focus-visible,
+.agendaLink:focus-visible,
+.moreLink:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.panel {
+    min-height: 240px;
+}
+
+.pickers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.pill,
+.dayPill {
+    padding: 7px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg-secondary);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.pill:hover,
+.dayPill:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-text-tertiary);
+}
+
+.pillSmall {
+    padding: 5px 12px;
+    font-size: 0.8125rem;
+}
+
+.pillActive,
+.pillActive:hover {
+    background: var(--color-text-primary);
+    border-color: var(--color-text-primary);
+    color: var(--color-bg-primary);
+}
+
+.dayStrip {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    /* Se desliza con el dedo o la rueda; la barra del sistema (blanca en
+       Windows) desentonaba con el tema oscuro. */
+    scrollbar-width: none;
+}
+
+.dayStrip::-webkit-scrollbar {
+    display: none;
+}
+
+.dayPill {
+    flex-shrink: 0;
+    text-transform: capitalize;
+}
+
+/* Hoy lleva una marca aunque no esté elegido: es a donde vuelve el ojo. */
+.dayToday:not(.pillActive) {
+    border-color: var(--color-accent);
+}
+
+.selectRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.selectLabel {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.select {
+    min-width: 0;
+    max-width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 0.9375rem;
+}
+
+/* ── Bloques ───────────────────────────────────────────────────────────── */
+
+.stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.blockHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.subTitle {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+}
+
+.moreLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-accent-ink);
+    text-decoration: none;
+}
+
+.moreLink:hover {
+    text-decoration: underline;
+}
+
+.cardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: var(--spacing-md);
+    align-items: start;
+}
+
+.card {
+    min-width: 0;
+    padding: 14px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-secondary);
+}
+
+.cardTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 10px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.cardCount {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
+.inlineState,
+.errorState {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 16px;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-xl);
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+}
+
+.errorState {
+    border-style: solid;
+    border-color: var(--color-error);
+    margin-bottom: var(--spacing-md);
+}
+
+.linkBtn {
+    border: 0;
+    background: none;
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--color-accent-ink);
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Medallas y estados ────────────────────────────────────────────────── */
+
+/* El metal se lee por el punto de color, no por un emoji: Windows no dibuja
+   algunos y el color funciona igual en claro y en oscuro. */
+.medalDot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+    flex-shrink: 0;
+}
+
+.medal_gold { background: #d4a017; }
+.medal_silver { background: #aeb4bc; }
+.medal_bronze { background: #b8733e; }
+
+.medalTag {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 6px;
+    vertical-align: 1px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+.chipScheduled {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.chipFinal {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+}
+
+.chipLive {
+    background: color-mix(in srgb, var(--color-error) 14%, transparent);
+    color: var(--color-text-primary);
+}
+
+.liveDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-error);
+    animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    50% { opacity: 0.35; }
+}
+
+.flag {
+    flex-shrink: 0;
+}
+
+/* ── Tarjeta de Argentina ──────────────────────────────────────────────── */
+
+.argCard {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
+    border-radius: var(--radius-xl);
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-secondary));
+}
+
+.argCard p {
+    margin: 0;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+}
+
+.argCard strong {
+    color: var(--color-text-primary);
+}
+
+/* ── Tablas ────────────────────────────────────────────────────────────── */
+
+.tableWrap {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-secondary);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+}
+
+.groupCaption {
+    padding: 10px 14px 0;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.table th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+
+.table th abbr {
+    text-decoration: none;
+    cursor: help;
+}
+
+.table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.thPos {
+    width: 44px;
+}
+
+.table .thNum {
+    text-align: right;
+}
+
+.thMetalLabel {
+    margin-left: 6px;
+}
+
+.posCell {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+}
+
+.teamCell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.teamCell strong {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.numCell {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.totalCell {
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.rowHighlight {
+    background: color-mix(in srgb, var(--color-accent) 9%, transparent);
+    box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+/* ── Listas compactas ──────────────────────────────────────────────────── */
+
+.latestList,
+.miniList,
+.agendaList,
+.podium {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.latestList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: 8px 16px;
+}
+
+.latestRow,
+.podiumRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.podium {
+    display: grid;
+    gap: 10px;
+}
+
+.latestCopy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+}
+
+.latestCopy strong {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.latestCopy span {
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.miniList {
+    display: grid;
+    gap: 8px;
+}
+
+.miniRow {
+    display: grid;
+    grid-template-columns: 18px 18px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+}
+
+.miniPos {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-tertiary);
+}
+
+.miniName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.miniMetals {
+    display: inline-flex;
+    gap: 10px;
+    font-variant-numeric: tabular-nums;
+}
+
+.miniMetal {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ── Partidos ──────────────────────────────────────────────────────────── */
+
+.dayGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dayTitle {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+.dayTitle::first-letter {
+    text-transform: uppercase;
+}
+
+.matchList {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    background: var(--color-bg-secondary);
+    overflow: hidden;
+}
+
+.matchRow {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) minmax(0, 160px);
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-border);
+    color: inherit;
+    text-decoration: none;
+    transition: background-color var(--transition-fast);
+}
+
+.matchRow:last-child {
+    border-bottom: 0;
+}
+
+.matchRow:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.matchTime {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+}
+
+.matchTeams {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.matchSide {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-secondary);
+}
+
+.winner {
+    color: var(--color-text-primary);
+    font-weight: 700;
+}
+
+.matchName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.matchScore {
+    min-width: 2ch;
+    text-align: right;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.matchStage {
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Agenda ────────────────────────────────────────────────────────────── */
+
+.agendaList {
+    display: flex;
+    flex-direction: column;
+}
+
+.agendaRow {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-top: 1px solid var(--color-border);
+    color: inherit;
+    text-decoration: none;
+}
+
+.agendaList li:first-child .agendaRow {
+    border-top: 0;
+}
+
+.agendaLink:hover .agendaCopy strong {
+    text-decoration: underline;
+}
+
+.agendaTime {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+}
+
+.agendaCopy {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+}
+
+.agendaCopy strong {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.agendaCopy span {
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Teléfono ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+    .matchRow {
+        grid-template-columns: 76px minmax(0, 1fr);
+    }
+
+    /* La instancia pasa abajo del partido en vez de robarle ancho a los nombres. */
+    .matchStage {
+        grid-column: 2;
+        text-align: left;
+    }
+
+    /* En el teléfono alcanza con el color del metal en el encabezado. */
+    .thMetalLabel {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+    }
+
+    .table th,
+    .table td {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spin,
+    .liveDot {
+        animation: none;
+    }
+}

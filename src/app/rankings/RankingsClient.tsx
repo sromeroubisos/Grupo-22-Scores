@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState, useTransition } from 'react';
 import type { CSSProperties } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import {
     AlertCircle,
     ChevronLeft,
@@ -69,7 +70,7 @@ const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: fal
  * tokens del sitio y anda en claro y en oscuro.
  */
 
-type RankingEntity = 'club' | 'seleccion';
+type RankingEntity = 'club' | 'seleccion' | 'delegacion';
 
 type RankingNouns = {
     /** Encabezado de la columna del nombre. */
@@ -109,7 +110,26 @@ const RANKING_NOUNS: Record<RankingEntity, RankingNouns> = {
         buscar: 'Buscar una union',
         comoSeCalcula: 'El ranking oficial de World Rugby. Se publica los lunes con los tests del fin de semana ya computados.',
     },
+    // El medallero de los Juegos Suramericanos: rankea delegaciones y no tiene
+    // puntos, tiene tres metales.
+    delegacion: {
+        entidad: 'Delegacion',
+        plural: 'delegaciones',
+        procedencia: 'Continente',
+        puntaje: 'Medallas',
+        tituloExport: 'Medallero Suramericanos 2026',
+        buscar: 'Buscar una delegacion',
+        comoSeCalcula: 'Ordenado como el medallero oficial: primero los oros, despues las platas y despues los bronces. Se actualiza con cada final.',
+    },
 };
+
+type MedalMetal = 'gold' | 'silver' | 'bronze';
+
+const MEDAL_COLUMNS: Array<{ metal: MedalMetal; label: string }> = [
+    { metal: 'gold', label: 'Oro' },
+    { metal: 'silver', label: 'Plata' },
+    { metal: 'bronze', label: 'Bronce' },
+];
 
 function getRankingNouns(entity?: RankingEntity | null): RankingNouns {
     return RANKING_NOUNS[entity ?? 'club'] ?? RANKING_NOUNS.club;
@@ -165,12 +185,31 @@ type PublicRankingEntry = {
         short_name?: string | null;
         logo_url?: string | null;
     } | null;
+    // Solo en el medallero de los Juegos.
+    medals?: { gold: number; silver: number; bronze: number; total: number } | null;
 };
 
 type PublicRankingDetail = {
     ranking: PublicRankingSummary;
     entries: PublicRankingEntry[];
+    // Solo en el medallero general de los Juegos: el de cada deporte.
+    breakdown?: Array<{ discipline: string; name: string; entries: PublicRankingEntry[] }>;
 };
+
+/** Los tres metales de una fila del medallero, en el orden en que se leen. */
+function MedalCounts({ medals }: { medals: NonNullable<PublicRankingEntry['medals']> }) {
+    return (
+        <span className={styles.medalCounts}>
+            {MEDAL_COLUMNS.map(({ metal, label }) => (
+                <span key={metal} className={styles.medalCount} title={`${medals[metal]} de ${label.toLowerCase()}`}>
+                    <span className={`${styles.medalDot} ${styles[`medal_${metal}`]}`} aria-hidden="true" />
+                    <span className={styles.srOnly}>{label}: </span>
+                    {medals[metal]}
+                </span>
+            ))}
+        </span>
+    );
+}
 
 const PUBLIC_RANKING_PAGE_SIZE = 20;
 const MOVERS_LIMIT = 3;
@@ -516,6 +555,11 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
     // el fundido todavia es el ranking anterior; la cabecera de la pagina ya
     // habla del nuevo.
     const nounsTabla = getRankingNouns(shownDetail?.ranking.entity ?? selectedRanking?.entity);
+    // El medallero cambia las columnas (tres metales en vez de puntos y
+    // variacion). Se mira la tabla que se esta mostrando, por el mismo fundido.
+    const tablaMedallero = (shownDetail?.ranking.entity ?? selectedRanking?.entity) === 'delegacion';
+    const esMedallero = selectedRanking?.entity === 'delegacion';
+    const desgloseMedallero = shownDetail?.breakdown ?? [];
 
     // Que pastilla se pinta como activa: la que se acaba de tocar, hasta que el
     // estado real la alcance.
@@ -692,11 +736,22 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                             {actualizadoEl ? <li>Actualizado el {actualizadoEl}</li> : null}
                             {semanaDeReferencia ? <li>Flechas respecto del {semanaDeReferencia}</li> : null}
                             {esSeleccion ? <li>Flechas respecto de la publicacion anterior</li> : null}
+                            {/* El medallero es la puerta al apartado de los Juegos,
+                                que en el telefono no tiene lugar en la barra. */}
+                            {esMedallero ? (
+                                <li>
+                                    <Link href="/juegos-odesur" className={styles.metaLink}>
+                                        Resultados, zonas y agenda de los Juegos
+                                    </Link>
+                                </li>
+                            ) : null}
                         </ul>
                     </div>
                     {/* El afiche se arma con la tabla que se esta mirando: mientras
-                        llega la nueva, el boton espera. */}
-                    {hasEntries && canExportPublicRanking && !refrescando ? (
+                        llega la nueva, el boton espera. El medallero no tiene
+                        afiche: la plantilla rotula "Puntos" y ahi diria el total
+                        de medallas, que no es lo mismo. */}
+                    {hasEntries && canExportPublicRanking && !refrescando && !esMedallero ? (
                         <div className={styles.headerActions}>
                             <ExportImage
                                 className={styles.exportAction}
@@ -942,22 +997,76 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                             >
                                 <table className={styles.table}>
                                     <caption className={styles.srOnly}>
-                                        {shownDetail?.ranking.name ?? titulo}. {nounsTabla.puntaje} y movimiento de puesto de cada {nounsTabla.entidad.toLowerCase()}
-                                        {semanaDeReferencia ? ` respecto del ${semanaDeReferencia}` : ''}.
+                                        {tablaMedallero
+                                            ? `${shownDetail?.ranking.name ?? titulo}. Oros, platas, bronces y total de medallas de cada delegacion.`
+                                            : (
+                                                <>
+                                                    {shownDetail?.ranking.name ?? titulo}. {nounsTabla.puntaje} y movimiento de puesto de cada {nounsTabla.entidad.toLowerCase()}
+                                                    {semanaDeReferencia ? ` respecto del ${semanaDeReferencia}` : ''}.
+                                                </>
+                                            )}
                                     </caption>
                                     <thead>
-                                        <tr>
-                                            <th scope="col" className={styles.thPos}>Pos</th>
-                                            <th scope="col">{nounsTabla.entidad}</th>
-                                            <th scope="col" className={styles.thRegion}>{nounsTabla.procedencia}</th>
-                                            <th scope="col" className={styles.thNum}>{nounsTabla.puntaje}</th>
-                                            <th scope="col" className={styles.thNum}>
-                                                <abbr title="Puntos ganados o perdidos desde la semana anterior">Var.</abbr>
-                                            </th>
-                                        </tr>
+                                        {tablaMedallero ? (
+                                            <tr>
+                                                <th scope="col" className={styles.thPos}>Pos</th>
+                                                <th scope="col">{nounsTabla.entidad}</th>
+                                                {MEDAL_COLUMNS.map(({ metal, label }) => (
+                                                    <th key={metal} scope="col" className={`${styles.thNum} ${styles.thMedal}`}>
+                                                        <span className={`${styles.medalDot} ${styles[`medal_${metal}`]}`} aria-hidden="true" />
+                                                        {label}
+                                                    </th>
+                                                ))}
+                                                <th scope="col" className={styles.thNum}>Total</th>
+                                            </tr>
+                                        ) : (
+                                            <tr>
+                                                <th scope="col" className={styles.thPos}>Pos</th>
+                                                <th scope="col">{nounsTabla.entidad}</th>
+                                                <th scope="col" className={styles.thRegion}>{nounsTabla.procedencia}</th>
+                                                <th scope="col" className={styles.thNum}>{nounsTabla.puntaje}</th>
+                                                <th scope="col" className={styles.thNum}>
+                                                    <abbr title="Puntos ganados o perdidos desde la semana anterior">Var.</abbr>
+                                                </th>
+                                            </tr>
+                                        )}
                                     </thead>
                                     <tbody>
-                                        {visibleEntries.map((entry, index) => {
+                                        {tablaMedallero ? visibleEntries.map((entry, index) => {
+                                            const name = getRankingClubName(entry);
+                                            const position = entry.current_position || paginatedEntries.start + index + 1;
+                                            const medals = entry.medals ?? { gold: 0, silver: 0, bronze: 0, total: Number(entry.current_rating) || 0 };
+
+                                            return (
+                                                <tr key={entry.id} className={styles.medalRow}>
+                                                    <td className={styles.posCell}>
+                                                        <span className={styles.posNumber}>{position}</span>
+                                                    </td>
+                                                    <td className={styles.clubCell}>
+                                                        <TeamLogo
+                                                            name={name}
+                                                            shortName={getRankingClubShortName(entry)}
+                                                            teamId={entry.club_id}
+                                                            logoUrl={entry.clubs?.logo_url}
+                                                            className={styles.clubLogo}
+                                                            fallbackClassName={styles.clubLogoFallbackText}
+                                                            size={32}
+                                                            title={`Bandera de ${name}`}
+                                                        />
+                                                        <span className={styles.clubCopy}>
+                                                            <strong>{name}</strong>
+                                                            <span className={styles.clubRegionMobile}>
+                                                                <MedalCounts medals={medals} />
+                                                            </span>
+                                                        </span>
+                                                    </td>
+                                                    {MEDAL_COLUMNS.map(({ metal }) => (
+                                                        <td key={metal} className={styles.medalCell}>{medals[metal]}</td>
+                                                    ))}
+                                                    <td className={styles.pointsCell}>{medals.total}</td>
+                                                </tr>
+                                            );
+                                        }) : visibleEntries.map((entry, index) => {
                                             const previousRating = getRankingPreviousRating(entry);
                                             const delta = getRankingDelta(entry.current_rating, previousRating);
                                             const clubName = getRankingClubName(entry);
@@ -1088,13 +1197,55 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                         <div className={styles.inlineState}>
                             <Layers3 size={16} />
                             <span>
-                                {rankingList.length
-                                    ? `Este ranking todavia no tiene ${nouns.plural} publicados.`
-                                    : `Todavia no hay un ranking publicado de ${sportLabel}.`}
+                                {esMedallero
+                                    ? 'Todavia no se entregaron medallas en este deporte.'
+                                    : rankingList.length
+                                        ? `Este ranking todavia no tiene ${nouns.plural} publicados.`
+                                        : `Todavia no hay un ranking publicado de ${sportLabel}.`}
                             </span>
                         </div>
                     ) : null}
                 </section>
+
+                {/* 4. El medallero de cada deporte (solo el general de los Juegos) */}
+                {tablaMedallero && desgloseMedallero.length ? (
+                    <section className={styles.breakdownSection} aria-labelledby="desglose-titulo">
+                        <div className={styles.tableHead}>
+                            <h2 id="desglose-titulo" className={styles.sectionTitle}>Por deporte</h2>
+                            <span className={styles.tableMeta}>
+                                {desgloseMedallero.length} {desgloseMedallero.length === 1 ? 'deporte con medallas' : 'deportes con medallas'}
+                            </span>
+                        </div>
+                        <div className={styles.breakdownGrid}>
+                            {desgloseMedallero.map((deporte) => (
+                                <article key={deporte.discipline} className={styles.breakdownCard}>
+                                    <h3 className={styles.breakdownTitle}>{deporte.name}</h3>
+                                    <ol className={styles.breakdownList}>
+                                        {deporte.entries.map((entry) => {
+                                            const name = getRankingClubName(entry);
+                                            return (
+                                                <li key={entry.id} className={styles.breakdownRow}>
+                                                    <span className={styles.breakdownPos}>{entry.current_position}</span>
+                                                    <TeamLogo
+                                                        name={name}
+                                                        shortName={getRankingClubShortName(entry)}
+                                                        teamId={entry.club_id}
+                                                        logoUrl={entry.clubs?.logo_url}
+                                                        className={styles.breakdownLogo}
+                                                        size={20}
+                                                        title={`Bandera de ${name}`}
+                                                    />
+                                                    <span className={styles.breakdownName}>{name}</span>
+                                                    {entry.medals ? <MedalCounts medals={entry.medals} /> : null}
+                                                </li>
+                                            );
+                                        })}
+                                    </ol>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
+                ) : null}
                 </div>
             </div>
         </div>

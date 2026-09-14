@@ -36,7 +36,8 @@ export type MatchProvider =
     | 'espn-soccer'
     | 'fih'
     | 'fisu'
-    | 'ultimate-sevens';
+    | 'ultimate-sevens'
+    | 'odesur';
 
 export type MatchStatusKind = 'scheduled' | 'live' | 'final';
 
@@ -114,12 +115,17 @@ const SUPPORTED: Record<MatchProvider, readonly MatchTabId[]> = {
     // conversiones, tarjetas) y las estadísticas por equipo en la página de
     // cada partido. La tabla no existe: la liga juega eliminación directa.
     'ultimate-sevens': ['previa', 'summary', 'videos', 'timeline', 'lineups', 'stats'],
+    // Juegos Suramericanos Santa Fe 2026 (Bornan): planilla con el plantel de
+    // cada lado, cronología de goles y tarjetas, y la tabla oficial de la zona.
+    // Las estadísticas por equipo existen en la fuente pero no se mapean
+    // todavía: sin ellas, la pestaña sería una promesa vacía.
+    odesur: ['previa', 'summary', 'videos', 'timeline', 'lineups', 'standings'],
 };
 
 // Las fuentes que publican el plantel poco antes del inicio. Para el resto,
 // una alineación que no llegó antes del partido no llega nunca.
 const PUBLISHES_LINEUPS_BEFORE_KICKOFF: readonly MatchProvider[] = [
-    'local', 'flashscore', 'espn-soccer', 'rugby-api-sports', 'espn-american-football', 'fih', 'fisu', 'ultimate-sevens',
+    'local', 'flashscore', 'espn-soccer', 'rugby-api-sports', 'espn-american-football', 'fih', 'fisu', 'ultimate-sevens', 'odesur',
 ];
 
 // Lo que un administrador carga a mano. El resto se deriva de los eventos, asi

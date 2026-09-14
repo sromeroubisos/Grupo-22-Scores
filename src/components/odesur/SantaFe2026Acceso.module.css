@@ -1,0 +1,152 @@
+/*
+ * El acceso a los Juegos Suramericanos en el home del teléfono.
+ *
+ * Los colores son los del logo oficial, medidos sobre el archivo:
+ *   tinta     #3b3a55  (el texto "XIII Juegos Suramericanos Santa Fe 2026")
+ *   antorcha  #d57d3b → #c63b2a → #c52f5d → #7e3883 → #4e4a93
+ *
+ * Pinta su propio fondo a propósito, y es el mismo en el tema claro y en el
+ * oscuro: es la marca del evento, no una tarjeta más del feed. El fondo es
+ * blanco porque el logo trae el texto en tinta oscura y no tiene versión en
+ * negativo; la acción va en esa misma tinta (11:1) y el degradé de la
+ * antorcha queda de filete abajo, donde se apoya Capi.
+ *
+ * Una sola fila de 76 px: con dos pisos llegaba a 142 y empujaba el selector
+ * de día fuera de la primera pantalla.
+ *
+ * Solo existe abajo de 768 px, el mismo corte donde el header esconde el link
+ * "Suramericanos" del nav de escritorio.
+ */
+
+.acceso {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .acceso {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        height: 76px;
+        padding: 0 10px 0 12px;
+        border-radius: var(--radius-lg, 12px);
+        overflow: hidden;
+        background:
+            radial-gradient(70px 60px at calc(100% - 64px) 100%, rgba(213, 125, 59, 0.2), transparent 70%),
+            #fff;
+        border: 1px solid rgba(59, 58, 85, 0.14);
+        box-shadow: 0 10px 24px -18px rgba(59, 58, 85, 0.75);
+        color: #3b3a55;
+        text-decoration: none;
+        transition: transform 0.15s ease;
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+/* El degradé de la antorcha como filete de base. */
+.acceso::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #d57d3b 0%, #c63b2a 25%, #c52f5d 50%, #7e3883 75%, #4e4a93 100%);
+}
+
+.acceso:active {
+    transform: scale(0.985);
+}
+
+.acceso:focus-visible {
+    outline: 2px solid var(--color-accent, #22c55e);
+    outline-offset: 3px;
+}
+
+.logo {
+    display: block;
+    flex: none;
+    width: auto;
+    height: 56px;
+}
+
+.texto {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+    padding-left: 10px;
+    border-left: 1px solid rgba(59, 58, 85, 0.14);
+}
+
+.dia {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    /* El magenta de la antorcha: 5.4:1 sobre blanco. */
+    color: #c52f5d;
+    white-space: nowrap;
+}
+
+.accion {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #3b3a55;
+    text-wrap: balance;
+}
+
+/* Capi se apoya sobre el filete: los hombros los corta el borde de abajo. */
+.capi {
+    display: block;
+    flex: none;
+    align-self: flex-end;
+    width: 68px;
+    height: 68px;
+    margin-bottom: 3px;
+}
+
+.flecha {
+    flex: none;
+    margin-left: -4px;
+    color: #3b3a55;
+}
+
+/* Un teléfono de 320 px: el logo y Capi ceden un poco y el día se va; la
+   acción baja a tres renglones cortos y todavía entra en los 76 px. */
+@media (max-width: 360px) {
+    .acceso {
+        gap: 6px;
+    }
+
+    .logo {
+        height: 50px;
+    }
+
+    .capi {
+        width: 60px;
+        height: 60px;
+    }
+
+    .texto {
+        padding-left: 8px;
+    }
+
+    .dia {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .acceso {
+        transition: none;
+    }
+
+    .acceso:active {
+        transform: none;
+    }
+}

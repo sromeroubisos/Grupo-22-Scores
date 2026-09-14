@@ -5,9 +5,9 @@ import {
     getFlashScoreLiveMatches,
     isExternalMatchesListDateSupported,
     isFlashScoreMatchesListDateSupported,
-    getVirtualRugbySevensLiveMatches,
-    getVirtualRugbySevensMatches,
-    wantsVirtualRugbySevens,
+    getVirtualDailyMatches,
+    getVirtualLiveMatches,
+    wantsVirtualProviders,
 } from '@/lib/services/flashscore';
 import { persistFromExternalMatches } from '@/lib/sync/catalog';
 import { recordExternalTournamentsFromMatches } from '@/lib/server/externalTournamentCatalog';
@@ -1475,12 +1475,13 @@ async function computeMatchesPayload(
 
                 const externalFetchStartedAt = Date.now();
                 // El gate lee `external_match_cache`, y los proveedores
-                // virtuales de seven no escriben ahí: un 'skip' habla de
-                // FlashScore, nunca de ellos. Gateado, se los pide igual (es un
-                // JSON por fuente, cacheado 10 s-5 min); si no, ya vienen
-                // adentro de getFlashScoreLiveMatches y no se piden dos veces.
+                // virtuales (los seven y los Juegos Suramericanos) no escriben
+                // ahí: un 'skip' habla de FlashScore, nunca de ellos. Gateado,
+                // se los pide igual (es un JSON por fuente, cacheado 20 s-5
+                // min); si no, ya vienen adentro de getFlashScoreLiveMatches y
+                // no se piden dos veces.
                 const liveMatches = livePollGated
-                    ? (wantsVirtualRugbySevens(sport) ? await getVirtualRugbySevensLiveMatches() : [])
+                    ? await getVirtualLiveMatches(sport)
                     : await getFlashScoreLiveMatches(sport);
                 externalItemsCount = liveMatches?.length || 0;
                 if (trace) {
@@ -1754,8 +1755,13 @@ async function computeMatchesPayload(
         }
 
         const flashScoreEnabledForRequestedSport = isFlashScoreEnabledForSport(sport || 'rugby');
+        // Un deporte sin proveedor externo (handball) igual tiene partidos de un
+        // proveedor virtual: los Juegos Suramericanos. Adentro, la mezcla no le
+        // pide nada a FlashScore para ese deporte; ver `getFlashScoreMatches`.
+        const externalEnabledForRequestedSport =
+            flashScoreEnabledForRequestedSport || wantsVirtualProviders(sport || 'rugby');
 
-        if (useExternal && date && flashScoreEnabledForRequestedSport) {
+        if (useExternal && date && externalEnabledForRequestedSport) {
             try {
                 // Fix: Parse YYYY-MM-DD as local date to avoid UTC timezone shift
                 const [year, month, day] = date.split('-').map(Number);
@@ -1848,18 +1854,18 @@ async function computeMatchesPayload(
                     console.log(`[matches] external cache empty day: no matches for date=${date}`);
                 }
 
-                // ── Proveedores virtuales de seven (FISU, Ultimate Sevens) ────
+                // ── Proveedores virtuales (FISU, Ultimate Sevens, ODESUR) ────
                 // La caché la llena fixture-sync cada hora, así que un torneo que
                 // acaba de entrar tarda hasta una hora en aparecer, y un marcador
                 // en juego llega con el retraso de live-sync. Cuando el día se
-                // sirvió desde la caché, los torneos de seven se piden aparte (es
+                // sirvió desde la caché, los virtuales se piden aparte (es
                 // barato: un JSON por fuente, cacheado 20 s-5 min) y se suma lo
                 // que la caché todavía no tiene. Si la caché no sirvió, el camino
                 // de reparación de abajo ya los trae adentro de FlashScore.
-                if ((servedFromExternalCache || emptyDayFromCache) && wantsVirtualRugbySevens(sport || 'rugby')) {
+                if ((servedFromExternalCache || emptyDayFromCache) && wantsVirtualProviders(sport || 'rugby')) {
                     const sevensStartedAt = Date.now();
                     // Cada fuente cae por su cuenta adentro: nunca lanza.
-                    const sevens = await getVirtualRugbySevensMatches(localDate, {
+                    const sevens = await getVirtualDailyMatches(sport || 'rugby', localDate, {
                         timeZone,
                         targetDateKey: date || undefined,
                     });
