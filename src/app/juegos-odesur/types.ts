@@ -86,8 +86,17 @@ export type OdesurMedalsView = {
     latest: OdesurMedallistView[];
 };
 
+/** Un lado de un cruce: el país (equipo) o el atleta con su país. */
+export type OdesurEntrantView = {
+    org: string | null;
+    name: string;
+    result: string;
+    winner: boolean;
+};
+
 export type OdesurAgendaItemView = {
     key: string;
+    resCode: string;
     discipline: string;
     disciplineName: string;
     eventName: string;
@@ -99,9 +108,63 @@ export type OdesurAgendaItemView = {
     venue: string;
     medal: boolean;
     matchId: string | null;
+    isH2H: boolean;
+    orgs: string[];
+    home: OdesurEntrantView | null;
+    away: OdesurEntrantView | null;
+    hasResults: boolean;
+    /** Los tres primeros de una prueba terminada que no es un cruce. */
+    podium: OdesurPodiumEntryView[];
+    participants: number | null;
+};
+
+export type OdesurPodiumEntryView = {
+    rank: number | null;
+    org: string | null;
+    name: string;
+    result: string;
+    metal: 'gold' | 'silver' | 'bronze' | null;
 };
 
 export type OdesurAgendaView = {
     day: string;
     items: OdesurAgendaItemView[];
+    /** Algún deporte llegó sin competidores: hay que volver a pedir el día. */
+    partial?: boolean;
+};
+
+export type OdesurSportDayView = {
+    units: number;
+    finals: number;
+    live: number;
+};
+
+export type OdesurSportIndexRowView = {
+    code: string;
+    name: string;
+    days: Record<string, OdesurSportDayView>;
+};
+
+export type OdesurSportsIndexView = {
+    sports: OdesurSportIndexRowView[];
+    missingDays: string[];
+};
+
+export type OdesurSportView = {
+    code: string;
+    name: string;
+    days: string[];
+    day: string;
+    items: OdesurAgendaItemView[];
+    medals: OdesurMedalTableView | null;
+    medallists: OdesurMedallistView[];
+};
+
+export type OdesurRankingRowView = {
+    rank: number | null;
+    org: string | null;
+    name: string;
+    result: string;
+    note: string;
+    qualified: boolean;
 };

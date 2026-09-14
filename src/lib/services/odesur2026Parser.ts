@@ -314,22 +314,249 @@ export function odesurDisciplineName(code: string, fallback = ''): string {
     return DISCIPLINE_NAMES[code.trim().toUpperCase()] || fallback || code;
 }
 
+/** Los 60 deportes, por nombre en castellano: el índice del apartado. */
+export function odesurAllDisciplines(): Array<{ code: string; name: string }> {
+    return Object.entries(DISCIPLINE_NAMES)
+        .map(([code, name]) => ({ code, name }))
+        .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+}
+
 /**
- * El nombre de una prueba con el género en castellano adelante. El resto
- * queda como lo escribe la API: traducir a mano las ~400 pruebas de 60
- * deportes sería un catálogo que envejece con cada cambio del programa.
+ * El vocabulario de las pruebas y las instancias, en castellano.
  *
- *   "Women's 1m Springboard" -> "Femenino · 1m Springboard"
+ * No es un catálogo de las ~400 pruebas: es el puñado de palabras con que la
+ * API las arma ("100m Freestyle", "Heat 2", "Round of 16"), medido sobre los
+ * 1910 turnos de los 14 días. Lo que no está en la lista queda como vino, y
+ * eso incluye a propósito los nombres propios de cada deporte (Kumite, K1,
+ * ILCA 7, Keirin), que en castellano se dicen igual.
+ *
+ * El orden importa: lo largo antes que lo corto ("Freestyle Relay" antes que
+ * "Relay", "Double Sculls" antes que "Double").
+ */
+const ES_VOCABULARY: Array<[RegExp, string]> = [
+    // Pesos: "up to 54 kg", "57Kg", "49 kg to 57 kg".
+    [/\bup to (\d+)\s*kg\b/gi, 'hasta $1 kg'],
+    [/(\d+)\s*kg to (\d+)\s*kg\b/gi, '$1 a $2 kg'],
+    [/(\d+)\s*kg\b/gi, '$1 kg'],
+    // Postas y estilos: "4 x 100m Medley Relay" -> "Posta 4x100 m combinada".
+    [/\b4 x (\d+)m Freestyle Relay\b/gi, 'posta 4x$1 m libre'],
+    [/\b4 x (\d+)m Medley Relay\b/gi, 'posta 4x$1 m combinada'],
+    [/\b4 x (\d+)m Relay Mixed\b/gi, 'posta 4x$1 m mixta'],
+    [/\b4 x (\d+)m Relay\b/gi, 'posta 4x$1 m'],
+    [/\bRelay\b/gi, 'posta'],
+    [/\b(\d+)m Freestyle\b/gi, '$1 m libre'],
+    [/\b(\d+)m Backstroke\b/gi, '$1 m espalda'],
+    [/\b(\d+)m Breaststroke\b/gi, '$1 m pecho'],
+    [/\b(\d+)m Butterfly\b/gi, '$1 m mariposa'],
+    [/\b(\d+)m Medley\b/gi, '$1 m combinado'],
+    [/\b(\d+)m Hurdles\b/gi, '$1 m con vallas'],
+    [/\b(\d+)m Steeplechase\b/gi, '$1 m con obstáculos'],
+    // Clavados y tiro: el aparato adelante, la distancia atrás.
+    [/\bSynchroni[sz]ed (\d+)m Springboard\b/gi, 'trampolín $1 m sincronizado'],
+    [/\bSynchroni[sz]ed\b/gi, 'sincronizado'],
+    [/\b(\d+)m Springboard\b/gi, 'trampolín $1 m'],
+    [/\b(\d+)m Platform\b/gi, 'plataforma $1 m'],
+    [/\b(\d+)m Air Pistol\b/gi, 'pistola de aire $1 m'],
+    [/\b(\d+)m Air Rifle\b/gi, 'rifle de aire $1 m'],
+    [/\b(\d+)m Rapid Fire Pistol\b/gi, 'pistola tiro rápido $1 m'],
+    [/\b(\d+)m (?:Rifle Three Positions|Three Positions Rifle)\b/gi, 'rifle tres posiciones $1 m'],
+    [/\b(\d+)m Pistol\b/gi, 'pistola $1 m'],
+    // Distancias sueltas: "10,000m" -> "10.000 m", "10km" -> "10 km".
+    [/\b(\d{1,2})[,.](\d{3})\s*m\b/gi, '$1.$2 m'],
+    [/\b(\d+)m\b/g, '$1 m'],
+    [/\b(\d+)km\b/gi, '$1 km'],
+    // Atletismo.
+    [/\bHalf Marathon Walk\b/gi, 'media maratón de marcha'],
+    [/\bHigh Jump\b/gi, 'salto en alto'],
+    [/\bLong Jump\b/gi, 'salto en largo'],
+    [/\bTriple Jump\b/gi, 'salto triple'],
+    [/\bPole Vault\b/gi, 'salto con garrocha'],
+    [/\bShot Put\b/gi, 'lanzamiento de bala'],
+    [/\bDiscus(?: Throw)?\b/gi, 'lanzamiento de disco'],
+    [/\bJavelin Throw\b/gi, 'lanzamiento de jabalina'],
+    [/\bHammer Throw\b/gi, 'lanzamiento de martillo'],
+    [/\bDecathlon\b/gi, 'decatlón'],
+    [/\bHeptathlon\b/gi, 'heptatlón'],
+    // Gimnasia.
+    [/\bIndividual All-Around\b/gi, 'individual general'],
+    [/\bFloor Exercise\b/gi, 'suelo'],
+    [/\bBalance Beam\b/gi, 'viga de equilibrio'],
+    [/\bAsymmetrical Bars\b/gi, 'paralelas asimétricas'],
+    [/\bVault\b/gi, 'salto'],
+    [/\bIndividual Ball\b/gi, 'pelota'],
+    [/\bIndividual Clubs\b/gi, 'mazas'],
+    [/\bIndividual Hoop\b/gi, 'aro'],
+    [/\bIndividual Ribbon\b/gi, 'cinta'],
+    // Esgrima y lucha. `\b` no ve la "É" como letra: va con lookaround Unicode.
+    [/\bFoil\b/gi, 'florete'],
+    [/(?<!\p{L})[ÉE]p[ée]e(?!\p{L})/giu, 'espada'],
+    [/\bSabre\b/gi, 'sable'],
+    [/\bGreco-Roman\b/gi, 'grecorromana'],
+    // Ciclismo.
+    [/\bRoad Race\b/gi, 'ruta'],
+    [/\bIndividual Time Trial\b/gi, 'contrarreloj individual'],
+    [/\bTime Trial\b/gi, 'contrarreloj'],
+    [/\bTeam Pursuit\b/gi, 'persecución por equipos'],
+    [/\bTeam Sprint\b/gi, 'velocidad por equipos'],
+    [/\bIndividual Sprint\b/gi, 'velocidad individual'],
+    [/\bPoints Race\b/gi, 'carrera por puntos'],
+    [/\bElimination Race\b/gi, 'eliminación'],
+    [/(?<!Direct )\bElimination\b/gi, 'eliminación'],
+    [/\bPoints\b/gi, 'puntos'],
+    [/\bDistance\b/gi, 'distancia'],
+    [/\bScratch Race\b/gi, 'scratch'],
+    [/\bTempo Race\b/gi, 'tempo'],
+    // Remo.
+    [/\bLightweight Double Sculls\b/gi, 'doble par peso ligero'],
+    [/\bIndividual Lightweight\b/gi, 'single peso ligero'],
+    [/\bSingle Sculls\b/gi, 'single'],
+    [/\bQuadruple Sculls\b/gi, 'cuádruple par'],
+    [/\bDouble Sculls\b/gi, 'doble par'],
+    [/\bPair\b(?= \()/gi, 'dos sin timonel'],
+    [/\bFour\b(?= \()/gi, 'cuatro sin timonel'],
+    [/\bEight\b(?= \()/gi, 'ocho con timonel'],
+    // Ecuestre, vela, deportes de tabla y de salón.
+    [/\bTeam Dressage\b/gi, 'por equipos'],
+    [/\bIndividual Dressage\b/gi, 'individual'],
+    [/\bTeam Jumping\b/gi, 'salto por equipos'],
+    [/\bIndividual Jumping\b/gi, 'salto individual'],
+    [/\bEventing Individual\b/gi, 'completo individual'],
+    [/\bEventing Team\b/gi, 'completo por equipos'],
+    [/\bOne-person Dinghy\b/gi, 'bote individual'],
+    [/\b2-person Snipe Boat - Mixed\b/gi, 'snipe doble mixto'],
+    [/\bWindsurfing\b/gi, 'windsurf'],
+    [/\bStreet Skateboarding\b/gi, 'street'],
+    [/\bCross-country\b/gi, 'cross country'],
+    [/\bSolo Dance\b/gi, 'danza solo'],
+    [/\bFree Dance\b/gi, 'danza libre'],
+    [/\bStyle Dance\b/gi, 'danza de estilo'],
+    [/\bShort Program\b/gi, 'programa corto'],
+    [/\bLong Program\b/gi, 'programa libre'],
+    [/\bTechnical Routine\b/gi, 'rutina técnica'],
+    [/\bFree Routine\b/gi, 'rutina libre'],
+    [/\bAcrobatic Routine\b/gi, 'rutina acrobática'],
+    [/\bDuets?\b/gi, 'dúo'],
+    [/\bCompound Mixed Archery Team\b/gi, 'compuesto equipo mixto'],
+    [/\bTeam Archery Compound\b/gi, 'compuesto por equipos'],
+    [/\bRecurve\b/gi, 'recurvo'],
+    [/\bCompound\b/gi, 'compuesto'],
+    [/\bSpeed\b/gi, 'velocidad'],
+    [/\bLead\b/gi, 'dificultad'],
+    [/\bMixed Teams\b/gi, 'equipos mixtos'],
+    [/\bMixed Team\b/gi, 'equipo mixto'],
+    [/\bDoubles?\b/gi, 'dobles'],
+    [/\b(?:Team|Teams) General\b/gi, 'equipos general'],
+    [/\bTeams\b/gi, 'equipos'],
+    [/\b(\S+) Team\b(?! Final)/gi, '$1 por equipos'],
+    [/\bTeam (?!Final\b)(\S+)/gi, '$1 por equipos'],
+    [/\b(?:Overall|Total)\b/gi, 'general'],
+    [/\bTechnical\b/gi, 'técnica'],
+    [/\bFreestyle\b/gi, 'libre'],
+    [/\bFree\b/gi, 'libre'],
+    // Instancias. Las llaves se dicen como en el fútbol: octavos, cuartos, semi.
+    [/\bFinals? - Gold Medal Match\b/gi, 'por el oro'],
+    [/\bFinals? - Bronze Medal Match\b/gi, 'por el bronce'],
+    [/\bFinals - Jumping Test\b/gi, 'final de salto'],
+    [/\b(?:Gold Medal (?:Match|Bout)|For Gold)\b/gi, 'por el oro'],
+    [/\b(?:Bronze Medal (?:Matches|Match|Bout)|For Bronze)\b/gi, 'por el bronce'],
+    [/\bBronze\s*[–-]\s*3\.º vs 4\.º/gi, 'por el bronce'],
+    [/\bBronze\b/gi, 'bronce'],
+    [/\bPreliminaries - Round of 16\b/gi, 'octavos de final'],
+    [/(?:\bRound of 16|\b1\/8 Finals|\b1\/8 Round|\bTable of 16)\b/gi, 'octavos de final'],
+    [/(?:\bRound of 32|\b1\/16 Round|\bTable of 32)\b/gi, '16avos de final'],
+    [/\bRound of 64\b/gi, '32avos de final'],
+    [/\bQuarter-?finals?\b/gi, 'cuartos de final'],
+    [/\bSemi-?finals?\b/gi, 'semifinal'],
+    [/\bFinals\b/gi, 'final'],
+    [/\bQualification Race\b/gi, 'carrera de clasificación'],
+    [/\b(?:Qualification|Qualifying|Qualify Round)\b/gi, 'clasificación'],
+    [/\bFencing Seeding Round\b/gi, 'ronda de clasificación'],
+    [/\bFencing Direct Elimination\b/gi, 'eliminación directa'],
+    [/\bRanking Round\b/gi, 'ronda de clasificación'],
+    [/\bPreliminary Round\b/gi, 'ronda preliminar'],
+    [/\b(?:Pool Stage|Group Play Stage|Group Stage)\b/gi, 'fase de grupos'],
+    [/\bRound Robin\b/gi, 'todos contra todos'],
+    [/\bRepechage\b/gi, 'repechaje'],
+    [/\bMedal Race\b/gi, 'regata por medallas'],
+    [/\bRace (\d+(?:, \d+)*) and (\d+)\b/gi, 'regatas $1 y $2'],
+    [/\bFirst Round\b/gi, 'primera ronda'],
+    [/\bFirst\s+Competition\b/gi, 'primera competencia'],
+    [/\bSecond Competition\b/gi, 'segunda competencia'],
+    [/\bThird Competition\b/gi, 'tercera competencia'],
+    [/\bRound one\b/gi, 'ronda 1'],
+    [/\bRound two\b/gi, 'ronda 2'],
+    [/\bTeam Final\b/gi, 'final por equipos'],
+    [/\bIndividual Final\b/gi, 'final individual'],
+    [/\bCross Country Test\b/gi, 'prueba de cross country'],
+    [/\bDressage Test\b/gi, 'prueba de adiestramiento'],
+    [/\bFor Place (\d+)-(\d+)\b/gi, 'puestos $1-$2'],
+    [/\bHeats\b/gi, 'series'],
+    [/\bHeat\b/gi, 'serie'],
+    [/\bMotos\b/gi, 'mangas'],
+    [/\bLaser Run\b/gi, 'laser run'],
+    [/\bFirst Run\b/gi, 'primera pasada'],
+    [/\bSecond Run\b/gi, 'segunda pasada'],
+    [/\bRun\b/g, 'pasada'],
+    [/\bRace\b/gi, 'carrera'],
+    [/\bBalls\b/gi, 'bolas'],
+    [/\bJump\b/gi, 'salto'],
+    [/\bTricks\b/gi, 'trucos'],
+    [/\bMatch\b/gi, 'partido'],
+    [/\bGame\b/gi, 'partido'],
+    [/\bBout\b/gi, 'combate'],
+    [/\bRound\b/gi, 'ronda'],
+    [/\bDay\b/gi, 'día'],
+    [/\bStage\b/gi, 'etapa'],
+    [/\bSubdivision\b/gi, 'subdivisión'],
+    [/\bDecider\b/gi, 'desempate'],
+    [/\bObstacle\b/gi, 'obstáculos'],
+    [/\bSwimming\b/gi, 'natación'],
+    [/\b(?:Group|Pool)\b/gi, 'grupo'],
+    // Una prueba que ya dijo si es individual lo dice en minúscula al final.
+    [/(?<=\S) Individual\b/g, ' individual'],
+];
+
+/**
+ * Un texto de la API en castellano, con mayúscula inicial.
+ *
+ *   "Round of 16"            -> "Octavos de final"
+ *   "4 x 100m Medley Relay"  -> "Posta 4x100 m combinada"
+ */
+export function odesurEs(raw: string): string {
+    let text = raw.trim();
+    if (!text) return '';
+    for (const [pattern, replacement] of ES_VOCABULARY) {
+        text = text.replace(pattern, replacement);
+    }
+    text = text.replace(/\s+/g, ' ').trim();
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+/**
+ * El nombre de una prueba con el género en castellano adelante y la prueba
+ * traducida por `odesurEs`.
+ *
+ *   "Women's 1m Springboard" -> "Femenino · Trampolín 1 m"
  */
 export function odesurEventName(raw: string): string {
-    const trimmed = raw.trim();
-    const gendered = /^(Men's|Women's|Mixed)\s+(.+)$/i.exec(trimmed);
-    if (!gendered) return trimmed;
-    const gender = /^men's$/i.test(gendered[1]) ? 'Masculino' : (/^women's$/i.test(gendered[1]) ? 'Femenino' : 'Mixto');
+    const trimmed = raw.trim().replace(/\s+/g, ' ');
+    // El género suele ir adelante ("Men's 100m"), pero hay pruebas que lo
+    // escriben al final o en el medio ("1X Men's", "Shiai Men's -60 Kg") y
+    // otras que lo repiten ("Men's EA SPORT FC Men's"). Se toma el primero y
+    // se sacan todos. "Mixed" solo cuenta adelante: en "Trap Mixed Team" es el
+    // equipo, no la rama.
+    const found = /(?:^|\s)(Men's|Women's)(?=\s|$)/i.exec(trimmed);
+    const mixed = /^Mixed\s+/i.test(trimmed);
+    if (!found && !mixed) return odesurEs(trimmed);
+    const gender = mixed ? 'Mixto' : (/^men's$/i.test(found?.[1] ?? '') ? 'Masculino' : 'Femenino');
+    const rest = trimmed
+        .replace(/^Mixed\s+/i, '')
+        .replace(/(?:^|\s)(?:Men's|Women's)(?=\s|$)/gi, ' ')
+        .trim();
     // En los deportes de equipo la prueba es "Men's Team": el deporte ya lo
     // dice la tarjeta, así que queda la rama sola.
-    if (/^team$/i.test(gendered[2].trim())) return gender;
-    return `${gender} · ${gendered[2]}`;
+    if (!rest || /^team$/i.test(rest)) return gender;
+    return `${gender} · ${odesurEs(rest)}`;
 }
 
 export function odesurOrgName(code: string | null, fallback = ''): string {
@@ -409,7 +636,8 @@ export function odesurStageName(phaseDescA: string, unitDescA: string): { pool: 
     const phase = phaseDescA.trim();
     const unit = unitDescA.trim();
 
-    const group = /^(?:Group|Pool)\s+([A-Z0-9]+)$/i.exec(phase);
+    // Una letra o un número: "Group Stage" no es la zona "STAGE".
+    const group = /^(?:Group|Pool)\s+([A-Za-z]|\d{1,2})$/.exec(phase);
     if (group) {
         const letter = group[1].toUpperCase();
         return { pool: letter, stageName: `Grupo ${letter}` };
@@ -422,7 +650,9 @@ export function odesurStageName(phaseDescA: string, unitDescA: string): { pool: 
     if (/bronze/i.test(phase)) return { pool: null, stageName: 'Tercer puesto' };
     if (/^semi-?finals?$/i.test(phase)) return { pool: null, stageName: 'Semifinal' };
     if (/^quarter-?finals?$/i.test(phase)) return { pool: null, stageName: 'Cuartos de final' };
-    if (/^group stage$/i.test(phase) || /^preliminar/i.test(phase)) return { pool: null, stageName: 'Fase de grupos' };
+    if (/^group stage$/i.test(phase) || /^preliminary round(?: - pool [a-z])?$/i.test(phase)) {
+        return { pool: null, stageName: 'Fase de grupos' };
+    }
 
     // "Classification 5th-8th" (cruce) y "Classification 5th-6th" (un puesto).
     // Algunas disciplinas escriben el ordinal con "°": "Classification 9°-12°".
@@ -435,7 +665,7 @@ export function odesurStageName(phaseDescA: string, unitDescA: string): { pool: 
             : { pool: null, stageName: `Puestos ${from}-${to}` };
     }
 
-    return { pool: null, stageName: phase || unit };
+    return { pool: null, stageName: odesurEs(phase || unit) };
 }
 
 /** "First Quarter" / "1st Half" / "Set 2" -> como se leen al lado del marcador. */
@@ -1156,13 +1386,25 @@ export function parseOdesurMedalDisciplines(json: unknown): string[] {
         .sort();
 }
 
+/** Uno de los dos lados de un cruce: un país (equipo) o un atleta con su país. */
+export type OdesurEntrant = {
+    org: string | null;
+    name: string;
+    /** Lo que marca el tablero: goles, sets, toques. Vacío antes de empezar. */
+    result: string;
+    winner: boolean;
+};
+
 export type OdesurAgendaItem = {
     key: string;
+    /** La llave de la unidad para pedir su resultado; vacía si no la tiene. */
+    resCode: string;
     discipline: string;
     disciplineName: string;
     eventName: string;
-    /** La instancia: "Grupo A", "Final", "Serie 2". */
+    /** La instancia: "Grupo A", "Final", "Series". */
     phaseName: string;
+    /** La unidad dentro de la instancia: "Partido 3", "Serie 2". */
     unitName: string;
     startsAtIso: string | null;
     status: string;
@@ -1172,14 +1414,78 @@ export type OdesurAgendaItem = {
     medal: boolean;
     /** Si es un partido de las disciplinas que tienen ficha en G22. */
     matchId: string | null;
+    /** Uno contra uno (un partido, un combate) o una prueba de muchos. */
+    isH2H: boolean;
+    /** Las delegaciones que compiten en la unidad. */
+    orgs: string[];
+    home: OdesurEntrant | null;
+    away: OdesurEntrant | null;
+    /** Si la fuente publica la clasificación de la unidad. */
+    hasResults: boolean;
+    /**
+     * Los tres primeros de una prueba que no es un cruce, con su marca y, en
+     * una final, su medalla. El cronograma de cada deporte los trae en cada
+     * unidad terminada (`Results`): la agenda muestra el resultado sin pedir
+     * la clasificación entera.
+     */
+    podium: OdesurPodiumEntry[];
+    /** Cuántos compiten en la unidad, si la fuente lo dice. */
+    participants: number | null;
 };
 
+export type OdesurPodiumEntry = {
+    rank: number | null;
+    org: string | null;
+    name: string;
+    result: string;
+    metal: OdesurMetal | null;
+};
+
+function parsePodium(value: unknown, isTeam: boolean): OdesurPodiumEntry[] {
+    if (!Array.isArray(value)) return [];
+    return value
+        .map((item) => {
+            const record = asRecord(item);
+            if (!record || record.HasData === false) return null;
+            const org = orgCode(record.Org);
+            const rawName = asString(record.Name).trim();
+            if (!org && !rawName) return null;
+            const rank = toInt(record.RkPo);
+            return {
+                rank: rank && rank > 0 ? rank : null,
+                org,
+                name: isTeam || !rawName ? odesurOrgName(org, rawName) : odesurPersonName(rawName),
+                result: asString(record.Result).trim(),
+                metal: METALS[asString(record.Medal).trim().toUpperCase()] ?? null,
+            } satisfies OdesurPodiumEntry;
+        })
+        .filter((entry): entry is OdesurPodiumEntry => entry !== null)
+        .sort((a, b) => (a.rank ?? Number.MAX_SAFE_INTEGER) - (b.rank ?? Number.MAX_SAFE_INTEGER))
+        .slice(0, 3);
+}
+
+function parseEntrant(value: unknown, isTeam: boolean): OdesurEntrant | null {
+    const record = asRecord(value);
+    if (!record) return null;
+    const org = orgCode(record.Org);
+    const rawName = asString(record.Name).trim();
+    if (!org && !rawName) return null;
+    return {
+        org,
+        // En equipo el lado es el país; en individual, la persona.
+        name: isTeam || !rawName ? odesurOrgName(org, rawName) : odesurPersonName(rawName),
+        result: asString(record.Result).trim(),
+        winner: record.Winner === true,
+    };
+}
+
 /**
- * La agenda de un día de TODOS los deportes (`ALL/schedule/day/{fecha}`).
- * Sirve para lo que no es un partido: una final de natación, una serie de
- * esgrima. Esta ruta no trae a los competidores (ver el encabezado); para los
- * deportes de equipo, el partido con su marcador sale del cronograma de cada
- * disciplina y la agenda solo apunta a él con `matchId`.
+ * La agenda de un día. Sirve igual para `ALL/schedule/day/{fecha}` (todos los
+ * deportes, SIN competidores) y para `{DISC}/schedule/daily/{fecha}` (un
+ * deporte, CON `Orgs` en cada unidad y `Home`/`Away` en los cruces): son la
+ * misma fila, y la segunda trae de más quién compite. Con eso la agenda puede
+ * decir quién juega y filtrar por país en los 60 deportes, no solo en los de
+ * equipo.
  */
 export function parseOdesurAgenda(json: unknown): OdesurAgendaItem[] {
     if (!Array.isArray(json)) return [];
@@ -1192,24 +1498,56 @@ export function parseOdesurAgenda(json: unknown): OdesurAgendaItem[] {
             const discipline = asString(record.Disc).trim().toUpperCase();
             if (!discipline) return null;
 
-            const key = asString(record.ResCode) || asString(record.Key);
+            const resCode = asString(record.ResCode).trim();
+            const key = resCode || asString(record.Key);
             const status = asString(record.Status);
             const medal = asString(record.Medal).trim();
             const unit = parseOdesurUnit(record);
+            const isH2H = record.isH2H === true;
+            const isTeam = asString(record.Type).trim().toUpperCase() === 'T';
+
+            const home = isH2H ? parseEntrant(record.Home, isTeam) : null;
+            const away = isH2H ? parseEntrant(record.Away, isTeam) : null;
+            const orgs = new Set<string>();
+            if (Array.isArray(record.Orgs)) {
+                for (const value of record.Orgs) {
+                    const code = orgCode(value);
+                    if (code) orgs.add(code);
+                }
+            }
+            if (home?.org) orgs.add(home.org);
+            if (away?.org) orgs.add(away.org);
+            const hasScore = Boolean(home?.result && away?.result);
+            const unitName = odesurEs(asString(record.UnitDescA));
+            const phaseName = odesurStageName(asString(record.PhaseDescA), asString(record.UnitDescA)).stageName;
 
             return {
                 key,
+                resCode,
                 discipline,
                 disciplineName: odesurDisciplineName(discipline, asString(record.DiscDesc)),
                 eventName: odesurEventName(asString(record.EventDesc)),
-                phaseName: odesurStageName(asString(record.PhaseDescA), asString(record.UnitDescA)).stageName,
-                unitName: asString(record.UnitDescA),
+                phaseName,
+                // Una unidad que repite la instancia ("Final" en la fase
+                // "Final", "Por el bronce" en "Tercer puesto") no suma nada al lado.
+                unitName: unitName === phaseName
+                    || (phaseName === 'Tercer puesto' && /bronce/i.test(unitName))
+                    || (phaseName === 'Final' && /oro/i.test(unitName))
+                    ? ''
+                    : unitName,
                 startsAtIso: parseOdesurDateTime(asString(record.DateTimeRaw)),
                 status,
-                state: classifyOdesurStatus(status, false),
+                state: record.IsLive === true ? 'live' : classifyOdesurStatus(status, hasScore),
                 venue: asString(record.VenueDesc) || asString(record.LocDesc),
                 medal: medal !== '' && medal !== '0',
                 matchId: unit ? odesurMatchIdOf(unit) : null,
+                isH2H,
+                orgs: [...orgs].sort(),
+                home,
+                away,
+                hasResults: record.ShowResults === true && resCode !== '',
+                podium: isH2H ? [] : parsePodium(record.Results, isTeam),
+                participants: toInt(asRecord(record.Counters)?.Partics),
             } satisfies OdesurAgendaItem;
         })
         .filter((item): item is OdesurAgendaItem => item !== null)
@@ -1217,6 +1555,61 @@ export function parseOdesurAgenda(json: unknown): OdesurAgendaItem[] {
             (a.startsAtIso ?? '').localeCompare(b.startsAtIso ?? '')
             || a.disciplineName.localeCompare(b.disciplineName, 'es')
         ));
+}
+
+export type OdesurRankingRow = {
+    rank: number | null;
+    org: string | null;
+    /** El atleta o, en una prueba de equipo, el país. */
+    name: string;
+    /** La marca: un tiempo, una distancia, un puntaje. */
+    result: string;
+    /** Lo que no es una marca: "DNS", "DNF", "DSQ". */
+    note: string;
+    /** Pasó a la siguiente instancia. */
+    qualified: boolean;
+};
+
+/**
+ * La clasificación de una unidad (`{DISC}/results/{ResCode}`): quién llegó en
+ * qué puesto y con qué marca. Es lo que se ve al abrir una serie o una final
+ * de un deporte individual; los cruces ya llevan el marcador en la agenda.
+ */
+export function parseOdesurRanking(json: unknown): OdesurRankingRow[] {
+    const record = asRecord(json);
+    if (!record || !Array.isArray(record.Competitors)) return [];
+    const isTeam = asString(asRecord(record.Info)?.Type).trim().toUpperCase() === 'T';
+
+    return record.Competitors
+        .map((item, index) => {
+            const row = asRecord(item);
+            if (!row) return null;
+            const org = orgCode(row.Org);
+            const rawName = asString(row.Name).trim();
+            const irm = asString(row.IRM).trim().toUpperCase();
+            const rank = toInt(row.RkPo) || toInt(row.Rk);
+            return {
+                entry: {
+                    rank: rank && rank > 0 ? rank : null,
+                    org,
+                    name: isTeam || !rawName
+                        ? odesurOrgName(org, rawName || asString(row.OrgDesc))
+                        : odesurPersonName(rawName),
+                    result: asString(row.Result).trim(),
+                    note: irm && irm !== 'OK' ? irm : '',
+                    qualified: /^q$/i.test(asString(row.Qualified).trim()),
+                } satisfies OdesurRankingRow,
+                order: toInt(row.StartSortOrder) ?? index,
+            };
+        })
+        .filter((row): row is { entry: OdesurRankingRow; order: number } => row !== null)
+        // Primero los que tienen puesto, en orden; después el resto, en el
+        // orden de largada (una serie que todavía no se corrió).
+        .sort((a, b) => (
+            (a.entry.rank ?? Number.MAX_SAFE_INTEGER) - (b.entry.rank ?? Number.MAX_SAFE_INTEGER)
+            || a.order - b.order
+        ))
+        .map((row) => row.entry);
 }
 
 // --------------------------------------------------------------------------

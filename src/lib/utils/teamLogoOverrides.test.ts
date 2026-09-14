@@ -27,6 +27,11 @@ test('un país lleva su bandera, lo escriba quien lo escriba', () => {
     // El proveedor escribe en inglés; la plataforma, en español. Las dos entran.
     assert.equal(getNationalTeamFlag('Sudáfrica'), '/logos/selecciones/south-africa.png');
     assert.equal(getNationalTeamFlag('Japón'), '/logos/selecciones/japan.png');
+    // Las 15 delegaciones de los Juegos Suramericanos, con el nombre en castellano.
+    assert.equal(getNationalTeamFlag('Paraguay'), '/logos/selecciones/paraguay.png');
+    assert.equal(getNationalTeamFlag('Panamá'), '/logos/selecciones/panama.png');
+    assert.equal(getNationalTeamFlag('Surinam'), '/logos/selecciones/suriname.png');
+    assert.equal(getNationalTeamFlag('Curazao'), '/logos/selecciones/curacao.png');
     assert.equal(getNationalTeamFlag('Gales'), getNationalTeamFlag('Wales'));
     // Taiwán compite con otro nombre y es el mismo país.
     assert.equal(getNationalTeamFlag('Chinese Taipei'), '/logos/selecciones/taiwan.png');

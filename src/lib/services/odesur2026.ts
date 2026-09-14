@@ -49,7 +49,9 @@ import {
     parseOdesurMedalDisciplines,
     parseOdesurMedallists,
     parseOdesurMedals,
+    parseOdesurRanking,
     parseOdesurResultDetail,
+    odesurAllDisciplines,
     rankMedals,
     type OdesurAction,
     type OdesurAgendaItem,
@@ -58,6 +60,7 @@ import {
     type OdesurGroup,
     type OdesurMedalCount,
     type OdesurMedallist,
+    type OdesurRankingRow,
     type OdesurResultDetail,
     type OdesurRosterPlayer,
     type OdesurStandingRow,
@@ -82,6 +85,7 @@ export {
     type OdesurCompetition,
     type OdesurDisciplineCode,
     type OdesurMedallist,
+    type OdesurRankingRow,
 } from '@/lib/services/odesur2026Parser';
 
 const API_ROOT = `/s/${ODESUR_CHAMP}/${ODESUR_LANG}`;
@@ -229,7 +233,7 @@ export function odesurToday(): string {
 // Recursos
 // --------------------------------------------------------------------------
 
-async function getDisciplineDays(code: OdesurDisciplineCode): Promise<string[]> {
+async function getDisciplineDays(code: string): Promise<string[]> {
     return readResource(
         `days:${code}`,
         `días de ${code}`,
@@ -314,10 +318,10 @@ async function getActions(code: OdesurDisciplineCode, resCode: string, live: boo
 // --------------------------------------------------------------------------
 
 /**
- * La bandera curada del cajón `public/logos/selecciones` cuando existe (la
- * misma que usa el resto del sitio para ese país) y, si no, la SVG de
- * `public/flags` por el código ISO. El cajón curado tiene 5 de las 15
- * delegaciones; sin la SVG, Paraguay o Colombia saldrían con iniciales.
+ * La bandera curada del cajón `public/logos/selecciones` (la misma que usa el
+ * resto del sitio para ese país, en forma de hoja) y, si no, la SVG de
+ * `public/flags` por el código ISO. Desde septiembre de 2026 el cajón tiene
+ * las 15 delegaciones; la SVG queda de red para un nombre que no se reconozca.
  */
 export function odesurFlagUrl(code: string | null, name: string): string {
     const curated = getNationalTeamFlag(name);
@@ -953,13 +957,178 @@ export async function getOdesurLatestMedallists(): Promise<OdesurMedallist[]> {
 // Agenda y vistas del apartado de los Juegos
 // --------------------------------------------------------------------------
 
-/** La agenda de un día de Santa Fe, con los 60 deportes. */
+function agendaTtl(items: OdesurAgendaItem[]): number {
+    if (items.some((item) => item.state === 'live')) return TTL_DAILY_LIVE_SECONDS;
+    if (items.length > 0 && items.every((item) => item.state === 'final' || item.state === 'cancelled')) {
+        return TTL_DAILY_SETTLED_SECONDS;
+    }
+    return TTL_DAILY_OPEN_SECONDS;
+}
+
+function compareAgendaItems(a: OdesurAgendaItem, b: OdesurAgendaItem): number {
+    return (a.startsAtIso ?? '').localeCompare(b.startsAtIso ?? '')
+        || a.disciplineName.localeCompare(b.disciplineName, 'es');
+}
+
+/** La agenda de un día de Santa Fe, con los 60 deportes (sin competidores). */
 export async function getOdesurAgenda(day: string): Promise<OdesurAgendaItem[]> {
     return readResource(
         `agenda:${day}`,
         `agenda del ${day}`,
         async () => parseOdesurAgenda(await fetchJson(`ALL/schedule/day/${day}`)),
-        (items) => (items.some((item) => item.state === 'live') ? TTL_DAILY_LIVE_SECONDS : TTL_DAILY_OPEN_SECONDS),
+        agendaTtl,
+    );
+}
+
+/**
+ * La agenda de UN deporte en un día, con quién compite en cada unidad: las
+ * delegaciones (`Orgs`) y, en los cruces, los dos lados con su marcador.
+ */
+export async function getOdesurSportAgenda(code: string, day: string): Promise<OdesurAgendaItem[]> {
+    const discipline = code.trim().toUpperCase();
+    return readResource(
+        `board:${discipline}:${day}`,
+        `agenda de ${discipline} del ${day}`,
+        async () => parseOdesurAgenda(await fetchJson(`${discipline}/schedule/daily/${day}`)),
+        agendaTtl,
+    );
+}
+
+export type OdesurDayBoard = {
+    items: OdesurAgendaItem[];
+    /** Algún deporte no llegó a tiempo y quedó sin competidores. */
+    partial: boolean;
+};
+
+/**
+ * La agenda de un día con los competidores de cada unidad.
+ *
+ * `ALL/schedule/day` dice QUÉ se juega pero no QUIÉN; el cronograma de cada
+ * deporte trae las delegaciones y los cruces. Se pide el de cada deporte que
+ * juega ese día (entre 10 y 20; cada uno con su caché) y se usa en lugar de
+ * sus filas de `ALL`.
+ *
+ * Con `budgetMs` (la primera pintura del servidor) un deporte que no contesta
+ * a tiempo se queda con su fila de `ALL` y el día sale `partial`: la página se
+ * pinta igual y el cliente lo vuelve a pedir. Sin presupuesto, se espera a
+ * todos, y el que falla también cae a su fila de `ALL`: un deporte caído no
+ * le saca la agenda a los otros 59.
+ */
+export async function getOdesurDayBoard(day: string, budgetMs = 0): Promise<OdesurDayBoard> {
+    const base = await getOdesurAgenda(day);
+    const codes = [...new Set(base.map((item) => item.discipline))].sort();
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const deadline = budgetMs > 0
+        ? new Promise<'late'>((resolve) => { timer = setTimeout(() => resolve('late'), budgetMs); })
+        : null;
+
+    const perSport = await Promise.all(codes.map((code) => {
+        const load = getOdesurSportAgenda(code, day).catch((error) => {
+            console.warn(`[ODESUR] agenda de ${code} del ${day} no disponible:`, error instanceof Error ? error.message : error);
+            return null;
+        });
+        return deadline ? Promise.race([load, deadline]) : load;
+    }));
+    if (timer) clearTimeout(timer);
+
+    let partial = false;
+    const items: OdesurAgendaItem[] = [];
+    codes.forEach((code, index) => {
+        const detailed = perSport[index];
+        if (Array.isArray(detailed) && detailed.length > 0) {
+            items.push(...detailed);
+            return;
+        }
+        if (detailed === 'late') partial = true;
+        items.push(...base.filter((item) => item.discipline === code));
+    });
+
+    return { items: items.sort(compareAgendaItems), partial };
+}
+
+export type OdesurSportDay = {
+    /** Unidades del deporte ese día. */
+    units: number;
+    /** Pruebas que reparten medallas ese día. */
+    finals: number;
+    live: number;
+};
+
+export type OdesurSportIndexRow = {
+    code: string;
+    name: string;
+    /** Día -> actividad. Solo los días en que el deporte compite. */
+    days: Record<string, OdesurSportDay>;
+};
+
+/**
+ * El calendario de los 60 deportes: qué días compite cada uno y cuándo
+ * reparte medallas. Sale de las 14 agendas diarias (una caché por día), no
+ * de 60 pedidos de `schedule/days`. Un día que no contesta queda afuera y se
+ * informa en `missingDays`: el calendario no inventa un día vacío.
+ */
+export async function getOdesurSportsIndex(days: string[]): Promise<{ sports: OdesurSportIndexRow[]; missingDays: string[] }> {
+    const perDay = await Promise.all(days.map((day) => getOdesurAgenda(day).catch(() => null)));
+    const rows = new Map<string, OdesurSportIndexRow>(
+        odesurAllDisciplines().map(({ code, name }) => [code, { code, name, days: {} }]),
+    );
+    const missingDays: string[] = [];
+
+    days.forEach((day, index) => {
+        const items = perDay[index];
+        if (!items) {
+            missingDays.push(day);
+            return;
+        }
+        const finals = new Map<string, Set<string>>();
+        for (const item of items) {
+            let row = rows.get(item.discipline);
+            if (!row) {
+                row = { code: item.discipline, name: item.disciplineName, days: {} };
+                rows.set(item.discipline, row);
+            }
+            const slot = row.days[day] ?? { units: 0, finals: 0, live: 0 };
+            slot.units += 1;
+            if (item.state === 'live') slot.live += 1;
+            row.days[day] = slot;
+            // Una final con su partido por el bronce es UNA prueba que reparte.
+            if (item.medal) {
+                const events = finals.get(item.discipline) ?? new Set<string>();
+                events.add(item.eventName);
+                finals.set(item.discipline, events);
+            }
+        }
+        for (const [code, events] of finals) {
+            const slot = rows.get(code)?.days[day];
+            if (slot) slot.finals = events.size;
+        }
+    });
+
+    return {
+        sports: [...rows.values()].sort((a, b) => a.name.localeCompare(b.name, 'es')),
+        missingDays,
+    };
+}
+
+/** Los días en que compite un deporte (cualquiera de los 60). */
+export async function getOdesurSportDays(code: string): Promise<string[]> {
+    return getDisciplineDays(code.trim().toUpperCase());
+}
+
+/**
+ * La clasificación de una unidad: puesto, atleta, país y marca. Mientras falte
+ * alguien por clasificar (una serie en curso) se refresca seguido.
+ */
+export async function getOdesurUnitRanking(code: string, resCode: string): Promise<OdesurRankingRow[]> {
+    const discipline = code.trim().toUpperCase();
+    return readResource(
+        `ranking:${resCode}`,
+        `clasificación ${resCode}`,
+        async () => parseOdesurRanking(await fetchJson(`${discipline}/results/${resCode}`)),
+        (rows) => (rows.length > 0 && rows.every((row) => row.rank !== null || row.note !== '')
+            ? TTL_DETAIL_SETTLED_SECONDS
+            : TTL_DETAIL_LIVE_SECONDS),
     );
 }
 

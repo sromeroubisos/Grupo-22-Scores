@@ -1,8 +1,36 @@
-/* Apartado de los Juegos Suramericanos Santa Fe 2026 (`/juegos-odesur`). */
+/*
+ * Apartado de los Juegos Suramericanos Santa Fe 2026 (`/juegos-odesur`).
+ *
+ * La página no pinta fondo: el del sitio pasa por debajo y los colores salen
+ * de los tokens de `globals.css`, así que el tema claro y el oscuro salen
+ * solos (el sitio usa `data-theme`, no `prefers-color-scheme`).
+ *
+ * La marca del evento entra en dos lugares y nada más: el logo, sobre su
+ * propia placa blanca (trae el texto en tinta oscura y no tiene negativo), y
+ * el degradé de la antorcha como filete abajo de la cabecera. El resto es la
+ * interfaz del sitio: una herramienta de consulta, no un afiche.
+ */
 
 .page {
-    padding-top: var(--spacing-lg);
-    padding-bottom: calc(var(--spacing-3xl) + 32px);
+    --ink: var(--color-text-primary);
+    --ink-2: var(--color-text-secondary);
+    --ink-3: var(--color-text-tertiary);
+    --edge: var(--color-border);
+    --ground: var(--color-bg-primary);
+    --surface: var(--color-bg-secondary);
+    --raised: var(--color-bg-tertiary);
+    --accent: var(--color-accent);
+    --accent-ink: var(--color-accent-ink);
+    --live: var(--color-error);
+    --on-accent: #04130c;
+    --gold: #d4a017;
+    --silver: #aeb4bc;
+    --bronze: #b8733e;
+    --torch: linear-gradient(90deg, #d57d3b 0%, #c63b2a 25%, #c52f5d 50%, #7e3883 75%, #4e4a93 100%);
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --radius-panel: 16px;
+
+    padding-block: var(--spacing-lg) calc(var(--spacing-3xl) + 32px);
 }
 
 .srOnly {
@@ -17,64 +45,173 @@
     border: 0;
 }
 
-/* ── Cabecera ──────────────────────────────────────────────────────────── */
-
-.header {
-    padding-top: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
+.page button:focus-visible,
+.page a:focus-visible,
+.page select:focus-visible,
+.page input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
-.kicker {
-    margin: 0 0 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-accent-ink);
+/* ── Cabecera ──────────────────────────────────────────────────────────── */
+
+.hero {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px 20px;
+    padding-top: var(--spacing-sm);
+}
+
+.heroLogo {
+    display: block;
+    width: auto;
+    height: 72px;
+    padding: 6px 10px;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(59, 58, 85, 0.12);
+}
+
+.heroText {
+    min-width: 0;
 }
 
 .title {
     margin: 0;
-    font-size: clamp(1.625rem, 4vw, 2.25rem);
+    font-size: 1.875rem;
     font-weight: 800;
-    line-height: 1.15;
-    color: var(--color-text-primary);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-wrap: balance;
 }
 
-.lead {
-    margin: 8px 0 0;
-    max-width: 60ch;
-    color: var(--color-text-secondary);
-    line-height: 1.5;
-}
-
-.meta {
+.heroMeta {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px 14px;
-    margin: 12px 0 0;
-    padding: 0;
-    list-style: none;
-    font-size: 0.8125rem;
-    color: var(--color-text-tertiary);
+    gap: 4px 14px;
+    margin: 8px 0 0;
+    font-size: 0.875rem;
+    color: var(--ink-2);
 }
 
-.metaLive {
+.heroLive {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-weight: 600;
-    color: var(--color-text-primary);
+    font-weight: 700;
+    color: var(--ink);
 }
 
-/* ── Pestañas y selectores ─────────────────────────────────────────────── */
+.followCta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--ground);
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 800;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out), transform 150ms var(--ease-out);
+}
+
+.followCta:active {
+    transform: scale(0.97);
+}
+
+.followCtaOn {
+    background: var(--surface);
+    border-color: var(--edge);
+    color: var(--ink);
+}
+
+.followCtaOn svg {
+    color: var(--accent-ink);
+}
+
+/* El medallero de lo que se sigue: fichas en una fila que se desliza. */
+.tally {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.tally::-webkit-scrollbar {
+    display: none;
+}
+
+.tallyItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px 6px 8px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color 150ms var(--ease-out);
+}
+
+.tallyItem:hover {
+    border-color: var(--ink-3);
+}
+
+.tallyName {
+    font-weight: 700;
+}
+
+.tallyPos {
+    font-weight: 700;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+}
+
+.tallyMetals {
+    display: inline-flex;
+    gap: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.tallyMetals > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.tallyNone {
+    color: var(--ink-2);
+}
+
+.torch {
+    height: 3px;
+    margin-top: 18px;
+    border-radius: 3px;
+    background: var(--torch);
+}
+
+/* ── Pestañas ──────────────────────────────────────────────────────────── */
 
 .tabs {
     display: flex;
     gap: 4px;
+    margin: var(--spacing-md) 0 var(--spacing-lg);
+    border-bottom: 1px solid var(--edge);
     overflow-x: auto;
-    border-bottom: 1px solid var(--color-border);
-    margin-bottom: var(--spacing-lg);
     scrollbar-width: none;
 }
 
@@ -83,153 +220,62 @@
 }
 
 .tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     flex-shrink: 0;
-    padding: 10px 14px;
+    padding: 12px 16px;
     border: 0;
     border-bottom: 2px solid transparent;
     background: none;
     font: inherit;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink-2);
     cursor: pointer;
-    transition: color var(--transition-fast), border-color var(--transition-fast);
+    transition: color 150ms var(--ease-out), border-color 150ms var(--ease-out);
 }
 
 .tab:hover {
-    color: var(--color-text-primary);
+    color: var(--ink);
 }
 
 .tabActive {
-    color: var(--color-text-primary);
-    border-bottom-color: var(--color-accent);
+    color: var(--ink);
+    border-bottom-color: var(--accent);
 }
 
-.tab:focus-visible,
-.pill:focus-visible,
-.dayPill:focus-visible,
-.matchRow:focus-visible,
-.agendaLink:focus-visible,
-.moreLink:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
+.tabCount {
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--raised);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink-2);
 }
 
 .panel {
-    min-height: 240px;
+    min-height: 320px;
 }
 
-.pickers {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.pill,
-.dayPill {
-    padding: 7px 14px;
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    background: var(--color-bg-secondary);
-    font: inherit;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
-}
-
-.pill:hover,
-.dayPill:hover {
-    color: var(--color-text-primary);
-    border-color: var(--color-text-tertiary);
-}
-
-.pillSmall {
-    padding: 5px 12px;
-    font-size: 0.8125rem;
-}
-
-.pillActive,
-.pillActive:hover {
-    background: var(--color-text-primary);
-    border-color: var(--color-text-primary);
-    color: var(--color-bg-primary);
-}
-
-.dayStrip {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    /* Se desliza con el dedo o la rueda; la barra del sistema (blanca en
-       Windows) desentonaba con el tema oscuro. */
-    scrollbar-width: none;
-}
-
-.dayStrip::-webkit-scrollbar {
-    display: none;
-}
-
-.dayPill {
-    flex-shrink: 0;
-    text-transform: capitalize;
-}
-
-/* Hoy lleva una marca aunque no esté elegido: es a donde vuelve el ojo. */
-.dayToday:not(.pillActive) {
-    border-color: var(--color-accent);
-}
-
-.selectRow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.selectLabel {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-}
-
-.select {
-    min-width: 0;
-    max-width: 100%;
-    padding: 8px 12px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-bg-secondary);
-    color: var(--color-text-primary);
-    font: inherit;
-    font-size: 0.9375rem;
-}
-
-/* ── Bloques ───────────────────────────────────────────────────────────── */
+/* ── Bloques y botones ─────────────────────────────────────────────────── */
 
 .stack {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
+    gap: var(--spacing-md);
 }
 
 .block {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: 12px;
+    min-width: 0;
 }
 
 .blockHead {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 8px 16px;
@@ -238,17 +284,23 @@
 .sectionTitle {
     margin: 0;
     font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.sectionTitle::first-letter {
+    text-transform: uppercase;
 }
 
 .subTitle {
     margin: 0;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.subTitle::first-letter {
     text-transform: uppercase;
-    color: var(--color-text-tertiary);
 }
 
 .moreLink {
@@ -256,8 +308,8 @@
     align-items: center;
     gap: 4px;
     font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-accent-ink);
+    font-weight: 700;
+    color: var(--accent-ink);
     text-decoration: none;
 }
 
@@ -265,133 +317,258 @@
     text-decoration: underline;
 }
 
-.cardGrid {
+.hint {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--ink-2);
+}
+
+.primaryBtn,
+.ghostBtn,
+.backBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 999px;
+    font: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), color 150ms var(--ease-out);
+}
+
+.primaryBtn {
+    padding: 9px 18px;
+    border: 0;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 0.875rem;
+    font-weight: 800;
+}
+
+.primaryBtn:hover {
+    filter: brightness(1.06);
+}
+
+.ghostBtn,
+.backBtn {
+    padding: 7px 14px;
+    border: 1px solid var(--edge);
+    background: transparent;
+    color: var(--ink);
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+.ghostBtn:hover,
+.backBtn:hover {
+    border-color: var(--ink-3);
+    background: var(--surface);
+}
+
+.backBtn {
+    align-self: flex-start;
+}
+
+.iconBtn {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-    gap: var(--spacing-md);
-    align-items: start;
+    place-items: center;
+    flex: none;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
 }
 
-.card {
+.iconBtn:hover {
+    background: var(--raised);
+}
+
+.linkBtn {
+    align-self: flex-start;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--accent-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+}
+
+.starBtn {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--ink-3);
+    cursor: pointer;
+    transition: color 150ms var(--ease-out), background-color 150ms var(--ease-out), transform 150ms var(--ease-out);
+}
+
+.starBtn:hover {
+    color: var(--ink);
+    background: var(--raised);
+}
+
+.starBtn:active {
+    transform: scale(0.9);
+}
+
+.starBtnOn,
+.starBtnOn:hover {
+    color: var(--accent-ink);
+}
+
+.searchField {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink-3);
+}
+
+.searchField:focus-within {
+    border-color: var(--accent);
+}
+
+.searchField input {
+    width: 180px;
     min-width: 0;
-    padding: 14px 16px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    background: var(--color-bg-secondary);
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.875rem;
 }
 
-.cardTitle {
+.page .searchField input:focus-visible {
+    outline: none;
+}
+
+.searchField input::placeholder {
+    color: var(--ink-2);
+}
+
+/* ── Estados ───────────────────────────────────────────────────────────── */
+
+.skeleton {
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-panel);
+    background: var(--surface);
+    overflow: hidden;
+}
+
+.skeletonRow {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin: 0 0 10px;
-    font-size: 0.9375rem;
+    gap: 18px;
+    padding: 18px 16px;
+    border-top: 1px solid var(--edge);
+}
+
+.skeletonRow:first-of-type {
+    border-top: 0;
+}
+
+.skeletonTime,
+.skeletonText {
+    height: 12px;
+    border-radius: 6px;
+    background: var(--raised);
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.skeletonTime {
+    width: 40px;
+    flex: none;
+}
+
+@keyframes shimmer {
+    50% { opacity: 0.45; }
+}
+
+.empty {
+    padding: 32px 20px;
+    border: 1px dashed var(--edge);
+    border-radius: var(--radius-panel);
+    text-align: center;
+}
+
+.emptyTitle {
+    margin: 0;
+    font-size: 1rem;
     font-weight: 700;
-    color: var(--color-text-primary);
+    color: var(--ink);
+    text-wrap: balance;
 }
 
-.cardCount {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-text-tertiary);
-    font-variant-numeric: tabular-nums;
+.emptyTitle::first-letter {
+    text-transform: uppercase;
 }
 
-.inlineState,
+.emptyBody p {
+    margin: 6px auto 0;
+    max-width: 52ch;
+    color: var(--ink-2);
+    text-wrap: pretty;
+}
+
+.emptyActions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
 .errorState {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
     padding: 14px 16px;
-    border: 1px dashed var(--color-border);
-    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-error);
+    border-radius: var(--radius-panel);
     font-size: 0.9375rem;
-    color: var(--color-text-secondary);
+    color: var(--ink);
 }
 
-.errorState {
-    border-style: solid;
-    border-color: var(--color-error);
-    margin-bottom: var(--spacing-md);
-}
+/* ── Medallas, estados y banderas ──────────────────────────────────────── */
 
-.linkBtn {
-    border: 0;
-    background: none;
-    padding: 0;
-    font: inherit;
-    font-weight: 600;
-    color: var(--color-accent-ink);
-    cursor: pointer;
-    text-decoration: underline;
-}
-
-.spin {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ── Medallas y estados ────────────────────────────────────────────────── */
-
-/* El metal se lee por el punto de color, no por un emoji: Windows no dibuja
-   algunos y el color funciona igual en claro y en oscuro. */
 .medalDot {
     display: inline-block;
+    flex-shrink: 0;
     width: 9px;
     height: 9px;
     border-radius: 50%;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
-    flex-shrink: 0;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
 }
 
-.medal_gold { background: #d4a017; }
-.medal_silver { background: #aeb4bc; }
-.medal_bronze { background: #b8733e; }
-
-.medalTag {
-    display: inline-flex;
-    align-items: center;
-    margin-right: 6px;
-    vertical-align: 1px;
-}
-
-.chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-}
-
-.chipScheduled {
-    background: var(--color-bg-tertiary);
-    color: var(--color-text-secondary);
-}
-
-.chipFinal {
-    background: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
-}
-
-.chipLive {
-    background: color-mix(in srgb, var(--color-error) 14%, transparent);
-    color: var(--color-text-primary);
-}
+.medal_gold { background: var(--gold); }
+.medal_silver { background: var(--silver); }
+.medal_bronze { background: var(--bronze); }
 
 .liveDot {
+    display: inline-block;
+    flex: none;
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--color-error);
+    background: var(--live);
     animation: pulse 1.6s ease-in-out infinite;
 }
 
@@ -399,39 +576,866 @@
     50% { opacity: 0.35; }
 }
 
-.flag {
-    flex-shrink: 0;
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
-/* ── Tarjeta de Argentina ──────────────────────────────────────────────── */
+.tagLive {
+    background: color-mix(in srgb, var(--live) 16%, transparent);
+    color: var(--ink);
+}
 
-.argCard {
+.tagMuted {
+    padding-inline: 0;
+    font-weight: 600;
+    color: var(--ink-2);
+}
+
+.tagWarn {
+    background: color-mix(in srgb, #f59e0b 20%, transparent);
+    color: var(--ink);
+}
+
+.medalTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+/*
+ * La bandera en hoja. Los PNG del cajón son de 256×256 con la bandera en
+ * x=18, y=53, 219×150: la caja tiene la proporción de la bandera y la imagen
+ * se corre para que su margen transparente quede afuera.
+ */
+.flag {
+    --flag-w: 22px;
+    position: relative;
+    display: inline-block;
+    flex: none;
+    width: var(--flag-w);
+    aspect-ratio: 219 / 150;
+    overflow: hidden;
+    line-height: 0;
+    vertical-align: middle;
+}
+
+.flagCurated img {
+    position: absolute;
+    top: calc(var(--flag-w) * -0.242);
+    left: calc(var(--flag-w) * -0.0822);
+    width: calc(var(--flag-w) * 1.1689);
+    max-width: none;
+    height: auto;
+}
+
+/* Un país fuera del cajón: la SVG recortada en la misma hoja. */
+.flagFallback {
+    border-radius: 0 40% 0 40% / 0 58% 0 58%;
+    outline: 1.5px solid #000;
+    outline-offset: -1.5px;
+}
+
+.flagFallback img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.flagEmpty {
+    border-radius: 0 40% 0 40% / 0 58% 0 58%;
+    background: var(--raised);
+}
+
+.chev {
+    flex: none;
+    color: var(--ink-3);
+    transition: transform 200ms var(--ease-out);
+}
+
+.chevOpen {
+    transform: rotate(180deg);
+}
+
+/* ── Días ──────────────────────────────────────────────────────────────── */
+
+.dayStrip {
+    display: flex;
+    gap: 6px;
+    padding: 2px 2px 6px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+}
+
+.dayStrip::-webkit-scrollbar {
+    display: none;
+}
+
+.dayBtn {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    min-width: 56px;
+    padding: 7px 6px 6px;
+    border: 1px solid var(--edge);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink-2);
+    font: inherit;
+    scroll-snap-align: center;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), color 150ms var(--ease-out);
+}
+
+.dayBtn:hover {
+    border-color: var(--ink-3);
+    color: var(--ink);
+}
+
+.dayBtnOn,
+.dayBtnOn:hover {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--ground);
+}
+
+/* Hoy lleva una marca aunque no esté elegido: es a donde vuelve el ojo. */
+.dayBtnToday:not(.dayBtnOn) {
+    border-color: var(--accent);
+    color: var(--ink);
+}
+
+.dayWeek {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.dayNum {
+    font-size: 1.125rem;
+    font-weight: 800;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+}
+
+.dayFinals {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    min-height: 15px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.dayFinalsDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+}
+
+.dayBtnSlim {
+    min-width: 52px;
+    padding-bottom: 7px;
+}
+
+/* ── Barra de filtros ──────────────────────────────────────────────────── */
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.segmented {
+    display: inline-flex;
+    gap: 2px;
+    max-width: 100%;
+    padding: 3px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    background: var(--surface);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.segmented::-webkit-scrollbar {
+    display: none;
+}
+
+.segment {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 13px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-2);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
+}
+
+.segment:hover {
+    color: var(--ink);
+}
+
+.segmentOn,
+.segmentOn:hover {
+    background: var(--raised);
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--edge);
+}
+
+.segmentCount {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+}
+
+.sportSelect select {
+    max-width: 100%;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.agendaHead {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 4px;
+}
+
+.agendaHeadText {
+    min-width: 0;
+}
+
+.agendaHeadActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.agendaSummary {
+    margin: 4px 0 0;
+    font-size: 0.875rem;
+    color: var(--ink-2);
+}
+
+/* ── Agenda ────────────────────────────────────────────────────────────── */
+
+.agenda {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-panel);
+    background: var(--surface);
+    overflow: hidden;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 68px minmax(0, 1fr);
+    border-top: 1px solid var(--edge);
+    transition: background-color 150ms var(--ease-out);
+}
+
+.agenda > .row:first-child,
+.nowLine + .row {
+    border-top: 0;
+}
+
+.row:has(.rowAction:hover) {
+    background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+/* Lo que se sigue: un tinte del acento, además de la ★ junto a la hora. */
+.rowFollowed {
+    background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+.rowLive {
+    background: color-mix(in srgb, var(--live) 6%, transparent);
+}
+
+.rowTime {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 15px 0 0 16px;
+    font-size: 0.9375rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+}
+
+/*
+ * La misma hora que la fila de arriba, atenuada: oculta dejaba la columna en
+ * blanco y parecía que faltaba un dato.
+ */
+.timeRepeat {
+    font-weight: 600;
+    color: var(--ink-3);
+}
+
+.rowStar {
+    color: var(--accent-ink);
+}
+
+.rowMain {
+    min-width: 0;
+}
+
+/*
+ * Una fila: arriba el rótulo chico (deporte · prueba · instancia), abajo el
+ * resultado a todo el ancho, y el estado a la derecha. El resultado es el
+ * titular; el rótulo, contexto.
+ */
+.rowBody {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        'meta side'
+        'result side';
+    align-items: center;
+    gap: 7px 16px;
+    width: 100%;
+    min-height: 56px;
+    padding: 13px 16px 13px 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+}
+
+.rowAction {
+    cursor: pointer;
+}
+
+.page .rowAction:focus-visible {
+    outline-offset: -2px;
+    border-radius: 10px;
+}
+
+.rowMeta {
+    grid-area: meta;
+    display: block;
+    min-width: 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--ink-2);
+    text-wrap: pretty;
+}
+
+/* El punto va pegado a lo anterior (espacio duro): un renglón nunca empieza con "·". */
+.rowMeta > * + *::before {
+    content: '\00a0·\0020';
+    color: var(--ink-3);
+}
+
+.rowSport {
+    font-weight: 700;
+    color: var(--ink);
+}
+
+/*
+ * Una prueba que todavía no dice quién compite (un día que viene): sin
+ * resultado abajo, el rótulo es el texto de la fila y la fila se achica.
+ */
+.rowBody.rowBodyBare {
+    grid-template-areas: 'meta side';
+    min-height: 0;
+}
+
+.rowBodyBare .rowMeta {
+    font-size: 0.9375rem;
+    color: var(--ink);
+}
+
+.rowResult {
+    grid-area: result;
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 14px 18px;
-    border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
-    border-radius: var(--radius-xl);
-    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-secondary));
+    min-width: 0;
 }
 
-.argCard p {
+.rowResult:empty {
+    display: none;
+}
+
+.rowSide {
+    grid-area: side;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+/* El podio de una prueba terminada: tres puestos en fila, con la marca. */
+.podiumInline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 28px;
+    width: 100%;
     margin: 0;
-    line-height: 1.45;
-    color: var(--color-text-secondary);
+    padding: 0;
+    list-style: none;
 }
 
-.argCard strong {
-    color: var(--color-text-primary);
+/* La marca va pegada al nombre: separada al fondo de una columna, el ojo no la une. */
+.podiumEntry {
+    display: grid;
+    grid-template-columns: 14px auto minmax(0, auto) auto;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+    padding: 2px 4px;
+    margin: 0 -4px;
+    border-radius: 7px;
+    font-size: 0.9375rem;
+    color: var(--ink);
+}
+
+.podiumEntryOn {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.podiumEntry .medalDot {
+    width: 11px;
+    height: 11px;
+}
+
+.podiumRank {
+    font-size: 0.8125rem;
+    font-weight: 800;
+    color: var(--ink-2);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.podiumEntryName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 700;
+}
+
+.podiumEntryResult {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.entrants {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+}
+
+.entrantsCount {
+    font-size: 0.8125rem;
+    color: var(--ink-2);
+}
+
+/* Un cruce: los dos lados apilados, con el marcador a la derecha. */
+.duel {
+    display: grid;
+    gap: 5px;
+    width: 100%;
+    max-width: 440px;
+    min-width: 0;
+}
+
+.duelSide {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    font-size: 0.9375rem;
+    color: var(--ink-2);
+}
+
+.duelWinner {
+    color: var(--ink);
+    font-weight: 700;
+}
+
+.duelName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.duelStar {
+    margin-left: 5px;
+    vertical-align: -1px;
+    color: var(--accent-ink);
+}
+
+.duelScore {
+    min-width: 2ch;
+    text-align: right;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+}
+
+.flagRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px;
+}
+
+.flagSlot {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 7px;
+}
+
+.flagSlotOn {
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.flagMore {
+    padding: 0 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink-2);
+}
+
+.nowLine {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 16px;
+    border-top: 1px solid var(--edge);
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--live);
+    scroll-margin: 120px;
+}
+
+.nowLine::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--live);
+}
+
+.agenda > .nowLine:first-child {
+    border-top: 0;
+}
+
+/* Lo que se despliega adentro de una fila. */
+.ranking {
+    max-width: 680px;
+    padding: 0 16px 16px 0;
+}
+
+.rankingTitle {
+    margin: 0 0 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--ink-2);
+}
+
+.rankingList {
+    display: grid;
+    gap: 1px;
+    margin: 0 0 10px;
+    padding: 8px 0 0;
+    list-style: none;
+    border-top: 1px dashed var(--edge);
+}
+
+.rankingRow {
+    display: grid;
+    grid-template-columns: 40px auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+}
+
+.rankingRowOn {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.rankingPos {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 700;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+}
+
+.rankingName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.rankingOrg {
+    margin-left: 6px;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--ink-2);
+}
+
+.rankingResult {
+    font-weight: 700;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.qualified {
+    margin-left: 6px;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    color: var(--accent-ink);
+    text-decoration: none;
+    cursor: help;
+}
+
+.rankingNote {
+    margin: 0;
+    padding-top: 8px;
+    border-top: 1px dashed var(--edge);
+    font-size: 0.875rem;
+    color: var(--ink-2);
+}
+
+.sessionList {
+    display: grid;
+    margin: 0;
+    padding: 0 16px 12px 0;
+    list-style: none;
+}
+
+.sessionItem {
+    display: grid;
+    grid-template-columns: 48px minmax(96px, 0.55fr) minmax(0, 1.45fr);
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px dashed var(--edge);
+    font-size: 0.8125rem;
+}
+
+.sessionTime {
+    font-weight: 700;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+}
+
+.sessionUnit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink-2);
+}
+
+.sessionItem .duelSide {
+    font-size: 0.8125rem;
+}
+
+/* ── Qué seguís ────────────────────────────────────────────────────────── */
+
+.followPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 16px;
+    padding: 18px;
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-panel);
+    background: var(--surface);
+    animation: panelIn 220ms var(--ease-out);
+}
+
+@keyframes panelIn {
+    from { opacity: 0; transform: translateY(-6px); }
+}
+
+.followHead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.followLead {
+    margin: 4px 0 0;
+    max-width: 62ch;
+    font-size: 0.875rem;
+    color: var(--ink-2);
+}
+
+.followGroupTitle {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 4px 0 0;
+    font-size: 0.9375rem;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.followGroupTitle span {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--ink-2);
+}
+
+.orgGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 156px), 1fr));
+    gap: 8px;
+}
+
+.orgToggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 46px;
+    padding: 8px 12px;
+    border: 1px solid var(--edge);
+    border-radius: 12px;
+    background: var(--ground);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 150ms var(--ease-out), background-color 150ms var(--ease-out);
+}
+
+.orgToggle:hover {
+    border-color: var(--ink-3);
+}
+
+.orgToggleName {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.toggleMark {
+    display: inline-flex;
+    margin-left: auto;
+    color: var(--accent-ink);
+}
+
+.toggleOn,
+.toggleOn:hover {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, var(--ground));
+}
+
+.followSportsHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.chipGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 36px;
+    padding: 6px 13px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    background: var(--ground);
+    color: var(--ink-2);
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 150ms var(--ease-out), color 150ms var(--ease-out), background-color 150ms var(--ease-out);
+}
+
+.chip:hover {
+    border-color: var(--ink-3);
+    color: var(--ink);
+}
+
+.chip.toggleOn {
+    color: var(--ink);
+}
+
+.chip.toggleOn svg {
+    color: var(--accent-ink);
+}
+
+.followFoot {
+    display: flex;
+    justify-content: flex-end;
 }
 
 /* ── Tablas ────────────────────────────────────────────────────────────── */
 
 .tableWrap {
     overflow-x: auto;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    background: var(--color-bg-secondary);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-panel);
+    background: var(--surface);
 }
 
 .table {
@@ -441,22 +1445,20 @@
 }
 
 .groupCaption {
-    padding: 10px 14px 0;
+    padding: 12px 14px 2px;
     text-align: left;
     font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
+    font-weight: 800;
+    color: var(--ink);
 }
 
 .table th {
     padding: 10px 12px;
+    border-bottom: 1px solid var(--edge);
     text-align: left;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    color: var(--color-text-tertiary);
-    border-bottom: 1px solid var(--color-border);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink-2);
     white-space: nowrap;
 }
 
@@ -467,12 +1469,16 @@
 
 .table td {
     padding: 9px 12px;
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--edge);
     vertical-align: middle;
 }
 
 .table tbody tr:last-child td {
     border-bottom: 0;
+}
+
+.tableCompact td {
+    padding-block: 7px;
 }
 
 .thPos {
@@ -483,14 +1489,18 @@
     text-align: right;
 }
 
+.thStar {
+    width: 44px;
+}
+
 .thMetalLabel {
     margin-left: 6px;
 }
 
 .posCell {
     font-weight: 700;
+    color: var(--ink-2);
     font-variant-numeric: tabular-nums;
-    color: var(--color-text-secondary);
 }
 
 .teamCell {
@@ -501,35 +1511,55 @@
 }
 
 .teamCell strong {
-    font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-weight: 700;
 }
 
 .numCell {
     text-align: right;
     font-variant-numeric: tabular-nums;
-    color: var(--color-text-secondary);
+    color: var(--ink-2);
     white-space: nowrap;
 }
 
 .totalCell {
-    font-weight: 700;
-    color: var(--color-text-primary);
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.table .starCell {
+    width: 44px;
+    padding: 2px 6px;
+    text-align: right;
 }
 
 .rowHighlight {
-    background: color-mix(in srgb, var(--color-accent) 9%, transparent);
-    box-shadow: inset 3px 0 0 var(--color-accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
-/* ── Listas compactas ──────────────────────────────────────────────────── */
+/* ── Medallero ─────────────────────────────────────────────────────────── */
+
+.medalsLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+    align-items: start;
+    gap: 28px;
+}
+
+.medalsAside {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    min-width: 0;
+}
 
 .latestList,
 .miniList,
-.agendaList,
-.podium {
+.podium,
+.podiumList,
+.sportMedalList {
     margin: 0;
     padding: 0;
     list-style: none;
@@ -537,21 +1567,23 @@
 
 .latestList {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-    gap: 8px 16px;
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-panel);
+    background: var(--surface);
+    overflow: hidden;
 }
 
-.latestRow,
-.podiumRow {
-    display: flex;
+.latestRow {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
     align-items: center;
     gap: 10px;
-    min-width: 0;
+    padding: 10px 14px;
+    border-top: 1px solid var(--edge);
 }
 
-.podium {
-    display: grid;
-    gap: 10px;
+.latestRow:first-child {
+    border-top: 0;
 }
 
 .latestCopy {
@@ -562,51 +1594,123 @@
 }
 
 .latestCopy strong {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--ink);
 }
 
 .latestCopy span {
-    font-size: 0.8125rem;
-    color: var(--color-text-tertiary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 0.8125rem;
+    color: var(--ink-2);
+}
+
+.latestTime {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+}
+
+.sportMedalList {
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-panel);
+    background: var(--surface);
+    overflow: hidden;
+}
+
+.sportMedalList li + li {
+    border-top: 1px solid var(--edge);
+}
+
+.sportMedalRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 14px;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out);
+}
+
+.sportMedalRow:hover {
+    background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+.sportMedalName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.sportMedalLeaders {
+    display: inline-flex;
+    gap: 10px;
+}
+
+.sportMedalLeader {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sportMedalGold {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
 }
 
 .miniList {
     display: grid;
-    gap: 8px;
+    gap: 2px;
 }
 
 .miniRow {
     display: grid;
-    grid-template-columns: 18px 18px minmax(0, 1fr) auto;
+    grid-template-columns: 20px auto minmax(0, 1fr) auto;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
+    padding: 6px 8px;
+    border-radius: 8px;
     font-size: 0.875rem;
+}
+
+.miniRowOn {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
 .miniPos {
     text-align: right;
+    color: var(--ink-2);
     font-variant-numeric: tabular-nums;
-    color: var(--color-text-tertiary);
 }
 
 .miniName {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-weight: 600;
+    color: var(--ink);
 }
 
 .miniMetals {
     display: inline-flex;
     gap: 10px;
     font-variant-numeric: tabular-nums;
+    color: var(--ink);
 }
 
 .miniMetal {
@@ -615,175 +1719,430 @@
     gap: 4px;
 }
 
-/* ── Partidos ──────────────────────────────────────────────────────────── */
-
-.dayGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.dayTitle {
-    margin: 0;
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--color-text-secondary);
-}
-
-.dayTitle::first-letter {
-    text-transform: uppercase;
-}
-
-.matchList {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    background: var(--color-bg-secondary);
-    overflow: hidden;
-}
-
-.matchRow {
+.podiumList {
     display: grid;
-    grid-template-columns: 96px minmax(0, 1fr) minmax(0, 160px);
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--color-border);
-    color: inherit;
-    text-decoration: none;
-    transition: background-color var(--transition-fast);
+    gap: 14px;
 }
 
-.matchRow:last-child {
+.podiumEvent {
+    min-width: 0;
+}
+
+.podiumTitle {
+    margin: 0 0 6px;
+    font-size: 0.8125rem;
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.podium {
+    display: grid;
+    gap: 6px;
+}
+
+.podiumRow {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 9px;
+    font-size: 0.875rem;
+}
+
+.podiumName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ink);
+}
+
+/* ── Deportes: el calendario ───────────────────────────────────────────── */
+
+.matrixWrap {
+    overflow-x: auto;
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-panel);
+    background: var(--surface);
+}
+
+.matrix {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.875rem;
+}
+
+.matrix th,
+.matrix td {
+    padding: 0;
+    border-bottom: 1px solid var(--edge);
+    text-align: center;
+}
+
+.matrix tbody tr:last-child th,
+.matrix tbody tr:last-child td {
     border-bottom: 0;
 }
 
-.matchRow:hover {
-    background: var(--color-bg-tertiary);
+.matrixCorner,
+.matrixSport {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    min-width: 190px;
+    border-right: 1px solid var(--edge);
+    background: var(--surface);
+    text-align: left;
 }
 
-.matchTime {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    font-size: 0.875rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--color-text-primary);
-}
-
-.matchTeams {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 0;
-}
-
-.matchSide {
-    display: grid;
-    grid-template-columns: 20px minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 8px;
-    color: var(--color-text-secondary);
-}
-
-.winner {
-    color: var(--color-text-primary);
-    font-weight: 700;
-}
-
-.matchName {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.matchScore {
-    min-width: 2ch;
-    text-align: right;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-}
-
-.matchStage {
-    font-size: 0.8125rem;
-    color: var(--color-text-tertiary);
-    text-align: right;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* ── Agenda ────────────────────────────────────────────────────────────── */
-
-.agendaList {
-    display: flex;
-    flex-direction: column;
-}
-
-.agendaRow {
-    display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 0;
-    border-top: 1px solid var(--color-border);
-    color: inherit;
-    text-decoration: none;
-}
-
-.agendaList li:first-child .agendaRow {
-    border-top: 0;
-}
-
-.agendaLink:hover .agendaCopy strong {
-    text-decoration: underline;
-}
-
-.agendaTime {
-    font-size: 0.8125rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--color-text-primary);
-}
-
-.agendaCopy {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    line-height: 1.3;
-}
-
-.agendaCopy strong {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-}
-
-.agendaCopy span {
+.matrixCorner {
+    padding: 8px 14px;
     font-size: 0.75rem;
-    color: var(--color-text-tertiary);
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-weight: 700;
+    color: var(--ink-2);
+}
+
+.matrixSportInner {
+    display: flex;
+    align-items: center;
+    padding: 0 8px 0 4px;
+}
+
+.matrixName {
+    padding: 8px 4px;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
     white-space: nowrap;
+    cursor: pointer;
+}
+
+.matrixName:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.matrixRowOn .matrixSport {
+    background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+
+.matrixDay {
+    min-width: 40px;
+    padding: 6px 2px;
+    font-weight: 600;
+    color: var(--ink-2);
+}
+
+.matrixDay abbr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.15;
+    text-decoration: none;
+    cursor: default;
+}
+
+.matrixDayWeek {
+    font-size: 0.6875rem;
+}
+
+.matrixDayNum {
+    font-size: 0.875rem;
+    font-weight: 800;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.matrixToday {
+    background: color-mix(in srgb, var(--accent) 9%, transparent);
+}
+
+.cell {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 40px;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out);
+}
+
+.cell:hover {
+    background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.cellMark {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--ink-3);
+}
+
+.cellFinal .cellMark,
+.legendFinal {
+    width: 13px;
+    height: 13px;
+    background: var(--gold);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.22);
+}
+
+.cellLive .cellMark {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--live) 45%, transparent);
+    animation: pulse 1.6s ease-in-out infinite;
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--ink-2);
+}
+
+.legend > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legendMark {
+    vertical-align: middle;
+}
+
+/* ── Deportes: uno ─────────────────────────────────────────────────────── */
+
+.sportHead {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sportTitleRow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.sportTitle {
+    min-height: 1.2em;
+    margin: 0;
+    font-size: 1.625rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+}
+
+.followToggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 15px;
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out);
+}
+
+.followToggle:hover {
+    border-color: var(--ink-3);
+}
+
+.followToggleOn,
+.followToggleOn:hover {
+    border-color: color-mix(in srgb, var(--accent) 60%, var(--edge));
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+
+.followToggleOn svg {
+    color: var(--accent-ink);
+}
+
+.sportLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(290px, 380px);
+    align-items: start;
+    gap: 28px;
+}
+
+.sportLayoutSingle {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.sportAside {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    min-width: 0;
+}
+
+.competitionActions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+}
+
+.standingsGrid {
+    display: grid;
+    gap: 12px;
+}
+
+/* ── Escritorio angosto y tableta ──────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+    .medalsLayout,
+    .sportLayout {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
 /* ── Teléfono ──────────────────────────────────────────────────────────── */
 
-@media (max-width: 640px) {
-    .matchRow {
-        grid-template-columns: 76px minmax(0, 1fr);
+@media (max-width: 720px) {
+    .hero {
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 12px 14px;
     }
 
-    /* La instancia pasa abajo del partido en vez de robarle ancho a los nombres. */
-    .matchStage {
+    .heroLogo {
+        height: 56px;
+        padding: 4px 7px;
+        border-radius: 12px;
+    }
+
+    .title {
+        font-size: 1.375rem;
+    }
+
+    .heroMeta {
+        margin-top: 6px;
+        font-size: 0.8125rem;
+    }
+
+    /* Compacto, al lado del título: a todo el ancho empujaba la agenda abajo. */
+    .followCta {
         grid-column: 2;
-        text-align: left;
+        justify-self: start;
+        padding: 7px 14px;
+        font-size: 0.875rem;
     }
 
-    /* En el teléfono alcanza con el color del metal en el encabezado. */
+    .hero {
+        align-items: start;
+    }
+
+    .heroLogo {
+        grid-row: span 2;
+    }
+
+    .segment {
+        padding: 6px 10px;
+        font-size: 0.8125rem;
+    }
+
+    /* El chevrón ya dice que se abre; la palabra le robaba ancho al título. */
+    .tagResults {
+        display: none;
+    }
+
+    .tab {
+        padding: 12px 14px;
+    }
+
+    .toolbar {
+        align-items: stretch;
+    }
+
+    .sportSelect,
+    .sportSelect select,
+    .searchField {
+        width: 100%;
+    }
+
+    .searchField input {
+        flex: 1;
+        width: auto;
+    }
+
+    .row {
+        grid-template-columns: 56px minmax(0, 1fr);
+    }
+
+    .rowTime {
+        padding: 14px 0 0 12px;
+        font-size: 0.875rem;
+    }
+
+    /* El resultado va a todo el ancho, abajo del rótulo; el estado, arriba a la derecha. */
+    .rowBody {
+        grid-template-areas:
+            'meta side'
+            'result result';
+        align-items: start;
+        gap: 8px 10px;
+        padding: 12px 12px 12px 0;
+    }
+
+    .rowSide {
+        gap: 8px;
+    }
+
+    /* En el teléfono, un puesto por renglón y la marca a la derecha, en columna. */
+    .podiumInline {
+        display: grid;
+        gap: 5px;
+    }
+
+    .podiumEntry {
+        grid-template-columns: 14px auto minmax(0, 1fr) auto;
+    }
+
+    .duel {
+        max-width: none;
+    }
+
+    /* Alcanza con el punto dorado; el texto queda para el lector de pantalla. */
+    .medalTagText {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+    }
+
+    .ranking,
+    .sessionList {
+        padding-right: 12px;
+    }
+
+    .rankingRow {
+        grid-template-columns: 34px auto minmax(0, 1fr) auto;
+        gap: 8px;
+        padding: 6px 4px;
+    }
+
+    .sessionItem {
+        grid-template-columns: 44px minmax(0, 1fr);
+        gap: 6px 10px;
+    }
+
+    .sessionItem > :nth-child(3) {
+        grid-column: 2;
+    }
+
     .thMetalLabel {
         position: absolute;
         width: 1px;
@@ -797,11 +2156,54 @@
         padding-left: 8px;
         padding-right: 8px;
     }
+
+    .matrixCorner,
+    .matrixSport {
+        min-width: 150px;
+    }
+
+    .matrixName {
+        max-width: 112px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .followPanel {
+        padding: 14px;
+    }
+
+    .sportTitle {
+        font-size: 1.375rem;
+    }
+}
+
+/* Dedos, no mouse: los controles chicos crecen hasta un blanco cómodo. */
+@media (pointer: coarse) {
+    .segment,
+    .ghostBtn,
+    .backBtn,
+    .chip {
+        min-height: 40px;
+    }
+
+    .starBtn {
+        width: 40px;
+        height: 40px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .spin,
-    .liveDot {
+    .liveDot,
+    .skeletonTime,
+    .skeletonText,
+    .cellLive .cellMark,
+    .followPanel {
         animation: none;
+    }
+
+    .chev,
+    .followCta,
+    .starBtn {
+        transition: none;
     }
 }
