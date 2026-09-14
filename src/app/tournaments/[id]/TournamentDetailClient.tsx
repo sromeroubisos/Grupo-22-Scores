@@ -36,6 +36,7 @@ import { SPORTS } from '@/lib/data/sports';
 import type { SportId } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
 import { getTournamentFlashScoreConfig, getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
+import { parseOdesurTournamentId } from '@/lib/services/odesur2026Parser';
 import {
     getPlayoffTeamsCount,
     resolvePlayoffStagesForTeams,
@@ -80,9 +81,22 @@ function isFihWorldCupTournamentId(id: string): boolean {
     return id.toLowerCase().startsWith('fih-wc-');
 }
 
-/** Mundial Universitario de Seven de la FISU: torneo externo, no vive en la base. */
+/**
+ * Mundial Universitario de Seven de la FISU y Juegos Suramericanos (ODESUR):
+ * torneos externos del mismo proveedor (Bornan), no viven en la base.
+ */
 function isFisuTournamentId(id: string): boolean {
-    return id.toLowerCase().startsWith('fisu-');
+    const normalized = id.toLowerCase();
+    return normalized.startsWith('fisu-') || normalized.startsWith('odesur-');
+}
+
+/**
+ * El deporte de un torneo de los Juegos Suramericanos sale del id, que dice la
+ * disciplina (`odesur-2026-hoc-w` -> hockey). Sin esto el rótulo caía al
+ * rugby por omisión, como cualquier torneo externo sin deporte propio.
+ */
+function odesurSportOf(id: string): string | null {
+    return parseOdesurTournamentId(id)?.discipline.sportId ?? null;
 }
 
 /** Ultimate Sevens: `us7-m` / `us7-w`, una por rama. Torneo externo, no vive en la base. */
@@ -2119,7 +2133,7 @@ export default function TournamentDetailPage({
                             name: nameParam || 'Cargando...',
                             url: '',
                             type: 'league' as any,
-                            sportId: (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : isEspnSoccerTournamentId(id) ? 'football' : isFihWorldCupTournamentId(id) ? 'field-hockey' : 'rugby')) as any,
+                            sportId: (overrideSport || (isEspnAmericanFootballTournamentId(id) ? 'american-football' : isEspnSoccerTournamentId(id) ? 'football' : isFihWorldCupTournamentId(id) ? 'field-hockey' : odesurSportOf(id) || 'rugby')) as any,
                             countryId: 'international',
                             categories: [],
                             priority: 0,

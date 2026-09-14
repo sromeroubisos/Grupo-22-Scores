@@ -57,6 +57,10 @@ import {
     parseUs7TournamentId,
 } from '@/lib/services/ultimateSevens';
 import {
+    getOdesurTournamentBundle,
+    parseOdesurTournamentId,
+} from '@/lib/services/odesur2026';
+import {
     getRugbyPassTournamentBundle,
     parseRugbyPassTournamentId,
 } from '@/lib/services/rugbyPassTournamentBundle';
@@ -1097,6 +1101,7 @@ export async function GET(request: Request) {
     const fihCompetition = parseFihTournamentId(id) || parseFihTournamentId(dbTournamentMeta?.external_id);
     const fisuCompetition = parseFisuTournamentId(id) || parseFisuTournamentId(dbTournamentMeta?.external_id);
     const us7Competition = parseUs7TournamentId(id) || parseUs7TournamentId(dbTournamentMeta?.external_id);
+    const odesurCompetition = parseOdesurTournamentId(id) || parseOdesurTournamentId(dbTournamentMeta?.external_id);
     const rugbyPassCompetitionId =
         parseRugbyPassTournamentId(id) ?? parseRugbyPassTournamentId(dbTournamentMeta?.external_id);
 
@@ -1152,6 +1157,48 @@ export async function GET(request: Request) {
                     archives: bundle.archives,
                 });
             }
+        }
+
+        // Juegos Suramericanos Santa Fe 2026: el mismo proveedor que la FISU
+        // (Bornan), otro campeonato. El id dice disciplina y rama
+        // (`odesur-2026-hoc-w`); el torneo no vive en FlashScore ni en la base.
+        if (odesurCompetition) {
+            const bundle = await getOdesurTournamentBundle(odesurCompetition);
+
+            return perf.json({
+                ok: true,
+                _debug: {
+                    query: { id, url, sport, requestedSeason },
+                    resolvedIds: bundle.ids,
+                    provider: 'odesur',
+                    counts: {
+                        results: bundle.results.length,
+                        fixtures: bundle.fixtures.length,
+                        standings: bundle.standings.length,
+                    },
+                },
+                _cache: {
+                    entityId: bundle.ids.tournamentId,
+                    tabSources: {
+                        details: 'api',
+                        results: 'api',
+                        fixtures: 'api',
+                        standings: 'api',
+                    },
+                },
+                ids: bundle.ids,
+                details: bundle.details,
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                standings: bundle.standings,
+                standingsForm: bundle.standingsForm,
+                standingsHtFt: bundle.standingsHtFt,
+                standingsOverUnder: bundle.standingsOverUnder,
+                teamLabels: bundle.teamLabels,
+                topScorers: bundle.topScorers,
+                draw: bundle.draw,
+                archives: bundle.archives,
+            });
         }
 
         // Mundial Universitario de Seven 2026: la fuente es la FISU (Bornan).

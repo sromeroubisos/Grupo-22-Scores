@@ -31,8 +31,9 @@ export async function GET(
         const rawDate = new URL(request.url).searchParams.get('date')?.trim() || '';
         const date = ISO_DATE_REGEX.test(rawDate) ? rawDate : null;
 
-        // El id decide la fuente: un UUID es un ranking de clubes de la base, y
-        // `world-rugby-mru` / `world-rugby-wru` son las fotos de World Rugby.
+        // El id decide la fuente: un UUID es un ranking de clubes de la base,
+        // `world-rugby-mru` / `world-rugby-wru` son las fotos de World Rugby y
+        // `odesur-2026-medallero*` es el medallero de los Juegos Suramericanos.
         const data = await getPublicRankingDetail(id, { date });
 
         return NextResponse.json({ data }, {

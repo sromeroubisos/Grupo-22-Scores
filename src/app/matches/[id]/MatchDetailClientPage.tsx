@@ -177,6 +177,13 @@ function isFisuMatchId(value: string) {
     return /^fisu-match-[mw]-[A-Z0-9_]{4}-\d{6}$/i.test(value);
 }
 
+// Juegos Suramericanos: `odesur-match-hoc-w-GP01-000100` (confirmado: disciplina,
+// rama, fase y unidad) o `odesur-match-vvo-w-p202609151800-ARG-PAR` (todavía sin
+// llave: hora de pared y los dos países). Mismo formato que `odesurMatchIdOf`.
+function isOdesurMatchId(value: string) {
+    return /^odesur-match-[a-z0-9]{3}-[mw]-(?:[A-Z0-9_]{2,6}-\d{6}|p\d{12}-[A-Z]{3}-[A-Z]{3})$/i.test(value);
+}
+
 // Ultimate Sevens: `us7-match-31176`, el `gameId` de la API de la liga. Mismo
 // formato que `us7MatchIdOf`.
 function isUltimateSevensMatchId(value: string) {
@@ -781,7 +788,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isFisuExternal = isFisuMatchId(id);
     const isUltimateSevensExternal = isUltimateSevensMatchId(id);
     const isRugbyPassExternal = isRugbyPassMatchId(id);
-    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal || isFisuExternal || isUltimateSevensExternal || isRugbyPassExternal;
+    const isOdesurExternal = isOdesurMatchId(id);
+    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal || isFisuExternal || isUltimateSevensExternal || isRugbyPassExternal || isOdesurExternal;
 
     const resolvedMatchId =
         typeof state.matchData?.id === 'string' && state.matchData.id.trim()
@@ -845,6 +853,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isRugbyPassSource = state.matchData?.externalProvider === 'rugbypass';
     const isFisuSource = state.matchData?.externalProvider === 'fisu';
     const isUltimateSevensSource = state.matchData?.externalProvider === 'ultimate-sevens';
+    const isOdesurSource = state.matchData?.externalProvider === 'odesur';
     // La fuente puede publicar el plantel de la temporada en vez de la
     // formación del partido. Rotularlo "Titulares" sería afirmar algo que no dijo.
     const isSquadLineup = state.matchData?.lineupsKind === 'squad';
@@ -869,6 +878,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         : isFihSource ? 'fih'
         : isFisuSource ? 'fisu'
         : isUltimateSevensSource ? 'ultimate-sevens'
+        : isOdesurSource ? 'odesur'
         : isEspnSoccerSource ? 'espn-soccer'
         : isRugbyApiSportsSource ? 'rugby-api-sports'
         : isEspnSource ? 'espn-american-football'
@@ -931,7 +941,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     // Mundial de Hockey: el bundle ya viene en el vocabulario de
                     // la pantalla (eventos canonicos, planilla, alineaciones),
                     // asi que no hay nada que normalizar aca.
-                    if ((payload?.source === 'fih' || payload?.source === 'fisu' || payload?.source === 'ultimate-sevens') && payload?.match) {
+                    // Los Juegos Suramericanos arman el bundle igual.
+                    if ((payload?.source === 'fih' || payload?.source === 'fisu' || payload?.source === 'ultimate-sevens' || payload?.source === 'odesur') && payload?.match) {
                         statusRef.current = payload.match.status || 'scheduled';
                         setState({
                             kind: 'ok',

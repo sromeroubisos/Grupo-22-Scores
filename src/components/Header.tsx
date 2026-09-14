@@ -141,7 +141,12 @@ export default function Header() {
     const isRankingsRoute = pathname?.startsWith('/rankings') ?? false;
     // El Prode dejó de ser una pestaña de primera plana: vive dentro de Juegos.
     // La pestaña queda marcada también mientras se navega el prode.
-    const isGamesRoute = Boolean(pathname && (pathname.startsWith('/juegos') || pathname.startsWith('/prode')));
+    // `/juegos` exacto o sus hijas: `/juegos-odesur` también empieza con
+    // "/juegos" y no es la sección de minijuegos.
+    const isGamesRoute = Boolean(pathname && (
+        pathname === '/juegos' || pathname.startsWith('/juegos/') || pathname.startsWith('/prode')
+    ));
+    const isOdesurRoute = pathname?.startsWith('/juegos-odesur') ?? false;
     const isNotificationsRoute = pathname?.startsWith('/notifications') ?? false;
     /**
      * "Organizá" es la puerta permanente del embudo comercial: el dirigente que
@@ -254,6 +259,22 @@ export default function Header() {
                             <path d="M17.5 6H6.5A4.5 4.5 0 0 0 2 10.5v3A4.5 4.5 0 0 0 6.5 18c1.3 0 2-.6 2.8-1.4l.4-.6h4.6l.4.6c.8.8 1.5 1.4 2.8 1.4a4.5 4.5 0 0 0 4.5-4.5v-3A4.5 4.5 0 0 0 17.5 6Z" />
                         </svg>
                         <span>Juegos</span>
+                    </Link>
+
+                    {/* Los Juegos Suramericanos Santa Fe 2026 (13 al 26 de
+                        septiembre). Es una entrada de temporada: cuando los
+                        Juegos terminen, sale del nav. */}
+                    <Link
+                        href="/juegos-odesur"
+                        className={`g22-desktop-link ${isOdesurRoute ? 'active' : ''}`}
+                        aria-current={isOdesurRoute ? 'page' : undefined}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="15" r="6" />
+                            <path d="M9 3h6l-1.5 6h-3z" />
+                            <path d="M12 12.5v5" />
+                        </svg>
+                        <span>Suramericanos</span>
                     </Link>
 
                     <Link

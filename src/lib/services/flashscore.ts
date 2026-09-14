@@ -19,6 +19,13 @@ import {
     getUltimateSevensMatches,
     hasUltimateSevensMatchesOnDate,
 } from '@/lib/services/ultimateSevens';
+import {
+    getOdesurLiveMatches,
+    getOdesurMatches,
+    hasOdesurMatchesOnDate,
+    isOdesurCopyLeague,
+    isOdesurSport,
+} from '@/lib/services/odesur2026';
 import { mergeHockeyProviders } from '@/lib/services/hockeyProviderMerge';
 import {
     getEspnAmericanFootballLiveMatches,
@@ -227,6 +234,10 @@ export async function isExternalMatchesListDateSupported(
     timeZone?: string,
 ): Promise<boolean> {
     if (isFlashScoreMatchesListDateSupported(targetDateKey, timeZone)) return true;
+    // Los Juegos Suramericanos publican su calendario entero: la final del 26
+    // tiene que aparecer aunque falten más de 7 días. Va antes que la FIH
+    // porque el hockey de los Juegos no es el del Mundial.
+    if (await hasOdesurMatchesOnDate(isRugbySport(sportId) ? 'rugby' : sportId, targetDateKey)) return true;
     if (isFieldHockeySport(sportId)) return hasFihWorldCupMatchesOnDate(targetDateKey, timeZone);
     if (isRugbySport(sportId)) {
         const [universitario, ultimate] = await Promise.all([
@@ -261,7 +272,7 @@ export async function getVirtualRugbySevensMatches(
     date: Date,
     options?: { timeZone?: string; targetDateKey?: string },
 ): Promise<Match[]> {
-    const [universitario, ultimate] = await Promise.all([
+    const [universitario, ultimate, suramericanos] = await Promise.all([
         getFisuRugbySevensMatches(date, options).catch((error) => {
             console.warn('[FISU] fixture del Mundial Universitario no disponible:', error?.message);
             return [] as Match[];
@@ -270,8 +281,15 @@ export async function getVirtualRugbySevensMatches(
             console.warn('[Ultimate Sevens] fixture no disponible:', error?.message);
             return [] as Match[];
         }),
+        // El seven de los Juegos Suramericanos entra por esta misma puerta y
+        // no por la general de ODESUR: acá ya está resuelto que el rugby pasa
+        // una sola vez aunque el camino en vivo se abra en union + league.
+        getOdesurMatches('rugby', date, options).catch((error) => {
+            console.warn('[ODESUR] seven de los Juegos no disponible:', error?.message);
+            return [] as Match[];
+        }),
     ]);
-    return [...universitario, ...ultimate];
+    return [...universitario, ...ultimate, ...suramericanos];
 }
 
 /**
@@ -282,7 +300,7 @@ export async function getVirtualRugbySevensMatches(
  * fila que nadie iba a poner.
  */
 export async function getVirtualRugbySevensLiveMatches(): Promise<Match[]> {
-    const [universitario, ultimate] = await Promise.all([
+    const [universitario, ultimate, suramericanos] = await Promise.all([
         getFisuRugbySevensLiveMatches().catch((error) => {
             console.warn('[FISU] en vivo del Mundial Universitario no disponible:', error?.message);
             return [] as Match[];
@@ -291,8 +309,80 @@ export async function getVirtualRugbySevensLiveMatches(): Promise<Match[]> {
             console.warn('[Ultimate Sevens] en vivo no disponible:', error?.message);
             return [] as Match[];
         }),
+        getOdesurLiveMatches('rugby').catch((error) => {
+            console.warn('[ODESUR] en vivo del seven de los Juegos no disponible:', error?.message);
+            return [] as Match[];
+        }),
     ]);
-    return [...universitario, ...ultimate];
+    return [...universitario, ...ultimate, ...suramericanos];
+}
+
+/**
+ * Los Juegos Suramericanos en los deportes que NO son rugby (hockey, fútbol,
+ * handball, vóley, beach y waterpolo). El rugby queda afuera porque entra con
+ * los otros seven virtuales, que ya resuelven su doble camino.
+ */
+function wantsOdesurMerge(sportId: string): boolean {
+    return !isRugbySport(sportId) && isOdesurSport(sportId);
+}
+
+/**
+ * Suma los partidos de los Juegos a los de otro proveedor. De la otra fuente
+ * se cae SOLO su copia de los Juegos, y solo si los Juegos trajeron algo: con
+ * Bornan caído, la copia ajena es mejor que nada.
+ */
+function mergeOdesurMatches(odesur: Match[], others: Match[]): Match[] {
+    if (odesur.length === 0) return others;
+    return [...odesur, ...others.filter((match) => !isOdesurCopyLeague(match.leagueName))];
+}
+
+/** ¿El deporte tiene algún proveedor virtual (seven o Juegos Suramericanos)? */
+export function wantsVirtualProviders(sportId: string): boolean {
+    return wantsVirtualRugbySevens(sportId) || wantsOdesurMerge(sportId);
+}
+
+/**
+ * Los partidos de una fecha de todos los proveedores virtuales de un deporte.
+ * Es la puerta del camino "caché primero" de `api/matches`: la caché la llena
+ * fixture-sync cada hora, así que los virtuales se piden aparte para que un
+ * marcador en juego no llegue con una hora de atraso. Nunca lanza.
+ */
+export async function getVirtualDailyMatches(
+    sportId: string,
+    date: Date,
+    options?: { timeZone?: string; targetDateKey?: string },
+): Promise<Match[]> {
+    const [sevens, suramericanos] = await Promise.all([
+        wantsVirtualRugbySevens(sportId) ? getVirtualRugbySevensMatches(date, options) : Promise.resolve([] as Match[]),
+        wantsOdesurMerge(sportId)
+            ? getOdesurMatches(sportId, date, options).catch((error) => {
+                console.warn('[ODESUR] fixture de los Juegos no disponible:', error?.message);
+                return [] as Match[];
+            })
+            : Promise.resolve([] as Match[]),
+    ]);
+    return [...sevens, ...suramericanos];
+}
+
+/**
+ * Los partidos EN JUEGO de todos los proveedores virtuales de un deporte. Es
+ * la puerta que usa el sondeo en vivo de `api/matches` cuando el gate de
+ * `external_match_cache` dice que FlashScore no tiene nada: los virtuales no
+ * escriben en esa tabla, así que un 'skip' habla de FlashScore y nunca de
+ * ellos. Sin esta puerta, un partido de hockey de los Juegos en juego
+ * quedaba apagado por la ausencia de una fila que nadie iba a poner.
+ */
+export async function getVirtualLiveMatches(sportId: string): Promise<Match[]> {
+    const [sevens, suramericanos] = await Promise.all([
+        wantsVirtualRugbySevens(sportId) ? getVirtualRugbySevensLiveMatches() : Promise.resolve([] as Match[]),
+        wantsOdesurMerge(sportId)
+            ? getOdesurLiveMatches(sportId).catch((error) => {
+                console.warn('[ODESUR] en vivo de los Juegos no disponible:', error?.message);
+                return [] as Match[];
+            })
+            : Promise.resolve([] as Match[]),
+    ]);
+    return [...sevens, ...suramericanos];
 }
 
 function getFlashScoreRawTournamentList(data: any): any[] {
@@ -465,7 +555,43 @@ export async function getFlashScoreMatchesRaw(
 
 // formatDateKey is now imported from @/lib/timezone
 
+/**
+ * Los partidos de un deporte en una fecha, de todos los proveedores. Los
+ * Juegos Suramericanos se suman acá, arriba de la rama de cada deporte, para
+ * no repetir la mezcla en seis ramas; cada lado cae por su cuenta.
+ */
 export async function getFlashScoreMatches(
+    date: Date,
+    sportId: string,
+    options?: { timeZone?: string; targetDateKey?: string }
+): Promise<Match[]> {
+    if (!wantsOdesurMerge(sportId)) return getProviderDailyMatches(date, sportId, options);
+
+    let providerError: unknown = null;
+    const [suramericanos, others] = await Promise.all([
+        getOdesurMatches(sportId, date, options).catch((error) => {
+            console.warn('[ODESUR] fixture de los Juegos no disponible:', error?.message);
+            return [] as Match[];
+        }),
+        // Un deporte sin proveedor externo (handball) entra acá solo por los
+        // Juegos: la política lo sigue cerrando para FlashScore.
+        isFlashScoreEnabledForSport(sportId)
+            ? getProviderDailyMatches(date, sportId, options).catch((error) => {
+                providerError = error;
+                return [] as Match[];
+            })
+            : Promise.resolve([] as Match[]),
+    ]);
+
+    // Igual que con el Mundial de hockey: si el proveedor de siempre se cayó y
+    // los Juegos tampoco trajeron nada, el llamador tiene que enterarse del
+    // corte (cae al caché y avisa) en vez de ver un día vacío.
+    if (providerError && suramericanos.length === 0) throw providerError;
+
+    return mergeOdesurMatches(suramericanos, others);
+}
+
+async function getProviderDailyMatches(
     date: Date,
     sportId: string,
     options?: { timeZone?: string; targetDateKey?: string }
@@ -637,7 +763,22 @@ function getAdjacentDayOffset(timeZone?: string): number {
     }
 }
 
+/** Los partidos en juego de un deporte, de todos los proveedores. */
 export async function getFlashScoreLiveMatches(sportId: string): Promise<Match[]> {
+    if (!wantsOdesurMerge(sportId)) return getProviderLiveMatches(sportId);
+
+    const [suramericanos, others] = await Promise.all([
+        getOdesurLiveMatches(sportId).catch((error) => {
+            console.warn('[ODESUR] en vivo de los Juegos no disponible:', error?.message);
+            return [] as Match[];
+        }),
+        getProviderLiveMatches(sportId),
+    ]);
+
+    return mergeOdesurMatches(suramericanos, others);
+}
+
+async function getProviderLiveMatches(sportId: string): Promise<Match[]> {
     if (sportId === 'american-football') {
         return getEspnAmericanFootballLiveMatches();
     }

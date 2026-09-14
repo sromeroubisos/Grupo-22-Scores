@@ -22,6 +22,19 @@ import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
 import { readWeeklyBaselineMark } from '@/lib/rankings/rankingWeek';
 import { getClubRankingDetail, listClubRankings } from '@/lib/server/clubRankings';
 import { getWorldRugbySnapshot } from '@/lib/server/worldRugbyRankings';
+import {
+    getOdesurDisciplineMedalTable,
+    getOdesurMedalTable,
+    getOdesurMedalTablesByDiscipline,
+    odesurFlagUrl,
+    type OdesurMedalTable,
+} from '@/lib/services/odesur2026';
+import {
+    ODESUR_DISCIPLINES,
+    odesurDisciplineName,
+    odesurDisciplinesForSport,
+    type OdesurDisciplineCode,
+} from '@/lib/services/odesur2026Parser';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import {
     WORLD_RUGBY_CATEGORIES,
@@ -30,8 +43,12 @@ import {
     type WorldRugbySnapshot,
 } from '@/lib/integrations/worldrugby/rankings';
 
-/** Que se esta rankeando. La pantalla lo usa para los rotulos, nada mas. */
-export type RankingEntity = 'club' | 'seleccion';
+/**
+ * Que se esta rankeando. La pantalla lo usa para los rotulos y, en el caso de
+ * `delegacion` (el medallero de los Juegos), para cambiar las columnas: un
+ * medallero no tiene puntos ni variacion, tiene tres metales.
+ */
+export type RankingEntity = 'club' | 'seleccion' | 'delegacion';
 
 export type PublicRankingSummary = {
     id: string;
@@ -81,11 +98,24 @@ export type PublicRankingEntry = {
         short_name: string | null;
         logo_url: string | null;
     } | null;
+    /** Solo en el medallero de los Juegos: los tres metales y el total. */
+    medals?: MedalCount | null;
+};
+
+export type MedalCount = { gold: number; silver: number; bronze: number; total: number };
+
+/** Un deporte del desglose del medallero general. */
+export type PublicMedalBreakdown = {
+    discipline: string;
+    name: string;
+    entries: PublicRankingEntry[];
 };
 
 export type PublicRankingDetail = {
     ranking: PublicRankingSummary;
     entries: PublicRankingEntry[];
+    /** Solo en el medallero general de los Juegos: el medallero de cada deporte. */
+    breakdown?: PublicMedalBreakdown[];
 };
 
 const WORLD_RUGBY_SPORT = 'rugby';
@@ -209,10 +239,131 @@ function clubRowToSummary(ranking: Awaited<ReturnType<typeof listClubRankings>>[
     };
 }
 
+// --------------------------------------------------------------------------
+// Medallero de los Juegos Suramericanos Santa Fe 2026
+// --------------------------------------------------------------------------
+//
+// Otro ranking VIRTUAL, como el de World Rugby: lo publica la organizacion de
+// los Juegos (Bornan) y aca solo se muestra. Rankea delegaciones, no clubes,
+// y no tiene puntos ni semana anterior: tiene oros, platas y bronces, en el
+// orden del medallero oficial.
+//
+// Entra en los siete deportes de G22 que tienen disciplina en los Juegos, con
+// dos tablas cada uno: el medallero general (con el desglose de los 60
+// deportes adentro) y el de ese deporte. Listarlos no cuesta un request: el
+// resumen es fijo y la tabla se pide recien al abrirla.
+
+const ODESUR_RANKING_ID = 'odesur-2026-medallero';
+const ODESUR_RANKING_PREFIX = `${ODESUR_RANKING_ID}-`;
+const ODESUR_SEASON = '2026';
+
+function isOdesurRankingId(id: string): boolean {
+    return id === ODESUR_RANKING_ID || id.startsWith(ODESUR_RANKING_PREFIX);
+}
+
+/** `odesur-2026-medallero-hoc` -> `HOC`; el general no tiene disciplina. */
+function odesurDisciplineFromRankingId(id: string): OdesurDisciplineCode | null {
+    if (!id.startsWith(ODESUR_RANKING_PREFIX)) return null;
+    const code = id.slice(ODESUR_RANKING_PREFIX.length).toUpperCase() as OdesurDisciplineCode;
+    return ODESUR_DISCIPLINES[code] ? code : null;
+}
+
+function odesurSummary(discipline: OdesurDisciplineCode | null, updatedAt: string | null): PublicRankingSummary {
+    const disciplineName = discipline ? odesurDisciplineName(discipline).toLowerCase() : null;
+
+    return {
+        id: discipline ? `${ODESUR_RANKING_PREFIX}${discipline.toLowerCase()}` : ODESUR_RANKING_ID,
+        name: discipline ? `Suramericanos 2026: medallero de ${disciplineName}` : 'Suramericanos 2026: medallero',
+        sport: discipline ? ODESUR_DISCIPLINES[discipline].sportId : null,
+        season: ODESUR_SEASON,
+        results_season: Number(ODESUR_SEASON),
+        scope: 'Juegos Suramericanos Santa Fe 2026',
+        description: discipline
+            ? `Las medallas de ${disciplineName} en los Juegos Suramericanos Santa Fe 2026`
+            : 'El medallero de los Juegos Suramericanos Santa Fe 2026, con el de cada deporte debajo',
+        entity: 'delegacion',
+        // Sin fotos semanales ni semana de referencia: el medallero es el de hoy.
+        snapshot_date: null,
+        history_from: null,
+        movement_baseline_week: null,
+        stale_from_match_id: null,
+        stale_reason: null,
+        initial_imported_at: updatedAt,
+        backfill_completed_at: null,
+        last_incremental_match_id: null,
+        created_at: updatedAt,
+        updated_at: updatedAt,
+        metadata: { positionLabels: normalizeRankingPositionLabels(null) },
+    };
+}
+
+function odesurEntries(table: OdesurMedalTable): PublicRankingEntry[] {
+    return table.rows.map((row) => ({
+        id: `${table.discipline}-${row.code}`,
+        // Una delegacion no es una fila de `clubs`: va null a proposito, y la
+        // bandera viaja resuelta en `logo_url`, como en World Rugby.
+        club_id: null,
+        source_name: row.name,
+        source_region: null,
+        current_position: row.position,
+        source_previous_position: null,
+        current_rating: row.total,
+        previous_rating: null,
+        initial_rating: row.total,
+        clubs: {
+            name: row.name,
+            short_name: row.code,
+            logo_url: odesurFlagUrl(row.code, row.name) || null,
+        },
+        medals: { gold: row.gold, silver: row.silver, bronze: row.bronze, total: row.total },
+    }));
+}
+
+/** Los medalleros que van en el catalogo de un deporte: el general y el suyo. */
+function listOdesurSummaries(sportId: string): PublicRankingSummary[] {
+    const disciplines = odesurDisciplinesForSport(sportId);
+    if (disciplines.length === 0) return [];
+    return [
+        { ...odesurSummary(null, null), sport: sportId },
+        ...disciplines.map((discipline) => odesurSummary(discipline.code, null)),
+    ];
+}
+
+async function getOdesurRankingDetail(rankingId: string): Promise<PublicRankingDetail> {
+    const discipline = odesurDisciplineFromRankingId(rankingId);
+
+    if (discipline) {
+        const table = await getOdesurDisciplineMedalTable(discipline);
+        return { ranking: odesurSummary(discipline, table.fetchedAt), entries: odesurEntries(table) };
+    }
+
+    // El desglose va por su cuenta: si un deporte no contesta, el medallero
+    // general aparece igual y ese deporte falta del desglose.
+    const [table, breakdown] = await Promise.all([
+        getOdesurMedalTable(),
+        getOdesurMedalTablesByDiscipline().catch((error) => {
+            console.error('[rankings] no se pudo armar el desglose del medallero de los Juegos:', error);
+            return [] as OdesurMedalTable[];
+        }),
+    ]);
+
+    return {
+        ranking: odesurSummary(null, table.fetchedAt),
+        entries: odesurEntries(table),
+        breakdown: breakdown.map((item) => ({
+            discipline: item.discipline,
+            name: item.disciplineName,
+            entries: odesurEntries(item),
+        })),
+    };
+}
+
 /**
  * El catalogo publico. Con `sportId` filtra por deporte igual que antes; las
- * selecciones solo entran cuando el deporte es rugby, y van DESPUES de los
- * rankings de clubes para no cambiarle el ranking por omision a nadie.
+ * selecciones solo entran cuando el deporte es rugby, y los medalleros de los
+ * Juegos en los siete deportes que tienen disciplina ahi. Los virtuales van
+ * DESPUES de los rankings de clubes para no cambiarle el ranking por omision a
+ * nadie.
  */
 export async function listPublicRankings(sportId?: string | null): Promise<PublicRankingSummary[]> {
     const normalizedSport = String(sportId || '').trim().toLowerCase();
@@ -222,11 +373,13 @@ export async function listPublicRankings(sportId?: string | null): Promise<Publi
         ))
         .map(clubRowToSummary);
 
+    const odesur = normalizedSport ? listOdesurSummaries(normalizedSport) : [];
+
     if (normalizedSport && normalizedSport !== WORLD_RUGBY_SPORT) {
-        return clubRankings;
+        return [...clubRankings, ...odesur];
     }
 
-    return [...clubRankings, ...(await listWorldRugbySummaries())];
+    return [...clubRankings, ...(await listWorldRugbySummaries()), ...odesur];
 }
 
 function clubEntryToPublic(
@@ -273,6 +426,10 @@ export async function getPublicRankingDetail(
     rankingId: string,
     options: PublicRankingDetailOptions = {},
 ): Promise<PublicRankingDetail> {
+    if (isOdesurRankingId(rankingId)) {
+        return getOdesurRankingDetail(rankingId);
+    }
+
     const category = categoryFromRankingId(rankingId);
 
     if (category) {
