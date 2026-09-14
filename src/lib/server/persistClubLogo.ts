@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import sharp from 'sharp';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 /**
@@ -52,6 +53,40 @@ function isBucketMissing(message: string | null | undefined) {
     return typeof message === 'string' && /bucket not found/i.test(message);
 }
 
+// Tope del escudo guardado: el proxy de escudos no sirve más de 512 px, y las
+// placas de exportación lo dibujan más chico que eso.
+const CREST_MAX_PX = 512;
+
+/**
+ * Achica el escudo antes de guardarlo.
+ *
+ * Los que llegaban por acá se subían tal cual: hay escudos de 263 KB en el bucket.
+ * El 14/9 se migraron los 950 que seguían en base64 con esta misma receta y el
+ * promedio bajó de 77 KB a 18 KB: paleta de 256 colores con alfa, que en un escudo
+ * —arte plano— no se distingue del original. SVG (vectorial) y GIF (puede ser
+ * animado) quedan como vienen. Si sharp no lo puede leer, o reencodar no achica,
+ * va el original: esto nunca rompe una subida.
+ */
+export async function normalizeCrest(mimeType: string, bytes: Buffer): Promise<{ bytes: Buffer; mimeType: string }> {
+    if (/svg|gif/i.test(mimeType)) {
+        return { bytes, mimeType };
+    }
+
+    try {
+        const normalized = await sharp(bytes)
+            .rotate()
+            .resize(CREST_MAX_PX, CREST_MAX_PX, { fit: 'inside', withoutEnlargement: true })
+            .png({ palette: true, quality: 90, effort: 10, compressionLevel: 9 })
+            .toBuffer();
+
+        return normalized.length < bytes.length
+            ? { bytes: normalized, mimeType: 'image/png' }
+            : { bytes, mimeType };
+    } catch {
+        return { bytes, mimeType };
+    }
+}
+
 export async function persistClubLogo(
     clubId: string,
     rawValue: unknown,
@@ -75,17 +110,19 @@ export async function persistClubLogo(
         return { url: value, origin: 'url' };
     }
 
-    const [, mimeType, base64] = match;
-    let bytes: Buffer;
+    const [, rawMimeType, base64] = match;
+    let rawBytes: Buffer;
     try {
-        bytes = Buffer.from(base64, 'base64');
+        rawBytes = Buffer.from(base64, 'base64');
     } catch {
         return { url: value, origin: 'inline-fallback', warning: 'El archivo del escudo no se pudo leer; quedó embebido.' };
     }
 
-    if (bytes.byteLength === 0) {
+    if (rawBytes.byteLength === 0) {
         return { url: value, origin: 'inline-fallback', warning: 'El archivo del escudo llegó vacío; quedó embebido.' };
     }
+
+    const { bytes, mimeType } = await normalizeCrest(rawMimeType, rawBytes);
 
     // El nombre sale del CONTENIDO, no de la hora: subir dos veces el mismo
     // escudo escribe el mismo archivo en vez de dejar huérfanos acumulándose en
