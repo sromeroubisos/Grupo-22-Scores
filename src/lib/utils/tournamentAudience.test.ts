@@ -165,6 +165,26 @@ test('el M16 Desarrollo de seleccionados entra en las dos pestañas y los Desarr
     }
 });
 
+test('el amistoso de seleccionados entra en las dos pestañas y el de un club no', () => {
+    // El feed nombra al amistoso con su round_label (ver /api/matches).
+    for (const nombre of [
+        'Amistoso de seleccionados M19 · Academia Italiana 2026',
+        'Amistosos internacionales de seleccionados M20',
+    ]) {
+        assert.equal(isDualAudienceTournament({ name: nombre }), true, nombre);
+        assert.equal(matchesTournamentAudience({ name: nombre }, 'mayores'), true, nombre);
+        assert.equal(matchesTournamentAudience({ name: nombre }, 'juveniles'), true, nombre);
+    }
+
+    // El de pretemporada de un club sigue en mayores; el de una M19 de club, en
+    // juveniles. Ninguno de los dos va a las dos.
+    assert.equal(isDualAudienceTournament({ name: 'Amistoso de pretemporada · 2026/27' }), false);
+    assert.equal(matchesTournamentAudience({ name: 'Amistoso de pretemporada · 2026/27' }, 'mayores'), true);
+    assert.equal(isDualAudienceTournament({ name: 'Amistoso M19 · Hindú vs CASI' }), false);
+    assert.equal(matchesTournamentAudience({ name: 'Amistoso M19 · Hindú vs CASI' }, 'mayores'), false);
+    assert.equal(matchesTournamentAudience({ name: 'Amistoso M19 · Hindú vs CASI' }, 'juveniles'), true);
+});
+
 test('la puerta no se lleva puesto ningún otro torneo', () => {
     // El resto de los juveniles sigue sólo en su pestaña: si esto se rompe, la
     // portada se llena de M15 y el segmento deja de servir para nada.

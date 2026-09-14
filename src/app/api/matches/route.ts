@@ -484,6 +484,37 @@ type PublicDbMatchesResult = {
     message: string | null;
 };
 
+/**
+ * El "torneo" de un partido sin torneo: el amistoso.
+ *
+ * Su nombre es el `round_label`, que ya es lo que la ficha del club muestra como
+ * competencia ("Amistoso de pretemporada · 2026/27"). La portada decide la
+ * pestaña —Mayores o Juveniles/Reserva— con el nombre y nada más, así que con el
+ * 'Partido Local' de antes todo amistoso caía en Mayores: el de una M15 igual
+ * que el de dos seleccionados. Sin rótulo se queda el nombre de siempre.
+ *
+ * El id lleva el rótulo porque la portada agrupa por id: con 'db-local' para
+ * todos, dos series de amistosos del mismo día quedaban bajo un solo encabezado,
+ * con el nombre de la primera.
+ */
+function friendlyFeedTournament(match: PublicDbMatchRow, sport: string | null) {
+    const label = (match.round_label || '').trim();
+    const slug = label
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+    return {
+        id: slug ? `db-local:${slug}` : 'db-local',
+        name: label || 'Partido Local',
+        sport,
+        status: 'published',
+        country: 'Internacional',
+    };
+}
+
 function mapDbMatchToPublicFeed(
     match: PublicDbMatchRow,
     tournamentMap: Map<string, DbTournamentLite>,
@@ -547,13 +578,7 @@ function mapDbMatchToPublicFeed(
             status: tournament.status || 'published',
             priority: tournament.priority ?? 0,
             country: resolveTournamentCountry(tournament),
-        } : {
-            id: match.tournament_id || 'db-local',
-            name: 'Partido Local',
-            sport: resolvedSport,
-            status: 'published',
-            country: 'Internacional',
-        },
+        } : friendlyFeedTournament(match, resolvedSport),
         liveEnabled: normalizedStatus === 'live',
         source: 'db' as const,
     };
