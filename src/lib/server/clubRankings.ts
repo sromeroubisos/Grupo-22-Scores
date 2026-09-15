@@ -1,11 +1,18 @@
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
 import {
+    computeWorldRugbyExchange,
+    rankByRating,
+    replaySeason,
+    type ReplayMatch,
+} from '@/lib/rankings/rankingReplay';
+import {
     getRankingWeekKey,
+    getReferenceWeekKey,
+    getWeeklyReferenceCutoff,
     isNewRankingWeek,
     legacyWeeklyBaselineMark,
     readWeeklyBaselineMark,
-    resolveWeeklyBaseline,
 } from '@/lib/rankings/rankingWeek';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
@@ -419,65 +426,6 @@ function parseScore(score: unknown) {
     }
 
     return { home: parsedHome, away: parsedAway };
-}
-
-function clampRatingGap(value: number) {
-    if (value > 10) return 10;
-    if (value < -10) return -10;
-    return value;
-}
-
-function computeWorldRugbyExchange(
-    ranking: RankingRow,
-    homeRating: number,
-    awayRating: number,
-    score: { home: number; away: number },
-) {
-    // Cero desde el 1 de julio de 2026, cuando World Rugby saco la ventaja de
-    // local del calculo — el primer cambio de formula desde que el ranking nacio
-    // en octubre de 2003. El motivo fue la sede neutral: cada vez mas tests se
-    // juegan fuera de casa y el handicap terminaba castigando al que figuraba
-    // como local sin serlo.
-    //
-    // Sigue siendo una columna por ranking: el que quiera volver a ponerla en 3
-    // cambia la fila, no el motor.
-    const homeAdvantage = toNumber(ranking.home_advantage, 0);
-    const marginThreshold = ranking.margin_threshold ?? 15;
-    const marginMultiplier = toNumber(ranking.margin_multiplier, 1.5);
-    const eventMultiplier = toNumber(ranking.event_multiplier, 1);
-
-    const homeGap = clampRatingGap(awayRating - (homeRating + homeAdvantage));
-    const homeResultSignal = score.home > score.away ? 1 : score.home < score.away ? -1 : 0;
-
-    let homeDelta = homeResultSignal + 0.1 * homeGap;
-    const margin = Math.abs(score.home - score.away);
-
-    if (margin > marginThreshold) {
-        homeDelta *= marginMultiplier;
-    }
-
-    homeDelta *= eventMultiplier;
-    homeDelta = roundRating(homeDelta);
-
-    return {
-        homeDelta,
-        awayDelta: roundRating(-homeDelta),
-        margin,
-        result:
-            homeResultSignal > 0
-                ? ('home_win' as const)
-                : homeResultSignal < 0
-                    ? ('away_win' as const)
-                    : ('draw' as const),
-        metadata: {
-            algorithm: 'world_rugby',
-            homeAdvantage,
-            ratingGap: homeGap,
-            marginThreshold,
-            marginMultiplier: margin > marginThreshold ? marginMultiplier : 1,
-            eventMultiplier,
-        },
-    };
 }
 
 function getSeasonRange(resultsSeason: number) {
@@ -1421,52 +1369,34 @@ export async function actualizarRankingSemanal(rankingId: string) {
         activeEntries.map((entry) => entry.club_id),
     );
 
-    // El "anterior" de cada fila —puesto y puntaje— es la tabla tal como quedó
-    // publicada la SEMANA pasada, y se toma una sola vez por semana: en la
-    // primera corrida (el cron del martes). Si el panel vuelve a recalcular el
-    // jueves, o se corrige un resultado, la referencia se conserva; tomarla de
-    // nuevo dejaba la variación en 0,00 y las flechas apagadas hasta el martes
-    // siguiente, y la tabla "semana a semana" medía en realidad "desde la
-    // última vez que alguien tocó el panel". La decisión vive en rankingWeek.ts.
+    // La semana del ranking arranca el martes a las 00:00 de Argentina (cuando
+    // corre el cron). La marca en metadata dice de qué semana es la tabla que
+    // se publica; sirve para el rótulo de la pantalla y para que el panel diga
+    // si esta corrida abrió la semana o la repitió.
     const semana = getRankingWeekKey();
-    // Sin marca (rankings que corrieron con la lógica anterior), la última corrida
-    // hace de marca: si fue esta misma semana, lo guardado ya es la referencia.
     const marcaPrevia = readWeeklyBaselineMark(ranking.metadata)
         ?? legacyWeeklyBaselineMark(ranking.backfill_completed_at);
     const referenciaRenovada = isNewRankingWeek(marcaPrevia, semana);
-    const referencia = resolveWeeklyBaseline(entries, marcaPrevia, semana);
 
-    // Desde cero, con el puntaje inicial de cada club.
     const porClub = new Map<string, RankingEntryRow>();
     for (const entry of entries) {
-        entry.current_rating = roundRating(toNumber(entry.initial_rating));
-        entry.last_applied_match_id = null;
         porClub.set(entry.club_id, entry);
     }
 
-    // En orden cronológico: el intercambio de World Rugby depende de los puntajes
-    // del momento, así que dos partidos al revés no dan lo mismo.
-    const ordenados = [...partidos].sort(compareMatchOrder);
-    let aplicados = 0;
-
-    for (const match of ordenados) {
+    const elegibles: ReplayMatch[] = [];
+    for (const match of partidos) {
         if (!isRankingEligibleForMatch(ranking, match, porClub)) continue;
-        if (!match.home_club_id || !match.away_club_id) continue;
-
-        const local = porClub.get(match.home_club_id);
-        const visitante = porClub.get(match.away_club_id);
+        if (!match.home_club_id || !match.away_club_id || !match.date_time) continue;
         const score = parseScore(match.score);
-        if (!local || !visitante || !score) continue;
+        if (!score) continue;
 
-        const ratingLocal = roundRating(toNumber(local.current_rating));
-        const ratingVisitante = roundRating(toNumber(visitante.current_rating));
-        const intercambio = computeWorldRugbyExchange(ranking, ratingLocal, ratingVisitante, score);
-
-        local.current_rating = roundRating(ratingLocal + intercambio.homeDelta);
-        visitante.current_rating = roundRating(ratingVisitante + intercambio.awayDelta);
-        local.last_applied_match_id = match.id;
-        visitante.last_applied_match_id = match.id;
-        aplicados += 1;
+        elegibles.push({
+            id: match.id,
+            date_time: match.date_time,
+            home_club_id: match.home_club_id,
+            away_club_id: match.away_club_id,
+            score,
+        });
     }
 
     // Los ajustes manuales van DESPUÉS de los partidos y en el orden en que se
@@ -1491,25 +1421,47 @@ export async function actualizarRankingSemanal(rankingId: string) {
         );
     }
 
-    const ajustesAplicados = ((ajustes ?? []) as RankingManualAdjustmentRow[]).flatMap((ajuste) => {
-        const entry = porClub.get(ajuste.club_id);
-        if (!entry) return [];
+    const ajustesCargados = (ajustes ?? []) as RankingManualAdjustmentRow[];
+    const cuenta = {
+        entries: entries.map((entry) => ({ club_id: entry.club_id, initial_rating: entry.initial_rating })),
+        matches: elegibles,
+        adjustments: ajustesCargados,
+        config: ranking,
+    };
 
-        const actual = toNumber(entry.current_rating);
-        const pedido = toNumber(ajuste.value);
-        entry.current_rating = roundRating(ajuste.mode === 'set' ? pedido : actual + pedido);
+    // Dos cuentas, no una. La tabla de HOY es la temporada entera; la referencia
+    // —el "anterior" contra el que se dibujan la flecha y la variación— es la
+    // misma temporada cortada en el martes de la semana PASADA: los partidos
+    // jugados antes de ese martes y los ajustes cargados antes. Es la tabla que
+    // se publicó la semana pasada, rehecha con los datos de hoy. Así la
+    // variación mide lo que pasó desde entonces, sin importar qué había quedado
+    // guardado: una tabla congelada (el corte de 1000 partidos, 15/9/2026: tres
+    // fines de semana mostrados como uno), un Recalcular a destiempo o un
+    // resultado cargado tarde no la pueden inflar. Un resultado corregido entra
+    // corregido en las dos cuentas, y un ajuste manual nuevo se ve una sola vez,
+    // la semana en que se cargó.
+    const hoy = replaySeason(cuenta);
+    const referencia = replaySeason({ ...cuenta, until: getWeeklyReferenceCutoff(semana) });
+    const nombreDe = (clubId: string) => {
+        const entry = porClub.get(clubId);
+        return entry ? (getRankingEntryClub(entry)?.name || entry.source_name) : clubId;
+    };
+    const puestosPrevios = rankByRating(referencia.ratings, nombreDe);
+    const aplicados = hoy.applied;
+    const ajustesAplicados = hoy.adjustments;
 
-        return [{ ...ajuste, resulting_rating: entry.current_rating }];
-    });
+    for (const entry of entries) {
+        entry.current_rating = hoy.ratings.get(entry.club_id) ?? roundRating(toNumber(entry.initial_rating));
+        entry.last_applied_match_id = hoy.lastMatchByClub.get(entry.club_id) ?? null;
+    }
 
     // Las posiciones salen de ordenar por puntaje acá mismo. La posición anterior
     // —la que dibuja la flechita de subió/bajó— y el puntaje anterior son la
     // referencia de la semana, resuelta arriba.
     const ordenadas = [...entries].sort(compareRankingEntries);
     const filas = ordenadas.map((entry, index) => {
-        const base = referencia.get(entry.club_id);
-        const posicionPrevia = base?.position ?? null;
-        const ratingPrevio = base?.rating ?? toNumber(entry.current_rating);
+        const posicionPrevia = puestosPrevios.get(entry.club_id) ?? null;
+        const ratingPrevio = referencia.ratings.get(entry.club_id) ?? toNumber(entry.current_rating);
 
         entry.current_position = index + 1;
         entry.source_previous_position = posicionPrevia;
@@ -1585,6 +1537,7 @@ export async function actualizarRankingSemanal(rankingId: string) {
         clubes: filas.length,
         puntero,
         semana,
+        semanaDeReferencia: getReferenceWeekKey(semana),
         referenciaRenovada,
     };
 }

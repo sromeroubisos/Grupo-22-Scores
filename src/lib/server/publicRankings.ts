@@ -19,7 +19,7 @@
  * mapeo copiado; ahora vive una sola vez, aca.
  */
 import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
-import { readWeeklyBaselineMark } from '@/lib/rankings/rankingWeek';
+import { getReferenceWeekKey, readWeeklyBaselineMark } from '@/lib/rankings/rankingWeek';
 import { getClubRankingDetail, listClubRankings } from '@/lib/server/clubRankings';
 import { getWorldRugbySnapshot } from '@/lib/server/worldRugbyRankings';
 import {
@@ -227,7 +227,12 @@ function clubRowToSummary(ranking: Awaited<ReturnType<typeof listClubRankings>>[
         history_from: null,
         // Lo que si tiene es la referencia de la semana: contra que martes se
         // miden las flechas. Es lo que la pantalla rotula debajo de la tabla.
-        movement_baseline_week: readWeeklyBaselineMark(ranking.metadata)?.weekKey ?? null,
+        // La marca dice de qué semana es la tabla; las flechas se miden contra
+        // la tabla del martes ANTERIOR, que es lo que el lector quiere saber.
+        movement_baseline_week: (() => {
+            const semana = readWeeklyBaselineMark(ranking.metadata)?.weekKey;
+            return semana ? getReferenceWeekKey(semana) : null;
+        })(),
         stale_from_match_id: ranking.stale_from_match_id,
         stale_reason: ranking.stale_reason,
         initial_imported_at: ranking.initial_imported_at,

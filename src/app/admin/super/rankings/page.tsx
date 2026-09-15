@@ -1072,17 +1072,17 @@ export default function SuperRankingsPage() {
                 clubes?: number;
                 puntero?: string | null;
                 semana?: string;
+                semanaDeReferencia?: string;
                 referenciaRenovada?: boolean;
             } | undefined;
-            // Decir que paso con la referencia semanal: si este Recalcular abrio la
-            // semana (las flechas ahora miden desde hoy) o si la conservo (miden
-            // desde el martes, como la tabla publica). Antes cada recalculo la
-            // pisaba en silencio y dejaba la variacion en cero.
+            // Decir contra que se miden las flechas: siempre la tabla del martes
+            // anterior, rehecha con los datos de hoy. Un Recalcular a mitad de
+            // semana no la mueve; antes cada recalculo la pisaba en silencio y
+            // dejaba la variacion en cero.
             const semana = resumen?.semana ? formatRankingWeekLabel(resumen.semana) : null;
-            const referencia = semana
-                ? resumen?.referenciaRenovada
-                    ? ` Abre la semana del ${semana}: las flechas miden desde esta corrida.`
-                    : ` Conserva la referencia del ${semana}: las flechas siguen midiendo la semana.`
+            const martesAnterior = resumen?.semanaDeReferencia ? formatRankingWeekLabel(resumen.semanaDeReferencia) : null;
+            const referencia = semana && martesAnterior
+                ? ` ${resumen?.referenciaRenovada ? 'Abre' : 'Repite'} la semana del ${semana}: las flechas y la variación miden respecto del ${martesAnterior}.`
                 : '';
             setFeedback({
                 tone: 'success',
