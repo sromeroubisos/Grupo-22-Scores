@@ -4,18 +4,20 @@
  * La tabla publica dibuja dos cosas contra un "anterior": la flecha de puesto
  * (`source_previous_position`) y la variacion de puntaje
  * (`source_payload.previous_rating`). Para que eso lea como "que paso esta
- * semana" el anterior tiene que ser la tabla tal como quedo publicada la semana
- * pasada, y nada mas.
+ * semana" el anterior tiene que ser la tabla de la semana pasada, y nada mas.
  *
  * Antes el anterior era "lo que habia antes de la ultima escritura", y lo
  * pisaba cualquiera: un segundo Recalcular el jueves dejaba las 151 filas en
  * 0,00 y sin flechas hasta el martes siguiente; un ajuste manual reescribia el
  * anterior de TODOS los clubes con el puesto de un minuto atras; el rebuild
- * viejo lo borraba directamente. El movimiento semanal quedaba a merced de
- * quien tocara el panel.
+ * viejo lo borraba directamente. Despues paso a ser "la tabla guardada al abrir
+ * la semana", y eso tambien fallo: si lo guardado estaba congelado (el corte de
+ * 1000 partidos), la primera corrida sana mostraba semanas acumuladas como si
+ * fueran una. Hoy el anterior no se copia de ningun lado: es la temporada
+ * reproducida hasta el martes que abrio la semana (rankingReplay.ts).
  *
- * Aca se define la semana y se decide, sin base de datos, cuando la referencia
- * se renueva y cuando se conserva. `clubRankings.ts` solo lee y escribe.
+ * Aca se define la semana —su clave y su instante de arranque— sin base de
+ * datos. `clubRankings.ts` solo lee y escribe.
  *
  * La semana arranca el MARTES a las 00:00 de Argentina, que es cuando corre el
  * cron `weekly-club-ranking` (`0 3 * * 2` en UTC). Argentina no tiene horario
@@ -89,49 +91,37 @@ export function isNewRankingWeek(mark: WeeklyBaselineMark | null, weekKey: strin
     return !mark || mark.weekKey !== weekKey;
 }
 
-export type WeeklyBaselineEntry = {
-    club_id: string;
-    current_position: number | null | undefined;
-    current_rating: number | string | null | undefined;
-    source_previous_position: number | null | undefined;
-    previous_rating: number | string | null | undefined;
-};
-
-export type WeeklyBaseline = {
-    position: number | null;
-    rating: number | null;
-};
-
-function toFiniteOrNull(value: unknown) {
-    if (value === null || value === undefined || value === '') return null;
-    const numeric = Number(value);
-    return Number.isFinite(numeric) ? numeric : null;
+/**
+ * El instante en que arranca la semana `weekKey`: ese martes a las 00:00 de
+ * Argentina, en ISO UTC. Es el corte de la referencia semanal: la tabla
+ * "anterior" es la temporada reproducida con los partidos jugados ANTES de
+ * este instante (rankingReplay.ts), no lo que hubiera quedado guardado.
+ */
+export function getRankingWeekStart(weekKey: string): string {
+    const [year, month, day] = weekKey.split('-').map(Number);
+    const start = new Date(Date.UTC(year, month - 1, day) - ARGENTINA_OFFSET_MINUTES * 60 * 1000);
+    return start.toISOString();
 }
 
 /**
- * El "anterior" de cada club para esta corrida.
- *
- * - Primera corrida de la semana: la referencia es la tabla tal como esta
- *   AHORA, antes de rehacerla. Es lo que el visitante vio toda la semana.
- * - Cualquier otra corrida de la misma semana (un Recalcular del panel, un
- *   resultado corregido): la referencia se conserva. Volver a tomarla dejaria
- *   la variacion en cero y las flechas apagadas hasta el martes.
+ * El corte de la referencia de la semana `weekKey`: el arranque de la semana
+ * ANTERIOR. La tabla que se publica el martes 15 se compara contra la que se
+ * publico el martes 8, y esa tenia los partidos jugados antes del martes 8. Los
+ * del sabado 12 y el domingo 13 son la novedad de esta semana, no parte de la
+ * referencia.
  */
-export function resolveWeeklyBaseline(
-    entries: WeeklyBaselineEntry[],
-    mark: WeeklyBaselineMark | null,
-    weekKey: string,
-): Map<string, WeeklyBaseline> {
-    const renew = isNewRankingWeek(mark, weekKey);
+export function getWeeklyReferenceCutoff(weekKey: string): string {
+    const start = new Date(getRankingWeekStart(weekKey));
+    return new Date(start.getTime() - 7 * DAY_IN_MS).toISOString();
+}
 
-    return new Map(
-        entries.map((entry) => [
-            entry.club_id,
-            renew
-                ? { position: toFiniteOrNull(entry.current_position), rating: toFiniteOrNull(entry.current_rating) }
-                : { position: toFiniteOrNull(entry.source_previous_position), rating: toFiniteOrNull(entry.previous_rating) },
-        ]),
-    );
+/**
+ * `YYYY-MM-DD` del martes contra el que se miden las flechas de la semana
+ * `weekKey`: el anterior. Es lo que la pantalla rotula como "respecto del
+ * martes X".
+ */
+export function getReferenceWeekKey(weekKey: string): string {
+    return getRankingWeekKey(new Date(getWeeklyReferenceCutoff(weekKey)));
 }
 
 /**

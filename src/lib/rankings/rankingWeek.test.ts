@@ -4,10 +4,11 @@ import assert from 'node:assert/strict';
 import {
   formatRankingWeekLabel,
   getRankingWeekKey,
+  getRankingWeekStart,
+  getWeeklyReferenceCutoff,
   isNewRankingWeek,
   legacyWeeklyBaselineMark,
   readWeeklyBaselineMark,
-  resolveWeeklyBaseline,
 } from './rankingWeek.ts';
 
 /* ── la semana del ranking ──────────────────────────────────────────────── */
@@ -67,47 +68,23 @@ test('sin marca, o con una de otra semana, la semana es nueva', () => {
   assert.equal(isNewRankingWeek({ weekKey: '2026-09-08', capturedAt: '' }, '2026-09-08'), false);
 });
 
-/* ── la referencia de cada club ─────────────────────────────────────────── */
+/* ── el corte de la referencia ──────────────────────────────────────────── */
 
-const fila = (club_id: string, posicion: number, rating: number, previa: number | null, ratingPrevio: number) => ({
-  club_id,
-  current_position: posicion,
-  current_rating: rating,
-  source_previous_position: previa,
-  previous_rating: ratingPrevio,
+test('la semana arranca en un instante concreto: el martes a las 00:00 de Argentina', () => {
+  assert.equal(getRankingWeekStart('2026-09-15'), '2026-09-15T03:00:00.000Z');
+  // El sabado anterior queda antes del corte; el propio martes ya no.
+  assert.ok('2026-09-12T18:30:00Z' < getRankingWeekStart('2026-09-15'));
+  assert.ok(getRankingWeekStart('2026-09-15') <= '2026-09-15T03:00:00.000Z');
+  // Ida y vuelta: el instante de arranque cae en su propia semana.
+  assert.equal(getRankingWeekKey(new Date(getRankingWeekStart('2026-09-15'))), '2026-09-15');
 });
 
-test('la primera corrida de la semana toma la tabla tal como esta antes de rehacerla', () => {
-  const base = resolveWeeklyBaseline(
-    [fila('a', 1, 90.5, 2, 88), fila('b', 2, 89, 1, 91)],
-    { weekKey: '2026-09-01', capturedAt: '' },
-    '2026-09-08',
-  );
-
-  assert.deepEqual(base.get('a'), { position: 1, rating: 90.5 });
-  assert.deepEqual(base.get('b'), { position: 2, rating: 89 });
-});
-
-test('una segunda corrida en la misma semana conserva la referencia en vez de pisarla', () => {
-  // Es el bug de siempre: el Recalcular del jueves dejaba todo en 0,00.
-  const base = resolveWeeklyBaseline(
-    [fila('a', 1, 90.5, 2, 88), fila('b', 2, 89, 1, 91)],
-    { weekKey: '2026-09-08', capturedAt: '' },
-    '2026-09-08',
-  );
-
-  assert.deepEqual(base.get('a'), { position: 2, rating: 88 });
-  assert.deepEqual(base.get('b'), { position: 1, rating: 91 });
-});
-
-test('un club sin puesto previo queda sin flecha, no con una inventada', () => {
-  const base = resolveWeeklyBaseline(
-    [{ club_id: 'nuevo', current_position: null, current_rating: '70', source_previous_position: null, previous_rating: null }],
-    null,
-    '2026-09-08',
-  );
-
-  assert.deepEqual(base.get('nuevo'), { position: null, rating: 70 });
+test('la referencia de una semana es la tabla del martes anterior: siete dias antes del arranque', () => {
+  assert.equal(getWeeklyReferenceCutoff('2026-09-15'), '2026-09-08T03:00:00.000Z');
+  // Los partidos del fin de semana 12-13/9 quedan del lado de "esta semana".
+  assert.ok('2026-09-12T18:30:00Z' >= getWeeklyReferenceCutoff('2026-09-15'));
+  // Los del 5-6/9 ya estaban en la tabla de la semana pasada.
+  assert.ok('2026-09-06T19:00:00Z' < getWeeklyReferenceCutoff('2026-09-15'));
 });
 
 /* ── el rotulo ──────────────────────────────────────────────────────────── */
