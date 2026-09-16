@@ -377,7 +377,13 @@ export default function TournamentStandingsTab({
           (labelOrder.get(b.label_id) ?? Number.MAX_SAFE_INTEGER),
       );
     const assignmentsToRemove = assignments.filter((assignment) => {
-      if (assignment.position !== normalizedPosition || !labelOrder.has(assignment.label_id)) return false;
+      /* Antes esto pedia ademas `labelOrder.has(assignment.label_id)`, o sea que
+         solo limpiaba las etiquetas que la fase todavia ofrece. La asignacion de
+         una etiqueta borrada de la fase sobrevivia: el gestor no la mostraba ni
+         la tocaba, pero seguia en `team_labels` y la tabla publica la leia. Asi
+         el Top 10 del Centro termino con dos etiquetas en los puestos 1 a 4 y
+         pintaba la vieja. Esta posicion se limpia entera. */
+      if (assignment.position !== normalizedPosition) return false;
       if (shareAcrossPhaseGroups) return true;
       return (assignment.group_id ?? null) === (selectedGroup ?? null);
     });

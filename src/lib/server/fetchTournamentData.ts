@@ -798,7 +798,12 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
                 supabase
                     .from('team_labels')
                     .select('id, label_id, club_id, position, tournament_id, phase_id, group_id, created_at, label:ui_labels(id, name, color, scope)')
-                    .eq('tournament_id', tournamentId),
+                    .eq('tournament_id', tournamentId)
+                    // Sin ORDER BY, PostgREST devuelve el orden del heap, que se
+                    // reacomoda con cualquier escritura. `resolveStandingsRowLabel`
+                    // ya desempata por fecha, pero el array llega estable para
+                    // cualquier otro que lo lea.
+                    .order('created_at', { ascending: false }),
                 [] as unknown[],
             ),
         ]);

@@ -158,7 +158,22 @@ export function resolveStandingsRowLabel(
       return true;
     })
     .sort((left, right) => {
-      return getAssignmentPriority(right, phaseId, groupId) - getAssignmentPriority(left, phaseId, groupId);
+      const byPriority =
+        getAssignmentPriority(right, phaseId, groupId) - getAssignmentPriority(left, phaseId, groupId);
+      if (byPriority !== 0) return byPriority;
+
+      // Dos etiquetas para el MISMO puesto y el mismo ambito empatan en
+      // prioridad, y ahi `matches[0]` quedaba a merced del orden en que
+      // Postgres devolvio las filas —el del heap, que se reacomoda con
+      // cualquier escritura—. Pasa de verdad: el gestor de escritorio deja
+      // huerfana la asignacion de una etiqueta que ya no figura en la fase, asi
+      // que un puesto puede tener la vieja y la nueva a la vez y la tabla pinta
+      // una u otra sin que nadie toque nada. Manda la ultima asignada.
+      const byRecency = (right.created_at ?? '').localeCompare(left.created_at ?? '');
+      if (byRecency !== 0) return byRecency;
+
+      // Ultimo recurso para que el orden sea total y no dependa del origen.
+      return (right.id ?? '').localeCompare(left.id ?? '');
     });
 
   return matches[0]?.label ?? null;
