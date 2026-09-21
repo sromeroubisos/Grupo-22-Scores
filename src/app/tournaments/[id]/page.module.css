@@ -2915,6 +2915,13 @@
     margin-left: auto;
 }
 
+/* Una fase con varias copas: un cuadro debajo del otro, cada uno con su título. */
+.playoffBracketStack {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
 .predictorBtn {
     display: inline-flex;
     align-items: center;

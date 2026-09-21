@@ -83,7 +83,9 @@ type TournamentRoundWithPhaseFilter = {
     id: string;
     name: string;
     phase_id: string;
+    group_id?: string | null;
     order_index: number | null;
+    bracket_group?: { name: string | null } | Array<{ name: string | null }> | null;
     tournament_phases: Array<{ tournament_id: string | null }>;
 };
 
@@ -716,7 +718,12 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
 
         let roundsQuery = supabase
             .from('tournament_rounds')
-            .select('id, name, phase_id, order_index, tournament_phases!inner(tournament_id)')
+            // group_id + nombre: la copa del constructor a la que pertenece la
+            // ronda. Sin esto, una fase con Oro/Plata/Bronce se dibuja en una
+            // sola llave. El nombre viaja embebido porque los grupos del
+            // constructor tienen season_id NULL y la consulta de grupos, que se
+            // acota por temporada, no los trae.
+            .select('id, name, phase_id, group_id, order_index, bracket_group:tournament_groups(name), tournament_phases!inner(tournament_id)')
             .eq('tournament_phases.tournament_id', tournamentId)
             .order('order_index', { ascending: true });
 
@@ -904,6 +911,10 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
                     name: normalizedRound.name,
                     phase_id: normalizedRound.phase_id,
                     order_index: normalizedRound.order_index,
+                    group_id: normalizedRound.group_id ?? null,
+                    group_name: (Array.isArray(normalizedRound.bracket_group)
+                        ? normalizedRound.bracket_group[0]?.name
+                        : normalizedRound.bracket_group?.name) ?? null,
                 };
             }),
             groups: groupsRes.data.map((group) => {

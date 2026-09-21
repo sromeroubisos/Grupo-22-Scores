@@ -11,6 +11,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
+import { splitPlayoffDraw, tagBracketRound } from '@/lib/playoff/bracketSplit';
 import RadialBracketPredictor from '@/components/RadialBracketPredictor';
 import TournamentPublicStats from './TournamentPublicStats';
 import TournamentScoresPanel, { hasRatedLineups, sondaDePuntajes } from './TournamentScoresPanel';
@@ -1511,7 +1512,29 @@ function buildDbPlayoffDraw(dbData: TournamentInitialData, preferredPhaseId?: st
             if (leftOrder !== rightOrder) return leftOrder - rightOrder;
             return String(left?.name || '').localeCompare(String(right?.name || ''));
         });
-    const configuredStages = resolvePlayoffStagesForTeams(phase?.settings, getPlayoffTeamsCount(phase?.settings));
+    // Una fase puede tener varias copas (Oro/Plata/Bronce): cada ronda se
+    // etiqueta con la suya —por el grupo del constructor o por el prefijo del
+    // nombre— y la pestaña dibuja un cuadro por copa.
+    const groupNameById = new Map<string, string>(
+        (Array.isArray(dbData.groups) ? (dbData.groups as any[]) : [])
+            .filter((group: any) => group?.id && group?.name)
+            .map((group: any) => [String(group.id), String(group.name)]),
+    );
+    const roundTagById = new Map(
+        phaseRounds.map((round: any) => [
+            String(round.id),
+            tagBracketRound(
+                String(round?.name || ''),
+                round?.group_name || (round?.group_id ? groupNameById.get(String(round.group_id)) : null),
+            ),
+        ]),
+    );
+    const hasSeveralBrackets = new Set([...roundTagById.values()].map((tag) => tag.bracketKey)).size > 1;
+    // La plantilla de la fase describe UN cuadro; con varias copas, rellenar
+    // cada ronda por su índice global inventaría cruces que no existen.
+    const configuredStages = hasSeveralBrackets
+        ? []
+        : resolvePlayoffStagesForTeams(phase?.settings, getPlayoffTeamsCount(phase?.settings));
     const buildPlaceholderMatch = (roundId: string, roundIndex: number, matchIndex: number) => ({
         match_id: `${roundId}-placeholder-${matchIndex + 1}`,
         home_participant: null,
@@ -1550,10 +1573,15 @@ function buildDbPlayoffDraw(dbData: TournamentInitialData, preferredPhaseId?: st
             mappedMatches.push(buildPlaceholderMatch(roundId, roundIndex, mappedMatches.length));
         }
 
+        const tag = roundTagById.get(roundId);
         return {
             round_id: roundId,
-            name: roundName,
+            // Dentro de su copa la ronda se llama "Final", no "Oro · Final":
+            // así el cuadro reconoce su columna final y su campeón.
+            name: hasSeveralBrackets && tag ? tag.stageName : roundName,
             matches: mappedMatches,
+            bracket_key: hasSeveralBrackets && tag ? tag.bracketKey : '',
+            bracket_label: hasSeveralBrackets && tag ? tag.bracketLabel : null,
         };
     };
 
@@ -3312,15 +3340,47 @@ export default function TournamentDetailPage({
             </div>
         </div>
     ) : null;
+    // Una fase con varias copas (Oro/Plata/Bronce) se dibuja en un cuadro por
+    // copa. El export y el predictor toman el principal (el primero), que es el
+    // que define al campeón: una llave mezclada no tiene un campeón coherente.
+    const playoffBrackets = splitPlayoffDraw(draw);
+    const primaryBracket = playoffBrackets[0] ?? null;
+    const primaryBracketRounds = primaryBracket?.rounds ?? draw;
+    // "Cuadro - Copa Oro · Copa Oro" cuando la fase se llama como una de sus copas.
+    const withBracketLabel = (baseTitle: string, label: string | null) =>
+        !label || baseTitle.toLowerCase().endsWith(label.toLowerCase()) ? baseTitle : `${baseTitle} · ${label}`;
+    const renderPlayoffBrackets = (baseTitle: string) => {
+        if (playoffBrackets.length <= 1) {
+            return <PlayoffBracket data={primaryBracketRounds} title={baseTitle} />;
+        }
+        return (
+            <div className={styles.playoffBracketStack}>
+                {playoffBrackets.map((bracket) => (
+                    <PlayoffBracket
+                        key={bracket.key || 'principal'}
+                        data={bracket.rounds}
+                        // La ronda común que reparte a las copas (cuartos que
+                        // mandan ganadores a Oro y perdedores a Plata) no tiene
+                        // copa: se titula con su instancia para no leerse como
+                        // una copa más.
+                        title={withBracketLabel(
+                            baseTitle,
+                            bracket.label ?? (bracket.rounds.length === 1 ? bracket.rounds[0].name : null),
+                        )}
+                    />
+                ))}
+            </div>
+        );
+    };
     const bracketExportData = {
-        title: bracketTitle,
+        title: playoffBrackets.length > 1 ? withBracketLabel(bracketTitle, primaryBracket?.label ?? null) : bracketTitle,
         subtitle: bracketPhase?.name || details?.season || 'Cuadro eliminatorio',
         tournamentLogo,
         tournamentName,
         // Esquinas del afiche: deporte y pais a la izquierda, temporada a la derecha.
         kickerLeft: [sportLabel, countryName].filter(Boolean).join(' '),
         kickerRight: yearDisplay ? `Temporada ${yearDisplay}` : '',
-        rounds: draw,
+        rounds: primaryBracketRounds,
     };
 
     // Quick stats
@@ -5063,7 +5123,7 @@ export default function TournamentDetailPage({
                                     </div>
                                 </div>
                                 {bracketPhaseSelector}
-                                <PlayoffBracket data={draw} title={bracketTitle} />
+                                {renderPlayoffBrackets(bracketTitle)}
                             </>
                         ) : (
                             <>
@@ -5325,7 +5385,7 @@ export default function TournamentDetailPage({
                             </div>
                         </div>
                         {bracketPhaseSelector}
-                        <PlayoffBracket data={draw} title={`Cuadro - ${getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName)}`} />
+                        {renderPlayoffBrackets(`Cuadro - ${getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName)}`)}
                     </div>
                 )}
 
@@ -5401,7 +5461,7 @@ export default function TournamentDetailPage({
 
             {showPredictor && draw.length > 0 && (
                 <RadialBracketPredictor
-                    rounds={draw}
+                    rounds={primaryBracketRounds}
                     title={`${getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName)}`}
                     logo={bracketLogo}
                     onClose={() => setShowPredictor(false)}
