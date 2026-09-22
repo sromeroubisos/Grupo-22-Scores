@@ -104,6 +104,18 @@
     {
       "path": "/api/cron/arusa-sync",
       "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/cron/aahba-sync",
+      "schedule": "11,41 18-23 * * 6,0"
+    },
+    {
+      "path": "/api/cron/aahba-sync",
+      "schedule": "11,41 0-2 * * 0,1"
+    },
+    {
+      "path": "/api/cron/aahba-sync",
+      "schedule": "23 14 * * *"
     }
   ]
 }
