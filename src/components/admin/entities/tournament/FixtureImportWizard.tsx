@@ -1,9 +1,15 @@
 'use client';
 
 import { startTransition, useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, FileUp, RefreshCw, Upload, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, FileUp, Plus, RefreshCw, Upload, X } from 'lucide-react';
 import { useFixture } from './FixtureContext';
 import './operation-console.css';
+import {
+  emptyKickoffDefaults,
+  normalizeKickoffTime,
+  suggestKickoff,
+  type KickoffSuggestion,
+} from '@/lib/services/fixtureKickoffDefaults';
 import type {
   FixtureColumnMapping,
   FixtureDuplicateAction,
@@ -11,6 +17,8 @@ import type {
   FixtureImportConfirmDecision,
   FixtureImportPreviewResult,
   FixtureImportPreviewRow,
+  FixtureKickoffDefaults,
+  FixtureKickoffSource,
 } from '@/lib/types/fixture-import';
 
 type DraftRow = FixtureImportPreviewRow & {
@@ -19,13 +27,17 @@ type DraftRow = FixtureImportPreviewRow & {
   overrides: Record<string, unknown>;
 };
 
+// El orden es el de una planilla de fixture leída de izquierda a derecha: qué
+// instancia, qué partido, quién juega, cuándo, dónde.
 const MAPPING_FIELDS: Array<{ key: keyof FixtureColumnMapping; label: string }> = [
+  { key: 'phase', label: 'Fase' },
+  { key: 'match_number', label: 'Partido N°' },
   { key: 'home_team', label: 'Club local' },
   { key: 'away_team', label: 'Club visitante' },
   { key: 'match_date', label: 'Fecha' },
   { key: 'match_time', label: 'Hora' },
   { key: 'venue', label: 'Sede' },
-  { key: 'round', label: 'Fecha / Round' },
+  { key: 'round', label: 'Jornada' },
   { key: 'group', label: 'Zona / Grupo' },
   { key: 'competition_name', label: 'Competencia' },
   { key: 'category', label: 'Categoria' },
@@ -51,6 +63,109 @@ function fieldValue(
   return automatic ?? '';
 }
 
+const KICKOFF_SOURCE_OPTIONS: Array<{ value: FixtureKickoffSource; label: string; hint: string }> = [
+  { value: 'home', label: 'Hora del local', hint: 'Cada club juega a su hora en su cancha.' },
+  { value: 'away', label: 'Hora del visitante', hint: 'La hora la pone el que viaja.' },
+  { value: 'tournament', label: 'General del torneo', hint: 'Una misma hora para todos.' },
+];
+
+const KICKOFF_ORIGIN_LABELS: Record<FixtureKickoffSource, string> = {
+  home: 'horario del local',
+  away: 'horario del visitante',
+  tournament: 'horario general del torneo',
+};
+
+/**
+ * El club que la fila tiene enganchado ahora. Misma regla que el desplegable y
+ * que `confirmImport` (override o, si no, el match automático): la hora
+ * sugerida tiene que salir del club que la fila MUESTRA.
+ */
+function rowClubId(row: DraftRow, side: 'home' | 'away'): string | null {
+  const override = row.overrides[side === 'home' ? 'homeClubId' : 'awayClubId'] as string | null | undefined;
+  return override || (side === 'home' ? row.matched.homeClub?.id : row.matched.awayClub?.id) || null;
+}
+
+/**
+ * La hora que muestra la fila y de dónde sale. Tres casos, en orden:
+ *   1. el usuario la tocó (aunque la haya dejado vacía a propósito);
+ *   2. la trae la planilla;
+ *   3. no la trae: se sugiere la del horario habitual.
+ * Sólo el tercero lleva `suggestion`, y es el único que se completa solo al
+ * confirmar.
+ */
+function rowTime(row: DraftRow, defaults: FixtureKickoffDefaults): { value: string; suggestion: KickoffSuggestion | null } {
+  if ('matchTime' in row.overrides) return { value: (row.overrides.matchTime as string | null) ?? '', suggestion: null };
+  if (row.normalized.matchTime) return { value: row.normalized.matchTime, suggestion: null };
+  const suggestion = suggestKickoff(defaults, rowClubId(row, 'home'), rowClubId(row, 'away'));
+  return { value: suggestion?.time ?? '', suggestion };
+}
+
+/**
+ * Lista de horarios de un dueño (un club o el torneo). El primero es el que se
+ * sugiere; el resto aparece como alternativa en cada fila.
+ */
+function KickoffTimeList({
+  label,
+  times,
+  onChange,
+}: {
+  label: string;
+  times: string[];
+  onChange: (times: string[]) => void;
+}) {
+  const [draft, setDraft] = useState('');
+  const add = () => {
+    const time = normalizeKickoffTime(draft);
+    if (!time || times.includes(time)) return;
+    onChange([...times, time]);
+    setDraft('');
+  };
+
+  return (
+    <div className="op-kickoff-owner">
+      <span className="op-kickoff-owner-name">{label}</span>
+      <div className="op-kickoff-times">
+        {times.map((time, index) => (
+          <span key={time} className={`op-kickoff-chip ${index === 0 ? 'is-main' : ''}`}>
+            {time}
+            <button
+              type="button"
+              onClick={() => onChange(times.filter((item) => item !== time))}
+              aria-label={`Quitar ${time} de ${label}`}
+            >
+              <X size={11} />
+            </button>
+          </span>
+        ))}
+        <span className="op-kickoff-add">
+          <input
+            type="time"
+            className="glass-input"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                add();
+              }
+            }}
+            aria-label={`Nuevo horario para ${label}`}
+          />
+          <button
+            type="button"
+            className="basalt-btn"
+            onClick={add}
+            disabled={!normalizeKickoffTime(draft)}
+            aria-label={`Agregar horario a ${label}`}
+          >
+            <Plus size={13} />
+          </button>
+        </span>
+      </div>
+    </div>
+  );
+}
+
 const STATUS_LABELS: Record<FixtureImportPreviewRow['status'], string> = {
   valid: 'Valida',
   warning: 'Con advertencias',
@@ -71,7 +186,7 @@ export function FixtureImportWizard({
   onComplete: () => void;
   onPreviewChange?: (preview: FixtureImportPreviewResult | null) => void;
 }) {
-  const { previewFixtureImport, confirmFixtureImport } = useFixture();
+  const { previewFixtureImport, confirmFixtureImport, saveFixtureKickoffDefaults } = useFixture();
   const [mode, setMode] = useState<'file' | 'text'>('file');
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -82,13 +197,84 @@ export function FixtureImportWizard({
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  // Horarios habituales: se aplican al preview apenas se tocan, y «Guardar»
+  // los deja en el torneo para la próxima importación.
+  const [kickoff, setKickoff] = useState<FixtureKickoffDefaults>(emptyKickoffDefaults);
+  const [kickoffDirty, setKickoffDirty] = useState(false);
+  const [kickoffSaving, setKickoffSaving] = useState(false);
+  const [kickoffFeedback, setKickoffFeedback] = useState<string | null>(null);
+  const [kickoffOpen, setKickoffOpen] = useState<boolean | null>(null);
+  const [showAllClubs, setShowAllClubs] = useState(false);
+
+  const updateKickoff = (patch: Partial<FixtureKickoffDefaults>) => {
+    setKickoff((current) => ({ ...current, ...patch }));
+    setKickoffDirty(true);
+    setKickoffFeedback(null);
+  };
+
+  const setTeamTimes = (clubId: string, times: string[]) => {
+    setKickoff((current) => {
+      const teamTimes = { ...current.teamTimes };
+      if (times.length) teamTimes[clubId] = times;
+      else delete teamTimes[clubId];
+      return { ...current, teamTimes };
+    });
+    setKickoffDirty(true);
+    setKickoffFeedback(null);
+  };
+
+  const handleSaveKickoff = async () => {
+    setKickoffSaving(true);
+    setKickoffFeedback(null);
+    try {
+      const saved = await saveFixtureKickoffDefaults(kickoff);
+      setKickoff(saved);
+      setKickoffDirty(false);
+      setKickoffFeedback('Horarios guardados en el torneo. La próxima importación los usa sola.');
+    } catch (error) {
+      setKickoffFeedback(error instanceof Error ? error.message : 'No se pudieron guardar los horarios.');
+    } finally {
+      setKickoffSaving(false);
+    }
+  };
 
   const metrics = useMemo(() => {
+    let withoutTime = 0;
+    let suggested = 0;
+    for (const row of rows) {
+      if (row.action !== 'approve') continue;
+      const time = rowTime(row, kickoff);
+      if (time.suggestion) suggested += 1;
+      else if (!time.value) withoutTime += 1;
+    }
     return {
       approved: rows.filter((row) => row.action === 'approve').length,
       omitted: rows.filter((row) => row.action === 'omit').length,
+      suggested,
+      withoutTime,
     };
-  }, [rows]);
+  }, [rows, kickoff]);
+
+  // Los clubes del archivo primero: son los que importan para ESTA carga. El
+  // resto del torneo queda detrás de «Ver todos».
+  const kickoffClubs = useMemo(() => {
+    const clubs = preview?.referenceData.clubs ?? [];
+    const inFile = new Set<string>();
+    for (const row of rows) {
+      const home = rowClubId(row, 'home');
+      const away = rowClubId(row, 'away');
+      if (home) inFile.add(home);
+      if (away) inFile.add(away);
+    }
+    const sorted = [...clubs].sort((a, b) => a.label.localeCompare(b.label, 'es'));
+    return {
+      inFile: sorted.filter((club) => inFile.has(club.id)),
+      rest: sorted.filter((club) => !inFile.has(club.id)),
+    };
+  }, [preview, rows]);
+
+  // Abierto por defecto sólo si hay partidos que necesitan hora.
+  const kickoffPanelOpen = kickoffOpen ?? (metrics.withoutTime + metrics.suggested > 0);
 
   // Cuántas líneas trae el texto pegado. Es la única señal que se puede dar
   // ANTES de analizar: sin esto pegás un WhatsApp y no sabés si el asistente
@@ -98,7 +284,8 @@ export function FixtureImportWizard({
     [pastedText],
   );
 
-  const ACCEPTED_EXTENSIONS = '.csv,.xlsx,.xls,.pdf,.png,.jpg,.jpeg,.webp';
+  // Todo lo que abre `fixtureWorkbookReader`, más PDF e imagen (texto u OCR).
+  const ACCEPTED_EXTENSIONS = '.xlsx,.xlsm,.xlsb,.xls,.xlt,.xltx,.xltm,.ods,.fods,.numbers,.csv,.tsv,.txt,.tab,.pdf,.png,.jpg,.jpeg,.webp';
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
@@ -130,6 +317,8 @@ export function FixtureImportWizard({
     startTransition(() => {
       setPreview(result.ok ? result : null);
       setMapping(result.mapping.selected || {});
+      // Un reanálisis no pisa horarios que el usuario está editando.
+      if (result.ok && !kickoffDirty) setKickoff(result.kickoffDefaults ?? emptyKickoffDefaults());
       setRows(
         !result.ok
           ? []
@@ -164,12 +353,17 @@ export function FixtureImportWizard({
     setIsConfirming(true);
     setFeedback(null);
 
-    const decisions: FixtureImportConfirmDecision[] = rows.map((row) => ({
-      previewId: row.previewId,
-      action: row.action,
-      duplicateAction: row.duplicateAction,
-      overrides: row.overrides,
-    }));
+    // La hora sugerida viaja como si el usuario la hubiera escrito: lo que se
+    // ve en la fila es lo que se graba.
+    const decisions: FixtureImportConfirmDecision[] = rows.map((row) => {
+      const { suggestion } = rowTime(row, kickoff);
+      return {
+        previewId: row.previewId,
+        action: row.action,
+        duplicateAction: row.duplicateAction,
+        overrides: suggestion ? { ...row.overrides, matchTime: suggestion.time } : row.overrides,
+      };
+    });
 
     const result = await confirmFixtureImport({
       phaseId,
@@ -244,7 +438,7 @@ export function FixtureImportWizard({
                 siguen aceptando —el flujo los banca como revisión manual— pero
                 la etiqueta ya no promete lo que el código no hace. */}
             <strong>Archivo</strong>
-            <small>Excel o CSV · el PDF y las imágenes todavía no se leen solos</small>
+            <small>Excel, LibreOffice, Numbers, CSV o PDF · una foto se lee con OCR</small>
           </span>
         </button>
         <button
@@ -311,7 +505,7 @@ export function FixtureImportWizard({
             >
               <FileUp size={26} aria-hidden="true" />
               <strong>{isDragging ? 'Soltá el archivo acá' : 'Arrastrá el archivo o hacé click'}</strong>
-              <small>Una planilla por vez. Con .xlsx, .xls o .csv se leen las filas solas; un .pdf o una foto entran igual, pero hay que cargarlos a mano.</small>
+              <small>Una planilla por vez, con la forma que tenga: tabla, bloques por fecha, una hoja por fecha o zona, tabla de doble entrada. Una foto sale con menos confianza: revisá los clubes.</small>
             </label>
           )}
         </div>
@@ -417,6 +611,116 @@ export function FixtureImportWizard({
             </div>
           ) : null}
 
+          {/* Lo que el reconocimiento hizo solo —saltar el título, juntar
+              hojas, partir «A vs B», heredar «FECHA 3»— se dice acá, antes de
+              las filas. Sin esto el mapeo aparece resuelto y no se sabe por qué. */}
+          {preview.issues.length ? (
+            <ul className="op-import-doc-notes">
+              {preview.issues.map((issue) => (
+                <li key={`${issue.code}-${issue.message}`} className={`is-${issue.severity}`}>
+                  {issue.severity === 'info' ? <CheckCircle2 size={13} /> : <AlertTriangle size={13} />}
+                  <span>{issue.message}</span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          {preview.referenceData.clubs.length ? (
+            <section className="op-kickoff" aria-label="Horarios habituales">
+              <button
+                type="button"
+                className="op-kickoff-head"
+                onClick={() => setKickoffOpen(!kickoffPanelOpen)}
+                aria-expanded={kickoffPanelOpen}
+              >
+                <Clock size={15} aria-hidden="true" />
+                <strong>Horarios habituales</strong>
+                <span>
+                  {metrics.suggested + metrics.withoutTime === 0
+                    ? 'Todos los partidos traen hora.'
+                    : `${metrics.suggested} con hora sugerida · ${metrics.withoutTime} sin hora`}
+                </span>
+              </button>
+
+              {kickoffPanelOpen ? (
+                <div className="op-kickoff-body">
+                  <p className="op-kickoff-lede">
+                    Cuando un partido no trae hora, se sugiere la del club. Cada fila se puede cambiar antes de confirmar.
+                  </p>
+
+                  <div className="op-kickoff-sources" role="radiogroup" aria-label="De dónde sale la hora sugerida">
+                    {KICKOFF_SOURCE_OPTIONS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={kickoff.source === option.value}
+                        className={`op-kickoff-source ${kickoff.source === option.value ? 'is-active' : ''}`}
+                        onClick={() => updateKickoff({ source: option.value })}
+                      >
+                        <strong>{option.label}</strong>
+                        <small>{option.hint}</small>
+                      </button>
+                    ))}
+                  </div>
+
+                  <KickoffTimeList
+                    label={kickoff.source === 'tournament' ? 'General del torneo' : 'General del torneo (si el club no tiene)'}
+                    times={kickoff.tournamentTimes}
+                    onChange={(times) => updateKickoff({ tournamentTimes: times })}
+                  />
+
+                  {kickoff.source !== 'tournament' ? (
+                    <div className="op-kickoff-clubs">
+                      {kickoffClubs.inFile.map((club) => (
+                        <KickoffTimeList
+                          key={club.id}
+                          label={club.label}
+                          times={kickoff.teamTimes[club.id] ?? []}
+                          onChange={(times) => setTeamTimes(club.id, times)}
+                        />
+                      ))}
+                      {showAllClubs
+                        ? kickoffClubs.rest.map((club) => (
+                            <KickoffTimeList
+                              key={club.id}
+                              label={club.label}
+                              times={kickoff.teamTimes[club.id] ?? []}
+                              onChange={(times) => setTeamTimes(club.id, times)}
+                            />
+                          ))
+                        : null}
+                      {kickoffClubs.rest.length ? (
+                        <button type="button" className="basalt-btn op-kickoff-more" onClick={() => setShowAllClubs((value) => !value)}>
+                          {showAllClubs
+                            ? 'Mostrar sólo los clubes del archivo'
+                            : `Ver los otros ${kickoffClubs.rest.length} clubes del torneo`}
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  <div className="op-import-foot">
+                    <span className="op-kickoff-status" role="status">
+                      {kickoffFeedback ?? (kickoffDirty
+                        ? 'Ya se aplican a este preview. Guardalos para no volver a cargarlos.'
+                        : 'Sin cambios para guardar.')}
+                    </span>
+                    <button
+                      type="button"
+                      className="basalt-btn basalt-btn-accent"
+                      onClick={handleSaveKickoff}
+                      disabled={!kickoffDirty || kickoffSaving}
+                    >
+                      {kickoffSaving ? <RefreshCw className="spin" size={14} /> : <Clock size={14} />}
+                      <span>{kickoffSaving ? 'Guardando…' : 'Guardar horarios'}</span>
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </section>
+          ) : null}
+
           <div className="op-import-stats">
             <div className="op-import-stat">
               <span>Filas aprobadas</span>
@@ -425,6 +729,10 @@ export function FixtureImportWizard({
             <div className="op-import-stat">
               <span>Filas omitidas</span>
               <strong>{metrics.omitted}</strong>
+            </div>
+            <div className="op-import-stat">
+              <span>Horas sugeridas</span>
+              <strong>{metrics.suggested}</strong>
             </div>
             <div className="op-import-stat">
               <span>Con advertencias</span>
@@ -442,7 +750,14 @@ export function FixtureImportWizard({
               del preview era la única parte del asistente imposible de adaptar a
               un teléfono. Ahora son clases. */}
           <div className="op-import-preview-list">
-            {rows.map((row) => (
+            {rows.map((row) => {
+              const time = rowTime(row, kickoff);
+              // «Falta la hora» deja de ser un aviso cuando hay hora sugerida:
+              // el hueco ya está cubierto y la fila lo dice en su campo.
+              const visibleIssues = time.suggestion || time.value
+                ? row.issues.filter((issue) => issue.code !== 'missing_time')
+                : row.issues;
+              return (
               <article key={row.previewId} className="op-import-preview-row">
                 <div className="op-import-preview-head">
                   <div className="op-import-preview-title">
@@ -507,14 +822,33 @@ export function FixtureImportWizard({
                       onChange={(event) => updateRow(row.previewId, { overrides: { matchDate: event.target.value || null } })}
                     />
                   </div>
-                  <div className="editor-field">
+                  <div className={`editor-field ${time.suggestion ? 'op-import-time-suggested' : ''}`}>
                     <label>Hora</label>
                     <input
                       type="time"
                       className="glass-input"
-                      value={String(row.overrides.matchTime || row.normalized.matchTime || '')}
+                      value={time.value}
                       onChange={(event) => updateRow(row.previewId, { overrides: { matchTime: event.target.value || null } })}
                     />
+                    {time.suggestion ? (
+                      <small className="op-import-round-hint">
+                        Sugerida: {KICKOFF_ORIGIN_LABELS[time.suggestion.origin]}.
+                        {time.suggestion.alternatives.length ? (
+                          <span className="op-kickoff-alts">
+                            {time.suggestion.alternatives.map((alternative) => (
+                              <button
+                                key={alternative}
+                                type="button"
+                                onClick={() => updateRow(row.previewId, { overrides: { matchTime: alternative } })}
+                                aria-label={`Usar ${alternative}`}
+                              >
+                                {alternative}
+                              </button>
+                            ))}
+                          </span>
+                        ) : null}
+                      </small>
+                    ) : null}
                   </div>
                   <div className="editor-field">
                     <label>Sede</label>
@@ -616,9 +950,9 @@ export function FixtureImportWizard({
                   </div>
                 </div>
 
-                {row.issues.length ? (
+                {visibleIssues.length ? (
                   <div className="op-import-preview-issues">
-                    {row.issues.map((issue) => (
+                    {visibleIssues.map((issue) => (
                       <div key={`${row.previewId}-${issue.code}-${issue.message}`} className="op-import-preview-issue">
                         {issue.severity === 'error' ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
                         <span>{issue.message}</span>
@@ -627,7 +961,8 @@ export function FixtureImportWizard({
                   </div>
                 ) : null}
               </article>
-            ))}
+              );
+            })}
           </div>
 
           <div className="op-import-foot">

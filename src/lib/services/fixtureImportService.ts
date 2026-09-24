@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createHash, randomUUID } from 'crypto';
-import * as XLSX from 'xlsx';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { FixtureService } from '@/lib/services/fixtureService';
 import { APP_TIMEZONE, combineLocalDateTimeToUtcIso } from '@/lib/timezone';
 import { isMissingRelationError } from '@/lib/utils/fixtureImportErrors';
 import { extractDocumentText } from '@/lib/services/fixtureTextExtraction';
 import { extractRoundLabel, parseFixtureText, type ParsedFixtureText } from '@/lib/services/fixtureLineParser';
+import { cellToDate, cellToTime, extractWorkbookFixture, type DetectedWorkbook, type SheetCell } from '@/lib/services/fixtureSheetDetection';
+import { buildClubIndex, findClubMentions, resolveRowsByClubs } from '@/lib/services/fixtureClubResolver';
+import { DELIMITED_EXTENSIONS, SPREADSHEET_EXTENSIONS, readWorkbook, type ReadWorkbookResult } from '@/lib/services/fixtureWorkbookReader';
+import { readKickoffDefaults } from '@/lib/services/fixtureKickoffDefaults';
 import type {
   FixtureColumnMapping,
   FixtureColumnSuggestion,
@@ -19,6 +22,7 @@ import type {
   FixtureImportDocumentType,
   FixtureImportIssue,
   FixtureImportNormalizedRow,
+  FixtureKickoffDefaults,
   FixtureImportPreviewResult,
   FixtureImportPreviewRow,
   FixtureImportReferenceData,
@@ -46,6 +50,8 @@ type ConfirmParams = {
 type TournamentContext = {
   tournament: any;
   phase: any;
+  /** Todas las fases del torneo: para reconocer filas que son de OTRA fase. */
+  phases: Array<{ id: string; name: string }>;
   rounds: any[];
   groups: any[];
   participants: Array<{
@@ -61,6 +67,7 @@ type TournamentContext = {
   venueAliases: Array<{ alias: string; canonical_name: string | null }>;
   clubVenues: any[];
   existingMatches: any[];
+  kickoffDefaults: FixtureKickoffDefaults;
 };
 
 type ParsedSource = {
@@ -106,30 +113,14 @@ type CachedPreviewRecord = {
 const IMPORT_PREVIEW_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const importPreviewCache = new Map<string, { createdAt: number; previews: CachedPreviewRecord[] }>();
 
-const HEADER_ALIASES: Record<keyof FixtureColumnMapping, string[]> = {
-  home_team: ['Local', 'Equipo Local', 'Home', 'Club A', 'Equipo A'],
-  away_team: ['Visitante', 'Equipo Visitante', 'Away', 'Club B', 'Equipo B'],
-  match_date: ['Fecha', 'Date', 'Dia', 'Día'],
-  match_time: ['Hora', 'Time', 'Kickoff'],
-  venue: ['Cancha', 'Sede', 'Venue', 'Field'],
-  round: ['Fecha N°', 'Round', 'Jornada', 'Fecha', 'Matchday'],
-  group: ['Zona', 'Grupo', 'Pool'],
-  phase: ['Fase', 'Stage', 'Etapa'],
-  competition_name: ['Torneo', 'Competencia', 'Competition'],
-  category: ['Categoría', 'Categoria', 'Division', 'División', 'Category'],
-  status: ['Estado', 'Status'],
-  score: ['Resultado', 'Score', 'Marcador'],
-  score_home: ['Goles Local', 'Puntos Local', 'Local Score'],
-  score_away: ['Goles Visitante', 'Puntos Visitante', 'Away Score'],
-};
-
-const REQUIRED_FIELDS: Array<keyof FixtureColumnMapping> = ['home_team', 'away_team'];
-
 export class FixtureImportService {
   static async createPreview(params: PreviewParams): Promise<FixtureImportPreviewResult> {
     const supabase = createAdminClient() as any;
     const context = await this.getContext(supabase, params.tournamentId, params.phaseId);
-    const parsed = await this.parseSource(params.file ?? null, params.pastedText ?? null, params.mapping ?? null);
+    const parsed = this.resolveLineRows(
+      await this.parseSource(params.file ?? null, params.pastedText ?? null, params.mapping ?? null),
+      context,
+    );
     const rows = parsed.rows.map((row, index) => this.buildPreviewRow(row, index + 1, parsed.mapping, context));
     const documentType = this.classifyDocument(parsed.headers, rows);
     const confidence = this.deriveConfidence(parsed.sourceType, rows, parsed.issues, documentType);
@@ -177,6 +168,7 @@ export class FixtureImportService {
       referenceData: this.referenceData(context),
       issues,
       rows,
+      kickoffDefaults: context.kickoffDefaults,
     };
   }
 
@@ -664,15 +656,16 @@ export class FixtureImportService {
   }
 
   private static async getContext(supabase: any, tournamentId: string, phaseId: string): Promise<TournamentContext> {
-    const [tournamentRes, phaseRes, roundsRes, groupsRes, participantsRes, competitionAliasesRes, venueAliasesRes, existingMatchesRes] =
+    const [tournamentRes, phaseRes, phasesRes, roundsRes, groupsRes, participantsRes, competitionAliasesRes, venueAliasesRes, existingMatchesRes] =
       await Promise.all([
         supabase.from('tournaments').select('*').eq('id', tournamentId).single(),
         supabase.from('tournament_phases').select('*').eq('id', phaseId).single(),
+        supabase.from('tournament_phases').select('id, name, season_id').eq('tournament_id', tournamentId),
         supabase.from('tournament_rounds').select('*').eq('phase_id', phaseId).order('order_index'),
         this.safeSelect(supabase, 'tournament_groups', '*', (query: any) => query.eq('phase_id', phaseId).order('order_index')),
         supabase
           .from('tournament_participants')
-          .select('id, club_id, name, short_code, group_id, clubs:club_id(id, name, short_name)')
+          .select('id, club_id, name, short_code, group_id, season_id, clubs:club_id(id, name, short_name)')
           .eq('tournament_id', tournamentId)
           .eq('status', 'active'),
         this.safeSelect(supabase, 'competition_aliases', 'alias', (query: any) => query.eq('tournament_id', tournamentId)),
@@ -687,18 +680,34 @@ export class FixtureImportService {
     if (tournamentRes.error || !tournamentRes.data) throw new Error(tournamentRes.error?.message || 'No se encontró el torneo.');
     if (phaseRes.error || !phaseRes.data) throw new Error(phaseRes.error?.message || 'No se encontró la fase.');
 
-    const clubIds = (participantsRes.data || []).map((participant: any) => participant.club_id).filter(Boolean);
+    // Un torneo que vive varias temporadas (el Top 10 del Centro tiene 26) guarda
+    // los participantes y las fases de TODAS. Sin recortar a la temporada de la
+    // fase, el importador ofrecía 310 filas de 28 clubes para un torneo de 10, y
+    // «Fase final» coincidía con la de cualquier año. Si la temporada todavía
+    // no tiene participantes cargados, se usan todos, sin repetir club.
+    const seasonId = phaseRes.data.season_id ?? null;
+    const allParticipants: any[] = participantsRes.data || [];
+    const seasonParticipants = seasonId ? allParticipants.filter((participant) => participant.season_id === seasonId) : [];
+    const participantRows = (seasonParticipants.length ? seasonParticipants : allParticipants)
+      .filter((participant, index, list) =>
+        !participant.club_id || list.findIndex((other) => other.club_id === participant.club_id) === index);
+    const phases = (phasesRes.data || []).filter((phase: any) => !seasonId || phase.season_id === seasonId);
+
+    const clubIds = participantRows.map((participant: any) => participant.club_id).filter(Boolean);
+    // Los alias se piden sólo de estos clubes: sin filtro, PostgREST corta en
+    // 1000 filas y los de este torneo podían no llegar nunca.
     const [clubAliasesRes, clubVenuesRes] = await Promise.all([
-      this.safeSelect(supabase, 'club_aliases', 'club_id, alias'),
+      clubIds.length > 0 ? this.safeSelect(supabase, 'club_aliases', 'club_id, alias', (query: any) => query.in('club_id', clubIds)) : { data: [], error: null },
       clubIds.length > 0 ? this.safeSelect(supabase, 'club_venues', '*', (query: any) => query.in('club_id', clubIds)) : { data: [], error: null },
     ]);
 
     return {
       tournament: tournamentRes.data,
       phase: phaseRes.data,
+      phases,
       rounds: roundsRes.data || [],
       groups: groupsRes.data || [],
-      participants: (participantsRes.data || []).map((participant: any) => ({
+      participants: participantRows.map((participant: any) => ({
         id: participant.id,
         club_id: participant.club_id,
         name: participant.name,
@@ -713,6 +722,7 @@ export class FixtureImportService {
       venueAliases: venueAliasesRes.data || [],
       clubVenues: clubVenuesRes.data || [],
       existingMatches: existingMatchesRes.data || [],
+      kickoffDefaults: readKickoffDefaults(tournamentRes.data.ruleset),
     };
   }
 
@@ -801,6 +811,116 @@ export class FixtureImportService {
     return issues;
   }
 
+  /**
+   * Resuelve local y visitante de las filas que vienen de texto (pegado, PDF o
+   * planilla leída fila por fila) buscando los clubes del torneo en la línea.
+   *
+   * Hace falta porque un PDF exportado de Excel pega las celdas con espacios:
+   * «10 9 10 Jockey Club Cba Tala R.C. 9» no tiene un «vs» por donde cortar.
+   * Conociendo los clubes, sí: se toma el último par de clubes pegados.
+   *
+   * Las líneas sin un partido reconocible —«Fecha TDI», «Fecha Libre», la
+   * lista del sorteo, notas— se dejan afuera y se avisa cuántas y cuáles. Si el
+   * parser ya había separado local y visitante con un «vs» y los clubes no son
+   * del torneo, la fila queda como vino: puede ser un club que falta cargar.
+   */
+  private static resolveLineRows(parsed: ParsedSource, context: TournamentContext): ParsedSource {
+    if (!parsed.rows.some((row) => typeof row._line === 'string')) return parsed;
+    const index = buildClubIndex(
+      context.participants
+        .filter((participant) => participant.club_id && participant.club)
+        .map((participant) => ({
+          id: participant.club_id as string,
+          name: participant.club.name || participant.name || '',
+          variants: [participant.name, participant.short_code, participant.club.short_name, ...participant.aliases]
+            .filter((value): value is string => Boolean(value)),
+        })),
+    );
+    if (!index.clubs.length) return parsed;
+
+    // Un lado «conocido» es un club del torneo: por palabras canónicas o por el
+    // mismo parecido que usa el preview (así un error de tipeo sigue entrando y
+    // se corrige en la fila). «Cruces», «Fecha Libre» o «1ro» no lo son.
+    const clubEntries: MatchableEntry[] = index.clubs.map((club) => ({
+      id: club.id,
+      label: club.label,
+      normalized: this.normalizeKey(club.label),
+      aliases: club.forms.map((form) => form.join(' ')),
+    }));
+    const { rows, dropped } = resolveRowsByClubs(
+      parsed.rows,
+      index,
+      (text) => Boolean(findClubMentions(text, index).length || this.matchEntity(text, clubEntries)),
+    );
+    if (!dropped.length) return { ...parsed, rows };
+
+    const examples = dropped.slice(0, 4).map((line) => `«${line.length > 40 ? `${line.slice(0, 40)}…` : line}»`).join(', ');
+    const issues = [
+      ...parsed.issues,
+      this.issue(
+        'info',
+        'non_match_lines',
+        `${dropped.length} ${dropped.length === 1 ? 'línea no es un partido' : 'líneas no son partidos'} de clubes del torneo y quedaron afuera: ${examples}${dropped.length > 4 ? '…' : ''}.`,
+        'document',
+      ),
+    ];
+    return { ...parsed, rows, issues };
+  }
+
+  /**
+   * Lo que el reconocimiento hizo por su cuenta, una línea por cosa: si saltó
+   * filas de título, juntó hojas o partió el partido en dos, el usuario tiene
+   * que poder verlo antes de mirar las filas.
+   */
+  private static issuesFromWorkbook(workbook: DetectedWorkbook): FixtureImportIssue[] {
+    const issues: FixtureImportIssue[] = [];
+    const { detected } = workbook;
+    if (detected.headerRowIndex > 0) {
+      issues.push(this.issue('info', 'header_row_detected', `Los encabezados están en la fila ${detected.headerRowIndex + 1}; lo de arriba se tomó como título.`, 'mapping'));
+    }
+    if (workbook.usedSheets.length > 1) {
+      issues.push(this.issue('info', 'sheets_merged', `Se juntaron ${workbook.usedSheets.length} hojas con la misma plantilla: ${workbook.usedSheets.join(', ')}.`, 'document'));
+    }
+    if (workbook.skippedSheets.length) {
+      issues.push(this.issue('info', 'sheets_skipped', `Quedaron afuera las hojas sin partidos o con otra forma: ${workbook.skippedSheets.join(', ')}.`, 'document'));
+    }
+    if (detected.matchupHeader) {
+      issues.push(this.issue('info', 'matchup_split', `La columna «${detected.matchupHeader}» trae el partido en una celda; se separó en local y visitante.`, 'mapping'));
+    }
+    if (detected.sectionRows) {
+      issues.push(this.issue('info', 'section_rows', `${detected.sectionRows} ${detected.sectionRows === 1 ? 'fila de sección' : 'filas de sección'} (jornada, zona, fecha o fase) se aplicaron a los partidos de abajo.`, 'round'));
+    }
+    if (detected.layout === 'matrix') {
+      issues.push(this.issue('info', 'matrix_layout', 'Es una tabla de doble entrada: cada fila se tomó como local y cada columna como visitante, con la fecha o la jornada del cruce.', 'mapping'));
+    }
+    if (workbook.sideBySideTables > 1) {
+      issues.push(this.issue('info', 'side_by_side_tables', `Había ${workbook.sideBySideTables} tablas una al lado de la otra; se leyeron por separado.`, 'mapping'));
+    }
+    if (detected.filledDown) {
+      issues.push(this.issue('info', 'filled_down', `${detected.filledDown} ${detected.filledDown === 1 ? 'celda vacía de fecha, jornada o zona se completó' : 'celdas vacías de fecha, jornada o zona se completaron'} con el valor de arriba.`, 'match_date'));
+    }
+    if (detected.monthFirstDates) {
+      issues.push(this.issue('warning', 'month_first_dates', 'Las fechas vienen en mes/día (formato de Excel en inglés) y se leyeron así. Revisá un par antes de confirmar.', 'match_date'));
+    }
+    return issues;
+  }
+
+  /** Lo que pasó al abrir el archivo, antes de mirar su contenido. */
+  private static issuesFromRead(read: ReadWorkbookResult): FixtureImportIssue[] {
+    const issues: FixtureImportIssue[] = [];
+    if (read.hiddenSheets.length) {
+      issues.push(this.issue('info', 'hidden_sheets', `Se ignoraron las hojas ocultas: ${read.hiddenSheets.join(', ')}.`, 'document'));
+    }
+    if (read.encoding === 'windows-1252') {
+      issues.push(this.issue('info', 'legacy_encoding', 'El archivo venía con la codificación de Excel en castellano (Windows-1252); se leyó así para no romper las tildes.', 'document'));
+    }
+    if (read.delimiter && read.delimiter !== ',') {
+      const name = read.delimiter === ';' ? 'punto y coma' : read.delimiter === '\t' ? 'tabulación' : `«${read.delimiter}»`;
+      issues.push(this.issue('info', 'delimiter_detected', `Las columnas vienen separadas por ${name}.`, 'document'));
+    }
+    return issues;
+  }
+
   private static async parseSource(file: File | null, pastedText: string | null, mapping: FixtureColumnMapping | null): Promise<ParsedSource> {
     if (pastedText?.trim()) {
       const parsed = parseFixtureText(pastedText);
@@ -846,21 +966,73 @@ export class FixtureImportService {
     const buffer = Buffer.from(await file.arrayBuffer());
 
     if (sourceType === 'excel' || sourceType === 'csv') {
-      const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true, raw: false });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: null, raw: false });
-      const headers = Array.from(new Set(rows.flatMap((row) => Object.keys(row))));
-      const suggestions = this.suggestMapping(headers);
-      const selectedMapping = { ...this.mappingFromSuggestions(suggestions), ...(mapping || {}) };
-      const needsManualMapping = REQUIRED_FIELDS.some((field) => !selectedMapping[field]);
+      // Valores crudos: la fecha de Excel llega como número de serie y la hora
+      // como fracción del día, y `fixtureSheetDetection` las decodifica sin
+      // depender del formato regional de la planilla. El lector se encarga de
+      // la codificación y el separador de los CSV, las hojas ocultas y las
+      // celdas combinadas.
+      const read = readWorkbook(new Uint8Array(buffer), sourceType === 'csv' ? 'delimited' : 'spreadsheet');
+      if (read.error) {
+        return {
+          sourceType,
+          headers: [],
+          rows: [],
+          extractedText: null,
+          issues: [this.issue('error', 'workbook_unreadable', read.error, 'document')],
+          mapping: {},
+          suggestions: [],
+          needsManualMapping: false,
+          fileName: file.name,
+          mimeType: file.type || null,
+          extension,
+          size: file.size,
+          buffer,
+        };
+      }
+      const readIssues = this.issuesFromRead(read);
+      const fixture = extractWorkbookFixture(read.sheets, mapping);
+
+      // Sin columnas de local y visitante: se leyó fila por fila, y los clubes
+      // los resuelve `resolveLineRows` contra los del torneo.
+      if (fixture.mode === 'lines') {
+        return {
+          sourceType,
+          headers: this.TEXT_HEADERS,
+          rows: this.rowsFromParsedText(fixture.parsed),
+          extractedText: fixture.text,
+          issues: [
+            ...readIssues,
+            this.issue('info', 'read_row_by_row', 'La planilla no tiene columnas de local y visitante: se leyó fila por fila, con las jornadas de sus rótulos.', 'mapping'),
+            ...this.issuesFromParsedText(fixture.parsed),
+          ],
+          mapping: this.TEXT_MAPPING,
+          suggestions: [],
+          needsManualMapping: false,
+          fileName: file.name,
+          mimeType: file.type || null,
+          extension,
+          size: file.size,
+          buffer,
+        };
+      }
+
+      const workbookDetection = fixture.detection;
+      const rows = fixture.rows as Record<string, unknown>[];
+      const headers = fixture.headers;
+      const suggestions = fixture.suggestions;
+      const selectedMapping = fixture.mapping;
+      const needsManualMapping = fixture.needsManualMapping;
+
       return {
         sourceType,
         headers,
         rows,
-        extractedText: rows.map((row) => Object.values(row).filter(Boolean).join(' | ')).join('\n'),
+        extractedText: rows.map((row) => Object.values(row).filter((value) => value !== null && value !== '').join(' | ')).join('\n'),
         issues: [
+          ...readIssues,
           ...(rows.length ? [] : [this.issue('error', 'no_rows_detected', 'El archivo no contiene filas.', 'document')]),
-          ...(needsManualMapping ? [this.issue('warning', 'manual_mapping_required', 'Completa el mapeo de columnas antes de confirmar.', 'mapping')] : []),
+          ...(workbookDetection ? this.issuesFromWorkbook(workbookDetection) : []),
+          ...(needsManualMapping ? [this.issue('warning', 'manual_mapping_required', 'No se reconoció qué columna es el local o el visitante. Asignalas en el mapeo y reanalizá.', 'mapping')] : []),
         ],
         mapping: selectedMapping,
         suggestions,
@@ -1016,13 +1188,19 @@ export class FixtureImportService {
     if (!normalized.venue) issues.push(this.issue('warning', 'missing_venue', 'La sede está ausente.', 'venue'));
     if (duplicateMatchId) issues.push(this.issue('warning', 'possible_duplicate', 'Se detectó un posible duplicado.', 'duplicate'));
 
+    const otherPhase = this.otherPhaseOf(normalized.phase, context);
+    if (otherPhase) {
+      issues.push(this.issue('info', 'other_phase', `Es de «${otherPhase}». Queda omitida: importala desde esa fase.`, 'phase'));
+    }
+
     const status = this.rowStatus(issues, Boolean(duplicateMatchId));
+    const matchup = `${normalized.homeTeam || 'Sin local'} vs ${normalized.awayTeam || 'Sin visitante'}`;
     return {
       previewId: randomUUID(),
       rowIndex,
-      sourceLabel: `${normalized.homeTeam || 'Sin local'} vs ${normalized.awayTeam || 'Sin visitante'}`,
+      sourceLabel: normalized.matchNumber ? `Partido ${normalized.matchNumber} · ${matchup}` : matchup,
       status,
-      action: status === 'error' ? 'omit' : 'approve',
+      action: status === 'error' || otherPhase ? 'omit' : 'approve',
       duplicateAction: duplicateMatchId ? 'skip_row' : 'skip_row',
       raw: rawRow,
       normalized,
@@ -1046,7 +1224,12 @@ export class FixtureImportService {
     };
     const scoreText = this.readString(pick('score'));
     const parsedScore = scoreText ? this.parseScore(scoreText) : null;
-    const matchDate = this.normalizeDate(pick('match_date'));
+    const matchDate = cellToDate(pick('match_date') as SheetCell);
+    // Sin columna de hora, la hora puede venir dentro de la fecha
+    // («19/09/2026 16:30» o una celda de fecha y hora de Excel).
+    const matchTime =
+      cellToTime(pick('match_time') as SheetCell) ??
+      cellToTime(pick('match_date') as SheetCell, { allowDateTime: true });
     return {
       sport: context.tournament.sport || null,
       competitionName: this.readString(pick('competition_name')) || context.tournament.display_name || context.tournament.name,
@@ -1055,7 +1238,7 @@ export class FixtureImportService {
       group: this.readString(pick('group')),
       round: this.readString(pick('round')),
       matchDate,
-      matchTime: this.normalizeTime(pick('match_time')),
+      matchTime,
       homeTeam: this.readString(pick('home_team')),
       awayTeam: this.readString(pick('away_team')),
       venue: this.readString(pick('venue')),
@@ -1066,7 +1249,27 @@ export class FixtureImportService {
       region: context.tournament.region || null,
       scoreHome: this.toNumber(pick('score_home')) ?? parsedScore?.home ?? null,
       scoreAway: this.toNumber(pick('score_away')) ?? parsedScore?.away ?? null,
+      matchNumber: this.readString(pick('match_number')),
     };
+  }
+
+  /**
+   * Si la fila dice una fase y esa fase es OTRA del torneo, devuelve su nombre.
+   * Una planilla con el torneo entero no tiene que meter las semifinales en la
+   * fase de grupos. Si el texto no coincide con ninguna fase no se opina: puede
+   * ser un rótulo propio de la planilla («Primera rueda»).
+   */
+  private static otherPhaseOf(phaseText: string | null, context: TournamentContext): string | null {
+    if (!phaseText || context.phases.length < 2) return null;
+    const entries: MatchableEntry[] = context.phases.map((phase) => ({
+      id: phase.id,
+      label: phase.name,
+      normalized: this.normalizeKey(phase.name || ''),
+      aliases: [],
+    }));
+    const hit = this.matchEntity(phaseText, entries);
+    if (!hit || hit.confidence === 'baja' || hit.id === context.phase.id) return null;
+    return hit.label;
   }
 
   private static referenceData(context: TournamentContext): FixtureImportReferenceData {
@@ -1133,50 +1336,15 @@ export class FixtureImportService {
     return 'baja';
   }
 
-  private static suggestMapping(headers: string[]): FixtureColumnSuggestion[] {
-    return Object.entries(HEADER_ALIASES).map(([field, aliases]) => {
-      const match = headers.find((header) => aliases.some((alias) => this.normalizeKey(alias) === this.normalizeKey(header)));
-      return { field: field as keyof FixtureColumnMapping, header: match || null, confidence: match ? 'alta' : 'baja' };
-    });
-  }
-
-  private static mappingFromSuggestions(suggestions: FixtureColumnSuggestion[]): FixtureColumnMapping {
-    return suggestions.reduce<FixtureColumnMapping>((accumulator, item) => {
-      accumulator[item.field] = item.header;
-      return accumulator;
-    }, {});
-  }
-
   private static detectSourceType(extension: string | null, mimeType: string | null): FixtureImportSourceType {
-    if (extension === '.xlsx' || extension === '.xls') return 'excel';
-    if (extension === '.csv') return 'csv';
+    if (SPREADSHEET_EXTENSIONS.includes(extension || '')) return 'excel';
+    if (DELIMITED_EXTENSIONS.includes(extension || '')) return 'csv';
+    // Sin extensión (un adjunto reenviado, un archivo de celular): el tipo MIME.
+    if (/spreadsheet|excel|opendocument\.spreadsheet|numbers/i.test(mimeType || '')) return 'excel';
+    if (/csv|tab-separated|text\/plain/i.test(mimeType || '')) return 'csv';
     if (extension === '.pdf') return mimeType === 'application/pdf' ? 'pdf_text' : 'pdf_scanned';
     if (['.png', '.jpg', '.jpeg', '.webp'].includes(extension || '')) return 'image';
     return 'unknown';
-  }
-
-  private static normalizeDate(value: unknown): string | null {
-    if (value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString().slice(0, 10);
-    if (typeof value === 'number' && Number.isFinite(value)) {
-      const parsed = XLSX.SSF.parse_date_code(value);
-      return parsed ? `${parsed.y}-${String(parsed.m).padStart(2, '0')}-${String(parsed.d).padStart(2, '0')}` : null;
-    }
-    const raw = this.readString(value);
-    if (!raw) return null;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
-    const latin = raw.match(/^(\d{1,2})[/-](\d{1,2})(?:[/-](\d{2,4}))?$/);
-    if (latin) {
-      const year = latin[3] ? Number(latin[3].length === 2 ? `20${latin[3]}` : latin[3]) : new Date().getFullYear();
-      return `${year}-${String(Number(latin[2])).padStart(2, '0')}-${String(Number(latin[1])).padStart(2, '0')}`;
-    }
-    const parsed = new Date(raw);
-    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10);
-  }
-
-  private static normalizeTime(value: unknown): string | null {
-    const raw = this.readString(value);
-    const match = raw?.match(/^(\d{1,2}):(\d{2})/);
-    return match ? `${String(Number(match[1])).padStart(2, '0')}:${match[2]}` : null;
   }
 
   private static parseScore(value: string): { home: number; away: number } | null {

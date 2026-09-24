@@ -4065,3 +4065,246 @@
         letter-spacing: 0.02em;
     }
 }
+
+/* ─── Importador: avisos del documento y horarios habituales ─────────────── */
+
+/* Lo que el reconocimiento hizo por su cuenta (título salteado, hojas
+   juntadas, «A vs B» partido). Una línea por cosa, en tono de nota. */
+.op-import-doc-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.op-import-doc-notes li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.op-import-doc-notes li svg {
+    flex: none;
+    margin-top: 2px;
+    color: var(--text-dim);
+}
+
+.op-import-doc-notes li.is-warning svg { color: var(--status-warning); }
+.op-import-doc-notes li.is-error svg { color: var(--status-error); }
+
+.op-kickoff {
+    margin-top: 14px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 4px;
+    background: var(--surface-elevated);
+}
+
+.op-kickoff-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    width: 100%;
+    padding: 11px 13px;
+    border: 0;
+    background: transparent;
+    color: var(--text-main);
+    text-align: left;
+    cursor: pointer;
+}
+
+.op-kickoff-head:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: -2px;
+}
+
+.op-kickoff-head strong {
+    font-size: 13px;
+}
+
+.op-kickoff-head span {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+}
+
+.op-kickoff-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 13px 13px;
+}
+
+.op-kickoff-lede {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.op-kickoff-sources {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+}
+
+.op-kickoff-source {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 9px 11px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 4px;
+    background: var(--bg-basalt);
+    color: var(--text-main);
+    text-align: left;
+    cursor: pointer;
+}
+
+.op-kickoff-source strong { font-size: 12.5px; }
+.op-kickoff-source small { font-size: 11px; color: var(--text-dim); }
+
+.op-kickoff-source.is-active {
+    border-color: color-mix(in srgb, var(--accent-primary) 55%, transparent);
+    background: color-mix(in srgb, var(--accent-primary) 10%, var(--surface-elevated));
+}
+
+.op-kickoff-source:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+.op-kickoff-clubs {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.op-kickoff-owner {
+    display: grid;
+    grid-template-columns: minmax(120px, 220px) minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-top: 1px solid var(--border-basalt);
+}
+
+.op-kickoff-owner-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12.5px;
+    color: var(--text-main);
+}
+
+.op-kickoff-times {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.op-kickoff-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 4px 3px 8px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 3px;
+    background: var(--bg-basalt);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+}
+
+/* El primero es el que se sugiere: se distingue sin necesitar leyenda. */
+.op-kickoff-chip.is-main {
+    border-color: color-mix(in srgb, var(--accent-primary) 55%, transparent);
+    color: var(--text-main);
+}
+
+.op-kickoff-chip button {
+    display: inline-flex;
+    padding: 2px;
+    border: 0;
+    border-radius: 2px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+}
+
+.op-kickoff-chip button:hover,
+.op-kickoff-chip button:focus-visible {
+    color: var(--status-error);
+}
+
+.op-kickoff-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.op-kickoff-add .glass-input {
+    width: 112px;
+    min-height: 30px;
+    padding: 3px 8px;
+}
+
+.op-kickoff-more {
+    align-self: flex-start;
+    margin-top: 6px;
+}
+
+.op-kickoff-status {
+    flex: 1;
+    min-width: 0;
+    font-size: 11.5px;
+    line-height: 1.4;
+    color: var(--text-dim);
+}
+
+/* La hora que no vino en la planilla se ve distinta de la que sí vino. */
+.op-import-time-suggested .glass-input {
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--accent-primary) 55%, transparent);
+}
+
+.op-kickoff-alts {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-left: 6px;
+}
+
+.op-kickoff-alts button {
+    padding: 1px 6px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 2px;
+    background: var(--bg-basalt);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.op-kickoff-alts button:hover,
+.op-kickoff-alts button:focus-visible {
+    border-color: var(--accent-primary);
+    color: var(--text-main);
+}
+
+@media (max-width: 640px) {
+    .op-kickoff-owner {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 6px;
+    }
+}
