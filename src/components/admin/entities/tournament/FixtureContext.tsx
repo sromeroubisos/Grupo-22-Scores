@@ -14,6 +14,7 @@ import type {
   FixtureImportConfirmDecision,
   FixtureImportConfirmResult,
   FixtureImportPreviewResult,
+  FixtureKickoffDefaults,
 } from '@/lib/types/fixture-import';
 
 type JsonRecord = Record<string, unknown>;
@@ -108,6 +109,8 @@ interface FixtureContextValue {
   importMatches: (phaseId: string, matches: JsonRecord[]) => Promise<{ success: boolean; imported: number; errors?: string[] }>;
   previewFixtureImport: (params: { phaseId: string; file?: File | null; pastedText?: string | null; mapping?: FixtureColumnMapping | null }) => Promise<FixtureImportPreviewResult>;
   confirmFixtureImport: (params: { phaseId: string; jobId: string; decisions: FixtureImportConfirmDecision[] }) => Promise<FixtureImportConfirmResult>;
+  /** Guarda los horarios habituales del importador. Devuelve lo que quedó guardado, ya saneado. */
+  saveFixtureKickoffDefaults: (defaults: FixtureKickoffDefaults) => Promise<FixtureKickoffDefaults>;
   resetRound: (roundId: string) => Promise<boolean>;
   saveRound: (roundId: string, round: JsonRecord) => Promise<void>;
   validateFixture: () => Promise<unknown>;
@@ -450,6 +453,21 @@ export function FixtureProvider({ children, initialFixture, tournamentId, season
     }
   }, [tournamentId, refreshFixture]);
 
+  // Tira si falla: el asistente muestra el motivo al lado del botón de
+  // guardar, y los horarios siguen aplicándose a este preview igual.
+  const saveFixtureKickoffDefaults = useCallback(async (defaults: FixtureKickoffDefaults) => {
+    const response = await fetch(`/api/tournaments/${tournamentId}/fixture/kickoff-defaults`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kickoffDefaults: defaults }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(result.error || 'No se pudieron guardar los horarios.');
+    }
+    return result.kickoffDefaults as FixtureKickoffDefaults;
+  }, [tournamentId]);
+
   const resetRound = useCallback(async (roundId: string) => {
     try {
       const response = await fetch(`/api/tournaments/${tournamentId}/fixture/rounds/${roundId}/reset`, {
@@ -628,6 +646,7 @@ export function FixtureProvider({ children, initialFixture, tournamentId, season
     importMatches,
     previewFixtureImport,
     confirmFixtureImport,
+    saveFixtureKickoffDefaults,
     resetRound,
     saveRound,
     validateFixture,
@@ -642,7 +661,7 @@ export function FixtureProvider({ children, initialFixture, tournamentId, season
     // recrea con selectedPhaseId (ya listado arriba → sin recomputo extra).
     setFixture, selectPhase, selectRound, setViewMode, setFilterStatus, setSortBy,
     openEditor, closeEditor, refreshFixture, generateFixture, generateMatches,
-    importMatches, previewFixtureImport, confirmFixtureImport, resetRound, saveRound,
+    importMatches, previewFixtureImport, confirmFixtureImport, saveFixtureKickoffDefaults, resetRound, saveRound,
     validateFixture, saveMatch, deleteMatch, deleteMatches,
   ]);
 

@@ -50,7 +50,8 @@ export type FixtureImportFieldKey =
   | 'region'
   | 'score'
   | 'score_home'
-  | 'score_away';
+  | 'score_away'
+  | 'match_number';
 
 export interface FixtureImportIssue {
   severity: FixtureImportSeverity;
@@ -75,6 +76,7 @@ export interface FixtureColumnMapping {
   score?: string | null;
   score_home?: string | null;
   score_away?: string | null;
+  match_number?: string | null;
 }
 
 export interface FixtureColumnSuggestion {
@@ -111,6 +113,8 @@ export interface FixtureImportNormalizedRow {
   region: string | null;
   scoreHome: number | null;
   scoreAway: number | null;
+  /** Número o código del partido tal como lo trae la planilla («12», «P3»). */
+  matchNumber?: string | null;
 }
 
 export interface FixtureImportPreviewRow {
@@ -173,6 +177,19 @@ export interface FixtureImportPreviewResult {
   referenceData: FixtureImportReferenceData;
   issues: FixtureImportIssue[];
   rows: FixtureImportPreviewRow[];
+  /** Horarios habituales guardados en el torneo; la UI sugiere la hora con ellos. */
+  kickoffDefaults?: FixtureKickoffDefaults;
+}
+
+/** De dónde sale la hora sugerida cuando la fila no trae hora. */
+export type FixtureKickoffSource = 'home' | 'away' | 'tournament';
+
+export interface FixtureKickoffDefaults {
+  source: FixtureKickoffSource;
+  /** Horarios generales del torneo, `HH:mm`. El primero es el que se sugiere. */
+  tournamentTimes: string[];
+  /** Horarios habituales por club (`club_id` → `HH:mm[]`). El primero manda. */
+  teamTimes: Record<string, string[]>;
 }
 
 export interface FixtureImportConfirmDecision {
