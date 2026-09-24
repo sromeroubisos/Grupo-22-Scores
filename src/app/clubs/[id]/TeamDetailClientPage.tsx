@@ -21,6 +21,7 @@ import QuickSquadModal from './QuickSquadModal';
 import PanelMatchForm, { type PanelFamilyClub } from './PanelMatchForm';
 import PanelCategories from './PanelCategories';
 import dynamic from 'next/dynamic';
+import { SponsorShowcase } from '@/components/sponsors/SponsorShowcase';
 
 // El export es la pieza mas pesada que carga esta pagina y solo hace falta cuando
 // alguien aprieta el boton. Diferido, deja de viajar en la primera carga: en el
@@ -2070,6 +2071,10 @@ function TeamDetailInner({ id }: { id: string }) {
                         </div>
                     </aside>
                 </div>
+
+                {/* Sponsors del club: se cargan desde el gestor (pestaña Sponsors).
+                    Espera al id real del club; sin sponsors activos no se dibuja nada. */}
+                <SponsorShowcase ownerType="club" ownerId={resolvedClubId} />
             </main>
         </div>
     );

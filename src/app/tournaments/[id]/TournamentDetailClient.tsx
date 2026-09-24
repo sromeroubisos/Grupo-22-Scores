@@ -36,6 +36,7 @@ import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { SPORTS } from '@/lib/data/sports';
 import type { SportId } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
+import { SponsorShowcase } from '@/components/sponsors/SponsorShowcase';
 import { getTournamentFlashScoreConfig, getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
 import { parseOdesurTournamentId } from '@/lib/services/odesur2026Parser';
 import {
@@ -5457,6 +5458,13 @@ export default function TournamentDetailPage({
                 banner, y el `?ref=torneo` es lo que después permite saber si
                 esta ubicación trajo a alguien.
               */}
+
+              {/* Sponsors del torneo: se cargan desde el gestor (pestaña Sponsors).
+                  Sin sponsors activos no se dibuja nada. La API resuelve el slug. */}
+              <SponsorShowcase
+                ownerType="tournament"
+                ownerId={(initialData?.tournament as { id?: string } | undefined)?.id ?? id}
+              />
             </div>
 
             {showPredictor && draw.length > 0 && (

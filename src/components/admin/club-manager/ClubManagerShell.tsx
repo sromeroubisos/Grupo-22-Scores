@@ -18,6 +18,7 @@ import { PublishTab } from './PublishTab';
 import { RelatedClubsTab } from './RelatedClubsTab';
 import { UsersTab } from './UsersTab';
 import { VenuesTab } from './VenuesTab';
+import { SponsorsManager } from '@/components/sponsors/SponsorsManager';
 
 import './club-manager.css';
 
@@ -229,6 +230,7 @@ export function ClubManagerShell({
                         notify={notify}
                     />
                 )}
+                {tab === 'sponsors' && <SponsorsManager ownerType="club" ownerId={id} notify={notify} />}
                 {tab === 'publicar' && (
                     <PublishTab
                         clubId={id}
