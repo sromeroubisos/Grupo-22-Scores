@@ -64,7 +64,10 @@ export const US7_COMPETITIONS: Record<Us7CompetitionKey, Us7Competition> = {
         name: 'Ultimate Sevens Masculino',
         fullName: 'Ultimate Sevens — Masculino',
         genderLabel: 'Masculino',
-        url: `${US7_SITE_URL}/match-centre/`,
+        // Una URL por rama: la portada agrupa por URL de torneo (es lo único que
+        // comparten las etapas de un proveedor) y con la misma URL la rama
+        // masculina se metía adentro del bloque "Femenino".
+        url: `${US7_SITE_URL}/match-centre/#masculino`,
     },
     w: {
         key: 'w',
@@ -73,7 +76,7 @@ export const US7_COMPETITIONS: Record<Us7CompetitionKey, Us7Competition> = {
         name: 'Ultimate Sevens Femenino',
         fullName: 'Ultimate Sevens — Femenino',
         genderLabel: 'Femenino',
-        url: `${US7_SITE_URL}/match-centre/`,
+        url: `${US7_SITE_URL}/match-centre/#femenino`,
     },
 };
 
