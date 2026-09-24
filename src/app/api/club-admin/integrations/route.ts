@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
                 .select('id', { count: 'exact', head: true })
                 .eq('club_id', clubId),
             admin
-                .from('club_sponsors')
+                .from('entity_sponsors')
                 .select('id', { count: 'exact', head: true })
                 .eq('club_id', clubId),
         ]);

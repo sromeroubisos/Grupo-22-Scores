@@ -1005,7 +1005,7 @@ export async function getClubDashboardOverview(
             .eq('club_id', clubId)
             .maybeSingle(),
         supabase
-            .from('club_sponsors')
+            .from('entity_sponsors')
             .select('id', { count: 'exact', head: true })
             .eq('club_id', clubId),
     ]);

@@ -9,7 +9,7 @@ import { RelatedSection } from '@/components/admin/entities/related/RelatedSecti
 import { AuditSection } from '@/components/admin/entities/audit/AuditSection';
 import { TournamentSummaryTab } from '@/components/admin/entities/tournament/TournamentSummaryTab';
 import { TournamentDetailsTab } from '@/components/admin/entities/tournament/TournamentDetailsTab';
-import { TournamentMediaTab } from '@/components/admin/entities/tournament/TournamentMediaTab';
+import { SponsorsManager } from '@/components/sponsors/SponsorsManager';
 import { TournamentManageShell } from '@/components/admin/entities/tournament/TournamentManageShell';
 import { TournamentStructureTab } from '@/components/admin/entities/tournament/TournamentStructureTab';
 import { ClubManagerShell } from '@/components/admin/club-manager/ClubManagerShell';
@@ -93,6 +93,11 @@ const TOURNAMENT_TAB_ALIASES: Record<string, string> = {
     publicacion: 'resumen',
     related: 'resumen',
     audit: 'resumen',
+    // "Medios y Branding" era un placeholder vacío: lo que tenía que ir ahí
+    // son los sponsors.
+    medios: 'sponsors',
+    branding: 'sponsors',
+    patrocinadores: 'sponsors',
 };
 
 function compactText(value: unknown): string | null {
@@ -549,11 +554,10 @@ export default async function ManageEntityPage({ params, searchParams }: ManageP
                                 initialSubtab={effectiveSubtab}
                             />
                         )}
-                    {effectiveTab === 'medios' && (
-                        <TournamentMediaTab
-                            data={result.data as TournamentRow}
-                            id={id}
-                        />
+                    {effectiveTab === 'sponsors' && (
+                        <div className="mx-auto w-full max-w-5xl">
+                            <SponsorsManager ownerType="tournament" ownerId={id} />
+                        </div>
                     )}
                 </div>
             </TournamentManageShell>
