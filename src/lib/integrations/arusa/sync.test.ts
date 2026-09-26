@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import type { PartidoArusa } from './client.ts';
-import { filaSegunArusa, planArusaMatches, rotarCompetencias, type PartidoExistente } from './sync.ts';
+import { aIsoDesdeUtc, faseSinReclamar, filaSegunArusa, planArusaMatches, rotarCompetencias, type PartidoExistente } from './sync.ts';
 
 const partido = (over: Partial<PartidoArusa> = {}): PartidoArusa => ({
     id: '144833532',
@@ -117,4 +117,19 @@ test('rotarCompetencias: es una rotación, no pierde ni repite, y el arranque ca
     assert.equal(new Set(arranques).size, arranques.length);
     // Con una sola competencia (`?slug=`) no hay nada que rotar.
     assert.deepEqual(rotarCompetencias(['solo'], a15), ['solo']);
+});
+
+test('aIsoDesdeUtc: la hora de Leverade es UTC, no hora de Santiago', () => {
+    // COBS 31-24 PWCC: "20:30" y el resultado cargado a las 22:36 UTC. Leído
+    // como hora local, el marcador habría salido antes del saque.
+    assert.equal(aIsoDesdeUtc('2026-09-26 20:30:00'), '2026-09-26T20:30:00.000Z');
+    assert.equal(filaSegunArusa(partido({ inicioLocal: '2026-07-12 17:00:00' }), 'a', 'b').date_time, '2026-07-12T17:00:00.000Z');
+});
+
+test('faseSinReclamar: la liga "Regular Season" sobrevive a que el torneo sume la fase de playoffs', () => {
+    const fases = [{ name: 'Playoffs Titulares' }, { name: 'Regular Season' }];
+    assert.equal(faseSinReclamar(fases, ['Titulares', 'Playoffs Titulares'])?.name, 'Regular Season');
+    assert.equal(faseSinReclamar([{ name: 'Regular Season' }], ['Titulares'])?.name, 'Regular Season');
+    // Dos sin reclamar: no se adivina.
+    assert.equal(faseSinReclamar([{ name: 'Regular Season' }, { name: 'Repechaje' }], ['Titulares']), undefined);
 });

@@ -61,6 +61,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { fetchCabecera, fetchPartidosDeGrupo } from '@/lib/integrations/arusa/client.ts';
 import {
   construirResolver,
+  faseSinReclamar,
   normalizarNombre,
   planArusaMatches,
   rotarCompetencias,
@@ -78,14 +79,17 @@ export const maxDuration = 300;
 const TORNEOS: { lev: string; slug: string; ramas: string[] }[] = [
   // Mayores. En Cuarta la rama de fase regular NO se llama "Titulares": el
   // nombre lo pone cada competencia a mano y acá quedó "Fase Regular".
-  { lev: '1328550', slug: 'top-10-de-arusa', ramas: ['Titulares'] },
+  // Los playoffs son otra rama (tipo `play_off`) y van a su fase, que se llama
+  // igual. Sin declararlos acá la llave no se actualiza nunca: las semis de
+  // 2026 las había cargado un script y quedaron 0-0 con el partido jugado.
+  { lev: '1328550', slug: 'top-10-de-arusa', ramas: ['Titulares', 'Playoffs Titulares'] },
   { lev: '1328552', slug: 'segunda-division-de-arusa', ramas: ['Titulares'] },
   { lev: '1328553', slug: 'tercera-division-de-arusa', ramas: ['Titulares'] },
   { lev: '1328554', slug: 'cuarta-division-de-arusa', ramas: ['Fase Regular'] },
 
   // Intermedias: la segunda rama de la MISMA competencia de mayores, con los
   // mismos clubes y otro plantel. Van a torneos aparte porque tienen su tabla.
-  { lev: '1328550', slug: 'intermedia-de-primera-de-arusa', ramas: ['Intermedia'] },
+  { lev: '1328550', slug: 'intermedia-de-primera-de-arusa', ramas: ['Intermedia', 'Playoffs Intermedia'] },
   { lev: '1328552', slug: 'intermedia-de-segunda-de-arusa', ramas: ['Intermedia'] },
   { lev: '1328553', slug: 'intermedia-de-tercera-de-arusa', ramas: ['Intermedia'] },
 
@@ -182,10 +186,13 @@ export async function GET(req: Request) {
           `(hay: ${cabecera.grupos.map((g) => g.nombre).join(', ')})`);
         continue;
       }
-      // La fase se empareja por nombre; los torneos cargados antes de que
-      // hubiera varias ramas tienen una sola fase, "Regular Season".
+      // La fase se empareja por nombre. Los torneos cargados antes de que
+      // hubiera varias ramas tienen su liga como "Regular Season": esa rama va
+      // a la ÚNICA fase que ninguna otra rama reclama por nombre. Antes se
+      // exigía que el torneo tuviera una sola fase, y el 18/09 alcanzó con
+      // sumarle "Playoffs Titulares" al Top 10 para que dejara de sincronizar.
       const fase = fases.find((f) => clave(f.name) === clave(rama.nombre))
-        ?? (fases.length === 1 && objetivo.ramas.length === 1 ? fases[0] : undefined);
+        ?? faseSinReclamar(fases, objetivo.ramas);
       if (!fase) {
         errors.push(`${objetivo.slug}: la rama "${rama.nombre}" no tiene fase equivalente ` +
           `(fases: ${fases.map((f) => f.name).join(', ')})`);

@@ -81,28 +81,30 @@ export function normalizarNombre(nombre: string): string {
 }
 
 /**
- * Hora local de Santiago → UTC. El offset se MIDE en esa fecha con `Intl`, no
- * se asume: Chile vuelve al horario de verano a principios de septiembre y la
- * última fecha del torneo cae del otro lado del cambio.
+ * La hora de Leverade ya viene en UTC: "2026-09-26 20:30:00" es 17:30 en
+ * Santiago. `display_timezone` es solo cómo la MUESTRA el sitio, no la zona del
+ * dato. Hasta el 26/09 se leía como hora local y todo ARUSA quedó corrido tres
+ * horas (cuatro en invierno): había partidos guardados a las 23 y a las 3 de la
+ * mañana. La prueba que lo resolvió: COBS 31-24 PWCC tenía el resultado cargado
+ * a las 22:36 UTC con un horario de "20:30" — como hora local habría sido un
+ * marcador publicado una hora antes del saque.
  */
-export function aUtcDesdeZona(localSql: string, zona: string): string {
-    const [dia, hora] = localSql.split(' ');
-    const [Y, M, D] = dia.split('-').map(Number);
-    const [hh, mm, ss] = (hora ?? '00:00:00').split(':').map(Number);
-    const tentativa = Date.UTC(Y, M - 1, D, hh, mm, ss || 0);
+export function aIsoDesdeUtc(utcSql: string): string {
+    const [dia, hora] = utcSql.split(' ');
+    return new Date(`${dia}T${hora ?? '00:00:00'}Z`).toISOString();
+}
 
-    const dtf = new Intl.DateTimeFormat('en-US', {
-        timeZone: zona, hour12: false,
-        year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', second: '2-digit',
-    });
-    const offset = (t: number) => {
-        const p = Object.fromEntries(dtf.formatToParts(new Date(t)).map((x) => [x.type, x.value]));
-        const comoUtc = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour % 24, +p.minute, +p.second);
-        return comoUtc - t;
-    };
-    const primera = tentativa - offset(tentativa);
-    return new Date(tentativa - offset(primera)).toISOString();
+/**
+ * La fase de una rama que no se llama como ninguna fase: la ÚNICA que no
+ * reclama por nombre ninguna de las ramas declaradas. Es el caso de los
+ * torneos cargados con su liga como "Regular Season" y la rama "Titulares".
+ * Si quedan dos o más sin reclamar, no se adivina.
+ */
+export function faseSinReclamar<F extends { name: string }>(fases: F[], ramas: string[]): F | undefined {
+    const clave = (s: string) => normalizarNombre(s).replace(/ /g, '');
+    const reclamadas = new Set(ramas.map(clave));
+    const libres = fases.filter((f) => !reclamadas.has(clave(f.name)));
+    return libres.length === 1 ? libres[0] : undefined;
 }
 
 /**
@@ -222,7 +224,7 @@ export function filaSegunArusa(p: PartidoArusa, local: string, visita: string): 
     const casa = p.jugado ? repartirPuntos(p.puntosLocal!, p.puntosVisita!, p.tablaLocal) : { base: 0, bonus: 0 };
     const fuera = p.jugado ? repartirPuntos(p.puntosVisita!, p.puntosLocal!, p.tablaVisita) : { base: 0, bonus: 0 };
     return {
-        date_time: p.inicioLocal ? aUtcDesdeZona(p.inicioLocal, p.zona) : null,
+        date_time: p.inicioLocal ? aIsoDesdeUtc(p.inicioLocal) : null,
         venue: p.cancha,
         status: p.jugado ? 'final' : p.postergado ? 'postponed' : 'scheduled',
         score: { home: p.puntosLocal ?? 0, away: p.puntosVisita ?? 0 },
