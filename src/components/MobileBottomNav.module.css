@@ -14,6 +14,10 @@
     padding: 8px max(12px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
     backdrop-filter: blur(16px) saturate(1.2);
     box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.22);
+    /* Capa propia: Safari de iPhone repinta un fixed con backdrop-filter en
+       cada cuadro del scroll con inercia y lo deja atrasado respecto del
+       viewport. Ver el bloque "Teléfono" en globals.css. */
+    transform: translateZ(0);
 }
 
 .navList {

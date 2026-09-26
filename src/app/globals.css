@@ -1748,3 +1748,25 @@ body:has([data-sticky-tabs]),
 main:has([data-sticky-tabs]) {
     overflow-x: clip;
 }
+
+/* ── Teléfono: la barra inferior fija no se despega al scrollear ──────────
+   Con `overflow-x: hidden` en html Y en body, el body pasa a ser un scroll
+   container y Safari de iPhone deja de anclar los `position: fixed` al
+   viewport mientras dura el scroll con inercia: la barra de Partidos /
+   Noticias / Ligas viajaba con el contenido y se veía flotando a mitad de
+   pantalla. `clip` recorta lo mismo sin crear el contenedor.
+
+   Medido a 390 × 844 contra producción (/, /noticias, /tournaments, /matches):
+   sin desborde horizontal nuevo, barra en 766..844 en todo el recorrido, y el
+   único sticky que despierta es el header del sitio, que era la intención
+   (`MobileBottomNav` cuenta con que la cabecera quede a la vista). filterBar y
+   listHeader siguen como estaban: viven adentro de `main`, que conserva su
+   `hidden`. Sólo abajo de 900 px, que es donde existe la barra. */
+@media (max-width: 900px) {
+    @supports (overflow: clip) {
+        html,
+        body {
+            overflow-x: clip;
+        }
+    }
+}
