@@ -82,27 +82,35 @@ const TORNEOS: { lev: string; slug: string; ramas: string[] }[] = [
   // Los playoffs son otra rama (tipo `play_off`) y van a su fase, que se llama
   // igual. Sin declararlos acá la llave no se actualiza nunca: las semis de
   // 2026 las había cargado un script y quedaron 0-0 con el partido jugado.
+  // Cada rama de playoff nueva necesita además su fase en el torneo y, si el
+  // torneo es una filial (Intermedia, juveniles), su mapa `equipo@rama` en
+  // club_external_ids: sin él el equipo cae en el club titular.
   { lev: '1328550', slug: 'top-10-de-arusa', ramas: ['Titulares', 'Playoffs Titulares'] },
-  { lev: '1328552', slug: 'segunda-division-de-arusa', ramas: ['Titulares'] },
-  { lev: '1328553', slug: 'tercera-division-de-arusa', ramas: ['Titulares'] },
-  { lev: '1328554', slug: 'cuarta-division-de-arusa', ramas: ['Fase Regular'] },
+  { lev: '1328552', slug: 'segunda-division-de-arusa', ramas: ['Titulares', 'Playoffs Titulares'] },
+  { lev: '1328553', slug: 'tercera-division-de-arusa', ramas: ['Titulares', 'Playoffs Titulares'] },
+  { lev: '1328554', slug: 'cuarta-division-de-arusa', ramas: ['Fase Regular', 'Playoffs'] },
 
   // Intermedias: la segunda rama de la MISMA competencia de mayores, con los
   // mismos clubes y otro plantel. Van a torneos aparte porque tienen su tabla.
   { lev: '1328550', slug: 'intermedia-de-primera-de-arusa', ramas: ['Intermedia', 'Playoffs Intermedia'] },
-  { lev: '1328552', slug: 'intermedia-de-segunda-de-arusa', ramas: ['Intermedia'] },
-  { lev: '1328553', slug: 'intermedia-de-tercera-de-arusa', ramas: ['Intermedia'] },
+  { lev: '1328552', slug: 'intermedia-de-segunda-de-arusa', ramas: ['Intermedia', 'Playoffs Intermedia'] },
+  { lev: '1328553', slug: 'intermedia-de-tercera-de-arusa', ramas: ['Intermedia', 'Playoffs Intermedia'] },
 
-  { lev: '1329068', slug: 'femenino-xv-de-arusa', ramas: ['Fase Regular'] },
+  { lev: '1329068', slug: 'femenino-xv-de-arusa', ramas: ['Fase Regular', 'Playoffs'] },
 
   // Juveniles. Los de Segunda no son una liga sola: después de la fase regular
   // el plantel se parte en zonas, y cada zona es su propia fase.
-  { lev: '1332975', slug: 'm18-primera-de-arusa', ramas: ['Torneo M18'] },
-  { lev: '1332976', slug: 'm16-primera-de-arusa', ramas: ['Torneo M16'] },
-  { lev: '1332977', slug: 'm14-primera-de-arusa', ramas: ['Torneo M14'] },
-  { lev: '1332978', slug: 'm13-primera-de-arusa', ramas: ['Torneo M13'] },
-  { lev: '1332982', slug: 'm18-segunda-de-arusa', ramas: ['Clausura M18', 'Zona 1', 'Zona 2'] },
-  { lev: '1332984', slug: 'm16-segunda-de-arusa', ramas: ['Torneo M16', 'Zona 1', 'Zona 2'] },
+  // "Playoffs M18/M16" y "Fecha 14" (M14/M13) son `league` en Leverade pero no
+  // son ligas: la primera mezcla el cruce del 3° al 6° por el pase a semis con
+  // la reubicación del resto, y la segunda es una fecha suelta después del
+  // todos contra todos. La tabla que les arma la fuente no significa nada, así
+  // que en G22 son fases `playoff` (sin tabla) y la liga regular no se toca.
+  { lev: '1332975', slug: 'm18-primera-de-arusa', ramas: ['Torneo M18', 'Playoffs M18', 'Semifinales M18'] },
+  { lev: '1332976', slug: 'm16-primera-de-arusa', ramas: ['Torneo M16', 'Playoffs M16', 'Semifinales M16'] },
+  { lev: '1332977', slug: 'm14-primera-de-arusa', ramas: ['Torneo M14', 'Fecha 14'] },
+  { lev: '1332978', slug: 'm13-primera-de-arusa', ramas: ['Torneo M13', 'Fecha 14'] },
+  { lev: '1332982', slug: 'm18-segunda-de-arusa', ramas: ['Clausura M18', 'Zona 1', 'Zona 2', 'Semifinales M18'] },
+  { lev: '1332984', slug: 'm16-segunda-de-arusa', ramas: ['Torneo M16', 'Zona 1', 'Zona 2', 'Semifinales M16'] },
   { lev: '1332985', slug: 'm14-segunda-de-arusa', ramas: ['Torneo M14', '2da Rueda M14'] },
 ];
 
