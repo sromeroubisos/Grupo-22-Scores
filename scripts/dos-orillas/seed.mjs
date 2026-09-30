@@ -598,13 +598,16 @@ async function main() {
     id: m.id, nombre: m.nombreMadre, union: m.union, ciudad: m.ciudad, region: m.region,
     logo: m.escudo ? `/clubs/${m.id}.png` : null,
   })));
-  for (const m of madresNuevas) madresDb.set(m.id, { id: m.id, union_id: m.union, city: m.ciudad, region: m.region });
+  for (const m of madresNuevas) madresDb.set(m.id, { id: m.id, union_id: m.union, city: m.ciudad, region: m.region, logo_url: m.escudo ? `/clubs/${m.id}.png` : null });
   if (completarBrown) await actualizar(`clubs?id=eq.${ESCUDO_BROWN.id}&logo_url=is.null`, { logo_url: `/clubs/${ESCUDO_BROWN.id}.png`, updated_at: ahora });
   console.log(`\n✓ ${madresNuevas.length} clubes madre`);
 
   await insertar('clubs', fichasNuevas.map((f) => {
     const madre = madresDb.get(f.madreId);
-    return filaDeClub({ id: f.id, nombre: f.nombre, union: madre?.union_id, ciudad: madre?.city, region: madre?.region, categoria: f.division });
+    // El escudo se COPIA de la madre: la pantalla del torneo lee `logo_url` de
+    // la ficha y no hereda por `club_derivatives` (las fichas sin escudo
+    // salían con iniciales).
+    return filaDeClub({ id: f.id, nombre: f.nombre, union: madre?.union_id, ciudad: madre?.city, region: madre?.region, categoria: f.division, logo: madre?.logo_url });
   }));
   console.log(`✓ ${fichasNuevas.length} fichas juveniles`);
   await insertar('club_derivatives', vinculos.map((v) => ({ id: crypto.randomUUID(), ...v, created_at: ahora })));
