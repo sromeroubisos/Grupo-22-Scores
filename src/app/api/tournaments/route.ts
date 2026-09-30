@@ -57,6 +57,10 @@ import {
     parseUs7TournamentId,
 } from '@/lib/services/ultimateSevens';
 import {
+    getWorldRugbyTournamentBundle,
+    wrEventByTournamentId,
+} from '@/lib/services/worldRugbyEvent';
+import {
     getOdesurTournamentBundle,
     parseOdesurTournamentId,
 } from '@/lib/services/odesur2026';
@@ -744,7 +748,8 @@ async function findDbTournamentMeta(id: string) {
         isEspnMotorsportTournamentId(id) ||
         parseFihTournamentId(id) !== null ||
         parseFisuTournamentId(id) !== null ||
-        parseUs7TournamentId(id) !== null
+        parseUs7TournamentId(id) !== null ||
+        wrEventByTournamentId(id) !== null
     ) {
         return null;
     }
@@ -1101,6 +1106,7 @@ export async function GET(request: Request) {
     const fihCompetition = parseFihTournamentId(id) || parseFihTournamentId(dbTournamentMeta?.external_id);
     const fisuCompetition = parseFisuTournamentId(id) || parseFisuTournamentId(dbTournamentMeta?.external_id);
     const us7Competition = parseUs7TournamentId(id) || parseUs7TournamentId(dbTournamentMeta?.external_id);
+    const worldRugbyEvent = wrEventByTournamentId(id) || wrEventByTournamentId(dbTournamentMeta?.external_id);
     const odesurCompetition = parseOdesurTournamentId(id) || parseOdesurTournamentId(dbTournamentMeta?.external_id);
     const rugbyPassCompetitionId =
         parseRugbyPassTournamentId(id) ?? parseRugbyPassTournamentId(dbTournamentMeta?.external_id);
@@ -1283,6 +1289,48 @@ export async function GET(request: Request) {
                 topScorers: bundle.topScorers,
                 draw: bundle.draw,
                 brackets: bundle.brackets,
+                archives: bundle.archives,
+            });
+        }
+
+        // Torneos de World Rugby que FlashScore no cubre (U20 Challenger 2026):
+        // la fuente es la API de Pulselive. La tabla es la oficial si está al
+        // día; si no, se calcula con los tries de cada cronología.
+        if (worldRugbyEvent) {
+            const bundle = await getWorldRugbyTournamentBundle(worldRugbyEvent);
+
+            return perf.json({
+                ok: true,
+                _debug: {
+                    query: { id, url, sport, requestedSeason },
+                    resolvedIds: bundle.ids,
+                    provider: 'worldrugby',
+                    counts: {
+                        results: bundle.results.length,
+                        fixtures: bundle.fixtures.length,
+                        standings: bundle.standings.length,
+                    },
+                },
+                _cache: {
+                    entityId: bundle.ids.tournamentId,
+                    tabSources: {
+                        details: 'api',
+                        results: 'api',
+                        fixtures: 'api',
+                        standings: 'api',
+                    },
+                },
+                ids: bundle.ids,
+                details: bundle.details,
+                results: bundle.results,
+                fixtures: bundle.fixtures,
+                standings: bundle.standings,
+                standingsForm: bundle.standingsForm,
+                standingsHtFt: bundle.standingsHtFt,
+                standingsOverUnder: bundle.standingsOverUnder,
+                teamLabels: bundle.teamLabels,
+                topScorers: bundle.topScorers,
+                draw: bundle.draw,
                 archives: bundle.archives,
             });
         }

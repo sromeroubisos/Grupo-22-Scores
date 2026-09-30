@@ -20,6 +20,11 @@ import {
     hasUltimateSevensMatchesOnDate,
 } from '@/lib/services/ultimateSevens';
 import {
+    getWorldRugbyLiveMatches,
+    getWorldRugbyMatches,
+    hasWorldRugbyMatchesOnDate,
+} from '@/lib/services/worldRugbyEvent';
+import {
     getOdesurLiveMatches,
     getOdesurMatches,
     hasOdesurMatchesOnDate,
@@ -240,11 +245,12 @@ export async function isExternalMatchesListDateSupported(
     if (await hasOdesurMatchesOnDate(isRugbySport(sportId) ? 'rugby' : sportId, targetDateKey)) return true;
     if (isFieldHockeySport(sportId)) return hasFihWorldCupMatchesOnDate(targetDateKey, timeZone);
     if (isRugbySport(sportId)) {
-        const [universitario, ultimate] = await Promise.all([
+        const [universitario, ultimate, worldRugby] = await Promise.all([
             hasFisuRugbySevensMatchesOnDate(targetDateKey, timeZone),
             hasUltimateSevensMatchesOnDate(targetDateKey, timeZone),
+            hasWorldRugbyMatchesOnDate(targetDateKey, timeZone),
         ]);
-        return universitario || ultimate;
+        return universitario || ultimate || worldRugby;
     }
     return false;
 }
@@ -272,7 +278,7 @@ export async function getVirtualRugbySevensMatches(
     date: Date,
     options?: { timeZone?: string; targetDateKey?: string },
 ): Promise<Match[]> {
-    const [universitario, ultimate, suramericanos] = await Promise.all([
+    const [universitario, ultimate, suramericanos, worldRugby] = await Promise.all([
         getFisuRugbySevensMatches(date, options).catch((error) => {
             console.warn('[FISU] fixture del Mundial Universitario no disponible:', error?.message);
             return [] as Match[];
@@ -288,8 +294,15 @@ export async function getVirtualRugbySevensMatches(
             console.warn('[ODESUR] seven de los Juegos no disponible:', error?.message);
             return [] as Match[];
         }),
+        // Los torneos de World Rugby que FlashScore no cubre (U20 Challenger).
+        // No son de seven, pero comparten la puerta: rugby union, fuente
+        // propia, y el mismo cuidado de no entrar dos veces por union + league.
+        getWorldRugbyMatches(date, options).catch((error) => {
+            console.warn('[World Rugby] fixture no disponible:', error?.message);
+            return [] as Match[];
+        }),
     ]);
-    return [...universitario, ...ultimate, ...suramericanos];
+    return [...universitario, ...ultimate, ...suramericanos, ...worldRugby];
 }
 
 /**
@@ -300,7 +313,7 @@ export async function getVirtualRugbySevensMatches(
  * fila que nadie iba a poner.
  */
 export async function getVirtualRugbySevensLiveMatches(): Promise<Match[]> {
-    const [universitario, ultimate, suramericanos] = await Promise.all([
+    const [universitario, ultimate, suramericanos, worldRugby] = await Promise.all([
         getFisuRugbySevensLiveMatches().catch((error) => {
             console.warn('[FISU] en vivo del Mundial Universitario no disponible:', error?.message);
             return [] as Match[];
@@ -313,8 +326,12 @@ export async function getVirtualRugbySevensLiveMatches(): Promise<Match[]> {
             console.warn('[ODESUR] en vivo del seven de los Juegos no disponible:', error?.message);
             return [] as Match[];
         }),
+        getWorldRugbyLiveMatches().catch((error) => {
+            console.warn('[World Rugby] en vivo no disponible:', error?.message);
+            return [] as Match[];
+        }),
     ]);
-    return [...universitario, ...ultimate, ...suramericanos];
+    return [...universitario, ...ultimate, ...suramericanos, ...worldRugby];
 }
 
 /**

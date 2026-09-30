@@ -106,6 +106,11 @@ function isUltimateSevensTournamentId(id: string): boolean {
     return /^us7-[mw]$/i.test(id);
 }
 
+/** Torneos de World Rugby que FlashScore no cubre (`wr-u20-challenger-2026`). No viven en la base. */
+function isWorldRugbyTournamentId(id: string): boolean {
+    return /^wr-[a-z0-9-]+$/i.test(id);
+}
+
 /**
  * RugbyPass: `rp-comp-208`. Torneo externo — no vive en la base, asi que no hay
  * que pedirle nada a `/api/db/tournaments/...`, que espera un UUID y contesta
@@ -608,7 +613,10 @@ function getQuickStats(
     let leaderRow: any = null;
     if (overallRows.length > 0) {
         const firstRow = overallRows[0]?.rows ? overallRows[0].rows[0] : overallRows[0];
-        if (firstRow) {
+        // Sin partidos jugados no hay líder: la primera fila de una tabla en
+        // cero es la primera por orden alfabético, no la que va ganando.
+        const firstRowPlayed = Number(firstRow?.matches_played ?? firstRow?.played ?? firstRow?.matches_total ?? NaN);
+        if (firstRow && firstRowPlayed !== 0) {
             leaderRow = firstRow;
             leaderName = firstRow.team?.name || firstRow.participant?.name || firstRow.name || '—';
             leaderLogo = getStandingsTeamLogo(firstRow) || null;
@@ -2156,7 +2164,7 @@ export default function TournamentDetailPage({
                 }
 
                 if (!localTournament) {
-                    if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id) || isEspnAmericanFootballTournamentId(id) || isEspnSoccerTournamentId(id) || isFihWorldCupTournamentId(id) || isFisuTournamentId(id) || isUltimateSevensTournamentId(id) || isRugbyPassTournamentId(id)) {
+                    if (id.toLowerCase().startsWith('fs-') || isRugbyApiSportsTournamentId(id) || isEspnAmericanFootballTournamentId(id) || isEspnSoccerTournamentId(id) || isFihWorldCupTournamentId(id) || isFisuTournamentId(id) || isUltimateSevensTournamentId(id) || isWorldRugbyTournamentId(id) || isRugbyPassTournamentId(id)) {
                         localTournament = {
                             id,
                             name: nameParam || 'Cargando...',
@@ -2316,6 +2324,7 @@ export default function TournamentDetailPage({
                     !isFihWorldCupTournamentId(id) &&
                     !isFisuTournamentId(id) &&
                     !isUltimateSevensTournamentId(id) &&
+                    !isWorldRugbyTournamentId(id) &&
                     !isRugbyPassTournamentId(id) &&
                     !isExternalCatalogRoute(id, routeSearch)
                 ) {
@@ -2483,7 +2492,7 @@ export default function TournamentDetailPage({
 
     useEffect(() => {
         // Un torneo externo no tiene temporadas en base: el selector no aplica.
-        if (id.toLowerCase().startsWith('fs-') || isFihWorldCupTournamentId(id) || isFisuTournamentId(id) || isUltimateSevensTournamentId(id) || isRugbyPassTournamentId(id) || isExternalCatalogRoute(id, routeSearch)) {
+        if (id.toLowerCase().startsWith('fs-') || isFihWorldCupTournamentId(id) || isFisuTournamentId(id) || isUltimateSevensTournamentId(id) || isWorldRugbyTournamentId(id) || isRugbyPassTournamentId(id) || isExternalCatalogRoute(id, routeSearch)) {
             setSeasonOptions([]);
             setSeasonOptionsLoaded(true);
             return;
@@ -3186,7 +3195,9 @@ export default function TournamentDetailPage({
     };
     const addFromMatches = (list: any[]) => {
         list.forEach((match) => {
-            registerTeam({
+            // Un lugar del cuadro que todavía no tiene dueño ("1.º Grupo A") no
+            // es un equipo: contarlo duplicaba los participantes del torneo.
+            if (!match.home_team?.placeholder) registerTeam({
                 id: match.home_team?.id || match.home_team?.team_id || match.home_club_id || null,
                 name: match.home_team?.name || match.event_home_team || match.home_team_name,
                 shortName: match.home_team?.short_name || match.home?.short_name || match.home_short_name || match.home_team_short_name || match.home_club_short_name || null,
@@ -3194,7 +3205,7 @@ export default function TournamentDetailPage({
                 teamUrl: match.home_team?.team_url || null,
                 league: match.home_team?.league || null,
             });
-            registerTeam({
+            if (!match.away_team?.placeholder) registerTeam({
                 id: match.away_team?.id || match.away_team?.team_id || match.away_club_id || null,
                 name: match.away_team?.name || match.event_away_team || match.away_team_name,
                 shortName: match.away_team?.short_name || match.away?.short_name || match.away_short_name || match.away_team_short_name || match.away_club_short_name || null,

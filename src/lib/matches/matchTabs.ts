@@ -37,7 +37,8 @@ export type MatchProvider =
     | 'fih'
     | 'fisu'
     | 'ultimate-sevens'
-    | 'odesur';
+    | 'odesur'
+    | 'worldrugby';
 
 export type MatchStatusKind = 'scheduled' | 'live' | 'final';
 
@@ -120,12 +121,16 @@ const SUPPORTED: Record<MatchProvider, readonly MatchTabId[]> = {
     // Las estadísticas por equipo existen en la fuente pero no se mapean
     // todavía: sin ellas, la pestaña sería una promesa vacía.
     odesur: ['previa', 'summary', 'videos', 'timeline', 'lineups', 'standings'],
+    // World Rugby (U20 Challenger): cronología con jugador y minuto, formación
+    // con dorsal y suplentes 48 h antes, estadísticas por equipo y la tabla
+    // del grupo. Sin H2H: la API no lo publica para juveniles.
+    worldrugby: ['previa', 'summary', 'videos', 'timeline', 'lineups', 'stats', 'standings'],
 };
 
 // Las fuentes que publican el plantel poco antes del inicio. Para el resto,
 // una alineación que no llegó antes del partido no llega nunca.
 const PUBLISHES_LINEUPS_BEFORE_KICKOFF: readonly MatchProvider[] = [
-    'local', 'flashscore', 'espn-soccer', 'rugby-api-sports', 'espn-american-football', 'fih', 'fisu', 'ultimate-sevens', 'odesur',
+    'local', 'flashscore', 'espn-soccer', 'rugby-api-sports', 'espn-american-football', 'fih', 'fisu', 'ultimate-sevens', 'odesur', 'worldrugby',
 ];
 
 // Lo que un administrador carga a mano. El resto se deriva de los eventos, asi

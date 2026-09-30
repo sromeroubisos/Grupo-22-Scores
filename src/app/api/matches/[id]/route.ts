@@ -54,6 +54,10 @@ import {
   parseUs7MatchId,
 } from '@/lib/services/ultimateSevens';
 import {
+  getWorldRugbyMatchBundle,
+  parseWrMatchId,
+} from '@/lib/services/worldRugbyEvent';
+import {
   getOdesurMatchBundle,
   parseOdesurMatchId,
 } from '@/lib/services/odesur2026';
@@ -410,6 +414,20 @@ export async function GET(
 
     if (parseUs7MatchId(matchId)) {
       const bundle = await getUltimateSevensMatchBundle(matchId);
+      if (!bundle) {
+        return jsonNoStore(
+          { error: 'Match not found' },
+          { status: 404 }
+        );
+      }
+
+      return jsonNoStore({ ...bundle, videos: await videosPromise });
+    }
+
+    // Torneos de World Rugby que FlashScore no cubre (U20 Challenger 2026):
+    // `wr-match-<uuid>`, el matchId de la API de Pulselive.
+    if (parseWrMatchId(matchId)) {
+      const bundle = await getWorldRugbyMatchBundle(matchId);
       if (!bundle) {
         return jsonNoStore(
           { error: 'Match not found' },

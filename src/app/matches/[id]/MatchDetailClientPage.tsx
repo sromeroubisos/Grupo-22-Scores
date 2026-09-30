@@ -194,6 +194,12 @@ function isUltimateSevensMatchId(value: string) {
     return /^us7-match-[A-Za-z0-9_]+$/i.test(value);
 }
 
+// Torneos de World Rugby (U20 Challenger): `wr-match-<uuid>`, el matchId de la
+// API de Pulselive. Mismo formato que `wrMatchIdOf`.
+function isWorldRugbyMatchId(value: string) {
+    return /^wr-match-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
+
 // RugbyPass: `rp-949624`, el numero de partido del proveedor. El prefijo es el
 // mismo `RUGBYPASS_MATCH_ID_PREFIX` con el que se guardan las filas en la cache.
 function isRugbyPassMatchId(value: string) {
@@ -791,9 +797,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isFihExternal = isFihMatchId(id);
     const isFisuExternal = isFisuMatchId(id);
     const isUltimateSevensExternal = isUltimateSevensMatchId(id);
+    const isWorldRugbyExternal = isWorldRugbyMatchId(id);
     const isRugbyPassExternal = isRugbyPassMatchId(id);
     const isOdesurExternal = isOdesurMatchId(id);
-    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal || isFisuExternal || isUltimateSevensExternal || isRugbyPassExternal || isOdesurExternal;
+    const isExternalMatch = isFlashScore || isRugbyExternal || isEspnExternal || isEspnSoccerExternal || isEspnMotorsportExternal || isFihExternal || isFisuExternal || isUltimateSevensExternal || isWorldRugbyExternal || isRugbyPassExternal || isOdesurExternal;
 
     const resolvedMatchId =
         typeof state.matchData?.id === 'string' && state.matchData.id.trim()
@@ -857,6 +864,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const isRugbyPassSource = state.matchData?.externalProvider === 'rugbypass';
     const isFisuSource = state.matchData?.externalProvider === 'fisu';
     const isUltimateSevensSource = state.matchData?.externalProvider === 'ultimate-sevens';
+    const isWorldRugbySource = state.matchData?.externalProvider === 'worldrugby';
     const isOdesurSource = state.matchData?.externalProvider === 'odesur';
     // La fuente puede publicar el plantel de la temporada en vez de la
     // formación del partido. Rotularlo "Titulares" sería afirmar algo que no dijo.
@@ -882,6 +890,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         : isFihSource ? 'fih'
         : isFisuSource ? 'fisu'
         : isUltimateSevensSource ? 'ultimate-sevens'
+        : isWorldRugbySource ? 'worldrugby'
         : isOdesurSource ? 'odesur'
         : isEspnSoccerSource ? 'espn-soccer'
         : isRugbyApiSportsSource ? 'rugby-api-sports'
@@ -946,7 +955,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     // la pantalla (eventos canonicos, planilla, alineaciones),
                     // asi que no hay nada que normalizar aca.
                     // Los Juegos Suramericanos arman el bundle igual.
-                    if ((payload?.source === 'fih' || payload?.source === 'fisu' || payload?.source === 'ultimate-sevens' || payload?.source === 'odesur') && payload?.match) {
+                    if ((payload?.source === 'fih' || payload?.source === 'fisu' || payload?.source === 'ultimate-sevens' || payload?.source === 'worldrugby' || payload?.source === 'odesur') && payload?.match) {
                         statusRef.current = payload.match.status || 'scheduled';
                         setState({
                             kind: 'ok',
@@ -2011,7 +2020,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const exportSportId = ((): string | number | undefined => {
         const raw = matchData?.sportId;
         if (raw != null && raw !== '') return raw as string | number;
-        if (isRugbyExternal || isRugbyApiSportsSource || isFisuExternal || isFisuSource || isUltimateSevensExternal || isUltimateSevensSource) return 'rugby';
+        if (isRugbyExternal || isRugbyApiSportsSource || isFisuExternal || isFisuSource || isUltimateSevensExternal || isUltimateSevensSource || isWorldRugbyExternal || isWorldRugbySource) return 'rugby';
         if (isFihExternal || isFihSource) return 'field-hockey';
         return undefined;
     })();
@@ -2153,7 +2162,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     // Ultimate Sevens no publica reloj, y el virtual del rugby (80', entretiempo
     // a los 40) dibujaba "HT" en un partido de diez minutos que no tiene
     // entretiempo. En vivo va el rotulo del bundle ("En juego").
-    const liveDisplayTime = isUltimateSevensSource && String(matchData.status || '').toLowerCase() === 'live'
+    // World Rugby sí publica reloj: el rótulo del bundle ("54'", "Entretiempo")
+    // es el oficial, y el virtual contaría desde el horario publicado.
+    const liveDisplayTime = (isUltimateSevensSource || isWorldRugbySource) && String(matchData.status || '').toLowerCase() === 'live'
         ? (matchData.currentMinute || 'En juego')
         : resolvePublicMatchTime(
             matchData.date,
@@ -3361,7 +3372,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             Ultimate Sevens trae la suya en la pagina del
                             partido, y derivarla de los eventos contaria con la
                             tabla del rugby un marcador que no es el de la liga. */}
-                        {activeTab === 'stats' && (isEspnSoccerSource || isFihSource || isRugbyPassSource || isUltimateSevensSource) && (
+                        {activeTab === 'stats' && (isEspnSoccerSource || isFihSource || isRugbyPassSource || isUltimateSevensSource || isWorldRugbySource) && (
                             <div className={styles.publicStatsPanel}>
                                 <div className={styles.panelTitle}>Estadísticas del partido</div>
                                 {statsData.length === 0 ? (
@@ -3402,7 +3413,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             </div>
                         )}
 
-                        {activeTab === 'stats' && !isEspnSoccerSource && !isFihSource && !isUltimateSevensSource && (
+                        {activeTab === 'stats' && !isEspnSoccerSource && !isFihSource && !isUltimateSevensSource && !isWorldRugbySource && (
                             <div className={styles.publicStatsPanel}>
                                 <div className={styles.panelTitle}>Estadísticas completas</div>
                                 {publicCompleteStatTabs.length === 0 ? (
