@@ -1,0 +1,10534 @@
+{
+ "year": 2016,
+ "format": "Edición 18° (2016). 12 clubes en M15, M16, M17 y M19 (Alma Juniors de Esperanza reemplaza a Atlético Brown de San Vicente en la categoría principal). Fase regular \"Fase clasificatoria\": 11 fechas, una rueda todos contra todos por división (66 partidos), del 21/5 al 27/8 con recesos 11/6, 9 y 16/7; hubo partidos adelantados (Estudiantes-Capibá el 25/5, cuatro partidos de la 4ª fecha el viernes 17/6, Estudiantes-Universitario M19 el 28/7 y M15-M17 el 31/7) y postergados. Después, Final Six en 5 fechas (10/9 al 8/10): dos zonas de seis, todos contra todos. Zona A = bloque Campeonato (se normaliza a phase \"Final Six Oro\", group \"Zona A\") y Zona B = bloque de posicionamiento para el fixture 2017 (phase \"Final Six Plata\", group \"Zona B\"). En M15, M16 y M17 las zonas salen de un puntaje clasificatorio que suma las tres tablas (12 puntos al primero, 11 al segundo, etc.; nota 2016-08-28_162): Campeonato = Santa Fe RC 34, Universitario 27, Estudiantes 26, Rowing 26, CRAI 24, CRAR 22; Posicionamiento = Cha Roga 20, Tilcara 17, La Salle 14, Querandí 10, Capibá 7, Alma Juniors 7. En M19 la zona sale de la propia tabla: Zona A = Estudiantes, Santa Fe RC, CRAI, Cha Roga, La Salle, Universitario; Zona B = Tilcara, Alma Juniors, Querandí, CRAR, Capibá, Rowing. Campeones: Estudiantes en M15, M16 (asegurado el 1/10) y M17; Santa Fe RC en M19 (asegurado el 1/10). Las notas no publican los puntos de tabla por partido (hp/ap null). Se ignoraron M1, amistosos (Rowing-Tilcara M17 y M19 del 22/10) y los sub-torneos.",
+ "champions": [
+  {
+   "division": "M15",
+   "cup": "Oro",
+   "club": "Estudiantes",
+   "note": "campeón del Final Six (Zona A), 13 puntos; nota 2016-10-08_172"
+  },
+  {
+   "division": "M16",
+   "cup": "Oro",
+   "club": "Estudiantes",
+   "note": "campeón anticipado; nota 2016-10-01_170"
+  },
+  {
+   "division": "M17",
+   "cup": "Oro",
+   "club": "Estudiantes",
+   "note": "campeón del Final Six (Zona A), 15 puntos; nota 2016-10-08_172"
+  },
+  {
+   "division": "M19",
+   "cup": "Oro",
+   "club": "Santa Fe RC",
+   "note": "campeón anticipado; nota 2016-10-01_170"
+  }
+ ],
+ "phases": [
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "teams": [
+    "Santa Fe RC",
+    "Estudiantes",
+    "Rowing",
+    "CRAI",
+    "CRAR",
+    "Universitario",
+    "Tilcara",
+    "Cha Roga",
+    "La Salle",
+    "Querandí",
+    "Alma Juniors",
+    "Capibá"
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "teams": [
+    "Santa Fe RC",
+    "Estudiantes",
+    "Rowing",
+    "CRAI",
+    "CRAR",
+    "Universitario",
+    "Tilcara",
+    "Cha Roga",
+    "La Salle",
+    "Querandí",
+    "Alma Juniors",
+    "Capibá"
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "teams": [
+    "Santa Fe RC",
+    "Estudiantes",
+    "Rowing",
+    "CRAI",
+    "CRAR",
+    "Universitario",
+    "Tilcara",
+    "Cha Roga",
+    "La Salle",
+    "Querandí",
+    "Alma Juniors",
+    "Capibá"
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "teams": [
+    "Santa Fe RC",
+    "Estudiantes",
+    "Rowing",
+    "CRAI",
+    "CRAR",
+    "Universitario",
+    "Tilcara",
+    "Cha Roga",
+    "La Salle",
+    "Querandí",
+    "Alma Juniors",
+    "Capibá"
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "teams": [
+    "Santa Fe RC",
+    "Universitario",
+    "Estudiantes",
+    "Rowing",
+    "CRAI",
+    "CRAR"
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "teams": [
+    "Cha Roga",
+    "Tilcara",
+    "La Salle",
+    "Querandí",
+    "Capibá",
+    "Alma Juniors"
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "teams": [
+    "Santa Fe RC",
+    "Universitario",
+    "Estudiantes",
+    "Rowing",
+    "CRAI",
+    "CRAR"
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "teams": [
+    "Cha Roga",
+    "Tilcara",
+    "La Salle",
+    "Querandí",
+    "Capibá",
+    "Alma Juniors"
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "teams": [
+    "Santa Fe RC",
+    "Universitario",
+    "Estudiantes",
+    "Rowing",
+    "CRAI",
+    "CRAR"
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "teams": [
+    "Cha Roga",
+    "Tilcara",
+    "La Salle",
+    "Querandí",
+    "Capibá",
+    "Alma Juniors"
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "teams": [
+    "Estudiantes",
+    "Santa Fe RC",
+    "CRAI",
+    "Cha Roga",
+    "La Salle",
+    "Universitario"
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "teams": [
+    "Tilcara",
+    "Alma Juniors",
+    "Querandí",
+    "CRAR",
+    "Capibá",
+    "Rowing"
+   ]
+  }
+ ],
+ "matches": [
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Capibá",
+   "away": "Santa Fe RC",
+   "hs": 9,
+   "as": 98,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Cha Roga",
+   "away": "CRAR",
+   "hs": 54,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 17,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Querandí",
+   "away": "Estudiantes",
+   "hs": 19,
+   "as": 44,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Rowing",
+   "away": "Alma Juniors",
+   "hs": 66,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Tilcara",
+   "away": "Universitario",
+   "hs": 36,
+   "as": 28,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-25",
+   "home": "Estudiantes",
+   "away": "Capibá",
+   "hs": 121,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-26_139"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "Alma Juniors",
+   "away": "Querandí",
+   "hs": 12,
+   "as": 25,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "CRAI",
+   "away": "Tilcara",
+   "hs": 17,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "CRAR",
+   "away": "Rowing",
+   "hs": 23,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 0,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "Universitario",
+   "away": "Cha Roga",
+   "hs": 13,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Capibá",
+   "away": "Querandí",
+   "hs": 0,
+   "as": 46,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Cha Roga",
+   "away": "CRAI",
+   "hs": 20,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": 18,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 14,
+   "as": 18,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Rowing",
+   "away": "Universitario",
+   "hs": 12,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 7,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 7,
+   "as": 21,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 7,
+   "as": 39,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga",
+   "hs": 5,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "Universitario",
+   "away": "CRAR",
+   "hs": 27,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-18",
+   "home": "Alma Juniors",
+   "away": "Capibá",
+   "hs": 55,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-18",
+   "home": "Querandí",
+   "away": "La Salle",
+   "hs": 30,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Cha Roga",
+   "away": "Estudiantes",
+   "hs": 31,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 13,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "La Salle",
+   "away": "Capibá",
+   "hs": 27,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Tilcara",
+   "away": "Querandí",
+   "hs": 19,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Universitario",
+   "away": "Alma Juniors",
+   "hs": 58,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Alma Juniors",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "disputado sin marcador publicado (figura sin resultado en la nota de la 6ª fecha); las tablas del 7-8/7 dan la victoria a Alma Juniors",
+   "src": "2016-06-30_148"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Capibá",
+   "away": "Tilcara",
+   "hs": 0,
+   "as": 70,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Querandí",
+   "away": "Cha Roga",
+   "hs": 12,
+   "as": 47,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 23,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-16",
+   "home": "Estudiantes",
+   "away": "Rowing",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "postergado de la 6ª fecha, recuperado el 16/7 sin marcador publicado; la tabla del 28/7 da la victoria a Rowing",
+   "src": "2016-06-30_148"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Cha Roga",
+   "away": "Capibá",
+   "hs": 74,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "CRAI",
+   "away": "Alma Juniors",
+   "hs": 10,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 37,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Rowing",
+   "away": "Querandí",
+   "hs": 65,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 39,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 31,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Alma Juniors",
+   "away": "Tilcara",
+   "hs": 12,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Capibá",
+   "away": "Rowing",
+   "hs": 0,
+   "as": 99,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "La Salle",
+   "away": "Cha Roga",
+   "hs": 12,
+   "as": 23,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Querandí",
+   "away": "CRAR",
+   "hs": 22,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 19,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-31",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 7,
+   "as": 32,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Cha Roga",
+   "away": "Tilcara",
+   "hs": 17,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 7,
+   "as": 42,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "CRAR",
+   "away": "Capibá",
+   "hs": 56,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Rowing",
+   "away": "La Salle",
+   "hs": 55,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Santa Fe RC",
+   "away": "Alma Juniors",
+   "hs": 50,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Universitario",
+   "away": "Querandí",
+   "hs": 53,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Alma Juniors",
+   "away": "Cha Roga",
+   "hs": 0,
+   "as": 30,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Capibá",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 46,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 12,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "La Salle",
+   "away": "CRAR",
+   "hs": 21,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Querandí",
+   "away": "CRAI",
+   "hs": 5,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Tilcara",
+   "away": "Rowing",
+   "hs": 5,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "CRAI",
+   "away": "Capibá",
+   "hs": 42,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "CRAR",
+   "away": "Tilcara",
+   "hs": 20,
+   "as": 31,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Estudiantes",
+   "away": "Alma Juniors",
+   "hs": 38,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Rowing",
+   "away": "Cha Roga",
+   "hs": 17,
+   "as": 31,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Santa Fe RC",
+   "away": "Querandí",
+   "hs": 36,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado",
+   "src": "2016-08-25_161"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "CRAI",
+   "away": "Santa Fe RC",
+   "hs": 16,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 22,
+   "as": 18,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 24,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 7,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 24,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 38,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 29,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Universitario",
+   "away": "CRAR",
+   "hs": 50,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 3,
+   "date": "2016-09-27",
+   "home": "Estudiantes",
+   "away": "CRAI",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "disputado sin marcador publicado (programado 27/9); la tabla tras la 4ª fecha da la victoria a Estudiantes",
+   "src": "2016-09-23_167"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 13,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 19,
+   "as": 45,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 4,
+   "date": "2016-10-04",
+   "home": "Santa Fe RC",
+   "away": "Universitario",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "suspendido por tormenta con 5-5 (reprogramado 4/10); sin resultado posterior publicado",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 13,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 32,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Universitario",
+   "away": "CRAI",
+   "hs": 32,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-06_171"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Capibá",
+   "away": "Cha Roga",
+   "hs": 7,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "La Salle",
+   "away": "Alma Juniors",
+   "hs": 0,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Querandí",
+   "away": "Tilcara",
+   "hs": 18,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Alma Juniors",
+   "away": "Capibá",
+   "hs": 55,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Cha Roga",
+   "away": "Querandí",
+   "hs": 24,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 49,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "La Salle",
+   "away": "Cha Roga",
+   "hs": 7,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Querandí",
+   "away": "Capibá",
+   "hs": 43,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Tilcara",
+   "away": "Alma Juniors",
+   "hs": 37,
+   "as": 16,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Alma Juniors",
+   "away": "Querandí",
+   "hs": 5,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Capibá",
+   "away": "La Salle",
+   "hs": 0,
+   "as": 55,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Cha Roga",
+   "away": "Tilcara",
+   "hs": 7,
+   "as": 40,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Cha Roga",
+   "away": "Alma Juniors",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "sin resultado publicado",
+   "src": "2016-10-06_171"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "La Salle",
+   "away": "Querandí",
+   "hs": 19,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Tilcara",
+   "away": "Capibá",
+   "hs": 78,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Capibá",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 90,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Cha Roga",
+   "away": "CRAR",
+   "hs": 10,
+   "as": 46,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 77,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Querandí",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 32,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Rowing",
+   "away": "Alma Juniors",
+   "hs": 111,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Tilcara",
+   "away": "Universitario",
+   "hs": 10,
+   "as": 60,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-25",
+   "home": "Estudiantes",
+   "away": "Capibá",
+   "hs": 90,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "Alma Juniors",
+   "away": "Querandí",
+   "hs": 5,
+   "as": 27,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "CRAR",
+   "away": "Rowing",
+   "hs": 0,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 59,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "Universitario",
+   "away": "Cha Roga",
+   "hs": 50,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-07-08",
+   "home": "CRAI",
+   "away": "Tilcara",
+   "hs": 40,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-08_151"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Capibá",
+   "away": "Querandí",
+   "hs": 12,
+   "as": 34,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Cha Roga",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 58,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": 35,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 72,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Rowing",
+   "away": "Universitario",
+   "hs": 26,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 67,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 28,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 53,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga",
+   "hs": 58,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "Universitario",
+   "away": "CRAR",
+   "hs": 36,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-18",
+   "home": "Alma Juniors",
+   "away": "Capibá",
+   "hs": 19,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-18",
+   "home": "Querandí",
+   "away": "La Salle",
+   "hs": 27,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Cha Roga",
+   "away": "Estudiantes",
+   "hs": 5,
+   "as": 53,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 5,
+   "as": 25,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "La Salle",
+   "away": "Capibá",
+   "hs": 24,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 7,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Tilcara",
+   "away": "Querandí",
+   "hs": 3,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Universitario",
+   "away": "Alma Juniors",
+   "hs": 76,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Alma Juniors",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "disputado sin marcador publicado (figura sin resultado en la nota de la 6ª fecha); las tablas del 7-8/7 dan la victoria a Alma Juniors",
+   "src": "2016-06-30_148"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Capibá",
+   "away": "Tilcara",
+   "hs": 0,
+   "as": 40,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado",
+   "src": "2016-06-30_148"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Querandí",
+   "away": "Cha Roga",
+   "hs": 13,
+   "as": 21,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 60,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-08",
+   "home": "Estudiantes",
+   "away": "Rowing",
+   "hs": 22,
+   "as": 33,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-08_151"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Cha Roga",
+   "away": "Capibá",
+   "hs": 47,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "CRAI",
+   "away": "Alma Juniors",
+   "hs": 99,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 27,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Rowing",
+   "away": "Querandí",
+   "hs": 79,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 45,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 8,
+   "as": 33,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Alma Juniors",
+   "away": "Tilcara",
+   "hs": 15,
+   "as": 42,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Capibá",
+   "away": "Rowing",
+   "hs": 0,
+   "as": 138,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "La Salle",
+   "away": "Cha Roga",
+   "hs": 14,
+   "as": 53,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Querandí",
+   "away": "CRAR",
+   "hs": 29,
+   "as": 32,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 15,
+   "as": 18,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-31",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 15,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Cha Roga",
+   "away": "Tilcara",
+   "hs": 20,
+   "as": 30,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 22,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "CRAR",
+   "away": "Capibá",
+   "hs": 102,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Rowing",
+   "away": "La Salle",
+   "hs": 68,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "suspendido por falta de jugadores de La Salle",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Santa Fe RC",
+   "away": "Alma Juniors",
+   "hs": 74,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Universitario",
+   "away": "Querandí",
+   "hs": 24,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Alma Juniors",
+   "away": "Cha Roga",
+   "hs": 21,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Capibá",
+   "away": "Universitario",
+   "hs": 17,
+   "as": 41,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 53,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "La Salle",
+   "away": "CRAR",
+   "hs": 5,
+   "as": 55,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Querandí",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 48,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Tilcara",
+   "away": "Rowing",
+   "hs": 14,
+   "as": 71,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "CRAI",
+   "away": "Capibá",
+   "hs": 84,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "CRAR",
+   "away": "Tilcara",
+   "hs": 24,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Estudiantes",
+   "away": "Alma Juniors",
+   "hs": 62,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Rowing",
+   "away": "Cha Roga",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado p/31/8",
+   "src": "2016-08-25_161"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Santa Fe RC",
+   "away": "Querandí",
+   "hs": 27,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado",
+   "src": "2016-08-25_161"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "CRAI",
+   "away": "Santa Fe RC",
+   "hs": 8,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 57,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 44,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 12,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 24,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 19,
+   "as": 28,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Estudiantes",
+   "away": "CRAI",
+   "hs": 12,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 13,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Universitario",
+   "away": "CRAR",
+   "hs": 62,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 8,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 7,
+   "as": 78,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Santa Fe RC",
+   "away": "Universitario",
+   "hs": 19,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 19,
+   "as": 46,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 59,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Universitario",
+   "away": "CRAI",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "sin resultado publicado",
+   "src": "2016-10-06_171"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "La Salle",
+   "away": "Alma Juniors",
+   "hs": 55,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Querandí",
+   "away": "Tilcara",
+   "hs": 38,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 1,
+   "date": "2016-10-22",
+   "home": "Capibá",
+   "away": "Cha Roga",
+   "hs": 5,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "postergado de la 1ª fecha del Final Six; jugado el 22/10 en Capibá (la nota dice \"cayó 24-5\")",
+   "src": "2016-10-22_173"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Alma Juniors",
+   "away": "Capibá",
+   "hs": 47,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Cha Roga",
+   "away": "Querandí",
+   "hs": 33,
+   "as": 18,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 59,
+   "as": 29,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "La Salle",
+   "away": "Cha Roga",
+   "hs": 52,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Querandí",
+   "away": "Capibá",
+   "hs": 54,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Tilcara",
+   "away": "Alma Juniors",
+   "hs": 32,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Alma Juniors",
+   "away": "Querandí",
+   "hs": 7,
+   "as": 60,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Capibá",
+   "away": "La Salle",
+   "hs": 7,
+   "as": 29,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Cha Roga",
+   "away": "Tilcara",
+   "hs": 10,
+   "as": 43,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Cha Roga",
+   "away": "Alma Juniors",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "sin resultado publicado",
+   "src": "2016-10-06_171"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "La Salle",
+   "away": "Querandí",
+   "hs": 7,
+   "as": 33,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Tilcara",
+   "away": "Capibá",
+   "hs": 101,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Capibá",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 43,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Cha Roga",
+   "away": "CRAR",
+   "hs": 8,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 25,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Querandí",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 148,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Rowing",
+   "away": "Alma Juniors",
+   "hs": 72,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Tilcara",
+   "away": "Universitario",
+   "hs": 10,
+   "as": 53,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-25",
+   "home": "Estudiantes",
+   "away": "Capibá",
+   "hs": 56,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-26_139"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "Alma Juniors",
+   "away": "Querandí",
+   "hs": 38,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "CRAI",
+   "away": "Tilcara",
+   "hs": 19,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "CRAR",
+   "away": "Rowing",
+   "hs": 27,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 50,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "Universitario",
+   "away": "Cha Roga",
+   "hs": 57,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Capibá",
+   "away": "Querandí",
+   "hs": 41,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Cha Roga",
+   "away": "CRAI",
+   "hs": 10,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": 46,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 10,
+   "as": 33,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Rowing",
+   "away": "Universitario",
+   "hs": 19,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 76,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 15,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 120,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga",
+   "hs": 72,
+   "as": 8,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "Universitario",
+   "away": "CRAR",
+   "hs": 34,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-18",
+   "home": "Alma Juniors",
+   "away": "Capibá",
+   "hs": 5,
+   "as": 44,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-18",
+   "home": "Querandí",
+   "away": "La Salle",
+   "hs": 0,
+   "as": 74,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Cha Roga",
+   "away": "Estudiantes",
+   "hs": 7,
+   "as": 47,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 29,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "La Salle",
+   "away": "Capibá",
+   "hs": 27,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 10,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Tilcara",
+   "away": "Querandí",
+   "hs": 29,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Universitario",
+   "away": "Alma Juniors",
+   "hs": 44,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Alma Juniors",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "disputado sin marcador publicado (figura sin resultado en la nota de la 6ª fecha); las tablas del 7-8/7 dan la victoria a La Salle",
+   "src": "2016-06-30_148"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Capibá",
+   "away": "Tilcara",
+   "hs": 39,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado",
+   "src": "2016-06-30_148"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Querandí",
+   "away": "Cha Roga",
+   "hs": 12,
+   "as": 50,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 54,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-08",
+   "home": "Estudiantes",
+   "away": "Rowing",
+   "hs": 31,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-08_151"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Cha Roga",
+   "away": "Capibá",
+   "hs": 50,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "CRAI",
+   "away": "Alma Juniors",
+   "hs": 83,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 5,
+   "as": 94,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Rowing",
+   "away": "Querandí",
+   "hs": 60,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 13,
+   "as": 33,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Alma Juniors",
+   "away": "Tilcara",
+   "hs": 17,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Capibá",
+   "away": "Rowing",
+   "hs": 15,
+   "as": 23,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "La Salle",
+   "away": "Cha Roga",
+   "hs": 27,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Querandí",
+   "away": "CRAR",
+   "hs": 0,
+   "as": 87,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 29,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-31",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 34,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Cha Roga",
+   "away": "Tilcara",
+   "hs": 36,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 12,
+   "as": 21,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "CRAR",
+   "away": "Capibá",
+   "hs": 49,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Rowing",
+   "away": "La Salle",
+   "hs": 17,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Santa Fe RC",
+   "away": "Alma Juniors",
+   "hs": 119,
+   "as": 8,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Universitario",
+   "away": "Querandí",
+   "hs": 62,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Alma Juniors",
+   "away": "Cha Roga",
+   "hs": 21,
+   "as": 27,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Capibá",
+   "away": "Universitario",
+   "hs": 7,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 18,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "La Salle",
+   "away": "CRAR",
+   "hs": 18,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Querandí",
+   "away": "CRAI",
+   "hs": 5,
+   "as": 35,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Tilcara",
+   "away": "Rowing",
+   "hs": 12,
+   "as": 52,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "CRAI",
+   "away": "Capibá",
+   "hs": 42,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "CRAR",
+   "away": "Tilcara",
+   "hs": 17,
+   "as": 8,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Estudiantes",
+   "away": "Alma Juniors",
+   "hs": 116,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Rowing",
+   "away": "Cha Roga",
+   "hs": 36,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Santa Fe RC",
+   "away": "Querandí",
+   "hs": 71,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "sin resultado publicado",
+   "src": "2016-08-25_161"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "CRAI",
+   "away": "Santa Fe RC",
+   "hs": 12,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 45,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 26,
+   "as": 45,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 17,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 12,
+   "as": 28,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 50,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 30,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Universitario",
+   "away": "CRAR",
+   "hs": 21,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 3,
+   "date": "2016-09-25",
+   "home": "Estudiantes",
+   "away": "CRAI",
+   "hs": 80,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 8,
+   "as": 8,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 28,
+   "as": 36,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Santa Fe RC",
+   "away": "Universitario",
+   "hs": 40,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 5,
+   "date": "2016-10-07",
+   "home": "Universitario",
+   "away": "CRAI",
+   "hs": 23,
+   "as": 21,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-06_171"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 3,
+   "as": 73,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 40,
+   "as": 21,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Capibá",
+   "away": "Cha Roga",
+   "hs": 20,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "La Salle",
+   "away": "Alma Juniors",
+   "hs": 34,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Querandí",
+   "away": "Tilcara",
+   "hs": 14,
+   "as": 29,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Alma Juniors",
+   "away": "Capibá",
+   "hs": 14,
+   "as": 36,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Cha Roga",
+   "away": "Querandí",
+   "hs": 60,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 5,
+   "as": 18,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "La Salle",
+   "away": "Cha Roga",
+   "hs": 29,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Querandí",
+   "away": "Capibá",
+   "hs": 0,
+   "as": 39,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Tilcara",
+   "away": "Alma Juniors",
+   "hs": 46,
+   "as": 36,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Alma Juniors",
+   "away": "Querandí",
+   "hs": 10,
+   "as": 25,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Capibá",
+   "away": "La Salle",
+   "hs": 3,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Cha Roga",
+   "away": "Tilcara",
+   "hs": 17,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Cha Roga",
+   "away": "Alma Juniors",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "sin resultado publicado",
+   "src": "2016-10-06_171"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "La Salle",
+   "away": "Querandí",
+   "hs": 54,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Tilcara",
+   "away": "Capibá",
+   "hs": 15,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Capibá",
+   "away": "Santa Fe RC",
+   "hs": 12,
+   "as": 31,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Cha Roga",
+   "away": "CRAR",
+   "hs": 25,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 22,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Querandí",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 66,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Rowing",
+   "away": "Alma Juniors",
+   "hs": 38,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2016-05-21",
+   "home": "Tilcara",
+   "away": "Universitario",
+   "hs": 12,
+   "as": 39,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-22_137"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-25",
+   "home": "Estudiantes",
+   "away": "Capibá",
+   "hs": 47,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-26_139"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "Alma Juniors",
+   "away": "Querandí",
+   "hs": 20,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "CRAI",
+   "away": "Tilcara",
+   "hs": 30,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "CRAR",
+   "away": "Rowing",
+   "hs": 28,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 49,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2016-05-28",
+   "home": "Universitario",
+   "away": "Cha Roga",
+   "hs": 9,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-05-28_141"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Capibá",
+   "away": "Querandí",
+   "hs": 34,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Cha Roga",
+   "away": "CRAI",
+   "hs": 6,
+   "as": 6,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": 23,
+   "as": 21,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 41,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Rowing",
+   "away": "Universitario",
+   "hs": 5,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2016-06-04",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-04_143"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 40,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 39,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga",
+   "hs": 41,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-17",
+   "home": "Universitario",
+   "away": "CRAR",
+   "hs": 60,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-18",
+   "home": "Alma Juniors",
+   "away": "Capibá",
+   "hs": 21,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2016-06-18",
+   "home": "Querandí",
+   "away": "La Salle",
+   "hs": 19,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-18_145"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Cha Roga",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 7,
+   "as": 53,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "La Salle",
+   "away": "Capibá",
+   "hs": 25,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 5,
+   "as": 58,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Tilcara",
+   "away": "Querandí",
+   "hs": 32,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2016-06-25",
+   "home": "Universitario",
+   "away": "Alma Juniors",
+   "hs": 57,
+   "as": 8,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-06-25_147"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Alma Juniors",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "disputado sin marcador publicado (figura sin resultado en la nota de la 6ª fecha); las tablas del 7-8/7 dan la victoria a La Salle",
+   "src": "2016-06-30_148"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Capibá",
+   "away": "Tilcara",
+   "hs": 0,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Querandí",
+   "away": "Cha Roga",
+   "hs": 0,
+   "as": 30,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-02",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 82,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-02_149"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-08",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 34,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-08_151"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2016-07-08",
+   "home": "Estudiantes",
+   "away": "Rowing",
+   "hs": 34,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-08_151"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Cha Roga",
+   "away": "Capibá",
+   "hs": 10,
+   "as": 18,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "CRAI",
+   "away": "Alma Juniors",
+   "hs": 34,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 5,
+   "as": 32,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Rowing",
+   "away": "Querandí",
+   "hs": 24,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 8,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2016-07-23",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 12,
+   "as": 34,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-23_153"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-28",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 35,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-28_154"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Alma Juniors",
+   "away": "Tilcara",
+   "hs": 14,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Capibá",
+   "away": "Rowing",
+   "hs": 8,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "La Salle",
+   "away": "Cha Roga",
+   "hs": 7,
+   "as": 35,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Querandí",
+   "away": "CRAR",
+   "hs": 14,
+   "as": 31,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2016-07-30",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 24,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-07-30_156"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Cha Roga",
+   "away": "Tilcara",
+   "hs": 41,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 25,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "CRAR",
+   "away": "Capibá",
+   "hs": 21,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Rowing",
+   "away": "La Salle",
+   "hs": 15,
+   "as": 30,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Santa Fe RC",
+   "away": "Alma Juniors",
+   "hs": 63,
+   "as": 8,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2016-08-06",
+   "home": "Universitario",
+   "away": "Querandí",
+   "hs": 34,
+   "as": 40,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-06_158"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Alma Juniors",
+   "away": "Cha Roga",
+   "hs": 0,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Capibá",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 41,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 15,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "La Salle",
+   "away": "CRAR",
+   "hs": 27,
+   "as": 27,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Querandí",
+   "away": "CRAI",
+   "hs": 5,
+   "as": 59,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2016-08-20",
+   "home": "Tilcara",
+   "away": "Rowing",
+   "hs": 19,
+   "as": 50,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-20_160"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "CRAI",
+   "away": "Capibá",
+   "hs": 64,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "CRAR",
+   "away": "Tilcara",
+   "hs": 23,
+   "as": 25,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Estudiantes",
+   "away": "Alma Juniors",
+   "hs": 52,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Rowing",
+   "away": "Cha Roga",
+   "hs": 7,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Santa Fe RC",
+   "away": "Querandí",
+   "hs": 29,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-08-28_162"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2016-08-27",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "sin resultado publicado",
+   "src": "2016-08-25_161"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Cha Roga",
+   "away": "CRAI",
+   "hs": 8,
+   "as": 25,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Estudiantes",
+   "away": "La Salle",
+   "hs": 19,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "disputado sin marcador publicado; la tabla posterior da la victoria a Santa Fe RC (Santa Fe RC 3, Universitario 1 tras la 1ª fecha)",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 5,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "La Salle",
+   "away": "Universitario",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "disputado sin marcador publicado; las tablas de la 3ª fecha dan la victoria a Universitario (jugado entre el 17 y el 23/9)",
+   "src": "2016-09-16_165"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga",
+   "hs": 31,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 3,
+   "date": "2016-09-23",
+   "home": "CRAI",
+   "away": "La Salle",
+   "hs": 19,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Cha Roga",
+   "away": "Universitario",
+   "hs": 8,
+   "as": 8,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 3,
+   "as": 6,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "La Salle",
+   "away": "Cha Roga",
+   "hs": 18,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 26,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Universitario",
+   "away": "Estudiantes",
+   "hs": 17,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 5,
+   "date": "2016-10-06",
+   "home": "Estudiantes",
+   "away": "Cha Roga",
+   "hs": 27,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-06_171"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 5,
+   "date": "2016-10-07",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 5,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-06_171"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 36,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Capibá",
+   "away": "Rowing",
+   "hs": 24,
+   "as": 52,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Querandí",
+   "away": "CRAR",
+   "hs": 56,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 1,
+   "date": "2016-09-10",
+   "home": "Tilcara",
+   "away": "Alma Juniors",
+   "hs": 31,
+   "as": 29,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-10_164"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "Alma Juniors",
+   "away": "Querandí",
+   "hs": 19,
+   "as": 43,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 2,
+   "date": "2016-09-17",
+   "home": "CRAR",
+   "away": "Capibá",
+   "hs": 21,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-17_166"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 2,
+   "date": "2016-09-21",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "disputado sin marcador publicado (programado 21/9 20:30); la tabla tras la 4ª fecha da la victoria a Tilcara",
+   "src": "2016-09-16_165"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Querandí",
+   "away": "Capibá",
+   "hs": 25,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Rowing",
+   "away": "Alma Juniors",
+   "hs": 43,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 3,
+   "date": "2016-09-24",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "suspendido a los 20 minutos con Tilcara 12-0 (la visita quedó con 12 jugadores y se lesionó uno); sin reprogramación ni resultado publicado",
+   "src": "2016-09-24_168"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Alma Juniors",
+   "away": "Capibá",
+   "hs": 39,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "CRAR",
+   "away": "Rowing",
+   "hs": 19,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 4,
+   "date": "2016-10-01",
+   "home": "Querandí",
+   "away": "Tilcara",
+   "hs": 21,
+   "as": 18,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-01_170"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "sin resultado publicado",
+   "src": "2016-10-06_171"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Rowing",
+   "away": "Querandí",
+   "hs": 28,
+   "as": 34,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "round": 5,
+   "date": "2016-10-08",
+   "home": "Tilcara",
+   "away": "Capibá",
+   "hs": 32,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2016-10-08_172"
+  }
+ ],
+ "standings": [
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 1,
+   "src": "2016-05-27_140",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 3
+    },
+    {
+     "club": "Rowing",
+     "pts": 3
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 3
+    },
+    {
+     "club": "Tilcara",
+     "pts": 3
+    },
+    {
+     "club": "CRAI",
+     "pts": 2
+    },
+    {
+     "club": "La Salle",
+     "pts": 2
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    },
+    {
+     "club": "Querandí",
+     "pts": 1
+    },
+    {
+     "club": "CRAR",
+     "pts": 1
+    },
+    {
+     "club": "Capibá",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 1,
+   "src": "2016-05-27_140",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 3
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 3
+    },
+    {
+     "club": "CRAI",
+     "pts": 3
+    },
+    {
+     "club": "Universitario",
+     "pts": 3
+    },
+    {
+     "club": "CRAR",
+     "pts": 3
+    },
+    {
+     "club": "Querandí",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 1
+    },
+    {
+     "club": "Tilcara",
+     "pts": 1
+    },
+    {
+     "club": "La Salle",
+     "pts": 1
+    },
+    {
+     "club": "Capibá",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 1,
+   "src": "2016-05-27_140",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 3
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 3
+    },
+    {
+     "club": "Universitario",
+     "pts": 3
+    },
+    {
+     "club": "La Salle",
+     "pts": 3
+    },
+    {
+     "club": "CRAR",
+     "pts": 3
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 1
+    },
+    {
+     "club": "CRAI",
+     "pts": 1
+    },
+    {
+     "club": "Capibá",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "Querandí",
+     "pts": 1
+    },
+    {
+     "club": "Tilcara",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 1,
+   "src": "2016-05-27_140",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 3
+    },
+    {
+     "club": "Rowing",
+     "pts": 3
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 3
+    },
+    {
+     "club": "CRAI",
+     "pts": 3
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 3
+    },
+    {
+     "club": "CRAR",
+     "pts": 1
+    },
+    {
+     "club": "La Salle",
+     "pts": 1
+    },
+    {
+     "club": "Capibá",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "Tilcara",
+     "pts": 1
+    },
+    {
+     "club": "Querandí",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2016-06-30_148",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 14
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "Universitario",
+     "pts": 13
+    },
+    {
+     "club": "CRAI",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 9
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "Capibá",
+     "pts": 8
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Querandí",
+     "pts": 7
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2016-06-30_148",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 15
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Capibá",
+     "pts": 9
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 7
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "Querandí",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2016-06-30_148",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 15
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "Universitario",
+     "pts": 12
+    },
+    {
+     "club": "CRAI",
+     "pts": 12
+    },
+    {
+     "club": "Rowing",
+     "pts": 11
+    },
+    {
+     "club": "Querandí",
+     "pts": 11
+    },
+    {
+     "club": "CRAR",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 7
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "Capibá",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2016-06-30_148",
+   "rows": [
+    {
+     "club": "Cha Roga",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 11
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 11
+    },
+    {
+     "club": "Universitario",
+     "pts": 11
+    },
+    {
+     "club": "Querandí",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 5
+    },
+    {
+     "club": "Capibá",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2016-07-07_150",
+   "rows": [
+    {
+     "club": "Cha Roga",
+     "pts": 18
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 13
+    },
+    {
+     "club": "Querandí",
+     "pts": 12
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 11
+    },
+    {
+     "club": "Universitario",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 11
+    },
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    },
+    {
+     "club": "Capibá",
+     "pts": 6
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2016-07-07_150",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 18
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "Universitario",
+     "pts": 12
+    },
+    {
+     "club": "CRAI",
+     "pts": 12
+    },
+    {
+     "club": "Querandí",
+     "pts": 12
+    },
+    {
+     "club": "Rowing",
+     "pts": 11
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 9
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 8
+    },
+    {
+     "club": "Capibá",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 7
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2016-07-07_150",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 18
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 14
+    },
+    {
+     "club": "La Salle",
+     "pts": 13
+    },
+    {
+     "club": "Capibá",
+     "pts": 12
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 7
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Querandí",
+     "pts": 6
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2016-07-07_150",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 17
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 14
+    },
+    {
+     "club": "Universitario",
+     "pts": 13
+    },
+    {
+     "club": "CRAI",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 12
+    },
+    {
+     "club": "La Salle",
+     "pts": 12
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "Capibá",
+     "pts": 9
+    },
+    {
+     "club": "Querandí",
+     "pts": 8
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2016-07-08_151",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 17
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 17
+    },
+    {
+     "club": "CRAI",
+     "pts": 16
+    },
+    {
+     "club": "Universitario",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 12
+    },
+    {
+     "club": "La Salle",
+     "pts": 12
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "Capibá",
+     "pts": 9
+    },
+    {
+     "club": "Querandí",
+     "pts": 8
+    },
+    {
+     "club": "Rowing",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2016-07-08_151",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 18
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 18
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 14
+    },
+    {
+     "club": "La Salle",
+     "pts": 13
+    },
+    {
+     "club": "Capibá",
+     "pts": 12
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 7
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Querandí",
+     "pts": 6
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2016-07-08_151",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 18
+    },
+    {
+     "club": "CRAI",
+     "pts": 16
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 14
+    },
+    {
+     "club": "Universitario",
+     "pts": 12
+    },
+    {
+     "club": "Querandí",
+     "pts": 12
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 9
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 8
+    },
+    {
+     "club": "Capibá",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 7
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2016-07-08_151",
+   "rows": [
+    {
+     "club": "Cha Roga",
+     "pts": 18
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 13
+    },
+    {
+     "club": "Querandí",
+     "pts": 12
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 11
+    },
+    {
+     "club": "Universitario",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 11
+    },
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    },
+    {
+     "club": "Capibá",
+     "pts": 6
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 7,
+   "src": "2016-07-28_154",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 20
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 20
+    },
+    {
+     "club": "CRAI",
+     "pts": 19
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "La Salle",
+     "pts": 15
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 13
+    },
+    {
+     "club": "Capibá",
+     "pts": 11
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "Querandí",
+     "pts": 9
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 6
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 7,
+   "src": "2016-07-28_154",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 21
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 18
+    },
+    {
+     "club": "La Salle",
+     "pts": 16
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 13
+    },
+    {
+     "club": "CRAI",
+     "pts": 12
+    },
+    {
+     "club": "Capibá",
+     "pts": 12
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 9
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 8
+    },
+    {
+     "club": "Querandí",
+     "pts": 7
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 7,
+   "src": "2016-07-28_154",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 21
+    },
+    {
+     "club": "CRAI",
+     "pts": 18
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 18
+    },
+    {
+     "club": "Rowing",
+     "pts": 17
+    },
+    {
+     "club": "Universitario",
+     "pts": 13
+    },
+    {
+     "club": "Querandí",
+     "pts": 13
+    },
+    {
+     "club": "Tilcara",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 11
+    },
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "Capibá",
+     "pts": 8
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 7,
+   "src": "2016-07-28_154",
+   "rows": [
+    {
+     "club": "Cha Roga",
+     "pts": 21
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 13
+    },
+    {
+     "club": "Querandí",
+     "pts": 13
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "La Salle",
+     "pts": 12
+    },
+    {
+     "club": "CRAI",
+     "pts": 12
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 9
+    },
+    {
+     "club": "Capibá",
+     "pts": 7
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2016-08-04_157",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 23
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 22
+    },
+    {
+     "club": "CRAI",
+     "pts": 20
+    },
+    {
+     "club": "Universitario",
+     "pts": 16
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 16
+    },
+    {
+     "club": "La Salle",
+     "pts": 16
+    },
+    {
+     "club": "CRAR",
+     "pts": 14
+    },
+    {
+     "club": "Rowing",
+     "pts": 13
+    },
+    {
+     "club": "Capibá",
+     "pts": 12
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Querandí",
+     "pts": 10
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 9
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2016-08-04_157",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 24
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 20
+    },
+    {
+     "club": "La Salle",
+     "pts": 19
+    },
+    {
+     "club": "CRAR",
+     "pts": 18
+    },
+    {
+     "club": "Universitario",
+     "pts": 16
+    },
+    {
+     "club": "Rowing",
+     "pts": 16
+    },
+    {
+     "club": "Capibá",
+     "pts": 13
+    },
+    {
+     "club": "CRAI",
+     "pts": 12
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 10
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 10
+    },
+    {
+     "club": "Querandí",
+     "pts": 8
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2016-08-04_157",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 22
+    },
+    {
+     "club": "CRAI",
+     "pts": 21
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 21
+    },
+    {
+     "club": "Rowing",
+     "pts": 20
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "Querandí",
+     "pts": 14
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 9
+    },
+    {
+     "club": "Capibá",
+     "pts": 9
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2016-08-04_157",
+   "rows": [
+    {
+     "club": "Cha Roga",
+     "pts": 24
+    },
+    {
+     "club": "Tilcara",
+     "pts": 19
+    },
+    {
+     "club": "Rowing",
+     "pts": 18
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 18
+    },
+    {
+     "club": "Universitario",
+     "pts": 17
+    },
+    {
+     "club": "CRAR",
+     "pts": 16
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 14
+    },
+    {
+     "club": "Querandí",
+     "pts": 14
+    },
+    {
+     "club": "La Salle",
+     "pts": 13
+    },
+    {
+     "club": "CRAI",
+     "pts": 13
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 10
+    },
+    {
+     "club": "Capibá",
+     "pts": 8
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 9,
+   "src": "2016-08-19_159",
+   "rows": [
+    {
+     "club": "Cha Roga",
+     "pts": 27
+    },
+    {
+     "club": "Universitario",
+     "pts": 23
+    },
+    {
+     "club": "Rowing",
+     "pts": 21
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 21
+    },
+    {
+     "club": "Tilcara",
+     "pts": 20
+    },
+    {
+     "club": "CRAR",
+     "pts": 19
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 16
+    },
+    {
+     "club": "CRAI",
+     "pts": 15
+    },
+    {
+     "club": "Querandí",
+     "pts": 15
+    },
+    {
+     "club": "La Salle",
+     "pts": 14
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 11
+    },
+    {
+     "club": "Capibá",
+     "pts": 9
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 9,
+   "src": "2016-08-19_159",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 27
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Rowing",
+     "pts": 23
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Universitario",
+     "pts": 18
+    },
+    {
+     "club": "Rowing",
+     "pts": 18
+    },
+    {
+     "club": "CRAR",
+     "pts": 16
+    },
+    {
+     "club": "Querandí",
+     "pts": 15
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 15
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 10
+    },
+    {
+     "club": "Capibá",
+     "pts": 10
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 9,
+   "src": "2016-08-19_159",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Universitario",
+     "pts": 23
+    },
+    {
+     "club": "CRAR",
+     "pts": 21
+    },
+    {
+     "club": "La Salle",
+     "pts": 20
+    },
+    {
+     "club": "Rowing",
+     "pts": 19
+    },
+    {
+     "club": "CRAI",
+     "pts": 14
+    },
+    {
+     "club": "Capibá",
+     "pts": 14
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 13
+    },
+    {
+     "club": "Tilcara",
+     "pts": 12
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 11
+    },
+    {
+     "club": "Querandí",
+     "pts": 9
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 9,
+   "src": "2016-08-19_159",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 24
+    },
+    {
+     "club": "CRAI",
+     "pts": 22
+    },
+    {
+     "club": "La Salle",
+     "pts": 19
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 17
+    },
+    {
+     "club": "CRAR",
+     "pts": 17
+    },
+    {
+     "club": "Capibá",
+     "pts": 13
+    },
+    {
+     "club": "Rowing",
+     "pts": 13
+    },
+    {
+     "club": "Querandí",
+     "pts": 13
+    },
+    {
+     "club": "Tilcara",
+     "pts": 12
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 10
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2016-08-25_161",
+   "rows": [
+    {
+     "club": "Cha Roga",
+     "pts": 30
+    },
+    {
+     "club": "Universitario",
+     "pts": 26
+    },
+    {
+     "club": "Rowing",
+     "pts": 24
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 24
+    },
+    {
+     "club": "CRAR",
+     "pts": 22
+    },
+    {
+     "club": "Tilcara",
+     "pts": 21
+    },
+    {
+     "club": "CRAI",
+     "pts": 18
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 17
+    },
+    {
+     "club": "Querandí",
+     "pts": 16
+    },
+    {
+     "club": "La Salle",
+     "pts": 15
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 12
+    },
+    {
+     "club": "Capibá",
+     "pts": 10
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2016-08-25_161",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 30
+    },
+    {
+     "club": "Rowing",
+     "pts": 26
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 26
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 25
+    },
+    {
+     "club": "Universitario",
+     "pts": 21
+    },
+    {
+     "club": "CRAR",
+     "pts": 19
+    },
+    {
+     "club": "Tilcara",
+     "pts": 19
+    },
+    {
+     "club": "Querandí",
+     "pts": 16
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 16
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 13
+    },
+    {
+     "club": "La Salle",
+     "pts": 11
+    },
+    {
+     "club": "Capibá",
+     "pts": 11
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2016-08-25_161",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 28
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 28
+    },
+    {
+     "club": "Universitario",
+     "pts": 24
+    },
+    {
+     "club": "La Salle",
+     "pts": 23
+    },
+    {
+     "club": "Rowing",
+     "pts": 22
+    },
+    {
+     "club": "CRAR",
+     "pts": 22
+    },
+    {
+     "club": "CRAI",
+     "pts": 17
+    },
+    {
+     "club": "Capibá",
+     "pts": 17
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 16
+    },
+    {
+     "club": "Tilcara",
+     "pts": 12
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 12
+    },
+    {
+     "club": "Querandí",
+     "pts": 10
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2016-08-25_161",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 27
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 25
+    },
+    {
+     "club": "CRAI",
+     "pts": 25
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 21
+    },
+    {
+     "club": "La Salle",
+     "pts": 20
+    },
+    {
+     "club": "Universitario",
+     "pts": 19
+    },
+    {
+     "club": "CRAR",
+     "pts": 18
+    },
+    {
+     "club": "Rowing",
+     "pts": 16
+    },
+    {
+     "club": "Capibá",
+     "pts": 14
+    },
+    {
+     "club": "Querandí",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 13
+    },
+    {
+     "club": "Querandí",
+     "pts": 11
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 11,
+   "src": "2016-08-28_162",
+   "rows": [
+    {
+     "club": "Cha Roga",
+     "pts": 33
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 27
+    },
+    {
+     "club": "Universitario",
+     "pts": 26
+    },
+    {
+     "club": "Rowing",
+     "pts": 25
+    },
+    {
+     "club": "Tilcara",
+     "pts": 24
+    },
+    {
+     "club": "CRAR",
+     "pts": 23
+    },
+    {
+     "club": "CRAI",
+     "pts": 21
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 20
+    },
+    {
+     "club": "Querandí",
+     "pts": 17
+    },
+    {
+     "club": "La Salle",
+     "pts": 15
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 13
+    },
+    {
+     "club": "Capibá",
+     "pts": 11
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 11,
+   "src": "2016-08-28_162",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 33
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 29
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 28
+    },
+    {
+     "club": "Rowing",
+     "pts": 26
+    },
+    {
+     "club": "CRAR",
+     "pts": 22
+    },
+    {
+     "club": "Universitario",
+     "pts": 21
+    },
+    {
+     "club": "Tilcara",
+     "pts": 20
+    },
+    {
+     "club": "Querandí",
+     "pts": 17
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 16
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 14
+    },
+    {
+     "club": "La Salle",
+     "pts": 12
+    },
+    {
+     "club": "Capibá",
+     "pts": 12
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 11,
+   "src": "2016-08-28_162",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 31
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 31
+    },
+    {
+     "club": "Universitario",
+     "pts": 24
+    },
+    {
+     "club": "La Salle",
+     "pts": 23
+    },
+    {
+     "club": "Rowing",
+     "pts": 25
+    },
+    {
+     "club": "CRAR",
+     "pts": 25
+    },
+    {
+     "club": "CRAI",
+     "pts": 20
+    },
+    {
+     "club": "Capibá",
+     "pts": 18
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 17
+    },
+    {
+     "club": "Tilcara",
+     "pts": 13
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 12
+    },
+    {
+     "club": "Querandí",
+     "pts": 11
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 11,
+   "src": "2016-08-28_162",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 30
+    },
+    {
+     "club": "CRAI",
+     "pts": 28
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 28
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 24
+    },
+    {
+     "club": "La Salle",
+     "pts": 20
+    },
+    {
+     "club": "Universitario",
+     "pts": 19
+    },
+    {
+     "club": "CRAR",
+     "pts": 19
+    },
+    {
+     "club": "Rowing",
+     "pts": 17
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "Querandí",
+     "pts": 15
+    },
+    {
+     "club": "Capibá",
+     "pts": 14
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 12
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 1,
+   "src": "2016-09-16_165",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 3
+    },
+    {
+     "club": "CRAI",
+     "pts": 3
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 3
+    },
+    {
+     "club": "La Salle",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 1
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 1,
+   "src": "2016-09-16_165",
+   "rows": [
+    {
+     "club": "Querandí",
+     "pts": 3
+    },
+    {
+     "club": "Tilcara",
+     "pts": 3
+    },
+    {
+     "club": "Rowing",
+     "pts": 2
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "CRAR",
+     "pts": 1
+    },
+    {
+     "club": "Capibá",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 1,
+   "src": "2016-09-16_165",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 3
+    },
+    {
+     "club": "CRAR",
+     "pts": 3
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 3
+    },
+    {
+     "club": "CRAI",
+     "pts": 1
+    },
+    {
+     "club": "Rowing",
+     "pts": 1
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 1,
+   "src": "2016-09-16_165",
+   "rows": [
+    {
+     "club": "La Salle",
+     "pts": 3
+    },
+    {
+     "club": "Tilcara",
+     "pts": 3
+    },
+    {
+     "club": "Capibá",
+     "pts": 3
+    },
+    {
+     "club": "Querandí",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 1,
+   "src": "2016-09-16_165",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 3
+    },
+    {
+     "club": "Rowing",
+     "pts": 3
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 2
+    },
+    {
+     "club": "CRAI",
+     "pts": 1
+    },
+    {
+     "club": "CRAR",
+     "pts": 1
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 1,
+   "src": "2016-09-16_165",
+   "rows": [
+    {
+     "club": "La Salle",
+     "pts": 3
+    },
+    {
+     "club": "Querandí",
+     "pts": 2
+    },
+    {
+     "club": "Tilcara",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 0
+    },
+    {
+     "club": "Capibá",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 1,
+   "src": "2016-09-16_165",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 3
+    },
+    {
+     "club": "CRAI",
+     "pts": 3
+    },
+    {
+     "club": "CRAR",
+     "pts": 3
+    },
+    {
+     "club": "Rowing",
+     "pts": 1
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 1,
+   "src": "2016-09-16_165",
+   "rows": [
+    {
+     "club": "Cha Roga",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 3
+    },
+    {
+     "club": "Querandí",
+     "pts": 3
+    },
+    {
+     "club": "Tilcara",
+     "pts": 1
+    },
+    {
+     "club": "La Salle",
+     "pts": 1
+    },
+    {
+     "club": "Capibá",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 2,
+   "src": "2016-09-17_166",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "CRAI",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 1
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 2,
+   "src": "2016-09-17_166",
+   "rows": [
+    {
+     "club": "Querandí",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 3
+    },
+    {
+     "club": "Rowing",
+     "pts": 2
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 2
+    },
+    {
+     "club": "CRAR",
+     "pts": 1
+    },
+    {
+     "club": "Capibá",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 2,
+   "src": "2016-09-17_166",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 4
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "Rowing",
+     "pts": 2
+    },
+    {
+     "club": "CRAI",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 2,
+   "src": "2016-09-17_166",
+   "rows": [
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "Capibá",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 2
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 2
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 2
+    },
+    {
+     "club": "Querandí",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 2,
+   "src": "2016-09-17_166",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "CRAI",
+     "pts": 4
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 3
+    },
+    {
+     "club": "CRAR",
+     "pts": 2
+    },
+    {
+     "club": "Universitario",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 2,
+   "src": "2016-09-17_166",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 3
+    },
+    {
+     "club": "Querandí",
+     "pts": 3
+    },
+    {
+     "club": "Capibá",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 2,
+   "src": "2016-09-17_166",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 6
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 4
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 2
+    },
+    {
+     "club": "Rowing",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 2,
+   "src": "2016-09-17_166",
+   "rows": [
+    {
+     "club": "Cha Roga",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 6
+    },
+    {
+     "club": "Querandí",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 2
+    },
+    {
+     "club": "Capibá",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 2,
+   "src": "2016-09-23_167",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "CRAI",
+     "pts": 4
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 2
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 2,
+   "src": "2016-09-23_167",
+   "rows": [
+    {
+     "club": "Querandí",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 3
+    },
+    {
+     "club": "Rowing",
+     "pts": 2
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 2
+    },
+    {
+     "club": "Capibá",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 2,
+   "src": "2016-09-23_167",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 4
+    },
+    {
+     "club": "CRAI",
+     "pts": 2
+    },
+    {
+     "club": "Rowing",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 2,
+   "src": "2016-09-23_167",
+   "rows": [
+    {
+     "club": "Capibá",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Querandí",
+     "pts": 2
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 2,
+   "src": "2016-09-23_167",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAI",
+     "pts": 4
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 3
+    },
+    {
+     "club": "CRAR",
+     "pts": 2
+    },
+    {
+     "club": "Universitario",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 2,
+   "src": "2016-09-23_167",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 3
+    },
+    {
+     "club": "Querandí",
+     "pts": 3
+    },
+    {
+     "club": "Capibá",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 2,
+   "src": "2016-09-23_167",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 4
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 4
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    },
+    {
+     "club": "Rowing",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 2,
+   "src": "2016-09-23_167",
+   "rows": [
+    {
+     "club": "Alma Juniors",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Querandí",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 2
+    },
+    {
+     "club": "Capibá",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 3,
+   "src": "2016-09-24_168",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 9
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 7
+    },
+    {
+     "club": "CRAI",
+     "pts": 7
+    },
+    {
+     "club": "Universitario",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 3,
+   "src": "2016-09-24_168",
+   "rows": [
+    {
+     "club": "Querandí",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 3
+    },
+    {
+     "club": "Capibá",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 3,
+   "src": "2016-09-24_168",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 9
+    },
+    {
+     "club": "Universitario",
+     "pts": 7
+    },
+    {
+     "club": "CRAR",
+     "pts": 7
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 4
+    },
+    {
+     "club": "CRAI",
+     "pts": 3
+    },
+    {
+     "club": "Rowing",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 3,
+   "src": "2016-09-24_168",
+   "rows": [
+    {
+     "club": "Capibá",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 5
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Querandí",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 3,
+   "src": "2016-09-24_168",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 9
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 3,
+   "src": "2016-09-24_168",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "La Salle",
+     "pts": 7
+    },
+    {
+     "club": "Querandí",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 4
+    },
+    {
+     "club": "Capibá",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 3,
+   "src": "2016-09-24_168",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 7
+    },
+    {
+     "club": "CRAI",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 4
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 3,
+   "src": "2016-09-24_168",
+   "rows": [
+    {
+     "club": "Cha Roga",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Querandí",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 7
+    },
+    {
+     "club": "La Salle",
+     "pts": 3
+    },
+    {
+     "club": "Capibá",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 3,
+   "src": "2016-09-29_169",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 7
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 7
+    },
+    {
+     "club": "CRAI",
+     "pts": 7
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 3,
+   "src": "2016-09-29_169",
+   "rows": [
+    {
+     "club": "Cha Roga",
+     "pts": 9
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 7
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Querandí",
+     "pts": 7
+    },
+    {
+     "club": "Capibá",
+     "pts": 3
+    },
+    {
+     "club": "La Salle",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 3,
+   "src": "2016-09-29_169",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 3,
+   "src": "2016-09-29_169",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 6
+    },
+    {
+     "club": "Querandí",
+     "pts": 6
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 5
+    },
+    {
+     "club": "Capibá",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 3,
+   "src": "2016-09-29_169",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 9
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 7
+    },
+    {
+     "club": "Universitario",
+     "pts": 7
+    },
+    {
+     "club": "CRAR",
+     "pts": 7
+    },
+    {
+     "club": "CRAI",
+     "pts": 3
+    },
+    {
+     "club": "Rowing",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 3,
+   "src": "2016-09-29_169",
+   "rows": [
+    {
+     "club": "Capibá",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 5
+    },
+    {
+     "club": "Querandí",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 3,
+   "src": "2016-09-29_169",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 9
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 7
+    },
+    {
+     "club": "CRAI",
+     "pts": 7
+    },
+    {
+     "club": "Universitario",
+     "pts": 6
+    },
+    {
+     "club": "La Salle",
+     "pts": 3
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 3,
+   "src": "2016-09-29_169",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 9
+    },
+    {
+     "club": "Querandí",
+     "pts": 7
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "Capibá",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 4,
+   "src": "2016-10-01_170",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 8
+    },
+    {
+     "club": "CRAI",
+     "pts": 8
+    },
+    {
+     "club": "Universitario",
+     "pts": 7
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 4,
+   "src": "2016-10-01_170",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 10
+    },
+    {
+     "club": "Querandí",
+     "pts": 10
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Capibá",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 4,
+   "src": "2016-10-01_170",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 12
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "Universitario",
+     "pts": 8
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 7
+    },
+    {
+     "club": "CRAI",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 4,
+   "src": "2016-10-01_170",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Querandí",
+     "pts": 9
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 6
+    },
+    {
+     "club": "Capibá",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 4,
+   "src": "2016-10-01_170",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 12
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 9
+    },
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 4,
+   "src": "2016-10-01_170",
+   "rows": [
+    {
+     "club": "Capibá",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 7
+    },
+    {
+     "club": "Querandí",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 4,
+   "src": "2016-10-01_170",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 12
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 8
+    },
+    {
+     "club": "CRAI",
+     "pts": 7
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 4,
+   "src": "2016-10-01_170",
+   "rows": [
+    {
+     "club": "Querandí",
+     "pts": 12
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 8
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 6
+    },
+    {
+     "club": "Capibá",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 4,
+   "src": "2016-10-06_171",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 8
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 4,
+   "src": "2016-10-06_171",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 10
+    },
+    {
+     "club": "Querandí",
+     "pts": 10
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Capibá",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 4,
+   "src": "2016-10-06_171",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 12
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "Universitario",
+     "pts": 8
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 7
+    },
+    {
+     "club": "CRAI",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 4,
+   "src": "2016-10-06_171",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Querandí",
+     "pts": 9
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 6
+    },
+    {
+     "club": "Capibá",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 4,
+   "src": "2016-10-06_171",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 12
+    },
+    {
+     "club": "Universitario",
+     "pts": 12
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 4,
+   "src": "2016-10-06_171",
+   "rows": [
+    {
+     "club": "Capibá",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 7
+    },
+    {
+     "club": "Querandí",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 4,
+   "src": "2016-10-06_171",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 13
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 12
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 11
+    },
+    {
+     "club": "CRAI",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 4,
+   "src": "2016-10-06_171",
+   "rows": [
+    {
+     "club": "Querandí",
+     "pts": 12
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 8
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 6
+    },
+    {
+     "club": "Capibá",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 5,
+   "src": "2016-10-08_172",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 13
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 9
+    },
+    {
+     "club": "CRAR",
+     "pts": 7
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 5,
+   "src": "2016-10-08_172",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 13
+    },
+    {
+     "club": "Querandí",
+     "pts": 11
+    },
+    {
+     "club": "Cha Roga",
+     "pts": null
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Capibá",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 5,
+   "src": "2016-10-08_172",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 8
+    },
+    {
+     "club": "CRAI",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 5,
+   "src": "2016-10-08_172",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 13
+    },
+    {
+     "club": "Querandí",
+     "pts": 12
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 6
+    },
+    {
+     "club": "Capibá",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 5,
+   "src": "2016-10-08_172",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 13
+    },
+    {
+     "club": "Universitario",
+     "pts": 12
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "CRAI",
+     "pts": 6
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 5,
+   "src": "2016-10-08_172",
+   "rows": [
+    {
+     "club": "Capibá",
+     "pts": 12
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 7
+    },
+    {
+     "club": "Querandí",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Oro",
+   "group": "Zona A",
+   "afterRound": 5,
+   "src": "2016-10-08_172",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 15
+    },
+    {
+     "club": "Universitario",
+     "pts": 12
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 11
+    },
+    {
+     "club": "CRAI",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 7
+    },
+    {
+     "club": "Cha Roga",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Six Plata",
+   "group": "Zona B",
+   "afterRound": 5,
+   "src": "2016-10-08_172",
+   "rows": [
+    {
+     "club": "Querandí",
+     "pts": 15
+    },
+    {
+     "club": "Tilcara",
+     "pts": 13
+    },
+    {
+     "club": "CRAR",
+     "pts": 8
+    },
+    {
+     "club": "Rowing",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 6
+    },
+    {
+     "club": "Capibá",
+     "pts": 6
+    }
+   ]
+  }
+ ],
+ "issues": [
+  "[2016-05-27_140] CONFLICTO M16 REG Estudiantes 90-0 Capibá vs ya cargado Estudiantes 70-0 Capibá [2016-05-26_139]",
+  "[2016-05-28_141] CONFLICTO M16 REG Estudiantes 90-0 Capibá vs ya cargado Estudiantes 70-0 Capibá [2016-05-26_139]",
+  "Conflicto de marcador M16 Estudiantes-Capibá (adelantado 25/5): la nota 2016-05-26_139 dice 70-0 y las notas 2016-05-27_140 y 2016-05-28_141 dicen 90-0. Se cargó 90-0 (dos notas contra una).",
+  "M16 Final Six Plata Capibá-Cha Roga: la nota 2016-10-22_173 dice que Capibá \"cayó 24-5\" ante Cha Roga en el partido reprogramado del Dos Orillas; se cargó Capibá 5 - Cha Roga 24. Las tablas publicadas terminan el 8/10, antes de este partido, por eso Capibá y Cha Roga figuran con 1 partido pendiente.",
+  "Partidos que las tablas indican jugados pero de los que no hay marcador en ninguna nota (status not_played con la evidencia en note): M15-M19 Alma Juniors-La Salle (6ª fecha, 4 divisiones); M15 Estudiantes-Rowing (6ª fecha, 16/7); M19 Final Six Oro Universitario-Santa Fe RC (1ª) y La Salle-Universitario (2ª); M19 Final Six Plata Rowing-Tilcara (2ª); M15 Final Six Oro Estudiantes-CRAI (3ª).",
+  "Partidos postergados o no disputados sin resultado posterior (status postponed): M15, M16 y M17 CRAI-Universitario (6ª fecha) y M17 Universitario-Santa Fe RC (7ª, postergado al 13/8): las tablas de agosto ya no los marcan pendientes pero no hay marcador; las cuatro Universitario-La Salle de la 11ª fecha y M16 Rowing-Cha Roga (11ª, postergado p/31/8): las tablas del 28/8 no los computan y no hay resultado; Final Six: M15, M16 y M17 Cha Roga-Alma Juniors (Zona B, 5ª), M19 CRAR-Alma Juniors (Zona B, 5ª) y M16 Universitario-CRAI (Zona A, 5ª): las tablas del 8/10 no los computan.",
+  "M15 Final Six Oro Universitario 32-0 CRAI (5ª fecha): la nota 2016-10-06_171 lo trae con \"(9/1-11:00-...)\", fecha imposible; la nota 2016-10-08_172 lo lista entre los resultados del sábado 8/10. Se cargó date 2016-10-08 (incierto). M17 Universitario 23-21 CRAI (7/10), M19 Estudiantes 27-7 Cha Roga (6/10) y M19 CRAI 5-19 Universitario (7/10) traen fecha propia y se respetó.",
+  "Las notas de 2016 no publican los puntos de tabla entre paréntesis: hp y ap quedan null en todos los partidos. El control de puntos por club no se puede hacer literalmente (ver control al final de este arreglo).",
+  "M16 fase clasificatoria Rowing 68-0 La Salle (9ª fecha): la nota dice \"suspendido por falta de jugadores de La Salle\"; se cargó 68-0 como final con esa aclaración porque la tabla del 19/8 le suma 3 a Rowing y 0 a La Salle.",
+  "Posiciones 2016 con erratas de la fuente copiadas como salen: 2016-08-25_161 M19 repite Querandí (14 y 11); 2016-08-19_159 M16 lista dos veces a Rowing (23 y 18); 2016-08-19_159 M19 omite a Universitario; 2016-08-04_157 M17/M19 y 2016-10-08_172 M15 Zona B (Cha Roga sin puntaje) tienen omisiones.",
+  "[2016-10-08_172] posiciones M15 Final Six Plata Zona B: sin puntaje para Cha Roga en \"Cha Roga\"",
+  "CONTROL DE PUNTOS (hp/ap no publicados, no se pueden sumar): no se pudo cerrar la tabla por partidos porque las notas no traen los puntos por partido y el sistema de bonus no se deduce (p. ej. victorias que valen 3 o 2 y derrotas que valen 0 o 1 sin patrón estable). Se hizo un control grueso con las ÚLTIMAS posiciones de cada fase y división (12 tablas, 96 clubes): puntaje publicado entre 2*G+2*E y 3*G+2*E+P+3*S (G/E/P = ganados/empatados/perdidos según los marcadores cargados, S = partidos sin marcador). Resultado: 3 clubes fuera de rango. Detalle: M19 Final Six Plata Zona B Capibá: publicado 6, fuera del rango [0,5] con G0 E0 P5 y 0 sin marcador | M17 Final Six Oro Zona A Universitario: publicado 12, fuera del rango [6,11] con G3 E0 P2 y 0 sin marcador | M17 Final Six Oro Zona A CRAR: publicado 11, fuera del rango [4,9] con G2 E0 P3 y 0 sin marcador. Son tablas con puntos extra que los marcadores no explican (posible bonus), no parecen partidos faltantes: los conteos por fase cierran (66 partidos por división en fase clasificatoria y 15 por zona en Final Six)."
+ ]
+}

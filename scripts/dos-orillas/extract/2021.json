@@ -1,0 +1,5964 @@
+{
+ "year": 2021,
+ "format": "Liga de 11 fechas (todos contra todos, sin ventanas, 28/8 al 6/11 previstas; la última se corrió al 13/11 por el Campeonato Argentino Juvenil). Primer DOJ tras la pandemia, con bonus de actitud. 10 clubes en M15-M17 y 11 en M19 (con CRAI \"A\" y CRAI \"B\"). Sin fase final: el campeón es el primero de la tabla. Phase usada: \"Campeonato\". Se disputaron partidos postergados hasta el 7/12.",
+ "champions": [
+  {
+   "division": "M15",
+   "cup": null,
+   "club": "CRAI",
+   "note": "campeón anticipado el 30/10 (antes de la última fecha); camada 2006"
+  },
+  {
+   "division": "M16",
+   "cup": null,
+   "club": "CRAI",
+   "note": "campeón anticipado el 30/10; camada 2005"
+  },
+  {
+   "division": "M17",
+   "cup": null,
+   "club": "Estudiantes",
+   "note": "campeón anticipado el 30/10; camada 2004"
+  },
+  {
+   "division": "M19",
+   "cup": null,
+   "club": "CRAR",
+   "note": "definido en el postergado de la 10° fecha Rowing-CRAR jugado el 7/12 (CRAR 24-19); CRAI quedó segundo; camadas 2002/2003"
+  }
+ ],
+ "phases": [
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "teams": [
+    "CRAR",
+    "Universitario",
+    "Rowing",
+    "La Salle",
+    "CRAI",
+    "Alma Juniors",
+    "Tilcara",
+    "Cha Roga Club",
+    "Estudiantes",
+    "Santa Fe RC"
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "teams": [
+    "CRAR",
+    "Universitario",
+    "Rowing",
+    "La Salle",
+    "CRAI",
+    "Alma Juniors",
+    "Tilcara",
+    "Cha Roga Club",
+    "Estudiantes",
+    "Santa Fe RC"
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "teams": [
+    "CRAR",
+    "Universitario",
+    "Rowing",
+    "La Salle",
+    "CRAI",
+    "Alma Juniors",
+    "Tilcara",
+    "Cha Roga Club",
+    "Estudiantes",
+    "Santa Fe RC"
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "teams": [
+    "CRAR",
+    "Universitario",
+    "Rowing",
+    "La Salle",
+    "CRAI",
+    "Alma Juniors",
+    "Tilcara",
+    "Cha Roga Club",
+    "Estudiantes",
+    "Santa Fe RC",
+    "CRAI B"
+   ]
+  }
+ ],
+ "matches": [
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "CRAR",
+   "away": "Universitario",
+   "hs": 10,
+   "as": 10,
+   "hp": 2,
+   "ap": 2,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "Rowing",
+   "away": "La Salle",
+   "hs": 31,
+   "as": 24,
+   "hp": 5,
+   "ap": 2,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "CRAI",
+   "away": "Alma Juniors",
+   "hs": 59,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "Tilcara",
+   "away": "Cha Roga Club",
+   "hs": 24,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 19,
+   "as": 0,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "Cha Roga Club",
+   "away": "CRAI",
+   "hs": 3,
+   "as": 38,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "Alma Juniors",
+   "away": "Rowing",
+   "hs": 10,
+   "as": 24,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "La Salle",
+   "away": "CRAR",
+   "hs": 19,
+   "as": 14,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": 38,
+   "as": 12,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 33,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 38,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-10-06",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": 30,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-08-21",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "adelantado de la 4° fecha, jugado el 21/8; marcador y puntos de tabla no publicados en las notas de 2021 (puntos inferidos de las posiciones: M15 Tilcara 5-0; M16 Estudiantes 5-0; M17 Estudiantes 5-0; M19 Estudiantes 4-1)",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 12,
+   "as": 26,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 7,
+   "as": 24,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "Alma Juniors",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 34,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "La Salle",
+   "away": "Alma Juniors",
+   "hs": 22,
+   "as": 10,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "Universitario",
+   "away": "Cha Roga Club",
+   "hs": 22,
+   "as": 25,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 10,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 31,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Tilcara",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 8,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Estudiantes",
+   "away": "Rowing",
+   "hs": 27,
+   "as": 17,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 50,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-11-06",
+   "home": "Cha Roga Club",
+   "away": "La Salle",
+   "hs": 15,
+   "as": 12,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "6° fecha: el 2/10 \"no se disputó por falta de médico\"; se jugó el 6/11",
+   "src": "2021-11-06_330"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-08",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 10,
+   "as": 13,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-09",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 31,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-09",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 10,
+   "as": 29,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-16",
+   "home": "Alma Juniors",
+   "away": "Cha Roga Club",
+   "hs": 15,
+   "as": 53,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 12,
+   "as": 33,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-19",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 19,
+   "as": 14,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "disputado 19/10 (8° fecha)",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-20",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 33,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "8° fecha postergada por vacunación de Universitario; disputado 20/10",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-20",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 52,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "8° fecha postergada por vacunación; disputado 20/10",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 8,
+   "as": 7,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 18,
+   "as": 22,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 14,
+   "as": 37,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-11-03",
+   "home": "Alma Juniors",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 47,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-11-06_330"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "Estudiantes",
+   "away": "Alma Juniors",
+   "hs": 45,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 28,
+   "as": 12,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 31,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga Club",
+   "hs": 39,
+   "as": 38,
+   "hp": 5,
+   "ap": 2,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-11-20",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 20,
+   "as": 23,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-11-20_334"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-06",
+   "home": "Alma Juniors",
+   "away": "Tilcara",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado de la 11° fecha (adelanto a 6/11 suspendido); sin resultado publicado",
+   "src": "2021-08-24_309"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-13",
+   "home": "Cha Roga Club",
+   "away": "Estudiantes",
+   "hs": 22,
+   "as": 22,
+   "hp": 2,
+   "ap": 2,
+   "status": "final",
+   "note": "11° fecha prevista el 6/11, corrida al 13/11 por el Campeonato Argentino Juvenil",
+   "src": "2021-11-13_332"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-13",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 10,
+   "as": 43,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "11° fecha prevista el 6/11, corrida al 13/11 por el Campeonato Argentino Juvenil",
+   "src": "2021-11-13_332"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-13",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 20,
+   "as": 17,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "11° fecha prevista el 6/11, corrida al 13/11 por el Campeonato Argentino Juvenil",
+   "src": "2021-11-13_332"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "CRAR",
+   "away": "Universitario",
+   "hs": 15,
+   "as": 27,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "errata de la nota: dice (5-0) pero Universitario ganó 27-15 y la tabla publicada le da los 5 a Universitario (probable (0-5)); se dejó lo impreso",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "Rowing",
+   "away": "La Salle",
+   "hs": 46,
+   "as": 16,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "CRAI",
+   "away": "Alma Juniors",
+   "hs": 91,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "Tilcara",
+   "away": "Cha Roga Club",
+   "hs": 5,
+   "as": 22,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 36,
+   "as": 24,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "Cha Roga Club",
+   "away": "CRAI",
+   "hs": 15,
+   "as": 39,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "Alma Juniors",
+   "away": "Rowing",
+   "hs": 5,
+   "as": 79,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "La Salle",
+   "away": "CRAR",
+   "hs": 0,
+   "as": 17,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": 32,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 40,
+   "as": 14,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 5,
+   "as": 36,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-10-06",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": 17,
+   "as": 10,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-08-21",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "adelantado de la 4° fecha, jugado el 21/8; marcador y puntos de tabla no publicados en las notas de 2021 (puntos inferidos de las posiciones: M15 Tilcara 5-0; M16 Estudiantes 5-0; M17 Estudiantes 5-0; M19 Estudiantes 4-1)",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 10,
+   "as": 24,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 37,
+   "as": 12,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "Alma Juniors",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 66,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "La Salle",
+   "away": "Alma Juniors",
+   "hs": 43,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "Universitario",
+   "away": "Cha Roga Club",
+   "hs": 34,
+   "as": 13,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 12,
+   "as": 13,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 38,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Tilcara",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 69,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Estudiantes",
+   "away": "Rowing",
+   "hs": 24,
+   "as": 27,
+   "hp": 2,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 50,
+   "as": 12,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Cha Roga Club",
+   "away": "La Salle",
+   "hs": 23,
+   "as": 13,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-09",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 24,
+   "as": 31,
+   "hp": 1,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-09",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 27,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-09",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 18,
+   "as": 17,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-16",
+   "home": "Alma Juniors",
+   "away": "Cha Roga Club",
+   "hs": 7,
+   "as": 27,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 41,
+   "as": 14,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 17,
+   "as": 14,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 38,
+   "as": 12,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 33,
+   "as": 3,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 40,
+   "as": 17,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 29,
+   "as": 36,
+   "hp": 2,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 41,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "Alma Juniors",
+   "away": "Santa Fe RC",
+   "hs": 12,
+   "as": 52,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "Estudiantes",
+   "away": "Alma Juniors",
+   "hs": 60,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 17,
+   "as": 27,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 22,
+   "as": 7,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga Club",
+   "hs": 63,
+   "as": 17,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-11-20",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 39,
+   "as": 17,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-11-20_334"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-06",
+   "home": "Alma Juniors",
+   "away": "Tilcara",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado de la 11° fecha (adelanto a 6/11 suspendido); sin resultado publicado",
+   "src": "2021-08-24_309"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-13",
+   "home": "Cha Roga Club",
+   "away": "Estudiantes",
+   "hs": 19,
+   "as": 36,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "11° fecha prevista el 6/11, corrida al 13/11 por el Campeonato Argentino Juvenil",
+   "src": "2021-11-13_332"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-13",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 15,
+   "as": 57,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "11° fecha prevista el 6/11, corrida al 13/11 por el Campeonato Argentino Juvenil",
+   "src": "2021-11-13_332"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-13",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 14,
+   "as": 50,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "11° fecha prevista el 6/11, corrida al 13/11 por el Campeonato Argentino Juvenil",
+   "src": "2021-11-13_332"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "CRAR",
+   "away": "Universitario",
+   "hs": 19,
+   "as": 12,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "Rowing",
+   "away": "La Salle",
+   "hs": 60,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "CRAI",
+   "away": "Alma Juniors",
+   "hs": 80,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "Tilcara",
+   "away": "Cha Roga Club",
+   "hs": 59,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 30,
+   "as": 45,
+   "hp": 1,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "Cha Roga Club",
+   "away": "CRAI",
+   "hs": 5,
+   "as": 58,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "Alma Juniors",
+   "away": "Rowing",
+   "hs": 24,
+   "as": 39,
+   "hp": 1,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "La Salle",
+   "away": "CRAR",
+   "hs": 41,
+   "as": 17,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": 12,
+   "as": 12,
+   "hp": 2,
+   "ap": 2,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": 36,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 55,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 34,
+   "as": 15,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-08-21",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "adelantado de la 4° fecha, jugado el 21/8; marcador y puntos de tabla no publicados en las notas de 2021 (puntos inferidos de las posiciones: M15 Tilcara 5-0; M16 Estudiantes 5-0; M17 Estudiantes 5-0; M19 Estudiantes 4-1)",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 27,
+   "as": 22,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 5,
+   "as": 7,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "Alma Juniors",
+   "away": "Universitario",
+   "hs": 5,
+   "as": 33,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "Universitario",
+   "away": "Cha Roga Club",
+   "hs": 33,
+   "as": 12,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 10,
+   "as": 25,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado de la 5° fecha; sin resultado publicado",
+   "src": "2021-08-24_309"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-11-20",
+   "home": "La Salle",
+   "away": "Alma Juniors",
+   "hs": 12,
+   "as": 7,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-11-20_334"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Tilcara",
+   "away": "CRAI",
+   "hs": 25,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 27,
+   "as": 19,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Estudiantes",
+   "away": "Rowing",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "6° fecha, suspendido por vacunación el 2/10; ninguna nota publica el resultado, pero la tabla del 30/10 le suma 5 a Estudiantes (39 publicado vs 34 esperado), así que se jugó o resolvió entre el 23 y el 30/10 sin marcador publicado",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-11-06",
+   "home": "Cha Roga Club",
+   "away": "La Salle",
+   "hs": 12,
+   "as": 26,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "6° fecha: el 2/10 \"no se disputó por falta de médico\"; se jugó el 6/11",
+   "src": "2021-11-06_330"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-08",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 59,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-08",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 15,
+   "as": 19,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-08",
+   "home": "Alma Juniors",
+   "away": "Cha Roga Club",
+   "hs": 15,
+   "as": 26,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-09",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 12,
+   "as": 18,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 41,
+   "as": 3,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 46,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 22,
+   "as": 15,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 28,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 12,
+   "as": 31,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 5,
+   "as": 82,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 5,
+   "as": 20,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-11-03",
+   "home": "Alma Juniors",
+   "away": "Santa Fe RC",
+   "hs": 19,
+   "as": 29,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-11-06_330"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "Estudiantes",
+   "away": "Alma Juniors",
+   "hs": 88,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 10,
+   "as": 12,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga Club",
+   "hs": 26,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado por vacunación (10° fecha); sin resultado publicado",
+   "src": "2021-08-24_309"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-11-20",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 36,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-11-20_334"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-06",
+   "home": "Alma Juniors",
+   "away": "Tilcara",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado de la 11° fecha (adelanto a 6/11 suspendido); sin resultado publicado",
+   "src": "2021-08-24_309"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-13",
+   "home": "Cha Roga Club",
+   "away": "Estudiantes",
+   "hs": 15,
+   "as": 29,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "11° fecha prevista el 6/11, corrida al 13/11 por el Campeonato Argentino Juvenil",
+   "src": "2021-11-13_332"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-13",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 14,
+   "as": 39,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "11° fecha prevista el 6/11, corrida al 13/11 por el Campeonato Argentino Juvenil",
+   "src": "2021-11-13_332"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-13",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 43,
+   "as": 14,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "11° fecha prevista el 6/11, corrida al 13/11 por el Campeonato Argentino Juvenil",
+   "src": "2021-11-13_332"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "CRAR",
+   "away": "Universitario",
+   "hs": 19,
+   "as": 20,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "Rowing",
+   "away": "La Salle",
+   "hs": 91,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "CRAI",
+   "away": "Alma Juniors",
+   "hs": 62,
+   "as": 14,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "Tilcara",
+   "away": "Cha Roga Club",
+   "hs": 90,
+   "as": 19,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2021-08-28",
+   "home": "Estudiantes",
+   "away": "CRAI B",
+   "hs": 60,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "CRAI B",
+   "away": "Tilcara",
+   "hs": 19,
+   "as": 38,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 20,
+   "as": 36,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "Cha Roga Club",
+   "away": "CRAI",
+   "hs": 7,
+   "as": 75,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "Alma Juniors",
+   "away": "Rowing",
+   "hs": 10,
+   "as": 24,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2021-09-04",
+   "home": "La Salle",
+   "away": "CRAR",
+   "hs": 0,
+   "as": 61,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-04_312"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-09",
+   "home": "CRAI",
+   "away": "CRAI B",
+   "hs": 68,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": 27,
+   "as": 20,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": 67,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 50,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2021-09-11",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 28,
+   "as": 15,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-11_314"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-08-21",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "adelantado de la 4° fecha, jugado el 21/8; marcador y puntos de tabla no publicados en las notas de 2021 (puntos inferidos de las posiciones: M15 Tilcara 5-0; M16 Estudiantes 5-0; M17 Estudiantes 5-0; M19 Estudiantes 4-1)",
+   "src": "2021-08-28_310"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 17,
+   "as": 38,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 14,
+   "as": 73,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "Alma Juniors",
+   "away": "Universitario",
+   "hs": 15,
+   "as": 31,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2021-09-18",
+   "home": "CRAI B",
+   "away": "Rowing",
+   "hs": 0,
+   "as": 49,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-18_316"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "La Salle",
+   "away": "Alma Juniors",
+   "hs": 21,
+   "as": 10,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "Universitario",
+   "away": "Cha Roga Club",
+   "hs": 20,
+   "as": 14,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 20,
+   "as": 31,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 10,
+   "as": 7,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2021-09-25",
+   "home": "CRAR",
+   "away": "CRAI B",
+   "hs": 60,
+   "as": 13,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-09-25_318"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Tilcara",
+   "away": "CRAI",
+   "hs": 19,
+   "as": 20,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Estudiantes",
+   "away": "Rowing",
+   "hs": 20,
+   "as": 12,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 17,
+   "as": 29,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "Cha Roga Club",
+   "away": "La Salle",
+   "hs": 14,
+   "as": 12,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 6,
+   "date": "2021-10-02",
+   "home": "CRAI B",
+   "away": "Universitario",
+   "hs": 6,
+   "as": 40,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-02_320"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-07",
+   "home": "La Salle",
+   "away": "CRAI B",
+   "hs": 22,
+   "as": 19,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-08",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 32,
+   "as": 24,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-08",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 24,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-08",
+   "home": "Alma Juniors",
+   "away": "Cha Roga Club",
+   "hs": 10,
+   "as": 0,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 7,
+   "date": "2021-10-09",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 6,
+   "as": 28,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-09_322"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 47,
+   "as": 12,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 17,
+   "as": 29,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 34,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 78,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 8,
+   "date": "2021-10-16",
+   "home": "CRAI B",
+   "away": "Alma Juniors",
+   "hs": 5,
+   "as": 10,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-16_324"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 26,
+   "as": 24,
+   "hp": 5,
+   "ap": 2,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 85,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "Cha Roga Club",
+   "away": "CRAI B",
+   "hs": 22,
+   "as": 31,
+   "hp": 1,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-10-23",
+   "home": "Alma Juniors",
+   "away": "Santa Fe RC",
+   "hs": 14,
+   "as": 39,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-23_326"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 9,
+   "date": "2021-11-20",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 19,
+   "as": 12,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2021-11-20_334"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "Estudiantes",
+   "away": "Alma Juniors",
+   "hs": 64,
+   "as": 8,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 82,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 45,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-10-30",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga Club",
+   "hs": 78,
+   "as": 21,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2021-10-30_328"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 10,
+   "date": "2021-12-07",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 19,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "postergado de la 10° fecha, jugado en La Tortuguita el 7/12; nota del 2021-12-08: CRAR 24-19 con 4 tries y bonus; puntos de tabla no publicados",
+   "src": "2021-12-08_335"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-06",
+   "home": "CRAI B",
+   "away": "Santa Fe RC",
+   "hs": 17,
+   "as": 36,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2021-11-06_330"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-06",
+   "home": "Alma Juniors",
+   "away": "Tilcara",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado de la 11° fecha (adelanto a 6/11 suspendido); sin resultado publicado",
+   "src": "2021-08-24_309"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-13",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 18,
+   "as": 25,
+   "hp": 1,
+   "ap": 5,
+   "status": "final",
+   "note": "ya figura jugado en la nota del 11/11 (adelantado antes de la fecha 11); fecha exacta no publicada",
+   "src": "2021-11-13_332"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-13",
+   "home": "Cha Roga Club",
+   "away": "Estudiantes",
+   "hs": 6,
+   "as": 27,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "11° fecha prevista el 6/11, corrida al 13/11 por el Campeonato Argentino Juvenil",
+   "src": "2021-11-13_332"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 11,
+   "date": "2021-11-13",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 22,
+   "as": 33,
+   "hp": 1,
+   "ap": 5,
+   "status": "final",
+   "note": "11° fecha prevista el 6/11, corrida al 13/11 por el Campeonato Argentino Juvenil",
+   "src": "2021-11-13_332"
+  }
+ ],
+ "standings": [
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 1,
+   "src": "2021-08-28_310",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 2
+    },
+    {
+     "club": "La Salle",
+     "pts": 2
+    },
+    {
+     "club": "Universitario",
+     "pts": 2
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 0
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 1,
+   "src": "2021-08-28_310",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 5
+    },
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 1,
+   "src": "2021-08-28_310",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 5
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 1,
+   "src": "2021-08-28_310",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "CRAR",
+     "pts": 1
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "CRAI B",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 2,
+   "src": "2021-09-04_312",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 4
+    },
+    {
+     "club": "CRAR",
+     "pts": 3
+    },
+    {
+     "club": "Universitario",
+     "pts": 2
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 2,
+   "src": "2021-09-04_312",
+   "rows": [
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 4
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 2,
+   "src": "2021-09-04_312",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 2,
+   "src": "2021-09-04_312",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "CRAI B",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 3,
+   "src": "2021-09-11_314",
+   "rows": [
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 9
+    },
+    {
+     "club": "CRAR",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 2
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 3,
+   "src": "2021-09-11_314",
+   "rows": [
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 3,
+   "src": "2021-09-11_314",
+   "rows": [
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 7
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "Universitario",
+     "pts": 3
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 3,
+   "src": "2021-09-11_314",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 15
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Universitario",
+     "pts": 9
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 1
+    },
+    {
+     "club": "La Salle",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "CRAI B",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 4,
+   "src": "2021-09-18_316",
+   "rows": [
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 9
+    },
+    {
+     "club": "Universitario",
+     "pts": 7
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 4,
+   "src": "2021-09-18_316",
+   "rows": [
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 9
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 4,
+   "src": "2021-09-18_316",
+   "rows": [
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "CRAI",
+     "pts": 11
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 7
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 4,
+   "src": "2021-09-18_316",
+   "rows": [
+    {
+     "club": "Rowing",
+     "pts": 20
+    },
+    {
+     "club": "CRAI",
+     "pts": 20
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "CRAR",
+     "pts": 16
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 14
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 1
+    },
+    {
+     "club": "La Salle",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "CRAI B",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 5,
+   "src": "2021-09-25_318",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 20
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 13
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 8
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 4
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 5,
+   "src": "2021-09-25_318",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 20
+    },
+    {
+     "club": "Rowing",
+     "pts": 16
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 9
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 5,
+   "src": "2021-09-25_318",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "Universitario",
+     "pts": 13
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "CRAI",
+     "pts": 11
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 7
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 6,
+   "src": "2021-10-02_320",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 24
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 18
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "La Salle",
+     "pts": 12
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 6
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 6,
+   "src": "2021-10-02_320",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 25
+    },
+    {
+     "club": "Rowing",
+     "pts": 21
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 19
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 7
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Tilcara",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 6,
+   "src": "2021-10-02_320",
+   "rows": [
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "Universitario",
+     "pts": 13
+    },
+    {
+     "club": "CRAI",
+     "pts": 11
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 6,
+   "src": "2021-10-02_320",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 28
+    },
+    {
+     "club": "CRAR",
+     "pts": 26
+    },
+    {
+     "club": "Universitario",
+     "pts": 23
+    },
+    {
+     "club": "Rowing",
+     "pts": 20
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 19
+    },
+    {
+     "club": "Tilcara",
+     "pts": 17
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "CRAI B",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 6,
+   "src": "2021-10-06_321",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 24
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 18
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 9
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 6,
+   "src": "2021-10-06_321",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 25
+    },
+    {
+     "club": "Rowing",
+     "pts": 21
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 19
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 13
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Tilcara",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 6,
+   "src": "2021-10-06_321",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 19
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "Tilcara",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "Universitario",
+     "pts": 13
+    },
+    {
+     "club": "CRAI",
+     "pts": 11
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 6,
+   "src": "2021-10-06_321",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 24
+    },
+    {
+     "club": "Universitario",
+     "pts": 23
+    },
+    {
+     "club": "CRAR",
+     "pts": 21
+    },
+    {
+     "club": "Rowing",
+     "pts": 20
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "CRAI B",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 7,
+   "src": "2021-10-09_322",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 24
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 23
+    },
+    {
+     "club": "Rowing",
+     "pts": 20
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 14
+    },
+    {
+     "club": "La Salle",
+     "pts": 12
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 8
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 7,
+   "src": "2021-10-09_322",
+   "rows": [
+    {
+     "club": "Rowing",
+     "pts": 26
+    },
+    {
+     "club": "CRAI",
+     "pts": 25
+    },
+    {
+     "club": "Universitario",
+     "pts": 23
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 20
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 14
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 12
+    },
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "Tilcara",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 7,
+   "src": "2021-10-09_322",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 19
+    },
+    {
+     "club": "Tilcara",
+     "pts": 18
+    },
+    {
+     "club": "Rowing",
+     "pts": 16
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "CRAI",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 7,
+   "src": "2021-10-09_322",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 31
+    },
+    {
+     "club": "CRAI",
+     "pts": 28
+    },
+    {
+     "club": "Universitario",
+     "pts": 23
+    },
+    {
+     "club": "Tilcara",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 20
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 20
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 4
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    },
+    {
+     "club": "CRAI B",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 7,
+   "src": "2021-10-13_323",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 19
+    },
+    {
+     "club": "Tilcara",
+     "pts": 18
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "CRAI",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 8,
+   "src": "2021-10-16_324",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 28
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 23
+    },
+    {
+     "club": "Rowing",
+     "pts": 21
+    },
+    {
+     "club": "CRAR",
+     "pts": 19
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "La Salle",
+     "pts": 12
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 11
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 8
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 8,
+   "src": "2021-10-16_324",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 30
+    },
+    {
+     "club": "Rowing",
+     "pts": 26
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Universitario",
+     "pts": 23
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 17
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 8,
+   "src": "2021-10-16_324",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 24
+    },
+    {
+     "club": "Tilcara",
+     "pts": 23
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 19
+    },
+    {
+     "club": "Rowing",
+     "pts": 17
+    },
+    {
+     "club": "CRAI",
+     "pts": 16
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 8,
+   "src": "2021-10-16_324",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 36
+    },
+    {
+     "club": "CRAI",
+     "pts": 33
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 25
+    },
+    {
+     "club": "Universitario",
+     "pts": 23
+    },
+    {
+     "club": "Tilcara",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 20
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 15
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    },
+    {
+     "club": "CRAI B",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 8,
+   "src": "2021-10-21_325",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 28
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 28
+    },
+    {
+     "club": "Rowing",
+     "pts": 21
+    },
+    {
+     "club": "CRAR",
+     "pts": 19
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 13
+    },
+    {
+     "club": "La Salle",
+     "pts": 12
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 11
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 9,
+   "src": "2021-10-23_326",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 33
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 28
+    },
+    {
+     "club": "Rowing",
+     "pts": 21
+    },
+    {
+     "club": "CRAR",
+     "pts": 19
+    },
+    {
+     "club": "Universitario",
+     "pts": 18
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 17
+    },
+    {
+     "club": "La Salle",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 11
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 9,
+   "src": "2021-10-23_326",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 35
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 30
+    },
+    {
+     "club": "Rowing",
+     "pts": 26
+    },
+    {
+     "club": "Universitario",
+     "pts": 28
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 9,
+   "src": "2021-10-23_326",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 29
+    },
+    {
+     "club": "Tilcara",
+     "pts": 28
+    },
+    {
+     "club": "CRAI",
+     "pts": 21
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 19
+    },
+    {
+     "club": "Rowing",
+     "pts": 17
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 9,
+   "src": "2021-10-23_326",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 36
+    },
+    {
+     "club": "CRAI",
+     "pts": 33
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 30
+    },
+    {
+     "club": "Universitario",
+     "pts": 28
+    },
+    {
+     "club": "Tilcara",
+     "pts": 24
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 20
+    },
+    {
+     "club": "Rowing",
+     "pts": 20
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    },
+    {
+     "club": "CRAI B",
+     "pts": 6
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 9,
+   "src": "2021-10-27_327",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 35
+    },
+    {
+     "club": "Rowing",
+     "pts": 26
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 30
+    },
+    {
+     "club": "Universitario",
+     "pts": 28
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 10,
+   "src": "2021-10-30_328",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 38
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 33
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 21
+    },
+    {
+     "club": "CRAR",
+     "pts": 19
+    },
+    {
+     "club": "Universitario",
+     "pts": 18
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "La Salle",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 13
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 10,
+   "src": "2021-10-30_328",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 39
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 35
+    },
+    {
+     "club": "Rowing",
+     "pts": 26
+    },
+    {
+     "club": "Universitario",
+     "pts": 28
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "La Salle",
+     "pts": 13
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 10,
+   "src": "2021-10-30_328",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 39
+    },
+    {
+     "club": "Tilcara",
+     "pts": 28
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 24
+    },
+    {
+     "club": "CRAI",
+     "pts": 22
+    },
+    {
+     "club": "Universitario",
+     "pts": 18
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 10,
+   "src": "2021-10-30_328",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 38
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 35
+    },
+    {
+     "club": "Tilcara",
+     "pts": 29
+    },
+    {
+     "club": "Universitario",
+     "pts": 28
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Rowing",
+     "pts": 20
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    },
+    {
+     "club": "CRAI B",
+     "pts": 6
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 10,
+   "src": "2021-11-04_329",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 38
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 38
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 21
+    },
+    {
+     "club": "CRAR",
+     "pts": 19
+    },
+    {
+     "club": "Universitario",
+     "pts": 18
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "La Salle",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 13
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 10,
+   "src": "2021-11-04_329",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 39
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 29
+    },
+    {
+     "club": "Tilcara",
+     "pts": 28
+    },
+    {
+     "club": "CRAI",
+     "pts": 22
+    },
+    {
+     "club": "Universitario",
+     "pts": 18
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 10,
+   "src": "2021-11-06_330",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 38
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 38
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 21
+    },
+    {
+     "club": "CRAR",
+     "pts": 19
+    },
+    {
+     "club": "Universitario",
+     "pts": 18
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 17
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "La Salle",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 11,
+   "src": "2021-11-13_332",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 43
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 38
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 24
+    },
+    {
+     "club": "Universitario",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 22
+    },
+    {
+     "club": "CRAR",
+     "pts": 19
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "La Salle",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 11,
+   "src": "2021-11-13_332",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 44
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 35
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 32
+    },
+    {
+     "club": "Rowing",
+     "pts": 31
+    },
+    {
+     "club": "Universitario",
+     "pts": 28
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "La Salle",
+     "pts": 13
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 11,
+   "src": "2021-11-13_332",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 44
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 29
+    },
+    {
+     "club": "Tilcara",
+     "pts": 28
+    },
+    {
+     "club": "CRAI",
+     "pts": 27
+    },
+    {
+     "club": "Universitario",
+     "pts": 23
+    },
+    {
+     "club": "Rowing",
+     "pts": 17
+    },
+    {
+     "club": "La Salle",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 11,
+   "src": "2021-11-13_332",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 43
+    },
+    {
+     "club": "CRAR",
+     "pts": 36
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 40
+    },
+    {
+     "club": "Tilcara",
+     "pts": 29
+    },
+    {
+     "club": "Universitario",
+     "pts": 29
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Rowing",
+     "pts": 25
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "CRAI B",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 11,
+   "src": "2021-11-20_334",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 43
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 38
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 24
+    },
+    {
+     "club": "CRAR",
+     "pts": 23
+    },
+    {
+     "club": "Rowing",
+     "pts": 23
+    },
+    {
+     "club": "Universitario",
+     "pts": 22
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "La Salle",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 11,
+   "src": "2021-11-20_334",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 44
+    },
+    {
+     "club": "Rowing",
+     "pts": 36
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 35
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 32
+    },
+    {
+     "club": "Universitario",
+     "pts": 28
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "La Salle",
+     "pts": 13
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 11,
+   "src": "2021-11-20_334",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 44
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 29
+    },
+    {
+     "club": "Tilcara",
+     "pts": 28
+    },
+    {
+     "club": "CRAI",
+     "pts": 27
+    },
+    {
+     "club": "Universitario",
+     "pts": 23
+    },
+    {
+     "club": "Rowing",
+     "pts": 22
+    },
+    {
+     "club": "La Salle",
+     "pts": 18
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 11,
+   "src": "2021-11-20_334",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 44
+    },
+    {
+     "club": "CRAR",
+     "pts": 40
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 40
+    },
+    {
+     "club": "Tilcara",
+     "pts": 29
+    },
+    {
+     "club": "Universitario",
+     "pts": 29
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Rowing",
+     "pts": 25
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "CRAI B",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    }
+   ]
+  }
+ ],
+ "issues": [
+  "Formato: no hay fase final; liga de todos contra todos a 11 fechas y el campeón es el primero de la tabla. Se usó phase \"Campeonato\". En M19 hay CRAI \"A\" (alias CRAI) y CRAI \"B\" (alias CRAI B); en M15-M17 solo CRAI.",
+  "Estudiantes-Tilcara (4° fecha, adelantado y jugado el 21/8, anterior a la primera nota): no hay marcador ni puntos en ninguna nota. Quedó status not_played en las 4 divisiones; los puntos de tabla se infirieron de las posiciones (M15 Tilcara 5-0; M16 Estudiantes 5-0; M17 Estudiantes 5-0; M19 Estudiantes 4-1) y entran así en el control.",
+  "Sin resultado publicado (quedaron postponed): Alma Juniors-Tilcara (11° fecha, las 4 divisiones; las tablas finales no los cuentan) y La Salle-Tilcara M17 (10° fecha, postergado por vacunación) y Rowing-Santa Fe RC M17 (5° fecha, postergado). Estudiantes-Rowing M17 (6° fecha) quedó not_played: la tabla sugiere que se resolvió pero ninguna nota da el marcador.",
+  "La fecha 11 (prevista 6/11) se corrió al 13/11 por el Campeonato Argentino Juvenil. La Salle-CRAI \"A\" M19 ya figura jugado en la nota del 11/11 (adelantado); se dejó fecha 2021-11-13 porque el día exacto no se publica. Fecha 9 figura \"23/9\" en el fixture: es 23/10.",
+  "Fechas de la 7° fecha: solo algunas indican viernes 8/10 (M15 CRAR-Estudiantes; M17 CRAR-Estudiantes, Universitario-Santa Fe RC, Alma-Cha Roga; M19 La Salle-CRAI B el 7/10, CRAR-Estudiantes, Universitario-Santa Fe RC, Alma-Cha Roga el 8/10); el resto quedó en el sábado 9/10 por no estar aclarado.",
+  "CONTROL M15 (final publicada vs suma de hp/ap): Cha Roga Club 17 vs 19 y La Salle 12 vs 14 (la tabla publica \"La Salle 1\", truncado): la tabla retuvo los 2-2 otorgados por el partido que \"no se disputó por falta de médico\" el 2/10, aunque después se jugó el 6/11 (15-12, 4-1). Universitario 21 vs 22: la tabla le suma +1 en la 6° fecha (8 a 9) cuando estaba libre; no se encontró causa.",
+  "CONTROL M16: CRAR 16 vs 11 y Universitario 23 vs 28: errata en 1° fecha, CRAR 15-27 Universitario figura (5-0) y la tabla le da los 5 a Universitario (se dejó hp/ap como lo imprime la nota). Cha Roga Club 18 vs 19 (+1 en la 6° fecha, 13 a 14) y Estudiantes 33 vs 32 (-1 en la 6° fecha, derrota 24-27 (2-5) contada como 1).",
+  "CONTROL M17: La Salle 16 vs 18 y Cha Roga Club 6 vs 3: la tabla retuvo los 2-2 del Cha Roga-La Salle \"no disputado\" (falta de médico, 2/10) y además no suma los 5 de Cha Roga por Alma Juniors 15-26 Cha Roga (0-5) del 8/10 (Alma tampoco cambia). Estudiantes 40 vs 44: +5 por el Estudiantes-Rowing sin marcador (ver arriba) y -1 desde la 6° fecha. Tilcara 29 vs 28, Santa Fe RC 30 vs 29: -1 cada uno desde la 6° fecha (la tabla del 2/10 baja 1 punto a Estudiantes, Tilcara y Santa Fe RC sin partido que lo explique). CRAI 26 vs 27: +1 desde la 8° fecha (22-15 a Rowing (4-1)).",
+  "CONTROL M19: Santa Fe RC 30 vs 25: la tabla no suma los 5 de CRAI B 17-36 Santa Fe RC (adelanto de la 11° fecha, 6/11). La Salle 11 vs 6: la tabla no suma los 4 del adelantado La Salle 22-19 CRAI B (7/10) y le resta 1 en la 6° fecha (Cha Roga 14-12 La Salle (4-1)). Cha Roga Club 6 vs 1: la tabla no suma los 4 de ese mismo partido ni el 1 de la 9° fecha (22-31 CRAI B (1-5)); la nota del 6/10 (321) trae una tabla M19 que parece anular ese partido. CRAI B 7 vs 6: la tabla no suma el 1 de CRAI B 5-10 Alma Juniors (1-4). CRAR, CRAI, Estudiantes, Universitario, Rowing, Tilcara y Alma cierran exactos.",
+  "M19 Rowing-CRAR (postergado de la 10° fecha, jugado 7/12, CRAR 24-19): la nota no publica puntos de tabla, hp/ap quedaron null (con 4 tries CRAR suma bonus). Las posiciones M19 de las notas del 13-20/11 no incluyen ese partido.",
+  "Las líneas \"Posiciones\" de las notas de designaciones repiten la tabla de la fecha anterior; se copiaron solo las que difieren de la anterior de esa división. Varias tienen errores propios (p. ej. M19 en la nota del 6/10 con CRAR 21 cuando la del 2/10 dice 26). afterRound de esas líneas es el de la última fecha jugada.",
+  "Partidos excluidos: amistosos de M1/M2/M17 (Capibá-Tacurú, Rowing-Tacurú), seleccionados y M18 USR."
+ ]
+}

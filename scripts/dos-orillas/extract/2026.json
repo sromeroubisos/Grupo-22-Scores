@@ -1,0 +1,8441 @@
+{
+  "year": 2026,
+  "format": "Tres etapas. (1) Fase clasificatoria de 9 fechas (28/3 al 13/6). En M15, M16 y M17 se dividió en 'Competencia Progresión' (8 clubes: Santa Fe RC, CRAI, CRAR, Estudiantes, Rowing, Tilcara, La Salle, Universitario; todos contra todos, una rueda) -> phase 'Fase clasificatoria', y 'Competencia Formación' (Santa Fe RC B, Alma Juniors, At. Brown, San Carlos, Querandí RC, Cha Roga Club, Estudiantes B, según la división) -> phase 'Competencia Formación', sin tabla publicada. Además hubo una 'ronda de amistosos' (ignorada). En M19 una sola tabla de 10 (los 8 + Alma Juniors y Cha Roga Club), más partidos de reservas (phase 'Reservas', alias con sufijo R). (2) Final Six (18/7 al 29/8, 5 fechas; algunos partidos de Plata M16/M17 se adelantaron al 27/6): Copa Oro con los 6 primeros -> 'Final Six Oro'; Copa Plata con el 7° y 8° de Progresión + Formación (M15: 5 equipos; M16: 7 equipos, con At. Brown y San Carlos compartiendo un lugar del fixture; M17: 6 equipos, con 'Cha Roga Club / Querandí RC' combinado) y en M19 con 7-10 de la tabla + CRAI B y Estudiantes B -> 'Final Six Plata'. (3) Final Four (5/9, 12/9, 26/9; M16 y M17 corrieron la 2ª fecha al 26/9 y la 3ª al 3/10 por el Argentino Juvenil): tres copas por división -> 'Final Four Oro' (4 primeros de la Final Six Oro), 'Final Four Plata' (5° y 6° de Oro + 1° y 2° de Plata), 'Final Four Bronce' (resto de Plata; M15 y M19 Alma-Cha Roga, M16 La Salle/Alma/At. Brown/San Carlos, M17 serie At. Brown-Querandí RC). Final Four: 1ª fecha 4°v1° y 2°v3°, 2ª 1°v3° y 2°v4°, 3ª 1°v2° y 3°v4°. Al 30/9 faltan la 3ª fecha de M16 y M17 (cargadas como 'scheduled') y At. Brown-San Carlos M16 (10/10) y CRAI-Tilcara M17 (6/10). Puntos de tabla: la fuente NO los publica en las fechas 2-4 de la fase clasificatoria ni en las fechas 1-4 de la Final Six (hp/ap null). Posiciones: se copió cada línea distinta; las repetidas textualmente en la nota de programación siguiente (mismo afterRound) se omitieron.",
+  "champions": [
+    {
+      "division": "M15",
+      "cup": "Oro",
+      "club": "Santa Fe RC",
+      "note": "Final Four Oro, 14 pts (nota del 26/9)"
+    },
+    {
+      "division": "M15",
+      "cup": "Plata",
+      "club": "Tilcara",
+      "note": "Final Four Plata, 12 pts (nota del 26/9)"
+    },
+    {
+      "division": "M17",
+      "cup": "Bronce",
+      "club": "Querandí RC",
+      "note": "serie de dos partidos con At. Brown (13-15 y 36-24)"
+    },
+    {
+      "division": "M19",
+      "cup": "Oro",
+      "club": "Estudiantes",
+      "note": "Final Four Oro, 15 pts, invicto (nota del 26/9)"
+    },
+    {
+      "division": "M19",
+      "cup": "Plata",
+      "club": "Universitario",
+      "note": "Final Four Plata, 14 pts (nota del 26/9)"
+    }
+  ],
+  "phases": [
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "teams": [
+        "Santa Fe RC",
+        "CRAI",
+        "CRAR",
+        "Estudiantes",
+        "Rowing",
+        "Tilcara",
+        "La Salle",
+        "Universitario"
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "teams": [
+        "Santa Fe RC",
+        "CRAI",
+        "CRAR",
+        "Estudiantes",
+        "Rowing",
+        "Tilcara",
+        "La Salle",
+        "Universitario"
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "teams": [
+        "Santa Fe RC",
+        "CRAI",
+        "CRAR",
+        "Estudiantes",
+        "Rowing",
+        "Tilcara",
+        "La Salle",
+        "Universitario"
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Competencia Formación",
+      "group": null,
+      "teams": [
+        "Santa Fe RC B",
+        "Alma Juniors",
+        "Cha Roga Club"
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Competencia Formación",
+      "group": null,
+      "teams": [
+        "Santa Fe RC B",
+        "Alma Juniors",
+        "At. Brown",
+        "San Carlos",
+        "Cha Roga Club"
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "teams": [
+        "Santa Fe RC B",
+        "Alma Juniors",
+        "At. Brown",
+        "San Carlos",
+        "Querandí RC",
+        "Cha Roga Club",
+        "Estudiantes B"
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "teams": [
+        "Santa Fe RC",
+        "CRAI",
+        "CRAR",
+        "Estudiantes",
+        "Rowing",
+        "Tilcara",
+        "La Salle",
+        "Universitario",
+        "Alma Juniors",
+        "Cha Roga Club"
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Reservas",
+      "group": null,
+      "teams": [
+        "Santa Fe RC R",
+        "CRAI R",
+        "Estudiantes R",
+        "Rowing R",
+        "CRAR R",
+        "Tilcara R"
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "teams": [
+        "Santa Fe RC",
+        "Estudiantes",
+        "La Salle",
+        "CRAI",
+        "Tilcara",
+        "Universitario"
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "teams": [
+        "Rowing",
+        "CRAR",
+        "Santa Fe RC B",
+        "Cha Roga Club",
+        "Alma Juniors"
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "teams": [
+        "Estudiantes",
+        "Tilcara",
+        "Santa Fe RC",
+        "Universitario",
+        "Rowing",
+        "CRAI"
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "teams": [
+        "CRAR",
+        "La Salle",
+        "Santa Fe RC B",
+        "Alma Juniors",
+        "At. Brown",
+        "San Carlos",
+        "Cha Roga Club"
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "teams": [
+        "Santa Fe RC",
+        "Rowing",
+        "CRAR",
+        "La Salle",
+        "Estudiantes",
+        "Universitario"
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "teams": [
+        "CRAI",
+        "Tilcara",
+        "Santa Fe RC B",
+        "Alma Juniors",
+        "At. Brown",
+        "Cha Roga Club / Querandí RC"
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "teams": [
+        "Santa Fe RC",
+        "Estudiantes",
+        "CRAI",
+        "Rowing",
+        "CRAR",
+        "La Salle"
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "teams": [
+        "Tilcara",
+        "Universitario",
+        "Cha Roga Club",
+        "Alma Juniors",
+        "CRAI B",
+        "Estudiantes B"
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Oro",
+      "group": null,
+      "teams": [
+        "Santa Fe RC",
+        "CRAI",
+        "La Salle",
+        "Estudiantes"
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Plata",
+      "group": null,
+      "teams": [
+        "Tilcara",
+        "Universitario",
+        "Rowing",
+        "CRAR"
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "teams": [
+        "Alma Juniors",
+        "Cha Roga Club"
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Oro",
+      "group": null,
+      "teams": [
+        "Tilcara",
+        "Estudiantes",
+        "Universitario",
+        "Santa Fe RC"
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Plata",
+      "group": null,
+      "teams": [
+        "CRAR",
+        "Cha Roga Club",
+        "Rowing",
+        "CRAI"
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "teams": [
+        "La Salle",
+        "Alma Juniors",
+        "At. Brown",
+        "San Carlos"
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Oro",
+      "group": null,
+      "teams": [
+        "Universitario",
+        "Estudiantes",
+        "Santa Fe RC",
+        "Rowing"
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Plata",
+      "group": null,
+      "teams": [
+        "CRAR",
+        "La Salle",
+        "CRAI",
+        "Tilcara"
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "teams": [
+        "At. Brown",
+        "Querandí RC"
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Oro",
+      "group": null,
+      "teams": [
+        "Santa Fe RC",
+        "Estudiantes",
+        "CRAI",
+        "CRAR"
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Plata",
+      "group": null,
+      "teams": [
+        "Universitario",
+        "Tilcara",
+        "Rowing",
+        "La Salle"
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "teams": [
+        "Cha Roga Club",
+        "Alma Juniors"
+      ]
+    }
+  ],
+  "matches": [
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Estudiantes",
+      "away": "La Salle",
+      "hs": 10,
+      "as": 35,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Rowing",
+      "away": "CRAR",
+      "hs": 22,
+      "as": 12,
+      "hp": 4,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "12:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Universitario",
+      "away": "Tilcara",
+      "hs": 19,
+      "as": 28,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "CRAR",
+      "away": "Universitario",
+      "hs": 14,
+      "as": 29,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "La Salle",
+      "away": "Rowing",
+      "hs": 57,
+      "as": 5,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "10:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "Santa Fe RC",
+      "away": "CRAI",
+      "hs": 24,
+      "as": 7,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "13:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Estudiantes",
+      "away": "Santa Fe RC",
+      "hs": 40,
+      "as": 7,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Universitario",
+      "away": "La Salle",
+      "hs": 7,
+      "as": 19,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "10:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Tilcara",
+      "away": "CRAR",
+      "hs": 57,
+      "as": 27,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "13:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "La Salle",
+      "away": "Tilcara",
+      "hs": 13,
+      "as": 5,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "10:45"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "Santa Fe RC",
+      "away": "Rowing",
+      "hs": 62,
+      "as": 17,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "CRAI",
+      "away": "Estudiantes",
+      "hs": 28,
+      "as": 27,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "Rowing",
+      "away": "CRAI",
+      "hs": 12,
+      "as": 5,
+      "hp": 4,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "Universitario",
+      "away": "Santa Fe RC",
+      "hs": 0,
+      "as": 50,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559",
+      "time": "10:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "CRAR",
+      "away": "La Salle",
+      "hs": 10,
+      "as": 17,
+      "hp": 1,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559",
+      "time": "12:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "Santa Fe RC",
+      "away": "Tilcara",
+      "hs": 35,
+      "as": 15,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "10:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "CRAI",
+      "away": "Universitario",
+      "hs": 15,
+      "as": 10,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "Estudiantes",
+      "away": "Rowing",
+      "hs": 81,
+      "as": 5,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Universitario",
+      "away": "Estudiantes",
+      "hs": 14,
+      "as": 32,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "10:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Tilcara",
+      "away": "CRAI",
+      "hs": 12,
+      "as": 60,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "12:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "CRAR",
+      "away": "Santa Fe RC",
+      "hs": 5,
+      "as": 47,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Santa Fe RC",
+      "away": "La Salle",
+      "hs": 22,
+      "as": 19,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "CRAI",
+      "away": "CRAR",
+      "hs": 50,
+      "as": 7,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "10:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Estudiantes",
+      "away": "Tilcara",
+      "hs": 20,
+      "as": 7,
+      "hp": 4,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Rowing",
+      "away": "Universitario",
+      "hs": 7,
+      "as": 49,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "12:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "Tilcara",
+      "away": "Rowing",
+      "hs": 46,
+      "as": 17,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "10:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "CRAR",
+      "away": "Estudiantes",
+      "hs": 12,
+      "as": 53,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "La Salle",
+      "away": "CRAI",
+      "hs": 17,
+      "as": 22,
+      "hp": 1,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Santa Fe RC B",
+      "away": "Alma Juniors",
+      "hs": 56,
+      "as": 21,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "13:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "Cha Roga Club",
+      "away": "Santa Fe RC B",
+      "hs": 44,
+      "as": 14,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "13:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Santa Fe RC B",
+      "away": "Cha Roga Club",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-05-30_563",
+      "time": "12:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Alma Juniors",
+      "away": "Cha Roga Club",
+      "hs": 17,
+      "as": 19,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "el fixture lo pone en Formación; las notas del 4/6 y 6/6 lo listan bajo Amistosos",
+      "src": "2026-06-06_565",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Estudiantes",
+      "away": "La Salle",
+      "hs": 92,
+      "as": 0,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "11:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Rowing",
+      "away": "CRAR",
+      "hs": 48,
+      "as": 5,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "12:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Universitario",
+      "away": "Tilcara",
+      "hs": 10,
+      "as": 57,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "10:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "CRAR",
+      "away": "Universitario",
+      "hs": 12,
+      "as": 14,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "La Salle",
+      "away": "Rowing",
+      "hs": 12,
+      "as": 29,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "11:15"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "Santa Fe RC",
+      "away": "CRAI",
+      "hs": 23,
+      "as": 10,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "13:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Estudiantes",
+      "away": "Santa Fe RC",
+      "hs": 19,
+      "as": 7,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Universitario",
+      "away": "La Salle",
+      "hs": 29,
+      "as": 7,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "11:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Tilcara",
+      "away": "CRAR",
+      "hs": 43,
+      "as": 10,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "12:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "La Salle",
+      "away": "Tilcara",
+      "hs": 14,
+      "as": 55,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "Santa Fe RC",
+      "away": "Rowing",
+      "hs": 28,
+      "as": 25,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "CRAI",
+      "away": "Estudiantes",
+      "hs": 7,
+      "as": 22,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "Rowing",
+      "away": "CRAI",
+      "hs": 10,
+      "as": 21,
+      "hp": 0,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559",
+      "time": "13:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "Universitario",
+      "away": "Santa Fe RC",
+      "hs": 19,
+      "as": 33,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559",
+      "time": "14:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "CRAR",
+      "away": "La Salle",
+      "hs": 31,
+      "as": 5,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "Santa Fe RC",
+      "away": "Tilcara",
+      "hs": 12,
+      "as": 23,
+      "hp": 0,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "10:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "CRAI",
+      "away": "Universitario",
+      "hs": 20,
+      "as": 28,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "Estudiantes",
+      "away": "Rowing",
+      "hs": 57,
+      "as": 5,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Universitario",
+      "away": "Estudiantes",
+      "hs": 12,
+      "as": 31,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "11:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Tilcara",
+      "away": "CRAI",
+      "hs": 31,
+      "as": 7,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "10:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "CRAR",
+      "away": "Santa Fe RC",
+      "hs": 27,
+      "as": 15,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "11:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Santa Fe RC",
+      "away": "La Salle",
+      "hs": 62,
+      "as": 0,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "CRAI",
+      "away": "CRAR",
+      "hs": 42,
+      "as": 22,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "12:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Estudiantes",
+      "away": "Tilcara",
+      "hs": 22,
+      "as": 7,
+      "hp": 4,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "10:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Rowing",
+      "away": "Universitario",
+      "hs": 22,
+      "as": 14,
+      "hp": 4,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "Tilcara",
+      "away": "Rowing",
+      "hs": 20,
+      "as": 12,
+      "hp": 4,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "10:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "CRAR",
+      "away": "Estudiantes",
+      "hs": 0,
+      "as": 12,
+      "hp": 0,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "11:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "La Salle",
+      "away": "CRAI",
+      "hs": 7,
+      "as": 47,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "13:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Santa Fe RC B",
+      "away": "Alma Juniors",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-03-28_551",
+      "time": "13:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "At. Brown",
+      "away": "San Carlos",
+      "hs": 34,
+      "as": 10,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "At. Brown",
+      "away": "Santa Fe RC B",
+      "hs": 28,
+      "as": 21,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "12:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "Cha Roga Club",
+      "away": "Santa Fe RC B",
+      "hs": 56,
+      "as": 22,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "Santa Fe RC B",
+      "away": "At. Brown",
+      "hs": 0,
+      "as": 60,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Santa Fe RC B",
+      "away": "Cha Roga Club",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "postergado; sin reprogramación publicada",
+      "src": "2026-05-30_563"
+    },
+    {
+      "division": "M16",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "San Carlos",
+      "away": "At. Brown",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-05-30_563",
+      "time": "10:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Alma Juniors",
+      "away": "Cha Roga Club",
+      "hs": 0,
+      "as": 40,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "el fixture lo pone en Formación; las notas del 4/6 y 6/6 lo listan bajo Amistosos",
+      "src": "2026-06-06_565",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-13",
+      "home": "San Carlos",
+      "away": "Santa Fe RC B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "fecha 8 reprogramada al 13/6; figura en el panorama sin marcador ni aclaración",
+      "src": "2026-06-13_567",
+      "time": "12:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Estudiantes",
+      "away": "La Salle",
+      "hs": 17,
+      "as": 29,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "11:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Rowing",
+      "away": "CRAR",
+      "hs": 12,
+      "as": 20,
+      "hp": 0,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "13:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Universitario",
+      "away": "Tilcara",
+      "hs": 32,
+      "as": 19,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "11:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "CRAR",
+      "away": "Universitario",
+      "hs": 34,
+      "as": 31,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "La Salle",
+      "away": "Rowing",
+      "hs": 20,
+      "as": 30,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "Santa Fe RC",
+      "away": "CRAI",
+      "hs": 44,
+      "as": 0,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "13:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Estudiantes",
+      "away": "Santa Fe RC",
+      "hs": 19,
+      "as": 28,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Universitario",
+      "away": "La Salle",
+      "hs": 17,
+      "as": 25,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "11:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Tilcara",
+      "away": "CRAR",
+      "hs": 28,
+      "as": 36,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "13:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "La Salle",
+      "away": "Tilcara",
+      "hs": 33,
+      "as": 14,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "14:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "Santa Fe RC",
+      "away": "Rowing",
+      "hs": 65,
+      "as": 26,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "CRAI",
+      "away": "Estudiantes",
+      "hs": 7,
+      "as": 22,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "14:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-08",
+      "home": "Rowing",
+      "away": "CRAI",
+      "hs": 21,
+      "as": 10,
+      "hp": 4,
+      "ap": 0,
+      "status": "final",
+      "note": "adelantado al viernes 8/5",
+      "src": "2026-05-09_559",
+      "time": "20:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "Universitario",
+      "away": "Santa Fe RC",
+      "hs": 7,
+      "as": 19,
+      "hp": 0,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559",
+      "time": "11:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "CRAR",
+      "away": "La Salle",
+      "hs": 31,
+      "as": 17,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559",
+      "time": "14:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "Santa Fe RC",
+      "away": "Tilcara",
+      "hs": 59,
+      "as": 29,
+      "hp": 5,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "12:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "Estudiantes",
+      "away": "Rowing",
+      "hs": 28,
+      "as": 36,
+      "hp": 1,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-19",
+      "home": "CRAI",
+      "away": "Universitario",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "reprogramado al martes 19/5 20 hs; nunca se publicó resultado",
+      "src": "2026-05-16_561",
+      "time": "20:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Universitario",
+      "away": "Estudiantes",
+      "hs": 44,
+      "as": 36,
+      "hp": 5,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "11:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Tilcara",
+      "away": "CRAI",
+      "hs": 17,
+      "as": 33,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "12:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "CRAR",
+      "away": "Santa Fe RC",
+      "hs": 21,
+      "as": 60,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "13:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Santa Fe RC",
+      "away": "La Salle",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración; las posiciones del 6/6 suman 5 a La Salle y 1 a Santa Fe RC",
+      "src": "2026-06-06_565",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-09",
+      "home": "CRAI",
+      "away": "CRAR",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "reprogramado p/9/6; nunca se publicó resultado",
+      "src": "2026-06-06_565"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Estudiantes",
+      "away": "Tilcara",
+      "hs": 50,
+      "as": 15,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "12:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Rowing",
+      "away": "Universitario",
+      "hs": 31,
+      "as": 14,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "14:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "Tilcara",
+      "away": "Rowing",
+      "hs": 5,
+      "as": 30,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "12:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "CRAR",
+      "away": "Estudiantes",
+      "hs": 7,
+      "as": 42,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "13:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "La Salle",
+      "away": "CRAI",
+      "hs": 16,
+      "as": 25,
+      "hp": 0,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "13:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Santa Fe RC B",
+      "away": "Alma Juniors",
+      "hs": 90,
+      "as": 10,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "11:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "At. Brown",
+      "away": "Querandí RC",
+      "hs": 31,
+      "as": 48,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "14:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "Santa Fe RC B",
+      "away": "Querandí RC",
+      "hs": 14,
+      "as": 12,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "partidos de dos tiempos de 20 minutos",
+      "src": "2026-04-11_553",
+      "time": "11:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "Querandí RC",
+      "away": "Estudiantes B",
+      "hs": 0,
+      "as": 13,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "partidos de dos tiempos de 20 minutos",
+      "src": "2026-04-11_553",
+      "time": "11:50"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "Estudiantes B",
+      "away": "Santa Fe RC B",
+      "hs": 29,
+      "as": 7,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "la nota dice \"Estudiantes - SFRC B\"; el fixture dice SFRC B-Estudiantes B. Partidos de dos tiempos de 20 minutos",
+      "src": "2026-04-11_553",
+      "time": "12:40"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "At. Brown",
+      "away": "Santa Fe RC B",
+      "hs": 47,
+      "as": 40,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "13:45"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Estudiantes B",
+      "away": "Querandí RC",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "no se disputó",
+      "src": "2026-04-18_555"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "Cha Roga Club",
+      "away": "Santa Fe RC B",
+      "hs": 34,
+      "as": 14,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "13:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "San Carlos",
+      "away": "At. Brown",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-05-09_559",
+      "time": "14:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "Santa Fe RC B",
+      "away": "At. Brown",
+      "hs": 31,
+      "as": 66,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "13:45"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Santa Fe RC B",
+      "away": "Cha Roga Club",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-05-30_563",
+      "time": "12:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Querandí RC",
+      "away": "At. Brown",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-05-30_563",
+      "time": "12:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Alma Juniors",
+      "away": "Cha Roga Club",
+      "hs": 5,
+      "as": 42,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "el fixture lo pone en Formación; las notas del 4/6 y 6/6 lo listan bajo Amistosos",
+      "src": "2026-06-06_565",
+      "time": "14:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Competencia Formación",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-13",
+      "home": "Querandí RC",
+      "away": "Santa Fe RC B",
+      "hs": 27,
+      "as": 12,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "fecha 8 reprogramada al 13/6",
+      "src": "2026-06-13_567",
+      "time": "12:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Estudiantes",
+      "away": "La Salle",
+      "hs": 45,
+      "as": 5,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Rowing",
+      "away": "CRAR",
+      "hs": 26,
+      "as": 17,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "13:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Universitario",
+      "away": "Tilcara",
+      "hs": 38,
+      "as": 19,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Santa Fe RC",
+      "away": "Alma Juniors",
+      "hs": 80,
+      "as": 10,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "CRAI",
+      "away": "Cha Roga Club",
+      "hs": 38,
+      "as": 12,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-03-28_551",
+      "time": "14:15"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "CRAR",
+      "away": "Universitario",
+      "hs": 65,
+      "as": 0,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "La Salle",
+      "away": "Rowing",
+      "hs": 24,
+      "as": 12,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "Santa Fe RC",
+      "away": "CRAI",
+      "hs": 28,
+      "as": 12,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "Alma Juniors",
+      "away": "Tilcara",
+      "hs": 0,
+      "as": 113,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "14:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "Cha Roga Club",
+      "away": "Estudiantes",
+      "hs": 10,
+      "as": 33,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-11_553",
+      "time": "11:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Estudiantes",
+      "away": "Santa Fe RC",
+      "hs": 26,
+      "as": 27,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Universitario",
+      "away": "La Salle",
+      "hs": 19,
+      "as": 31,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Tilcara",
+      "away": "CRAR",
+      "hs": 18,
+      "as": 24,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "15:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "CRAI",
+      "away": "Alma Juniors",
+      "hs": 111,
+      "as": 0,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "12:45"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Rowing",
+      "away": "Cha Roga Club",
+      "hs": 17,
+      "as": 7,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-18_555",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "La Salle",
+      "away": "Tilcara",
+      "hs": 24,
+      "as": 31,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "la nota escribe \"La Salle 24 31 Tilcara\"",
+      "src": "2026-04-25_557",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "Santa Fe RC",
+      "away": "Rowing",
+      "hs": 27,
+      "as": 18,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "CRAI",
+      "away": "Estudiantes",
+      "hs": 12,
+      "as": 31,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "14:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "Alma Juniors",
+      "away": "CRAR",
+      "hs": 7,
+      "as": 77,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "14:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "Cha Roga Club",
+      "away": "Universitario",
+      "hs": 12,
+      "as": 22,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "12:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "Rowing",
+      "away": "CRAI",
+      "hs": 20,
+      "as": 19,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559",
+      "time": "14:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "Universitario",
+      "away": "Santa Fe RC",
+      "hs": 7,
+      "as": 47,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "CRAR",
+      "away": "La Salle",
+      "hs": 58,
+      "as": 7,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559",
+      "time": "14:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "Estudiantes",
+      "away": "Alma Juniors",
+      "hs": 110,
+      "as": 0,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559",
+      "time": "13:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 5,
+      "date": "2026-05-09",
+      "home": "Tilcara",
+      "away": "Cha Roga Club",
+      "hs": 29,
+      "as": 12,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-09_559",
+      "time": "11:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "Santa Fe RC",
+      "away": "Tilcara",
+      "hs": 32,
+      "as": 17,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "12:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "CRAI",
+      "away": "Universitario",
+      "hs": 31,
+      "as": 25,
+      "hp": 5,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "Estudiantes",
+      "away": "Rowing",
+      "hs": 17,
+      "as": 31,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "Alma Juniors",
+      "away": "La Salle",
+      "hs": 0,
+      "as": 52,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 6,
+      "date": "2026-05-16",
+      "home": "Cha Roga Club",
+      "away": "CRAR",
+      "hs": 15,
+      "as": 41,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-16_561",
+      "time": "11:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Universitario",
+      "away": "Estudiantes",
+      "hs": 15,
+      "as": 36,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Tilcara",
+      "away": "CRAI",
+      "hs": 20,
+      "as": 32,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "13:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "CRAR",
+      "away": "Santa Fe RC",
+      "hs": 16,
+      "as": 25,
+      "hp": 0,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "Rowing",
+      "away": "Alma Juniors",
+      "hs": 132,
+      "as": 0,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "13:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 7,
+      "date": "2026-05-30",
+      "home": "La Salle",
+      "away": "Cha Roga Club",
+      "hs": 12,
+      "as": 10,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-05-30_563",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Santa Fe RC",
+      "away": "La Salle",
+      "hs": 19,
+      "as": 19,
+      "hp": 2,
+      "ap": 2,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "CRAI",
+      "away": "CRAR",
+      "hs": 36,
+      "as": 27,
+      "hp": 5,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "12:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Estudiantes",
+      "away": "Tilcara",
+      "hs": 17,
+      "as": 10,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "13:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Rowing",
+      "away": "Universitario",
+      "hs": 34,
+      "as": 14,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "14:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 8,
+      "date": "2026-06-06",
+      "home": "Alma Juniors",
+      "away": "Cha Roga Club",
+      "hs": 5,
+      "as": 74,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-06_565",
+      "time": "14:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-11",
+      "home": "Cha Roga Club",
+      "away": "Santa Fe RC",
+      "hs": 13,
+      "as": 23,
+      "hp": 0,
+      "ap": 4,
+      "status": "final",
+      "note": "adelantado al jueves 11/6",
+      "src": "2026-06-13_567",
+      "time": "20:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "Tilcara",
+      "away": "Rowing",
+      "hs": 20,
+      "as": 7,
+      "hp": 4,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "12:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "CRAR",
+      "away": "Estudiantes",
+      "hs": 5,
+      "as": 21,
+      "hp": 0,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "La Salle",
+      "away": "CRAI",
+      "hs": 0,
+      "as": 43,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "round": 9,
+      "date": "2026-06-13",
+      "home": "Universitario",
+      "away": "Alma Juniors",
+      "hs": 81,
+      "as": 0,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-06-13_567",
+      "time": "11:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Reservas",
+      "group": null,
+      "round": 1,
+      "date": "2026-03-28",
+      "home": "Rowing R",
+      "away": "CRAR R",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "suspendido",
+      "src": "2026-03-28_551"
+    },
+    {
+      "division": "M19",
+      "phase": "Reservas",
+      "group": null,
+      "round": 2,
+      "date": "2026-04-11",
+      "home": "Santa Fe RC R",
+      "away": "CRAI R",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "programado (nota del 8/4); no figura en el panorama del 11/4",
+      "src": "2026-04-08_552",
+      "time": "11:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Reservas",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Estudiantes R",
+      "away": "Santa Fe RC R",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "no se disputó",
+      "src": "2026-04-18_555"
+    },
+    {
+      "division": "M19",
+      "phase": "Reservas",
+      "group": null,
+      "round": 3,
+      "date": "2026-04-18",
+      "home": "Tilcara R",
+      "away": "CRAR R",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-04-18_555"
+    },
+    {
+      "division": "M19",
+      "phase": "Reservas",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "Santa Fe RC R",
+      "away": "Rowing R",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "no se disputó",
+      "src": "2026-04-25_557"
+    },
+    {
+      "division": "M19",
+      "phase": "Reservas",
+      "group": null,
+      "round": 4,
+      "date": "2026-04-25",
+      "home": "CRAI R",
+      "away": "Estudiantes R",
+      "hs": 28,
+      "as": 7,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-04-25_557",
+      "time": "12:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "CRAI",
+      "away": "Universitario",
+      "hs": 33,
+      "as": 14,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-18_570",
+      "time": "09:45"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "La Salle",
+      "away": "Estudiantes",
+      "hs": 24,
+      "as": 14,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-18_570",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "Tilcara",
+      "away": "Santa Fe RC",
+      "hs": 19,
+      "as": 20,
+      "hp": 1,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-18_570",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Universitario",
+      "away": "Tilcara",
+      "hs": 52,
+      "as": 12,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Santa Fe RC",
+      "away": "La Salle",
+      "hs": 22,
+      "as": 14,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "11:15"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Estudiantes",
+      "away": "CRAI",
+      "hs": 22,
+      "as": 24,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "12:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Estudiantes",
+      "away": "Universitario",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "suspendido el 1/8; disputado sin marcador publicado — las posiciones del 26/8 suman 5 a Estudiantes",
+      "src": "2026-08-01_574"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "CRAI",
+      "away": "Santa Fe RC",
+      "hs": 10,
+      "as": 12,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-01_574",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "La Salle",
+      "away": "Tilcara",
+      "hs": 33,
+      "as": 10,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-01_574",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Universitario",
+      "away": "La Salle",
+      "hs": 12,
+      "as": 18,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Tilcara",
+      "away": "CRAI",
+      "hs": 9,
+      "as": 26,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "12:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Santa Fe RC",
+      "away": "Estudiantes",
+      "hs": 21,
+      "as": 17,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "10:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Santa Fe RC",
+      "away": "Universitario",
+      "hs": 34,
+      "as": 14,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "CRAI",
+      "away": "La Salle",
+      "hs": 27,
+      "as": 21,
+      "hp": 5,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Estudiantes",
+      "away": "Tilcara",
+      "hs": 31,
+      "as": 20,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "12:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "Cha Roga Club",
+      "away": "CRAR",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "walkover",
+      "note": "GP visitante",
+      "src": "2026-07-18_570",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "Santa Fe RC B",
+      "away": "Rowing",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "postergado el 18/7; disputado sin marcador publicado — las posiciones del 8/8 solo cierran si se jugó (Rowing 15, Santa Fe RC B 5)",
+      "src": "2026-07-18_570"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Rowing",
+      "away": "Cha Roga Club",
+      "hs": 26,
+      "as": 24,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "CRAR",
+      "away": "Alma Juniors",
+      "hs": 52,
+      "as": 5,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "12:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Alma Juniors",
+      "away": "Rowing",
+      "hs": 7,
+      "as": 29,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-01_574",
+      "time": "12:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Cha Roga Club",
+      "away": "Santa Fe RC B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "suspendido el 1/8; disputado sin marcador publicado — las posiciones del 8/8 solo cierran si se jugó (Cha Roga Club 6)",
+      "src": "2026-08-01_574"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Santa Fe RC B",
+      "away": "Alma Juniors",
+      "hs": 40,
+      "as": 28,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Rowing",
+      "away": "CRAR",
+      "hs": 15,
+      "as": 24,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "12:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Santa Fe RC B",
+      "away": "CRAR",
+      "hs": 24,
+      "as": 28,
+      "hp": 1,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "12:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Alma Juniors",
+      "away": "Cha Roga Club",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-08-29_578",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "Santa Fe RC",
+      "away": "CRAI",
+      "hs": 17,
+      "as": 12,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-18_570",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "Rowing",
+      "away": "Tilcara",
+      "hs": 7,
+      "as": 36,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-18_570",
+      "time": "10:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "Universitario",
+      "away": "Estudiantes",
+      "hs": 26,
+      "as": 45,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-18_570",
+      "time": "12:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "CRAI",
+      "away": "Universitario",
+      "hs": 20,
+      "as": 27,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Estudiantes",
+      "away": "Rowing",
+      "hs": 31,
+      "as": 0,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Tilcara",
+      "away": "Santa Fe RC",
+      "hs": 34,
+      "as": 19,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Tilcara",
+      "away": "CRAI",
+      "hs": 43,
+      "as": 21,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-01_574",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Santa Fe RC",
+      "away": "Estudiantes",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "suspendido (1/8: duelo en Estudiantes / lluvia); nunca se reprogramó",
+      "src": "2026-08-01_574"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Rowing",
+      "away": "Universitario",
+      "hs": 8,
+      "as": 5,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-01_574",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "CRAI",
+      "away": "Rowing",
+      "hs": 15,
+      "as": 34,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "la nota escribe \"CRA B 15-34 Rowing\"",
+      "src": "2026-08-08_576",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Universitario",
+      "away": "Santa Fe RC",
+      "hs": 24,
+      "as": 17,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "10:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Estudiantes",
+      "away": "Tilcara",
+      "hs": 12,
+      "as": 18,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Santa Fe RC",
+      "away": "Rowing",
+      "hs": 41,
+      "as": 8,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Estudiantes",
+      "away": "CRAI",
+      "hs": 38,
+      "as": 7,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Tilcara",
+      "away": "Universitario",
+      "hs": 45,
+      "as": 24,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-06-27",
+      "home": "Alma Juniors",
+      "away": "At. Brown",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "adelantado al 27/6 (nota del 25/6); disputado sin marcador publicado — el panorama lo lista como \"Alma Jrs – San Carlos / At Brown (disputado)\"",
+      "src": "2026-07-18_570",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-06-27",
+      "home": "Alma Juniors",
+      "away": "San Carlos",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "fixture: Alma-San Carlos en la fecha 1; el panorama lo lista junto con At. Brown como \"(disputado)\"; fecha supuesta 27/6",
+      "src": "2026-07-18_570"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-06-27",
+      "home": "Cha Roga Club",
+      "away": "La Salle",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "adelantado al 27/6; disputado sin marcador publicado",
+      "src": "2026-07-18_570",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "Santa Fe RC B",
+      "away": "CRAR",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "postergado; nunca se reprogramó",
+      "src": "2026-07-18_570"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "At. Brown / San Carlos",
+      "away": "Santa Fe RC B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "postergado; nunca se reprogramó",
+      "src": "2026-07-25_572"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "CRAR",
+      "away": "Cha Roga Club",
+      "hs": 26,
+      "as": 20,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "La Salle",
+      "away": "Alma Juniors",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-07-25_572",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "La Salle",
+      "away": "At. Brown / San Carlos",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-08-01_574",
+      "time": "13:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Alma Juniors",
+      "away": "CRAR",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-08-01_574",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Cha Roga Club",
+      "away": "Santa Fe RC B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "suspendido; nunca se reprogramó",
+      "src": "2026-08-01_574"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "CRAR",
+      "away": "La Salle",
+      "hs": 31,
+      "as": 24,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "12:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-22",
+      "home": "At. Brown / San Carlos",
+      "away": "Cha Roga Club",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "postergado p/22/8; disputado sin marcador publicado — las posiciones del 26/8 suman 9 a Cha Roga Club",
+      "src": "2026-08-26_577"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Santa Fe RC B",
+      "away": "Alma Juniors",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "suspendido; nunca se reprogramó",
+      "src": "2026-08-08_576"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "CRAR",
+      "away": "At. Brown / San Carlos",
+      "hs": 41,
+      "as": 5,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "un solo marcador para el lugar compartido \"A. Brown / San Carlos\"",
+      "src": "2026-08-29_578",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Alma Juniors",
+      "away": "Cha Roga Club",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-08-29_578",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "La Salle",
+      "away": "Santa Fe RC B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "suspendido",
+      "src": "2026-08-29_578"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-21",
+      "home": "Universitario",
+      "away": "Santa Fe RC",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "reprogramado al martes 21/7; disputado sin marcador publicado — las posiciones del 8/8 suman 5 a Universitario y 1 a Santa Fe RC",
+      "src": "2026-07-18_570",
+      "time": "20:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "CRAR",
+      "away": "Estudiantes",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "postergado; sin resultado publicado",
+      "src": "2026-07-18_570"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "La Salle",
+      "away": "Rowing",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "postergado; sin resultado publicado",
+      "src": "2026-07-18_570"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Estudiantes",
+      "away": "Universitario",
+      "hs": 28,
+      "as": 10,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Santa Fe RC",
+      "away": "La Salle",
+      "hs": 25,
+      "as": 14,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "12:45"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Rowing",
+      "away": "CRAR",
+      "hs": 12,
+      "as": 13,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-25",
+      "home": "Rowing",
+      "away": "Estudiantes",
+      "hs": 28,
+      "as": 24,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "suspendido el 1/8; jugado el martes 25/8 en el Anexo La Tortuguita (dato del epígrafe de la foto de la nota del 26/8)",
+      "src": "2026-08-26_577"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "CRAR",
+      "away": "Santa Fe RC",
+      "hs": 25,
+      "as": 34,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-01_574",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "La Salle",
+      "away": "Universitario",
+      "hs": 27,
+      "as": 30,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-01_574",
+      "time": "13:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Estudiantes",
+      "away": "La Salle",
+      "hs": 29,
+      "as": 0,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Universitario",
+      "away": "CRAR",
+      "hs": 38,
+      "as": 14,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "11:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Santa Fe RC",
+      "away": "Rowing",
+      "hs": 28,
+      "as": 34,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "11:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Santa Fe RC",
+      "away": "Estudiantes",
+      "hs": 19,
+      "as": 22,
+      "hp": 1,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "CRAR",
+      "away": "La Salle",
+      "hs": 27,
+      "as": 21,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "13:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Rowing",
+      "away": "Universitario",
+      "hs": 12,
+      "as": 17,
+      "hp": 1,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-06-27",
+      "home": "Alma Juniors",
+      "away": "At. Brown",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "adelantado al 27/6; disputado sin marcador publicado. La nota del 25/6 lo anuncia como \"Alma Jrs - San Carlo\"; fixture y panorama dicen At. Brown",
+      "src": "2026-07-18_570",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-06-27",
+      "home": "Santa Fe RC B",
+      "away": "CRAI",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "adelantado al 27/6; disputado sin marcador publicado",
+      "src": "2026-07-18_570",
+      "time": "12:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "Cha Roga Club / Querandí RC",
+      "away": "Tilcara",
+      "hs": 17,
+      "as": 24,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-18_570",
+      "time": "13:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "At. Brown",
+      "away": "Santa Fe RC B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "postergado; nunca se reprogramó",
+      "src": "2026-07-25_572"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "CRAI",
+      "away": "Cha Roga Club / Querandí RC",
+      "hs": 35,
+      "as": 22,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Tilcara",
+      "away": "Alma Juniors",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "postergado; nunca se reprogramó",
+      "src": "2026-07-25_572"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Tilcara",
+      "away": "At. Brown",
+      "hs": 38,
+      "as": 14,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-01_574",
+      "time": "11:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Alma Juniors",
+      "away": "CRAI",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-08-01_574",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Cha Roga Club / Querandí RC",
+      "away": "Santa Fe RC B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "suspendido; nunca se reprogramó",
+      "src": "2026-08-01_574"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "At. Brown",
+      "away": "Cha Roga Club / Querandí RC",
+      "hs": 22,
+      "as": 26,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "13:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "CRAI",
+      "away": "Tilcara",
+      "hs": 38,
+      "as": 5,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Santa Fe RC B",
+      "away": "Alma Juniors",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "suspendido; nunca se reprogramó",
+      "src": "2026-08-08_576"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "CRAI",
+      "away": "At. Brown",
+      "hs": 106,
+      "as": 5,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "13:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Alma Juniors",
+      "away": "Cha Roga Club / Querandí RC",
+      "hs": 17,
+      "as": 74,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "la nota escribe \"Alma Jrs 17– Cha Roga Club / Querandí RC (74)\"; sin puntos de tabla",
+      "src": "2026-08-29_578",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Tilcara",
+      "away": "Santa Fe RC B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "suspendido",
+      "src": "2026-08-29_578"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "CRAI",
+      "away": "La Salle",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-07-18_570",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "Rowing",
+      "away": "Estudiantes",
+      "hs": 5,
+      "as": 23,
+      "hp": 0,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-18_570",
+      "time": "12:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "CRAR",
+      "away": "Santa Fe RC",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "postergado el 18/7; disputado sin marcador publicado — las posiciones del 26/8 suman 5 a Santa Fe RC y 1 a CRAR",
+      "src": "2026-07-18_570"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "La Salle",
+      "away": "CRAR",
+      "hs": 14,
+      "as": 38,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Santa Fe RC",
+      "away": "Rowing",
+      "hs": 32,
+      "as": 26,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "12:45"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Estudiantes",
+      "away": "CRAI",
+      "hs": 33,
+      "as": 33,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "13:15"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Estudiantes",
+      "away": "La Salle",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "suspendido el 1/8; disputado sin marcador publicado — las posiciones del 26/8 suman 5 a Estudiantes",
+      "src": "2026-08-01_574"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "CRAI",
+      "away": "Santa Fe RC",
+      "hs": 17,
+      "as": 12,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-01_574",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Rowing",
+      "away": "CRAR",
+      "hs": 17,
+      "as": 26,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "la programación del 29/7 lo daba suspendido; el panorama trae el resultado",
+      "src": "2026-08-01_574"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "La Salle",
+      "away": "Rowing",
+      "hs": 15,
+      "as": 36,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "CRAR",
+      "away": "CRAI",
+      "hs": 19,
+      "as": 31,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Santa Fe RC",
+      "away": "Estudiantes",
+      "hs": 10,
+      "as": 8,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "11:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Santa Fe RC",
+      "away": "La Salle",
+      "hs": 80,
+      "as": 7,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "13:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "CRAI",
+      "away": "Rowing",
+      "hs": 27,
+      "as": 42,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "14:15"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Estudiantes",
+      "away": "CRAR",
+      "hs": 34,
+      "as": 27,
+      "hp": 5,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-29_578",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "Alma Juniors",
+      "away": "Tilcara",
+      "hs": 0,
+      "as": 91,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-18_570",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "CRAI B",
+      "away": "Universitario",
+      "hs": 0,
+      "as": 54,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-18_570",
+      "time": "10:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-07-18",
+      "home": "Cha Roga Club",
+      "away": "Estudiantes B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "postergado el 18/7; disputado sin marcador publicado — las posiciones del 8/8 dan 10 a Cha Roga Club (5 de este partido + 5 del Alma-Cha Roga)",
+      "src": "2026-07-18_570"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-24",
+      "home": "Estudiantes B",
+      "away": "Alma Juniors",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "programado viernes 24/7 20 hs; el panorama lo da postergado",
+      "src": "2026-07-25_572",
+      "time": "20:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Tilcara",
+      "away": "CRAI B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "postergado; sin resultado publicado",
+      "src": "2026-07-25_572"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-07-25",
+      "home": "Universitario",
+      "away": "Cha Roga Club",
+      "hs": 19,
+      "as": 5,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-07-25_572",
+      "time": "13:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-07-30",
+      "home": "CRAI B",
+      "away": "Alma Juniors",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "jugado el jueves 30/7; figura en el panorama sin marcador ni aclaración",
+      "src": "2026-08-01_574",
+      "time": "20:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Cha Roga Club",
+      "away": "Tilcara",
+      "hs": 17,
+      "as": 32,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-01_574",
+      "time": "11:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-08-01",
+      "home": "Universitario",
+      "away": "Estudiantes B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "suspendido el 1/8; disputado sin marcador publicado — las posiciones del 26/8 suman 5 a Universitario",
+      "src": "2026-08-01_574"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-06",
+      "home": "Alma Juniors",
+      "away": "Cha Roga Club",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "jugado el jueves 6/8; figura en el panorama sin marcador ni aclaración",
+      "src": "2026-08-08_576",
+      "time": "20:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Tilcara",
+      "away": "Universitario",
+      "hs": 28,
+      "as": 12,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-08-08_576",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 4,
+      "date": "2026-08-08",
+      "home": "Estudiantes B",
+      "away": "CRAI B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "suspendido el 8/8; disputado sin marcador publicado — las posiciones del 26/8 suman 5 a CRAI B",
+      "src": "2026-08-08_576"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-27",
+      "home": "Universitario",
+      "away": "Alma Juniors",
+      "hs": 95,
+      "as": 5,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "jugado el jueves 27/8",
+      "src": "2026-08-29_578",
+      "time": "20:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Cha Roga Club",
+      "away": "CRAI B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-08-29_578",
+      "time": "12:45"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "round": 5,
+      "date": "2026-08-29",
+      "home": "Tilcara",
+      "away": "Estudiantes B",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "suspendido",
+      "src": "2026-08-29_578"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Estudiantes",
+      "away": "Santa Fe RC",
+      "hs": 12,
+      "as": 43,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "CRAI",
+      "away": "La Salle",
+      "hs": 26,
+      "as": 21,
+      "hp": 5,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-12",
+      "home": "Santa Fe RC",
+      "away": "La Salle",
+      "hs": 27,
+      "as": 24,
+      "hp": 4,
+      "ap": 2,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-12_582",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-12",
+      "home": "CRAI",
+      "away": "Estudiantes",
+      "hs": 17,
+      "as": 12,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-12_582",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-09-26",
+      "home": "Santa Fe RC",
+      "away": "CRAI",
+      "hs": 32,
+      "as": 17,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "12:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-09-26",
+      "home": "La Salle",
+      "away": "Estudiantes",
+      "hs": 26,
+      "as": 22,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Rowing",
+      "away": "Universitario",
+      "hs": 19,
+      "as": 17,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Tilcara",
+      "away": "CRAR",
+      "hs": 45,
+      "as": 17,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-12",
+      "home": "Universitario",
+      "away": "CRAR",
+      "hs": 40,
+      "as": 10,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-12_582",
+      "time": "12:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-12",
+      "home": "Tilcara",
+      "away": "Rowing",
+      "hs": 32,
+      "as": 26,
+      "hp": 5,
+      "ap": 2,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-12_582",
+      "time": "11:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-09-26",
+      "home": "Universitario",
+      "away": "Tilcara",
+      "hs": 29,
+      "as": 28,
+      "hp": 5,
+      "ap": 2,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "11:00"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-09-26",
+      "home": "CRAR",
+      "away": "Rowing",
+      "hs": 32,
+      "as": 20,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "12:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Alma Juniors",
+      "away": "Cha Roga Club",
+      "hs": 12,
+      "as": 27,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "12:30"
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-19",
+      "home": "Cha Roga Club",
+      "away": "Alma Juniors",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "reprogramado p/19/9; no se publicó resultado",
+      "src": "2026-09-12_582",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Universitario",
+      "away": "Tilcara",
+      "hs": 15,
+      "as": 19,
+      "hp": 1,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Estudiantes",
+      "away": "Santa Fe RC",
+      "hs": 17,
+      "as": 19,
+      "hp": 1,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-25",
+      "home": "Tilcara",
+      "away": "Santa Fe RC",
+      "hs": 26,
+      "as": 24,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "adelantado al viernes 25/9",
+      "src": "2026-09-26_584",
+      "time": "19:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-26",
+      "home": "Estudiantes",
+      "away": "Universitario",
+      "hs": 26,
+      "as": 10,
+      "hp": 4,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "12:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-10-03",
+      "home": "Tilcara",
+      "away": "Estudiantes",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "scheduled",
+      "note": "",
+      "src": "2026-09-30_585",
+      "time": "13:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-10-03",
+      "home": "Santa Fe RC",
+      "away": "Universitario",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "scheduled",
+      "note": "",
+      "src": "2026-09-30_585",
+      "time": "13:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Cha Roga Club",
+      "away": "Rowing",
+      "hs": 15,
+      "as": 15,
+      "hp": 2,
+      "ap": 2,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "11:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "CRAI",
+      "away": "CRAR",
+      "hs": 31,
+      "as": 37,
+      "hp": 2,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "13:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-26",
+      "home": "Rowing",
+      "away": "CRAR",
+      "hs": 12,
+      "as": 19,
+      "hp": 1,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "14:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-24",
+      "home": "CRAI",
+      "away": "Cha Roga Club",
+      "hs": 33,
+      "as": 20,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "adelantado al jueves 24/9",
+      "src": "2026-09-26_584",
+      "time": "19:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-10-03",
+      "home": "Rowing",
+      "away": "CRAI",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "scheduled",
+      "note": "",
+      "src": "2026-09-30_585",
+      "time": "12:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-10-03",
+      "home": "CRAR",
+      "away": "Cha Roga Club",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "scheduled",
+      "note": "",
+      "src": "2026-09-30_585",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "San Carlos",
+      "away": "La Salle",
+      "hs": 7,
+      "as": 48,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "12:30"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "At. Brown",
+      "away": "Alma Juniors",
+      "hs": 31,
+      "as": 33,
+      "hp": 2,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "13:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-26",
+      "home": "La Salle",
+      "away": "Alma Juniors",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración; las posiciones no cambian",
+      "src": "2026-09-26_584",
+      "time": "13:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "round": 2,
+      "date": "2026-10-10",
+      "home": "At. Brown",
+      "away": "San Carlos",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "scheduled",
+      "note": "postergado p/10/10",
+      "src": "2026-09-26_584"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "round": 3,
+      "date": "2026-10-03",
+      "home": "La Salle",
+      "away": "At. Brown",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "scheduled",
+      "note": "",
+      "src": "2026-09-30_585",
+      "time": "12:00"
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "round": 3,
+      "date": "2026-10-03",
+      "home": "Alma Juniors",
+      "away": "San Carlos",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "scheduled",
+      "note": "",
+      "src": "2026-09-30_585",
+      "time": "11:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Santa Fe RC",
+      "away": "Universitario",
+      "hs": 17,
+      "as": 10,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "12:45"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Rowing",
+      "away": "Estudiantes",
+      "hs": 14,
+      "as": 26,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-26",
+      "home": "Universitario",
+      "away": "Estudiantes",
+      "hs": 37,
+      "as": 31,
+      "hp": 5,
+      "ap": 2,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-26",
+      "home": "Rowing",
+      "away": "Santa Fe RC",
+      "hs": 15,
+      "as": 54,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "14:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-10-01",
+      "home": "Estudiantes",
+      "away": "Santa Fe RC",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "scheduled",
+      "note": "adelantado al jueves 1/10",
+      "src": "2026-09-30_585",
+      "time": "13:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-10-03",
+      "home": "Universitario",
+      "away": "Rowing",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "scheduled",
+      "note": "",
+      "src": "2026-09-30_585",
+      "time": "13:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Tilcara",
+      "away": "CRAR",
+      "hs": 15,
+      "as": 33,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "11:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "La Salle",
+      "away": "CRAI",
+      "hs": 24,
+      "as": 17,
+      "hp": 4,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "11:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-29",
+      "home": "CRAR",
+      "away": "CRAI",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "postponed",
+      "note": "postergado p/29/9 19.30 hs; la nota del 30/9 no trae resultado y lo sigue dando pendiente",
+      "src": "2026-09-30_585",
+      "time": "19:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-26",
+      "home": "La Salle",
+      "away": "Tilcara",
+      "hs": 58,
+      "as": 5,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "13:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-10-03",
+      "home": "CRAR",
+      "away": "La Salle",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "scheduled",
+      "note": "",
+      "src": "2026-09-30_585",
+      "time": "14:00"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-10-06",
+      "home": "CRAI",
+      "away": "Tilcara",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "scheduled",
+      "note": "programado p/6/10",
+      "src": "2026-09-30_585"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "At. Brown",
+      "away": "Querandí RC",
+      "hs": 15,
+      "as": 13,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "12:30"
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-26",
+      "home": "Querandí RC",
+      "away": "At. Brown",
+      "hs": 36,
+      "as": 24,
+      "hp": null,
+      "ap": null,
+      "status": "final",
+      "note": "postergado del 12/9; jugado el 26/9. Querandí RC campeón de la Copa Bronce",
+      "src": "2026-09-26_584",
+      "time": "16:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "CRAR",
+      "away": "Santa Fe RC",
+      "hs": 25,
+      "as": 29,
+      "hp": 1,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "15:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Estudiantes",
+      "away": "CRAI",
+      "hs": 37,
+      "as": 28,
+      "hp": 5,
+      "ap": 1,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-12",
+      "home": "Santa Fe RC",
+      "away": "CRAI",
+      "hs": 13,
+      "as": 38,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-12_582",
+      "time": "14:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-12",
+      "home": "Estudiantes",
+      "away": "CRAR",
+      "hs": 48,
+      "as": 7,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-12_582",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-09-26",
+      "home": "Santa Fe RC",
+      "away": "Estudiantes",
+      "hs": 3,
+      "as": 43,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "14:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Oro",
+      "group": null,
+      "round": 3,
+      "date": "2026-09-26",
+      "home": "CRAI",
+      "away": "CRAR",
+      "hs": 38,
+      "as": 22,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "14:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Universitario",
+      "away": "Rowing",
+      "hs": 27,
+      "as": 17,
+      "hp": 5,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "La Salle",
+      "away": "Tilcara",
+      "hs": 12,
+      "as": 33,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-05_580",
+      "time": "12:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-19",
+      "home": "Rowing",
+      "away": "Tilcara",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "postergado p/19/9; disputado sin marcador publicado — las posiciones del 23/9 suman 2 a Rowing y 2 a Tilcara",
+      "src": "2026-09-23_583"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 2,
+      "date": "2026-09-10",
+      "home": "La Salle",
+      "away": "Universitario",
+      "hs": 7,
+      "as": 27,
+      "hp": 0,
+      "ap": 5,
+      "status": "final",
+      "note": "jugado el jueves 10/9",
+      "src": "2026-09-12_582",
+      "time": "20:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-09-26",
+      "home": "Rowing",
+      "away": "La Salle",
+      "hs": 17,
+      "as": 5,
+      "hp": 4,
+      "ap": 0,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "14:30"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Plata",
+      "group": null,
+      "round": 3,
+      "date": "2026-09-26",
+      "home": "Tilcara",
+      "away": "Universitario",
+      "hs": 19,
+      "as": 22,
+      "hp": 1,
+      "ap": 4,
+      "status": "final",
+      "note": "",
+      "src": "2026-09-26_584",
+      "time": "15:00"
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "round": 1,
+      "date": "2026-09-05",
+      "home": "Cha Roga Club",
+      "away": "Alma Juniors",
+      "hs": null,
+      "as": null,
+      "hp": null,
+      "ap": null,
+      "status": "not_played",
+      "note": "figura en el panorama sin marcador ni aclaración",
+      "src": "2026-09-05_580",
+      "time": "11:00"
+    }
+  ],
+  "standings": [
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-04-25_557",
+      "rows": [
+        {
+          "club": "La Salle",
+          "pts": 18
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 10
+        },
+        {
+          "club": "Tilcara",
+          "pts": 10
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 7
+        },
+        {
+          "club": "Universitario",
+          "pts": 5
+        },
+        {
+          "club": "Rowing",
+          "pts": 5
+        },
+        {
+          "club": "CRAI",
+          "pts": 5
+        },
+        {
+          "club": "CRAR",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-05-09_559",
+      "rows": [
+        {
+          "club": "La Salle",
+          "pts": 22
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 15
+        },
+        {
+          "club": "Tilcara",
+          "pts": 10
+        },
+        {
+          "club": "Rowing",
+          "pts": 9
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 7
+        },
+        {
+          "club": "Universitario",
+          "pts": 5
+        },
+        {
+          "club": "CRAI",
+          "pts": 5
+        },
+        {
+          "club": "CRAR",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 6,
+      "src": "2026-05-16_561",
+      "rows": [
+        {
+          "club": "La Salle",
+          "pts": 22
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 20
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 12
+        },
+        {
+          "club": "Tilcara",
+          "pts": 10
+        },
+        {
+          "club": "Rowing",
+          "pts": 9
+        },
+        {
+          "club": "CRAI",
+          "pts": 9
+        },
+        {
+          "club": "Universitario",
+          "pts": 6
+        },
+        {
+          "club": "CRAR",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 7,
+      "src": "2026-05-30_563",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 25
+        },
+        {
+          "club": "La Salle",
+          "pts": 22
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 17
+        },
+        {
+          "club": "CRAI",
+          "pts": 14
+        },
+        {
+          "club": "Tilcara",
+          "pts": 10
+        },
+        {
+          "club": "Rowing",
+          "pts": 9
+        },
+        {
+          "club": "Universitario",
+          "pts": 6
+        },
+        {
+          "club": "CRAR",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 8,
+      "src": "2026-06-06_565",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 29
+        },
+        {
+          "club": "La Salle",
+          "pts": 23
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 21
+        },
+        {
+          "club": "CRAI",
+          "pts": 19
+        },
+        {
+          "club": "Universitario",
+          "pts": 11
+        },
+        {
+          "club": "Tilcara",
+          "pts": 10
+        },
+        {
+          "club": "Rowing",
+          "pts": 9
+        },
+        {
+          "club": "CRAR",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 9,
+      "src": "2026-06-13_567",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 29
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 26
+        },
+        {
+          "club": "La Salle",
+          "pts": 24
+        },
+        {
+          "club": "CRAI",
+          "pts": 23
+        },
+        {
+          "club": "Tilcara",
+          "pts": 15
+        },
+        {
+          "club": "Universitario",
+          "pts": 11
+        },
+        {
+          "club": "Rowing",
+          "pts": 9
+        },
+        {
+          "club": "CRAR",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-04-25_557",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 15
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 14
+        },
+        {
+          "club": "Rowing",
+          "pts": 11
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 9
+        },
+        {
+          "club": "Universitario",
+          "pts": 9
+        },
+        {
+          "club": "CRAR",
+          "pts": 1
+        },
+        {
+          "club": "La Salle",
+          "pts": 0
+        },
+        {
+          "club": "CRAI",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-05-09_559",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 15
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 14
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 14
+        },
+        {
+          "club": "Rowing",
+          "pts": 11
+        },
+        {
+          "club": "Universitario",
+          "pts": 9
+        },
+        {
+          "club": "CRAI",
+          "pts": 5
+        },
+        {
+          "club": "CRAR",
+          "pts": 4
+        },
+        {
+          "club": "La Salle",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 6,
+      "src": "2026-05-16_561",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 19
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 19
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 14
+        },
+        {
+          "club": "Universitario",
+          "pts": 14
+        },
+        {
+          "club": "Rowing",
+          "pts": 11
+        },
+        {
+          "club": "CRAI",
+          "pts": 5
+        },
+        {
+          "club": "CRAR",
+          "pts": 4
+        },
+        {
+          "club": "La Salle",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 7,
+      "src": "2026-05-30_563",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 24
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 24
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 14
+        },
+        {
+          "club": "Universitario",
+          "pts": 14
+        },
+        {
+          "club": "Rowing",
+          "pts": 11
+        },
+        {
+          "club": "CRAR",
+          "pts": 9
+        },
+        {
+          "club": "CRAI",
+          "pts": 5
+        },
+        {
+          "club": "La Salle",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 8,
+      "src": "2026-06-06_565",
+      "rows": [
+        {
+          "club": "Estudiantes",
+          "pts": 28
+        },
+        {
+          "club": "Tilcara",
+          "pts": 24
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 19
+        },
+        {
+          "club": "Universitario",
+          "pts": 19
+        },
+        {
+          "club": "Rowing",
+          "pts": 15
+        },
+        {
+          "club": "CRAI",
+          "pts": 10
+        },
+        {
+          "club": "CRAR",
+          "pts": 9
+        },
+        {
+          "club": "La Salle",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 9,
+      "src": "2026-06-13_567",
+      "rows": [
+        {
+          "club": "Estudiantes",
+          "pts": 32
+        },
+        {
+          "club": "Tilcara",
+          "pts": 28
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 19
+        },
+        {
+          "club": "Universitario",
+          "pts": 19
+        },
+        {
+          "club": "Rowing",
+          "pts": 15
+        },
+        {
+          "club": "CRAI",
+          "pts": 15
+        },
+        {
+          "club": "CRAR",
+          "pts": 9
+        },
+        {
+          "club": "La Salle",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-04-25_557",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 15
+        },
+        {
+          "club": "La Salle",
+          "pts": 14
+        },
+        {
+          "club": "CRAR",
+          "pts": 14
+        },
+        {
+          "club": "Universitario",
+          "pts": 7
+        },
+        {
+          "club": "Rowing",
+          "pts": 6
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 4
+        },
+        {
+          "club": "Tilcara",
+          "pts": 1
+        },
+        {
+          "club": "CRAI",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-05-09_559",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 19
+        },
+        {
+          "club": "CRAR",
+          "pts": 19
+        },
+        {
+          "club": "La Salle",
+          "pts": 14
+        },
+        {
+          "club": "Rowing",
+          "pts": 10
+        },
+        {
+          "club": "Universitario",
+          "pts": 7
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 4
+        },
+        {
+          "club": "Tilcara",
+          "pts": 1
+        },
+        {
+          "club": "CRAI",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 6,
+      "src": "2026-05-16_561",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 24
+        },
+        {
+          "club": "CRAR",
+          "pts": 19
+        },
+        {
+          "club": "Rowing",
+          "pts": 15
+        },
+        {
+          "club": "La Salle",
+          "pts": 14
+        },
+        {
+          "club": "Universitario",
+          "pts": 7
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 5
+        },
+        {
+          "club": "Tilcara",
+          "pts": 2
+        },
+        {
+          "club": "CRAI",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 7,
+      "src": "2026-05-30_563",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 29
+        },
+        {
+          "club": "CRAR",
+          "pts": 19
+        },
+        {
+          "club": "Rowing",
+          "pts": 15
+        },
+        {
+          "club": "La Salle",
+          "pts": 14
+        },
+        {
+          "club": "Universitario",
+          "pts": 13
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 6
+        },
+        {
+          "club": "CRAI",
+          "pts": 5
+        },
+        {
+          "club": "Tilcara",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 8,
+      "src": "2026-06-06_565",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 30
+        },
+        {
+          "club": "Rowing",
+          "pts": 20
+        },
+        {
+          "club": "CRAR",
+          "pts": 19
+        },
+        {
+          "club": "La Salle",
+          "pts": 19
+        },
+        {
+          "club": "Universitario",
+          "pts": 13
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 11
+        },
+        {
+          "club": "CRAI",
+          "pts": 5
+        },
+        {
+          "club": "Tilcara",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 9,
+      "src": "2026-06-13_567",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 30
+        },
+        {
+          "club": "Rowing",
+          "pts": 25
+        },
+        {
+          "club": "CRAR",
+          "pts": 19
+        },
+        {
+          "club": "La Salle",
+          "pts": 19
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 16
+        },
+        {
+          "club": "Universitario",
+          "pts": 13
+        },
+        {
+          "club": "CRAI",
+          "pts": 9
+        },
+        {
+          "club": "Tilcara",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-04-25_557",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 17
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 17
+        },
+        {
+          "club": "CRAR",
+          "pts": 14
+        },
+        {
+          "club": "Tilcara",
+          "pts": 11
+        },
+        {
+          "club": "CRAI",
+          "pts": 10
+        },
+        {
+          "club": "Rowing",
+          "pts": 9
+        },
+        {
+          "club": "Universitario",
+          "pts": 9
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 0
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-05-09_559",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 22
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 22
+        },
+        {
+          "club": "CRAR",
+          "pts": 19
+        },
+        {
+          "club": "Tilcara",
+          "pts": 16
+        },
+        {
+          "club": "Rowing",
+          "pts": 13
+        },
+        {
+          "club": "CRAI",
+          "pts": 11
+        },
+        {
+          "club": "Universitario",
+          "pts": 9
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 0
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-05-13_560",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 22
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 22
+        },
+        {
+          "club": "CRAR",
+          "pts": 19
+        },
+        {
+          "club": "Tilcara",
+          "pts": 16
+        },
+        {
+          "club": "Rowing",
+          "pts": 13
+        },
+        {
+          "club": "CRAI",
+          "pts": 11
+        },
+        {
+          "club": "Universitario",
+          "pts": 9
+        },
+        {
+          "club": "La Salle",
+          "pts": 9
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 0
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 6,
+      "src": "2026-05-16_561",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 27
+        },
+        {
+          "club": "CRAR",
+          "pts": 24
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 22
+        },
+        {
+          "club": "Rowing",
+          "pts": 18
+        },
+        {
+          "club": "Tilcara",
+          "pts": 16
+        },
+        {
+          "club": "CRAI",
+          "pts": 16
+        },
+        {
+          "club": "La Salle",
+          "pts": 14
+        },
+        {
+          "club": "Universitario",
+          "pts": 10
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 0
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 7,
+      "src": "2026-05-30_563",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 31
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 27
+        },
+        {
+          "club": "CRAR",
+          "pts": 24
+        },
+        {
+          "club": "Rowing",
+          "pts": 23
+        },
+        {
+          "club": "CRAI",
+          "pts": 21
+        },
+        {
+          "club": "La Salle",
+          "pts": 18
+        },
+        {
+          "club": "Tilcara",
+          "pts": 16
+        },
+        {
+          "club": "Universitario",
+          "pts": 10
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 1
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 8,
+      "src": "2026-06-06_565",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 33
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 31
+        },
+        {
+          "club": "Rowing",
+          "pts": 28
+        },
+        {
+          "club": "CRAI",
+          "pts": 26
+        },
+        {
+          "club": "CRAR",
+          "pts": 25
+        },
+        {
+          "club": "La Salle",
+          "pts": 22
+        },
+        {
+          "club": "Tilcara",
+          "pts": 17
+        },
+        {
+          "club": "Universitario",
+          "pts": 10
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 6
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Fase clasificatoria",
+      "group": null,
+      "afterRound": 9,
+      "src": "2026-06-13_567",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 37
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 35
+        },
+        {
+          "club": "CRAI",
+          "pts": 31
+        },
+        {
+          "club": "Rowing",
+          "pts": 28
+        },
+        {
+          "club": "CRAR",
+          "pts": 25
+        },
+        {
+          "club": "La Salle",
+          "pts": 22
+        },
+        {
+          "club": "Tilcara",
+          "pts": 21
+        },
+        {
+          "club": "Universitario",
+          "pts": 15
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 6
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-08_576",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 17
+        },
+        {
+          "club": "CRAI",
+          "pts": 16
+        },
+        {
+          "club": "La Salle",
+          "pts": 13
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 2
+        },
+        {
+          "club": "Tilcara",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-26_577",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 17
+        },
+        {
+          "club": "CRAI",
+          "pts": 16
+        },
+        {
+          "club": "La Salle",
+          "pts": 13
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 7
+        },
+        {
+          "club": "Universitario",
+          "pts": 6
+        },
+        {
+          "club": "Tilcara",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Oro",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-08-29_578",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 22
+        },
+        {
+          "club": "CRAI",
+          "pts": 21
+        },
+        {
+          "club": "La Salle",
+          "pts": 14
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 12
+        },
+        {
+          "club": "Universitario",
+          "pts": 6
+        },
+        {
+          "club": "Tilcara",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-08_576",
+      "rows": [
+        {
+          "club": "Rowing",
+          "pts": 15
+        },
+        {
+          "club": "CRAR",
+          "pts": 15
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 6
+        },
+        {
+          "club": "Santa Fe RC B",
+          "pts": 5
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Six Plata",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-08-29_578",
+      "rows": [
+        {
+          "club": "CRAR",
+          "pts": 19
+        },
+        {
+          "club": "Rowing",
+          "pts": 15
+        },
+        {
+          "club": "Santa Fe RC B",
+          "pts": 10
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 6
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-08_576",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 19
+        },
+        {
+          "club": "Universitario",
+          "pts": 12
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 11
+        },
+        {
+          "club": "Rowing",
+          "pts": 9
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 5
+        },
+        {
+          "club": "CRAI",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Oro",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-08-29_578",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 24
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 16
+        },
+        {
+          "club": "Universitario",
+          "pts": 12
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 10
+        },
+        {
+          "club": "Rowing",
+          "pts": 9
+        },
+        {
+          "club": "CRAI",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-08_576",
+      "rows": [
+        {
+          "club": "CRAR",
+          "pts": 20
+        },
+        {
+          "club": "La Salle",
+          "pts": 15
+        },
+        {
+          "club": "At. Brown",
+          "pts": 15
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 10
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 9
+        },
+        {
+          "club": "San Carlos",
+          "pts": 5
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-26_577",
+      "rows": [
+        {
+          "club": "CRAR",
+          "pts": 20
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 19
+        },
+        {
+          "club": "La Salle",
+          "pts": 15
+        },
+        {
+          "club": "At. Brown",
+          "pts": 15
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 9
+        },
+        {
+          "club": "San Carlos",
+          "pts": 5
+        },
+        {
+          "club": "Santa Fe RC B",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Six Plata",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-08-29_578",
+      "rows": [
+        {
+          "club": "CRAR",
+          "pts": 25
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 19
+        },
+        {
+          "club": "La Salle",
+          "pts": 15
+        },
+        {
+          "club": "At. Brown",
+          "pts": 15
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 9
+        },
+        {
+          "club": "San Carlos",
+          "pts": 5
+        },
+        {
+          "club": "Santa Fe RC B",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-08_576",
+      "rows": [
+        {
+          "club": "Universitario",
+          "pts": 15
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 12
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 10
+        },
+        {
+          "club": "Rowing",
+          "pts": 6
+        },
+        {
+          "club": "CRAR",
+          "pts": 4
+        },
+        {
+          "club": "La Salle",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-26_577",
+      "rows": [
+        {
+          "club": "Universitario",
+          "pts": 15
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 12
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 10
+        },
+        {
+          "club": "Rowing",
+          "pts": 10
+        },
+        {
+          "club": "CRAR",
+          "pts": 8
+        },
+        {
+          "club": "La Salle",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Oro",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-08-29_578",
+      "rows": [
+        {
+          "club": "Universitario",
+          "pts": 19
+        },
+        {
+          "club": "Rowing",
+          "pts": 16
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 14
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 13
+        },
+        {
+          "club": "CRAR",
+          "pts": 12
+        },
+        {
+          "club": "La Salle",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-08_576",
+      "rows": [
+        {
+          "club": "CRAI",
+          "pts": 20
+        },
+        {
+          "club": "Tilcara",
+          "pts": 15
+        },
+        {
+          "club": "At. Brown",
+          "pts": 12
+        },
+        {
+          "club": "Cha Roga Club / Querandí RC",
+          "pts": 12
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 7
+        },
+        {
+          "club": "Santa Fe RC B",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Six Plata",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-08-29_578",
+      "rows": [
+        {
+          "club": "CRAI",
+          "pts": 20
+        },
+        {
+          "club": "Cha Roga Club / Querandí RC",
+          "pts": 17
+        },
+        {
+          "club": "Tilcara",
+          "pts": 15
+        },
+        {
+          "club": "At. Brown",
+          "pts": 12
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 7
+        },
+        {
+          "club": "Santa Fe RC B",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-08_576",
+      "rows": [
+        {
+          "club": "CRAI",
+          "pts": 17
+        },
+        {
+          "club": "CRAR",
+          "pts": 10
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 10
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 8
+        },
+        {
+          "club": "Rowing",
+          "pts": 7
+        },
+        {
+          "club": "La Salle",
+          "pts": 7
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-26_577",
+      "rows": [
+        {
+          "club": "CRAI",
+          "pts": 17
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 15
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 13
+        },
+        {
+          "club": "CRAR",
+          "pts": 11
+        },
+        {
+          "club": "Rowing",
+          "pts": 7
+        },
+        {
+          "club": "La Salle",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Oro",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-08-29_578",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 20
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 18
+        },
+        {
+          "club": "CRAI",
+          "pts": 17
+        },
+        {
+          "club": "CRAR",
+          "pts": 12
+        },
+        {
+          "club": "Rowing",
+          "pts": 7
+        },
+        {
+          "club": "La Salle",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-08_576",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 15
+        },
+        {
+          "club": "La Salle",
+          "pts": 10
+        },
+        {
+          "club": "Universitario",
+          "pts": 9
+        },
+        {
+          "club": "CRAI B",
+          "pts": 5
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 5
+        },
+        {
+          "club": "Estudiantes B",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "afterRound": 4,
+      "src": "2026-08-26_577",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 15
+        },
+        {
+          "club": "Universitario",
+          "pts": 14
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 10
+        },
+        {
+          "club": "CRAI B",
+          "pts": 10
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 5
+        },
+        {
+          "club": "Estudiantes B",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Six Plata",
+      "group": null,
+      "afterRound": 5,
+      "src": "2026-08-29_578",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 15
+        },
+        {
+          "club": "Universitario",
+          "pts": 14
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 10
+        },
+        {
+          "club": "CRAI B",
+          "pts": 10
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 5
+        },
+        {
+          "club": "Estudiantes B",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Oro",
+      "group": null,
+      "afterRound": 1,
+      "src": "2026-09-05_580",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 5
+        },
+        {
+          "club": "CRAI",
+          "pts": 5
+        },
+        {
+          "club": "La Salle",
+          "pts": 1
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Oro",
+      "group": null,
+      "afterRound": 2,
+      "src": "2026-09-12_582",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 9
+        },
+        {
+          "club": "CRAI",
+          "pts": 9
+        },
+        {
+          "club": "La Salle",
+          "pts": 3
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Oro",
+      "group": null,
+      "afterRound": 3,
+      "src": "2026-09-26_584",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 14
+        },
+        {
+          "club": "CRAI",
+          "pts": 9
+        },
+        {
+          "club": "La Salle",
+          "pts": 7
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Plata",
+      "group": null,
+      "afterRound": 1,
+      "src": "2026-09-05_580",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 5
+        },
+        {
+          "club": "Rowing",
+          "pts": 4
+        },
+        {
+          "club": "Universitario",
+          "pts": 1
+        },
+        {
+          "club": "CRAR",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Plata",
+      "group": null,
+      "afterRound": 2,
+      "src": "2026-09-12_582",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 10
+        },
+        {
+          "club": "Universitario",
+          "pts": 6
+        },
+        {
+          "club": "Rowing",
+          "pts": 6
+        },
+        {
+          "club": "CRAR",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M15",
+      "phase": "Final Four Plata",
+      "group": null,
+      "afterRound": 3,
+      "src": "2026-09-26_584",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 12
+        },
+        {
+          "club": "Universitario",
+          "pts": 11
+        },
+        {
+          "club": "Rowing",
+          "pts": 6
+        },
+        {
+          "club": "CRAR",
+          "pts": 5
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Oro",
+      "group": null,
+      "afterRound": 1,
+      "src": "2026-09-05_580",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 4
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 4
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 1
+        },
+        {
+          "club": "Universitario",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Oro",
+      "group": null,
+      "afterRound": 2,
+      "src": "2026-09-26_584",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 8
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 6
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 6
+        },
+        {
+          "club": "Universitario",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Plata",
+      "group": null,
+      "afterRound": 1,
+      "src": "2026-09-05_580",
+      "rows": [
+        {
+          "club": "CRAR",
+          "pts": 5
+        },
+        {
+          "club": "Rowing",
+          "pts": 2
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 2
+        },
+        {
+          "club": "CRAI",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Plata",
+      "group": null,
+      "afterRound": 2,
+      "src": "2026-09-26_584",
+      "rows": [
+        {
+          "club": "CRAR",
+          "pts": 9
+        },
+        {
+          "club": "CRAI",
+          "pts": 7
+        },
+        {
+          "club": "Rowing",
+          "pts": 3
+        },
+        {
+          "club": "Cha Roga Club",
+          "pts": 2
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "afterRound": 1,
+      "src": "2026-09-05_580",
+      "rows": [
+        {
+          "club": "La Salle",
+          "pts": 5
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 5
+        },
+        {
+          "club": "At. Brown",
+          "pts": 2
+        },
+        {
+          "club": "San Carlos",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M16",
+      "phase": "Final Four Bronce",
+      "group": null,
+      "afterRound": 2,
+      "src": "2026-09-26_584",
+      "rows": [
+        {
+          "club": "La Salle",
+          "pts": 5
+        },
+        {
+          "club": "Alma Juniors",
+          "pts": 5
+        },
+        {
+          "club": "At. Brown",
+          "pts": 2
+        },
+        {
+          "club": "San Carlos",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Oro",
+      "group": null,
+      "afterRound": 1,
+      "src": "2026-09-05_580",
+      "rows": [
+        {
+          "club": "Estudiantes",
+          "pts": 5
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 4
+        },
+        {
+          "club": "Universitario",
+          "pts": 1
+        },
+        {
+          "club": "Rowing",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Oro",
+      "group": null,
+      "afterRound": 2,
+      "src": "2026-09-26_584",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 9
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 7
+        },
+        {
+          "club": "Universitario",
+          "pts": 6
+        },
+        {
+          "club": "Rowing",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Plata",
+      "group": null,
+      "afterRound": 1,
+      "src": "2026-09-05_580",
+      "rows": [
+        {
+          "club": "CRAR",
+          "pts": 5
+        },
+        {
+          "club": "La Salle",
+          "pts": 4
+        },
+        {
+          "club": "CRAI",
+          "pts": 1
+        },
+        {
+          "club": "Tilcara",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M17",
+      "phase": "Final Four Plata",
+      "group": null,
+      "afterRound": 2,
+      "src": "2026-09-26_584",
+      "rows": [
+        {
+          "club": "La Salle",
+          "pts": 9
+        },
+        {
+          "club": "CRAR",
+          "pts": 5
+        },
+        {
+          "club": "CRAI",
+          "pts": 1
+        },
+        {
+          "club": "Tilcara",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Oro",
+      "group": null,
+      "afterRound": 1,
+      "src": "2026-09-05_580",
+      "rows": [
+        {
+          "club": "Santa Fe RC",
+          "pts": 5
+        },
+        {
+          "club": "Estudiantes",
+          "pts": 5
+        },
+        {
+          "club": "CRAR",
+          "pts": 1
+        },
+        {
+          "club": "CRAI",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Oro",
+      "group": null,
+      "afterRound": 2,
+      "src": "2026-09-12_582",
+      "rows": [
+        {
+          "club": "Estudiantes",
+          "pts": 10
+        },
+        {
+          "club": "CRAI",
+          "pts": 6
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 5
+        },
+        {
+          "club": "CRAR",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Oro",
+      "group": null,
+      "afterRound": 3,
+      "src": "2026-09-26_584",
+      "rows": [
+        {
+          "club": "Estudiantes",
+          "pts": 15
+        },
+        {
+          "club": "CRAI",
+          "pts": 11
+        },
+        {
+          "club": "Santa Fe RC",
+          "pts": 5
+        },
+        {
+          "club": "CRAR",
+          "pts": 1
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Plata",
+      "group": null,
+      "afterRound": 1,
+      "src": "2026-09-05_580",
+      "rows": [
+        {
+          "club": "Tilcara",
+          "pts": 5
+        },
+        {
+          "club": "Universitario",
+          "pts": 5
+        },
+        {
+          "club": "La Salle",
+          "pts": 0
+        },
+        {
+          "club": "Rowing",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Plata",
+      "group": null,
+      "afterRound": 2,
+      "src": "2026-09-12_582",
+      "rows": [
+        {
+          "club": "Universitario",
+          "pts": 10
+        },
+        {
+          "club": "Tilcara",
+          "pts": 5
+        },
+        {
+          "club": "La Salle",
+          "pts": 0
+        },
+        {
+          "club": "Rowing",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Plata",
+      "group": null,
+      "afterRound": 2,
+      "src": "2026-09-23_583",
+      "rows": [
+        {
+          "club": "Universitario",
+          "pts": 10
+        },
+        {
+          "club": "Tilcara",
+          "pts": 7
+        },
+        {
+          "club": "Rowing",
+          "pts": 2
+        },
+        {
+          "club": "La Salle",
+          "pts": 0
+        }
+      ]
+    },
+    {
+      "division": "M19",
+      "phase": "Final Four Plata",
+      "group": null,
+      "afterRound": 3,
+      "src": "2026-09-26_584",
+      "rows": [
+        {
+          "club": "Universitario",
+          "pts": 14
+        },
+        {
+          "club": "Tilcara",
+          "pts": 8
+        },
+        {
+          "club": "Rowing",
+          "pts": 6
+        },
+        {
+          "club": "La Salle",
+          "pts": 0
+        }
+      ]
+    }
+  ],
+  "issues": [
+    "Puntos de tabla ausentes en la fuente para las fechas 2, 3 y 4 de la fase clasificatoria (todas las divisiones) y para las fechas 1-4 de Final Six (salvo algunos partidos sueltos). La suma total de hp/ap no puede cerrar en esas fases; el control se hizo además desde la primera línea de posiciones publicada.",
+    "M15 Fase clasificatoria: desde las posiciones tras la fecha 4 (25/4) cierra exacto con la tabla final (SFRC 29, Estudiantes 26, La Salle 24, CRAI 23, Tilcara 15, Universitario 11, Rowing 9, CRAR 2).",
+    "M16 Fase clasificatoria: la línea tras fecha 4 dice 'CRAI 1; La Salle y CRAI 0' (un CRAI es CRAR; se cargó CRAR 1 y CRAI 0 por los resultados). La línea tras fecha 5 dice 'CRAI 5; CRAI 4' (cargado CRAI 5, CRAR 4): con los partidos daría CRAI 4 y CRAR 6. Tras fecha 8 Universitario pasa de 14 a 19 aunque perdió 22-14 con Rowing (0 pts): +5 sin explicación. Tabla final publicada vs calculada desde fecha 4: Universitario 19 vs 14, CRAI 15 vs 14, CRAR 9 vs 11.",
+    "M17 Fase clasificatoria: SFRC A - La Salle (6/6) figura sin marcador; las posiciones suman 5 a La Salle y 1 a SFRC -> cargado not_played. CRAI-Universitario (reprogramado 19/5) y CRAI-CRAR (reprogramado 9/6) nunca tuvieron resultado publicado: postponed. Universitario suma +1 sin explicación entre fecha 6 y 7 (posible bonus del CRAI-Universitario del 19/5, pero CRAI no suma nada). Calculado desde fecha 4 vs publicado: SFRC 29 vs 30, La Salle 14 vs 19, Universitario 12 vs 13 (todo explicado por esos dos partidos sin marcador).",
+    "M19 Fase clasificatoria: las posiciones tras fecha 4 (25/4) y tras fecha 5 (9/5) omiten a La Salle; la nota de programación del 13/5 repite la de fecha 5 agregando 'La Salle 9' (se cargaron ambas). Tras fecha 8 La Salle sube de 18 a 22 con un empate 19-19 (2-2): +2 de más. Universitario 81-0 Alma Juniors (13/6) no trae puntos; las posiciones le suman 5. Calculado desde la línea del 13/5 vs final: cierra salvo La Salle 20 vs 22 y Universitario 10 vs 15 (este último se explica por el partido sin puntos).",
+    "M19 Reservas: solo aparecen en las notas de las fechas 1-4 (Rowing R-CRAR R suspendido; SFRC R-CRAI R programado y ausente del panorama; Estudiantes R-SFRC R y SFRC R-Rowing R no se disputaron; Tilcara R-CRAR R sin marcador; CRAI R 28-7 Estudiantes R). El fixture del 25/3 lista más partidos de reserva para las fechas 5-9 pero ninguna nota semanal los menciona: no se cargaron. La nota del 4/6 menciona 'Libres: SFRC R y Rowing B' (sic).",
+    "Competencia Formación (M15-M17): sin posiciones publicadas en todo el año, no hay control posible. Casi ningún partido trae puntos de tabla.",
+    "Competencia Formación, Alma Juniors - Cha Roga Club de la fecha 8 (6/6): el fixture del 25/3 lo ubica en Formación (M15, M16, M17) pero las notas del 4/6 y 6/6 lo listan bajo 'Amistosos'. Se cargó en Formación con nota. Si se lo considera amistoso, hay que borrar esas 3 filas.",
+    "Competencia Formación: las notas del 7/5 y 13/5 listan un 'San Carlos - At. Brown' en M15 (con árbitro) que no figura en el fixture (San Carlos y At. Brown no juegan M15 Formación) y nunca tuvo resultado: probable arrastre de la línea de M14; no se cargó. En M16 fecha 5, el fixture pone San Carlos-At. Brown pero la programación solo dice 'Libre: SFRC B': no se cargó.",
+    "Amistoso ignorado pero dudoso: 'M16 SFRC B 17-39 San Carlos' (11/4) aparece bajo Amistosos siendo dos clubes de Formación con fecha libre.",
+    "M17 Formación 11/4: la nota escribe 'Estudiantes 29-7 SFRC B'; por el fixture (SFRC B-Estudiantes B) se cargó como Estudiantes B. En M17 también figura San Carlos (fecha 5 vs At. Brown, sin marcador).",
+    "M16 Final Six Plata: At. Brown y San Carlos comparten un lugar del fixture ('At. Brown / San Carlos') pero en posiciones aparecen por separado (At. Brown 15, San Carlos 5). Decisión: equipos separados en 'teams'. En la fecha 1 el fixture detalla Alma-At. Brown, Alma-San Carlos y At. Brown-San Carlos; el panorama solo dice 'Alma Jrs – San Carlos / At Brown (disputado)': se cargaron Alma-At. Brown y Alma-San Carlos como not_played (el At. Brown-San Carlos no se cargó: sin evidencia). Los partidos del lugar compartido con un solo marcador (CRAR 41-5 'A. Brown / San Carlos', 29/8) o sin marcador se cargaron con el alias combinado 'At. Brown / San Carlos'. Ese 5-0 no se refleja en ninguno de los dos por separado en las posiciones.",
+    "M16 Final Six Plata: At. Brown/San Carlos - Cha Roga Club (postergado p/22/8) sin marcador; las posiciones del 26/8 suben a Cha Roga Club de 10 a 19 (+9, compatible con dos partidos: vs At. Brown y vs San Carlos). Desde el 26/8 la tabla final cierra (CRAR 25).",
+    "M16 y M17 Final Six Plata: varios partidos se jugaron el 27/6 (nota del 25/6), antes de la fecha 1 oficial; la nota del 25/6 anuncia en M17 'Alma Jrs - San Carlo' pero el fixture y el panorama dicen Alma-At. Brown (se cargó At. Brown).",
+    "M15 Final Six Oro: Estudiantes-Universitario (suspendido 1/8) sin marcador; entre el 8/8 y el 26/8 Estudiantes pasa de 2 a 7 y Universitario aparece con 6 -> cargado not_played. Desde el 26/8 la tabla final cierra.",
+    "M15 Final Six Plata: SFRC B-Rowing (fecha 1) y Cha Roga-SFRC B (fecha 3) figuran postergado/suspendido, pero las posiciones del 8/8 (Rowing 15, Cha Roga 6) solo cierran si se jugaron -> cargados not_played sin marcador. Tabla final: Santa Fe RC B publicado 10, calculado 6 (5 + 1 del 24-28 con CRAR).",
+    "M16 Final Six Oro: Santa Fe RC-Estudiantes (suspendido 1/8) nunca se reprogramó (postponed). Desde el 8/8 la tabla final cierra.",
+    "M17 Final Six Oro: Universitario-SFRC (21/7) sin marcador, las posiciones confirman victoria de Universitario con bonus de SFRC (not_played). Rowing 28-24 Estudiantes (M17, fecha 3) sale solo del epígrafe de la foto de la nota del 26/8 ('el martes por la noche' = 25/8), sin puntos. CRAR-Estudiantes y La Salle-Rowing (fecha 1) nunca tuvieron resultado: postponed. Posiciones: entre 8/8 y 26/8 Rowing +4, CRAR +4, La Salle +1, Estudiantes +0 (no cierra con un solo partido); tabla final publicada Rowing 16 (calc 11), La Salle 2 (calc 3). La tabla final marca como clasificado a CRAR y no a Rowing, pero la Final Four Oro M17 la juega Rowing y CRAR va a Plata.",
+    "M17 Final Six Plata: 'Alma Jrs 17– Cha Roga Club / Querandí RC (74)' se leyó como 17-74 sin puntos. La tabla final (29/8) está corrupta: 'CRAI 20, Querandí RC 17, Tilcara 15, At. 12, Cha Roga Club / Alma Jrs 7'; se cargó Querandí RC -> 'Cha Roga Club / Querandí RC' y 'Cha Roga Club / Alma Jrs' -> 'Alma Juniors'. CRAI no suma el 106-5 (5-0): publicado 20, calculado 25. Cha Roga/Querandí 17 = 12 + 5 del partido sin puntos. 'At.' = At. Brown.",
+    "M19 Final Six Oro: CRAI-La Salle (18/7) sin marcador; CRAR-SFRC (fecha 1) y Estudiantes-La Salle (fecha 3) sin marcador pero las posiciones del 26/8 los dan jugados (SFRC +5, CRAR +1, Estudiantes +5) -> not_played. La Salle baja de 7 a 0 entre el 8/8 y el 26/8 sin explicación. Tabla final: Rowing publicado 7, calculado 12 (no suma el 42-27 sobre CRAI).",
+    "M19 Final Six Plata: la línea del 8/8 dice 'La Salle 10' (La Salle no juega Plata; es Cha Roga Club). Cha Roga-Estudiantes B (f1), Universitario-Estudiantes B (f3) y Estudiantes B-CRAI B (f4) figuran suspendidos pero las posiciones solo cierran si se jugaron -> not_played. La línea final del 29/8 es copia de la del 26/8 y no suma el Universitario 95-5 Alma (27/8, 5-0): Universitario publicado 14, calculado 19. Tilcara-Estudiantes B (29/8) suspendido.",
+    "M16 Final Four Oro: tras la fecha 2 se publica SFRC 6 y Estudiantes 6; con los puntos de la nota (Tilcara 26-24 SFRC 4-1; Estudiantes 26-10 Universitario 4-0) da SFRC 5 y Estudiantes 5.",
+    "M19 Final Four Plata: Rowing-Tilcara (postergado p/19/9) sin marcador; la línea del 23/9 le suma 2 a cada uno (empate) -> not_played. Con eso la tabla final cierra (Universitario 14, Tilcara 8, Rowing 6, La Salle 0).",
+    "Final Four Bronce M15 y M19 (Alma Juniors - Cha Roga Club): solo se conoce M15 fecha 1 (Alma 12-27 Cha Roga). M15 fecha 2 reprogramada al 19/9 sin resultado; M19 fecha 1 sin marcador. Las fechas 2-3 de M19 y la 3 de M15 figuran solo en el fixture del 2/9 y no se cargaron. Sin campeón publicado. Se ignoró 'M2 - Bronce' (incluido 'Cha Roga Club 62-10 Santa Fe RC' del 12/9).",
+    "M16 Final Four Bronce: La Salle - Alma Juniors (26/9) sin marcador y las posiciones no cambian (not_played). At. Brown - San Carlos postergado al 10/10 (scheduled).",
+    "M17 Final Four Plata: CRAR-CRAI postergado al 29/9 19.30 hs; la nota del 30/9 no trae resultado y lo sigue dando pendiente (postponed, fecha 29/9).",
+    "Campeones: confirmados en la nota del 26/9 M15 Oro Santa Fe RC, M15 Plata Tilcara, M19 Oro Estudiantes, M19 Plata Universitario y M17 Bronce Querandí RC. M16 (Oro, Plata, Bronce) y M17 (Oro, Plata) se definen el 3/10 (y 6/10, 10/10); M15 y M19 Bronce sin dato.",
+    "El calendario anunciado el 25/3 decía Final Four 5, 12 y 29/9; se jugó 5, 12 y 26/9 (M16/M17 hasta 3/10). La nota del 13/6 decía que la Final Six arrancaba el 27/6; solo se adelantaron algunos partidos de Plata."
+  ]
+}
