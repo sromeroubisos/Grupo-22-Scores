@@ -63,6 +63,7 @@ const NATIONAL_TEAM_FLAGS: Record<string, string> = {
     lithuania: 'lithuania', lituania: 'lithuania',
     malaysia: 'malaysia', malasia: 'malaysia',
     mexico: 'mexico',
+    namibia: 'namibia',
     netherlands: 'netherlands', 'paises bajos': 'netherlands', holanda: 'netherlands',
     'new zealand': 'new-zealand', 'nueva zelanda': 'new-zealand', 'nueva zelandia': 'new-zealand',
     norway: 'norway', noruega: 'norway',
