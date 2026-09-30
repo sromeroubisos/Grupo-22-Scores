@@ -177,6 +177,11 @@ const BOTH_AUDIENCES_PATTERNS = [
     // en la portada igual que el Juvenil. Va con la forma exacta "amistoso de
     // seleccionados" para que el amistoso de la M19 de un club no se cuele.
     /\bamistosos?\s+(?:internacional(?:es)?\s+)?de\s+seleccionad[oa]s\b/i,
+    // El U20 Challenger de World Rugby: selecciones nacionales M20, y en 2026
+    // se juega en Santiago con Chile y Brasil. "U20" lo manda a juveniles y la
+    // portada de mayores lo escondía. Nombre exacto, que ningún torneo de clubes
+    // se llama así.
+    /\bu20\s+challenger\b/i,
 ];
 
 /** Si el torneo se muestra en los dos segmentos en vez de en el suyo. */
