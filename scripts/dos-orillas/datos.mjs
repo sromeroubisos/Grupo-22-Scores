@@ -47,7 +47,7 @@ export const MADRES = {
   // Nuevos: sólo aparecen en el juvenil, no había ficha de mayores.
   'San Carlos':         { id: 'san-carlos-r-c-santa-fe',    nombre: 'San Carlos RC', nuevo: true,
                           nombreMadre: 'San Carlos R.C.', ciudad: 'San Carlos Centro', region: 'Santa Fé',
-                          union: 'union-santafesina-de-rugby', escudo: null },
+                          union: 'union-santafesina-de-rugby', escudo: 'san-carlos-usr.png' },
   'Querandí RC':        { id: 'querandi-r-c',               nombre: 'Querandí RC', nuevo: true,
                           nombreMadre: 'Querandí R.C.', ciudad: 'Santa Fe', region: 'Santa Fé',
                           union: 'union-santafesina-de-rugby', escudo: 'logoquerandi2-7a6cdf0c.png' },
@@ -98,6 +98,9 @@ const SUFIJO_B = /\s+(R|B|Azul)$/;
 export function resolverAlias(aliasFuente) {
   const alias = SINONIMOS[aliasFuente] ?? aliasFuente;
   if (COMBINADOS[alias]) return { combinado: COMBINADOS[alias], variante: '' };
+  // Un alias que es club por sí mismo gana sobre la regla del sufijo:
+  // "Universitario R" es Universitario de ROSARIO, no la reserva del de Santa Fe.
+  if (MADRES[alias]) return { madre: MADRES[alias], raiz: alias, variante: '' };
   const m = alias.match(SUFIJO_B);
   const raiz = m ? alias.slice(0, m.index) : alias;
   const madre = MADRES[raiz];
