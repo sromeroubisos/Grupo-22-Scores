@@ -312,6 +312,5 @@ export const ESCUDO_BROWN = { id: 'atletico-brown-san-vicente', escudo: 'brown s
 /** Sábado de la 1ª fecha del Regional M19 2026. */
 export const TRL_FECHA1 = '2026-10-03';
 
-// En Storage y no en public/: una ruta de public/ recién existe en producción
-// después del deploy, y la base la sirve desde ya.
-export const LOGO_TRL = 'https://vxsolicapdcpemfsahbk.supabase.co/storage/v1/object/public/tournaments/logos/trl-m19-c089f83b3d150580.png';
+// Archivo en public/ y no Storage: sale del deploy y no gasta requests.
+export const LOGO_TRL = '/competiciones/ar-trl-m19.png';
