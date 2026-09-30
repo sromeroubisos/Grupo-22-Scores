@@ -1,0 +1,10602 @@
+{
+ "year": 2022,
+ "format": "Torneo Juvenil Dos Orillas 2022: 19 fechas en tres etapas. (1) Fase regular de 11 fechas (2/4 al 2/7), 10 clubes (CRAI \"B\" solo en M19), todos contra todos. (2) Segunda etapa de 5 fechas (23/7 al 27/8) con dos bloques por ranking, \"Campeonato\" (los 5 mejores de la fase regular; 6 en M19) y \"Clasificación\" (los 5 restantes), tabla nueva desde cero en cada bloque; con ventana el 13/8 y recuperos el 3/9. (3) Final Four (10/9, 24/9 y 1/10; el M19 Oro cerró el 7/10) en tres copas: Copa Oro y Copa Plata entre 4 equipos todos contra todos (los dos primeros de cada bloque se cruzan por ranking) y Copa Bronce entre 2 equipos a ida y vuelta. phases: \"Fase clasificatoria\" (regular), \"Campeonato\" y \"Clasificación\" (segunda etapa, nombres del torneo), \"Final Four Oro\", \"Final Four Plata\", \"Final Four Bronce\". Los rounds son por fase: fase regular 1..11, segunda etapa 1..5, Final Four 1..3 (Bronce 1..2).",
+ "champions": [
+  {
+   "division": "M15",
+   "cup": "Oro",
+   "club": "CRAI",
+   "note": "campeón el 1/10 con 12 puntos (Santa Fe RC 11)"
+  },
+  {
+   "division": "M16",
+   "cup": "Oro",
+   "club": "Santa Fe RC",
+   "note": "campeón el 1/10 con 14 puntos"
+  },
+  {
+   "division": "M17",
+   "cup": "Oro",
+   "club": "CRAI",
+   "note": "campeón el 1/10 con 14 puntos"
+  },
+  {
+   "division": "M19",
+   "cup": "Oro",
+   "club": "Santa Fe RC",
+   "note": "empató con Estudiantes en 10 puntos y ganó 27-25 el partido entre ambos, jugado el 7/10 en la 3° Final Four"
+  },
+  {
+   "division": "M15",
+   "cup": "Plata",
+   "club": "Estudiantes",
+   "note": ""
+  },
+  {
+   "division": "M16",
+   "cup": "Plata",
+   "club": "Tilcara",
+   "note": ""
+  },
+  {
+   "division": "M17",
+   "cup": "Plata",
+   "club": "CRAR",
+   "note": ""
+  },
+  {
+   "division": "M19",
+   "cup": "Plata",
+   "club": "CRAR",
+   "note": ""
+  },
+  {
+   "division": "M15",
+   "cup": "Bronce",
+   "club": "La Salle",
+   "note": "serie a dos partidos (ida 10/9 y vuelta 24/9)"
+  },
+  {
+   "division": "M16",
+   "cup": "Bronce",
+   "club": "Cha Roga Club",
+   "note": "serie a dos partidos (ida 10/9 y vuelta 24/9)"
+  },
+  {
+   "division": "M17",
+   "cup": "Bronce",
+   "club": "Rowing",
+   "note": "serie a dos partidos (ida 10/9 y vuelta 24/9)"
+  },
+  {
+   "division": "M19",
+   "cup": "Bronce",
+   "club": "Alma Juniors",
+   "note": "serie a dos partidos (ida 10/9 y vuelta 24/9); Alma Juniors campeón del global pese a perder la vuelta 7-12 (la ida, jugada el 20/9, no tiene marcador publicado)"
+  }
+ ],
+ "phases": [
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "teams": [
+    "Santa Fe RC",
+    "Estudiantes",
+    "CRAI",
+    "CRAR",
+    "Rowing",
+    "Tilcara",
+    "La Salle",
+    "Universitario",
+    "Cha Roga Club",
+    "Alma Juniors"
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "teams": [
+    "Tilcara",
+    "Santa Fe RC",
+    "CRAI",
+    "Universitario",
+    "Rowing"
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "teams": [
+    "Estudiantes",
+    "Cha Roga Club",
+    "CRAR",
+    "La Salle",
+    "Alma Juniors"
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Oro",
+   "group": null,
+   "teams": [
+    "Santa Fe RC",
+    "CRAI",
+    "Universitario",
+    "Tilcara"
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Plata",
+   "group": null,
+   "teams": [
+    "Estudiantes",
+    "Rowing",
+    "CRAR",
+    "Cha Roga Club"
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Bronce",
+   "group": null,
+   "teams": [
+    "La Salle",
+    "Alma Juniors"
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "teams": [
+    "Santa Fe RC",
+    "Estudiantes",
+    "CRAI",
+    "CRAR",
+    "Rowing",
+    "Tilcara",
+    "La Salle",
+    "Universitario",
+    "Cha Roga Club",
+    "Alma Juniors"
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "teams": [
+    "CRAI",
+    "CRAR",
+    "Santa Fe RC",
+    "Estudiantes",
+    "Universitario"
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "teams": [
+    "Tilcara",
+    "Cha Roga Club",
+    "Rowing",
+    "La Salle",
+    "Alma Juniors"
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Oro",
+   "group": null,
+   "teams": [
+    "Santa Fe RC",
+    "CRAI",
+    "CRAR",
+    "Estudiantes"
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Plata",
+   "group": null,
+   "teams": [
+    "Universitario",
+    "La Salle",
+    "Tilcara",
+    "Rowing"
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Bronce",
+   "group": null,
+   "teams": [
+    "Cha Roga Club",
+    "Alma Juniors"
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "teams": [
+    "Santa Fe RC",
+    "Estudiantes",
+    "CRAI",
+    "CRAR",
+    "Rowing",
+    "Tilcara",
+    "La Salle",
+    "Universitario",
+    "Cha Roga Club",
+    "Alma Juniors"
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "teams": [
+    "CRAI",
+    "Santa Fe RC",
+    "Universitario",
+    "Estudiantes",
+    "La Salle"
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "teams": [
+    "Rowing",
+    "Cha Roga Club",
+    "Tilcara",
+    "CRAR",
+    "Alma Juniors"
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Oro",
+   "group": null,
+   "teams": [
+    "CRAI",
+    "Universitario",
+    "Santa Fe RC",
+    "La Salle"
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Plata",
+   "group": null,
+   "teams": [
+    "Estudiantes",
+    "CRAR",
+    "Cha Roga Club",
+    "Tilcara"
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Bronce",
+   "group": null,
+   "teams": [
+    "Rowing",
+    "Alma Juniors"
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "teams": [
+    "Santa Fe RC",
+    "Estudiantes",
+    "CRAI",
+    "CRAR",
+    "Rowing",
+    "Tilcara",
+    "La Salle",
+    "Universitario",
+    "Cha Roga Club",
+    "Alma Juniors",
+    "CRAI B"
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "teams": [
+    "Estudiantes",
+    "CRAI",
+    "Tilcara",
+    "Santa Fe RC",
+    "Rowing",
+    "Universitario"
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "teams": [
+    "CRAI B",
+    "CRAR",
+    "La Salle",
+    "Alma Juniors",
+    "Cha Roga Club"
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Oro",
+   "group": null,
+   "teams": [
+    "CRAI",
+    "Estudiantes",
+    "Rowing",
+    "Santa Fe RC"
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Plata",
+   "group": null,
+   "teams": [
+    "Tilcara",
+    "CRAR",
+    "Cha Roga Club",
+    "Universitario"
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Bronce",
+   "group": null,
+   "teams": [
+    "La Salle",
+    "Alma Juniors"
+   ]
+  }
+ ],
+ "matches": [
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 46,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "La Salle",
+   "away": "Rowing",
+   "hs": 3,
+   "as": 57,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "Alma Juniors",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 85,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "Cha Roga Club",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 52,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 15,
+   "as": 37,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "Estudiantes",
+   "away": "Cha Roga Club",
+   "hs": 21,
+   "as": 19,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "CRAI",
+   "away": "Alma Juniors",
+   "hs": 92,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 109,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "CRAR",
+   "away": "Universitario",
+   "hs": 17,
+   "as": 12,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 10,
+   "as": 7,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 12,
+   "as": 5,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 62,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "Cha Roga Club",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 39,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 7,
+   "as": 11,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 31,
+   "as": 17,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "CRAI",
+   "away": "La Salle",
+   "hs": 69,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "Santa Fe RC",
+   "away": "Universitario",
+   "hs": 32,
+   "as": 19,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "Tilcara",
+   "away": "CRAI",
+   "hs": 22,
+   "as": 21,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "Universitario",
+   "away": "Estudiantes",
+   "hs": 36,
+   "as": 24,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "CRAR",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 65,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "Cha Roga Club",
+   "away": "Alma Juniors",
+   "hs": 39,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "Estudiantes",
+   "away": "CRAR",
+   "hs": 51,
+   "as": 21,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "Santa Fe RC",
+   "away": "Rowing",
+   "hs": 22,
+   "as": 15,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "Alma Juniors",
+   "away": "La Salle",
+   "hs": 12,
+   "as": 18,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 12,
+   "as": 13,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 12,
+   "as": 11,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "Tilcara",
+   "away": "Alma Juniors",
+   "hs": 88,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "La Salle",
+   "away": "Cha Roga Club",
+   "hs": 3,
+   "as": 36,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-06-04",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 27,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "postergado de la 7° fecha, jugado en la ventana del 4/6 (dato de la nota del 4/6)",
+   "src": "2022-06-04_353"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 5,
+   "as": 34,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "Cha Roga Club",
+   "away": "Tilcara",
+   "hs": 12,
+   "as": 48,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 16,
+   "as": 12,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "Alma Juniors",
+   "away": "Universitario",
+   "hs": 5,
+   "as": 57,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 58,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 17,
+   "as": 13,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": 62,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Universitario",
+   "away": "Cha Roga Club",
+   "hs": 36,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "Alma Juniors",
+   "away": "Rowing",
+   "hs": 7,
+   "as": 83,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 41,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "La Salle",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 69,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 21,
+   "as": 0,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 34,
+   "as": 22,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 17,
+   "as": 17,
+   "hp": 2,
+   "ap": 2,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Santa Fe RC",
+   "away": "Alma Juniors",
+   "hs": 88,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "CRAR",
+   "away": "La Salle",
+   "hs": 50,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 12,
+   "as": 15,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 10,
+   "as": 12,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "Tilcara",
+   "away": "Universitario",
+   "hs": 14,
+   "as": 14,
+   "hp": 2,
+   "ap": 2,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 18,
+   "as": 27,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "CRAI",
+   "away": "Tilcara",
+   "hs": 9,
+   "as": 3,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 22,
+   "as": 20,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-20",
+   "home": "Rowing",
+   "away": "CRAI",
+   "hs": 28,
+   "as": 34,
+   "hp": 2,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2022-09-03",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 14,
+   "as": 50,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "postergado de la 4° fecha, jugado el 3/9",
+   "src": "2022-09-03_371"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "Santa Fe RC",
+   "away": "Rowing",
+   "hs": 44,
+   "as": 13,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 48,
+   "as": 12,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "La Salle",
+   "away": "Cha Roga Club",
+   "hs": 26,
+   "as": 33,
+   "hp": 2,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Alma Juniors",
+   "away": "Estudiantes",
+   "hs": 5,
+   "as": 69,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "Estudiantes",
+   "away": "La Salle",
+   "hs": 87,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 33,
+   "as": 14,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 34,
+   "as": 22,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "La Salle",
+   "away": "Alma Juniors",
+   "hs": 20,
+   "as": 5,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-20",
+   "home": "Alma Juniors",
+   "away": "CRAR",
+   "hs": 0,
+   "as": 48,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 4,
+   "date": "2022-09-03",
+   "home": "Estudiantes",
+   "away": "Cha Roga Club",
+   "hs": 33,
+   "as": 19,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "postergado de la 4° fecha, jugado el 3/9",
+   "src": "2022-09-03_371"
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "Cha Roga Club",
+   "away": "Alma Juniors",
+   "hs": 71,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "CRAR",
+   "away": "La Salle",
+   "hs": 29,
+   "as": 14,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "CRAI",
+   "away": "Tilcara",
+   "hs": 31,
+   "as": 13,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Santa Fe RC",
+   "away": "Universitario",
+   "hs": 29,
+   "as": 16,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 15,
+   "as": 5,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Santa Fe RC",
+   "away": "Tilcara",
+   "hs": 48,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "CRAI",
+   "away": "Santa Fe RC",
+   "hs": 17,
+   "as": 14,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 15,
+   "as": 12,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 33,
+   "as": 26,
+   "hp": 5,
+   "ap": 2,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Estudiantes",
+   "away": "Cha Roga Club",
+   "hs": 41,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 12,
+   "as": 20,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Estudiantes",
+   "away": "CRAR",
+   "hs": 15,
+   "as": 3,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 27,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 31,
+   "as": 29,
+   "hp": 5,
+   "ap": 2,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Bronce",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "La Salle",
+   "away": "Alma Juniors",
+   "hs": 10,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "ida de la serie de Copa Bronce (2 partidos, sin puntos de tabla)",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Bronce",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Alma Juniors",
+   "away": "La Salle",
+   "hs": 21,
+   "as": 57,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "vuelta; campeón de Copa Bronce: La Salle (nota del 24/9)",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 25,
+   "as": 17,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "La Salle",
+   "away": "Rowing",
+   "hs": 10,
+   "as": 13,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "Alma Juniors",
+   "away": "Estudiantes",
+   "hs": 8,
+   "as": 53,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "Cha Roga Club",
+   "away": "Santa Fe RC",
+   "hs": 5,
+   "as": 34,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 13,
+   "as": 6,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "Estudiantes",
+   "away": "Cha Roga Club",
+   "hs": 47,
+   "as": 22,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "CRAI",
+   "away": "Alma Juniors",
+   "hs": 40,
+   "as": 14,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 19,
+   "as": 13,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "CRAR",
+   "away": "Universitario",
+   "hs": 50,
+   "as": 21,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 29,
+   "as": 29,
+   "hp": 3,
+   "ap": 3,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 21,
+   "as": 20,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 8,
+   "as": 10,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "Cha Roga Club",
+   "away": "CRAI",
+   "hs": 5,
+   "as": 29,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 13,
+   "as": 8,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 12,
+   "as": 17,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "CRAI",
+   "away": "La Salle",
+   "hs": 31,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "Santa Fe RC",
+   "away": "Universitario",
+   "hs": 22,
+   "as": 19,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "Tilcara",
+   "away": "CRAI",
+   "hs": 12,
+   "as": 19,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "Universitario",
+   "away": "Estudiantes",
+   "hs": 40,
+   "as": 17,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "CRAR",
+   "away": "Santa Fe RC",
+   "hs": 29,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "Cha Roga Club",
+   "away": "Alma Juniors",
+   "hs": 40,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "Estudiantes",
+   "away": "CRAR",
+   "hs": 12,
+   "as": 7,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "Santa Fe RC",
+   "away": "Rowing",
+   "hs": 32,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "Alma Juniors",
+   "away": "La Salle",
+   "hs": 0,
+   "as": 38,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 31,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 11,
+   "as": 21,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "Tilcara",
+   "away": "Alma Juniors",
+   "hs": 67,
+   "as": 15,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "La Salle",
+   "away": "Cha Roga Club",
+   "hs": 10,
+   "as": 29,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 13,
+   "as": 22,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 14,
+   "as": 21,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "Cha Roga Club",
+   "away": "Tilcara",
+   "hs": 18,
+   "as": 10,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 45,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "Alma Juniors",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 36,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 46,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 16,
+   "as": 24,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": 26,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Universitario",
+   "away": "Cha Roga Club",
+   "hs": 24,
+   "as": 30,
+   "hp": 1,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "Alma Juniors",
+   "away": "Rowing",
+   "hs": 0,
+   "as": 19,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 26,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "La Salle",
+   "away": "Universitario",
+   "hs": 5,
+   "as": 15,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 7,
+   "as": 50,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 35,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 10,
+   "as": 3,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Santa Fe RC",
+   "away": "Alma Juniors",
+   "hs": 69,
+   "as": 13,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "CRAR",
+   "away": "La Salle",
+   "hs": 44,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Estudiantes",
+   "away": "CRAR",
+   "hs": 20,
+   "as": 5,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Universitario",
+   "away": "CRAI",
+   "hs": 16,
+   "as": 18,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 5,
+   "as": 11,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "CRAR",
+   "away": "Santa Fe RC",
+   "hs": 14,
+   "as": 31,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 13,
+   "as": 15,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 10,
+   "as": 9,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-20",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 5,
+   "as": 38,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-20",
+   "home": "CRAI",
+   "away": "CRAR",
+   "hs": 28,
+   "as": 26,
+   "hp": 4,
+   "ap": 2,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "CRAR",
+   "away": "Universitario",
+   "hs": 45,
+   "as": 25,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 22,
+   "as": 3,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "La Salle",
+   "away": "Rowing",
+   "hs": 22,
+   "as": 17,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Alma Juniors",
+   "away": "Tilcara",
+   "hs": 8,
+   "as": 38,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 14,
+   "as": 17,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 22,
+   "as": 0,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "Cha Roga Club",
+   "away": "Tilcara",
+   "hs": 13,
+   "as": 12,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "La Salle",
+   "away": "Alma Juniors",
+   "hs": 45,
+   "as": 24,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-20",
+   "home": "Alma Juniors",
+   "away": "Cha Roga Club",
+   "hs": 7,
+   "as": 52,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-20",
+   "home": "Tilcara",
+   "away": "Rowing",
+   "hs": 26,
+   "as": 11,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "Rowing",
+   "away": "Alma Juniors",
+   "hs": 21,
+   "as": 0,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "Cha Roga Club",
+   "away": "La Salle",
+   "hs": 25,
+   "as": 44,
+   "hp": 1,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 41,
+   "as": 12,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 17,
+   "as": 3,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 36,
+   "as": 29,
+   "hp": 5,
+   "ap": 2,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "CRAI",
+   "away": "CRAR",
+   "hs": 20,
+   "as": 10,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 12,
+   "as": 11,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "Estudiantes",
+   "away": "CRAR",
+   "hs": 67,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 21,
+   "as": 3,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "La Salle",
+   "away": "Tilcara",
+   "hs": 14,
+   "as": 7,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 12,
+   "as": 34,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "La Salle",
+   "away": "Rowing",
+   "hs": 17,
+   "as": 35,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": 20,
+   "as": 19,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "Tilcara",
+   "away": "Rowing",
+   "hs": 16,
+   "as": 13,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Bronce",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Cha Roga Club",
+   "away": "Alma Juniors",
+   "hs": 31,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "ida de la serie de Copa Bronce (2 partidos, sin puntos de tabla)",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Bronce",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Alma Juniors",
+   "away": "Cha Roga Club",
+   "hs": 28,
+   "as": 44,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "vuelta; campeón de Copa Bronce: Cha Roga Club (nota del 24/9)",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 23,
+   "as": 14,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "La Salle",
+   "away": "Rowing",
+   "hs": 17,
+   "as": 12,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "Alma Juniors",
+   "away": "Estudiantes",
+   "hs": 7,
+   "as": 80,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "Cha Roga Club",
+   "away": "Santa Fe RC",
+   "hs": 10,
+   "as": 31,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 21,
+   "as": 17,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "Estudiantes",
+   "away": "Cha Roga Club",
+   "hs": 28,
+   "as": 17,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "CRAI",
+   "away": "Alma Juniors",
+   "hs": 157,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 26,
+   "as": 6,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "CRAR",
+   "away": "Universitario",
+   "hs": 11,
+   "as": 13,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 7,
+   "as": 48,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 22,
+   "as": 22,
+   "hp": 2,
+   "ap": 3,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 20,
+   "as": 24,
+   "hp": 2,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "Cha Roga Club",
+   "away": "CRAI",
+   "hs": 10,
+   "as": 24,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 37,
+   "as": 22,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 24,
+   "as": 31,
+   "hp": 1,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "CRAI",
+   "away": "La Salle",
+   "hs": 21,
+   "as": 3,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "Santa Fe RC",
+   "away": "Universitario",
+   "hs": 29,
+   "as": 3,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "Tilcara",
+   "away": "CRAI",
+   "hs": 5,
+   "as": 34,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "Universitario",
+   "away": "Estudiantes",
+   "hs": 15,
+   "as": 14,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "CRAR",
+   "away": "Santa Fe RC",
+   "hs": 0,
+   "as": 27,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "Cha Roga Club",
+   "away": "Alma Juniors",
+   "hs": 60,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "Estudiantes",
+   "away": "CRAR",
+   "hs": 22,
+   "as": 10,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "Santa Fe RC",
+   "away": "Rowing",
+   "hs": 41,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "Alma Juniors",
+   "away": "La Salle",
+   "hs": 5,
+   "as": 54,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 21,
+   "as": 0,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 26,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "Tilcara",
+   "away": "Alma Juniors",
+   "hs": 82,
+   "as": 12,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "La Salle",
+   "away": "Cha Roga Club",
+   "hs": 27,
+   "as": 8,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 7,
+   "as": 37,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 22,
+   "as": 24,
+   "hp": 2,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "Cha Roga Club",
+   "away": "Tilcara",
+   "hs": 27,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 40,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "Alma Juniors",
+   "away": "Universitario",
+   "hs": 5,
+   "as": 55,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 15,
+   "as": 18,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 14,
+   "as": 55,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": 74,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Universitario",
+   "away": "Cha Roga Club",
+   "hs": 32,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "Alma Juniors",
+   "away": "Rowing",
+   "hs": 0,
+   "as": 71,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 57,
+   "as": 17,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "La Salle",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 5,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 17,
+   "as": 7,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 29,
+   "as": 18,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 37,
+   "as": 8,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Santa Fe RC",
+   "away": "Alma Juniors",
+   "hs": 104,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "CRAR",
+   "away": "La Salle",
+   "hs": 10,
+   "as": 20,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 12,
+   "as": 44,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 8,
+   "as": 57,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 33,
+   "as": 3,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "Santa Fe RC",
+   "away": "Universitario",
+   "hs": 29,
+   "as": 17,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "Universitario",
+   "away": "CRAI",
+   "hs": 7,
+   "as": 17,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "Estudiantes",
+   "away": "La Salle",
+   "hs": 14,
+   "as": 15,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-19",
+   "home": "CRAI",
+   "away": "Santa Fe RC",
+   "hs": 26,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "la nota de designaciones escribe 19/9 (16.30) por error de tipeo; es el viernes 19/8",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-20",
+   "home": "La Salle",
+   "away": "Universitario",
+   "hs": 8,
+   "as": 41,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 19,
+   "as": 3,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "Universitario",
+   "away": "Estudiantes",
+   "hs": 15,
+   "as": 14,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Alma Juniors",
+   "away": "Rowing",
+   "hs": 7,
+   "as": 69,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 1,
+   "date": "2022-08-06",
+   "home": "CRAR",
+   "away": "Cha Roga Club",
+   "hs": 14,
+   "as": 33,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "postergado de la 1° fecha de la 2° etapa; la nota del 29/7 lo daba pendiente y la del 6/8 ya trae el marcador; fecha exacta no publicada; sin puntos de tabla (la tabla da 5 a Cha Roga y 0 a CRAR)",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 18,
+   "as": 31,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "Cha Roga Club",
+   "away": "Tilcara",
+   "hs": 10,
+   "as": 5,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "Tilcara",
+   "away": "Rowing",
+   "hs": 17,
+   "as": 12,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-13",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "postergado para el 13/8; disputado sin marcador publicado (la tabla del 17/8 le suma 5 a CRAR)",
+   "src": "2022-08-03_365"
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-20",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 8,
+   "as": 15,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 4,
+   "date": "2022-09-03",
+   "home": "Alma Juniors",
+   "away": "Tilcara",
+   "hs": 0,
+   "as": 46,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "postergado de la 4° fecha, jugado el 3/9",
+   "src": "2022-09-03_371"
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "Cha Roga Club",
+   "away": "Alma Juniors",
+   "hs": 36,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 5,
+   "as": 13,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "CRAI",
+   "away": "La Salle",
+   "hs": 71,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Santa Fe RC",
+   "away": "Universitario",
+   "hs": 31,
+   "as": 34,
+   "hp": 2,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 17,
+   "as": 10,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-26",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "la nota del 24/9 dice \"juegan 26/9\"; ninguna nota publica el resultado y las tablas del 1/10 no le suman puntos a ninguno (Santa Fe RC 2, La Salle 0 + 1 por el 4-1 de Universitario)",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "CRAI",
+   "away": "Santa Fe RC",
+   "hs": 28,
+   "as": 12,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": 17,
+   "as": 10,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 25,
+   "as": 10,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 13,
+   "as": 20,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Cha Roga Club",
+   "away": "Tilcara",
+   "hs": 14,
+   "as": 0,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Estudiantes",
+   "away": "CRAR",
+   "hs": 20,
+   "as": 32,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "Estudiantes",
+   "away": "Cha Roga Club",
+   "hs": 14,
+   "as": 14,
+   "hp": 2,
+   "ap": 2,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "CRAR",
+   "away": "Tilcara",
+   "hs": 7,
+   "as": 12,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Bronce",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Rowing",
+   "away": "Alma Juniors",
+   "hs": 46,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "ida de la serie de Copa Bronce (2 partidos, sin puntos de tabla)",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Bronce",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Alma Juniors",
+   "away": "Rowing",
+   "hs": 22,
+   "as": 66,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "vuelta; campeón de Copa Bronce: Rowing (nota del 24/9)",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 24,
+   "as": 19,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "La Salle",
+   "away": "Rowing",
+   "hs": 12,
+   "as": 29,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "Alma Juniors",
+   "away": "Estudiantes",
+   "hs": 5,
+   "as": 50,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "Cha Roga Club",
+   "away": "Santa Fe RC",
+   "hs": 5,
+   "as": 43,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2022-04-02",
+   "home": "CRAI B",
+   "away": "CRAI",
+   "hs": 5,
+   "as": 45,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-02_338"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 17,
+   "as": 27,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "Estudiantes",
+   "away": "Cha Roga Club",
+   "hs": 67,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "CRAI",
+   "away": "Alma Juniors",
+   "hs": 59,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 38,
+   "as": 12,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2022-04-09",
+   "home": "CRAR",
+   "away": "Universitario",
+   "hs": 33,
+   "as": 24,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-09_340"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-21",
+   "home": "Alma Juniors",
+   "away": "CRAI B",
+   "hs": 12,
+   "as": 17,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "disputado 21/4",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 20,
+   "as": 10,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 24,
+   "as": 31,
+   "hp": 2,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 10,
+   "as": 45,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2022-04-23",
+   "home": "Cha Roga Club",
+   "away": "CRAI",
+   "hs": 7,
+   "as": 66,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-23_342"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 19,
+   "as": 14,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 24,
+   "as": 14,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "CRAI B",
+   "away": "Cha Roga Club",
+   "hs": 33,
+   "as": 19,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "CRAI",
+   "away": "La Salle",
+   "hs": 69,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2022-04-30",
+   "home": "Santa Fe RC",
+   "away": "Universitario",
+   "hs": 22,
+   "as": 16,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-04-30_344"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "Tilcara",
+   "away": "CRAI",
+   "hs": 10,
+   "as": 23,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "Universitario",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 38,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "CRAR",
+   "away": "Santa Fe RC",
+   "hs": 14,
+   "as": 37,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "Cha Roga Club",
+   "away": "Alma Juniors",
+   "hs": 24,
+   "as": 17,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2022-05-07",
+   "home": "La Salle",
+   "away": "CRAI B",
+   "hs": 7,
+   "as": 10,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-07_346"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "Estudiantes",
+   "away": "CRAR",
+   "hs": 69,
+   "as": 0,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "Santa Fe RC",
+   "away": "Rowing",
+   "hs": 21,
+   "as": 19,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "CRAI B",
+   "away": "Tilcara",
+   "hs": 12,
+   "as": 38,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "Alma Juniors",
+   "away": "La Salle",
+   "hs": 14,
+   "as": 22,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2022-05-14",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 50,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-14_348"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 8,
+   "as": 26,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "Tilcara",
+   "away": "Alma Juniors",
+   "hs": 74,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "La Salle",
+   "away": "Cha Roga Club",
+   "hs": 31,
+   "as": 10,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 7,
+   "as": 47,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2022-05-21",
+   "home": "Universitario",
+   "away": "CRAI B",
+   "hs": 47,
+   "as": 17,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-21_350"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 33,
+   "as": 16,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "Cha Roga Club",
+   "away": "Tilcara",
+   "hs": 9,
+   "as": 40,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-05-28",
+   "home": "Alma Juniors",
+   "away": "Universitario",
+   "hs": 23,
+   "as": 43,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-05-28_352"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-06-04",
+   "home": "CRAI B",
+   "away": "CRAR",
+   "hs": 26,
+   "as": 21,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "postergado de la 8° fecha (duelo en CRAI), jugado en la ventana del 4/6; la nota escribe (1-4) en orden perdedor-ganador, la tabla confirma 4 para CRAI B y 1 para CRAR",
+   "src": "2022-06-04_353"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2022-06-04",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 28,
+   "as": 24,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "postergado de la 8° fecha (duelo en CRAI por Gerónimo Paz), jugado en la ventana del 4/6",
+   "src": "2022-06-04_353"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 57,
+   "as": 7,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Rowing",
+   "away": "CRAI B",
+   "hs": 31,
+   "as": 13,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 13,
+   "as": 25,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-11",
+   "home": "Universitario",
+   "away": "Cha Roga Club",
+   "hs": 33,
+   "as": 14,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2022-06-16",
+   "home": "CRAR",
+   "away": "Alma Juniors",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "reprogramado para el 16/6; disputado sin marcador publicado (las tablas del 21/6 suben a Alma de 3 a 7 y a CRAR de 7 a 8: Alma 4, CRAR 1)",
+   "src": "2022-06-11_355"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "Alma Juniors",
+   "away": "Rowing",
+   "hs": 0,
+   "as": 60,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "La Salle",
+   "away": "Universitario",
+   "hs": 26,
+   "as": 20,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 10,
+   "as": 21,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "CRAI B",
+   "away": "Santa Fe RC",
+   "hs": 14,
+   "as": 23,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2022-06-25",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 14,
+   "as": 30,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-06-25_357"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 38,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Estudiantes",
+   "away": "CRAI B",
+   "hs": 20,
+   "as": 7,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 31,
+   "as": 31,
+   "hp": 3,
+   "ap": 3,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "Santa Fe RC",
+   "away": "Alma Juniors",
+   "hs": 38,
+   "as": 20,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2022-07-02",
+   "home": "CRAR",
+   "away": "La Salle",
+   "hs": 38,
+   "as": 26,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-02_359"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 10,
+   "as": 34,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Tilcara",
+   "away": "Universitario",
+   "hs": 34,
+   "as": 6,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 20,
+   "as": 24,
+   "hp": 1,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 21,
+   "as": 25,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "CRAI",
+   "away": "Tilcara",
+   "hs": 11,
+   "as": 6,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-03",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 21,
+   "as": 34,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "postergado de la 2° fecha (suspendido por falta de médico), jugado el 3/9",
+   "src": "2022-09-03_371"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 39,
+   "as": 3,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "Tilcara",
+   "away": "Estudiantes",
+   "hs": 13,
+   "as": 12,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "Santa Fe RC",
+   "away": "Rowing",
+   "hs": 21,
+   "as": 24,
+   "hp": 1,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-19",
+   "home": "Estudiantes",
+   "away": "CRAI",
+   "hs": 13,
+   "as": 18,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "la nota de designaciones escribe 19/9 (16.00) por error de tipeo; es el viernes 19/8",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-20",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 12,
+   "as": 18,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "postergado para el 23/8 según la nota del 17/8, pero la del 20/8 ya trae el marcador; fecha exacta no publicada",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-20",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 24,
+   "as": 14,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 31,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 22,
+   "as": 10,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 12,
+   "as": 20,
+   "hp": 0,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Alma Juniors",
+   "away": "CRAR",
+   "hs": 7,
+   "as": 40,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 1,
+   "date": "2022-07-23",
+   "home": "Cha Roga Club",
+   "away": "CRAI B",
+   "hs": 13,
+   "as": 17,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-23_362"
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "CRAI B",
+   "away": "Alma Juniors",
+   "hs": 21,
+   "as": 23,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 2,
+   "date": "2022-07-30",
+   "home": "CRAR",
+   "away": "La Salle",
+   "hs": 55,
+   "as": 22,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-07-29_364"
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "La Salle",
+   "away": "CRAI B",
+   "hs": 26,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 3,
+   "date": "2022-08-06",
+   "home": "Alma Juniors",
+   "away": "Cha Roga Club",
+   "hs": 24,
+   "as": 28,
+   "hp": 1,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-06_366"
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-20",
+   "home": "Cha Roga Club",
+   "away": "La Salle",
+   "hs": 34,
+   "as": 5,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 4,
+   "date": "2022-08-20",
+   "home": "CRAI B",
+   "away": "CRAR",
+   "hs": 10,
+   "as": 42,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-20_368"
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "CRAR",
+   "away": "Cha Roga Club",
+   "hs": 64,
+   "as": 25,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "round": 5,
+   "date": "2022-08-27",
+   "home": "La Salle",
+   "away": "Alma Juniors",
+   "hs": 24,
+   "as": 15,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-08-27_370"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 13,
+   "as": 42,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 10,
+   "as": 13,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "CRAI",
+   "away": "Santa Fe RC",
+   "hs": 22,
+   "as": 15,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 19,
+   "as": 20,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-07",
+   "home": "CRAI",
+   "away": "Rowing",
+   "hs": 26,
+   "as": 21,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-07_378"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Oro",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-07",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 27,
+   "as": 25,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-07_378"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Tilcara",
+   "away": "Cha Roga Club",
+   "hs": 28,
+   "as": 21,
+   "hp": 5,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-10",
+   "home": "Universitario",
+   "away": "CRAR",
+   "hs": 12,
+   "as": 28,
+   "hp": 0,
+   "ap": 5,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-10_373"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 6,
+   "as": 7,
+   "hp": 1,
+   "ap": 4,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Universitario",
+   "away": "Cha Roga Club",
+   "hs": 19,
+   "as": 13,
+   "hp": 4,
+   "ap": 1,
+   "status": "final",
+   "note": "",
+   "src": "2022-09-24_375"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "Tilcara",
+   "away": "Universitario",
+   "hs": 24,
+   "as": 5,
+   "hp": 4,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Plata",
+   "group": null,
+   "round": 3,
+   "date": "2022-10-01",
+   "home": "CRAR",
+   "away": "Cha Roga Club",
+   "hs": 36,
+   "as": 14,
+   "hp": 5,
+   "ap": 0,
+   "status": "final",
+   "note": "",
+   "src": "2022-10-01_377"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Bronce",
+   "group": null,
+   "round": 1,
+   "date": "2022-09-20",
+   "home": "La Salle",
+   "away": "Alma Juniors",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "ida postergada y jugada el 20/9 (designación del 21/9: \"Alma Juniors - La Salle (20/9 - 21)\"); disputado sin marcador publicado. Alma Juniors fue campeón del global pese a perder la vuelta 7-12, por lo que habría ganado la ida",
+   "src": "2022-09-21_374"
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Bronce",
+   "group": null,
+   "round": 2,
+   "date": "2022-09-24",
+   "home": "Alma Juniors",
+   "away": "La Salle",
+   "hs": 7,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "vuelta; Alma Juniors \"Campeón Copa Bronce\" (global)",
+   "src": "2022-09-24_375"
+  }
+ ],
+ "standings": [
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-04-02_338",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 5
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "CRAI",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-04-07_339",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 5
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-04-09_340",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-04-09_340",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 8
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 2
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "Universitario",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-04-09_340",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "CRAR",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-04-09_340",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "CRAI B",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-04-21_341",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "CRAI B",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-04-23_342",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 14
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 11
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-04-23_342",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 14
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 12
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 9
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-04-23_342",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 8
+    },
+    {
+     "club": "Universitario",
+     "pts": 6
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-04-23_342",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 15
+    },
+    {
+     "club": "Tilcara",
+     "pts": 14
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "CRAI B",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 2
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-04-27_343",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 14
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 12
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 9
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 3
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-04-27_343",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 8
+    },
+    {
+     "club": "Universitario",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-04-27_343",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 15
+    },
+    {
+     "club": "Tilcara",
+     "pts": 14
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "CRAI B",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 2
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-04-30_344",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 18
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 16
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 11
+    },
+    {
+     "club": "Universitario",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-04-30_344",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 18
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 16
+    },
+    {
+     "club": "CRAI",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "Universitario",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 3
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-04-30_344",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 20
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 20
+    },
+    {
+     "club": "CRAI",
+     "pts": 14
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "Universitario",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-04-30_344",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 20
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 19
+    },
+    {
+     "club": "Tilcara",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "CRAI B",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-05-04_345",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 20
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 20
+    },
+    {
+     "club": "CRAI",
+     "pts": 14
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "Universitario",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-05-04_345",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 20
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 19
+    },
+    {
+     "club": "Tilcara",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "CRAI B",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-05-07_346",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 23
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 21
+    },
+    {
+     "club": "CRAI",
+     "pts": 16
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 16
+    },
+    {
+     "club": "Rowing",
+     "pts": 11
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-05-07_346",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 19
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 18
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 16
+    },
+    {
+     "club": "CRAR",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-05-07_346",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 21
+    },
+    {
+     "club": "CRAI",
+     "pts": 19
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-05-07_346",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 24
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 24
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 19
+    },
+    {
+     "club": "Tilcara",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "CRAI B",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-05-11_347",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 21
+    },
+    {
+     "club": "CRAI",
+     "pts": 19
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2022-05-14_348",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 26
+    },
+    {
+     "club": "Tilcara",
+     "pts": 23
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 21
+    },
+    {
+     "club": "CRAI",
+     "pts": 17
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "Rowing",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2022-05-14_348",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 24
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 21
+    },
+    {
+     "club": "CRAR",
+     "pts": 15
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2022-05-14_348",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 30
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 25
+    },
+    {
+     "club": "CRAI",
+     "pts": 23
+    },
+    {
+     "club": "La Salle",
+     "pts": 11
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2022-05-14_348",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 29
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 29
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 23
+    },
+    {
+     "club": "Tilcara",
+     "pts": 20
+    },
+    {
+     "club": "Rowing",
+     "pts": 16
+    },
+    {
+     "club": "CRAI B",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Universitario",
+     "pts": 3
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2022-05-19_349",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Tilcara",
+     "pts": 23
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 21
+    },
+    {
+     "club": "CRAI",
+     "pts": 17
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "Rowing",
+     "pts": 13
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 7,
+   "src": "2022-05-21_350",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 28
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 26
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "CRAI",
+     "pts": 17
+    },
+    {
+     "club": "Rowing",
+     "pts": 17
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 7,
+   "src": "2022-05-21_350",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 28
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 26
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 21
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "CRAR",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 7,
+   "src": "2022-05-21_350",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 30
+    },
+    {
+     "club": "CRAI",
+     "pts": 28
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 25
+    },
+    {
+     "club": "La Salle",
+     "pts": 16
+    },
+    {
+     "club": "Rowing",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 7,
+   "src": "2022-05-21_350",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 34
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 34
+    },
+    {
+     "club": "Tilcara",
+     "pts": 25
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 23
+    },
+    {
+     "club": "Rowing",
+     "pts": 16
+    },
+    {
+     "club": "CRAI B",
+     "pts": 14
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "Universitario",
+     "pts": 8
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2022-05-28_352",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 33
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 31
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "CRAI",
+     "pts": 21
+    },
+    {
+     "club": "Universitario",
+     "pts": 19
+    },
+    {
+     "club": "Rowing",
+     "pts": 18
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2022-05-28_352",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 33
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "CRAR",
+     "pts": 15
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2022-05-28_352",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 35
+    },
+    {
+     "club": "CRAI",
+     "pts": 33
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "La Salle",
+     "pts": 16
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2022-05-28_352",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 39
+    },
+    {
+     "club": "CRAI",
+     "pts": 34
+    },
+    {
+     "club": "Tilcara",
+     "pts": 30
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 23
+    },
+    {
+     "club": "Rowing",
+     "pts": 16
+    },
+    {
+     "club": "CRAI B",
+     "pts": 14
+    },
+    {
+     "club": "Universitario",
+     "pts": 13
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2022-06-04_353",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 33
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 31
+    },
+    {
+     "club": "CRAI",
+     "pts": 26
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Universitario",
+     "pts": 19
+    },
+    {
+     "club": "Rowing",
+     "pts": 18
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2022-06-04_353",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 39
+    },
+    {
+     "club": "CRAI",
+     "pts": 38
+    },
+    {
+     "club": "Tilcara",
+     "pts": 30
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 23
+    },
+    {
+     "club": "CRAI B",
+     "pts": 18
+    },
+    {
+     "club": "Rowing",
+     "pts": 16
+    },
+    {
+     "club": "Universitario",
+     "pts": 13
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "CRAR",
+     "pts": 7
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2022-06-09_354",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 33
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 31
+    },
+    {
+     "club": "CRAI",
+     "pts": 26
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Universitario",
+     "pts": 19
+    },
+    {
+     "club": "Rowing",
+     "pts": 17
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 11
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2022-06-09_354",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 33
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "CRAR",
+     "pts": 15
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 14
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2022-06-09_354",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 35
+    },
+    {
+     "club": "CRAI",
+     "pts": 33
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "La Salle",
+     "pts": 15
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 8,
+   "src": "2022-06-09_354",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 39
+    },
+    {
+     "club": "CRAI",
+     "pts": 38
+    },
+    {
+     "club": "Tilcara",
+     "pts": 30
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 24
+    },
+    {
+     "club": "CRAI B",
+     "pts": 18
+    },
+    {
+     "club": "Rowing",
+     "pts": 18
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 7
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 9,
+   "src": "2022-06-11_355",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 38
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 35
+    },
+    {
+     "club": "CRAI",
+     "pts": 27
+    },
+    {
+     "club": "Universitario",
+     "pts": 24
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 17
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 11
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 9,
+   "src": "2022-06-11_355",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 37
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Tilcara",
+     "pts": 21
+    },
+    {
+     "club": "CRAR",
+     "pts": 20
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "Universitario",
+     "pts": 16
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 9,
+   "src": "2022-06-11_355",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 38
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 35
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "Universitario",
+     "pts": 20
+    },
+    {
+     "club": "La Salle",
+     "pts": 19
+    },
+    {
+     "club": "Rowing",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 12
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 9,
+   "src": "2022-06-11_355",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 42
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 39
+    },
+    {
+     "club": "Tilcara",
+     "pts": 35
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 24
+    },
+    {
+     "club": "Rowing",
+     "pts": 23
+    },
+    {
+     "club": "Universitario",
+     "pts": 19
+    },
+    {
+     "club": "CRAI B",
+     "pts": 18
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 7
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 9,
+   "src": "2022-06-21_356",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 42
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 39
+    },
+    {
+     "club": "Tilcara",
+     "pts": 35
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 24
+    },
+    {
+     "club": "Rowing",
+     "pts": 23
+    },
+    {
+     "club": "Universitario",
+     "pts": 19
+    },
+    {
+     "club": "CRAI B",
+     "pts": 18
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 8
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 7
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2022-06-25_357",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 38
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 35
+    },
+    {
+     "club": "CRAI",
+     "pts": 32
+    },
+    {
+     "club": "Universitario",
+     "pts": 29
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 22
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2022-06-25_357",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 42
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "CRAR",
+     "pts": 25
+    },
+    {
+     "club": "Tilcara",
+     "pts": 21
+    },
+    {
+     "club": "Universitario",
+     "pts": 20
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "Rowing",
+     "pts": 14
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2022-06-25_357",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 43
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 35
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "Universitario",
+     "pts": 24
+    },
+    {
+     "club": "La Salle",
+     "pts": 19
+    },
+    {
+     "club": "Rowing",
+     "pts": 19
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 12
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2022-06-25_357",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 44
+    },
+    {
+     "club": "CRAI",
+     "pts": 42
+    },
+    {
+     "club": "Tilcara",
+     "pts": 35
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 28
+    },
+    {
+     "club": "Rowing",
+     "pts": 28
+    },
+    {
+     "club": "Universitario",
+     "pts": 20
+    },
+    {
+     "club": "CRAI B",
+     "pts": 18
+    },
+    {
+     "club": "La Salle",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 12
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 7
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2022-06-30_358",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 43
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 35
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "Universitario",
+     "pts": 24
+    },
+    {
+     "club": "La Salle",
+     "pts": 20
+    },
+    {
+     "club": "Rowing",
+     "pts": 19
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 12
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 11,
+   "src": "2022-07-02_359",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 40
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 40
+    },
+    {
+     "club": "CRAI",
+     "pts": 32
+    },
+    {
+     "club": "Universitario",
+     "pts": 31
+    },
+    {
+     "club": "Rowing",
+     "pts": 27
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 16
+    },
+    {
+     "club": "CRAR",
+     "pts": 14
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 11,
+   "src": "2022-07-02_359",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 42
+    },
+    {
+     "club": "CRAR",
+     "pts": 30
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 30
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "Universitario",
+     "pts": 25
+    },
+    {
+     "club": "Tilcara",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 9
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 11,
+   "src": "2022-07-02_359",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 43
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 40
+    },
+    {
+     "club": "Universitario",
+     "pts": 29
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "La Salle",
+     "pts": 24
+    },
+    {
+     "club": "Rowing",
+     "pts": 24
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 12
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 11,
+   "src": "2022-07-02_359",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 49
+    },
+    {
+     "club": "CRAI",
+     "pts": 42
+    },
+    {
+     "club": "Tilcara",
+     "pts": 38
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 33
+    },
+    {
+     "club": "Rowing",
+     "pts": 33
+    },
+    {
+     "club": "Universitario",
+     "pts": 24
+    },
+    {
+     "club": "CRAI B",
+     "pts": 18
+    },
+    {
+     "club": "CRAR",
+     "pts": 17
+    },
+    {
+     "club": "La Salle",
+     "pts": 16
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-07-23_362",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Rowing",
+     "pts": 1
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    },
+    {
+     "club": "CRAI",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-07-23_362",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 2
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-07-23_362",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 4
+    },
+    {
+     "club": "CRAI",
+     "pts": 4
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-07-23_362",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Rowing",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-07-23_362",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "Universitario",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-07-23_362",
+   "rows": [
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    },
+    {
+     "club": "Tilcara",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-07-23_362",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 5
+    },
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 1
+    },
+    {
+     "club": "Rowing",
+     "pts": 0
+    },
+    {
+     "club": "Universitario",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-07-23_362",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "CRAI B",
+     "pts": 4
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-07-29_364",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "CRAI",
+     "pts": 4
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 4
+    },
+    {
+     "club": "Universitario",
+     "pts": 3
+    },
+    {
+     "club": "Rowing",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-07-29_364",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 2
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-07-29_364",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 8
+    },
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-07-29_364",
+   "rows": [
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-07-29_364",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 0
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    },
+    {
+     "club": "Universitario",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-07-29_364",
+   "rows": [
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 1
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-07-29_364",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-07-29_364",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "CRAI B",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 4
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-06_366",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 8
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Universitario",
+     "pts": 7
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 4
+    },
+    {
+     "club": "Rowing",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-06_366",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-06_366",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 12
+    },
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 2
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-06_366",
+   "rows": [
+    {
+     "club": "La Salle",
+     "pts": 13
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-06_366",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 14
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 1
+    },
+    {
+     "club": "Universitario",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-06_366",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-06_366",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 7
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-06_366",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 6
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "CRAI B",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-17_367",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 11
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 7
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-17_367",
+   "rows": [
+    {
+     "club": "La Salle",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 4
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-17_367",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-17_367",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 7
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-08-17_367",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "CRAI B",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-08-20_368",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 13
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Universitario",
+     "pts": 7
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 4
+    },
+    {
+     "club": "Rowing",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-08-20_368",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 11
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-08-20_368",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 13
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 12
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 11
+    },
+    {
+     "club": "Universitario",
+     "pts": 2
+    },
+    {
+     "club": "CRAR",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-08-20_368",
+   "rows": [
+    {
+     "club": "La Salle",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-08-20_368",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 19
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-08-20_368",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 13
+    },
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-08-20_368",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 18
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 8
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 4,
+   "src": "2022-08-20_368",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 15
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 6
+    },
+    {
+     "club": "CRAI B",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-08-27_370",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 18
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Universitario",
+     "pts": 7
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-08-27_370",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 15
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-08-27_370",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 13
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 12
+    },
+    {
+     "club": "CRAR",
+     "pts": 7
+    },
+    {
+     "club": "Universitario",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-08-27_370",
+   "rows": [
+    {
+     "club": "La Salle",
+     "pts": 19
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-08-27_370",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 19
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "Universitario",
+     "pts": 9
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-08-27_370",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 18
+    },
+    {
+     "club": "CRAR",
+     "pts": 14
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-08-27_370",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 22
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 13
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-08-27_370",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 20
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 6
+    },
+    {
+     "club": "CRAI B",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-09-03_371",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 18
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "Universitario",
+     "pts": 7
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Rowing",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-09-03_371",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 16
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 15
+    },
+    {
+     "club": "La Salle",
+     "pts": 7
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Clasificación",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-09-03_371",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 18
+    },
+    {
+     "club": "CRAR",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Alma Juniors",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Campeonato",
+   "group": null,
+   "afterRound": 5,
+   "src": "2022-09-03_371",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 13
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Oro",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-09-10_373",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "CRAI",
+     "pts": 4
+    },
+    {
+     "club": "Universitario",
+     "pts": 0
+    },
+    {
+     "club": "Tilcara",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Oro",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-09-10_373",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "CRAI",
+     "pts": 4
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Oro",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-09-10_373",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 5
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 2
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Oro",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-09-10_373",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 5
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 4
+    },
+    {
+     "club": "Rowing",
+     "pts": 1
+    },
+    {
+     "club": "CRAI",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Plata",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-09-10_373",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 5
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 2
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Plata",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-09-10_373",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 1
+    },
+    {
+     "club": "Rowing",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Plata",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-09-10_373",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 4
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    },
+    {
+     "club": "Tilcara",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Plata",
+   "group": null,
+   "afterRound": 1,
+   "src": "2022-09-10_373",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    },
+    {
+     "club": "Universitario",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Oro",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-09-24_375",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 8
+    },
+    {
+     "club": "Universitario",
+     "pts": 0
+    },
+    {
+     "club": "Tilcara",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Oro",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-09-24_375",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 8
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 2
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Oro",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-09-24_375",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Universitario",
+     "pts": 6
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 2
+    },
+    {
+     "club": "La Salle",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Oro",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-09-24_375",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 9
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "CRAI",
+     "pts": 4
+    },
+    {
+     "club": "Rowing",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Plata",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-09-24_375",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 4
+    },
+    {
+     "club": "CRAR",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Plata",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-09-24_375",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Plata",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-09-24_375",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Plata",
+   "group": null,
+   "afterRound": 2,
+   "src": "2022-09-24_375",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 9
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Oro",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-10-01_377",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 12
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 11
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Oro",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-10-01_377",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 14
+    },
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 7
+    },
+    {
+     "club": "CRAR",
+     "pts": 0
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Oro",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-10-01_377",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 14
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 2
+    },
+    {
+     "club": "La Salle",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Final Four Plata",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-10-01_377",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 14
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Final Four Plata",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-10-01_377",
+   "rows": [
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Final Four Plata",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-10-01_377",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 7
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Plata",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-10-01_377",
+   "rows": [
+    {
+     "club": "CRAR",
+     "pts": 14
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Final Four Oro",
+   "group": null,
+   "afterRound": 3,
+   "src": "2022-10-07_378",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 2
+    }
+   ]
+  }
+ ],
+ "issues": [
+  "Formato: 10 clubes (7 USR y 3 UER), CRAI \"B\" solo en M19 (11 equipos). Fase regular de 11 fechas (2/4 al 2/7, todos contra todos; la fuente la llama \"fase regular\" y a veces \"clasificatoria\", se usó phase \"Fase clasificatoria\"). Segunda etapa de 5 fechas (23/7 al 27/8) en dos bloques por ranking: \"Zona Campeonato\" (los 5 mejores; 6 en M19) y \"Zona Clasificación\" (los otros 5), con tabla nueva desde cero; se usaron phase \"Campeonato\" y \"Clasificación\" (group null). Final Four de 3 fechas: Copa Oro y Copa Plata entre 4 equipos (todos contra todos, 1-4/2-3, 1-3/2-4, 1-2/3-4) y Copa Bronce entre 2 equipos a ida y vuelta. La 2° y 3° Final Four se corrieron del 17/9 y 24/9 al 24/9 y 1/10; el M19 Oro cerró el 7/10.",
+  "Copa Bronce: las notas no ponen puntos de tabla; hp/ap null. Los equipos: M15 La Salle/Alma Juniors, M16 Cha Roga Club/Alma Juniors, M17 Rowing/Alma Juniors, M19 La Salle/Alma Juniors. En M19 la ida (20/9) no tiene marcador publicado y Alma Juniors quedó campeón pese a perder la vuelta 7-12.",
+  "Ignorado: TRL juvenil (notas del 11/10 al 5/11, Jockey campeón), amistosos (M1, M2, triangulares de M15-M17 en octubre) y la nota de amistosos de Salto Grande. CRAI \"B\" quedó fuera de la Final Four de M19 (último de Clasificación).",
+  "Resultados sin marcador publicado: M19 CRAR-Alma Juniors (fase regular, 9° fecha, reprogramado al 16/6; por las tablas Alma 4, CRAR 1), M17 CRAR-Alma Juniors (Clasificación, 3° fecha, postergado al 13/8; por la tabla CRAR 5), M19 La Salle-Alma Juniors (ida de Copa Bronce, 20/9). Sin resultado y sin fecha de juego confirmada: M17 Copa Oro Santa Fe RC-La Salle (2° Final Four, \"juegan 26/9\"; las tablas no le suman puntos a nadie).",
+  "Partidos sin puntos de tabla entre paréntesis: M19 CRAI B 5-45 CRAI (1° fecha; las tablas dan CRAI 5 y CRAI B 1) y M17 CRAR 14-33 Cha Roga (Clasificación, postergado de la 1° fecha; la tabla da 5 a Cha Roga). Ese último apareció en la nota del 6/8 sin fecha de juego.",
+  "Fuera de la nota en forma de listado: los tres partidos jugados en la ventana del 4/6 (M15 CRAR 0-27 CRAI, M19 CRAI B 26-21 CRAR, M19 CRAI 28-24 Rowing) salen de la prosa de la nota del 4/6; en el de CRAI B la nota escribe (1-4) en orden perdedor-ganador y se cargó hp 4 / ap 1 porque la tabla lo confirma. El M15 Estudiantes 15-3 CRAR (Copa Plata, 2° Final Four) figura pegado sin espacio (\"Estudiantes15-3 CRAR\") en la nota del 24/9.",
+  "Fechas inciertas: en la nota del 17/8 los partidos de la 4° fecha de Campeonato M17 CRAI-Santa Fe RC y M19 Estudiantes-CRAI figuran \"19/9\" (tipeo; era el viernes 19/8); M19 Universitario-Santa Fe RC (4° fecha Campeonato) figura postergado al 23/8 pero el 20/8 ya tiene marcador: se dejó 2022-08-20. M17 CRAR-Cha Roga Clasificación: 2022-08-06 por aparecer en esa nota. M19 Copa Oro 3° fecha: los dos partidos se postergaron al 7/10 por el viaje de Estudiantes.",
+  "CONTROL fase regular (suma de hp/ap vs última tabla de la 11° fecha): M15 Cha Roga Club 14 vs 16 (la tabla le suma 1 sin partido el 9/6 y otro en la 11° fecha, Rowing 34-22 (5-0)); M16 Rowing 19 vs 9 y Cha Roga Club 19 vs 9: la tabla final publica \"Rowing y Cha Roga 9\", tipeo de 19 (Rowing 14+5, Cha Roga 19+0); M16 Universitario 24 vs 25 (10-3 a Tilcara figura (4-1) y la tabla le da 5); M17 La Salle 25 vs 24 (La Salle 20-24 Estudiantes (2-5) figura 2 y la tabla de la 3° fecha le da 1); M19 Tilcara 37 vs 38 (la tabla de la 1° fecha le da 5 por el 24-19 a CRAR (4-1)), Santa Fe RC 32 vs 33, Rowing 32 vs 33, Estudiantes 48 vs 49, Universitario 23 vs 24, Alma Juniors 6 vs 9 (la tabla de la 11° fecha le suma 2 a Alma por el 0-5 ante Santa Fe RC y 1 a Estudiantes y Universitario sobre los paréntesis de la nota). CRAI, CRAR, La Salle, Cha Roga Club, Alma Juniors (salvo M19) y el resto cierran exactos.",
+  "CONTROL Campeonato y Clasificación: M15 Clasificación Estudiantes 15 vs 16 y La Salle 6 vs 7 (desde la 3° fecha la tabla suma 1 a cada uno sobre los paréntesis: CRAR 34-22 Estudiantes (5-0) y La Salle 20-5 Alma (4-0)); M16 Clasificación Rowing 9 vs 10, La Salle 18 vs 19, Alma Juniors 0 vs 1 (desde la tabla del 17/8, La Salle 45-24 Alma (5-0) y Rowing libre); M17 Clasificación Rowing 7 vs 6 y Tilcara 10 vs 11 (Rowing 8-15 Cha Roga (1-4) no suma el 1 a Rowing; Tilcara +1); M19 Clasificación Alma Juniors 5 vs 6 y Cha Roga Club 12 vs 11 (Alma 24-28 Cha Roga figura (1-5) y la tabla del 17/8 implica (2-4)). Campeonato (las 4 divisiones) cierra exacto.",
+  "CONTROL Final Four: todo cierra exacto salvo M19 Copa Oro Rowing 3 vs 2 (CRAI 26-21 Rowing figura (5-1) y la tabla de la nota del 7/10 le deja 2). Los puntos de la tabla final M19 Oro: Santa Fe RC 10, Estudiantes 10, CRAI 9, Rowing 2; el título se definió por el partido entre ambos.",
+  "Las líneas \"Posiciones\" de las notas de designaciones repiten la tabla de la fecha anterior; se copiaron solo las que difieren de la anterior de esa división y fase. Varias traen errores propios: M17 Clasificación del 28/7 y 3/8 con \"(*) partido postergado\" y tablas parciales; la nota del 9/6 (354) muestra tablas intermedias (p. ej. M15 Cha Roga 11, CRAR y La Salle 4) corregidas después. En algunas tablas quedan clubes sin puntos porque la nota los corta (p. ej. \"CRAR.\" sin número)."
+ ]
+}

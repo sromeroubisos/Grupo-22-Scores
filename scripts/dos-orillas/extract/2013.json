@@ -1,0 +1,10290 @@
+{
+ "year": 2013,
+ "format": "Torneo de todos contra todos a ida y vuelta, 22 fechas, del 4/5 al 2/11/2013 en M15, M16 y M17 (doce clubes, ocho santafesinos y cuatro paranaenses; reingresan At. Brown de San Vicente y Capibá RC y los jugadores del ex Náutico El Quillá pasan a Querandí RC) y hasta el 19/10 previsto en M19 (diez clubes, sin Capibá ni At. Brown, 18 partidos). Una sola fase ('Fase clasificatoria' = toda la liga), sin copas ni playoffs: campeon = lider de la tabla. La primera rueda terminó en la fecha 11 (3/8). Ventanas: 22/6, 31/8 y 12/10; sin fechas el 13 y 20/7. Puntaje M15-M17: ganado 2, empatado 1, perdido 0 mas 1 punto de disciplina por partido (se pierde con 2 amonestaciones o 1 expulsion); las notas no publican los puntos por partido (hp/ap null). Campeones segun nota del 2/11/2013 y notas posteriores.",
+ "champions": [
+  {
+   "division": "M15",
+   "cup": "",
+   "club": "Santa Fe RC",
+   "note": "59 puntos (19 ganados en 21 partidos); le quedaba el postergado ante Capibá"
+  },
+  {
+   "division": "M16",
+   "cup": "",
+   "club": "Cha Roga Club",
+   "note": "titulo compartido con CRAI; ambos empatados con 62 puntos"
+  },
+  {
+   "division": "M16",
+   "cup": "",
+   "club": "CRAI",
+   "note": "titulo compartido con Cha Roga Club; ambos empatados con 62 puntos"
+  },
+  {
+   "division": "M17",
+   "cup": "",
+   "club": "Universitario",
+   "note": "61 puntos en 21 partidos; le quedaba el postergado ante Rowing"
+  },
+  {
+   "division": "M19",
+   "cup": "",
+   "club": "Santa Fe RC",
+   "note": "94 puntos en 18 partidos (2 derrotas); CRAI 83 y Universitario 80"
+  }
+ ],
+ "phases": [
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "teams": [
+    "Estudiantes",
+    "Tilcara",
+    "Santa Fe RC",
+    "Rowing",
+    "Capibá",
+    "At. Brown",
+    "La Salle",
+    "CRAR",
+    "Universitario",
+    "Cha Roga Club",
+    "CRAI",
+    "Querandí RC"
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "teams": [
+    "Estudiantes",
+    "Tilcara",
+    "Santa Fe RC",
+    "Rowing",
+    "Capibá",
+    "At. Brown",
+    "La Salle",
+    "CRAR",
+    "Universitario",
+    "Cha Roga Club",
+    "CRAI",
+    "Querandí RC"
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "teams": [
+    "Estudiantes",
+    "Tilcara",
+    "Santa Fe RC",
+    "Rowing",
+    "Capibá",
+    "At. Brown",
+    "La Salle",
+    "CRAR",
+    "Universitario",
+    "Cha Roga Club",
+    "CRAI",
+    "Querandí RC"
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "teams": [
+    "Estudiantes",
+    "Tilcara",
+    "Santa Fe RC",
+    "Rowing",
+    "La Salle",
+    "CRAR",
+    "Universitario",
+    "Cha Roga Club",
+    "CRAI",
+    "Querandí RC"
+   ]
+  }
+ ],
+ "matches": [
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2013-05-04",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 40,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-04_025"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2013-05-04",
+   "home": "Santa Fe RC",
+   "away": "Rowing",
+   "hs": 42,
+   "as": 28,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-04_025"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2013-05-04",
+   "home": "Capibá",
+   "away": "At. Brown",
+   "hs": 0,
+   "as": 48,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-04_025"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2013-05-04",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 19,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-04_025"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2013-05-04",
+   "home": "Santa Fe RC",
+   "away": "Rowing",
+   "hs": 42,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-04_025"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2013-05-04",
+   "home": "Capibá",
+   "away": "At. Brown",
+   "hs": 17,
+   "as": 44,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-04_025"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2013-05-04",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 32,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-04_025"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2013-05-04",
+   "home": "Santa Fe RC",
+   "away": "Rowing",
+   "hs": 24,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-04_025"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2013-05-04",
+   "home": "Capibá",
+   "away": "At. Brown",
+   "hs": 0,
+   "as": 66,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-04_025"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2013-05-04",
+   "home": "Estudiantes",
+   "away": "Tilcara",
+   "hs": 30,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-04_025"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 1,
+   "date": "2013-05-04",
+   "home": "Santa Fe RC",
+   "away": "Rowing",
+   "hs": 41,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-04_025"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 17,
+   "as": 48,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "La Salle",
+   "away": "Capibá",
+   "hs": 55,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Rowing",
+   "away": "CRAI",
+   "hs": 20,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Querandí RC",
+   "away": "At. Brown",
+   "hs": 44,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Cha Roga Club",
+   "away": "Estudiantes",
+   "hs": 5,
+   "as": 6,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 7,
+   "as": 31,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "La Salle",
+   "away": "Capibá",
+   "hs": 27,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Rowing",
+   "away": "CRAI",
+   "hs": 7,
+   "as": 57,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Querandí RC",
+   "away": "At. Brown",
+   "hs": 31,
+   "as": 16,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Cha Roga Club",
+   "away": "Estudiantes",
+   "hs": 12,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 20,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "La Salle",
+   "away": "Capibá",
+   "hs": 45,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Rowing",
+   "away": "CRAI",
+   "hs": 25,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Querandí RC",
+   "away": "At. Brown",
+   "hs": 28,
+   "as": 27,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Cha Roga Club",
+   "away": "Estudiantes",
+   "hs": 6,
+   "as": 80,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Tilcara",
+   "away": "Santa Fe RC",
+   "hs": 8,
+   "as": 23,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Rowing",
+   "away": "CRAI",
+   "hs": 41,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 2,
+   "date": "2013-05-11",
+   "home": "Cha Roga Club",
+   "away": "Estudiantes",
+   "hs": 17,
+   "as": 29,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-11_027"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Estudiantes",
+   "away": "CRAR",
+   "hs": 51,
+   "as": 6,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Capibá",
+   "away": "Querandí RC",
+   "hs": 7,
+   "as": 35,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "CRAI",
+   "away": "Tilcara",
+   "hs": 21,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "At. Brown",
+   "away": "Rowing",
+   "hs": 12,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": 17,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga Club",
+   "hs": 45,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Estudiantes",
+   "away": "CRAR",
+   "hs": 27,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Capibá",
+   "away": "Querandí RC",
+   "hs": 12,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "CRAI",
+   "away": "Tilcara",
+   "hs": 39,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "At. Brown",
+   "away": "Rowing",
+   "hs": 17,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": 26,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga Club",
+   "hs": 15,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Estudiantes",
+   "away": "CRAR",
+   "hs": 31,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Capibá",
+   "away": "Querandí RC",
+   "hs": 8,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "CRAI",
+   "away": "Tilcara",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado para el 20/6; sin marcador publicado (por tabla ganó Tilcara)",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "At. Brown",
+   "away": "Rowing",
+   "hs": 7,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": 32,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga Club",
+   "hs": 48,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Estudiantes",
+   "away": "CRAR",
+   "hs": 46,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "CRAI",
+   "away": "Tilcara",
+   "hs": 16,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Universitario",
+   "away": "La Salle",
+   "hs": 15,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 3,
+   "date": "2013-05-18",
+   "home": "Santa Fe RC",
+   "away": "Cha Roga Club",
+   "hs": 35,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-18_029"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "La Salle",
+   "away": "Querandí RC",
+   "hs": 10,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Rowing",
+   "away": "Capibá",
+   "hs": 47,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Tilcara",
+   "away": "At. Brown",
+   "hs": 5,
+   "as": 36,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Cha Roga Club",
+   "away": "CRAI",
+   "hs": 22,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "CRAR",
+   "away": "Santa Fe RC",
+   "hs": 7,
+   "as": 72,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Universitario",
+   "away": "Estudiantes",
+   "hs": 19,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "La Salle",
+   "away": "Querandí RC",
+   "hs": 19,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Rowing",
+   "away": "Capibá",
+   "hs": 43,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Tilcara",
+   "away": "At. Brown",
+   "hs": 40,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Cha Roga Club",
+   "away": "CRAI",
+   "hs": 16,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "CRAR",
+   "away": "Santa Fe RC",
+   "hs": 19,
+   "as": 43,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Universitario",
+   "away": "Estudiantes",
+   "hs": 22,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "La Salle",
+   "away": "Querandí RC",
+   "hs": 45,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Rowing",
+   "away": "Capibá",
+   "hs": 54,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Tilcara",
+   "away": "At. Brown",
+   "hs": 70,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Cha Roga Club",
+   "away": "CRAI",
+   "hs": 15,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "CRAR",
+   "away": "Santa Fe RC",
+   "hs": 10,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Universitario",
+   "away": "Estudiantes",
+   "hs": 17,
+   "as": 8,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "La Salle",
+   "away": "Querandí RC",
+   "hs": 13,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Cha Roga Club",
+   "away": "CRAI",
+   "hs": 14,
+   "as": 32,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "CRAR",
+   "away": "Santa Fe RC",
+   "hs": 5,
+   "as": 63,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 4,
+   "date": "2013-05-25",
+   "home": "Universitario",
+   "away": "Estudiantes",
+   "hs": 22,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-05-25_031"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "Estudiantes",
+   "away": "La Salle",
+   "hs": 56,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "Capibá",
+   "away": "Tilcara",
+   "hs": 12,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "Querandí RC",
+   "away": "Rowing",
+   "hs": 25,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "At. Brown",
+   "away": "Cha Roga Club",
+   "hs": 12,
+   "as": 42,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "Estudiantes",
+   "away": "La Salle",
+   "hs": 62,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "Capibá",
+   "away": "Tilcara",
+   "hs": 0,
+   "as": 44,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "Querandí RC",
+   "away": "Rowing",
+   "hs": 10,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "At. Brown",
+   "away": "Cha Roga Club",
+   "hs": 15,
+   "as": 43,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "Estudiantes",
+   "away": "La Salle",
+   "hs": 41,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "Capibá",
+   "away": "Tilcara",
+   "hs": 0,
+   "as": 81,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "Querandí RC",
+   "away": "Rowing",
+   "hs": 8,
+   "as": 90,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "At. Brown",
+   "away": "Cha Roga Club",
+   "hs": 25,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "Estudiantes",
+   "away": "La Salle",
+   "hs": 34,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 5,
+   "date": "2013-06-01",
+   "home": "Querandí RC",
+   "away": "Rowing",
+   "hs": 7,
+   "as": 49,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-01_033"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Rowing",
+   "away": "La Salle",
+   "hs": 22,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Tilcara",
+   "away": "Querandí RC",
+   "hs": 12,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Cha Roga Club",
+   "away": "Capibá",
+   "hs": 75,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 14,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "CRAR",
+   "away": "At. Brown",
+   "hs": 16,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Rowing",
+   "away": "La Salle",
+   "hs": 24,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Tilcara",
+   "away": "Querandí RC",
+   "hs": 43,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Cha Roga Club",
+   "away": "Capibá",
+   "hs": 73,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 16,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "CRAR",
+   "away": "At. Brown",
+   "hs": 31,
+   "as": 21,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Universitario",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Rowing",
+   "away": "La Salle",
+   "hs": 7,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Tilcara",
+   "away": "Querandí RC",
+   "hs": 45,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Cha Roga Club",
+   "away": "Capibá",
+   "hs": 35,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 14,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "CRAR",
+   "away": "At. Brown",
+   "hs": 30,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Universitario",
+   "away": "CRAI",
+   "hs": 8,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Rowing",
+   "away": "La Salle",
+   "hs": 23,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Tilcara",
+   "away": "Querandí RC",
+   "hs": 36,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Santa Fe RC",
+   "away": "Estudiantes",
+   "hs": 37,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 6,
+   "date": "2013-06-08",
+   "home": "Universitario",
+   "away": "CRAI",
+   "hs": 34,
+   "as": 11,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-08_035"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 24,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "Capibá",
+   "away": "CRAR",
+   "hs": 5,
+   "as": 34,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 13,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "Querandí RC",
+   "away": "Cha Roga Club",
+   "hs": 10,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "At. Brown",
+   "away": "Universitario",
+   "hs": 10,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 0,
+   "as": 25,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "Capibá",
+   "away": "CRAR",
+   "hs": 0,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 22,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "Querandí RC",
+   "away": "Cha Roga Club",
+   "hs": 5,
+   "as": 47,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "At. Brown",
+   "away": "Universitario",
+   "hs": 22,
+   "as": 42,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 8,
+   "as": 11,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "Capibá",
+   "away": "CRAR",
+   "hs": 10,
+   "as": 51,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 23,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "Querandí RC",
+   "away": "Cha Roga Club",
+   "hs": 5,
+   "as": 30,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "At. Brown",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 53,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "Rowing",
+   "away": "Tilcara",
+   "hs": 7,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "CRAI",
+   "away": "Estudiantes",
+   "hs": 34,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 7,
+   "date": "2013-06-15",
+   "home": "Querandí RC",
+   "away": "Cha Roga Club",
+   "hs": 8,
+   "as": 21,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-15_037"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "Estudiantes",
+   "away": "At. Brown",
+   "hs": 85,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "La Salle",
+   "away": "Tilcara",
+   "hs": 5,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "Cha Roga Club",
+   "away": "Rowing",
+   "hs": 26,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "CRAR",
+   "away": "Querandí RC",
+   "hs": 12,
+   "as": 34,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "Universitario",
+   "away": "Capibá",
+   "hs": 97,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "Estudiantes",
+   "away": "At. Brown",
+   "hs": 65,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "La Salle",
+   "away": "Tilcara",
+   "hs": 12,
+   "as": 50,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "Cha Roga Club",
+   "away": "Rowing",
+   "hs": 49,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "CRAR",
+   "away": "Querandí RC",
+   "hs": 27,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "Universitario",
+   "away": "Capibá",
+   "hs": 92,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "Estudiantes",
+   "away": "At. Brown",
+   "hs": 55,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "La Salle",
+   "away": "Tilcara",
+   "hs": 15,
+   "as": 21,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "Cha Roga Club",
+   "away": "Rowing",
+   "hs": 22,
+   "as": 39,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "CRAR",
+   "away": "Querandí RC",
+   "hs": 45,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "Universitario",
+   "away": "Capibá",
+   "hs": 92,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "La Salle",
+   "away": "Tilcara",
+   "hs": 27,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "Cha Roga Club",
+   "away": "Rowing",
+   "hs": 8,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "CRAR",
+   "away": "Querandí RC",
+   "hs": 52,
+   "as": 21,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 8,
+   "date": "2013-06-29",
+   "home": "Santa Fe RC",
+   "away": "CRAI",
+   "hs": 19,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-06-29_039"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 45,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Universitario",
+   "away": "Querandí RC",
+   "hs": 39,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Capibá",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 118,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Tilcara",
+   "away": "Cha Roga Club",
+   "hs": 0,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 7,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Universitario",
+   "away": "Querandí RC",
+   "hs": 67,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Capibá",
+   "away": "Estudiantes",
+   "hs": 7,
+   "as": 47,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Tilcara",
+   "away": "Cha Roga Club",
+   "hs": 12,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 34,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Universitario",
+   "away": "Querandí RC",
+   "hs": 88,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Capibá",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 81,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Tilcara",
+   "away": "Cha Roga Club",
+   "hs": 78,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Rowing",
+   "away": "CRAR",
+   "hs": 31,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Tilcara",
+   "away": "Cha Roga Club",
+   "hs": 47,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 9,
+   "date": "2013-07-06",
+   "home": "Universitario",
+   "away": "Querandí RC",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado para el 20/7; sin resultado publicado",
+   "src": "2013-07-06_040"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 12,
+   "as": 50,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Santa Fe RC",
+   "away": "Querandí RC",
+   "hs": 40,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Capibá",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 71,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 58,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Tilcara",
+   "away": "Universitario",
+   "hs": 20,
+   "as": 37,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 5,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Santa Fe RC",
+   "away": "Querandí RC",
+   "hs": 58,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Capibá",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 83,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 24,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Tilcara",
+   "away": "Universitario",
+   "hs": 15,
+   "as": 35,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 15,
+   "as": 37,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Santa Fe RC",
+   "away": "Querandí RC",
+   "hs": 31,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Capibá",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 70,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 0,
+   "as": 42,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Tilcara",
+   "away": "Universitario",
+   "hs": 25,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Rowing",
+   "away": "Estudiantes",
+   "hs": 22,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Santa Fe RC",
+   "away": "Querandí RC",
+   "hs": 52,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Cha Roga Club",
+   "away": "CRAR",
+   "hs": 8,
+   "as": 31,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 10,
+   "date": "2013-07-27",
+   "home": "Tilcara",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-07-27_041"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "CRAI",
+   "away": "At. Brown",
+   "hs": 15,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "Santa Fe RC",
+   "away": "Capibá",
+   "hs": 96,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "Estudiantes",
+   "away": "Querandí RC",
+   "hs": 37,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "La Salle",
+   "away": "Cha Roga Club",
+   "hs": 15,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "CRAR",
+   "away": "Tilcara",
+   "hs": 32,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 32,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "CRAI",
+   "away": "At. Brown",
+   "hs": 74,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "Santa Fe RC",
+   "away": "Capibá",
+   "hs": 64,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "Estudiantes",
+   "away": "Querandí RC",
+   "hs": 71,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "La Salle",
+   "away": "Cha Roga Club",
+   "hs": 0,
+   "as": 55,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "CRAR",
+   "away": "Tilcara",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "disputado sin marcador completo: la nota publica solo \"CRAR 17\"; por tabla ganó CRAR",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 34,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "CRAI",
+   "away": "At. Brown",
+   "hs": 43,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "Santa Fe RC",
+   "away": "Capibá",
+   "hs": 45,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "La Salle",
+   "away": "Cha Roga Club",
+   "hs": 50,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 52,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "Estudiantes",
+   "away": "Querandí RC",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado para el 31/8; sin resultado publicado",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "CRAR",
+   "away": "Tilcara",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado para el 31/8; sin resultado publicado",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "La Salle",
+   "away": "Cha Roga Club",
+   "hs": 15,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "CRAR",
+   "away": "Tilcara",
+   "hs": 33,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "Universitario",
+   "away": "Rowing",
+   "hs": 28,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 11,
+   "date": "2013-08-03",
+   "home": "Estudiantes",
+   "away": "Querandí RC",
+   "hs": 39,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-03_043"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Tilcara",
+   "away": "Estudiantes",
+   "hs": 3,
+   "as": 54,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 19,
+   "as": 60,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "At. Brown",
+   "away": "Capibá",
+   "hs": 55,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "CRAR",
+   "away": "La Salle",
+   "hs": 17,
+   "as": 32,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Cha Roga Club",
+   "away": "Universitario",
+   "hs": 10,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Querandí RC",
+   "away": "CRAI",
+   "hs": 5,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Tilcara",
+   "away": "Estudiantes",
+   "hs": 19,
+   "as": 32,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 26,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "At. Brown",
+   "away": "Capibá",
+   "hs": 40,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "CRAR",
+   "away": "La Salle",
+   "hs": 56,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Cha Roga Club",
+   "away": "Universitario",
+   "hs": 21,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Querandí RC",
+   "away": "CRAI",
+   "hs": 10,
+   "as": 71,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 25,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "At. Brown",
+   "away": "Capibá",
+   "hs": 26,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "CRAR",
+   "away": "La Salle",
+   "hs": 20,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Cha Roga Club",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 71,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Querandí RC",
+   "away": "CRAI",
+   "hs": 0,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Tilcara",
+   "away": "Estudiantes",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Tilcara",
+   "away": "Estudiantes",
+   "hs": 29,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Rowing",
+   "away": "Santa Fe RC",
+   "hs": 3,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "CRAR",
+   "away": "La Salle",
+   "hs": 23,
+   "as": 18,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Cha Roga Club",
+   "away": "Universitario",
+   "hs": 17,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 12,
+   "date": "2013-08-10",
+   "home": "Querandí RC",
+   "away": "CRAI",
+   "hs": 10,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-10_045"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Rowing",
+   "away": "CRAI",
+   "hs": 32,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Estudiantes",
+   "away": "Cha Roga Club",
+   "hs": 17,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Capibá",
+   "away": "La Salle",
+   "hs": 0,
+   "as": 27,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Santa Fe RC",
+   "away": "Tilcara",
+   "hs": 70,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "At. Brown",
+   "away": "Querandí RC",
+   "hs": 55,
+   "as": 18,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Rowing",
+   "away": "CRAI",
+   "hs": 6,
+   "as": 66,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Estudiantes",
+   "away": "Cha Roga Club",
+   "hs": 20,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Capibá",
+   "away": "La Salle",
+   "hs": 20,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Santa Fe RC",
+   "away": "Tilcara",
+   "hs": 28,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "At. Brown",
+   "away": "Querandí RC",
+   "hs": 56,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Universitario",
+   "away": "CRAR",
+   "hs": 20,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Rowing",
+   "away": "CRAI",
+   "hs": 20,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Estudiantes",
+   "away": "Cha Roga Club",
+   "hs": 62,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Capibá",
+   "away": "La Salle",
+   "hs": 0,
+   "as": 43,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Santa Fe RC",
+   "away": "Tilcara",
+   "hs": 25,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "At. Brown",
+   "away": "Querandí RC",
+   "hs": 15,
+   "as": 16,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Universitario",
+   "away": "CRAR",
+   "hs": 41,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Rowing",
+   "away": "CRAI",
+   "hs": 7,
+   "as": 41,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Estudiantes",
+   "away": "Cha Roga Club",
+   "hs": 29,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Santa Fe RC",
+   "away": "Tilcara",
+   "hs": 54,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 13,
+   "date": "2013-08-17",
+   "home": "Universitario",
+   "away": "CRAR",
+   "hs": 34,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-17_047"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Tilcara",
+   "away": "CRAI",
+   "hs": 12,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Rowing",
+   "away": "At. Brown",
+   "hs": 17,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 46,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Querandí RC",
+   "away": "Capibá",
+   "hs": 38,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "La Salle",
+   "away": "Universitario",
+   "hs": 8,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Cha Roga Club",
+   "away": "Santa Fe RC",
+   "hs": 22,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Tilcara",
+   "away": "CRAI",
+   "hs": 5,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Rowing",
+   "away": "At. Brown",
+   "hs": 52,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 24,
+   "as": 25,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Querandí RC",
+   "away": "Capibá",
+   "hs": 5,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "La Salle",
+   "away": "Universitario",
+   "hs": 8,
+   "as": 41,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Cha Roga Club",
+   "away": "Santa Fe RC",
+   "hs": 8,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Tilcara",
+   "away": "CRAI",
+   "hs": 8,
+   "as": 42,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Rowing",
+   "away": "At. Brown",
+   "hs": 36,
+   "as": 29,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 10,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Querandí RC",
+   "away": "Capibá",
+   "hs": 20,
+   "as": 6,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "La Salle",
+   "away": "Universitario",
+   "hs": 15,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Cha Roga Club",
+   "away": "Santa Fe RC",
+   "hs": 11,
+   "as": 42,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "Tilcara",
+   "away": "CRAI",
+   "hs": 10,
+   "as": 41,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "CRAR",
+   "away": "Estudiantes",
+   "hs": 30,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 14,
+   "date": "2013-08-24",
+   "home": "La Salle",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-08-24_049"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 14,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Capibá",
+   "away": "Rowing",
+   "hs": 3,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Querandí RC",
+   "away": "La Salle",
+   "hs": 17,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "At. Brown",
+   "away": "Tilcara",
+   "hs": 33,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "CRAI",
+   "away": "Cha Roga Club",
+   "hs": 21,
+   "as": 34,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 84,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 34,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Capibá",
+   "away": "Rowing",
+   "hs": 7,
+   "as": 36,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Querandí RC",
+   "away": "La Salle",
+   "hs": 28,
+   "as": 35,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "At. Brown",
+   "away": "Tilcara",
+   "hs": 10,
+   "as": 30,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "CRAI",
+   "away": "Cha Roga Club",
+   "hs": 28,
+   "as": 8,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 43,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 24,
+   "as": 8,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Capibá",
+   "away": "Rowing",
+   "hs": 3,
+   "as": 62,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Querandí RC",
+   "away": "La Salle",
+   "hs": 8,
+   "as": 32,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "At. Brown",
+   "away": "Tilcara",
+   "hs": 7,
+   "as": 42,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "CRAI",
+   "away": "Cha Roga Club",
+   "hs": 59,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 27,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Estudiantes",
+   "away": "Universitario",
+   "hs": 7,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Querandí RC",
+   "away": "La Salle",
+   "hs": 5,
+   "as": 32,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "CRAI",
+   "away": "Cha Roga Club",
+   "hs": 59,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 15,
+   "date": "2013-09-07",
+   "home": "Santa Fe RC",
+   "away": "CRAR",
+   "hs": 40,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-07_051"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Tilcara",
+   "away": "Capibá",
+   "hs": 35,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Rowing",
+   "away": "Querandí RC",
+   "hs": 20,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 5,
+   "as": 63,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 10,
+   "as": 29,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 12,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Cha Roga Club",
+   "away": "At. Brown",
+   "hs": 15,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Tilcara",
+   "away": "Capibá",
+   "hs": 30,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Rowing",
+   "away": "Querandí RC",
+   "hs": 43,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 7,
+   "as": 55,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 5,
+   "as": 43,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 12,
+   "as": 37,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Cha Roga Club",
+   "away": "At. Brown",
+   "hs": 77,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Tilcara",
+   "away": "Capibá",
+   "hs": 40,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Rowing",
+   "away": "Querandí RC",
+   "hs": 71,
+   "as": 8,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 6,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 10,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": 14,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Cha Roga Club",
+   "away": "At. Brown",
+   "hs": 22,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Rowing",
+   "away": "Querandí RC",
+   "hs": 36,
+   "as": 8,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "La Salle",
+   "away": "Estudiantes",
+   "hs": 8,
+   "as": 26,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "Universitario",
+   "away": "Santa Fe RC",
+   "hs": 3,
+   "as": 46,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 16,
+   "date": "2013-09-14",
+   "home": "CRAR",
+   "away": "CRAI",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-09-14_053"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 30,
+   "as": 33,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "Capibá",
+   "away": "Cha Roga Club",
+   "hs": 14,
+   "as": 34,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "At. Brown",
+   "away": "CRAR",
+   "hs": 42,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "La Salle",
+   "away": "Rowing",
+   "hs": 0,
+   "as": 21,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "Querandí RC",
+   "away": "Tilcara",
+   "hs": 10,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 5,
+   "as": 44,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "Capibá",
+   "away": "Cha Roga Club",
+   "hs": 0,
+   "as": 64,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 40,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "La Salle",
+   "away": "Rowing",
+   "hs": 24,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "Querandí RC",
+   "away": "Tilcara",
+   "hs": 13,
+   "as": 31,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "At. Brown",
+   "away": "CRAR",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado para el 25/9; sin resultado publicado",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 29,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "Capibá",
+   "away": "Cha Roga Club",
+   "hs": 5,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "At. Brown",
+   "away": "CRAR",
+   "hs": 8,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "La Salle",
+   "away": "Rowing",
+   "hs": 18,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "Querandí RC",
+   "away": "Tilcara",
+   "hs": 11,
+   "as": 52,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "Estudiantes",
+   "away": "Santa Fe RC",
+   "hs": 15,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "La Salle",
+   "away": "Rowing",
+   "hs": 15,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "Querandí RC",
+   "away": "Tilcara",
+   "hs": 3,
+   "as": 37,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 17,
+   "date": "2013-09-20",
+   "home": "CRAI",
+   "away": "Universitario",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-09-20_054"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Tilcara",
+   "away": "Rowing",
+   "hs": 0,
+   "as": 36,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Estudiantes",
+   "away": "CRAI",
+   "hs": 50,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Universitario",
+   "away": "At. Brown",
+   "hs": 29,
+   "as": 29,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "CRAR",
+   "away": "Capibá",
+   "hs": 29,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Tilcara",
+   "away": "Rowing",
+   "hs": 18,
+   "as": 11,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Estudiantes",
+   "away": "CRAI",
+   "hs": 15,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Universitario",
+   "away": "At. Brown",
+   "hs": 51,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "CRAR",
+   "away": "Capibá",
+   "hs": 35,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Tilcara",
+   "away": "Rowing",
+   "hs": 31,
+   "as": 52,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Estudiantes",
+   "away": "CRAI",
+   "hs": 22,
+   "as": 29,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Universitario",
+   "away": "At. Brown",
+   "hs": 69,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "CRAR",
+   "away": "Capibá",
+   "hs": 84,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Cha Roga Club",
+   "away": "Querandí RC",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado para el 31/10 19.30; sin resultado publicado",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Tilcara",
+   "away": "Rowing",
+   "hs": 7,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Estudiantes",
+   "away": "CRAI",
+   "hs": 30,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-09-28",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-09-28_056"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 25,
+   "as": 25,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 17,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Capibá",
+   "away": "Universitario",
+   "hs": 0,
+   "as": 34,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Querandí RC",
+   "away": "CRAR",
+   "hs": 37,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "At. Brown",
+   "away": "Estudiantes",
+   "hs": 5,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "CRAI",
+   "away": "Santa Fe RC",
+   "hs": 10,
+   "as": 64,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 48,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 9,
+   "as": 19,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Capibá",
+   "away": "Universitario",
+   "hs": 15,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Querandí RC",
+   "away": "CRAR",
+   "hs": 5,
+   "as": 36,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "At. Brown",
+   "away": "Estudiantes",
+   "hs": 27,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "CRAI",
+   "away": "Santa Fe RC",
+   "hs": 10,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 66,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 33,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Capibá",
+   "away": "Universitario",
+   "hs": 3,
+   "as": 74,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Querandí RC",
+   "away": "CRAR",
+   "hs": 6,
+   "as": 48,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "At. Brown",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 52,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "CRAI",
+   "away": "Santa Fe RC",
+   "hs": 31,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Tilcara",
+   "away": "La Salle",
+   "hs": 22,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Rowing",
+   "away": "Cha Roga Club",
+   "hs": 31,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "Querandí RC",
+   "away": "CRAR",
+   "hs": 3,
+   "as": 48,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 19,
+   "date": "2013-10-05",
+   "home": "CRAI",
+   "away": "Santa Fe RC",
+   "hs": 40,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-06_058"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 18,
+   "date": "2013-10-17",
+   "home": "Santa Fe RC",
+   "away": "La Salle",
+   "hs": 90,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "postergado de la fecha 18, disputado 17/10/13",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "Estudiantes",
+   "away": "Capibá",
+   "hs": 51,
+   "as": 11,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "Universitario",
+   "away": "Querandí RC",
+   "hs": 26,
+   "as": 12,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "CRAR",
+   "away": "Rowing",
+   "hs": 31,
+   "as": 29,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 19,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "Santa Fe RC",
+   "away": "At. Brown",
+   "hs": 53,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "Estudiantes",
+   "away": "Capibá",
+   "hs": 68,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "Universitario",
+   "away": "Querandí RC",
+   "hs": 46,
+   "as": 9,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "CRAR",
+   "away": "Rowing",
+   "hs": 22,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "Cha Roga Club",
+   "away": "Tilcara",
+   "hs": 31,
+   "as": 20,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 9,
+   "as": 48,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "Santa Fe RC",
+   "away": "At. Brown",
+   "hs": 86,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "Estudiantes",
+   "away": "Capibá",
+   "hs": 49,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "Universitario",
+   "away": "Querandí RC",
+   "hs": 91,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "CRAR",
+   "away": "Rowing",
+   "hs": 37,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "Cha Roga Club",
+   "away": "Tilcara",
+   "hs": 17,
+   "as": 40,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 13,
+   "as": 32,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "Santa Fe RC",
+   "away": "At. Brown",
+   "hs": 46,
+   "as": 24,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "Universitario",
+   "away": "Querandí RC",
+   "hs": 44,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "CRAR",
+   "away": "Rowing",
+   "hs": 18,
+   "as": 13,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 20,
+   "date": "2013-10-19",
+   "home": "La Salle",
+   "away": "CRAI",
+   "hs": 7,
+   "as": 21,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-19_059"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "Estudiantes",
+   "away": "Rowing",
+   "hs": 39,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 48,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "La Salle",
+   "away": "At. Brown",
+   "hs": 8,
+   "as": 31,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "CRAI",
+   "away": "Capibá",
+   "hs": 51,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "Santa Fe RC",
+   "away": "Querandí RC",
+   "hs": 56,
+   "as": 17,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "CRAR",
+   "away": "Cha Roga Club",
+   "hs": 15,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "Estudiantes",
+   "away": "Rowing",
+   "hs": 15,
+   "as": 14,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 27,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "La Salle",
+   "away": "At. Brown",
+   "hs": 32,
+   "as": 29,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "CRAI",
+   "away": "Capibá",
+   "hs": 121,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "Santa Fe RC",
+   "away": "Querandí RC",
+   "hs": 57,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "CRAR",
+   "away": "Cha Roga Club",
+   "hs": 8,
+   "as": 54,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "Estudiantes",
+   "away": "Rowing",
+   "hs": 12,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 53,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "La Salle",
+   "away": "At. Brown",
+   "hs": 38,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "CRAI",
+   "away": "Capibá",
+   "hs": 43,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "Santa Fe RC",
+   "away": "Querandí RC",
+   "hs": 31,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "CRAR",
+   "away": "Cha Roga Club",
+   "hs": 48,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "Estudiantes",
+   "away": "Rowing",
+   "hs": 15,
+   "as": 7,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "Universitario",
+   "away": "Tilcara",
+   "hs": 29,
+   "as": 22,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "Santa Fe RC",
+   "away": "Querandí RC",
+   "hs": 91,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 21,
+   "date": "2013-10-26",
+   "home": "CRAR",
+   "away": "Cha Roga Club",
+   "hs": 38,
+   "as": 0,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-10-26_060"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 15,
+   "as": 30,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Cha Roga Club",
+   "away": "La Salle",
+   "hs": 12,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Querandí RC",
+   "away": "Estudiantes",
+   "hs": 33,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "At. Brown",
+   "away": "CRAI",
+   "hs": 17,
+   "as": 31,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Rowing",
+   "away": "Universitario",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Capibá",
+   "away": "Santa Fe RC",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 27,
+   "as": 31,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Cha Roga Club",
+   "away": "La Salle",
+   "hs": 77,
+   "as": 3,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Querandí RC",
+   "away": "Estudiantes",
+   "hs": 12,
+   "as": 40,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "At. Brown",
+   "away": "CRAI",
+   "hs": 7,
+   "as": 45,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Rowing",
+   "away": "Universitario",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Capibá",
+   "away": "Santa Fe RC",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": 24,
+   "as": 5,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Cha Roga Club",
+   "away": "La Salle",
+   "hs": 18,
+   "as": 15,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Querandí RC",
+   "away": "Estudiantes",
+   "hs": 0,
+   "as": 65,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "At. Brown",
+   "away": "CRAI",
+   "hs": 24,
+   "as": 47,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Rowing",
+   "away": "Universitario",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Capibá",
+   "away": "Santa Fe RC",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Cha Roga Club",
+   "away": "La Salle",
+   "hs": 19,
+   "as": 10,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Querandí RC",
+   "away": "Estudiantes",
+   "hs": 7,
+   "as": 38,
+   "hp": null,
+   "ap": null,
+   "status": "final",
+   "note": "",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-11-02",
+   "home": "Rowing",
+   "away": "Universitario",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "postponed",
+   "note": "postergado; sin resultado publicado",
+   "src": "2013-11-02_062"
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "round": 22,
+   "date": "2013-10-12",
+   "home": "Tilcara",
+   "away": "CRAR",
+   "hs": null,
+   "as": null,
+   "hp": null,
+   "ap": null,
+   "status": "not_played",
+   "note": "disputado 12/10/2013 sin marcador publicado",
+   "src": "2013-11-02_062"
+  }
+ ],
+ "standings": [
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 2,
+   "src": "2013-05-17_028",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 6
+    },
+    {
+     "club": "At. Brown",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "CRAI",
+     "pts": 4
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    },
+    {
+     "club": "Rowing",
+     "pts": 4
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 2
+    },
+    {
+     "club": "Capibá",
+     "pts": 2
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 2,
+   "src": "2013-05-17_028",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 6
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 6
+    },
+    {
+     "club": "At. Brown",
+     "pts": 4
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    },
+    {
+     "club": "Universitario",
+     "pts": 4
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 4
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 2
+    },
+    {
+     "club": "Capibá",
+     "pts": 2
+    },
+    {
+     "club": "Rowing",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 2,
+   "src": "2013-05-17_028",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "Universitario",
+     "pts": 6
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 5
+    },
+    {
+     "club": "At. Brown",
+     "pts": 4
+    },
+    {
+     "club": "CRAI",
+     "pts": 4
+    },
+    {
+     "club": "Rowing",
+     "pts": 4
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 3
+    },
+    {
+     "club": "CRAR",
+     "pts": 2
+    },
+    {
+     "club": "Capibá",
+     "pts": 2
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 2,
+   "src": "2013-05-17_028",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 12
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 11
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 7
+    },
+    {
+     "club": "CRAI",
+     "pts": 7
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "La Salle",
+     "pts": 2
+    },
+    {
+     "club": "Tilcara",
+     "pts": 2
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 1
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 3,
+   "src": "2013-05-22_030",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 9
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 9
+    },
+    {
+     "club": "Universitario",
+     "pts": 9
+    },
+    {
+     "club": "CRAI",
+     "pts": 7
+    },
+    {
+     "club": "At. Brown",
+     "pts": 7
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 7
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Rowing",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "Tilcara",
+     "pts": 3
+    },
+    {
+     "club": "Capibá",
+     "pts": 3
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 2
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 3,
+   "src": "2013-05-22_030",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 9
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 7
+    },
+    {
+     "club": "At. Brown",
+     "pts": 7
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 7
+    },
+    {
+     "club": "Universitario",
+     "pts": 7
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Tilcara",
+     "pts": 5
+    },
+    {
+     "club": "Capibá",
+     "pts": 3
+    },
+    {
+     "club": "Rowing",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 3,
+   "src": "2013-05-22_030",
+   "rows": [
+    {
+     "club": "Estudiantes",
+     "pts": 9
+    },
+    {
+     "club": "Universitario",
+     "pts": 9
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 8
+    },
+    {
+     "club": "Rowing",
+     "pts": 7
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 7
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "At. Brown",
+     "pts": 5
+    },
+    {
+     "club": "CRAI",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 3
+    },
+    {
+     "club": "CRAR",
+     "pts": 3
+    },
+    {
+     "club": "Capibá",
+     "pts": 3
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 3,
+   "src": "2013-05-22_030",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 18
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 17
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 12
+    },
+    {
+     "club": "Rowing",
+     "pts": 7
+    },
+    {
+     "club": "CRAR",
+     "pts": 7
+    },
+    {
+     "club": "La Salle",
+     "pts": 3
+    },
+    {
+     "club": "Tilcara",
+     "pts": 3
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 2
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 1
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 4,
+   "src": "2013-05-31_032",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 12
+    },
+    {
+     "club": "Universitario",
+     "pts": 12
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "At. Brown",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 8
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 8
+    },
+    {
+     "club": "CRAI",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "Tilcara",
+     "pts": 4
+    },
+    {
+     "club": "Capibá",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 4,
+   "src": "2013-05-31_032",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 12
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 10
+    },
+    {
+     "club": "Universitario",
+     "pts": 10
+    },
+    {
+     "club": "At. Brown",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 8
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 8
+    },
+    {
+     "club": "Tilcara",
+     "pts": 8
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 6
+    },
+    {
+     "club": "Rowing",
+     "pts": 6
+    },
+    {
+     "club": "Capibá",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 4,
+   "src": "2013-05-31_032",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 12
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 11
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "Rowing",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 8
+    },
+    {
+     "club": "CRAI",
+     "pts": 6
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "At. Brown",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 5
+    },
+    {
+     "club": "CRAR",
+     "pts": 4
+    },
+    {
+     "club": "Capibá",
+     "pts": 4
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 4,
+   "src": "2013-05-31_032",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 24
+    },
+    {
+     "club": "Universitario",
+     "pts": 20
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 19
+    },
+    {
+     "club": "CRAI",
+     "pts": 18
+    },
+    {
+     "club": "CRAR",
+     "pts": 8
+    },
+    {
+     "club": "Rowing",
+     "pts": 7
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 7
+    },
+    {
+     "club": "La Salle",
+     "pts": 3
+    },
+    {
+     "club": "Tilcara",
+     "pts": 3
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2013-06-06_034",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 15
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 13
+    },
+    {
+     "club": "Universitario",
+     "pts": 13
+    },
+    {
+     "club": "CRAI",
+     "pts": 11
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 11
+    },
+    {
+     "club": "At. Brown",
+     "pts": 11
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 7
+    },
+    {
+     "club": "Tilcara",
+     "pts": 6
+    },
+    {
+     "club": "Capibá",
+     "pts": 6
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2013-06-06_034",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 15
+    },
+    {
+     "club": "CRAI",
+     "pts": 13
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 13
+    },
+    {
+     "club": "Universitario",
+     "pts": 11
+    },
+    {
+     "club": "Tilcara",
+     "pts": 11
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 9
+    },
+    {
+     "club": "At. Brown",
+     "pts": 9
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 9
+    },
+    {
+     "club": "Rowing",
+     "pts": 9
+    },
+    {
+     "club": "La Salle",
+     "pts": 9
+    },
+    {
+     "club": "CRAR",
+     "pts": 7
+    },
+    {
+     "club": "Capibá",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2013-06-06_034",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 13
+    },
+    {
+     "club": "Rowing",
+     "pts": 13
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 12
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "Tilcara",
+     "pts": 9
+    },
+    {
+     "club": "CRAI",
+     "pts": 9
+    },
+    {
+     "club": "At. Brown",
+     "pts": 9
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 9
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 6
+    },
+    {
+     "club": "CRAR",
+     "pts": 5
+    },
+    {
+     "club": "Capibá",
+     "pts": 5
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 5,
+   "src": "2013-06-06_034",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 29
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 25
+    },
+    {
+     "club": "CRAI",
+     "pts": 24
+    },
+    {
+     "club": "Universitario",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 13
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 7
+    },
+    {
+     "club": "La Salle",
+     "pts": 4
+    },
+    {
+     "club": "Tilcara",
+     "pts": 3
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2013-06-14_036",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 18
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 14
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 14
+    },
+    {
+     "club": "CRAI",
+     "pts": 14
+    },
+    {
+     "club": "At. Brown",
+     "pts": 14
+    },
+    {
+     "club": "Universitario",
+     "pts": 14
+    },
+    {
+     "club": "Rowing",
+     "pts": 12
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 8
+    },
+    {
+     "club": "Tilcara",
+     "pts": 7
+    },
+    {
+     "club": "Capibá",
+     "pts": 7
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2013-06-14_036",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 16
+    },
+    {
+     "club": "CRAI",
+     "pts": 16
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 16
+    },
+    {
+     "club": "Tilcara",
+     "pts": 14
+    },
+    {
+     "club": "Universitario",
+     "pts": 12
+    },
+    {
+     "club": "Rowing",
+     "pts": 12
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 10
+    },
+    {
+     "club": "At. Brown",
+     "pts": 10
+    },
+    {
+     "club": "CRAR",
+     "pts": 10
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 10
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    },
+    {
+     "club": "Capibá",
+     "pts": 6
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2013-06-14_036",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 18
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 16
+    },
+    {
+     "club": "Rowing",
+     "pts": 16
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 13
+    },
+    {
+     "club": "Tilcara",
+     "pts": 12
+    },
+    {
+     "club": "La Salle",
+     "pts": 11
+    },
+    {
+     "club": "CRAI",
+     "pts": 10
+    },
+    {
+     "club": "At. Brown",
+     "pts": 10
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 10
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 9
+    },
+    {
+     "club": "CRAR",
+     "pts": 8
+    },
+    {
+     "club": "Capibá",
+     "pts": 6
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 6,
+   "src": "2013-06-14_036",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 35
+    },
+    {
+     "club": "Universitario",
+     "pts": 27
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 26
+    },
+    {
+     "club": "CRAI",
+     "pts": 25
+    },
+    {
+     "club": "Rowing",
+     "pts": 19
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Tilcara",
+     "pts": 8
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 6
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 7,
+   "src": "2013-06-28_038",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 21
+    },
+    {
+     "club": "CRAI",
+     "pts": 17
+    },
+    {
+     "club": "At. Brown",
+     "pts": 16
+    },
+    {
+     "club": "Universitario",
+     "pts": 16
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 15
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 15
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 11
+    },
+    {
+     "club": "Tilcara",
+     "pts": 8
+    },
+    {
+     "club": "Capibá",
+     "pts": 8
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 7,
+   "src": "2013-06-28_038",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 21
+    },
+    {
+     "club": "CRAI",
+     "pts": 19
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 19
+    },
+    {
+     "club": "Tilcara",
+     "pts": 17
+    },
+    {
+     "club": "Universitario",
+     "pts": 15
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "Rowing",
+     "pts": 13
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 11
+    },
+    {
+     "club": "At. Brown",
+     "pts": 11
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 11
+    },
+    {
+     "club": "Capibá",
+     "pts": 7
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 7,
+   "src": "2013-06-28_038",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 21
+    },
+    {
+     "club": "Tilcara",
+     "pts": 17
+    },
+    {
+     "club": "Rowing",
+     "pts": 17
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 16
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 16
+    },
+    {
+     "club": "CRAI",
+     "pts": 14
+    },
+    {
+     "club": "La Salle",
+     "pts": 12
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 12
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "At. Brown",
+     "pts": 11
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 11
+    },
+    {
+     "club": "Capibá",
+     "pts": 7
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 7,
+   "src": "2013-06-28_038",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 35
+    },
+    {
+     "club": "Universitario",
+     "pts": 27
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 26
+    },
+    {
+     "club": "CRAI",
+     "pts": 25
+    },
+    {
+     "club": "Rowing",
+     "pts": 19
+    },
+    {
+     "club": "CRAR",
+     "pts": 11
+    },
+    {
+     "club": "Tilcara",
+     "pts": 8
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 8
+    },
+    {
+     "club": "La Salle",
+     "pts": 5
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 3
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2013-08-01_042",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 25
+    },
+    {
+     "club": "Universitario",
+     "pts": 22
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 21
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 20
+    },
+    {
+     "club": "At. Brown",
+     "pts": 20
+    },
+    {
+     "club": "Rowing",
+     "pts": 19
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 19
+    },
+    {
+     "club": "CRAI",
+     "pts": 17
+    },
+    {
+     "club": "La Salle",
+     "pts": 14
+    },
+    {
+     "club": "CRAR",
+     "pts": 13
+    },
+    {
+     "club": "Tilcara",
+     "pts": 10
+    },
+    {
+     "club": "Capibá",
+     "pts": 10
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2013-08-01_042",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 27
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 23
+    },
+    {
+     "club": "CRAI",
+     "pts": 22
+    },
+    {
+     "club": "Universitario",
+     "pts": 21
+    },
+    {
+     "club": "Tilcara",
+     "pts": 21
+    },
+    {
+     "club": "CRAR",
+     "pts": 19
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 17
+    },
+    {
+     "club": "Rowing",
+     "pts": 15
+    },
+    {
+     "club": "At. Brown",
+     "pts": 13
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 13
+    },
+    {
+     "club": "La Salle",
+     "pts": 12
+    },
+    {
+     "club": "Capibá",
+     "pts": 9
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2013-08-01_042",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 27
+    },
+    {
+     "club": "Tilcara",
+     "pts": 23
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 22
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 20
+    },
+    {
+     "club": "CRAI",
+     "pts": 17
+    },
+    {
+     "club": "CRAR",
+     "pts": 15
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 14
+    },
+    {
+     "club": "La Salle",
+     "pts": 13
+    },
+    {
+     "club": "At. Brown",
+     "pts": 13
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 13
+    },
+    {
+     "club": "Capibá",
+     "pts": 9
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 10,
+   "src": "2013-08-01_042",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 45
+    },
+    {
+     "club": "Universitario",
+     "pts": 33
+    },
+    {
+     "club": "CRAI",
+     "pts": 32
+    },
+    {
+     "club": "Rowing",
+     "pts": 31
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "Tilcara",
+     "pts": 19
+    },
+    {
+     "club": "CRAR",
+     "pts": 17
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 11
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 11
+    },
+    {
+     "club": "La Salle",
+     "pts": 10
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 12,
+   "src": "2013-08-15_046",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 34
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 30
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 29
+    },
+    {
+     "club": "Universitario",
+     "pts": 29
+    },
+    {
+     "club": "At. Brown",
+     "pts": 27
+    },
+    {
+     "club": "CRAI",
+     "pts": 26
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 22
+    },
+    {
+     "club": "Rowing",
+     "pts": 22
+    },
+    {
+     "club": "La Salle",
+     "pts": 19
+    },
+    {
+     "club": "CRAR",
+     "pts": 18
+    },
+    {
+     "club": "Tilcara",
+     "pts": 13
+    },
+    {
+     "club": "Capibá",
+     "pts": 13
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 12,
+   "src": "2013-08-15_046",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 36
+    },
+    {
+     "club": "CRAI",
+     "pts": 31
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 31
+    },
+    {
+     "club": "Universitario",
+     "pts": 28
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 26
+    },
+    {
+     "club": "CRAR",
+     "pts": 25
+    },
+    {
+     "club": "Tilcara",
+     "pts": 24
+    },
+    {
+     "club": "At. Brown",
+     "pts": 20
+    },
+    {
+     "club": "Rowing",
+     "pts": 18
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 16
+    },
+    {
+     "club": "La Salle",
+     "pts": 15
+    },
+    {
+     "club": "Capibá",
+     "pts": 12
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 12,
+   "src": "2013-08-15_046",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 36
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 27
+    },
+    {
+     "club": "Rowing",
+     "pts": 27
+    },
+    {
+     "club": "CRAI",
+     "pts": 26
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 25
+    },
+    {
+     "club": "Tilcara",
+     "pts": 24
+    },
+    {
+     "club": "CRAR",
+     "pts": 21
+    },
+    {
+     "club": "La Salle",
+     "pts": 20
+    },
+    {
+     "club": "At. Brown",
+     "pts": 18
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 17
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 15
+    },
+    {
+     "club": "Capibá",
+     "pts": 12
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 12,
+   "src": "2013-08-15_046",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 56
+    },
+    {
+     "club": "Universitario",
+     "pts": 50
+    },
+    {
+     "club": "CRAI",
+     "pts": 43
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 37
+    },
+    {
+     "club": "Rowing",
+     "pts": 37
+    },
+    {
+     "club": "CRAR",
+     "pts": 33
+    },
+    {
+     "club": "Tilcara",
+     "pts": 26
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "La Salle",
+     "pts": 15
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 14
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 13,
+   "src": "2013-08-22_048",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 37
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 33
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 30
+    },
+    {
+     "club": "At. Brown",
+     "pts": 30
+    },
+    {
+     "club": "Universitario",
+     "pts": 29
+    },
+    {
+     "club": "CRAI",
+     "pts": 27
+    },
+    {
+     "club": "Rowing",
+     "pts": 25
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 23
+    },
+    {
+     "club": "La Salle",
+     "pts": 22
+    },
+    {
+     "club": "CRAR",
+     "pts": 18
+    },
+    {
+     "club": "Tilcara",
+     "pts": 14
+    },
+    {
+     "club": "Capibá",
+     "pts": 14
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 13,
+   "src": "2013-08-22_048",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 39
+    },
+    {
+     "club": "CRAI",
+     "pts": 34
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 34
+    },
+    {
+     "club": "Universitario",
+     "pts": 31
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 27
+    },
+    {
+     "club": "CRAR",
+     "pts": 26
+    },
+    {
+     "club": "Tilcara",
+     "pts": 26
+    },
+    {
+     "club": "At. Brown",
+     "pts": 23
+    },
+    {
+     "club": "Rowing",
+     "pts": 18
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 17
+    },
+    {
+     "club": "La Salle",
+     "pts": 16
+    },
+    {
+     "club": "Capibá",
+     "pts": 15
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 13,
+   "src": "2013-08-22_048",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 38
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 30
+    },
+    {
+     "club": "CRAI",
+     "pts": 29
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 28
+    },
+    {
+     "club": "Rowing",
+     "pts": 28
+    },
+    {
+     "club": "Tilcara",
+     "pts": 25
+    },
+    {
+     "club": "La Salle",
+     "pts": 22
+    },
+    {
+     "club": "CRAR",
+     "pts": 22
+    },
+    {
+     "club": "At. Brown",
+     "pts": 19
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 18
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 17
+    },
+    {
+     "club": "Capibá",
+     "pts": 12
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 13,
+   "src": "2013-08-22_048",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 62
+    },
+    {
+     "club": "Universitario",
+     "pts": 56
+    },
+    {
+     "club": "CRAI",
+     "pts": 49
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 43
+    },
+    {
+     "club": "Rowing",
+     "pts": 38
+    },
+    {
+     "club": "CRAR",
+     "pts": 34
+    },
+    {
+     "club": "Tilcara",
+     "pts": 27
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "La Salle",
+     "pts": 15
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 14
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 14,
+   "src": "2013-09-05_050",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 38
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 36
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 33
+    },
+    {
+     "club": "At. Brown",
+     "pts": 33
+    },
+    {
+     "club": "Universitario",
+     "pts": 32
+    },
+    {
+     "club": "CRAI",
+     "pts": 29
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 26
+    },
+    {
+     "club": "Rowing",
+     "pts": 26
+    },
+    {
+     "club": "La Salle",
+     "pts": 23
+    },
+    {
+     "club": "CRAR",
+     "pts": 19
+    },
+    {
+     "club": "Tilcara",
+     "pts": 16
+    },
+    {
+     "club": "Capibá",
+     "pts": 15
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 14,
+   "src": "2013-09-05_050",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 40
+    },
+    {
+     "club": "CRAI",
+     "pts": 37
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 37
+    },
+    {
+     "club": "Universitario",
+     "pts": 34
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 30
+    },
+    {
+     "club": "CRAR",
+     "pts": 27
+    },
+    {
+     "club": "Tilcara",
+     "pts": 26
+    },
+    {
+     "club": "At. Brown",
+     "pts": 24
+    },
+    {
+     "club": "Rowing",
+     "pts": 22
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 18
+    },
+    {
+     "club": "Capibá",
+     "pts": 18
+    },
+    {
+     "club": "La Salle",
+     "pts": 17
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 14,
+   "src": "2013-09-05_050",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 42
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 33
+    },
+    {
+     "club": "CRAI",
+     "pts": 32
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 31
+    },
+    {
+     "club": "Rowing",
+     "pts": 30
+    },
+    {
+     "club": "Tilcara",
+     "pts": 25
+    },
+    {
+     "club": "La Salle",
+     "pts": 23
+    },
+    {
+     "club": "CRAR",
+     "pts": 23
+    },
+    {
+     "club": "At. Brown",
+     "pts": 20
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 19
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 19
+    },
+    {
+     "club": "Capibá",
+     "pts": 13
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 14,
+   "src": "2013-09-05_050",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 68
+    },
+    {
+     "club": "Universitario",
+     "pts": 61
+    },
+    {
+     "club": "CRAI",
+     "pts": 55
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 44
+    },
+    {
+     "club": "CRAR",
+     "pts": 40
+    },
+    {
+     "club": "Rowing",
+     "pts": 38
+    },
+    {
+     "club": "Tilcara",
+     "pts": 28
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 20
+    },
+    {
+     "club": "La Salle",
+     "pts": 16
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 14
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 15,
+   "src": "2013-09-12_052",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 41
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 39
+    },
+    {
+     "club": "At. Brown",
+     "pts": 36
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 35
+    },
+    {
+     "club": "Universitario",
+     "pts": 33
+    },
+    {
+     "club": "CRAI",
+     "pts": 29
+    },
+    {
+     "club": "Rowing",
+     "pts": 29
+    },
+    {
+     "club": "La Salle",
+     "pts": 24
+    },
+    {
+     "club": "CRAR",
+     "pts": 20
+    },
+    {
+     "club": "Tilcara",
+     "pts": 17
+    },
+    {
+     "club": "Capibá",
+     "pts": 16
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 15,
+   "src": "2013-09-12_052",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 41
+    },
+    {
+     "club": "CRAI",
+     "pts": 40
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 40
+    },
+    {
+     "club": "Universitario",
+     "pts": 35
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 33
+    },
+    {
+     "club": "Tilcara",
+     "pts": 29
+    },
+    {
+     "club": "CRAR",
+     "pts": 28
+    },
+    {
+     "club": "Rowing",
+     "pts": 25
+    },
+    {
+     "club": "At. Brown",
+     "pts": 25
+    },
+    {
+     "club": "La Salle",
+     "pts": 20
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 19
+    },
+    {
+     "club": "Capibá",
+     "pts": 19
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 15,
+   "src": "2013-09-12_052",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 43
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 36
+    },
+    {
+     "club": "CRAI",
+     "pts": 35
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 34
+    },
+    {
+     "club": "Rowing",
+     "pts": 33
+    },
+    {
+     "club": "Tilcara",
+     "pts": 29
+    },
+    {
+     "club": "La Salle",
+     "pts": 25
+    },
+    {
+     "club": "CRAR",
+     "pts": 24
+    },
+    {
+     "club": "At. Brown",
+     "pts": 21
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 20
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 20
+    },
+    {
+     "club": "Capibá",
+     "pts": 14
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 15,
+   "src": "2013-09-12_052",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 74
+    },
+    {
+     "club": "Universitario",
+     "pts": 66
+    },
+    {
+     "club": "CRAI",
+     "pts": 61
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 46
+    },
+    {
+     "club": "CRAR",
+     "pts": 41
+    },
+    {
+     "club": "Rowing",
+     "pts": 38
+    },
+    {
+     "club": "Tilcara",
+     "pts": 28
+    },
+    {
+     "club": "La Salle",
+     "pts": 22
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 15
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 17,
+   "src": "2013-09-26_055",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 47
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 43
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 41
+    },
+    {
+     "club": "At. Brown",
+     "pts": 40
+    },
+    {
+     "club": "Rowing",
+     "pts": 35
+    },
+    {
+     "club": "Universitario",
+     "pts": 34
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 31
+    },
+    {
+     "club": "CRAI",
+     "pts": 30
+    },
+    {
+     "club": "La Salle",
+     "pts": 26
+    },
+    {
+     "club": "CRAR",
+     "pts": 24
+    },
+    {
+     "club": "Tilcara",
+     "pts": 23
+    },
+    {
+     "club": "Capibá",
+     "pts": 18
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 17,
+   "src": "2013-09-26_055",
+   "rows": [
+    {
+     "club": "Cha Roga Club",
+     "pts": 47
+    },
+    {
+     "club": "CRAI",
+     "pts": 46
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 46
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 37
+    },
+    {
+     "club": "Universitario",
+     "pts": 37
+    },
+    {
+     "club": "Tilcara",
+     "pts": 35
+    },
+    {
+     "club": "Rowing",
+     "pts": 30
+    },
+    {
+     "club": "CRAR",
+     "pts": 29
+    },
+    {
+     "club": "At. Brown",
+     "pts": 26
+    },
+    {
+     "club": "La Salle",
+     "pts": 23
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 21
+    },
+    {
+     "club": "Capibá",
+     "pts": 21
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 17,
+   "src": "2013-09-26_055",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 49
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 40
+    },
+    {
+     "club": "CRAI",
+     "pts": 39
+    },
+    {
+     "club": "Rowing",
+     "pts": 39
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 38
+    },
+    {
+     "club": "Tilcara",
+     "pts": 34
+    },
+    {
+     "club": "CRAR",
+     "pts": 28
+    },
+    {
+     "club": "La Salle",
+     "pts": 27
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 26
+    },
+    {
+     "club": "At. Brown",
+     "pts": 22
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 22
+    },
+    {
+     "club": "Capibá",
+     "pts": 16
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 17,
+   "src": "2013-09-26_055",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 81
+    },
+    {
+     "club": "Universitario",
+     "pts": 67
+    },
+    {
+     "club": "CRAI",
+     "pts": 61
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 56
+    },
+    {
+     "club": "Rowing",
+     "pts": 48
+    },
+    {
+     "club": "CRAR",
+     "pts": 41
+    },
+    {
+     "club": "Tilcara",
+     "pts": 34
+    },
+    {
+     "club": "La Salle",
+     "pts": 25
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 22
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 17
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 18,
+   "src": "2013-10-03_057",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 47
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 45
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 43
+    },
+    {
+     "club": "At. Brown",
+     "pts": 41
+    },
+    {
+     "club": "Rowing",
+     "pts": 38
+    },
+    {
+     "club": "Universitario",
+     "pts": 37
+    },
+    {
+     "club": "CRAI",
+     "pts": 32
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 32
+    },
+    {
+     "club": "La Salle",
+     "pts": 29
+    },
+    {
+     "club": "CRAR",
+     "pts": 27
+    },
+    {
+     "club": "Tilcara",
+     "pts": 24
+    },
+    {
+     "club": "Capibá",
+     "pts": 19
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 18,
+   "src": "2013-10-03_057",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 52
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 50
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 46
+    },
+    {
+     "club": "Universitario",
+     "pts": 40
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 38
+    },
+    {
+     "club": "Tilcara",
+     "pts": 38
+    },
+    {
+     "club": "CRAR",
+     "pts": 36
+    },
+    {
+     "club": "Rowing",
+     "pts": 31
+    },
+    {
+     "club": "At. Brown",
+     "pts": 28
+    },
+    {
+     "club": "La Salle",
+     "pts": 24
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 22
+    },
+    {
+     "club": "Capibá",
+     "pts": 22
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 18,
+   "src": "2013-10-03_057",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 52
+    },
+    {
+     "club": "CRAI",
+     "pts": 45
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 44
+    },
+    {
+     "club": "Rowing",
+     "pts": 42
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 38
+    },
+    {
+     "club": "Tilcara",
+     "pts": 34
+    },
+    {
+     "club": "CRAR",
+     "pts": 31
+    },
+    {
+     "club": "La Salle",
+     "pts": 28
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 26
+    },
+    {
+     "club": "At. Brown",
+     "pts": 23
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 23
+    },
+    {
+     "club": "Capibá",
+     "pts": 17
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 18,
+   "src": "2013-10-03_057",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 81
+    },
+    {
+     "club": "Universitario",
+     "pts": 67
+    },
+    {
+     "club": "CRAI",
+     "pts": 62
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 61
+    },
+    {
+     "club": "Rowing",
+     "pts": 50
+    },
+    {
+     "club": "CRAR",
+     "pts": 41
+    },
+    {
+     "club": "Tilcara",
+     "pts": 39
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 28
+    },
+    {
+     "club": "La Salle",
+     "pts": 25
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 18
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 21,
+   "src": "2013-10-31_061",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 59
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 53
+    },
+    {
+     "club": "Universitario",
+     "pts": 52
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 49
+    },
+    {
+     "club": "At. Brown",
+     "pts": 47
+    },
+    {
+     "club": "Rowing",
+     "pts": 42
+    },
+    {
+     "club": "CRAI",
+     "pts": 38
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 37
+    },
+    {
+     "club": "La Salle",
+     "pts": 36
+    },
+    {
+     "club": "CRAR",
+     "pts": 34
+    },
+    {
+     "club": "Tilcara",
+     "pts": 28
+    },
+    {
+     "club": "Capibá",
+     "pts": 22
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 21,
+   "src": "2013-10-31_061",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 59
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 59
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 58
+    },
+    {
+     "club": "Universitario",
+     "pts": 49
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 45
+    },
+    {
+     "club": "Tilcara",
+     "pts": 43
+    },
+    {
+     "club": "CRAR",
+     "pts": 40
+    },
+    {
+     "club": "Rowing",
+     "pts": 36
+    },
+    {
+     "club": "At. Brown",
+     "pts": 33
+    },
+    {
+     "club": "La Salle",
+     "pts": 30
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 25
+    },
+    {
+     "club": "Capibá",
+     "pts": 25
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 21,
+   "src": "2013-10-31_061",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 61
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 56
+    },
+    {
+     "club": "CRAI",
+     "pts": 54
+    },
+    {
+     "club": "Rowing",
+     "pts": 47
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 45
+    },
+    {
+     "club": "Tilcara",
+     "pts": 43
+    },
+    {
+     "club": "CRAR",
+     "pts": 43
+    },
+    {
+     "club": "La Salle",
+     "pts": 33
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 32
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 27
+    },
+    {
+     "club": "At. Brown",
+     "pts": 26
+    },
+    {
+     "club": "Capibá",
+     "pts": 20
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 21,
+   "src": "2013-10-31_061",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 88
+    },
+    {
+     "club": "Universitario",
+     "pts": 80
+    },
+    {
+     "club": "CRAI",
+     "pts": 78
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 68
+    },
+    {
+     "club": "CRAR",
+     "pts": 63
+    },
+    {
+     "club": "Rowing",
+     "pts": 58
+    },
+    {
+     "club": "Tilcara",
+     "pts": 52
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 35
+    },
+    {
+     "club": "La Salle",
+     "pts": 27
+    },
+    {
+     "club": "Querandí RC",
+     "pts": 20
+    }
+   ]
+  },
+  {
+   "division": "M15",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 22,
+   "src": "2013-11-07_063",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 59
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 54
+    },
+    {
+     "club": "Universitario",
+     "pts": 52
+    }
+   ]
+  },
+  {
+   "division": "M19",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 22,
+   "src": "2013-11-07_063",
+   "rows": [
+    {
+     "club": "Santa Fe RC",
+     "pts": 94
+    },
+    {
+     "club": "CRAI",
+     "pts": 83
+    },
+    {
+     "club": "Universitario",
+     "pts": 80
+    }
+   ]
+  },
+  {
+   "division": "M17",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 22,
+   "src": "2013-11-13_064",
+   "rows": [
+    {
+     "club": "Universitario",
+     "pts": 61
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 58
+    },
+    {
+     "club": "CRAI",
+     "pts": 57
+    },
+    {
+     "club": "Rowing",
+     "pts": 47
+    },
+    {
+     "club": "Tilcara",
+     "pts": 46
+    }
+   ]
+  },
+  {
+   "division": "M16",
+   "phase": "Fase clasificatoria",
+   "group": null,
+   "afterRound": 22,
+   "src": "2013-11-20_065",
+   "rows": [
+    {
+     "club": "CRAI",
+     "pts": 62
+    },
+    {
+     "club": "Cha Roga Club",
+     "pts": 62
+    },
+    {
+     "club": "Santa Fe RC",
+     "pts": 58
+    },
+    {
+     "club": "Universitario",
+     "pts": 49
+    },
+    {
+     "club": "Estudiantes",
+     "pts": 48
+    }
+   ]
+  }
+ ],
+ "issues": [
+  "Control de puntos: no se pudo cerrar por hp/ap porque las notas no traen los puntos por partido (todos null). Como sustituto, cada tabla de M15-M17 (despues de las fechas 2,3,4,5,6,7,10,12,13,14,15,17,18,21) se comparo con los partidos cargados con el puntaje 2/1/0 mas hasta 1 punto de disciplina por partido: ninguna tabla queda por debajo de los puntos por resultado ni por encima del maximo que permiten los partidos sin marcador. No se controlo M19 (su puntaje con bonus no esta documentado en las notas).",
+  "Sin marcador publicado (no cargados): fecha 1 (las notas solo traen 3 de 6 cruces: faltan La Salle-CRAR, Universitario-Cha Roga y CRAI-Querandí en las cuatro divisiones); fecha 2 CRAR-Universitario (todas); fecha 5 Santa Fe RC-Universitario y CRAI-CRAR (todas); fecha 6 Universitario-CRAI (M15); fecha 7 La Salle-Santa Fe RC (todas); fecha 8 Santa Fe RC-CRAI (M15-M17); fecha 9 La Salle-CRAI (M15-M17, M19) y Santa Fe RC-At. Brown (M15-M17); fecha 10 La Salle-At. Brown (M15-M17); fecha 13 Universitario-CRAR (M15); fecha 14 Cha Roga-Santa Fe RC (M19); fecha 18 Cha Roga-Querandí (M15, M16, M19); fecha 20 Cha Roga-Tilcara (M15, M19). Los puntos de esos partidos si estan en las tablas.",
+  "Postergados sin resultado en las notas (status postponed): M17 CRAI-Tilcara (fecha 3, al 20/6; por tabla ganó Tilcara, sin marcador), M17 Estudiantes-Querandí y CRAR-Tilcara (fecha 11, al 31/8), M17 Tilcara-Estudiantes (fecha 12), M19 Universitario-Querandí (fecha 9, al 20/7), M19 CRAR-CRAI (fecha 16), M15 Universitario-CRAI y M19 Universitario-CRAI (fecha 17), M16 At. Brown-CRAR (fecha 17, al 25/9), Santa Fe RC-La Salle de M16, M17 y M19 (fecha 18; en M15 se jugó el 17/10), M17 Cha Roga-Querandí (fecha 18) y, en la fecha 22, Rowing-Universitario (M15, M16, M17, M19) y Capibá-Santa Fe RC (M15, M16, M17): pueden haberse jugado despues del 2/11 sin nota (las notas de campeones de 7/11 a 20/11 todavia los dan pendientes).",
+  "M16 CRAR-Tilcara (fecha 11): la nota del 3/8 publica 'CRAR 17 - Tilcara;' sin el marcador de Tilcara; se cargó como not_played con la nota; por tabla ganó CRAR.",
+  "M19 Tilcara-CRAR de la fecha 22: 'disputado 12/10/2013' sin marcador publicado; not_played con fecha 2013-10-12.",
+  "Fechas: la nota con los resultados de la fecha 17 esta fechada el viernes 20/09/2013 (la 16 fue el 14/9 y la 18 el 28/9); se uso 2013-09-20. Fecha 19: nota del 6/10, programada el sabado 5/10; se uso 2013-10-05. Santa Fe R.-La Salle M15 (postergado de la 18) se jugo el 17/10 y figura con round 18.",
+  "Numeracion: las notas del 6/7 y del 27/7 dicen ambas '10° Fecha'; por el fixture (22 fechas, 6 cruces por fecha, sin fechas el 13 y 20/7) la del 6/7 es la 9 y la del 27/7 la 10. Ventanas del certamen: 22/6, 31/8 y 12/10.",
+  "M19 tuvo 10 clubes (sin Capibá ni At. Brown): 18 partidos en las 22 fechas, con cuatro libres por club (las notas lo marcan con 'Libres'). La nota de campeones dice que Santa Fe RC M19 'falta la ultima etapa ante Capibá', que en M19 es una fecha libre. Las tablas parciales citadas en las notas de campeones (7/11, 13/11, 20/11) se cargaron como standings afterRound 22.",
+  "Campeones: M15 y M19 Santa Fe RC, M17 Universitario, M16 titulo compartido Cha Roga Club y CRAI (62 puntos cada uno; Santa Fe RC 58 con un postergado ante Capibá). Fuente: notas 2013-11-02_062, 11-07_063, 11-13_064 y 11-20_065 (que coinciden con la indicada).",
+  "Amistosos ignorados: jornada en Capibá (13/4), partidos en El Plumazo (20/4) y Estudiantes 12 - Santa Fe Rugby 12 M19 (6/7).",
+  "Reglamento inferido de las tablas: ganado 2 + 1 de disciplina, empatado 1 + 1, perdido 0 + 1; el punto de disciplina se pierde con tarjetas (nota del 20/11). M19 suma bonus (puntajes mayores).",
+  "Nombres normalizados: CrAR/CRAR -> CRAR; Santoto/Cha Roga/Ch Roga/Cha Raga -> Cha Roga Club; CAE -> Estudiantes; A. Brown/Brown -> At. Brown; SFR/SRF/SRRC/Santa Fe Rugby -> Santa Fe RC; La Salle Jobson -> La Salle; Querandi -> Querandí RC; 'Capibá' sin cambios."
+ ]
+}
