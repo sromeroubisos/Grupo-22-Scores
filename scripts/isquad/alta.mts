@@ -104,6 +104,7 @@ async function limpiarTorneo(tournamentId: string) {
 const ahora = new Date().toISOString();
 const COLORES_ZONA = ['#00a365', '#eab308', '#f97316', '#3b82f6'];
 const porId = new Map(CLUBES.map((c: any) => [c.id, c]));
+const nombresBase = new Map<string, string>();
 const archivoDeEscudo = (id: string) => (porId.get(id)?.escudoDe ?? id) as string;
 
 function escudoLocal(id: string) {
@@ -189,9 +190,10 @@ async function escribirTorneo(t: any, grupos: GrupoLeido[], tournamentId: string
     ruleset: RULESET, ruleset_version: 1,
     sport_id: 'rugby', sport: 'rugby', sport_name: 'Rugby',
     priority: 0, sponsors: [], social_links: {}, display_order: 0, is_popular: false,
-    is_api_managed: true, review_status: 'approved', data_source: 'isquad',
+    // `url` vacía e `is_api_managed` en false A PROPÓSITO: con el link de iSquad en `url` y
+    // `is_api_managed` en true la página lo trató como de FlashScore y no leyó la base.
+    is_api_managed: false, review_status: 'approved', data_source: null,
     external_id: buildTournamentExternalId(TEMPORADA, t.campeonato),
-    url: `https://resultadosrugby.isquad.es/competicion.php?id=${grupos[0].id}`,
     current_season_id: null, created_at: ahora, updated_at: ahora,
   }]);
   await insertar('tournament_seasons', [{
@@ -250,7 +252,8 @@ async function escribirTorneo(t: any, grupos: GrupoLeido[], tournamentId: string
     const clubId = (EQUIPOS as Record<string, string>)[equipoId];
     return { participantId: crypto.randomUUID(), entryId: crypto.randomUUID(), clubId, zona: z };
   }));
-  const nombreDe = (id: string) => (porId.get(id)?.name ?? id) as string;
+  // Los clubes `existe: true` no traen nombre en el canon: el de la base.
+  const nombreDe = (id: string) => (porId.get(id)?.name ?? nombresBase.get(id) ?? id) as string;
   await insertar('tournament_participants', participantes.map((p) => ({
     id: p.participantId, tournament_id: tournamentId, season_id: seasonId,
     season_entry_id: null, club_id: p.clubId, name: nombreDe(p.clubId), type: 'club',
@@ -281,6 +284,7 @@ async function main() {
   // ── Clubes ─────────────────────────────────────────────────────────────────
   const ids = CLUBES.map((c: any) => c.id);
   const enBase = new Map((await leer<any>(`clubs?select=id,name,country,union_id,city,region,logo_url&id=in.(${ids.join(',')})`)).map((c) => [c.id, c]));
+  for (const [id, c] of enBase) nombresBase.set(id, c.name);
   const faltanExistentes = CLUBES.filter((c: any) => c.existe && !enBase.has(c.id)).map((c: any) => c.id);
   if (faltanExistentes.length) throw new Error(`clubes marcados existe:true que no están: ${faltanExistentes.join(', ')}`);
   const choques = CLUBES.filter((c: any) => !c.existe && enBase.has(c.id) && enBase.get(c.id).country !== PAIS);
