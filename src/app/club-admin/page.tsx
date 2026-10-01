@@ -52,7 +52,15 @@ export default async function ClubAdminPage({ searchParams }: ClubAdminPageProps
     const resolvedManagedClub = requestedClubRef
         ? managed.clubs.find((club) => club.id === requestedClubRef || club.slug === requestedClubRef) ?? null
         : null;
-    const targetClubId = resolvedManagedClub?.id ?? null;
+    // Una cuenta que maneja UN club (con o sin sus categorías) entra directo a
+    // su club principal: la lista de elección no tiene nada que elegir y era la
+    // primera pantalla que veía el club.
+    const familyRoots = Array.from(new Set(managed.clubs.map((club) => club.familyRootId)));
+    const singleRootId = !requestedClubRef && familyRoots.length === 1
+        && managed.clubs.some((club) => club.id === familyRoots[0])
+        ? familyRoots[0]
+        : null;
+    const targetClubId = resolvedManagedClub?.id ?? singleRootId;
 
     if (!managed.clubs.length) {
         return (

@@ -89,11 +89,11 @@ export function PublishTab({ clubId, notify, onPublishedChange }: PublishTabProp
             required: true,
         },
         {
-            label: 'Planteles',
+            label: 'Categorías',
             done: status.steps.divisions.done,
             detail: status.steps.divisions.count === 1
-                ? 'Un plantel creado'
-                : `${status.steps.divisions.count} planteles creados`,
+                ? 'Una categoría creada'
+                : `${status.steps.divisions.count} categorías creadas`,
             required: true,
         },
         {
@@ -161,7 +161,7 @@ export function PublishTab({ clubId, notify, onPublishedChange }: PublishTabProp
                         onClick={() => toggle(true)}
                         disabled={working || !status.canPublish}
                         title={!status.canPublish
-                            ? 'Completá la identidad y creá al menos un plantel para poder publicar.'
+                            ? 'Completá la identidad y creá al menos una categoría (en Jugadores) para poder publicar.'
                             : undefined}
                     >
                         {working
@@ -171,7 +171,7 @@ export function PublishTab({ clubId, notify, onPublishedChange }: PublishTabProp
                     </button>
                     {!status.canPublish && (
                         <p className="cm-hint" style={{ marginTop: 10 }}>
-                            Para publicar hacen falta la identidad completa y al menos un plantel.
+                            Para publicar hacen falta la identidad completa y al menos una categoría, que se crea en Jugadores.
                         </p>
                     )}
                 </>

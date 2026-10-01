@@ -16,19 +16,23 @@ export async function GET(
     const { id } = await params;
     const supabase = await createClient();
 
-    const [clubRes, divisions, venuesRes] = await Promise.all([
+    const [clubRes, divisions, venuesRes, derivedRes] = await Promise.all([
         // Sin `select('*')`: esa consulta se traía `logo_url`, que en los clubes
         // con escudo embebido son ~870 KB de base64 por una pantalla que solo
         // necesita saber SI hay escudo.
         supabase.from('clubs').select('name, logo_url, primary_color, is_visible, status').eq('id', id).single(),
         fetchDivisions(id),
         supabase.from('club_venues').select('id',    { count: 'exact', head: true }).eq('club_id', id),
+        // Las categorías de verdad son clubes derivados ("Catamarca R.C. M16").
+        // `club_divisions` / `club_teams` están vacías en la base: contando solo
+        // eso, ningún club llegaba nunca a poder publicarse.
+        supabase.from('club_derivatives').select('derived_club_id', { count: 'exact', head: true }).eq('base_club_id', id),
     ]);
 
     if (clubRes.error || !clubRes.data) return err('Club no encontrado', 404);
 
     const club = clubRes.data;
-    const divisionCount = divisions.length;
+    const divisionCount = divisions.length + (derivedRes.count ?? 0);
     const venueCount    = venuesRes.count    ?? 0;
 
     const missingIdentity: string[] = [];

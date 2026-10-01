@@ -3343,3 +3343,56 @@
         scroll-behavior: auto !important;
     }
 }
+
+/* Categorías por edad en el alta de partido: tocar una la elige, y si el club
+   todavía no la tiene la crea con su nombre completo ("Catamarca R.C. M16"). */
+.categoryChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.categoryChip {
+    min-height: 32px;
+    padding: 5px 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.categoryChip:hover:not(:disabled) {
+    border-color: var(--color-accent);
+}
+
+.categoryChip:disabled {
+    cursor: progress;
+    opacity: 0.6;
+}
+
+/* La que todavía no existe: borde punteado y texto atenuado, para que se lea
+   que tocarla la crea. */
+.categoryChipNew {
+    border-style: dashed;
+    color: var(--color-text-muted);
+}
+
+.categoryChipActive,
+.categoryChipActive:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    border-style: solid;
+    background: var(--color-accent);
+    color: var(--color-bg-primary, #fff);
+}
+
+@media (max-width: 640px) {
+    .categoryChip {
+        min-height: 40px;
+        padding: 8px 13px;
+    }
+}

@@ -781,6 +781,8 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     // the same gate the editor page enforces, so it never leaks other
     // tournaments and stays in sync with the backend.
     const [canManageMatch, setCanManageMatch] = useState(false);
+    // A qué editor lleva "Editar partido". Lo dice el servidor según el rol.
+    const [serverEditHref, setServerEditHref] = useState<string | null>(null);
     const statusRef = useRef<string>('scheduled');
     // Tabla e historial ya cargados para este partido. El poll en vivo trae
     // el marcador cada 12s; si en cada tick volviamos a blanquear la barra de
@@ -818,7 +820,11 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
             cache: 'no-store',
         })
             .then((r) => (r.ok ? r.json() : { canEdit: false }))
-            .then((j) => { if (!cancelled) setCanManageMatch(Boolean(j?.canEdit)); })
+            .then((j) => {
+                if (cancelled) return;
+                setCanManageMatch(Boolean(j?.canEdit));
+                setServerEditHref(typeof j?.editHref === 'string' && j.editHref.startsWith('/') ? j.editHref : null);
+            })
             .catch(() => { if (!cancelled) setCanManageMatch(false); });
         return () => { cancelled = true; };
     }, [state.kind, resolvedMatchId, isExternalMatch, currentUserId]);
@@ -2027,14 +2033,14 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     const adminMatchId = typeof matchData.id === 'string' && matchData.id.trim()
         ? matchData.id.trim()
         : id;
-    // Global admins get the super console; tournament admins (canManageMatch
-    // but not global) must use the /admin/torneo mirror — the /admin/super
-    // layout is gated by requireGlobalAdminContext and would bounce them out
-    // before the match control panel ever renders. Both routes mount the same
-    // MatchCenterClient, and per-match tournament scope is enforced server-side.
+    // Los tres editores (/admin/super, /admin/torneo, /matches/[id]/editar)
+    // montan el mismo MatchCenterClient; cambia la guarda de ROL de la sección.
+    // Un admin de club con membresía en el torneo pasaba el permiso del partido
+    // pero rebotaba contra la guarda de rol de /admin/torneo y caía en la
+    // portada: por eso el destino viene del servidor (`can-edit`).
     const adminMatchHref = isSuperAdminUser
         ? `/admin/super/partidos/${encodeURIComponent(adminMatchId)}`
-        : `/admin/torneo/partidos/${encodeURIComponent(adminMatchId)}`;
+        : serverEditHref ?? `/matches/${encodeURIComponent(adminMatchId)}/editar`;
     const firstPublicStatTabId = publicCompleteStatTabs[0]?.id ?? 'marcador';
     const effectivePublicStatTab = publicCompleteStatTabs.some((t) => t.id === publicStatsTab)
         ? publicStatsTab

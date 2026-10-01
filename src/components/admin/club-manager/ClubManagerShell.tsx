@@ -220,7 +220,14 @@ export function ClubManagerShell({
                         notify={notify}
                     />
                 )}
-                {tab === 'jugadores' && <PlayersTab clubId={id} notify={notify} />}
+                {tab === 'jugadores' && (
+                    <PlayersTab
+                        clubId={id}
+                        clubName={club.name}
+                        navigationMode={navigationMode}
+                        notify={notify}
+                    />
+                )}
                 {tab === 'sedes' && <VenuesTab clubId={id} notify={notify} />}
                 {tab === 'usuarios' && <UsersTab clubId={id} notify={notify} />}
                 {tab === 'relacionados' && (

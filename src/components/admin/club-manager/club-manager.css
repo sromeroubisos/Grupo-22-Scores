@@ -835,3 +835,59 @@
         flex: 1;
     }
 }
+
+/* Categorías por edad: tocar una que falta la crea ("Catamarca R.C. M16"). */
+.cm-cat-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.cm-cat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 36px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px dashed var(--color-border);
+    background: transparent;
+    color: var(--color-text-secondary, var(--color-text-muted));
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 120ms ease, color 120ms ease, background-color 120ms ease;
+}
+
+.cm-cat-chip:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-text-primary);
+}
+
+.cm-cat-chip:disabled {
+    cursor: default;
+}
+
+.cm-cat-chip.is-on {
+    border-style: solid;
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    color: var(--color-text-primary);
+}
+
+/* Fila entera como enlace: la puerta del panel (lista de clubes). */
+.cm-row-link-card {
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.cm-row-link-card:hover,
+.cm-row-link-card:focus-visible {
+    border-color: var(--color-accent);
+}
+
+.cm-row-link-card > svg {
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+}

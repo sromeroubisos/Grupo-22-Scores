@@ -3,6 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './page.module.css';
 import { CATEGORY_LEVELS, resolveCategoryLevel } from '@/lib/clubs/categoryLevel';
+import {
+    CATEGORY_PRESETS,
+    categoryOptionLevel,
+    findCategoryByLevel,
+    presetCategoryName,
+    type CategoryOption,
+} from '@/lib/clubs/categoryPresets';
 
 /**
  * Alta de partido desde el Panel del Día.
@@ -73,6 +80,10 @@ export default function PanelMatchForm({
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // El botón de categoría que se está creando (`ours:m16`), para no pedirla dos veces.
+    const [presetBusy, setPresetBusy] = useState<string | null>(null);
+    const [presetError, setPresetError] = useState<{ which: 'ours' | 'rival'; text: string } | null>(null);
+
     // Las competencias propias del club, para el desplegable. Si la ruta no
     // contesta, el alta sigue: la competencia es opcional.
     useEffect(() => {
@@ -123,6 +134,128 @@ export default function PanelMatchForm({
         if (!time) return 'Poné la hora';
         return null;
     }, [ourClubId, rivalCategoryId, date, time]);
+
+    const ourLevel = useMemo(() => {
+        const current = ourClubs.find(club => club.id === ourClubId);
+        return current ? categoryOptionLevel(current) : null;
+    }, [ourClubs, ourClubId]);
+
+    /** Elegir la categoría propia arrastra la del rival si tiene la misma: M16 contra M16. */
+    const selectOurCategory = (id: string, options: CategoryOption[] = ourClubs) => {
+        setOurClubId(id);
+        const picked = options.find(option => option.id === id);
+        if (!picked || !rivalClub) return;
+        const twin = findCategoryByLevel(rivalClub.categories, categoryOptionLevel(picked));
+        if (twin) setRivalCategoryId(twin.id);
+    };
+
+    const selectRivalClub = (club: RivalClub) => {
+        setRivalClub(club);
+        const twin = ourLevel ? findCategoryByLevel(club.categories, ourLevel) : null;
+        setRivalCategoryId(twin?.id ?? (club.categories.length === 1 ? club.categories[0].id : ''));
+    };
+
+    /**
+     * Toque sobre un botón de categoría: elige la que ya existe y, si no hay,
+     * la crea como club derivado. Un 409 con parecidas no es un error acá: el
+     * botón dice "M16" y la parecida ES la M16, así que se usa esa.
+     */
+    const pickPreset = async (which: 'ours' | 'rival', preset: { label: string; level: string }) => {
+        const options: CategoryOption[] = which === 'ours' ? ourClubs : (rivalClub?.categories ?? []);
+        const existing = findCategoryByLevel(options, preset.level);
+        setPresetError(null);
+
+        if (existing) {
+            if (which === 'ours') selectOurCategory(existing.id);
+            else setRivalCategoryId(existing.id);
+            return;
+        }
+
+        const baseClubId = which === 'ours'
+            ? (ourClubs.find(club => club.isBase)?.id ?? clubId)
+            : rivalClub?.id;
+        if (!baseClubId) return;
+
+        setPresetBusy(`${which}:${preset.level}`);
+        try {
+            const response = await fetch(`/api/clubs/${encodeURIComponent(clubId)}/categories`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ baseClubId, label: preset.label, level: preset.level }),
+            });
+            const payload = await response.json().catch(() => null);
+
+            let created: CategoryOption | null = null;
+            if (response.status === 409 && Array.isArray(payload?.similar) && payload.similar.length > 0) {
+                created = { id: payload.similar[0].id, name: payload.similar[0].name, isBase: false };
+            } else if (response.ok && payload?.ok && payload.category) {
+                created = { id: payload.category.id, name: payload.category.name, isBase: false };
+            }
+
+            if (!created) {
+                setPresetError({ which, text: payload?.error || 'No se pudo crear la categoría' });
+                return;
+            }
+
+            const category = created;
+            if (which === 'ours') {
+                const next = ourClubs.some(club => club.id === category.id) ? ourClubs : [...ourClubs, category];
+                setOurClubs(next);
+                selectOurCategory(category.id, next);
+            } else if (rivalClub) {
+                setRivalClub({
+                    ...rivalClub,
+                    categories: rivalClub.categories.some(option => option.id === category.id)
+                        ? rivalClub.categories
+                        : [...rivalClub.categories, category],
+                });
+                setRivalCategoryId(category.id);
+            }
+        } catch {
+            setPresetError({ which, text: 'No se pudo crear la categoría. Revisá la conexión.' });
+        } finally {
+            setPresetBusy(null);
+        }
+    };
+
+    const categoryChips = (which: 'ours' | 'rival', baseName: string) => {
+        const options: CategoryOption[] = which === 'ours' ? ourClubs : (rivalClub?.categories ?? []);
+        const selectedId = which === 'ours' ? ourClubId : rivalCategoryId;
+
+        return (
+            <>
+                <div
+                    className={styles.categoryChips}
+                    role="radiogroup"
+                    aria-label={which === 'ours' ? 'Categoría de tu club' : 'Categoría del rival'}
+                >
+                    {CATEGORY_PRESETS.map(preset => {
+                        const existing = findCategoryByLevel(options, preset.level);
+                        const active = Boolean(existing && existing.id === selectedId);
+                        const busy = presetBusy === `${which}:${preset.level}`;
+                        const className = styles.categoryChip
+                            + (active ? ' ' + styles.categoryChipActive : '')
+                            + (!existing ? ' ' + styles.categoryChipNew : '');
+                        return (
+                            <button
+                                key={preset.level}
+                                type="button"
+                                role="radio"
+                                aria-checked={active}
+                                className={className}
+                                disabled={presetBusy !== null}
+                                title={existing ? existing.name : `Se crea ${presetCategoryName(baseName, preset)}`}
+                                onClick={() => { void pickPreset(which, preset); }}
+                            >
+                                {busy ? 'Creando…' : (existing ? preset.label : `+ ${preset.label}`)}
+                            </button>
+                        );
+                    })}
+                </div>
+                {presetError?.which === which ? <p className={styles.panelFormError}>{presetError.text}</p> : null}
+            </>
+        );
+    };
 
     const openCategoryCreator = (which: 'ours' | 'rival') => {
         setCreatingFor(which);
@@ -175,8 +308,9 @@ export default function PanelMatchForm({
 
             const created = payload.category as { id: string; name: string };
             if (creatingFor === 'ours') {
-                setOurClubs(current => [...current, { id: created.id, name: created.name, isBase: false }]);
-                setOurClubId(created.id);
+                const next = [...ourClubs, { id: created.id, name: created.name, isBase: false }];
+                setOurClubs(next);
+                selectOurCategory(created.id, next);
             } else if (rivalClub) {
                 setRivalClub({
                     ...rivalClub,
@@ -302,7 +436,7 @@ export default function PanelMatchForm({
             </div>
         ) : (
             <button type="button" className={styles.linkButton} onClick={() => openCategoryCreator(which)}>
-                + Crear categoría
+                + Otra categoría (nombre libre)
             </button>
         )
     );
@@ -377,12 +511,18 @@ export default function PanelMatchForm({
                     <select
                         className={styles.panelFormInput}
                         value={ourClubId}
-                        onChange={event => setOurClubId(event.target.value)}
+                        onChange={event => selectOurCategory(event.target.value)}
                     >
                         {ourClubs.map(club => (
-                            <option key={club.id} value={club.id}>{club.name}</option>
+                            <option key={club.id} value={club.id}>
+                                {club.name}{club.isBase ? ' (Primera)' : ''}
+                            </option>
                         ))}
                     </select>
+                    {categoryChips('ours', ourClubs.find(club => club.isBase)?.name ?? 'tu club')}
+                    <p className={styles.panelFormHint}>
+                        Tocá la categoría. Las de borde punteado todavía no existen: se crean al tocarlas.
+                    </p>
                     {categoryCreator('ours', ourClubs.find(club => club.isBase)?.name ?? 'tu club')}
                 </label>
 
@@ -470,10 +610,7 @@ export default function PanelMatchForm({
                                     key={club.id}
                                     type="button"
                                     className={styles.rivalResult}
-                                    onClick={() => {
-                                        setRivalClub(club);
-                                        setRivalCategoryId(club.categories.length === 1 ? club.categories[0].id : '');
-                                    }}
+                                    onClick={() => selectRivalClub(club)}
                                 >
                                     <span>{club.name}</span>
                                     <span className={styles.rivalResultMeta}>
@@ -502,9 +639,10 @@ export default function PanelMatchForm({
                                 </option>
                             ))}
                         </select>
+                        {categoryChips('rival', rivalClub.name)}
                         {rivalClub.categories.length === 1 ? (
                             <p className={styles.panelFormHint}>
-                                {rivalClub.name} todavía no tiene categorías cargadas en G22. Podés crearla acá.
+                                {rivalClub.name} todavía no tiene categorías cargadas en G22. Tocá la que juega y se crea.
                             </p>
                         ) : null}
                         {categoryCreator('rival', rivalClub.name)}

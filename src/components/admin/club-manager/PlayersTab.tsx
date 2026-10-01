@@ -3,9 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Loader2, Plus, Trash2, UserRound, Users } from 'lucide-react';
 import type { PersonWithRole } from '@/lib/services/personService';
+import type { ClubConsoleMode } from '@/lib/clubAdminRoutes';
+import { ClubCategoriesCard } from './ClubCategoriesCard';
 
 interface PlayersTabProps {
     clubId: string;
+    /** Nombre del club, para mostrar cómo va a quedar una categoría ("… M16"). */
+    clubName: string;
+    navigationMode?: ClubConsoleMode;
     notify: (text: string, kind?: 'ok' | 'error') => void;
 }
 
@@ -74,7 +79,7 @@ function seasonLabel(roster: SeasonRoster) {
     return competition ? `${year} · ${competition}` : year;
 }
 
-export function PlayersTab({ clubId, notify }: PlayersTabProps) {
+export function PlayersTab({ clubId, clubName, navigationMode = 'admin', notify }: PlayersTabProps) {
     const [seasonRosters, setSeasonRosters] = useState<SeasonRoster[]>([]);
     const [people, setPeople] = useState<PersonWithRole[] | null>(null);
     const [selected, setSelected] = useState<string>(CURRENT);
@@ -83,8 +88,6 @@ export function PlayersTab({ clubId, notify }: PlayersTabProps) {
     const [currentBlocked, setCurrentBlocked] = useState<string | null>(null);
 
     const [divisions, setDivisions] = useState<Division[]>([]);
-    const [newDivision, setNewDivision] = useState('');
-    const [creatingDivision, setCreatingDivision] = useState(false);
     const [busyDivisionId, setBusyDivisionId] = useState<string | null>(null);
 
     const [adding, setAdding] = useState(false);
@@ -151,31 +154,6 @@ export function PlayersTab({ clubId, notify }: PlayersTabProps) {
         () => (people ?? []).filter((person) => (person.role || 'player').toLowerCase() === 'player'),
         [people],
     );
-
-    const createDivision = async () => {
-        const name = newDivision.trim();
-        if (!name) return;
-
-        setCreatingDivision(true);
-        try {
-            const response = await fetch(`/api/clubs/${encodeURIComponent(clubId)}/divisions`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name }),
-            });
-            const payload = await response.json().catch(() => null);
-            if (response.status === 409) throw new Error('Ya existe un plantel con ese nombre.');
-            if (!response.ok) throw new Error(payload?.error || 'No se pudo crear el plantel.');
-
-            setNewDivision('');
-            await loadDivisions();
-            notify(`Plantel "${name}" creado`);
-        } catch (caught) {
-            notify(caught instanceof Error ? caught.message : 'No se pudo crear el plantel.', 'error');
-        } finally {
-            setCreatingDivision(false);
-        }
-    };
 
     const removeDivision = async (division: Division) => {
         if (!window.confirm(`¿Borrar el plantel ${division.name}?`)) return;
@@ -410,42 +388,24 @@ export function PlayersTab({ clubId, notify }: PlayersTabProps) {
                 </div>
             )}
 
-            <section className="cm-card">
-                <div className="cm-card-head">
-                    <div>
-                        <h2>Planteles</h2>
-                        <p>Las categorías del club: primera, intermedia, juveniles. Hace falta al menos una para poder publicarlo.</p>
-                    </div>
-                </div>
+            <ClubCategoriesCard
+                clubId={clubId}
+                clubName={clubName}
+                navigationMode={navigationMode}
+                notify={notify}
+            />
 
-                <div className="cm-search" style={{ marginBottom: 16 }}>
-                    <input
-                        className="cm-input"
-                        placeholder="Nombre del plantel — Primera, M19, Damas A"
-                        value={newDivision}
-                        onChange={(event) => setNewDivision(event.target.value)}
-                        aria-label="Nombre del plantel nuevo"
-                    />
-                    <button
-                        type="button"
-                        className="cm-btn"
-                        onClick={createDivision}
-                        disabled={creatingDivision || !newDivision.trim()}
-                        title={!newDivision.trim() ? 'Escribí el nombre del plantel para crearlo.' : undefined}
-                    >
-                        {creatingDivision
-                            ? <Loader2 size={14} className="animate-spin" aria-hidden="true" />
-                            : <Plus size={14} aria-hidden="true" />}
-                        Crear
-                    </button>
-                </div>
-
-                {divisions.length === 0 ? (
-                    <div className="cm-empty">
-                        <strong>Sin planteles</strong>
-                        Creá el primero para poder publicar el club.
+            {/* Los planteles viejos (`club_divisions` / `club_teams`, o los
+                compartidos por la familia) se siguen mostrando si existen, pero
+                ya no se crean desde acá: la categoría es un club derivado. */}
+            {divisions.length > 0 && (
+                <section className="cm-card">
+                    <div className="cm-card-head">
+                        <div>
+                            <h2>Planteles</h2>
+                            <p>Los planteles compartidos con la familia de clubes.</p>
+                        </div>
                     </div>
-                ) : (
                     <div className="cm-list">
                         {divisions.map((division) => (
                             <div key={division.id} className="cm-row">
@@ -487,8 +447,8 @@ export function PlayersTab({ clubId, notify }: PlayersTabProps) {
                             </div>
                         ))}
                     </div>
-                )}
-            </section>
+                </section>
+            )}
         </>
     );
 }

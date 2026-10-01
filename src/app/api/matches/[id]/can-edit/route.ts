@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ensureMatchManagementAccess } from '@/lib/server/matchCenterAdmin';
+import { ensureMatchManagementAccess, resolveMatchEditorHref } from '@/lib/server/matchCenterAdmin';
 import { MANAGEMENT_MEMBERSHIP_ROLES } from '@/lib/auth/roles';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * GET /api/matches/:id/can-edit -> { canEdit: boolean }
+ * GET /api/matches/:id/can-edit -> { canEdit: boolean, editHref?: string }
  *
  * Authoritative visibility check for the public match page's
  * "Editar partido" button. Reuses the same gate the editor page itself
@@ -24,8 +24,10 @@ export async function GET(
 ) {
   const { id } = await params;
   try {
-    await ensureMatchManagementAccess(id, MANAGEMENT_MEMBERSHIP_ROLES);
-    return NextResponse.json({ canEdit: true });
+    const context = await ensureMatchManagementAccess(id, MANAGEMENT_MEMBERSHIP_ROLES);
+    // El destino lo decide el servidor, que conoce el rol: el cliente solo sabe
+    // si es super admin, y un admin de club mandado a /admin/torneo rebotaba.
+    return NextResponse.json({ canEdit: true, editHref: resolveMatchEditorHref(context, id) });
   } catch {
     return NextResponse.json({ canEdit: false });
   }
