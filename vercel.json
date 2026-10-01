@@ -116,6 +116,14 @@
     {
       "path": "/api/cron/aahba-sync",
       "schedule": "23 14 * * *"
+    },
+    {
+      "path": "/api/cron/isquad-sync",
+      "schedule": "17 13-21/2 * * 6,0"
+    },
+    {
+      "path": "/api/cron/isquad-sync",
+      "schedule": "47 7 * * *"
     }
   ]
 }
