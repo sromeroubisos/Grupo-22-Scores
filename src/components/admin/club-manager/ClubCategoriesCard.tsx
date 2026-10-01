@@ -1,16 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Loader2, Plus, Users } from 'lucide-react';
+import { ChevronRight, Users } from 'lucide-react';
+import { CategoryPicker } from '@/components/clubs/CategoryPicker';
 import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
+import { resolveCategoryLevel } from '@/lib/clubs/categoryLevel';
 import {
-    CATEGORY_PRESETS,
-    findCategoryByLevel,
-    presetCategoryName,
+    DEVELOPMENT_PRESETS,
+    categoryOptionLevel,
     type CategoryOption,
-    type CategoryPreset,
 } from '@/lib/clubs/categoryPresets';
+import { requestCategory } from '@/lib/clubs/requestCategory';
 
 interface ClubCategoriesCardProps {
     clubId: string;
@@ -21,22 +22,31 @@ interface ClubCategoriesCardProps {
 
 type CategoryRow = CategoryOption & { levelLabel?: string | null };
 
+const DEVELOPMENT_LEVELS = new Set(DEVELOPMENT_PRESETS.map((preset) => preset.level));
+
+/** El renglón chico de cada categoría. M1 y M2 no son "Menores de 1": son desarrollo. */
+function subtitleOf(category: CategoryRow): string {
+    if (category.isBase) return 'Primera, club principal';
+    const level = categoryOptionLevel(category);
+    if (level && DEVELOPMENT_LEVELS.has(level)) return 'Desarrollo';
+    if (!level) return 'Categoría';
+    return category.levelLabel || 'Categoría';
+}
+
 /**
- * Las categorías del club: Primera, Intermedia, juveniles.
+ * Las categorías del club: Primera, Intermedia, juveniles, desarrollo, y los
+ * equipos de cada una (A, B, C...).
  *
- * Cada categoría es un CLUB derivado ("Catamarca R.C. M16") colgado del base por
- * `club_derivatives`, igual que las que crea el alta de partido del panel. Es lo
- * que eligen los torneos y los partidos, así que la que se crea acá aparece
- * después al cargar un partido. Antes esta tarjeta escribía en `club_divisions`,
- * una tabla sin uso y con RLS cerrada: el alta no llegaba a ningún lado.
+ * Cada categoría es un CLUB derivado ("Catamarca R.C. M16 B") colgado del base
+ * por `club_derivatives`, igual que las que crea el alta de partido. Es lo que
+ * eligen los torneos y los partidos, así que la que se crea acá aparece después
+ * al cargar un partido. Antes esta tarjeta escribía en `club_divisions`, una
+ * tabla sin uso y con RLS cerrada: el alta no llegaba a ningún lado.
  */
 export function ClubCategoriesCard({ clubId, clubName, navigationMode = 'admin', notify }: ClubCategoriesCardProps) {
     const [categories, setCategories] = useState<CategoryRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
-    const [busyLevel, setBusyLevel] = useState<string | null>(null);
-    const [customName, setCustomName] = useState('');
-    const [creatingCustom, setCreatingCustom] = useState(false);
 
     const load = useCallback(async () => {
         setLoadError(null);
@@ -44,7 +54,13 @@ export function ClubCategoriesCard({ clubId, clubName, navigationMode = 'admin',
             const response = await fetch(`/api/clubs/${encodeURIComponent(clubId)}/categories`, { cache: 'no-store' });
             const payload = await response.json().catch(() => null);
             if (!response.ok || !payload?.ok) throw new Error(payload?.error || 'No se pudieron cargar las categorías.');
-            setCategories(Array.isArray(payload.categories) ? payload.categories : []);
+            const rows = Array.isArray(payload.categories) ? payload.categories : [];
+            setCategories(rows.map((row: { id: string; name: string; isBase: boolean; levelLabel?: string | null }) => ({
+                id: row.id,
+                name: row.name,
+                isBase: Boolean(row.isBase),
+                levelLabel: row.levelLabel ?? null,
+            })));
         } catch (caught) {
             setLoadError(caught instanceof Error ? caught.message : 'No se pudieron cargar las categorías.');
         } finally {
@@ -57,54 +73,24 @@ export function ClubCategoriesCard({ clubId, clubName, navigationMode = 'admin',
     const base = categories.find((category) => category.isBase) ?? null;
     const baseName = base?.name || clubName;
 
-    /**
-     * Alta de una categoría. Un 409 con parecidas no se trata como error: si el
-     * club ya tenía "M16" con otro nombre, esa ES la que se pidió.
-     */
-    const create = async (label: string, level: string | null): Promise<boolean> => {
-        const response = await fetch(`/api/clubs/${encodeURIComponent(clubId)}/categories`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ baseClubId: base?.id ?? clubId, label, level }),
-        });
-        const payload = await response.json().catch(() => null);
+    // El orden del escalafón: Primera, Intermedia, juveniles de mayor a menor,
+    // desarrollo, y dentro de cada una por letra. Así la lista se lee como el club.
+    const ordered = useMemo(() => [...categories].sort((left, right) => {
+        if (left.isBase !== right.isBase) return left.isBase ? -1 : 1;
+        const a = resolveCategoryLevel({ name: left.name });
+        const b = resolveCategoryLevel({ name: right.name });
+        return a.rank - b.rank || a.variant.localeCompare(b.variant) || left.name.localeCompare(right.name, 'es');
+    }), [categories]);
 
-        if (response.status === 409 && Array.isArray(payload?.similar) && payload.similar.length > 0) {
-            notify(`Ya existía: ${payload.similar[0].name}`);
-            return true;
+    const create = async (label: string, level: string | null, variant: string | null) => {
+        const result = await requestCategory({ clubId, baseClubId: base?.id ?? clubId, label, level, variant });
+        if (!result.ok || !result.option) {
+            notify(result.error || 'No se pudo crear la categoría.', 'error');
+            return null;
         }
-        if (!response.ok || !payload?.ok) {
-            notify(payload?.error || 'No se pudo crear la categoría.', 'error');
-            return false;
-        }
-        notify(`Categoría creada: ${payload.category?.name ?? label}`);
+        notify(result.existed ? `Ya existía: ${result.option.name}` : `Categoría creada: ${result.option.name}`);
         await load();
-        return true;
-    };
-
-    const pickPreset = async (preset: CategoryPreset) => {
-        if (findCategoryByLevel(categories, preset.level)) return;
-        setBusyLevel(preset.level);
-        try {
-            await create(preset.label, preset.level);
-        } catch {
-            notify('No se pudo crear la categoría. Revisá la conexión.', 'error');
-        } finally {
-            setBusyLevel(null);
-        }
-    };
-
-    const createCustom = async () => {
-        const label = customName.trim();
-        if (!label) return;
-        setCreatingCustom(true);
-        try {
-            if (await create(label, null)) setCustomName('');
-        } catch {
-            notify('No se pudo crear la categoría. Revisá la conexión.', 'error');
-        } finally {
-            setCreatingCustom(false);
-        }
+        return result.option;
     };
 
     return (
@@ -113,56 +99,10 @@ export function ClubCategoriesCard({ clubId, clubName, navigationMode = 'admin',
                 <div>
                     <h2>Categorías</h2>
                     <p>
-                        Tocá las que tiene el club. Cada una queda con su nombre completo (por
-                        ejemplo <strong>{presetCategoryName(baseName, CATEGORY_PRESETS[6])}</strong>) y
-                        aparece al cargar un partido.
+                        Tocá una categoría para crearla y ver sus equipos (A, B, C). Cada una queda con su
+                        nombre completo y aparece al cargar un partido.
                     </p>
                 </div>
-            </div>
-
-            <div className="cm-cat-chips" role="group" aria-label="Categorías por edad">
-                {CATEGORY_PRESETS.map((preset) => {
-                    const existing = findCategoryByLevel(categories, preset.level);
-                    const busy = busyLevel === preset.level;
-                    return (
-                        <button
-                            key={preset.level}
-                            type="button"
-                            className={`cm-cat-chip${existing ? ' is-on' : ''}`}
-                            aria-pressed={Boolean(existing)}
-                            disabled={loading || busyLevel !== null || Boolean(existing)}
-                            title={existing ? existing.name : `Crear ${presetCategoryName(baseName, preset)}`}
-                            onClick={() => { void pickPreset(preset); }}
-                        >
-                            {busy
-                                ? <Loader2 size={13} className="animate-spin" aria-hidden="true" />
-                                : existing ? null : <Plus size={13} aria-hidden="true" />}
-                            {preset.label}
-                        </button>
-                    );
-                })}
-            </div>
-
-            <div className="cm-search" style={{ margin: '14px 0 16px' }}>
-                <input
-                    className="cm-input"
-                    placeholder="Otra con nombre propio: Damas, M22, Intermedia B"
-                    value={customName}
-                    onChange={(event) => setCustomName(event.target.value)}
-                    aria-label="Nombre de otra categoría"
-                />
-                <button
-                    type="button"
-                    className="cm-btn"
-                    onClick={createCustom}
-                    disabled={creatingCustom || !customName.trim()}
-                    title={!customName.trim() ? 'Escribí el nombre de la categoría para crearla.' : undefined}
-                >
-                    {creatingCustom
-                        ? <Loader2 size={14} className="animate-spin" aria-hidden="true" />
-                        : <Plus size={14} aria-hidden="true" />}
-                    Crear
-                </button>
             </div>
 
             {loading ? (
@@ -170,29 +110,37 @@ export function ClubCategoriesCard({ clubId, clubName, navigationMode = 'admin',
             ) : loadError ? (
                 <div className="cm-alert">{loadError}</div>
             ) : (
-                <div className="cm-list">
-                    {categories.map((category) => (
-                        <div key={category.id} className="cm-row">
-                            <span className="cm-avatar" aria-hidden="true"><Users size={15} /></span>
-                            <div className="cm-row-main">
-                                <div className="cm-row-title">
-                                    {category.isBase || category.id === clubId ? category.name : (
-                                        <Link
-                                            href={buildClubManageHref(category.id, 'general', navigationMode)}
-                                            className="cm-row-link"
-                                        >
-                                            {category.name}
-                                            <ChevronRight size={14} aria-hidden="true" />
-                                        </Link>
-                                    )}
-                                </div>
-                                <div className="cm-row-sub">
-                                    {category.isBase ? 'Primera · club principal' : (category.levelLabel || 'Categoría')}
+                <>
+                    <CategoryPicker
+                        mode="manage"
+                        label="Categorías del club"
+                        options={categories}
+                        baseName={baseName}
+                        onCreate={create}
+                    />
+
+                    <div className="cm-list" style={{ marginTop: 18 }}>
+                        {ordered.map((category) => (
+                            <div key={category.id} className="cm-row">
+                                <span className="cm-avatar" aria-hidden="true"><Users size={15} /></span>
+                                <div className="cm-row-main">
+                                    <div className="cm-row-title">
+                                        {category.isBase || category.id === clubId ? category.name : (
+                                            <Link
+                                                href={buildClubManageHref(category.id, 'inicio', navigationMode)}
+                                                className="cm-row-link"
+                                            >
+                                                {category.name}
+                                                <ChevronRight size={14} aria-hidden="true" />
+                                            </Link>
+                                        )}
+                                    </div>
+                                    <div className="cm-row-sub">{subtitleOf(category)}</div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                </>
             )}
         </section>
     );

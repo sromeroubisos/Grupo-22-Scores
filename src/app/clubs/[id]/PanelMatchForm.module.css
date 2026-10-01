@@ -1,0 +1,460 @@
+/* Alta de partido del club (Panel del Día y gestor de club). Hoja propia: no
+   depende de page.module.css de la ficha, así el formulario se ve igual en las
+   dos puertas. Tokens de globals.css; píldora para lo tocable, 12px para cajas. */
+
+.form {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    margin-bottom: 20px;
+}
+
+.head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+/* Cada bloque es una pregunta: quién, contra quién, cuándo, en qué competencia. */
+.block {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--color-bg-primary);
+    border: 1px solid var(--color-border);
+    min-width: 0;
+}
+
+.blockTitle {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+}
+
+.field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.fieldWide {
+    flex: 2 1 220px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.row > .field:first-child {
+    flex: 1 1 120px;
+}
+
+.input {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 15px;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.searchField {
+    position: relative;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+}
+
+.searchInput {
+    padding-left: 36px;
+}
+
+.results {
+    display: grid;
+    gap: 6px;
+}
+
+.result {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 46px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.result:hover {
+    border-color: var(--color-accent);
+}
+
+.resultMeta {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-tertiary);
+}
+
+.rivalPicked {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 46px;
+    padding: 6px 6px 6px 14px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-secondary));
+}
+
+.rivalName {
+    min-width: 0;
+    font-size: 15px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.iconButton {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    color: var(--color-text-secondary, var(--color-text-tertiary));
+    cursor: pointer;
+}
+
+.iconButton:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-accent);
+}
+
+.segmented {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+.segment,
+.segmentOn {
+    min-height: 40px;
+    border-radius: 999px;
+    border: none;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 120ms ease, color 120ms ease;
+}
+
+.segment {
+    background: transparent;
+    color: var(--color-text-tertiary);
+}
+
+.segment:hover {
+    color: var(--color-text-primary);
+}
+
+.segmentOn {
+    background: var(--color-accent);
+    color: #04150d;
+}
+
+.quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.quickChip,
+.quickOn {
+    min-height: 38px;
+    padding: 6px 13px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.quickChip {
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+}
+
+.quickChip:hover {
+    border-color: var(--color-accent);
+}
+
+.quickOn {
+    border: 1px solid var(--color-accent);
+    background: var(--color-accent);
+    color: #04150d;
+}
+
+.disclosure {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.disclosureCopy {
+    display: grid;
+    gap: 2px;
+}
+
+.disclosureMeta {
+    font-size: 13px;
+    color: var(--color-text-tertiary);
+}
+
+.chevron,
+.chevronOpen {
+    flex-shrink: 0;
+    color: var(--color-text-tertiary);
+    transition: transform 160ms ease;
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+.competition {
+    display: grid;
+    gap: 8px;
+}
+
+.inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.inline .input {
+    flex: 1 1 200px;
+    width: auto;
+}
+
+.secondary {
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.secondary:disabled {
+    cursor: default;
+    color: var(--color-text-tertiary);
+}
+
+/* El partido tal como va a quedar. Se arma mientras se completa. */
+.summary {
+    display: grid;
+    gap: 4px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px dashed var(--color-border);
+}
+
+.summaryMatch {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 8px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.35;
+}
+
+.summaryTeam {
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.summaryEmpty {
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+}
+
+.summaryVs {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+}
+
+.summaryMeta {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-text-secondary, var(--color-text-tertiary));
+}
+
+.summaryMeta:first-letter {
+    text-transform: uppercase;
+}
+
+.primary {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid var(--color-accent);
+    background: var(--color-accent);
+    color: #04150d;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.primary:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+/* Deshabilitado sigue legible: el texto dice qué falta y tiene que leerse. */
+.primary:disabled {
+    cursor: default;
+    border-color: var(--color-border);
+    background: var(--color-bg-primary);
+    color: var(--color-text-secondary, var(--color-text-tertiary));
+}
+
+.hint {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-text-tertiary);
+}
+
+.error {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-error, #ef4444);
+}
+
+.linkButton {
+    min-height: 36px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-accent);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.linkButton:hover {
+    text-decoration: underline;
+}
+
+.result:focus-visible,
+.iconButton:focus-visible,
+.segment:focus-visible,
+.segmentOn:focus-visible,
+.quickChip:focus-visible,
+.quickOn:focus-visible,
+.disclosure:focus-visible,
+.secondary:focus-visible,
+.primary:focus-visible,
+.linkButton:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+    .form {
+        padding: 20px;
+        gap: 16px;
+    }
+
+    .primary {
+        width: auto;
+        justify-self: end;
+        min-width: 240px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .segment,
+    .segmentOn,
+    .chevron,
+    .chevronOpen,
+    .primary {
+        transition: none;
+    }
+
+    .primary:active:not(:disabled) {
+        transform: none;
+    }
+}
