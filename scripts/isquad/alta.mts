@@ -37,6 +37,8 @@ import {
 const REPO = process.cwd();
 const ROLLBACK = path.join(REPO, 'ISQUAD_ALTA_ROLLBACK.sql');
 const PAIS = 'España';
+/** El logo de la federación (lo publica iSquad): ninguna competición tiene uno propio. */
+const LOGO_FER = '/competiciones/es-fer.png';
 
 const modo = process.argv.includes('--execute') ? 'execute' : process.argv.includes('--plan') ? 'plan' : null;
 if (!modo) { console.error('usá --plan o --execute'); process.exit(2); }
@@ -183,7 +185,7 @@ async function escribirTorneo(t: any, grupos: GrupoLeido[], tournamentId: string
     name: t.nombre, display_name: t.nombre, original_name: t.nombre, slug: t.slug,
     status: 'published', category: t.categoria, gender: t.genero, age_grade: t.edad,
     region: PAIS, country: PAIS, country_id: 'spain', country_name: PAIS,
-    format: conZonas ? 'groups' : 'league', is_visible: true, is_active: true, logo_url: null,
+    format: conZonas ? 'groups' : 'league', is_visible: true, is_active: true, logo_url: LOGO_FER,
     ruleset: RULESET, ruleset_version: 1,
     sport_id: 'rugby', sport: 'rugby', sport_name: 'Rugby',
     priority: 0, sponsors: [], social_links: {}, display_order: 0, is_popular: false,
