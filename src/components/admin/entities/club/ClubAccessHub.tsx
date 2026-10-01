@@ -84,7 +84,7 @@ export function ClubAccessHub({ clubs }: ClubAccessHubProps) {
                         {family.members.map((club) => (
                             <Link
                                 key={club.id}
-                                href={`/club-admin?club=${encodeURIComponent(club.id)}&tab=general&type=club`}
+                                href={`/club-admin?club=${encodeURIComponent(club.id)}&tab=inicio&type=club`}
                                 prefetch={false}
                                 className="cm-row cm-row-link-card"
                             >

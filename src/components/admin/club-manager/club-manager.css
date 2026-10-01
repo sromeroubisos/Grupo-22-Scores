@@ -891,3 +891,187 @@
     flex-shrink: 0;
     color: var(--color-text-tertiary);
 }
+
+/* ── Inicio: portada de accesos rápidos ───────────────────────────────── */
+
+.cm-tabs[hidden] {
+    display: none;
+}
+
+.cm-home {
+    display: grid;
+    gap: 14px;
+}
+
+/* La acción que más se repite va sola y a lo ancho, con el acento del sitio
+   como tinte (no como relleno: el texto queda en tinta normal y se lee igual
+   en claro y en oscuro). */
+.cm-home-hero {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    min-height: 88px;
+    padding: 18px 20px;
+    border-radius: var(--cm-radius);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-bg-secondary));
+    color: var(--color-text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast), transform 120ms ease;
+}
+
+.cm-home-hero:hover {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 18%, var(--color-bg-secondary));
+}
+
+.cm-home-hero-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: var(--color-accent);
+    color: #04150d;
+}
+
+.cm-home-hero-copy {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    flex: 1;
+}
+
+.cm-home-hero-title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.cm-home-hero-detail {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--color-text-secondary, var(--color-text-tertiary));
+}
+
+.cm-home-hero-arrow {
+    flex-shrink: 0;
+    color: var(--color-accent);
+    transition: transform 160ms ease;
+}
+
+.cm-home-hero:hover .cm-home-hero-arrow {
+    transform: translateX(3px);
+}
+
+.cm-home-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+@media (min-width: 768px) {
+    .cm-home-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+    }
+}
+
+.cm-home-tile-wide {
+    grid-column: span 2;
+}
+
+.cm-home-tile {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    min-height: 116px;
+    padding: 14px;
+    border-radius: var(--cm-radius);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast), transform 120ms ease;
+}
+
+.cm-home-tile:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
+}
+
+.cm-home-tile-icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-primary);
+    color: var(--color-accent);
+}
+
+.cm-home-tile-title {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.cm-home-tile-detail {
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--color-text-tertiary);
+}
+
+.cm-home-hero:active,
+.cm-home-tile:active {
+    transform: scale(0.98);
+}
+
+.cm-home-hero:focus-visible,
+.cm-home-tile:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* ── Crear partido ────────────────────────────────────────────────────── */
+
+.cm-match-done {
+    display: grid;
+    justify-items: start;
+    gap: 8px;
+}
+
+.cm-match-done-icon {
+    color: var(--color-accent);
+}
+
+.cm-match-done p {
+    color: var(--color-text-tertiary);
+    font-size: 14px;
+}
+
+.cm-match-done-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cm-home-hero,
+    .cm-home-tile,
+    .cm-home-hero-arrow {
+        transition: none;
+    }
+
+    .cm-home-hero:active,
+    .cm-home-tile:active,
+    .cm-home-hero:hover .cm-home-hero-arrow {
+        transform: none;
+    }
+}

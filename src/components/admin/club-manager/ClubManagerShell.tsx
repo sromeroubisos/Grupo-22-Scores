@@ -13,6 +13,8 @@ import {
     type ClubManagerTabId,
 } from '@/lib/club-admin/manageTabs';
 import { GeneralTab } from './GeneralTab';
+import { HomeTab } from './HomeTab';
+import { MatchTab } from './MatchTab';
 import { PlayersTab } from './PlayersTab';
 import { PublishTab } from './PublishTab';
 import { RelatedClubsTab } from './RelatedClubsTab';
@@ -108,6 +110,9 @@ export function ClubManagerShell({
     const goToTab = useCallback((next: ClubManagerTabId) => {
         setTab(next);
         pushClubManageHistoryState(id, next, navigationMode);
+        // Desde un acceso de Inicio, la sección nueva arranca arriba: si no, en
+        // el teléfono se abre a mitad de pantalla, debajo de la cabecera.
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [id, navigationMode]);
 
     // El escudo del estado manda sobre el que llegó del servidor: si se cambia en
@@ -136,13 +141,25 @@ export function ClubManagerShell({
     const location = [club.city, club.region].filter(Boolean).join(', ');
     const sportLabel = club.sport ? getSportDisplayName(club.sport) : null;
     const fallbackBack = navigationMode === 'club-admin' ? '/club-admin' : '/admin/super/clubes';
+    const publicHref = `/clubs/${club.slug || club.id}`;
+    const onHome = tab === 'inicio';
 
     return (
         <div className="cm-root">
-            <Link href={backHref || fallbackBack} prefetch={false} className="cm-back">
-                <ArrowLeft size={14} aria-hidden="true" />
-                {navigationMode === 'club-admin' ? 'Volver al panel' : 'Volver a clubes'}
-            </Link>
+            {/* "Volver al panel" lleva a Inicio, la portada de accesos. Desde
+                Inicio, el club no tiene adónde volver (entra directo a su club);
+                el super admin vuelve a la lista de clubes. */}
+            {!onHome ? (
+                <button type="button" className="cm-back" onClick={() => goToTab('inicio')}>
+                    <ArrowLeft size={14} aria-hidden="true" />
+                    Volver al panel
+                </button>
+            ) : navigationMode !== 'club-admin' ? (
+                <Link href={backHref || fallbackBack} prefetch={false} className="cm-back">
+                    <ArrowLeft size={14} aria-hidden="true" />
+                    Volver a clubes
+                </Link>
+            ) : null}
 
             <header className="cm-header">
                 <div className="cm-crest">
@@ -176,7 +193,7 @@ export function ClubManagerShell({
 
                 <div className="cm-header-actions">
                     <Link
-                        href={`/clubs/${club.slug || club.id}`}
+                        href={publicHref}
                         prefetch={false}
                         target="_blank"
                         rel="noreferrer"
@@ -188,7 +205,8 @@ export function ClubManagerShell({
                 </div>
             </header>
 
-            <div className="cm-tabs" role="tablist" aria-label="Secciones del club" ref={tabsRef}>
+            {/* En Inicio la barra sobra: los mismos destinos están como botones. */}
+            <div className="cm-tabs" role="tablist" aria-label="Secciones del club" ref={tabsRef} hidden={onHome}>
                 {CLUB_MANAGER_TABS.map((item) => (
                     <button
                         key={item.id}
@@ -211,6 +229,15 @@ export function ClubManagerShell({
                 id={`cm-panel-${tab}`}
                 aria-labelledby={`cm-tab-${tab}`}
             >
+                {tab === 'inicio' && <HomeTab onOpen={goToTab} />}
+                {tab === 'partido' && (
+                    <MatchTab
+                        clubId={id}
+                        publicHref={publicHref}
+                        onDone={() => goToTab('inicio')}
+                        notify={notify}
+                    />
+                )}
                 {tab === 'general' && (
                     <GeneralTab
                         id={id}

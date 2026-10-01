@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Link2, Loader2, Plus, Search, Unlink } from 'lucide-react';
+import { ExternalLink, Link2, Loader2, Plus, Search, Unlink } from 'lucide-react';
 import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
 
 interface RelatedClubsTabProps {
@@ -148,13 +148,97 @@ export function RelatedClubsTab({ clubId, navigationMode, notify }: RelatedClubs
     }
 
     const members = family?.clubs ?? [];
+    // El principal primero y después el resto por nombre: así "M15, M16, M17"
+    // quedan en orden y la familia se lee de arriba hacia abajo.
+    const orderedMembers = [...members].sort((left, right) => {
+        if (left.isRoot !== right.isRoot) return left.isRoot ? -1 : 1;
+        return left.name.localeCompare(right.name, 'es', { numeric: true });
+    });
 
     return (
         <>
             <section className="cm-card">
                 <div className="cm-card-head">
                     <div>
-                        <h2>Vincular un club</h2>
+                        <h2>Clubes de la familia</h2>
+                        <p>
+                            {members.length === 1 ? 'Un club' : `${members.length} clubes`}: el principal, sus
+                            categorías y sus ramas. Cada uno tiene su panel y su ficha.
+                        </p>
+                    </div>
+                </div>
+
+                {error && <div className="cm-alert">{error}</div>}
+
+                {!error && members.length <= 1 ? (
+                    <div className="cm-empty">
+                        <strong>Este club no tiene familia</strong>
+                        Creá sus categorías en Jugadores, o vinculá abajo sus ramas (damas,
+                        hockey) para que compartan planteles y accesos.
+                    </div>
+                ) : (
+                    <div className="cm-list">
+                        {orderedMembers.map((club) => (
+                            <div key={club.id} className={`cm-row${club.isCurrent ? ' cm-row-current' : ''}`}>
+                                <span className="cm-avatar" aria-hidden="true">
+                                    {club.logoUrl ? <img src={club.logoUrl} alt="" /> : <Link2 size={15} />}
+                                </span>
+                                <div className="cm-row-main">
+                                    <div className="cm-row-title">{club.name}</div>
+                                    <div className="cm-row-sub">
+                                        {club.isRoot
+                                            ? 'Club base de la familia'
+                                            : club.parentClubName
+                                                ? `Depende de ${club.parentClubName}`
+                                                : 'Vinculado a la familia'}
+                                        {club.sport ? ` · ${club.sport}` : ''}
+                                    </div>
+                                </div>
+                                <div className="cm-row-actions">
+                                    {club.isCurrent && <span className="cm-badge cm-badge-accent">Este club</span>}
+                                    {!club.isCurrent && (
+                                        <Link
+                                            href={buildClubManageHref(club.id, 'inicio', navigationMode)}
+                                            prefetch={false}
+                                            className="cm-btn cm-btn-sm"
+                                        >
+                                            Abrir panel
+                                        </Link>
+                                    )}
+                                    <Link
+                                        href={`/clubs/${encodeURIComponent(club.id)}`}
+                                        prefetch={false}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="cm-btn cm-btn-icon"
+                                        aria-label={`Ver la ficha pública de ${club.name}`}
+                                        title="Ver ficha"
+                                    >
+                                        <ExternalLink size={14} aria-hidden="true" />
+                                    </Link>
+                                    {canWrite && !club.isRoot && (
+                                        <button
+                                            type="button"
+                                            className="cm-btn cm-btn-danger cm-btn-icon"
+                                            onClick={() => unlink(club)}
+                                            disabled={busyId === club.id}
+                                            aria-label={`Desvincular a ${club.name}`}
+                                        >
+                                            {busyId === club.id
+                                                ? <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                                                : <Unlink size={14} aria-hidden="true" />}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </section>
+            <section className="cm-card">
+                <div className="cm-card-head">
+                    <div>
+                        <h2>Sumar un club a la familia</h2>
                         <p>
                             Los clubes de una familia comparten planteles y accesos.
                             {family?.rootClubName ? ` La base es ${family.rootClubName}.` : ''}
@@ -231,70 +315,6 @@ export function RelatedClubsTab({ clubId, navigationMode, notify }: RelatedClubs
                 )}
             </section>
 
-            <section className="cm-card">
-                <div className="cm-card-head">
-                    <div>
-                        <h2>Familia</h2>
-                        <p>{members.length === 1 ? 'Un club' : `${members.length} clubes`} en esta familia.</p>
-                    </div>
-                </div>
-
-                {error && <div className="cm-alert">{error}</div>}
-
-                {!error && members.length <= 1 ? (
-                    <div className="cm-empty">
-                        <strong>Este club no tiene familia</strong>
-                        Vinculá las ramas del club —damas, juveniles, hockey— para que compartan
-                        planteles y accesos.
-                    </div>
-                ) : (
-                    <div className="cm-list">
-                        {members.map((club) => (
-                            <div key={club.id} className={`cm-row${club.isCurrent ? ' cm-row-current' : ''}`}>
-                                <span className="cm-avatar" aria-hidden="true">
-                                    {club.logoUrl ? <img src={club.logoUrl} alt="" /> : <Link2 size={15} />}
-                                </span>
-                                <div className="cm-row-main">
-                                    <div className="cm-row-title">{club.name}</div>
-                                    <div className="cm-row-sub">
-                                        {club.isRoot
-                                            ? 'Club base de la familia'
-                                            : club.parentClubName
-                                                ? `Depende de ${club.parentClubName}`
-                                                : 'Vinculado a la familia'}
-                                        {club.sport ? ` · ${club.sport}` : ''}
-                                    </div>
-                                </div>
-                                <div className="cm-row-actions">
-                                    {club.isCurrent && <span className="cm-badge cm-badge-accent">Este club</span>}
-                                    {!club.isCurrent && (
-                                        <Link
-                                            href={buildClubManageHref(club.id, 'general', navigationMode)}
-                                            prefetch={false}
-                                            className="cm-btn cm-btn-sm"
-                                        >
-                                            Abrir
-                                        </Link>
-                                    )}
-                                    {canWrite && !club.isRoot && (
-                                        <button
-                                            type="button"
-                                            className="cm-btn cm-btn-danger cm-btn-icon"
-                                            onClick={() => unlink(club)}
-                                            disabled={busyId === club.id}
-                                            aria-label={`Desvincular a ${club.name}`}
-                                        >
-                                            {busyId === club.id
-                                                ? <Loader2 size={14} className="animate-spin" aria-hidden="true" />
-                                                : <Unlink size={14} aria-hidden="true" />}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </section>
         </>
     );
 }

@@ -113,8 +113,8 @@ export function ClubCategoriesCard({ clubId, clubName, navigationMode = 'admin',
                 <div>
                     <h2>Categorías</h2>
                     <p>
-                        Tocá las que tiene el club. Cada una queda con su nombre completo
-                        —por ejemplo <strong>{presetCategoryName(baseName, CATEGORY_PRESETS[6])}</strong>— y
+                        Tocá las que tiene el club. Cada una queda con su nombre completo (por
+                        ejemplo <strong>{presetCategoryName(baseName, CATEGORY_PRESETS[6])}</strong>) y
                         aparece al cargar un partido.
                     </p>
                 </div>
@@ -146,7 +146,7 @@ export function ClubCategoriesCard({ clubId, clubName, navigationMode = 'admin',
             <div className="cm-search" style={{ margin: '14px 0 16px' }}>
                 <input
                     className="cm-input"
-                    placeholder="Otra con nombre propio — Damas, M22, Intermedia B"
+                    placeholder="Otra con nombre propio: Damas, M22, Intermedia B"
                     value={customName}
                     onChange={(event) => setCustomName(event.target.value)}
                     aria-label="Nombre de otra categoría"
