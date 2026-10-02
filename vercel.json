@@ -124,6 +124,14 @@
     {
       "path": "/api/cron/isquad-sync",
       "schedule": "47 7 * * *"
+    },
+    {
+      "path": "/api/cron/sporti-sync",
+      "schedule": "37 15-23/2 * * 6,0"
+    },
+    {
+      "path": "/api/cron/sporti-sync",
+      "schedule": "37 8 * * *"
     }
   ]
 }
