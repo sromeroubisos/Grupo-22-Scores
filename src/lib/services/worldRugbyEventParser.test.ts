@@ -6,8 +6,10 @@ import {
     WR_TTL_HOT_SECONDS,
     WR_TTL_IDLE_SECONDS,
     WR_TTL_MATCHDAY_SECONDS,
+    applyWrManualResults,
     classifyWrStatus,
     computeWrPoolTables,
+    parseWrManualResult,
     parseWrMatchId,
     parseWrSchedule,
     parseWrSquads,
@@ -349,4 +351,101 @@ test('la tabla oficial manda solo si está al día', () => {
     const computedAhead = [{ pool: 'A', name: 'Grupo A', rows: [{ ...official[0].rows[0], played: 2 }] }];
     assert.equal(pickWrStandings(official, computedAhead).source, 'computed');
     assert.equal(pickWrStandings([], computedSame).source, 'computed');
+});
+
+// --------------------------------------------------------------------------
+// Carga manual
+// --------------------------------------------------------------------------
+
+const MANUAL_KICKOFF = Date.UTC(2026, 9, 2, 13, 0);
+const MANUAL_ID = '400ae82f-b7d0-4b31-8ad6-35be501b6e2a';
+
+function wrFixture(state: 'scheduled' | 'live' | 'final', score: [number, number] | null = null) {
+    const side = (name: string, country: string, value: number | null) => ({
+        teamId: country, name, country, abbreviation: null, placeholder: false, score: value,
+    });
+    return {
+        matchId: MANUAL_ID,
+        number: 1,
+        pool: 'A',
+        phase: '',
+        stageLabel: 'Grupo A · Fecha 1',
+        round: 1,
+        kickoffMs: MANUAL_KICKOFF,
+        kickoffIso: new Date(MANUAL_KICKOFF).toISOString(),
+        venue: '',
+        city: '',
+        home: side('Rumania M20', 'Romania', score ? score[0] : null),
+        away: side('Brasil M20', 'Brazil', score ? score[1] : null),
+        rawStatus: state === 'scheduled' ? 'U' : state === 'live' ? 'L1' : 'C',
+        state,
+        clockSecs: null,
+    };
+}
+
+function manualOf(raw: Record<string, unknown>) {
+    const result = parseWrManualResult(raw);
+    assert.ok(result);
+    return new Map([[MANUAL_ID, result]]);
+}
+
+test('carga manual: valida estado y marcador, y descarta tries de un solo lado', () => {
+    assert.equal(parseWrManualResult({ status: 'terminado', homeScore: 1, awayScore: 0 }), null);
+    assert.equal(parseWrManualResult({ status: 'final', homeScore: -3, awayScore: 0 }), null);
+    assert.equal(parseWrManualResult({ status: 'final', homeScore: 7.5, awayScore: 0 }), null);
+    assert.deepEqual(parseWrManualResult({ status: 'final', homeScore: '24', awayScore: 17, homeTries: 3, minute: 50 }), {
+        status: 'final', homeScore: 24, awayScore: 17, homeTries: null, awayTries: null, minute: null,
+    });
+});
+
+test('carga manual: cubre el partido que World Rugby no publicó', () => {
+    const now = MANUAL_KICKOFF + 2 * 3_600_000;
+    const [fixture] = applyWrManualResults([wrFixture('scheduled')], manualOf({
+        status: 'final', homeScore: 24, awayScore: 17, homeTries: 3, awayTries: 2,
+    }), now);
+    assert.equal(fixture.state, 'final');
+    assert.equal(fixture.rawStatus, 'C');
+    assert.equal(fixture.home.score, 24);
+    assert.equal(fixture.away.score, 17);
+    assert.equal(fixture.manual, true);
+    assert.deepEqual(fixture.manualTries, { home: 3, away: 2 });
+});
+
+test('carga manual: World Rugby manda en cuanto publica algo', () => {
+    const manual = manualOf({ status: 'final', homeScore: 24, awayScore: 17 });
+    const now = MANUAL_KICKOFF + 30 * 60_000;
+    for (const official of [wrFixture('live', [5, 0]), wrFixture('final', [22, 15])]) {
+        const [fixture] = applyWrManualResults([official], manual, now);
+        assert.equal(fixture, official);
+    }
+});
+
+test('carga manual: el en vivo lleva minuto y entretiempo, y se cierra solo a las 3 h', () => {
+    const during = MANUAL_KICKOFF + 60 * 60_000;
+    const [live] = applyWrManualResults([wrFixture('scheduled')], manualOf({ status: 'live', homeScore: 10, awayScore: 7, minute: 54 }), during);
+    assert.equal(live.state, 'live');
+    assert.equal(wrLiveLabel(live.rawStatus, live.clockSecs), "54'");
+
+    const [half] = applyWrManualResults([wrFixture('scheduled')], manualOf({ status: 'halftime', homeScore: 10, awayScore: 7 }), during);
+    assert.equal(wrLiveLabel(half.rawStatus, half.clockSecs), 'Entretiempo');
+
+    const [forgotten] = applyWrManualResults(
+        [wrFixture('scheduled')],
+        manualOf({ status: 'live', homeScore: 10, awayScore: 7, minute: 60 }),
+        MANUAL_KICKOFF + 4 * 3_600_000,
+    );
+    assert.equal(forgotten.state, 'final');
+});
+
+test('carga manual: el partido cargado suma a la tabla, con bonus si hay tries', () => {
+    const now = MANUAL_KICKOFF + 2 * 3_600_000;
+    const [fixture] = applyWrManualResults([wrFixture('scheduled')], manualOf({
+        status: 'final', homeScore: 31, awayScore: 26, homeTries: 5, awayTries: 4,
+    }), now);
+    const tries = new Map([[fixture.matchId, fixture.manualTries as { home: number; away: number }]]);
+    const [table] = computeWrPoolTables([fixture], tries);
+    const romania = table.rows.find((row) => row.country === 'Romania');
+    const brazil = table.rows.find((row) => row.country === 'Brazil');
+    assert.equal(romania?.points, 5);
+    assert.equal(brazil?.points, 2);
 });

@@ -245,6 +245,10 @@ export interface WrFixture {
     rawStatus: string;
     state: MatchStatus;
     clockSecs: number | null;
+    /** El marcador sale de una carga manual de G22, no de World Rugby. */
+    manual?: boolean;
+    /** Tries de la carga manual, para el bonus ofensivo. Null si no se cargaron. */
+    manualTries?: { home: number; away: number } | null;
 }
 
 type Json = Record<string, unknown>;
@@ -977,4 +981,99 @@ export function pickWrStandings(
         return { tables: [...official], source: 'official' };
     }
     return { tables: [...computed], source: 'computed' };
+}
+
+// --------------------------------------------------------------------------
+// Carga manual
+// --------------------------------------------------------------------------
+
+/**
+ * Lo que carga un admin de G22 cuando World Rugby no publica el partido (el
+ * Challenger 2026 se jugó entero con la fuente en "sin empezar, 0-0").
+ */
+export type WrManualStatus = 'live' | 'halftime' | 'final';
+
+export interface WrManualResult {
+    status: WrManualStatus;
+    homeScore: number;
+    awayScore: number;
+    /** Tries de cada lado: sin ellos no hay bonus ofensivo. */
+    homeTries: number | null;
+    awayTries: number | null;
+    /** Minuto del partido en juego (1 a 80, más el agregado). */
+    minute: number | null;
+}
+
+const MANUAL_STATUSES: readonly WrManualStatus[] = ['live', 'halftime', 'final'];
+
+function asCount(value: unknown, max: number): number | null {
+    const number = asNumber(value);
+    return number !== null && Number.isInteger(number) && number >= 0 && number <= max ? number : null;
+}
+
+/** Valida una carga manual (del cuerpo de un pedido o de la base). Null si no sirve. */
+export function parseWrManualResult(raw: unknown): WrManualResult | null {
+    const value = asObject(raw);
+    if (!value) return null;
+    const status = asString(value.status) as WrManualStatus;
+    if (!MANUAL_STATUSES.includes(status)) return null;
+    const homeScore = asCount(value.homeScore, 300);
+    const awayScore = asCount(value.awayScore, 300);
+    if (homeScore === null || awayScore === null) return null;
+    const homeTries = asCount(value.homeTries, 60);
+    const awayTries = asCount(value.awayTries, 60);
+    const bothTries = homeTries !== null && awayTries !== null;
+    const minute = status === 'live' ? asCount(value.minute, 120) : null;
+    return {
+        status,
+        homeScore,
+        awayScore,
+        homeTries: bothTries ? homeTries : null,
+        awayTries: bothTries ? awayTries : null,
+        minute: minute !== null && minute > 0 ? minute : null,
+    };
+}
+
+/**
+ * Pone la carga manual sobre el fixture de World Rugby.
+ *
+ * La fuente oficial manda: la carga solo cubre un partido que World Rugby
+ * todavía no publicó. En cuanto la fuente lo pasa a en vivo, final,
+ * postergado o cancelado, se muestra lo suyo y la carga queda guardada sin
+ * efecto. Un "en vivo" manual que nadie cerró pasa a final a las 3 h, con la
+ * misma guarda que el en vivo de la fuente.
+ */
+export function applyWrManualResults(
+    fixtures: readonly WrFixture[],
+    manual: ReadonlyMap<string, WrManualResult>,
+    nowMs: number,
+): WrFixture[] {
+    if (manual.size === 0) return [...fixtures];
+    return fixtures.map((fixture) => {
+        const result = manual.get(fixture.matchId);
+        if (!result || fixture.state !== 'scheduled') return fixture;
+
+        const staleLive = result.status !== 'final'
+            && fixture.kickoffMs !== null
+            && nowMs > fixture.kickoffMs + STALE_LIVE_AFTER_MS;
+        const final = result.status === 'final' || staleLive;
+        const rawStatus = final
+            ? 'C'
+            : result.status === 'halftime'
+                ? 'LHT'
+                : result.minute !== null && result.minute > 40 ? 'L2' : 'L1';
+
+        return {
+            ...fixture,
+            rawStatus,
+            state: final ? 'final' : 'live',
+            clockSecs: !final && result.status === 'live' && result.minute !== null ? (result.minute - 1) * 60 : null,
+            home: { ...fixture.home, score: result.homeScore },
+            away: { ...fixture.away, score: result.awayScore },
+            manual: true,
+            manualTries: result.homeTries !== null && result.awayTries !== null
+                ? { home: result.homeTries, away: result.awayTries }
+                : null,
+        };
+    });
 }
