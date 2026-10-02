@@ -149,7 +149,9 @@ export function CategoryPicker({
             >
                 {isBusy
                     ? <Loader2 size={13} className="animate-spin" aria-hidden="true" />
-                    : !exists ? <Plus size={13} aria-hidden="true" /> : null}
+                    // Al elegir, el punteado ya dice "no existe": el "+" en cada
+                    // botón era ruido. Al administrar sí va, porque ahí es la acción.
+                    : !exists && !isSelect ? <Plus size={13} aria-hidden="true" /> : null}
                 {preset.label}
             </button>
         );
@@ -178,7 +180,7 @@ export function CategoryPicker({
             >
                 {isBusy
                     ? <Loader2 size={12} className="animate-spin" aria-hidden="true" />
-                    : !existing ? <Plus size={12} aria-hidden="true" />
+                    : !existing ? (isSelect ? null : <Plus size={12} aria-hidden="true" />)
                         : !isSelect ? <Check size={12} aria-hidden="true" /> : null}
                 {variant || 'Única'}
             </button>
@@ -235,7 +237,7 @@ export function CategoryPicker({
                 <div className={styles.letters}>
                     <span className={styles.groupLabel}>Equipos de {activePreset.label}</span>
                     <div
-                        className={styles.chips}
+                        className={`${styles.chips} ${styles.letterRow}`}
                         role={isSelect ? 'radiogroup' : 'group'}
                         aria-label={`Equipos de ${activePreset.label}`}
                     >
@@ -243,6 +245,10 @@ export function CategoryPicker({
                         {CATEGORY_LETTERS.map((letter) => letterChip(activePreset, letter))}
                     </div>
                 </div>
+            )}
+
+            {isSelect && (
+                <p className={styles.hint}>Las punteadas todavía no existen: se crean al tocarlas.</p>
             )}
 
             {customOpen ? (

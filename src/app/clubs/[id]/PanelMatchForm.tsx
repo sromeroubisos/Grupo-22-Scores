@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Search, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { Check, ChevronDown, Loader2, Search, X } from 'lucide-react';
 import { CategoryPicker } from '@/components/clubs/CategoryPicker';
 import {
     categoryOptionLevel,
@@ -17,20 +17,23 @@ import styles from './PanelMatchForm.module.css';
  * Alta de partido del club: la usan el Panel del Día de la ficha pública y la
  * sección "Crear partido" del gestor de club.
  *
- * Va en cuatro bloques, en el orden en que se piensa un partido: quién juega
- * (tu categoría), contra quién (el rival y su categoría), cuándo y dónde, y la
- * competencia, que es opcional y va plegada. Abajo, el resumen dice el partido
- * tal como va a quedar, y el botón dice qué falta mientras falte algo.
+ * Es una guía de tres pasos, de a uno abierto por vez: tu categoría, el rival,
+ * y cuándo y dónde. En el teléfono los tres bloques abiertos a la vez eran una
+ * pared de botones; así se ve solo lo que toca decidir ahora, y lo ya decidido
+ * queda resumido en una línea que se toca para cambiarlo.
  *
- * El rival no es un club: es una CATEGORÍA de otro club. Por eso el buscador
- * devuelve el club y después se elige su categoría con los mismos botones.
- * Elegir la propia arrastra la del rival si existe la misma (M16 contra M16).
+ * El botón final nunca está muerto: si falta algo, dice qué y lleva al paso
+ * donde se completa.
+ *
+ * El rival no es un club: es una CATEGORÍA de otro club. Elegir la propia
+ * arrastra la del rival si existe la misma (M16 B contra M16 B).
  */
 
 export type PanelFamilyClub = { id: string; name: string; isBase: boolean };
 
 type RivalClub = { id: string; name: string; categories: CategoryOption[] };
 type Competition = { id: string; name: string };
+type StepId = 'ours' | 'rival' | 'when';
 
 interface PanelMatchFormProps {
     clubId: string;
@@ -94,6 +97,72 @@ function quickDates(today: string): Array<{ key: string; label: string }> {
     return result;
 }
 
+interface StepProps {
+    id: StepId;
+    index: number;
+    title: string;
+    open: boolean;
+    done: boolean;
+    /** Lo elegido, en una línea: se ve con el paso cerrado. */
+    summary: string | null;
+    onToggle: () => void;
+    children: ReactNode;
+}
+
+/**
+ * Un paso de la guía. El cuerpo se abre y se cierra animando la altura con
+ * `grid-template-rows` (0fr a 1fr), que no necesita medir nada en JS.
+ */
+function Step({ id, index, title, open, done, summary, onToggle, children }: StepProps) {
+    const ref = useRef<HTMLElement | null>(null);
+    const wasOpen = useRef(open);
+
+    // Al abrirse, el paso sube a la vista: en el teléfono el que se abre suele
+    // quedar debajo del pliegue, y el que se cerró arriba ya no ocupa lugar.
+    useEffect(() => {
+        if (open && !wasOpen.current) {
+            const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            window.setTimeout(() => {
+                ref.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+            }, 140);
+        }
+        wasOpen.current = open;
+    }, [open]);
+
+    return (
+        <section
+            ref={ref}
+            className={[styles.step, open ? styles.stepOpen : '', done ? styles.stepDone : ''].join(' ')}
+            aria-labelledby={`pmf-${id}-title`}
+        >
+            <button
+                type="button"
+                className={styles.stepHead}
+                aria-expanded={open}
+                aria-controls={`pmf-${id}-body`}
+                onClick={onToggle}
+            >
+                <span className={styles.stepBadge} aria-hidden="true">
+                    {done && !open ? <Check size={14} strokeWidth={3} className={styles.stepCheck} /> : index}
+                </span>
+                <span className={styles.stepHeadCopy}>
+                    <span id={`pmf-${id}-title`} className={styles.stepTitle}>{title}</span>
+                    {!open && summary && <span className={styles.stepSummary}>{summary}</span>}
+                </span>
+                <ChevronDown size={18} aria-hidden="true" className={styles.stepChevron} />
+            </button>
+            <div id={`pmf-${id}-body`} className={styles.stepBody} aria-hidden={!open}>
+                <div className={styles.stepInner}>
+                    {/* Montado aunque esté cerrado: así no se pierde lo que se tocó y
+                        el cierre anima con contenido. `visibility` (en el CSS) lo saca
+                        del teclado y de los lectores mientras está cerrado. */}
+                    <div className={styles.stepContent}>{children}</div>
+                </div>
+            </div>
+        </section>
+    );
+}
+
 export default function PanelMatchForm({
     clubId,
     familyClubs,
@@ -108,6 +177,7 @@ export default function PanelMatchForm({
 
     const base = ourClubs.find((club) => club.isBase) ?? ourClubs[0] ?? null;
     const [ourClubId, setOurClubId] = useState('');
+    const [step, setStep] = useState<StepId | null>('ours');
 
     const [rivalQuery, setRivalQuery] = useState('');
     const [rivalResults, setRivalResults] = useState<RivalClub[]>([]);
@@ -239,14 +309,20 @@ export default function PanelMatchForm({
         return option;
     };
 
-    const missing = useMemo(() => {
-        if (!ourClubId) return 'Elegí la categoría de tu club';
-        if (!rivalClub) return 'Buscá el rival';
-        if (!rivalCategoryId) return 'Elegí la categoría del rival';
-        if (!date) return 'Poné la fecha';
-        if (!time) return 'Poné la hora';
+    const oursDone = Boolean(ourClubId);
+    const rivalDone = Boolean(rivalClub && rivalCategoryId);
+
+    /** Lo que falta y el paso donde se completa. */
+    const missing = useMemo((): { text: string; step: StepId } | null => {
+        if (!ourClubId) return { text: 'Elegí la categoría de tu club', step: 'ours' };
+        if (!rivalClub) return { text: 'Buscá el rival', step: 'rival' };
+        if (!rivalCategoryId) return { text: 'Elegí la categoría del rival', step: 'rival' };
+        if (!date) return { text: 'Poné la fecha', step: 'when' };
+        if (!time) return { text: 'Poné la hora', step: 'when' };
         return null;
     }, [ourClubId, rivalClub, rivalCategoryId, date, time]);
+
+    const toggle = (id: StepId) => setStep((current) => (current === id ? null : id));
 
     const createCompetition = async () => {
         const name = newCompetitionName.trim();
@@ -275,7 +351,10 @@ export default function PanelMatchForm({
     };
 
     const submit = async () => {
-        if (missing) return;
+        if (missing) {
+            setStep(missing.step);
+            return;
+        }
         setSubmitting(true);
         setError(null);
         try {
@@ -309,7 +388,7 @@ export default function PanelMatchForm({
     const awayName = isHome ? rivalCategory?.name : ourCategory?.name;
     const competitionName = competitions.find((competition) => competition.id === competitionId)?.name ?? null;
     const when = [longDay(date), time ? `a las ${time}` : null].filter(Boolean).join(' ');
-    const where = [venue.trim() || null, competitionName].filter(Boolean).join(', ');
+    const where = [isHome ? 'De local' : 'De visitante', venue.trim() || null, competitionName].filter(Boolean).join(', ');
 
     return (
         <div className={styles.form}>
@@ -318,8 +397,15 @@ export default function PanelMatchForm({
                 <button type="button" className={styles.linkButton} onClick={onCancel}>Cancelar</button>
             </div>
 
-            <section className={styles.block} aria-labelledby="pmf-ours">
-                <h4 id="pmf-ours" className={styles.blockTitle}>Tu categoría</h4>
+            <Step
+                id="ours"
+                index={1}
+                title="Tu categoría"
+                open={step === 'ours'}
+                done={oursDone}
+                summary={ourCategory?.name ?? null}
+                onToggle={() => toggle('ours')}
+            >
                 <CategoryPicker
                     mode="select"
                     label="Categoría de tu club"
@@ -330,11 +416,25 @@ export default function PanelMatchForm({
                     onCreate={createOurs}
                 />
                 {categoryError?.side === 'ours' && <p className={styles.error}>{categoryError.text}</p>}
-            </section>
+                <button
+                    type="button"
+                    className={styles.next}
+                    disabled={!oursDone}
+                    onClick={() => setStep(rivalDone ? 'when' : 'rival')}
+                >
+                    {oursDone ? 'Seguir con el rival' : 'Tocá una categoría'}
+                </button>
+            </Step>
 
-            <section className={styles.block} aria-labelledby="pmf-rival">
-                <h4 id="pmf-rival" className={styles.blockTitle}>Rival</h4>
-
+            <Step
+                id="rival"
+                index={2}
+                title="Rival"
+                open={step === 'rival'}
+                done={rivalDone}
+                summary={rivalCategory?.name ?? rivalClub?.name ?? null}
+                onToggle={() => toggle('rival')}
+            >
                 {rivalClub ? (
                     <>
                         <div className={styles.rivalPicked}>
@@ -358,12 +458,15 @@ export default function PanelMatchForm({
                             onSelect={(option) => { setRivalCategoryId(option.id); setCategoryError(null); }}
                             onCreate={createRival}
                         />
-                        {rivalClub.categories.length <= 1 && (
-                            <p className={styles.hint}>
-                                {rivalClub.name} todavía no tiene categorías cargadas. Tocá la que juega y se crea.
-                            </p>
-                        )}
                         {categoryError?.side === 'rival' && <p className={styles.error}>{categoryError.text}</p>}
+                        <button
+                            type="button"
+                            className={styles.next}
+                            disabled={!rivalDone}
+                            onClick={() => setStep('when')}
+                        >
+                            {rivalDone ? 'Seguir con la fecha' : 'Elegí la categoría del rival'}
+                        </button>
                     </>
                 ) : (
                     <>
@@ -385,11 +488,12 @@ export default function PanelMatchForm({
                                 ) : rivalResults.length === 0 ? (
                                     <p className={styles.hint}>Ningún club de tu deporte con ese nombre.</p>
                                 ) : (
-                                    rivalResults.map((club) => (
+                                    rivalResults.map((club, index) => (
                                         <button
                                             key={club.id}
                                             type="button"
                                             className={styles.result}
+                                            style={{ animationDelay: `${Math.min(index, 6) * 30}ms` }}
                                             onClick={() => selectRivalClub(club)}
                                         >
                                             <span>{club.name}</span>
@@ -405,12 +509,19 @@ export default function PanelMatchForm({
                         )}
                     </>
                 )}
-            </section>
+            </Step>
 
-            <section className={styles.block} aria-labelledby="pmf-when">
-                <h4 id="pmf-when" className={styles.blockTitle}>Cuándo y dónde</h4>
-
-                <div className={styles.segmented} role="radiogroup" aria-label="Localía">
+            <Step
+                id="when"
+                index={3}
+                title="Cuándo y dónde"
+                open={step === 'when'}
+                done={Boolean(date && time)}
+                summary={when || null}
+                onToggle={() => toggle('when')}
+            >
+                <div className={styles.segmented} role="radiogroup" aria-label="Localía" data-away={!isHome}>
+                    <span className={styles.segmentThumb} aria-hidden="true" />
                     <button
                         type="button"
                         role="radio"
@@ -477,9 +588,7 @@ export default function PanelMatchForm({
                         />
                     </label>
                 </div>
-            </section>
 
-            <section className={styles.block}>
                 <button
                     type="button"
                     className={styles.disclosure}
@@ -487,9 +596,9 @@ export default function PanelMatchForm({
                     onClick={() => setCompetitionOpen((open) => !open)}
                 >
                     <span className={styles.disclosureCopy}>
-                        <span className={styles.blockTitle}>Competencia</span>
+                        <span className={styles.label}>Competencia (opcional)</span>
                         <span className={styles.disclosureMeta}>
-                            {competitionName ?? 'Opcional. Sin competencia, es un partido suelto.'}
+                            {competitionName ?? 'Sin competencia, es un partido suelto.'}
                         </span>
                     </span>
                     <ChevronDown
@@ -530,36 +639,35 @@ export default function PanelMatchForm({
                                 {creatingCompetition ? 'Creando…' : !newCompetitionName.trim() ? 'Poné un nombre' : 'Crear'}
                             </button>
                         </div>
-                        <p className={styles.hint}>
-                            Agrupa los partidos del club y no compite con los torneos oficiales.
-                        </p>
                     </div>
                 )}
-            </section>
+            </Step>
 
             <div className={styles.summary} aria-live="polite">
                 <p className={styles.summaryMatch}>
-                    <span className={homeName ? styles.summaryTeam : styles.summaryEmpty}>
+                    <span key={homeName ?? 'h'} className={homeName ? styles.summaryTeam : styles.summaryEmpty}>
                         {homeName ?? (isHome ? 'Tu categoría' : 'Rival')}
                     </span>
                     <span className={styles.summaryVs}>vs</span>
-                    <span className={awayName ? styles.summaryTeam : styles.summaryEmpty}>
+                    <span key={awayName ?? 'a'} className={awayName ? styles.summaryTeam : styles.summaryEmpty}>
                         {awayName ?? (isHome ? 'Rival' : 'Tu categoría')}
                     </span>
                 </p>
                 {when && <p className={styles.summaryMeta}>{when}</p>}
-                {where && <p className={styles.summaryMeta}>{where}</p>}
+                <p className={styles.summaryMeta}>{where}</p>
             </div>
 
             {error && <p className={styles.error}>{error}</p>}
 
             <button
                 type="button"
-                className={styles.primary}
+                className={missing ? styles.primaryPending : styles.primary}
                 onClick={submit}
-                disabled={Boolean(missing) || submitting}
+                disabled={submitting}
             >
-                {submitting ? 'Cargando…' : missing ?? 'Cargar partido'}
+                {submitting
+                    ? <><Loader2 size={16} className="animate-spin" aria-hidden="true" /> Cargando…</>
+                    : missing?.text ?? 'Cargar partido'}
             </button>
         </div>
     );

@@ -1075,3 +1075,50 @@
         transform: none;
     }
 }
+
+/* Partido cargado: la tarjeta sube y el tilde se dibuja (círculo y después la
+   marca). Es la confirmación de que se guardó, no decoración. */
+.cm-match-done {
+    animation: cm-done-rise 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.cm-match-done-icon svg circle {
+    stroke-dasharray: 64;
+    stroke-dashoffset: 64;
+    animation: cm-draw 420ms ease-out 80ms forwards;
+}
+
+.cm-match-done-icon svg path {
+    stroke-dasharray: 12;
+    stroke-dashoffset: 12;
+    animation: cm-draw 260ms ease-out 440ms forwards;
+}
+
+@keyframes cm-done-rise {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes cm-draw {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cm-match-done {
+        animation: none;
+    }
+
+    .cm-match-done-icon svg circle,
+    .cm-match-done-icon svg path {
+        animation: none;
+        stroke-dashoffset: 0;
+    }
+}
