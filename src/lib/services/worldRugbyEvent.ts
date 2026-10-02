@@ -19,10 +19,12 @@ import type { Match } from '@/types/match';
 import { memoryCache } from '@/lib/cache';
 import { formatDateKey } from '@/lib/timezone';
 import { getNationalTeamFlag } from '@/lib/utils/teamLogoOverrides';
+import { getExternalMatchResultOverrides } from '@/lib/server/externalMatchResultOverrides';
 import {
     WR_API_URL,
     WR_EVENTS,
     WR_PROVIDER,
+    applyWrManualResults,
     computeWrPoolTables,
     parseWrMatchId,
     parseWrSchedule,
@@ -43,6 +45,7 @@ import {
     type WrEventDef,
     type WrFixture,
     type WrLineupPlayer,
+    type WrManualResult,
     type WrPerson,
     type WrPoolTable,
     type WrSide,
@@ -147,12 +150,27 @@ async function readResource(
  * es un ensayo de la mesa).
  */
 async function getEventFixtures(event: WrEventDef): Promise<WrFixture[]> {
-    const json = await readResource(
-        `${CACHE_PREFIX}:schedule:${event.eventId}`,
-        `/event/${event.eventId}/schedule`,
-        (raw) => wrRefreshTtlSeconds(parseWrSchedule(raw, event, Date.now()), Date.now()),
-    );
-    return parseWrSchedule(json, event, Date.now());
+    const [json, manual] = await Promise.all([
+        readResource(
+            `${CACHE_PREFIX}:schedule:${event.eventId}`,
+            `/event/${event.eventId}/schedule`,
+            (raw) => wrRefreshTtlSeconds(parseWrSchedule(raw, event, Date.now()), Date.now()),
+        ),
+        getManualResults(),
+    ]);
+    const now = Date.now();
+    return applyWrManualResults(parseWrSchedule(json, event, now), manual, now);
+}
+
+/** Las cargas manuales de G22, por id de World Rugby. Ver `applyWrManualResults`. */
+async function getManualResults(): Promise<Map<string, WrManualResult>> {
+    const overrides = await getExternalMatchResultOverrides(WR_PROVIDER, wrMatchIdOf(''));
+    const manual = new Map<string, WrManualResult>();
+    for (const [appMatchId, override] of overrides) {
+        const matchId = parseWrMatchId(appMatchId);
+        if (matchId) manual.set(matchId, override);
+    }
+    return manual;
 }
 
 /** Todos los torneos a la vez. Uno caído no se lleva a los demás. */
@@ -173,11 +191,14 @@ function matchTtl(fixture: WrFixture): number {
 }
 
 async function getTimelineJson(fixture: WrFixture): Promise<unknown | null> {
+    // Un partido cargado a mano no tiene cronología en la fuente.
+    if (fixture.manual) return null;
     if (fixture.state !== 'live' && fixture.state !== 'final') return null;
     return readResource(`${CACHE_PREFIX}:timeline:${fixture.matchId}`, `/match/${fixture.matchId}/timeline`, () => matchTtl(fixture));
 }
 
 async function getStatsJson(fixture: WrFixture): Promise<unknown | null> {
+    if (fixture.manual) return null;
     if (fixture.state !== 'live' && fixture.state !== 'final') return null;
     return readResource(`${CACHE_PREFIX}:stats:${fixture.matchId}`, `/match/${fixture.matchId}/stats`, () => matchTtl(fixture));
 }
@@ -203,6 +224,7 @@ async function getPoolTables(event: WrEventDef, fixtures: WrFixture[]): Promise<
             .then((json) => parseWrStandings(json, event))
             .catch(() => [] as WrPoolTable[]),
         Promise.all(finished.map(async (fixture) => {
+            if (fixture.manual) return [fixture.matchId, fixture.manualTries ?? null] as const;
             const json = await getTimelineJson(fixture).catch(() => null);
             return [fixture.matchId, json ? wrTriesOf(json) : null] as const;
         })),
@@ -623,7 +645,7 @@ export async function getWorldRugbyMatchBundle(rawMatchId: string) {
         console.warn(`[World Rugby] ${what} no disponible:`, error instanceof Error ? error.message : error);
         return null;
     };
-    const [summary, squads, timelineJson, statsJson, tables] = await Promise.all([
+    const [summary, squads, timelineJson, statsJson, tables, overrides] = await Promise.all([
         getSummary(fixture).catch(warn('formación')),
         getSquads(event).catch((error) => {
             warn('planteles')(error);
@@ -634,7 +656,9 @@ export async function getWorldRugbyMatchBundle(rawMatchId: string) {
         fixture.pool
             ? getEventFixtures(event).then((all) => getPoolTables(event, all)).catch(() => [] as WrPoolTable[])
             : Promise.resolve([] as WrPoolTable[]),
+        getExternalMatchResultOverrides(WR_PROVIDER, wrMatchIdOf('')),
     ]);
+    const manualResult = overrides.get(wrMatchIdOf(fixture.matchId)) ?? null;
 
     const events = timelineJson ? parseWrTimeline(timelineJson, namesOf(summary, squads)) : [];
     const stats = statsJson ? parseWrStats(statsJson) : [];
@@ -706,6 +730,20 @@ export async function getWorldRugbyMatchBundle(rawMatchId: string) {
             // Sin formación publicada va el plantel del torneo: la pantalla lo
             // rotula "Plantel" y no "Titulares".
             lineupsKind: kind === 'squad' ? 'squad' : undefined,
+            // La carga manual guardada, aunque la fuente ya la haya tapado:
+            // el formulario del admin arranca de ahí.
+            manualResult: manualResult
+                ? {
+                    status: manualResult.status,
+                    homeScore: manualResult.homeScore,
+                    awayScore: manualResult.awayScore,
+                    homeTries: manualResult.homeTries,
+                    awayTries: manualResult.awayTries,
+                    minute: manualResult.minute,
+                    updatedAt: manualResult.updatedAt,
+                    active: Boolean(fixture.manual),
+                }
+                : null,
             standings,
             h2h: empty,
             events,

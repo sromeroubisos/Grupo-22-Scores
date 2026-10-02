@@ -59,6 +59,7 @@ import PlayerMatchSheet, {
 } from './PlayerMatchSheet';
 import MyLineupBuilder from './MyLineupBuilder';
 import LineupRatingEditorModal from './LineupRatingEditorModal';
+import ManualResultEditor from './ManualResultEditor';
 import MatchVideosPanel from './MatchVideosPanel';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { resolveTournamentLogo as resolveTournamentLogoSource } from '@/lib/utils/tournamentLogo';
@@ -776,6 +777,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         if (activeTab !== 'players') setPeopleRatingsOpen(false);
     }, [activeTab]);
     const [lineupReloadKey, setLineupReloadKey] = useState(0);
+    const [manualResultOpen, setManualResultOpen] = useState(false);
     // Whether the current user can edit THIS match (super/global/federation
     // admin OR an admin of this match's tournament). Resolved server-side via
     // the same gate the editor page enforces, so it never leaks other
@@ -2586,6 +2588,11 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 Editar partido
                             </ProtectedLink>
                         )}
+                        {isSuperAdminUser && isWorldRugbyExternal && (
+                            <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setManualResultOpen(true)}>
+                                Cargar resultado
+                            </button>
+                        )}
                         <button className={styles.btn}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
                             Exportar
@@ -3913,6 +3920,18 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
             </div>
 
             <PlayerMatchSheet subject={playerSheetSubject} onClose={closePlayerSheet} />
+
+            {isSuperAdminUser && isWorldRugbyExternal && (
+                <ManualResultEditor
+                    open={manualResultOpen}
+                    matchId={id}
+                    homeTeamName={matchData.home.name}
+                    awayTeamName={matchData.away.name}
+                    current={matchData.manualResult ?? null}
+                    onClose={() => setManualResultOpen(false)}
+                    onSaved={() => setLineupReloadKey((k) => k + 1)}
+                />
+            )}
 
             {isSuperAdminUser && (
                 <LineupRatingEditorModal
