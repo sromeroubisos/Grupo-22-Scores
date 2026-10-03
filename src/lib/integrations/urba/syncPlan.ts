@@ -64,6 +64,12 @@ export function construirPatch(
   entrada: { fila: MatchRow; cambios: string[] },
   statusActual: string | null | undefined,
 ): PatchDeSync | null {
+  // Un partido EN VIVO no lo pisa URBA mientras URBA no tenga el resultado: URBA no
+  // publica marcador en vivo, asi que su "programado, sin marcador" no es un dato,
+  // es que todavia no cargo. Pisarlo devolvia a "programado" partidos en pleno 2T
+  // (Top 14, 2026-10-03, que sigue `urba-vivo`). El final oficial entra igual.
+  if (String(statusActual ?? '').toLowerCase() === 'live' && entrada.fila.status !== 'final') return null;
+
   const permitidos = new Set<string>(CAMPOS_SINCRONIZABLES);
   const cambios = entrada.cambios.filter((c): c is CampoSincronizable => permitidos.has(c));
   if (cambios.length === 0) return null;

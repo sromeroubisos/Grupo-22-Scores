@@ -43,9 +43,14 @@ export type LecturaVivo = {
   rotulo: string;
 };
 
-/** 0 programado -> no se toca; 1 en juego -> live; 2 finalizado -> final. Otro (suspendido...) no se escribe. */
+/**
+ * 0 programado -> no se toca; 1 primer tiempo, 5 entretiempo, 6 segundo tiempo -> live;
+ * 2 finalizado -> final. Otro (suspendido...) no se escribe.
+ * Medido el 2026-10-03: el 5 y el 6 no son "otro estado", son el MISMO partido en juego.
+ */
+const EN_JUEGO = new Set([1, 5, 6]);
 export function estadoNuestro(statusId: number): 'live' | 'final' | null {
-  if (statusId === 1) return 'live';
+  if (EN_JUEGO.has(statusId)) return 'live';
   if (statusId === 2) return 'final';
   return null;
 }
@@ -112,7 +117,7 @@ export async function leerPartidoDataFactory(canal: string, idFuente: string): P
 
   const st = j.status;
   const periodo: '1T' | '2T' = st.currentPeriod === 2 ? '2T' : '1T';
-  const corriendo = st.statusId === 1 && st.clockStatus !== 'stop';
+  const corriendo = (st.statusId === 1 || st.statusId === 6) && st.clockStatus !== 'stop';
   const enVivo = corriendo ? segundosDelPeriodo(st, j.match.gmt ?? -3) : null;
   const segundos = enVivo ?? (st.currentMinutes ?? 0) * 60;
   const marcador = {

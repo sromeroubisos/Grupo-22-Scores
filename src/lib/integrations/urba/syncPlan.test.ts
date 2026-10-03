@@ -175,3 +175,16 @@ test('nunca devuelve una parte negativa', () => {
     assert.ok(parte >= 0 && parte < PARTES_DEL_BARRIDO, `parte fuera de rango: ${parte}`);
   }
 });
+
+/* ── un partido en vivo ─────────────────────────────────────────────────── */
+
+test('un partido en vivo no se pisa con el "programado" de URBA', () => {
+  const sinResultado = fila({ status: 'scheduled', score: null });
+  assert.equal(construirPatch({ fila: sinResultado as any, cambios: ['status', 'score'] }, 'live'), null);
+});
+
+test('un partido en vivo sí toma el final oficial de URBA', () => {
+  const p = construirPatch({ fila: fila() as any, cambios: ['status', 'score'] }, 'live');
+  assert.equal(p!.seFinaliza, true);
+  assert.deepEqual(p!.patch.score, { home: 20, away: 10 });
+});
