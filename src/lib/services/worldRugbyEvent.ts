@@ -231,7 +231,9 @@ async function getPoolTables(event: WrEventDef, fixtures: WrFixture[]): Promise<
     ]);
     const triesByMatch = new Map<string, { home: number; away: number }>();
     for (const [matchId, value] of tries) if (value) triesByMatch.set(matchId, value);
-    return pickWrStandings(official, computeWrPoolTables(fixtures, triesByMatch)).tables;
+    const bonusByMatch = new Map<string, { home: boolean; away: boolean }>();
+    for (const fixture of finished) if (fixture.manualTryBonus) bonusByMatch.set(fixture.matchId, fixture.manualTryBonus);
+    return pickWrStandings(official, computeWrPoolTables(fixtures, triesByMatch, bonusByMatch)).tables;
 }
 
 // --------------------------------------------------------------------------
@@ -739,6 +741,8 @@ export async function getWorldRugbyMatchBundle(rawMatchId: string) {
                     awayScore: manualResult.awayScore,
                     homeTries: manualResult.homeTries,
                     awayTries: manualResult.awayTries,
+                    homeTryBonus: manualResult.homeTryBonus,
+                    awayTryBonus: manualResult.awayTryBonus,
                     minute: manualResult.minute,
                     updatedAt: manualResult.updatedAt,
                     active: Boolean(fixture.manual),

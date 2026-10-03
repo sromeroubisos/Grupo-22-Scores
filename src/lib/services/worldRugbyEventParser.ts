@@ -249,6 +249,8 @@ export interface WrFixture {
     manual?: boolean;
     /** Tries de la carga manual, para el bonus ofensivo. Null si no se cargaron. */
     manualTries?: { home: number; away: number } | null;
+    /** Bonus ofensivo declarado en la carga manual sin tries. */
+    manualTryBonus?: { home: boolean; away: boolean } | null;
 }
 
 type Json = Record<string, unknown>;
@@ -876,11 +878,14 @@ function sortRows(rows: WrStandingRow[]): WrStandingRow[] {
  *
  * Los tries salen de la cronología de cada partido (`triesByMatch`). Si falta
  * la de alguno, ese partido no suma bonus ofensivo: mejor un punto de menos
- * que uno inventado.
+ * que uno inventado. La excepción es una carga manual que declara el bonus
+ * sin los tries (`bonusByMatch`): la crónica dice "goleó con bonus" pero no
+ * cuántos tries, y contarlos a ojo pondría en la tabla un número falso.
  */
 export function computeWrPoolTables(
     fixtures: readonly WrFixture[],
     triesByMatch: ReadonlyMap<string, { home: number; away: number }>,
+    bonusByMatch: ReadonlyMap<string, { home: boolean; away: boolean }> = new Map(),
 ): WrPoolTable[] {
     const pools = new Map<string, Map<string, WrStandingRow>>();
 
@@ -897,21 +902,22 @@ export function computeWrPoolTables(
         const home = table.get(homeKey) as WrStandingRow;
         const away = table.get(awayKey) as WrStandingRow;
         const tries = triesByMatch.get(fixture.matchId) ?? null;
+        const declared = tries ? null : bonusByMatch.get(fixture.matchId) ?? null;
         const homeScore = fixture.home.score;
         const awayScore = fixture.away.score;
 
-        const sides: [WrStandingRow, number, number, number, number][] = [
-            [home, homeScore, awayScore, tries?.home ?? 0, tries?.away ?? 0],
-            [away, awayScore, homeScore, tries?.away ?? 0, tries?.home ?? 0],
+        const sides: [WrStandingRow, number, number, number, number, boolean][] = [
+            [home, homeScore, awayScore, tries?.home ?? 0, tries?.away ?? 0, declared?.home ?? false],
+            [away, awayScore, homeScore, tries?.away ?? 0, tries?.home ?? 0, declared?.away ?? false],
         ];
-        for (const [row, own, other, ownTries, otherTries] of sides) {
+        for (const [row, own, other, ownTries, otherTries, declaredBonus] of sides) {
             row.played += 1;
             row.pointsFor += own;
             row.pointsAgainst += other;
             row.triesFor += ownTries;
             row.triesAgainst += otherTries;
             let bonus = 0;
-            if (tries && ownTries >= 4) bonus += 1;
+            if (tries ? ownTries >= 4 : declaredBonus) bonus += 1;
             if (own > other) {
                 row.won += 1;
                 row.points += 4;
@@ -1000,6 +1006,12 @@ export interface WrManualResult {
     /** Tries de cada lado: sin ellos no hay bonus ofensivo. */
     homeTries: number | null;
     awayTries: number | null;
+    /**
+     * Bonus ofensivo declarado, para cuando se sabe que lo hubo pero no
+     * cuántos tries. Con los tries cargados no cuenta: mandan los tries.
+     */
+    homeTryBonus: boolean;
+    awayTryBonus: boolean;
     /** Minuto del partido en juego (1 a 80, más el agregado). */
     minute: number | null;
 }
@@ -1030,6 +1042,8 @@ export function parseWrManualResult(raw: unknown): WrManualResult | null {
         awayScore,
         homeTries: bothTries ? homeTries : null,
         awayTries: bothTries ? awayTries : null,
+        homeTryBonus: !bothTries && value.homeTryBonus === true,
+        awayTryBonus: !bothTries && value.awayTryBonus === true,
         minute: minute !== null && minute > 0 ? minute : null,
     };
 }
@@ -1073,6 +1087,9 @@ export function applyWrManualResults(
             manual: true,
             manualTries: result.homeTries !== null && result.awayTries !== null
                 ? { home: result.homeTries, away: result.awayTries }
+                : null,
+            manualTryBonus: result.homeTryBonus || result.awayTryBonus
+                ? { home: result.homeTryBonus, away: result.awayTryBonus }
                 : null,
         };
     });
