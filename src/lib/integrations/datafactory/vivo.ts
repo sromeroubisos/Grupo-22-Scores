@@ -52,10 +52,10 @@ export function estadoNuestro(statusId: number): 'live' | 'final' | null {
 
 /** Segundos corridos del tiempo actual desde la hora de arranque del periodo (hora local de la fuente). */
 function segundosDelPeriodo(st: PartidoFuente['status'], gmt: number) {
-  if (st.startHour == null || st.startMinute == null) return null;
-  const ahora = new Date(Date.now() + gmt * 3600_000);
-  const s = (ahora.getUTCHours() * 3600 + ahora.getUTCMinutes() * 60 + ahora.getUTCSeconds())
-    - (st.startHour * 3600 + st.startMinute * 60 + (st.startSecond ?? 0));
+  const h = Number(st.startHour), m = Number(st.startMinute), seg = Number(st.startSecond ?? 0) || 0;
+  if (st.startHour == null || st.startMinute == null || !Number.isFinite(h) || !Number.isFinite(m)) return null;
+  const ahora = new Date(Date.now() + (Number(gmt) || -3) * 3600_000);
+  const s = (ahora.getUTCHours() * 3600 + ahora.getUTCMinutes() * 60 + ahora.getUTCSeconds()) - (h * 3600 + m * 60 + seg);
   return s >= 0 && s < 70 * 60 ? s : null;
 }
 
