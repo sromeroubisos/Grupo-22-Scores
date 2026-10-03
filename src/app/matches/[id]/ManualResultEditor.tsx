@@ -17,6 +17,8 @@ export type ManualResultSnapshot = {
     awayScore: number;
     homeTries: number | null;
     awayTries: number | null;
+    homeTryBonus?: boolean;
+    awayTryBonus?: boolean;
     minute: number | null;
     updatedAt?: string;
     active?: boolean;
@@ -89,6 +91,8 @@ export default function ManualResultEditor({ open, matchId, homeTeamName, awayTe
     const [awayScore, setAwayScore] = useState('');
     const [homeTries, setHomeTries] = useState('');
     const [awayTries, setAwayTries] = useState('');
+    const [homeBonus, setHomeBonus] = useState(false);
+    const [awayBonus, setAwayBonus] = useState(false);
     const [minute, setMinute] = useState('');
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -102,6 +106,8 @@ export default function ManualResultEditor({ open, matchId, homeTeamName, awayTe
         setAwayScore(toText(current?.awayScore));
         setHomeTries(toText(current?.homeTries));
         setAwayTries(toText(current?.awayTries));
+        setHomeBonus(Boolean(current?.homeTryBonus));
+        setAwayBonus(Boolean(current?.awayTryBonus));
         setMinute(toText(current?.minute));
         setError(null);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -145,6 +151,8 @@ export default function ManualResultEditor({ open, matchId, homeTeamName, awayTe
                         awayScore: away,
                         homeTries: triesHome,
                         awayTries: triesAway,
+                        homeTryBonus: triesHome === null && homeBonus,
+                        awayTryBonus: triesAway === null && awayBonus,
                         minute: status === 'live' ? toCount(minute) : null,
                     })
                     : undefined,
@@ -166,6 +174,8 @@ export default function ManualResultEditor({ open, matchId, homeTeamName, awayTe
         setScore: (value: string) => void,
         tries: string,
         setTries: (value: string) => void,
+        bonus: boolean,
+        setBonus: (value: boolean) => void,
     ) => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
             <div style={{ ...labelStyle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={label}>{label}</div>
@@ -177,6 +187,13 @@ export default function ManualResultEditor({ open, matchId, homeTeamName, awayTe
                 Tries (opcional, para el bonus)
                 <input inputMode="numeric" value={tries} onChange={(e) => setTries(e.target.value)} style={inputStyle} />
             </label>
+            {/* Sin tries, el bonus se declara: la crónica dice que lo hubo pero no cuántos tries. */}
+            {tries.trim() === '' && (
+                <label style={{ ...fieldStyle, flexDirection: 'row', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                    <input type="checkbox" checked={bonus} onChange={(e) => setBonus(e.target.checked)} />
+                    Bonus ofensivo
+                </label>
+            )}
         </div>
     );
 
@@ -238,8 +255,8 @@ export default function ManualResultEditor({ open, matchId, homeTeamName, awayTe
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                    {sideFields(homeTeamName, homeScore, setHomeScore, homeTries, setHomeTries)}
-                    {sideFields(awayTeamName, awayScore, setAwayScore, awayTries, setAwayTries)}
+                    {sideFields(homeTeamName, homeScore, setHomeScore, homeTries, setHomeTries, homeBonus, setHomeBonus)}
+                    {sideFields(awayTeamName, awayScore, setAwayScore, awayTries, setAwayTries, awayBonus, setAwayBonus)}
                 </div>
 
                 {status === 'live' && (

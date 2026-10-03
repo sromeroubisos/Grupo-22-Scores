@@ -394,7 +394,8 @@ test('carga manual: valida estado y marcador, y descarta tries de un solo lado',
     assert.equal(parseWrManualResult({ status: 'final', homeScore: -3, awayScore: 0 }), null);
     assert.equal(parseWrManualResult({ status: 'final', homeScore: 7.5, awayScore: 0 }), null);
     assert.deepEqual(parseWrManualResult({ status: 'final', homeScore: '24', awayScore: 17, homeTries: 3, minute: 50 }), {
-        status: 'final', homeScore: 24, awayScore: 17, homeTries: null, awayTries: null, minute: null,
+        status: 'final', homeScore: 24, awayScore: 17, homeTries: null, awayTries: null,
+        homeTryBonus: false, awayTryBonus: false, minute: null,
     });
 });
 
@@ -448,4 +449,18 @@ test('carga manual: el partido cargado suma a la tabla, con bonus si hay tries',
     const brazil = table.rows.find((row) => row.country === 'Brazil');
     assert.equal(romania?.points, 5);
     assert.equal(brazil?.points, 2);
+});
+
+test('carga manual: el bonus ofensivo declarado cuenta sin tries, y con tries mandan los tries', () => {
+    const now = MANUAL_KICKOFF + 2 * 3_600_000;
+    const [declarado] = applyWrManualResults([wrFixture('scheduled')], manualOf({
+        status: 'final', homeScore: 6, awayScore: 95, awayTryBonus: true,
+    }), now);
+    assert.deepEqual(declarado.manualTryBonus, { home: false, away: true });
+    const [tabla] = computeWrPoolTables([declarado], new Map(), new Map([[declarado.matchId, declarado.manualTryBonus as { home: boolean; away: boolean }]]));
+    assert.equal(tabla.rows.find((row) => row.country === 'Brazil')?.points, 5);
+    assert.equal(tabla.rows.find((row) => row.country === 'Brazil')?.triesFor, 0);
+
+    const conTries = parseWrManualResult({ status: 'final', homeScore: 22, awayScore: 15, homeTries: 3, awayTries: 2, homeTryBonus: true });
+    assert.equal(conTries?.homeTryBonus, false);
 });
