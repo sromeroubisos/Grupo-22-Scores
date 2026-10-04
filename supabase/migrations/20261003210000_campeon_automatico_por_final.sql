@@ -22,6 +22,30 @@
 -- `settings.champion_source = 'final_automatica'`), así una corrección del
 -- marcador de la final corrige también el campeón.
 
+-- ¿La ronda es LA final? Acepta "Final", "Gran final" y la forma con copa
+-- "Copa de Oro · Final" (la que usa el cuadro para separar copas, ver
+-- `src/lib/playoff/bracketSplit.ts`). Una copa secundaria ("Copa de Plata ·
+-- Final") no cuenta, y "Final por el 5º puesto" tampoco: no es "final" a secas.
+create or replace function public.g22_es_ronda_final(p_nombre text)
+returns boolean
+language plpgsql
+immutable
+as $$
+declare
+  v_base text := lower(trim(coalesce(p_nombre, '')));
+  v_copa text := '';
+begin
+  if v_base ~ '\s[·\-–—|:]\s' then
+    v_copa := regexp_replace(v_base, '\s+[·\-–—|:]\s+.*$', '');
+    v_base := regexp_replace(v_base, '^.*\s[·\-–—|:]\s+', '');
+  end if;
+  if v_copa ~* '(repechaje|repechage|rev[aá]lida|puesto|descenso|permanencia|plata|bronce|estimulo|estímulo|reclasific|promoci|consuelo|ascenso|clasificaci|reubicaci|apertura|clausura)' then
+    return false;
+  end if;
+  return v_base in ('final', 'gran final');
+end;
+$$;
+
 create or replace function public.g22_campeon_por_final(p_match_id uuid)
 returns text
 language plpgsql
@@ -48,7 +72,7 @@ begin
    where m.id = p_match_id;
 
   if not found or v.status <> 'final' or v.season_id is null then return null; end if;
-  if lower(trim(v.ronda)) not in ('final', 'gran final') then return null; end if;
+  if not public.g22_es_ronda_final(v.ronda) then return null; end if;
   if v.phase_type not in ('playoff', 'knockout') then return null; end if;
   if v.fase ~* c_excluir then return null; end if;
 
@@ -65,7 +89,7 @@ begin
     join public.tournament_phases p2 on p2.id = r2.phase_id
    where m2.season_id = v.season_id
      and m2.status <> 'postponed'
-     and lower(trim(r2.name)) in ('final', 'gran final')
+     and public.g22_es_ronda_final(r2.name)
      and p2.phase_type in ('playoff', 'knockout')
      and p2.name !~* c_excluir;
   if v_finales <> 1 then return null; end if;
