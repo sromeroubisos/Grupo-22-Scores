@@ -1,9 +1,11 @@
 import { canonicalizeSportId } from '@/lib/clubDerivatives';
 import { normalizeRankingPositionLabels } from '@/lib/rankings/rankingTable';
 import {
-    computeWorldRugbyExchange,
+    computeMatchExchange,
     rankByRating,
     replaySeason,
+    resolvePlayoffStage,
+    type PlayoffStage,
     type ReplayMatch,
 } from '@/lib/rankings/rankingReplay';
 import {
@@ -170,6 +172,8 @@ type MatchSnapshot = {
     group_id: string | null;
     round_uuid: string | null;
     updated_at: string | null;
+    /** Instancia de playoff (cuartos, semis, final) resuelta desde la ronda y la fase. */
+    playoff_stage?: PlayoffStage | null;
 };
 
 type ImportRankingEntryInput = {
@@ -457,6 +461,7 @@ function normalizeMatchSnapshot(row: MatchSnapshot | null | undefined): MatchSna
         group_id: readText(row.group_id),
         round_uuid: readText(row.round_uuid),
         updated_at: readText(row.updated_at),
+        playoff_stage: row.playoff_stage ?? null,
     };
 }
 
@@ -619,13 +624,87 @@ async function enrichMatchesWithTournamentSport(
         matches.map((match) => match.tournament_id ?? '').filter(Boolean),
     );
 
-    return matches
+    const withSport = matches
         .map((match) => normalizeMatchSnapshot({
             ...match,
             sport_id: match.sport_id ?? tournamentSportMap.get(match.tournament_id ?? '') ?? null,
             sport: match.sport ?? tournamentSportMap.get(match.tournament_id ?? '') ?? null,
         } as MatchSnapshot))
         .filter((match): match is MatchSnapshot => Boolean(match));
+
+    return enrichMatchesWithPlayoffStage(supabase, withSport);
+}
+
+const LOOKUP_CHUNK = 100;
+
+/**
+ * Resuelve la instancia de playoff de cada partido (cuartos, semis, final) para
+ * que el ganador cobre su bonus. `matches` no dice en que instancia se jugo:
+ * lo dice el nombre de la ronda (`tournament_rounds.name`) dentro de una fase
+ * de eliminacion (`tournament_phases.phase_type`). Se piden primero las fases
+ * —pocas— y solo las rondas de las fases de playoff, asi la consulta no crece
+ * con las cientos de "Fecha N" de la fase regular.
+ */
+async function enrichMatchesWithPlayoffStage(
+    supabase: ReturnType<typeof getAdminClient>,
+    matches: MatchSnapshot[],
+) {
+    const phaseIds = Array.from(new Set(matches.map((match) => match.phase_id ?? '').filter(Boolean)));
+    if (phaseIds.length === 0) return matches;
+
+    const phases = new Map<string, { name: string | null; phase_type: string | null }>();
+    for (let desde = 0; desde < phaseIds.length; desde += LOOKUP_CHUNK) {
+        const { data, error } = await supabase
+            .from('tournament_phases')
+            .select('id, name, phase_type')
+            .in('id', phaseIds.slice(desde, desde + LOOKUP_CHUNK));
+
+        if (error) {
+            throw createClubRankingQueryError(error, 'No se pudieron cargar las fases de los partidos del ranking.');
+        }
+
+        for (const row of (data || []) as Array<{ id: string; name: string | null; phase_type: string | null }>) {
+            phases.set(row.id, { name: readText(row.name), phase_type: readText(row.phase_type) });
+        }
+    }
+
+    const playoffPhaseIds = [...phases.entries()]
+        .filter(([, phase]) => {
+            const type = (phase.phase_type ?? '').toLowerCase();
+            return type === 'knockout' || type === 'playoff';
+        })
+        .map(([id]) => id);
+    if (playoffPhaseIds.length === 0) return matches;
+
+    const rounds = new Map<string, { name: string | null; phase_id: string | null }>();
+    for (let desde = 0; desde < playoffPhaseIds.length; desde += LOOKUP_CHUNK) {
+        const { data, error } = await supabase
+            .from('tournament_rounds')
+            .select('id, name, phase_id')
+            .in('phase_id', playoffPhaseIds.slice(desde, desde + LOOKUP_CHUNK));
+
+        if (error) {
+            throw createClubRankingQueryError(error, 'No se pudieron cargar las rondas de playoff de los partidos del ranking.');
+        }
+
+        for (const row of (data || []) as Array<{ id: string; name: string | null; phase_id: string | null }>) {
+            rounds.set(row.id, { name: readText(row.name), phase_id: readText(row.phase_id) });
+        }
+    }
+
+    return matches.map((match) => {
+        const round = match.round_uuid ? rounds.get(match.round_uuid) : undefined;
+        if (!round) return { ...match, playoff_stage: null };
+        const phase = phases.get(round.phase_id ?? match.phase_id ?? '');
+        return {
+            ...match,
+            playoff_stage: resolvePlayoffStage({
+                roundName: round.name,
+                phaseName: phase?.name ?? null,
+                phaseType: phase?.phase_type ?? null,
+            }),
+        };
+    });
 }
 
 async function getClubsByIds(
@@ -1396,6 +1475,7 @@ export async function actualizarRankingSemanal(rankingId: string) {
             home_club_id: match.home_club_id,
             away_club_id: match.away_club_id,
             score,
+            stage: match.playoff_stage ?? null,
         });
     }
 
@@ -1804,11 +1884,12 @@ async function applyMatchToRanking(
         return false;
     }
 
-    const exchange = computeWorldRugbyExchange(
+    const exchange = computeMatchExchange(
         ranking,
         toNumber(homeEntry.current_rating),
         toNumber(awayEntry.current_rating),
         score,
+        match.playoff_stage ?? null,
     );
 
     const homeRatingBefore = roundRating(toNumber(homeEntry.current_rating));

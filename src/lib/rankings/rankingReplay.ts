@@ -16,6 +16,11 @@
  * semanas congelada por el corte de 1000 partidos y la primera corrida sana
  * mostro tres fines de semana como si fueran uno (Belgrano −4,69 y 16 puestos
  * por un solo partido perdido por diez).
+ *
+ * Encima del intercambio hay UN premio que no es suma cero: el que gana un
+ * partido de playoff se lleva un bonus fijo por la instancia (cuartos, semis,
+ * final). Solo el ganador —al perdedor no se le resta nada mas que lo que ya
+ * perdio en el intercambio— y solo si hubo ganador: un empate no paga.
  */
 
 export type ExchangeConfig = {
@@ -25,12 +30,28 @@ export type ExchangeConfig = {
     event_multiplier?: number | string | null;
 };
 
+export type PlayoffStage = 'quarterfinal' | 'semifinal' | 'final';
+
+/**
+ * Lo que suma el GANADOR de una instancia de playoff, aparte del intercambio.
+ * Es un premio y no un intercambio: no sale del bolsillo del perdedor, asi que
+ * la tabla entera sube un poco con cada playoff. Regla de la casa (16/9/2026):
+ * cuartos 0,5 · semifinal 1,5 · final 2.
+ */
+export const PLAYOFF_WIN_BONUS: Record<PlayoffStage, number> = {
+    quarterfinal: 0.5,
+    semifinal: 1.5,
+    final: 2,
+};
+
 export type ReplayMatch = {
     id: string;
     date_time: string;
     home_club_id: string;
     away_club_id: string;
     score: { home: number; away: number };
+    /** Instancia de playoff, si el partido es de una. Paga el bonus al ganador. */
+    stage?: PlayoffStage | null;
 };
 
 export type ReplayAdjustment = {
@@ -128,6 +149,80 @@ export function computeWorldRugbyExchange(
     };
 }
 
+function normalizeLabel(value: string | null | undefined) {
+    return (value ?? '')
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .trim();
+}
+
+/**
+ * Fases que tienen "cuartos" o "final" en el nombre de sus rondas pero no son
+ * la instancia que premia el ranking: el repechaje y la revalida del Torneo del
+ * Interior se juegan el mismo dia que los cuartos y sus rondas se llaman igual
+ * (medido el 16/9/2026: 8 "Cuartos de final" del TDI A, 4 de playoff y 4 de
+ * repechaje). Las copas de consuelo (Plata, Bronce, Estimulo) tampoco: "la
+ * final" es la del torneo, no la de la copa que juegan los que quedaron afuera.
+ */
+const PHASE_WITHOUT_BONUS = /repechaje|revalida|permanencia|descenso|promocion|reclasificacion|plata|bronce|estimulo|consuelo/;
+const ROUND_WITHOUT_BONUS = /octavos|avos de final|ronda de|tercer|3er|puesto|plata|bronce|estimulo|consuelo/;
+
+/**
+ * La instancia de playoff de un partido, leida del nombre de su ronda —el
+ * constructor de playoffs las llama "Cuartos de final", "Semifinal" y "Final",
+ * y los torneos cargados a mano usan los mismos rotulos— dentro de una fase de
+ * eliminacion. Devuelve null para todo lo que no paga bonus: la fase regular,
+ * los octavos, el repechaje, el partido por el tercer puesto.
+ */
+export function resolvePlayoffStage(input: {
+    roundName?: string | null;
+    phaseName?: string | null;
+    phaseType?: string | null;
+}): PlayoffStage | null {
+    const round = normalizeLabel(input.roundName);
+    if (!round) return null;
+
+    const phaseType = normalizeLabel(input.phaseType);
+    if (phaseType && phaseType !== 'knockout' && phaseType !== 'playoff') return null;
+    if (PHASE_WITHOUT_BONUS.test(normalizeLabel(input.phaseName))) return null;
+    if (ROUND_WITHOUT_BONUS.test(round)) return null;
+
+    if (/cuartos/.test(round)) return 'quarterfinal';
+    if (/semi/.test(round)) return 'semifinal';
+    if (/\bfinal\b/.test(round)) return 'final';
+    return null;
+}
+
+/**
+ * El movimiento completo de un partido: el intercambio de World Rugby mas, si
+ * es una instancia de playoff con ganador, el bonus de esa instancia para el
+ * ganador y solo para el ganador. Es la UNICA cuenta por partido: la usan la
+ * corrida semanal, el rebuild y el camino incremental, asi que no pueden dar
+ * distinto.
+ */
+export function computeMatchExchange(
+    config: ExchangeConfig,
+    homeRating: number,
+    awayRating: number,
+    score: { home: number; away: number },
+    stage?: PlayoffStage | null,
+) {
+    const exchange = computeWorldRugbyExchange(config, homeRating, awayRating, score);
+    const bonus = stage && exchange.result !== 'draw' ? PLAYOFF_WIN_BONUS[stage] : 0;
+
+    return {
+        ...exchange,
+        homeDelta: roundRating(exchange.homeDelta + (exchange.result === 'home_win' ? bonus : 0)),
+        awayDelta: roundRating(exchange.awayDelta + (exchange.result === 'away_win' ? bonus : 0)),
+        metadata: {
+            ...exchange.metadata,
+            playoffStage: stage ?? null,
+            playoffBonus: bonus,
+        },
+    };
+}
+
 function compareChronologically(left: ReplayMatch, right: ReplayMatch) {
     const leftTime = new Date(left.date_time).getTime();
     const rightTime = new Date(right.date_time).getTime();
@@ -186,7 +281,7 @@ export function replaySeason(input: {
         const awayRating = ratings.get(match.away_club_id);
         if (homeRating === undefined || awayRating === undefined) continue;
 
-        const exchange = computeWorldRugbyExchange(input.config, homeRating, awayRating, match.score);
+        const exchange = computeMatchExchange(input.config, homeRating, awayRating, match.score, match.stage);
 
         ratings.set(match.home_club_id, roundRating(homeRating + exchange.homeDelta));
         ratings.set(match.away_club_id, roundRating(awayRating + exchange.awayDelta));
