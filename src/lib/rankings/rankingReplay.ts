@@ -44,6 +44,28 @@ export const PLAYOFF_WIN_BONUS: Record<PlayoffStage, number> = {
     final: 2,
 };
 
+/**
+ * El bonus automatico rige para los partidos jugados desde el miercoles
+ * 7/10/2026 00:00 de Argentina. Lo anterior se premio a mano con ajustes
+ * (Tala +3, Natacion +3,5, Los Teros +2...) y los playoffs que nadie cobro
+ * quedan asi: la regla no paga hacia atras. Sin este corte, la corrida
+ * reproduce la temporada entera y le suma a cada playoff de 2026 un bonus que
+ * se sumaba a los ajustes manuales —el campeon cobraba dos veces y la tabla
+ * se reacomodaba sola—.
+ */
+export const PLAYOFF_BONUS_FROM = '2026-10-07T03:00:00.000Z';
+
+/** La instancia, solo si el partido se jugo desde que rige el bonus. */
+export function playoffStageWithBonus(
+    stage: PlayoffStage | null | undefined,
+    dateTime: string | null | undefined,
+): PlayoffStage | null {
+    if (!stage || !dateTime) return null;
+    const played = new Date(dateTime).getTime();
+    if (!Number.isFinite(played)) return null;
+    return played >= Date.parse(PLAYOFF_BONUS_FROM) ? stage : null;
+}
+
 export type ReplayMatch = {
     id: string;
     date_time: string;

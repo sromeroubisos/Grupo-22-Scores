@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {
   computeMatchExchange,
   computeWorldRugbyExchange,
+  playoffStageWithBonus,
   rankByRating,
   replaySeason,
   resolvePlayoffStage,
@@ -169,4 +170,15 @@ test('un club que no esta en la tabla no mueve a nadie', () => {
 test('los puestos salen del puntaje, y a igual puntaje por nombre', () => {
   const puestos = rankByRating(new Map([['b', 80], ['a', 80], ['c', 90]]), (id) => id.toUpperCase());
   assert.deepEqual([...puestos], [['c', 1], ['a', 2], ['b', 3]]);
+});
+
+test('el bonus no paga hacia atras: los playoffs previos al 7/10/2026 se premiaron a mano', () => {
+  // La final del TDI "A" (Tala 34-20 Jockey Rosario, 3/10) ya cobro su +3 manual.
+  assert.equal(playoffStageWithBonus('final', '2026-10-03T19:00:00Z'), null);
+  // Martes 6/10 23:59 de Argentina: todavia no rige.
+  assert.equal(playoffStageWithBonus('semifinal', '2026-10-07T02:59:00Z'), null);
+  assert.equal(playoffStageWithBonus('semifinal', '2026-10-07T03:00:00Z'), 'semifinal');
+  assert.equal(playoffStageWithBonus('final', '2026-11-14T18:00:00Z'), 'final');
+  assert.equal(playoffStageWithBonus(null, '2026-11-14T18:00:00Z'), null);
+  assert.equal(playoffStageWithBonus('final', null), null);
 });
