@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Users } from 'lucide-react';
+import { ChevronRight, ExternalLink, Loader2, Trash2, Users } from 'lucide-react';
 import { CategoryPicker } from '@/components/clubs/CategoryPicker';
 import { buildClubManageHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
 import { resolveCategoryLevel } from '@/lib/clubs/categoryLevel';
@@ -47,6 +47,8 @@ export function ClubCategoriesCard({ clubId, clubName, navigationMode = 'admin',
     const [categories, setCategories] = useState<CategoryRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
+    const [confirmId, setConfirmId] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const load = useCallback(async () => {
         setLoadError(null);
@@ -93,6 +95,28 @@ export function ClubCategoriesCard({ clubId, clubName, navigationMode = 'admin',
         return result.option;
     };
 
+    // Solo se borra una categoría vacía: el servidor revisa partidos, torneos y
+    // plantel, y si tiene algo contesta qué tiene.
+    const remove = async (category: CategoryRow) => {
+        setDeletingId(category.id);
+        try {
+            const params = new URLSearchParams({ categoryId: category.id });
+            const response = await fetch(
+                `/api/clubs/${encodeURIComponent(clubId)}/categories?${params.toString()}`,
+                { method: 'DELETE' },
+            );
+            const payload = await response.json().catch(() => null);
+            if (!response.ok || !payload?.ok) throw new Error(payload?.error || 'No se pudo borrar la categoría.');
+            notify(`Categoría borrada: ${category.name}`);
+            await load();
+        } catch (caught) {
+            notify(caught instanceof Error ? caught.message : 'No se pudo borrar la categoría.', 'error');
+        } finally {
+            setDeletingId(null);
+            setConfirmId(null);
+        }
+    };
+
     return (
         <section className="cm-card">
             <div className="cm-card-head">
@@ -136,6 +160,57 @@ export function ClubCategoriesCard({ clubId, clubName, navigationMode = 'admin',
                                         )}
                                     </div>
                                     <div className="cm-row-sub">{subtitleOf(category)}</div>
+                                </div>
+                                <div className="cm-row-actions">
+                                    {confirmId === category.id ? (
+                                        <>
+                                            <span className="cm-hint">¿Borrarla?</span>
+                                            <button
+                                                type="button"
+                                                className="cm-btn cm-btn-sm cm-btn-danger"
+                                                onClick={() => { void remove(category); }}
+                                                disabled={deletingId === category.id}
+                                            >
+                                                {deletingId === category.id
+                                                    ? <Loader2 size={13} className="animate-spin" aria-hidden="true" />
+                                                    : null}
+                                                Sí, borrar
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="cm-btn cm-btn-sm"
+                                                onClick={() => setConfirmId(null)}
+                                                disabled={deletingId === category.id}
+                                            >
+                                                No
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Link
+                                                href={`/clubs/${encodeURIComponent(category.id)}`}
+                                                prefetch={false}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="cm-btn cm-btn-sm"
+                                                aria-label={`Ver la ficha de ${category.name}`}
+                                            >
+                                                <ExternalLink size={13} aria-hidden="true" />
+                                                Ficha
+                                            </Link>
+                                            {!category.isBase && category.id !== clubId && (
+                                                <button
+                                                    type="button"
+                                                    className="cm-btn cm-btn-icon cm-btn-danger"
+                                                    onClick={() => setConfirmId(category.id)}
+                                                    aria-label={`Borrar la categoría ${category.name}`}
+                                                    title="Borrar categoría"
+                                                >
+                                                    <Trash2 size={14} aria-hidden="true" />
+                                                </button>
+                                            )}
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         ))}

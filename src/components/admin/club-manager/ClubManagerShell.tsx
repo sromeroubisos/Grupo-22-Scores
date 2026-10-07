@@ -15,6 +15,7 @@ import {
 import { GeneralTab } from './GeneralTab';
 import { HomeTab } from './HomeTab';
 import { MatchTab } from './MatchTab';
+import { MatchesTab } from './MatchesTab';
 import { PlayersTab } from './PlayersTab';
 import { PublishTab } from './PublishTab';
 import { RelatedClubsTab } from './RelatedClubsTab';
@@ -229,12 +230,22 @@ export function ClubManagerShell({
                 id={`cm-panel-${tab}`}
                 aria-labelledby={`cm-tab-${tab}`}
             >
-                {tab === 'inicio' && <HomeTab onOpen={goToTab} />}
+                {tab === 'inicio' && (
+                    <HomeTab onOpen={goToTab} />
+                )}
+                {tab === 'partidos' && (
+                    <MatchesTab
+                        clubId={id}
+                        onCreate={() => goToTab('partido')}
+                        notify={notify}
+                    />
+                )}
                 {tab === 'partido' && (
                     <MatchTab
                         clubId={id}
                         publicHref={publicHref}
-                        onDone={() => goToTab('inicio')}
+                        onDone={() => goToTab('partidos')}
+                        onShowMatches={() => goToTab('partidos')}
                         notify={notify}
                     />
                 )}
@@ -250,6 +261,7 @@ export function ClubManagerShell({
                 {tab === 'jugadores' && (
                     <PlayersTab
                         clubId={id}
+                        clubSport={club.sport ?? club.sport_id}
                         clubName={club.name}
                         navigationMode={navigationMode}
                         notify={notify}

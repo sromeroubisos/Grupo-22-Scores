@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, ExternalLink, Plus } from 'lucide-react';
+import { CheckCircle2, ExternalLink, ListChecks, Plus } from 'lucide-react';
 import PanelMatchForm, { type PanelFamilyClub } from '@/app/clubs/[id]/PanelMatchForm';
 import { APP_TIMEZONE } from '@/lib/timezone';
 
@@ -10,6 +10,8 @@ interface MatchTabProps {
     clubId: string;
     publicHref: string;
     onDone: () => void;
+    /** Lleva a la lista de partidos del club, donde aparece el recién cargado. */
+    onShowMatches: () => void;
     notify: (text: string, kind?: 'ok' | 'error') => void;
 }
 
@@ -34,7 +36,7 @@ function todayKey(): string {
  * La familia (club base + categorías) sale de `/api/clubs/[id]/categories`, que
  * ya la devuelve con `isBase` y pide permiso de administración del club.
  */
-export function MatchTab({ clubId, publicHref, onDone, notify }: MatchTabProps) {
+export function MatchTab({ clubId, publicHref, onDone, onShowMatches, notify }: MatchTabProps) {
     const [family, setFamily] = useState<PanelFamilyClub[] | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [created, setCreated] = useState(false);
@@ -84,9 +86,13 @@ export function MatchTab({ clubId, publicHref, onDone, notify }: MatchTabProps) 
                 <h2>Partido cargado</h2>
                 <p>Ya figura en la agenda del club. Desde la ficha del partido se carga el resultado.</p>
                 <div className="cm-match-done-actions">
+                    <button type="button" className="cm-btn cm-btn-primary" onClick={onShowMatches}>
+                        <ListChecks size={14} aria-hidden="true" />
+                        Ver los partidos del club
+                    </button>
                     <button
                         type="button"
-                        className="cm-btn cm-btn-primary"
+                        className="cm-btn"
                         onClick={() => {
                             setCreated(false);
                             setFormKey((value) => value + 1);

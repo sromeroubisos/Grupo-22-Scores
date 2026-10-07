@@ -1,18 +1,38 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Loader2, Plus, Trash2, UserRound, Users } from 'lucide-react';
-import type { PersonWithRole } from '@/lib/services/personService';
-import type { ClubConsoleMode } from '@/lib/clubAdminRoutes';
+import Link from 'next/link';
+import { ChevronRight, Loader2, Pencil, Plus, Trash2, UserRound, Users } from 'lucide-react';
+import type { PersonClubInput, PersonIdentityMatch, PersonWithRole } from '@/lib/services/personService';
+import type { Division } from '@/lib/services/divisionService';
+import { buildClubRosterHref, type ClubConsoleMode } from '@/lib/clubAdminRoutes';
+import { getPlayerPositionsForSport, resolveRosterSport } from '@/lib/data/playerPositions';
+import { PersonManagementModal } from '@/components/admin/entities/club/PersonManagementModal';
 import { ClubCategoriesCard } from './ClubCategoriesCard';
 
 interface PlayersTabProps {
     clubId: string;
+    /** Deporte del club: con él se eligen los puestos cuando el jugador va al plantel base. */
+    clubSport?: string | null;
     /** Nombre del club, para mostrar cómo va a quedar una categoría ("… M16"). */
     clubName: string;
     navigationMode?: ClubConsoleMode;
     notify: (text: string, kind?: 'ok' | 'error') => void;
 }
+
+/** Lo que el alta manda a `/api/club-admin/roster`; la confirmación de identidad lo reenvía con un campo más. */
+type NewPlayerPayload = Pick<
+    PersonClubInput,
+    'first_name' | 'last_name' | 'role' | 'position' | 'division_id' | 'birth_date' | 'id_number' | 'weight' | 'height'
+>;
+
+type IdentityPrompt = {
+    payload: NewPlayerPayload;
+    matches: PersonIdentityMatch[];
+};
+
+/** Valor del selector de categoría para "sin categoría": el plantel base del club. */
+const BASE_ROSTER = '';
 
 type RosterMembership = {
     id: string;
@@ -49,16 +69,22 @@ type SeasonRoster = {
 /** `current` es el plantel vivo del club; el resto son planteles cerrados de una temporada. */
 const CURRENT = 'current';
 
-type Division = {
-    id: string;
-    name: string;
-    season?: string | null;
-    category?: string | null;
-    gender?: string | null;
-    status?: string | null;
-    players_count?: number;
-    is_family_division?: boolean;
-};
+/** Un número de la ficha (peso, altura): vacío o inválido no viaja. */
+function positiveNumber(raw: string): number | undefined {
+    const value = Number.parseFloat(raw.replace(',', '.'));
+    return Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+/** "23 años" a partir de `YYYY-MM-DD`; sin fecha, nada. */
+function ageLabel(birthDate?: string | null): string | null {
+    if (!birthDate) return null;
+    const [year, month, day] = birthDate.slice(0, 10).split('-').map(Number);
+    if (!year || !month || !day) return null;
+    const now = new Date();
+    let age = now.getFullYear() - year;
+    if (now.getMonth() + 1 < month || (now.getMonth() + 1 === month && now.getDate() < day)) age -= 1;
+    return age >= 0 && age < 100 ? `${age} años` : null;
+}
 
 function personName(person: RosterMembership['player']) {
     if (!person) return 'Jugador sin ficha';
@@ -79,7 +105,7 @@ function seasonLabel(roster: SeasonRoster) {
     return competition ? `${year} · ${competition}` : year;
 }
 
-export function PlayersTab({ clubId, clubName, navigationMode = 'admin', notify }: PlayersTabProps) {
+export function PlayersTab({ clubId, clubSport, clubName, navigationMode = 'admin', notify }: PlayersTabProps) {
     const [seasonRosters, setSeasonRosters] = useState<SeasonRoster[]>([]);
     const [people, setPeople] = useState<PersonWithRole[] | null>(null);
     const [selected, setSelected] = useState<string>(CURRENT);
@@ -94,7 +120,32 @@ export function PlayersTab({ clubId, clubName, navigationMode = 'admin', notify 
     const [newFirst, setNewFirst] = useState('');
     const [newLast, setNewLast] = useState('');
     const [newPosition, setNewPosition] = useState('');
+    const [newBirthDate, setNewBirthDate] = useState('');
+    const [newIdNumber, setNewIdNumber] = useState('');
+    const [newWeight, setNewWeight] = useState('');
+    const [newHeight, setNewHeight] = useState('');
+    const [newDivisionId, setNewDivisionId] = useState<string>(BASE_ROSTER);
+    const [identityPrompt, setIdentityPrompt] = useState<IdentityPrompt | null>(null);
     const [busyId, setBusyId] = useState<string | null>(null);
+    // La ficha completa (documento, nacimiento, foto) se edita en el mismo modal
+    // que usa la página de plantel: una sola ficha, dos puertas.
+    const [editingPlayer, setEditingPlayer] = useState<PersonWithRole | null>(null);
+
+    // El puesto se elige con el deporte de la categoría; si va al plantel base, con el del club.
+    const selectedDivision = useMemo(
+        () => divisions.find((division) => division.id === newDivisionId) ?? null,
+        [divisions, newDivisionId],
+    );
+    const rosterSport = resolveRosterSport(selectedDivision?.sport, clubSport);
+    const positionCatalog = useMemo(() => getPlayerPositionsForSport(rosterSport), [rosterSport]);
+
+    // Al cambiar de categoría puede cambiar el deporte: un puesto de rugby no vale en hockey.
+    useEffect(() => {
+        if (!positionCatalog) return;
+        if (newPosition && !positionCatalog.positions.some((position) => position.label === newPosition)) {
+            setNewPosition('');
+        }
+    }, [positionCatalog, newPosition]);
 
     const loadCurrent = useCallback(async () => {
         const response = await fetch(`/api/club-admin/roster?clubId=${encodeURIComponent(clubId)}`, { cache: 'no-store' });
@@ -176,37 +227,68 @@ export function PlayersTab({ clubId, clubName, navigationMode = 'admin', notify 
         }
     };
 
-    const addPlayer = async () => {
-        const first = newFirst.trim();
-        const last = newLast.trim();
-        if (!first || !last) return;
-
+    /**
+     * Manda el alta. Si el servicio encuentra una ficha con el mismo nombre en
+     * otro club, contesta `identity_confirmation_required` con las candidatas:
+     * acá se muestran y el usuario decide si es la misma persona
+     * (`existing_person_id`) o una nueva (`force_create_new`). Antes ese código
+     * llegaba como un error de toast sin salida.
+     */
+    const submitPlayer = async (
+        payload: NewPlayerPayload,
+        decision?: { existing_person_id?: string; force_create_new?: boolean },
+    ) => {
         setAdding(true);
         try {
             const response = await fetch('/api/club-admin/roster', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    clubId,
-                    first_name: first,
-                    last_name: last,
-                    role: 'player',
-                    position: newPosition.trim() || undefined,
-                }),
+                body: JSON.stringify({ clubId, ...payload, ...decision }),
             });
-            const payload = await response.json().catch(() => null);
-            if (!response.ok) throw new Error(payload?.error || 'No se pudo agregar al jugador.');
+            const result = await response.json().catch(() => null);
 
+            if (!response.ok) {
+                if (result?.code === 'identity_confirmation_required' && Array.isArray(result.matches) && result.matches.length > 0) {
+                    setIdentityPrompt({ payload, matches: result.matches });
+                    return;
+                }
+                throw new Error(result?.error || 'No se pudo agregar al jugador.');
+            }
+
+            setIdentityPrompt(null);
             setNewFirst('');
             setNewLast('');
             setNewPosition('');
-            await loadCurrent();
-            notify(`${first} ${last} se sumó al plantel`);
+            setNewBirthDate('');
+            setNewIdNumber('');
+            setNewWeight('');
+            setNewHeight('');
+            await Promise.all([loadCurrent(), loadDivisions()]);
+            notify(`${payload.first_name} ${payload.last_name} se sumó al plantel`);
         } catch (caught) {
             notify(caught instanceof Error ? caught.message : 'No se pudo agregar al jugador.', 'error');
         } finally {
             setAdding(false);
         }
+    };
+
+    const addPlayer = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const first = newFirst.trim();
+        const last = newLast.trim();
+        if (!first || !last) return;
+
+        await submitPlayer({
+            first_name: first,
+            last_name: last,
+            role: 'player',
+            position: newPosition.trim() || undefined,
+            division_id: newDivisionId || undefined,
+            birth_date: newBirthDate || undefined,
+            id_number: newIdNumber.trim() || undefined,
+            weight: positiveNumber(newWeight),
+            height: positiveNumber(newHeight),
+        });
     };
 
     const removePlayer = async (person: PersonWithRole) => {
@@ -265,44 +347,203 @@ export function PlayersTab({ clubId, clubName, navigationMode = 'admin', notify 
                             <div className="cm-notice">{currentBlocked}</div>
                         ) : (
                             <>
-                                <div className="cm-search" style={{ marginBottom: 16 }}>
-                                    <input
-                                        className="cm-input"
-                                        style={{ flex: '1 1 140px' }}
-                                        placeholder="Nombre"
-                                        value={newFirst}
-                                        onChange={(event) => setNewFirst(event.target.value)}
-                                        aria-label="Nombre del jugador"
-                                    />
-                                    <input
-                                        className="cm-input"
-                                        style={{ flex: '1 1 140px' }}
-                                        placeholder="Apellido"
-                                        value={newLast}
-                                        onChange={(event) => setNewLast(event.target.value)}
-                                        aria-label="Apellido del jugador"
-                                    />
-                                    <input
-                                        className="cm-input"
-                                        style={{ flex: '0 1 150px' }}
-                                        placeholder="Puesto (opcional)"
-                                        value={newPosition}
-                                        onChange={(event) => setNewPosition(event.target.value)}
-                                        aria-label="Puesto del jugador"
-                                    />
-                                    <button
-                                        type="button"
-                                        className="cm-btn cm-btn-primary"
-                                        onClick={addPlayer}
-                                        disabled={adding || !newFirst.trim() || !newLast.trim()}
-                                        title={!newFirst.trim() || !newLast.trim() ? 'Escribí nombre y apellido para sumarlo.' : undefined}
-                                    >
-                                        {adding
-                                            ? <Loader2 size={14} className="animate-spin" aria-hidden="true" />
-                                            : <Plus size={14} aria-hidden="true" />}
-                                        Sumar
-                                    </button>
-                                </div>
+                                <form className="cm-add-player" onSubmit={addPlayer}>
+                                    <div className="cm-field">
+                                        <label className="cm-label" htmlFor="cm-player-first">Nombre</label>
+                                        <input
+                                            id="cm-player-first"
+                                            className="cm-input"
+                                            autoComplete="given-name"
+                                            value={newFirst}
+                                            onChange={(event) => setNewFirst(event.target.value)}
+                                        />
+                                    </div>
+                                    <div className="cm-field">
+                                        <label className="cm-label" htmlFor="cm-player-last">Apellido</label>
+                                        <input
+                                            id="cm-player-last"
+                                            className="cm-input"
+                                            autoComplete="family-name"
+                                            value={newLast}
+                                            onChange={(event) => setNewLast(event.target.value)}
+                                        />
+                                    </div>
+                                    <div className="cm-field">
+                                        <label className="cm-label" htmlFor="cm-player-division">Categoría</label>
+                                        <select
+                                            id="cm-player-division"
+                                            className="cm-select"
+                                            value={newDivisionId}
+                                            onChange={(event) => setNewDivisionId(event.target.value)}
+                                        >
+                                            <option value={BASE_ROSTER}>Plantel base del club</option>
+                                            {divisions.map((division) => (
+                                                <option key={division.id} value={division.id}>{division.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="cm-field">
+                                        <label className="cm-label" htmlFor="cm-player-position">Puesto</label>
+                                        {positionCatalog ? (
+                                            <select
+                                                id="cm-player-position"
+                                                className="cm-select"
+                                                value={newPosition}
+                                                onChange={(event) => setNewPosition(event.target.value)}
+                                            >
+                                                <option value="">Sin puesto</option>
+                                                {positionCatalog.groups.map((group) => (
+                                                    <optgroup key={group.id} label={group.label}>
+                                                        {positionCatalog.positions
+                                                            .filter((position) => position.group === group.id)
+                                                            .map((position) => (
+                                                                <option key={position.code} value={position.label}>
+                                                                    {position.label}
+                                                                </option>
+                                                            ))}
+                                                    </optgroup>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <input
+                                                id="cm-player-position"
+                                                className="cm-input"
+                                                placeholder="Opcional"
+                                                value={newPosition}
+                                                onChange={(event) => setNewPosition(event.target.value)}
+                                            />
+                                        )}
+                                    </div>
+                                    <div className="cm-field">
+                                        <label className="cm-label" htmlFor="cm-player-birth">Fecha de nacimiento</label>
+                                        <input
+                                            id="cm-player-birth"
+                                            type="date"
+                                            className="cm-input"
+                                            autoComplete="bday"
+                                            max={new Date().toISOString().slice(0, 10)}
+                                            value={newBirthDate}
+                                            onChange={(event) => setNewBirthDate(event.target.value)}
+                                        />
+                                    </div>
+                                    <div className="cm-field">
+                                        <label className="cm-label" htmlFor="cm-player-doc">Documento</label>
+                                        <input
+                                            id="cm-player-doc"
+                                            className="cm-input"
+                                            inputMode="numeric"
+                                            placeholder="Opcional"
+                                            value={newIdNumber}
+                                            onChange={(event) => setNewIdNumber(event.target.value)}
+                                        />
+                                    </div>
+                                    <div className="cm-field">
+                                        <label className="cm-label" htmlFor="cm-player-weight">Peso (kg)</label>
+                                        <input
+                                            id="cm-player-weight"
+                                            className="cm-input"
+                                            inputMode="decimal"
+                                            placeholder="Opcional"
+                                            value={newWeight}
+                                            onChange={(event) => setNewWeight(event.target.value)}
+                                        />
+                                    </div>
+                                    <div className="cm-field">
+                                        <label className="cm-label" htmlFor="cm-player-height">Altura (cm)</label>
+                                        <input
+                                            id="cm-player-height"
+                                            className="cm-input"
+                                            inputMode="numeric"
+                                            placeholder="Opcional"
+                                            value={newHeight}
+                                            onChange={(event) => setNewHeight(event.target.value)}
+                                        />
+                                    </div>
+                                    <div className="cm-add-player-submit">
+                                        <button
+                                            type="submit"
+                                            className="cm-btn cm-btn-primary"
+                                            disabled={adding || !newFirst.trim() || !newLast.trim()}
+                                        >
+                                            {adding
+                                                ? <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                                                : <Plus size={14} aria-hidden="true" />}
+                                            Sumar
+                                        </button>
+                                    </div>
+                                    <p className="cm-hint cm-add-player-hint">
+                                        {!newFirst.trim() || !newLast.trim()
+                                            ? 'Escribí nombre y apellido para sumarlo.'
+                                            : !positionCatalog && !rosterSport
+                                                ? 'Cargá el deporte del club en General para elegir el puesto de una lista.'
+                                                : 'Podés cambiar la categoría y el puesto después desde su plantel.'}
+                                    </p>
+                                </form>
+
+                                {identityPrompt && (
+                                    <div className="cm-notice cm-identity" role="alert">
+                                        <strong>
+                                            Ya hay una ficha de {identityPrompt.payload.first_name} {identityPrompt.payload.last_name}
+                                        </strong>
+                                        <p>
+                                            Si es la misma persona, se vincula la ficha existente a este club y conserva su historial.
+                                            Si es otra, se crea una nueva.
+                                        </p>
+                                        <div className="cm-list">
+                                            {identityPrompt.matches.map((match) => (
+                                                <div key={match.person_id} className="cm-row">
+                                                    <span className="cm-avatar" aria-hidden="true">
+                                                        {match.photo_url
+                                                            ? <img src={match.photo_url} alt="" />
+                                                            : <UserRound size={16} />}
+                                                    </span>
+                                                    <div className="cm-row-main">
+                                                        <div className="cm-row-title">{match.full_name}</div>
+                                                        <div className="cm-row-sub">
+                                                            {[
+                                                                match.birth_date ? `Nació el ${match.birth_date}` : null,
+                                                                match.id_number ? `Doc. ${match.id_number}` : null,
+                                                                match.already_linked_to_club
+                                                                    ? 'Ya está en este club'
+                                                                    : match.club_links.length > 0
+                                                                        ? match.club_links.map((link) => link.club_name).join(', ')
+                                                                        : 'Sin club',
+                                                            ].filter(Boolean).join(' · ')}
+                                                        </div>
+                                                    </div>
+                                                    <div className="cm-row-actions">
+                                                        <button
+                                                            type="button"
+                                                            className="cm-btn cm-btn-sm"
+                                                            disabled={adding}
+                                                            onClick={() => submitPlayer(identityPrompt.payload, { existing_person_id: match.person_id })}
+                                                        >
+                                                            Es la misma persona
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="cm-identity-actions">
+                                            <button
+                                                type="button"
+                                                className="cm-btn cm-btn-sm"
+                                                disabled={adding}
+                                                onClick={() => setIdentityPrompt(null)}
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="cm-btn cm-btn-sm cm-btn-primary"
+                                                disabled={adding}
+                                                onClick={() => submitPlayer(identityPrompt.payload, { force_create_new: true })}
+                                            >
+                                                Es otra persona, crear ficha nueva
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {players.length === 0 ? (
                                     <div className="cm-empty">
@@ -323,13 +564,27 @@ export function PlayersTab({ clubId, clubName, navigationMode = 'admin', notify 
                                                         {person.full_name || `${person.first_name} ${person.last_name}`.trim()}
                                                     </div>
                                                     <div className="cm-row-sub">
-                                                        {[person.position, person.division_name].filter(Boolean).join(' · ') || 'Sin puesto asignado'}
+                                                        {[
+                                                            person.position,
+                                                            person.division_name,
+                                                            ageLabel(person.birth_date),
+                                                            person.weight ? `${person.weight} kg` : null,
+                                                            person.height ? `${person.height} cm` : null,
+                                                        ].filter(Boolean).join(' · ') || 'Sin puesto asignado'}
                                                     </div>
                                                 </div>
                                                 <div className="cm-row-actions">
                                                     {person.status && person.status !== 'active' && (
                                                         <span className="cm-badge">{person.status}</span>
                                                     )}
+                                                    <button
+                                                        type="button"
+                                                        className="cm-btn cm-btn-icon"
+                                                        onClick={() => setEditingPlayer(person)}
+                                                        aria-label={`Editar la ficha de ${person.full_name || person.first_name}`}
+                                                    >
+                                                        <Pencil size={14} aria-hidden="true" />
+                                                    </button>
                                                     <button
                                                         type="button"
                                                         className="cm-btn cm-btn-danger cm-btn-icon"
@@ -403,7 +658,7 @@ export function PlayersTab({ clubId, clubName, navigationMode = 'admin', notify 
                     <div className="cm-card-head">
                         <div>
                             <h2>Planteles</h2>
-                            <p>Los planteles compartidos con la familia de clubes.</p>
+                            <p>Entrá a uno para ver y editar su lista de jugadores.</p>
                         </div>
                     </div>
                     <div className="cm-list">
@@ -411,7 +666,18 @@ export function PlayersTab({ clubId, clubName, navigationMode = 'admin', notify 
                             <div key={division.id} className="cm-row">
                                 <span className="cm-avatar" aria-hidden="true"><Users size={15} /></span>
                                 <div className="cm-row-main">
-                                    <div className="cm-row-title">{division.name}</div>
+                                    <div className="cm-row-title">
+                                        {/* Las compartidas tienen id sintético y no resuelven a una página propia. */}
+                                        {division.is_family_division ? division.name : (
+                                            <Link
+                                                href={buildClubRosterHref(clubId, division.id, navigationMode)}
+                                                className="cm-row-link"
+                                            >
+                                                {division.name}
+                                                <ChevronRight size={14} aria-hidden="true" />
+                                            </Link>
+                                        )}
+                                    </div>
                                     <div className="cm-row-sub">
                                         {[
                                             division.season,
@@ -449,6 +715,21 @@ export function PlayersTab({ clubId, clubName, navigationMode = 'admin', notify 
                     </div>
                 </section>
             )}
+
+            <PersonManagementModal
+                clubId={clubId}
+                divisions={divisions}
+                clubSport={clubSport}
+                isOpen={editingPlayer !== null}
+                onClose={() => setEditingPlayer(null)}
+                onSuccess={async () => {
+                    await Promise.all([loadCurrent(), loadDivisions()]);
+                    notify('Ficha actualizada');
+                }}
+                initialMode="player"
+                person={editingPlayer}
+                submitMode="club-admin-api"
+            />
         </>
     );
 }

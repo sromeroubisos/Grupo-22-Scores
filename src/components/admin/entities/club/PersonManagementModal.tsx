@@ -17,17 +17,16 @@ import {
     updatePersonInClub,
 } from '@/lib/services/personService';
 import { Division } from '@/lib/services/divisionService';
+import {
+    findPlayerPosition,
+    getPlayerPositionsForSport,
+    resolveRosterSport,
+    sportHasFrontRow,
+} from '@/lib/data/playerPositions';
 
-const RUGBY_POSITION_GROUPS = [
-    {
-        label: 'Forwards',
-        positions: ['Pilar Izquierdo', 'Hooker', 'Pilar Derecho', 'Segunda Linea', 'Ala', 'Octavo'],
-    },
-    {
-        label: 'Backs',
-        positions: ['Medio Scrum', 'Apertura', 'Wing', 'Centro', 'Fullback'],
-    },
-];
+// El modal trae sus estilos: lo abre la página de plantel y también el gestor
+// de club, que no pasa por ClubAccessHub (el único que importaba la hoja).
+import './vitreous-club.css';
 
 /**
  * Sugerencias para el país emisor del documento. El campo acepta cualquier
@@ -59,6 +58,8 @@ interface Props {
     lockDivisionId?: string;
     person?: PersonWithRole | null;
     submitMode?: 'service' | 'club-admin-api';
+    /** Deporte del club, para elegir el puesto cuando la ficha va al plantel base. */
+    clubSport?: string | null;
 }
 
 type RosterMutationApiResponse = {
@@ -73,7 +74,7 @@ function getAgeLabel(birthDate: string) {
     if (!birthDate) return 'Sin fecha';
 
     const date = new Date(birthDate);
-    if (Number.isNaN(date.getTime())) return 'Fecha invalida';
+    if (Number.isNaN(date.getTime())) return 'Fecha inválida';
 
     const today = new Date();
     let age = today.getFullYear() - date.getFullYear();
@@ -82,10 +83,10 @@ function getAgeLabel(birthDate: string) {
         age -= 1;
     }
 
-    return `${age} anos`;
+    return `${age} años`;
 }
 
-export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSuccess, initialMode, lockDivisionId, person, submitMode = 'club-admin-api' }: Props) {
+export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSuccess, initialMode, lockDivisionId, person, submitMode = 'club-admin-api', clubSport }: Props) {
     const [loading, setLoading] = useState(false);
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -109,10 +110,14 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
         [divisionId, divisions, lockDivisionId],
     );
     const linkedDivisionClubs = selectedDivision?.linked_clubs ?? [];
+    // El puesto depende del deporte de la categoría (un club polideportivo tiene
+    // categorías de rugby y de hockey); si va al plantel base, del deporte del club.
+    const rosterSport = resolveRosterSport(selectedDivision?.sport, clubSport);
+    const positionCatalog = useMemo(() => getPlayerPositionsForSport(rosterSport), [rosterSport]);
+    const showFrontRow = initialMode === 'player' && sportHasFrontRow(rosterSport);
     const identityComplete = Boolean(firstName && lastName);
-    const sportsComplete = initialMode === 'staff' ? Boolean(role) : Boolean(birthDate && position);
-    const physicalComplete = initialMode === 'staff' ? true : Boolean(weight && height);
-    const assignmentComplete = Boolean(lockDivisionId || divisionId || !divisions || divisions.length === 0);
+    const sportsComplete = initialMode === 'staff' ? Boolean(role) : Boolean(position);
+    const assignmentComplete = Boolean(lockDivisionId || divisionId);
     const isEditing = Boolean(person?.id);
     const currentRoleLabel = STAFF_ROLES.find(([value]) => value === role)?.[1] || 'STAFF';
     const previewMeta = initialMode === 'player' ? (position || 'Sin posicion').toUpperCase() : currentRoleLabel;
@@ -149,6 +154,15 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
         setPendingPayload(null);
         setFormError(null);
     }, [firstName, lastName, idNumber, docCountry, birthDate, position, role, divisionId, photoUrl, weight, height, hasIdentityPrompt]);
+
+    // Una ficha vieja puede traer "Medio Scrum" o "Segunda Linea": se lleva a la
+    // etiqueta del catálogo para que el botón se marque y se guarde canónica. Si
+    // no matchea nada (texto libre de otro deporte), se deja como está.
+    useEffect(() => {
+        if (!positionCatalog || !position) return;
+        const canonical = findPlayerPosition(rosterSport, position);
+        if (canonical && canonical.label !== position) setPosition(canonical.label);
+    }, [positionCatalog, rosterSport, position]);
 
     if (!isOpen) return null;
 
@@ -277,7 +291,8 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                 role,
                 division_id: divisionId || undefined,
                 status: 'active',
-                ...(initialMode === 'player' ? { front_row_certified: frontRowCertified } : {}),
+                // La marca ① solo existe en rugby: en otro deporte no se manda.
+                ...(showFrontRow ? { front_row_certified: frontRowCertified } : {}),
             };
 
             if (isEditing && person?.id) {
@@ -330,7 +345,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                     <div className="registry-header-info">
                         <h2>Ficha de club</h2>
                         <h1>{formLabel}</h1>
-                        <p>Carga rapida con preview lateral y asignacion opcional</p>
+                        <p>Nombre y apellido alcanzan para guardar. El resto se completa cuando se tenga.</p>
                     </div>
                     <div className="flex items-center">
                         <span className="registry-version-badge">
@@ -390,7 +405,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                     />
                                 </div>
                                 <div className="registry-field-group">
-                                    <label>Pais del doc.</label>
+                                    <label>País del doc.</label>
                                     <input
                                         list="doc-country-suggestions"
                                         value={docCountry}
@@ -406,10 +421,10 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                 </div>
                             </div>
                             <div className="registry-age-indicator">
-                                El documento identifica al jugador dentro de su pais: mismo pais y mismo numero es la misma persona.
+                                El documento identifica al jugador dentro de su país: mismo país y mismo número es la misma persona.
                             </div>
 
-                            <div className="registry-column-title" style={{ marginTop: '2.5rem' }}>Biometria</div>
+                            <div className="registry-column-title" style={{ marginTop: '2.5rem' }}>Datos físicos</div>
                             {initialMode === 'player' && (
                                 <div className="registry-field-group">
                                     <label>Fecha de nacimiento</label>
@@ -447,77 +462,117 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                         />
                                     </div>
                                 </div>
-                            ) : (
-                                <div className="registry-field-group">
-                                    <label>Cargo</label>
-                                    <select
-                                        value={role}
-                                        onChange={(e) => setRole(e.target.value)}
-                                    >
-                                        {STAFF_ROLES.map(([value, label]) => (
-                                            <option key={value} value={value}>{label}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-
-                            <div className="registry-info-note">
-                                <p>
-                                    📌 El jugador queda en el plantel base y puede asignarse luego a otras divisiones.
-                                </p>
-                            </div>
+                            ) : null}
                         </section>
 
                         {/* COL 2: PERFIL DEPORTIVO */}
                         <section className="registry-column registry-column-alt">
-                            <div className="registry-column-title">Perfil Deportivo</div>
+                            <div className="registry-column-title">Perfil deportivo</div>
+
+                            {/* La categoría va ANTES del puesto: de ella sale el deporte, y del
+                                deporte la lista de puestos. */}
+                            <div className="registry-field-group registry-division-selector">
+                                <label htmlFor="person-division">Categoría</label>
+                                {!lockDivisionId && divisions && divisions.length > 0 ? (
+                                    <>
+                                        <select
+                                            id="person-division"
+                                            value={divisionId}
+                                            onChange={(e) => setDivisionId(e.target.value)}
+                                        >
+                                            <option value="">Plantel base del club</option>
+                                            {divisions.map((division) => (
+                                                <option key={division.id} value={division.id}>
+                                                    {division.name.toUpperCase()} ({division.season})
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {linkedDivisionClubs.length > 0 && (
+                                            <div className="registry-division-shared">
+                                                Comparte con: {linkedDivisionClubs.map((club) => club.name).join(', ')}
+                                            </div>
+                                        )}
+                                        <p className="registry-division-hint">
+                                            Si no se elige categoría, queda en el plantel base y se puede asignar después.
+                                        </p>
+                                    </>
+                                ) : (
+                                    <select id="person-division" disabled>
+                                        <option>{assignmentLabel}</option>
+                                    </select>
+                                )}
+                            </div>
 
                             {initialMode === 'player' ? (
                                 <div className="registry-rugby-section">
-                                    {RUGBY_POSITION_GROUPS.map((group) => (
-                                        <div key={group.label}>
-                                            <h3>🔵 {group.label}</h3>
-                                            <div className="registry-pos-grid">
-                                                {group.positions.map((item) => (
-                                                    <button
-                                                        key={item}
-                                                        type="button"
-                                                        onClick={() => setPosition(item)}
-                                                        className={`registry-pos-btn ${position === item ? 'active' : ''}`}
-                                                    >
-                                                        {item}
-                                                    </button>
-                                                ))}
+                                    {positionCatalog ? (
+                                        positionCatalog.groups.map((group) => (
+                                            <div key={group.id} role="radiogroup" aria-label={`Puesto: ${group.label}`}>
+                                                <h3>{group.label}</h3>
+                                                <div className="registry-pos-grid">
+                                                    {positionCatalog.positions
+                                                        .filter((item) => item.group === group.id)
+                                                        .map((item) => (
+                                                            <button
+                                                                key={item.code}
+                                                                type="button"
+                                                                role="radio"
+                                                                aria-checked={position === item.label}
+                                                                onClick={() => setPosition(position === item.label ? '' : item.label)}
+                                                                className={`registry-pos-btn ${position === item.label ? 'active' : ''}`}
+                                                            >
+                                                                {item.label}
+                                                            </button>
+                                                        ))}
+                                                </div>
                                             </div>
+                                        ))
+                                    ) : (
+                                        <div className="registry-field-group">
+                                            <label htmlFor="person-position">Puesto</label>
+                                            <input
+                                                id="person-position"
+                                                value={position}
+                                                onChange={(e) => setPosition(e.target.value)}
+                                                placeholder="Opcional"
+                                            />
+                                            <p className="registry-division-hint">
+                                                {rosterSport
+                                                    ? 'Este deporte todavía no tiene lista de puestos: se escribe a mano.'
+                                                    : 'Cargá el deporte del club para elegir el puesto de una lista.'}
+                                            </p>
                                         </div>
-                                    ))}
-                                    <label
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 8,
-                                            marginTop: '1rem',
-                                            cursor: 'pointer',
-                                            fontSize: 12,
-                                        }}
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            checked={frontRowCertified}
-                                            onChange={(e) => setFrontRowCertified(e.target.checked)}
-                                        />
-                                        <span>
-                                            Curso de primeras lineas aprobado
-                                            <span style={{ display: 'block', opacity: 0.6, fontSize: 11 }}>
-                                                Sale como &#9312; en la planilla oficial del partido.
+                                    )}
+                                    {showFrontRow && (
+                                        <label
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 8,
+                                                marginTop: '1rem',
+                                                cursor: 'pointer',
+                                                fontSize: 12,
+                                            }}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={frontRowCertified}
+                                                onChange={(e) => setFrontRowCertified(e.target.checked)}
+                                            />
+                                            <span>
+                                                Curso de primeras líneas aprobado
+                                                <span style={{ display: 'block', opacity: 0.6, fontSize: 11 }}>
+                                                    Sale como &#9312; en la planilla oficial del partido.
+                                                </span>
                                             </span>
-                                        </span>
-                                    </label>
+                                        </label>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="registry-field-group">
-                                    <label>Perfil del staff</label>
+                                    <label htmlFor="person-staff-role">Cargo</label>
                                     <select
+                                        id="person-staff-role"
                                         value={role}
                                         onChange={(e) => setRole(e.target.value)}
                                     >
@@ -525,18 +580,13 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                             <option key={value} value={value}>{label}</option>
                                         ))}
                                     </select>
-                                    <div className="registry-info-note" style={{ marginTop: '1rem' }}>
-                                        <p>
-                                            Se conserva el mismo flujo de alta, pero con una ficha lateral orientada a roles y validacion operativa.
-                                        </p>
-                                    </div>
                                 </div>
                             )}
                         </section>
 
                         {/* COL 3: PREVIEW */}
                         <section className="registry-column registry-preview-panel">
-                            <div className="registry-column-title">Live Preview</div>
+                            <div className="registry-column-title">Vista previa</div>
 
                             <label htmlFor="photo-upload" className="registry-avatar-container">
                                 {photoUrl ? (
@@ -544,7 +594,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                 ) : (
                                     <>
                                         <User className="w-8 h-8 text-[var(--ca-text-muted)]" />
-                                        <span className="registry-upload-text">Upload Photo</span>
+                                        <span className="registry-upload-text">Subir foto</span>
                                     </>
                                 )}
                             </label>
@@ -579,22 +629,20 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                 )}
                             </div>
 
+                            {/* Solo nombre y apellido son obligatorios: el resto se marca en
+                                verde cuando está, y apagado cuando no, nunca en rojo. */}
                             <div className="registry-checklist">
                                 <div className="registry-check-item">
-                                    Identidad
+                                    Nombre y apellido
                                     <span className={`registry-status-led ${identityComplete ? 'ok' : 'fail'}`} />
                                 </div>
                                 <div className="registry-check-item">
-                                    Deportivo
-                                    <span className={`registry-status-led ${sportsComplete ? 'ok' : 'fail'}`} />
+                                    {initialMode === 'player' ? 'Puesto (opcional)' : 'Cargo'}
+                                    <span className={`registry-status-led ${sportsComplete ? 'ok' : ''}`} />
                                 </div>
                                 <div className="registry-check-item">
-                                    Fisico
-                                    <span className={`registry-status-led ${physicalComplete ? 'ok' : 'fail'}`} />
-                                </div>
-                                <div className="registry-check-item">
-                                    Asignacion
-                                    <span className={`registry-status-led ${assignmentComplete ? 'ok' : 'fail'}`} />
+                                    Categoría (opcional)
+                                    <span className={`registry-status-led ${assignmentComplete ? 'ok' : ''}`} />
                                 </div>
                             </div>
                         </section>
@@ -607,7 +655,7 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                                 Posible misma persona
                             </div>
                             <p className="registry-identity-prompt-desc">
-                                Encontramos fichas con el mismo nombre. Elige una para vincularla a este club o crea una nueva si no es la misma persona.
+                                Encontramos fichas con el mismo nombre. Elegí una para vincularla a este club, o creá una nueva si no es la misma persona.
                             </p>
 
                             <div className="grid gap-[10px]">
@@ -684,41 +732,6 @@ export function PersonManagementModal({ clubId, divisions, isOpen, onClose, onSu
                     )}
                 {/* FOOTER */}
                 <footer className="registry-footer">
-                    <div className="registry-division-selector">
-                        <div className="flex-1">
-                            <label className="registry-field-label" style={{ display: 'block', marginBottom: 6 }}>
-                                Asignacion de Division
-                            </label>
-                            {!lockDivisionId && divisions && divisions.length > 0 ? (
-                                <>
-                                    <select
-                                        value={divisionId}
-                                        onChange={(e) => setDivisionId(e.target.value)}
-                                    >
-                                        <option value="">Plantel base del club</option>
-                                        {divisions.map((division) => (
-                                            <option key={division.id} value={division.id}>
-                                                {division.name.toUpperCase()} ({division.season})
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {linkedDivisionClubs.length > 0 && (
-                                        <div className="registry-division-shared">
-                                            Comparte con: {linkedDivisionClubs.map((club) => club.name).join(', ')}
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                <select disabled>
-                                    <option>Plantel base del club</option>
-                                </select>
-                            )}
-                        </div>
-                        <p className="registry-division-hint">
-                            Si no se elige plantel, queda en el base.
-                        </p>
-                    </div>
-
                     <div className="registry-action-btns">
                         <button
                             type="button"

@@ -17,10 +17,14 @@
  * formulario del panel de la ficha pública. "Clubes relacionados" pasó a
  * llamarse "Clubes de la familia"; el id sigue siendo `relacionados` para no
  * romper links.
+ *
+ * "Partidos" es la agenda de la familia vista desde el gestor: el mismo "Hoy"
+ * de la ficha pública, con la baja de lo que cargó el club.
  */
 
 export type ClubManagerTabId =
     | 'inicio'
+    | 'partidos'
     | 'partido'
     | 'general'
     | 'jugadores'
@@ -32,6 +36,7 @@ export type ClubManagerTabId =
 
 export const CLUB_MANAGER_TABS: ReadonlyArray<{ id: ClubManagerTabId; label: string }> = [
     { id: 'inicio', label: 'Inicio' },
+    { id: 'partidos', label: 'Partidos' },
     { id: 'partido', label: 'Crear partido' },
     { id: 'general', label: 'General' },
     { id: 'jugadores', label: 'Jugadores' },
@@ -50,7 +55,9 @@ const ALIASES: Record<string, ClubManagerTabId> = {
     home: 'inicio',
     panel: 'inicio',
     partido: 'partido',
-    partidos: 'partido',
+    partidos: 'partidos',
+    hoy: 'partidos',
+    agenda: 'partidos',
     'crear-partido': 'partido',
     resumen: 'general',
     identidad: 'general',

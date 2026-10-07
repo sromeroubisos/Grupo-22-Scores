@@ -3,6 +3,7 @@
 import {
     ArrowRight,
     BadgeCheck,
+    CalendarDays,
     CalendarPlus,
     Handshake,
     IdCard,
@@ -32,11 +33,13 @@ type Shortcut = {
  * planteles, ver su familia. Lo que se toca una vez (datos, sedes, accesos,
  * sponsors, publicar) va después. El orden es el de uso, no el de las pestañas.
  *
- * Siete accesos con el primero a doble ancho son ocho celdas: cuatro filas
- * justas en dos columnas y dos en cuatro, sin un hueco al final de la grilla.
+ * Ocho accesos a ancho simple son ocho celdas: cuatro filas justas en dos
+ * columnas y dos en cuatro, sin un hueco al final de la grilla. Si se suma un
+ * noveno, alguno tiene que pasar a doble ancho (`wide`).
  */
 const SHORTCUTS: readonly Shortcut[] = [
-    { tab: 'jugadores', title: 'Categorías y jugadores', detail: 'Primera, Intermedia, juveniles y sus planteles.', icon: Users, wide: true },
+    { tab: 'partidos', title: 'Partidos y Hoy', detail: 'Lo que se juega hoy, lo que viene y los resultados.', icon: CalendarDays },
+    { tab: 'jugadores', title: 'Categorías y jugadores', detail: 'Primera, Intermedia, juveniles y sus planteles.', icon: Users },
     { tab: 'relacionados', title: 'Clubes de la familia', detail: 'El club, sus categorías y sus ramas.', icon: Network },
     { tab: 'general', title: 'Datos del club', detail: 'Escudo, nombre, colores y unión.', icon: IdCard },
     { tab: 'sedes', title: 'Sedes', detail: 'Canchas donde juega el club.', icon: MapPin },
