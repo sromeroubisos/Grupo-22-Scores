@@ -1,7 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { computeWorldRugbyExchange, rankByRating, replaySeason } from './rankingReplay.ts';
+import {
+  computeMatchExchange,
+  computeWorldRugbyExchange,
+  rankByRating,
+  replaySeason,
+  resolvePlayoffStage,
+} from './rankingReplay.ts';
 
 const config = { home_advantage: 0, margin_threshold: 15, margin_multiplier: 1.5, event_multiplier: 1 };
 
@@ -26,6 +32,70 @@ test('la brecha se acota a diez puntos: piso cero y techo dos, sin regla aparte'
 test('ganar por mas de quince multiplica por 1,5; el empate solo mueve la brecha', () => {
   assert.equal(computeWorldRugbyExchange(config, 80, 82, { home: 40, away: 10 }).homeDelta, 1.8);
   assert.equal(computeWorldRugbyExchange(config, 80, 82, { home: 20, away: 20 }).homeDelta, 0.2);
+});
+
+/* ── el bonus de playoff ────────────────────────────────────────────────── */
+
+test('la instancia sale del nombre de la ronda dentro de una fase de eliminacion', () => {
+  assert.equal(resolvePlayoffStage({ roundName: 'Cuartos de final', phaseName: 'Playoffs', phaseType: 'playoff' }), 'quarterfinal');
+  assert.equal(resolvePlayoffStage({ roundName: 'Semifinal', phaseName: 'Playoff', phaseType: 'knockout' }), 'semifinal');
+  assert.equal(resolvePlayoffStage({ roundName: 'Final', phaseName: 'Final', phaseType: 'playoff' }), 'final');
+  assert.equal(resolvePlayoffStage({ roundName: 'Final · Copa Oro', phaseName: 'Playoffs', phaseType: 'playoff' }), 'final');
+
+  // Lo que no paga: la fase regular, los octavos, el tercer puesto.
+  assert.equal(resolvePlayoffStage({ roundName: 'Fecha 12', phaseName: 'Fase regular', phaseType: 'group_stage' }), null);
+  assert.equal(resolvePlayoffStage({ roundName: 'Final', phaseName: 'Zona A', phaseType: 'league' }), null);
+  assert.equal(resolvePlayoffStage({ roundName: 'Octavos de final', phaseName: 'Playoffs', phaseType: 'playoff' }), null);
+  assert.equal(resolvePlayoffStage({ roundName: 'Tercer puesto', phaseName: 'Playoffs', phaseType: 'playoff' }), null);
+  assert.equal(resolvePlayoffStage({ roundName: null, phaseName: 'Repechaje', phaseType: 'knockout' }), null);
+});
+
+test('el repechaje del TDI se llama "Cuartos de final" y no es un cuarto de final', () => {
+  // Medido el 16/9/2026: el Torneo del Interior "A" tuvo 8 "Cuartos de final"
+  // el 12/9, 4 de la fase Cuartos y 4 de la fase Repechaje. Solo pagan los 4.
+  assert.equal(resolvePlayoffStage({ roundName: 'Cuartos de final', phaseName: 'Cuartos de Final', phaseType: 'playoff' }), 'quarterfinal');
+  assert.equal(resolvePlayoffStage({ roundName: 'Cuartos de final', phaseName: 'Repechaje', phaseType: 'playoff' }), null);
+  assert.equal(resolvePlayoffStage({ roundName: 'Cuartos de final', phaseName: 'Reválida', phaseType: 'playoff' }), null);
+  // Las copas de consuelo tampoco: la final del torneo es una sola.
+  assert.equal(resolvePlayoffStage({ roundName: 'Final · Copa Plata', phaseName: 'Playoffs', phaseType: 'playoff' }), null);
+});
+
+test('el bonus lo cobra solo el ganador, aparte del intercambio, y el perdedor no pierde nada mas', () => {
+  const base = computeWorldRugbyExchange(config, 80, 84, { home: 30, away: 20 });
+  const cuartos = computeMatchExchange(config, 80, 84, { home: 30, away: 20 }, 'quarterfinal');
+  const semis = computeMatchExchange(config, 80, 84, { home: 30, away: 20 }, 'semifinal');
+
+  assert.equal(cuartos.homeDelta, Number((base.homeDelta + 0.5).toFixed(4)));
+  assert.equal(cuartos.awayDelta, base.awayDelta);
+  assert.equal(semis.homeDelta, Number((base.homeDelta + 1.5).toFixed(4)));
+  assert.equal(semis.awayDelta, base.awayDelta);
+
+  // Gana la visita: el bonus va a la visita y el local queda con su intercambio.
+  const baseVisita = computeWorldRugbyExchange(config, 80, 84, { home: 20, away: 30 });
+  const final = computeMatchExchange(config, 80, 84, { home: 20, away: 30 }, 'final');
+  assert.equal(final.awayDelta, Number((baseVisita.awayDelta + 2).toFixed(4)));
+  assert.equal(final.homeDelta, baseVisita.homeDelta);
+  assert.equal(final.metadata.playoffBonus, 2);
+  assert.equal(final.metadata.playoffStage, 'final');
+});
+
+test('sin instancia o sin ganador no hay bonus: la cuenta sigue siendo suma cero', () => {
+  const regular = computeMatchExchange(config, 80, 84, { home: 30, away: 20 }, null);
+  assert.equal(Number((regular.homeDelta + regular.awayDelta).toFixed(4)), 0);
+  assert.equal(regular.metadata.playoffBonus, 0);
+
+  const empate = computeMatchExchange(config, 80, 84, { home: 20, away: 20 }, 'final');
+  assert.equal(Number((empate.homeDelta + empate.awayDelta).toFixed(4)), 0);
+  assert.equal(empate.metadata.playoffBonus, 0);
+});
+
+test('en la temporada reproducida la final paga sus dos puntos al campeon', () => {
+  const partido = { id: 'f', date_time: '2026-09-12T18:30:00Z', home_club_id: 'belgrano', away_club_id: 'tilos', score: { home: 30, away: 20 } };
+  const sinBonus = replaySeason({ entries, matches: [partido], adjustments: [], config });
+  const conBonus = replaySeason({ entries, matches: [{ ...partido, stage: 'final' as const }], adjustments: [], config });
+
+  assert.equal(Number((conBonus.ratings.get('belgrano')! - sinBonus.ratings.get('belgrano')!).toFixed(4)), 2);
+  assert.equal(conBonus.ratings.get('tilos'), sinBonus.ratings.get('tilos'));
 });
 
 /* ── la temporada reproducida ───────────────────────────────────────────── */
