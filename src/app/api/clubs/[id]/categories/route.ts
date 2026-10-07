@@ -443,3 +443,100 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         return err('No se pudo guardar la categoría', 500);
     }
 }
+
+/**
+ * Lo que impide borrar una categoría: todo lo que la referencia y que el
+ * borrado del club se llevaría puesto en cascada (participaciones, tablas,
+ * planteles) o que no dejaría borrar (partidos). Se cuenta tabla por tabla
+ * para poder decir QUÉ tiene, no solo que "no se puede".
+ */
+const CATEGORY_USAGE_CHECKS: ReadonlyArray<{ table: string; columns: string[]; label: (count: number) => string }> = [
+    { table: 'matches', columns: ['home_club_id', 'away_club_id'], label: (n) => `${n} partido${n === 1 ? '' : 's'}` },
+    { table: 'tournament_participants', columns: ['club_id'], label: (n) => `${n} torneo${n === 1 ? '' : 's'}` },
+    { table: 'team_season_entries', columns: ['club_id'], label: (n) => `${n} inscripción${n === 1 ? '' : 'es'} a torneos` },
+    { table: 'club_person_roles', columns: ['club_id'], label: (n) => `${n} persona${n === 1 ? '' : 's'} en el plantel` },
+    { table: 'team_memberships', columns: ['club_id'], label: (n) => `${n} jugador${n === 1 ? '' : 'es'} asignado${n === 1 ? '' : 's'}` },
+    { table: 'people', columns: ['club_id'], label: (n) => `${n} ficha${n === 1 ? '' : 's'} de jugador` },
+    { table: 'season_rosters', columns: ['club_id'], label: (n) => `${n} plantel${n === 1 ? '' : 'es'} de temporada` },
+];
+
+/**
+ * DELETE /api/clubs/:id/categories?categoryId=… — baja de una categoría vacía.
+ *
+ * Es para deshacer una categoría creada de más o mal nombrada. Una categoría
+ * es un club derivado, y borrar un club arrastra en cascada sus torneos, su
+ * tabla y su plantel: por eso solo se borra si no tiene NADA de eso. Si tiene,
+ * contesta 409 con el detalle y no toca la base.
+ *
+ * El club base nunca se borra desde acá, y la categoría tiene que colgar de
+ * esta familia por `club_derivatives`.
+ */
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    try {
+        const { id } = await params;
+        const clubId = normalizeText(id);
+        if (!clubId) return err('club requerido', 400);
+
+        const categoryId = normalizeText(request.nextUrl.searchParams.get('categoryId'));
+        if (!categoryId) return err('Falta la categoría', 400);
+
+        const supabase = await createClient();
+        const context = await requireUserAccessContext(supabase).catch(() => null);
+        if (!context) return err('No autenticado', 401);
+
+        const target = await getClubManagementTarget(supabase, clubId);
+        if (!target) return err('Club no encontrado', 404);
+        if (!canManageClubContext(context, target, MANAGEMENT_MEMBERSHIP_ROLES)) {
+            return err('Sin permisos para administrar este club', 403);
+        }
+
+        const familyIds = new Set(target.familyClubIds ?? [target.clubId]);
+        if (!familyIds.has(categoryId)) {
+            return err('Esa categoría no pertenece a este club', 403);
+        }
+
+        const admin = createAdminClient();
+
+        // Tiene que ser un DERIVADO: el club base (o uno suelto) no es una categoría.
+        const { data: link } = await admin
+            .from('club_derivatives')
+            .select('base_club_id')
+            .eq('derived_club_id', categoryId)
+            .maybeSingle();
+        if (!link) return err('El club principal no se puede borrar desde acá', 400);
+
+        const usage: string[] = [];
+        for (const check of CATEGORY_USAGE_CHECKS) {
+            const filter = check.columns.map((column) => `${column}.eq.${categoryId}`).join(',');
+            const { count, error } = await (admin as any)
+                .from(check.table)
+                .select('*', { count: 'exact', head: true })
+                .or(filter);
+            if (error) {
+                // Si no se puede contar, no se borra: preferimos un "no" a una cascada a ciegas.
+                console.error('[clubs/categories] DELETE no pudo revisar', check.table, error);
+                return err('No se pudo revisar si la categoría está en uso', 500);
+            }
+            if (count && count > 0) usage.push(check.label(count));
+        }
+
+        if (usage.length > 0) {
+            return NextResponse.json({
+                ok: false,
+                error: `No se puede borrar: tiene ${usage.join(', ')}. Borralos primero o pedí la baja al administrador.`,
+                usage,
+            }, { status: 409 });
+        }
+
+        const removed = await admin.from('clubs').delete().eq('id', categoryId);
+        if (removed.error) {
+            console.error('[clubs/categories] DELETE fallido', removed.error);
+            return err(removed.error.message || 'No se pudo borrar la categoría', 500);
+        }
+
+        return NextResponse.json({ ok: true });
+    } catch (error) {
+        console.error('[clubs/categories] DELETE', error);
+        return err('No se pudo borrar la categoría', 500);
+    }
+}

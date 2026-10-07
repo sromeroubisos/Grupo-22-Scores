@@ -10,10 +10,22 @@
  *
  * Los alias existen porque hay links viejos dando vueltas (favoritos, mails,
  * la tabla de clubes del super admin). Un `tab` que ya no está no tiene que
- * romper: cae en General.
+ * romper: cae en Inicio.
+ *
+ * 2026-10: "Inicio" es la portada de accesos rápidos (lo primero que ve un club
+ * al entrar, y adonde lleva "Volver al panel") y "Crear partido" monta el mismo
+ * formulario del panel de la ficha pública. "Clubes relacionados" pasó a
+ * llamarse "Clubes de la familia"; el id sigue siendo `relacionados` para no
+ * romper links.
+ *
+ * "Partidos" es la agenda de la familia vista desde el gestor: el mismo "Hoy"
+ * de la ficha pública, con la baja de lo que cargó el club.
  */
 
 export type ClubManagerTabId =
+    | 'inicio'
+    | 'partidos'
+    | 'partido'
     | 'general'
     | 'jugadores'
     | 'sedes'
@@ -23,19 +35,30 @@ export type ClubManagerTabId =
     | 'publicar';
 
 export const CLUB_MANAGER_TABS: ReadonlyArray<{ id: ClubManagerTabId; label: string }> = [
+    { id: 'inicio', label: 'Inicio' },
+    { id: 'partidos', label: 'Partidos' },
+    { id: 'partido', label: 'Crear partido' },
     { id: 'general', label: 'General' },
     { id: 'jugadores', label: 'Jugadores' },
+    { id: 'relacionados', label: 'Clubes de la familia' },
     { id: 'sedes', label: 'Sedes' },
     { id: 'usuarios', label: 'Usuarios' },
-    { id: 'relacionados', label: 'Clubes relacionados' },
     { id: 'sponsors', label: 'Sponsors' },
     { id: 'publicar', label: 'Publicar' },
 ];
 
 const ALLOWED = new Set<ClubManagerTabId>(CLUB_MANAGER_TABS.map((tab) => tab.id));
 
-/** Nombres viejos → sección actual. Todo lo que no figure cae en General. */
+/** Nombres viejos → sección actual. Todo lo que no figure cae en Inicio. */
 const ALIASES: Record<string, ClubManagerTabId> = {
+    inicio: 'inicio',
+    home: 'inicio',
+    panel: 'inicio',
+    partido: 'partido',
+    partidos: 'partidos',
+    hoy: 'partidos',
+    agenda: 'partidos',
+    'crear-partido': 'partido',
     resumen: 'general',
     identidad: 'general',
     configuracion: 'general',
@@ -62,10 +85,10 @@ const ALIASES: Record<string, ClubManagerTabId> = {
 
 export function normalizeClubManagerTab(requested?: string | null): ClubManagerTabId {
     const key = (requested ?? '').trim().toLowerCase();
-    if (!key) return 'general';
+    if (!key) return 'inicio';
 
     const aliased = ALIASES[key];
     if (aliased) return aliased;
 
-    return ALLOWED.has(key as ClubManagerTabId) ? (key as ClubManagerTabId) : 'general';
+    return ALLOWED.has(key as ClubManagerTabId) ? (key as ClubManagerTabId) : 'inicio';
 }

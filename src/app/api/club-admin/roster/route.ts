@@ -93,8 +93,6 @@ export async function POST(request: NextRequest) {
         photo_url: typeof body?.photo_url === 'string' ? body.photo_url : undefined,
         weight: typeof body?.weight === 'number' ? body.weight : undefined,
         height: typeof body?.height === 'number' ? body.height : undefined,
-        jersey_number: typeof body?.jersey_number === 'number' ? body.jersey_number : undefined,
-        squad_role: typeof body?.squad_role === 'string' ? body.squad_role : undefined,
         existing_person_id: typeof body?.existing_person_id === 'string' ? body.existing_person_id : undefined,
         force_create_new: body?.force_create_new === true,
     }, admin);
@@ -138,8 +136,6 @@ export async function PATCH(request: NextRequest) {
         photo_url: typeof body?.photo_url === 'string' ? body.photo_url : undefined,
         weight: typeof body?.weight === 'number' ? body.weight : undefined,
         height: typeof body?.height === 'number' ? body.height : undefined,
-        jersey_number: typeof body?.jersey_number === 'number' ? body.jersey_number : undefined,
-        squad_role: typeof body?.squad_role === 'string' ? body.squad_role : undefined,
     }, admin);
 
     if (!result.success) {
