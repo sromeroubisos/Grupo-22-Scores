@@ -4,6 +4,7 @@ import {
     computeMatchExchange,
     rankByRating,
     replaySeason,
+    playoffStageWithBonus,
     resolvePlayoffStage,
     type PlayoffStage,
     type ReplayMatch,
@@ -698,11 +699,15 @@ async function enrichMatchesWithPlayoffStage(
         const phase = phases.get(round.phase_id ?? match.phase_id ?? '');
         return {
             ...match,
-            playoff_stage: resolvePlayoffStage({
-                roundName: round.name,
-                phaseName: phase?.name ?? null,
-                phaseType: phase?.phase_type ?? null,
-            }),
+            // Los playoffs anteriores al corte se premiaron a mano: no pagan.
+            playoff_stage: playoffStageWithBonus(
+                resolvePlayoffStage({
+                    roundName: round.name,
+                    phaseName: phase?.name ?? null,
+                    phaseType: phase?.phase_type ?? null,
+                }),
+                match.date_time,
+            ),
         };
     });
 }
