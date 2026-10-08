@@ -1,0 +1,463 @@
+/* La tabla por fechas. Hereda los tokens --fl-* de .page (page.module.css),
+   así que el tema claro llega solo; acá solo se pisan los colores de serie. */
+
+/* ── Barra: el selector va a la derecha, arriba de la tabla ───────────── */
+.bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin: 0 0 10px;
+    min-height: 44px;
+}
+
+/* En la barra de herramientas ocupa el espacio libre y empuja Exportar al
+   borde; en el celular esa barra no se ve y el selector baja a su fila. */
+.barToolbar { flex: 1; margin: 0; min-width: 0; }
+.barMobile { display: none; }
+@media (max-width: 600px) {
+    .barToolbar { display: none; }
+    .barMobile { display: flex; }
+}
+
+.barCaption {
+    margin-right: auto;
+    min-width: 0;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--fl-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation: tl-fade 260ms var(--fl-ease-out-quart, ease-out) both;
+}
+.barCaption strong { color: var(--fl-text); font-weight: 700; }
+
+/* ── Selector ─────────────────────────────────────────────────────────── */
+.picker {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px;
+    border-radius: 12px;
+    border: 1px solid var(--fl-border);
+    background: var(--fl-surface);
+}
+
+.stepBtn {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    border: none;
+    background: transparent;
+    color: var(--fl-text-muted);
+    cursor: pointer;
+    transition: background 140ms ease, color 140ms ease, transform 120ms ease;
+}
+.stepBtn:hover:not(:disabled) { background: var(--fl-surface-alt); color: var(--fl-text); }
+.stepBtn:active:not(:disabled) { transform: scale(0.94); }
+.stepBtn:disabled { opacity: 0.35; cursor: default; }
+.stepBtn:focus-visible,
+.trigger:focus-visible,
+.evolutionToggle:focus-visible,
+.chip:focus-visible {
+    outline: 2px solid var(--fl-primary);
+    outline-offset: 2px;
+}
+
+.playBtn { overflow: hidden; }
+.playBtnOn { color: var(--fl-primary-text); background: rgba(0, 163, 101, 0.12); }
+
+/* El avance hacia la próxima fecha, como una barrita al pie del botón. */
+.playProgress {
+    position: absolute;
+    left: 7px;
+    right: 7px;
+    bottom: 4px;
+    height: 2px;
+    border-radius: 2px;
+    background: rgba(0, 163, 101, 0.2);
+    overflow: hidden;
+}
+.playProgressFill {
+    display: block;
+    height: 100%;
+    background: var(--fl-primary);
+    transform-origin: left;
+    animation: tl-progress linear both;
+}
+
+.triggerWrap { position: relative; }
+
+.trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 152px;
+    height: 36px;
+    padding: 0 10px 0 12px;
+    border-radius: 9px;
+    border: none;
+    background: var(--fl-surface-alt);
+    color: var(--fl-text);
+    cursor: pointer;
+    text-align: left;
+    transition: background 160ms ease, box-shadow 160ms ease;
+}
+.trigger:hover { background: var(--fl-surface-hov); }
+.triggerHistoric { box-shadow: inset 0 0 0 1px rgba(0, 163, 101, 0.45); }
+
+.triggerText {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+    min-width: 0;
+    flex: 1;
+}
+.triggerLabel {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    animation: tl-label-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.triggerSub {
+    margin-top: 2px;
+    font-size: 0.64rem;
+    font-weight: 600;
+    color: var(--fl-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.chevron { color: var(--fl-text-muted); transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1); flex-shrink: 0; }
+.chevronOpen { transform: rotate(180deg); }
+
+/* La lista se abre desde la esquina del botón, alineada a la derecha. */
+.list {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: -45px;
+    z-index: 40;
+    width: min(300px, calc(100vw - 32px));
+    max-height: min(380px, 60vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border-radius: 14px;
+    border: 1px solid var(--fl-border);
+    background: var(--fl-surface);
+    box-shadow: var(--fl-shadow);
+    outline: none;
+    transform-origin: top right;
+    animation: tl-pop 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 6px 10px;
+    border-radius: 9px;
+    cursor: pointer;
+    animation: tl-item-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i, 0) * 18ms);
+}
+.optionActive { background: var(--fl-surface-alt); }
+.optionSelected .optionTitle { color: var(--fl-primary-text); }
+
+.optionMain { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.15; }
+.optionTitle { font-size: 0.8rem; font-weight: 800; color: var(--fl-text); }
+.optionDate { margin-top: 2px; font-size: 0.66rem; font-weight: 600; color: var(--fl-text-muted); font-variant-numeric: tabular-nums; }
+
+.optionLeader {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 118px;
+    min-width: 0;
+}
+.optionCrest { width: 18px; height: 18px; object-fit: contain; flex-shrink: 0; }
+.optionCrestEmpty { width: 14px; height: 14px; border-radius: 50%; background: var(--fl-surface-hov); flex-shrink: 0; }
+.optionLeaderName {
+    font-size: 0.66rem;
+    font-weight: 600;
+    color: var(--fl-text-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.optionCheck { color: var(--fl-primary-text); flex-shrink: 0; opacity: 0; transform: scale(0.6); transition: opacity 160ms ease, transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+.optionSelected .optionCheck { opacity: 1; transform: scale(1); }
+
+/* ── Flecha de puestos en la fila ─────────────────────────────────────── */
+.delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    flex-shrink: 0;
+    margin-left: 6px;
+    padding: 1px 5px 1px 3px;
+    border-radius: 999px;
+    font-family: var(--fl-mono);
+    font-size: 0.62rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+    animation: tl-delta-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: 380ms;
+}
+.deltaUp { color: var(--fl-success); background: rgba(34, 197, 94, 0.12); }
+.deltaDown { color: var(--fl-danger); background: rgba(239, 68, 68, 0.12); }
+.deltaSame { color: var(--fl-text-dim); background: transparent; padding: 1px 4px; }
+
+/* Destello de la fila que se movió: verde si subió, rojo si bajó. Se pinta con
+   box-shadow para no pisar el degradé de las filas con etiqueta. */
+.flipRoot [data-moved='up'] { animation: tl-flash-up 1s ease-out both; }
+.flipRoot [data-moved='down'] { animation: tl-flash-down 1s ease-out both; }
+
+/* ── Botón del gráfico, al lado de la leyenda ─────────────────────────── */
+.legendRow {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 14px;
+}
+.legendRow > :first-child:not(.evolutionToggle) { flex: 1; min-width: 0; margin-top: 0; }
+
+.evolutionToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    margin-left: auto;
+    border-radius: var(--fl-radius-sm);
+    border: 1px solid var(--fl-border);
+    background: var(--fl-surface);
+    color: var(--fl-text);
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: border-color 160ms ease, color 160ms ease, background 160ms ease, transform 120ms ease;
+}
+.evolutionToggle:hover { border-color: var(--fl-primary); color: var(--fl-primary-text); }
+.evolutionToggle:active { transform: scale(0.97); }
+.evolutionToggleOn { border-color: rgba(0, 163, 101, 0.45); color: var(--fl-primary-text); background: rgba(0, 163, 101, 0.08); }
+
+/* ── Gráfico ──────────────────────────────────────────────────────────── */
+.chartPanel {
+    /* Paleta categórica validada (dataviz, 4 puestos): oscuro sobre #0f141b. */
+    --tl-s1: #3987e5;
+    --tl-s2: #d95926;
+    --tl-s3: #199e70;
+    --tl-s4: #c98500;
+    --tl-line: rgba(139, 154, 180, 0.32);
+
+    margin-top: 12px;
+    padding: 16px 16px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--fl-border);
+    background: var(--fl-surface);
+    transform-origin: top center;
+    animation: tl-panel-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+:global([data-theme='light']) .chartPanel {
+    --tl-s1: #2a78d6;
+    --tl-s2: #eb6834;
+    --tl-s3: #1baf7a;
+    --tl-s4: #eda100;
+    --tl-line: rgba(80, 96, 120, 0.26);
+}
+
+.chartHead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.chartTitle { margin: 0; font-size: 0.86rem; font-weight: 800; color: var(--fl-text); }
+.chartHint { margin: 0; font-size: 0.7rem; font-weight: 600; color: var(--fl-text-muted); }
+
+.chartScroll {
+    position: relative;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--fl-surface-hov) transparent;
+    padding-bottom: 4px;
+}
+.chart { display: block; overflow: visible; touch-action: pan-x pan-y; }
+
+.gridLine { stroke: var(--fl-border); stroke-width: 1; }
+.axisText { fill: var(--fl-text-dim); font-family: var(--fl-mono); font-size: 10px; font-weight: 700; }
+.axisTextStrong { fill: var(--fl-primary-text); }
+
+.colMark { fill: var(--fl-surface-alt); opacity: 0.7; }
+.colMarkSelected { fill: rgba(0, 163, 101, 0.1); stroke: rgba(0, 163, 101, 0.35); stroke-width: 1; }
+.colHit { fill: transparent; cursor: pointer; }
+
+.series { color: var(--tl-line); transition: opacity 200ms ease; }
+.series1 { color: var(--tl-s1); }
+.series2 { color: var(--tl-s2); }
+.series3 { color: var(--tl-s3); }
+.series4 { color: var(--tl-s4); }
+.seriesDim { opacity: 0.35; }
+
+.seriesLine {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    /* Las líneas se dibujan solas al abrir el panel. */
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: tl-draw 1100ms cubic-bezier(0.65, 0, 0.35, 1) 80ms forwards;
+    transition: stroke-width 160ms ease;
+}
+.seriesPinned .seriesLine { stroke-width: 3; }
+.seriesFocus:not(.seriesPinned) { color: var(--fl-text-soft); }
+.seriesFocus .seriesLine { stroke-width: 3; }
+
+.seriesDot {
+    fill: currentColor;
+    stroke: var(--fl-surface);
+    stroke-width: 2;
+    animation: tl-dot-in 260ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.seriesHit { fill: none; stroke: transparent; stroke-width: 14; cursor: pointer; pointer-events: stroke; }
+
+.endLabel { cursor: pointer; }
+.endLabelHit { fill: transparent; transition: fill 140ms ease; }
+.endLabel:hover .endLabelHit,
+.endLabelFocus .endLabelHit { fill: var(--fl-surface-alt); }
+.endLabelDot { fill: var(--fl-text-dim); }
+.endLabelText { fill: var(--fl-text-muted); font-size: 11px; font-weight: 600; }
+/* El nombre va en tinta de texto, nunca en el color de la serie. */
+.endLabelPinned .endLabelText,
+.endLabelFocus .endLabelText { fill: var(--fl-text); font-weight: 800; }
+.endLabelPinned .endLabelHit { fill: color-mix(in srgb, currentColor 14%, transparent); }
+
+.tooltip {
+    position: absolute;
+    top: 4px;
+    z-index: 2;
+    min-width: 170px;
+    max-width: 200px;
+    padding: 9px 11px;
+    border-radius: 10px;
+    border: 1px solid var(--fl-border);
+    background: var(--fl-surface-alt);
+    box-shadow: var(--fl-shadow-sm);
+    pointer-events: none;
+    animation: tl-fade 140ms ease-out both;
+}
+.tooltipTitle { margin: 0 0 6px; font-size: 0.7rem; font-weight: 800; color: var(--fl-text); }
+.tooltipRow { display: flex; gap: 8px; margin: 2px 0; font-size: 0.7rem; color: var(--fl-text-soft); }
+.tooltipPos { width: 14px; font-family: var(--fl-mono); font-weight: 800; color: var(--fl-text-dim); text-align: right; }
+.tooltipName { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tooltipFoot { margin: 6px 0 0; font-size: 0.62rem; font-weight: 600; color: var(--fl-text-muted); }
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+}
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 0 10px 0 8px;
+    border-radius: 999px;
+    border: 1px solid var(--fl-border);
+    background: transparent;
+    color: var(--fl-text-soft);
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 120ms ease;
+}
+.chip:hover { background: var(--fl-surface-alt); color: var(--fl-text); }
+.chip:active { transform: scale(0.96); }
+/* .chip fija el color del texto y va después de .series*: el color de la
+   serie se reafirma acá, con más especificidad. */
+.chip.series1 { color: var(--tl-s1); }
+.chip.series2 { color: var(--tl-s2); }
+.chip.series3 { color: var(--tl-s3); }
+.chip.series4 { color: var(--tl-s4); }
+.chipOn { border-color: currentColor; background: color-mix(in srgb, currentColor 10%, transparent); }
+.chipOn .chipName, .chipOn .chipRange { color: var(--fl-text); }
+.chipSwatch { width: 8px; height: 8px; border-radius: 50%; background: var(--tl-line); flex-shrink: 0; }
+.chipOn .chipSwatch { background: currentColor; transform: scale(1.15); }
+.chipCrest { width: 16px; height: 16px; object-fit: contain; }
+.chipName { max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chipRange { font-family: var(--fl-mono); font-size: 0.62rem; font-weight: 700; color: var(--fl-text-dim); }
+
+/* ── Mobile ───────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .bar { flex-wrap: wrap; gap: 8px; }
+    .barCaption { order: 2; flex-basis: 100%; margin-right: 0; }
+    .picker { margin-left: auto; }
+    .trigger { min-width: 128px; }
+    .list { right: -90px; }
+    .legendRow { flex-direction: column; }
+    .evolutionToggle { width: 100%; margin-left: 0; }
+    .chartPanel { padding: 14px 10px 12px; }
+}
+
+/* ── Keyframes ────────────────────────────────────────────────────────── */
+@keyframes tl-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tl-pop {
+    from { opacity: 0; transform: translateY(-4px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes tl-item-in {
+    from { opacity: 0; transform: translateX(6px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes tl-label-in {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes tl-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes tl-delta-in {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes tl-flash-up {
+    0% { box-shadow: inset 0 0 0 999px rgba(34, 197, 94, 0.16); }
+    100% { box-shadow: inset 0 0 0 999px rgba(34, 197, 94, 0); }
+}
+@keyframes tl-flash-down {
+    0% { box-shadow: inset 0 0 0 999px rgba(239, 68, 68, 0.14); }
+    100% { box-shadow: inset 0 0 0 999px rgba(239, 68, 68, 0); }
+}
+@keyframes tl-panel-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes tl-draw { to { stroke-dashoffset: 0; } }
+@keyframes tl-dot-in {
+    from { opacity: 0; transform: scale(0.3); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .barCaption, .list, .option, .triggerLabel, .delta, .chartPanel, .seriesDot, .tooltip, .playProgressFill {
+        animation: none;
+    }
+    .flipRoot [data-moved] { animation: none; }
+    .seriesLine { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
+    .chevron, .optionCheck, .stepBtn, .trigger, .chip, .evolutionToggle { transition: none; }
+}

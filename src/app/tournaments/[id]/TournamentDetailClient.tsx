@@ -18,6 +18,17 @@ import TournamentScoresPanel, { hasRatedLineups, sondaDePuntajes } from './Tourn
 import TournamentChampionsTab, { ClubCrest, type ChampionRef } from './TournamentChampionsTab';
 import TournamentSofascoreStats from './TournamentSofascoreStats';
 import TournamentNavigation from './TournamentNavigation';
+import {
+    EvolutionToggle,
+    PositionDeltaChip,
+    StandingsEvolutionChart,
+    StandingsRoundPicker,
+    formatRoundDays,
+    useFlipReorder,
+    type EvolutionColumn,
+} from './StandingsTimeline';
+import timelineStyles from './StandingsTimeline.module.css';
+import { computeRoundCutoffs, dayKeyInZone } from '@/lib/standings/standingsTimeline';
 import { resolveSofascoreLeague } from '@/lib/sofascoreLeagueMap';
 import { StandingsEngine } from '@/lib/services/standingsEngine';
 import { getAllCountries, getCountryById } from '@/lib/data/countries';
@@ -1440,6 +1451,59 @@ function buildStandingsSnapshot(dbData: TournamentInitialData, preferredPhaseId?
     return grouped.length > 0 ? grouped : persistedStandings;
 }
 
+type StandingsTimelineEntry = {
+    round: number;
+    dayKey: string;
+    fromDayKey: string;
+    matchesPlayed: number;
+    standings: any[];
+};
+
+/**
+ * La tabla al cierre de cada fecha (src/lib/standings/standingsTimeline.ts
+ * decide dónde cierra cada una). Cada foto es la MISMA cuenta que la tabla
+ * actual —buildCalculatedStandings— con los partidos jugados hasta ese día.
+ *
+ * Vacío cuando la tabla no sale de los partidos: carga manual (la tabla
+ * oficial se copia a mano y no hay de dónde reconstruir el pasado) y fases que
+ * arrastran puntos de otra fase, que acá no se ven. Mostrar una foto vieja
+ * calculada distinta de la tabla publicada sería peor que no mostrar nada.
+ */
+function buildStandingsTimeline(dbData: TournamentInitialData, phaseId: string | null): StandingsTimelineEntry[] {
+    if (dbData.queryErrors?.matches || dbData.queryErrors?.participants) return [];
+
+    const { activePhase, activePhaseId, resolvedRules, matches } = getDbStandingsContext(dbData, phaseId);
+    if (resolvedRules?.calculation_mode === 'fully_manual') return [];
+    if (isPhaseCarryOverEnabled(activePhase?.settings)) return [];
+    if (activePhase && isKnockoutPhaseType(activePhase.phase_type)) return [];
+
+    const phaseMatches = matches.filter(
+        (match: any) => !activePhaseId || !match?.phase_id || String(match.phase_id) === String(activePhaseId),
+    );
+    const cutoffs = computeRoundCutoffs(
+        phaseMatches.map((match: any) => ({
+            homeId: match.home_club_id,
+            awayId: match.away_club_id,
+            dateTime: match.date_time,
+            isFinal: isDbFinalStatus(match.status),
+        })),
+        APP_TIMEZONE,
+    );
+
+    return cutoffs.map((cutoff) => {
+        const scoped = {
+            ...dbData,
+            matches: matches.filter((match: any) => {
+                if (!isDbFinalStatus(match?.status)) return true;
+                if (!match?.date_time) return false;
+                const key = dayKeyInZone(match.date_time, APP_TIMEZONE);
+                return key !== null && key <= cutoff.dayKey;
+            }),
+        } as TournamentInitialData;
+        return { ...cutoff, standings: buildCalculatedStandings(scoped, activePhaseId) };
+    });
+}
+
 function buildPhaseFlatStandingsRows(dbData: TournamentInitialData, phaseId: string) {
     const persistedRows = (Array.isArray(dbData.standings) ? dbData.standings : [])
         .filter((row: any) =>
@@ -2036,6 +2100,15 @@ export default function TournamentDetailPage({
 
     const [tournamentData, setTournamentData] = useState<any>(preloaded?.tournamentMeta ?? null);
     const [standings, setStandings] = useState<any[]>(preloaded?.standings ?? []);
+    // Los datos crudos de la base, para reconstruir la tabla de cada fecha. Solo
+    // en torneos que se cargan acá: en los de proveedor externo la tabla es la
+    // del proveedor y no hay con qué fotografiar el pasado.
+    const [timelineDbData, setTimelineDbData] = useState<TournamentInitialData | null>(() =>
+        initialData?.ok && preloaded?.tournamentMeta?.__isDbOnly ? initialData : null,
+    );
+    // Índice de la fecha que se mira; null es la tabla actual.
+    const [timelineRound, setTimelineRound] = useState<number | null>(null);
+    const [evolutionOpen, setEvolutionOpen] = useState(false);
     const [standingsForm, setStandingsForm] = useState<any[]>([]);
     const [standingsFormTeamLabels, setStandingsFormTeamLabels] = useState<any[]>([]);
     const [standingsHtFt, setStandingsHtFt] = useState<any[]>([]);
@@ -2299,6 +2372,8 @@ export default function TournamentDetailPage({
                             setFixtures(sortMatchesByDate(snapshot.fixtures || [], 'asc'));
                             setDraw(snapshot.draw ?? []);
                             setStandings(snapshot.standings);
+                            setTimelineDbData(dbData);
+                            setTimelineRound(null);
                         }
 
                             // Map DB matches → frontend match format
@@ -2565,7 +2640,36 @@ export default function TournamentDetailPage({
         () => standingsScopeViews.filter((view) => view.kind === 'global' || !isKnockoutPhaseType(view.phase?.phase_type)),
         [standingsScopeViews],
     );
-    const hasVisibleStandingsData = visibleStandingsScopeViews.length > 0 || (!hasDbKnockoutPhase && (
+
+    // ── Tabla por fechas ──────────────────────────────────────────────────
+    // La fase que muestra la tabla: la vista elegida, o la única que hay. La
+    // tabla global de un circuito no tiene fechas (suma etapas, no partidos).
+    const timelinePhaseId = useMemo<string | null | undefined>(() => {
+        const view = visibleStandingsScopeViews.find((v) => v.id === activeStandingsScope) || visibleStandingsScopeViews[0] || null;
+        if (!view) return null;
+        if (view.kind === 'global') return undefined;
+        return String(view.phase?.id ?? view.id);
+    }, [activeStandingsScope, visibleStandingsScopeViews]);
+
+    const timelineEntries = useMemo<StandingsTimelineEntry[]>(() => {
+        if (!timelineDbData || timelinePhaseId === undefined || activeTab !== 'standings') return [];
+        try {
+            return buildStandingsTimeline(timelineDbData, timelinePhaseId);
+        } catch (timelineError) {
+            // Un dato raro en un partido viejo no puede tumbar la tabla actual.
+            console.warn('[tabla por fechas] no se pudo reconstruir:', timelineError);
+            return [];
+        }
+    }, [activeTab, timelineDbData, timelinePhaseId]);
+
+    useEffect(() => {
+        setTimelineRound(null);
+    }, [timelinePhaseId]);
+
+    const standingsFlipRef = React.useRef<HTMLDivElement | null>(null);
+    useFlipReorder(standingsFlipRef, timelineRound);
+
+    const hasVisibleStandingsData =visibleStandingsScopeViews.length > 0 || (!hasDbKnockoutPhase && (
         standings.length > 0 ||
         standingsForm.length > 0 ||
         standingsHtFt.length > 0 ||
@@ -3007,8 +3111,67 @@ export default function TournamentDetailPage({
                     : standingsView === 'overunder'
                         ? standingsOverUnderTeamLabels
                         : dbTeamLabels;
-    const activeRows = normalizeStandingsRows(standingsSource);
-    const activeFlatRows = flattenStandingsRows(standingsSource);
+    // La tabla por fechas vive solo en la vista General de una tabla de
+    // partidos: Forma, HT/FT o la global de un circuito no tienen "fechas".
+    const timelineAvailable =
+        timelineEntries.length > 0 &&
+        !isMotorsportTournament &&
+        !isCircuitGlobalTable &&
+        activeStandingsRenderer === 'standard' &&
+        (Boolean(selectedStandingsScopeView) || standingsView === 'overall');
+    const timelineEntry = timelineAvailable && timelineRound !== null ? timelineEntries[timelineRound] ?? null : null;
+    const timelineSource = timelineEntry ? timelineEntry.standings : standingsSource;
+    const activeRows = normalizeStandingsRows(timelineSource);
+    const activeFlatRows = flattenStandingsRows(timelineSource);
+
+    // Cuántos puestos se movió cada club respecto de la fecha anterior. En la
+    // tabla actual no se muestra: la flecha es parte de mirar una fecha.
+    const timelineDeltaByTeam = new Map<string, number>();
+    if (timelineEntry && timelineRound !== null && timelineRound > 0) {
+        const positionsOf = (rows: any[]) => {
+            const out = new Map<string, number>();
+            rows.forEach((row: any, index: number) => {
+                const teamId = String(getStandingsTeamId(row) ?? '');
+                if (teamId) out.set(teamId, row.position || index + 1);
+            });
+            return out;
+        };
+        const before = positionsOf(flattenStandingsRows(timelineEntries[timelineRound - 1].standings));
+        positionsOf(activeFlatRows).forEach((position, teamId) => {
+            const previous = before.get(teamId);
+            if (previous) timelineDeltaByTeam.set(teamId, previous - position);
+        });
+    }
+
+    // Columnas del gráfico: una por fecha cerrada, y "Hoy" si después de la
+    // última hubo partidos que todavía no completan una fecha.
+    const evolutionColumns: EvolutionColumn[] = (() => {
+        if (!timelineAvailable) return [];
+        const toColumnRows = (standingsRows: any[]) =>
+            flattenStandingsRows(standingsRows)
+                .map((row: any, index: number) => ({
+                    teamId: String(getStandingsTeamId(row) ?? ''),
+                    name: getStandingsTeamName(row),
+                    logo: getStandingsTeamLogo(row) || null,
+                    position: row.position || index + 1,
+                }))
+                .filter((row) => row.teamId);
+        const columns: EvolutionColumn[] = timelineEntries.map((entry) => ({
+            label: `F${entry.round}`,
+            title: `Fecha ${entry.round}, ${formatRoundDays(entry.fromDayKey, entry.dayKey)}`,
+            rows: toColumnRows(entry.standings),
+        }));
+        const lastEntry = timelineEntries[timelineEntries.length - 1];
+        const currentPlayed = flattenStandingsRows(standingsSource)
+            .reduce((total: number, row: any) => total + (Number(row.matches_total) || 0), 0) / 2;
+        if (lastEntry && currentPlayed > lastEntry.matchesPlayed) {
+            columns.push({ label: 'Hoy', title: 'Tabla actual', rows: toColumnRows(standingsSource) });
+        }
+        return columns;
+    })();
+    const evolutionHighlightColumn = timelineRound !== null
+        ? timelineRound
+        : (evolutionColumns.length > 0 ? evolutionColumns.length - 1 : null);
     const motorsportOverallGroups = isMotorsportTournament ? splitMotorsportStandingsRows(overallRows) : null;
     const motorsportActiveGroups = isMotorsportTournament ? splitMotorsportStandingsRows(activeFlatRows) : null;
     const motorsportDriverRows = isMotorsportTournament
@@ -3984,9 +4147,14 @@ export default function TournamentDetailPage({
                     ? row.goals_for - row.goals_against
                     : 0;
 
+        // La clave es el club y no el índice: así la fila es el mismo nodo entre
+        // una fecha y otra, y puede viajar a su puesto nuevo (useFlipReorder).
+        const flipKey = teamId ? String(teamId) : undefined;
+
         return (
             <div
-                key={idx}
+                key={flipKey ? `team-${flipKey}` : idx}
+                data-flip-key={flipKey}
                 className={`${styles.tableRow} ${rowAccentStyle ? styles.tableRowTinted : ''}`}
                 style={rowAccentStyle}
             >
@@ -4010,6 +4178,9 @@ export default function TournamentDetailPage({
                             ? <Link href={teamHref} className={styles.colTeamName}>{teamName}</Link>
                             : <span className={styles.colTeamName}>{teamName}</span>}
                     </div>
+                    {flipKey && timelineDeltaByTeam.has(flipKey) && (
+                        <PositionDeltaChip key={`delta-${timelineRound}`} delta={timelineDeltaByTeam.get(flipKey)} />
+                    )}
                 </div>
                 {columns.map((column) => {
                     // La columna 'diff' se resuelve acá y no por su value(): el
@@ -4031,6 +4202,73 @@ export default function TournamentDetailPage({
     };
 
     // ── Featured match renderer ───────────────────────────────────────────
+
+    // El selector de fecha: en escritorio va en la barra de herramientas, a la
+    // derecha y al lado de Exportar; en el celular, en una fila propia.
+    const showTimelinePicker = timelineAvailable && activeRows.length > 0;
+    // Las filas que arma el motor no traen escudo: se resuelve igual que en la
+    // tabla, por el registro de clubes de la pantalla.
+    const timelineLogoOf = (teamId: string, name: string, own?: string | null) =>
+        own ||
+        teamMap.get(`id:${teamId}`)?.logo ||
+        teamMap.get(`name:${name.toLowerCase()}`)?.logo ||
+        null;
+    const timelineOptions = timelineEntries.map((entry) => {
+        const leader = flattenStandingsRows(entry.standings)[0];
+        const leaderName = leader ? getStandingsTeamName(leader) : null;
+        return {
+            round: entry.round,
+            dayKey: entry.dayKey,
+            fromDayKey: entry.fromDayKey,
+            leaderName,
+            leaderLogo: leader && leaderName
+                ? timelineLogoOf(String(getStandingsTeamId(leader) ?? ''), leaderName, getStandingsTeamLogo(leader))
+                : null,
+        };
+    });
+    const evolutionChartColumns: EvolutionColumn[] = evolutionColumns.map((column) => ({
+        ...column,
+        rows: column.rows.map((row) => ({ ...row, logo: timelineLogoOf(row.teamId, row.name, row.logo) })),
+    }));
+    const renderTimelineBar = (placement: 'toolbar' | 'mobile') => (
+        <div className={`${timelineStyles.bar} ${placement === 'toolbar' ? timelineStyles.barToolbar : timelineStyles.barMobile}`}>
+            {timelineEntry && (
+                <p key={timelineEntry.round} className={timelineStyles.barCaption} aria-live="polite">
+                    Así estaba la tabla al cierre de la <strong>fecha {timelineEntry.round}</strong>
+                </p>
+            )}
+            <StandingsRoundPicker options={timelineOptions} value={timelineRound} onChange={setTimelineRound} />
+        </div>
+    );
+
+    // La leyenda de la tabla principal, con el botón del gráfico de evolución al
+    // lado. Si la tabla no tiene etiquetas, el botón queda solo.
+    const evolutionPanelId = 'standings-evolution';
+    const renderStandingsFooter = (items: StandingsLegendItem[]) => {
+        const legend = renderStandingsLegend(items);
+        if (evolutionColumns.length < 2) return legend;
+
+        return (
+            <>
+                <div className={timelineStyles.legendRow}>
+                    {legend}
+                    <EvolutionToggle
+                        open={evolutionOpen}
+                        onToggle={() => setEvolutionOpen((open) => !open)}
+                        controls={evolutionPanelId}
+                    />
+                </div>
+                {evolutionOpen && (
+                    <StandingsEvolutionChart
+                        id={evolutionPanelId}
+                        columns={evolutionChartColumns}
+                        highlightColumn={evolutionHighlightColumn}
+                        onColumnClick={(index) => setTimelineRound(index < timelineEntries.length ? index : null)}
+                    />
+                )}
+            </>
+        );
+    };
 
     const renderStandingsLegend = (items: StandingsLegendItem[]) => {
         if (items.length === 0) return null;
@@ -5156,7 +5394,12 @@ export default function TournamentDetailPage({
                                 </div>
                             </div>
                         )}
-                        <div className={styles.standingsToolbar}>
+                        <div
+                            className={styles.standingsToolbar}
+                            // El scroll horizontal de la barra recortaría la lista del
+                            // selector de fecha, que se despliega hacia abajo.
+                            style={showTimelinePicker ? { overflow: 'visible' } : undefined}
+                        >
                             {!isMotorsportTournament && !selectedStandingsScopeView && !isCircuitTournament && (
                                 <div className={styles.pillsGroup}>
                                     <button className={`${styles.pillBtn} ${standingsView === 'overall' ? styles.pillBtnActive : ''}`} onClick={() => setStandingsView('overall')}>General</button>
@@ -5174,12 +5417,16 @@ export default function TournamentDetailPage({
                                     ))}
                                 </div>
                             )}
+                            {showTimelinePicker && renderTimelineBar('toolbar')}
                             <ExportImage
                                 template="standings"
                                 filename={`tabla-${tournamentData?.name}`}
                                 data={{
                                     title: tournamentData?.name || 'Tabla de Posiciones',
-                                    subtitle: selectedStandingsScopeView?.subtitle || details?.season || 'Clasificación',
+                                    // Mirando una fecha se exporta esa tabla: que la placa lo diga.
+                                    subtitle: timelineEntry
+                                        ? `Al cierre de la fecha ${timelineEntry.round}`
+                                        : (selectedStandingsScopeView?.subtitle || details?.season || 'Clasificación'),
                                     tournamentLogo,
                                     rows: isMotorsportTournament ? motorsportStandingsExportRows : standingsExportRows,
                                     groups: isMotorsportTournament ? [] : standingsExportGroups,
@@ -5211,8 +5458,15 @@ export default function TournamentDetailPage({
                             <>
                                 {activeRows.length === 0 && <p className={styles.emptyState}>Tabla no disponible.</p>}
 
+                                {/* En el celular la barra de herramientas se esconde: el
+                                    selector baja a su propia fila, arriba de la tabla. */}
+                                {showTimelinePicker && renderTimelineBar('mobile')}
+
                                 {activeRows.length > 0 && activeStandingsRenderer === 'standard' && (
-                                    <div className={styles.standingsContainer}>
+                                    <div
+                                        ref={standingsFlipRef}
+                                        className={`${styles.standingsContainer} ${timelineStyles.flipRoot}`}
+                                    >
                                         {activeRows[0]?.rows ? (
                                             <div className={styles.groupsStack}>
                                                 {activeRows.map((group: any, gidx: number) => (
@@ -5233,7 +5487,7 @@ export default function TournamentDetailPage({
                                                     </div>
                                                 </div>
                                         )}
-                                        {renderStandingsLegend(standingsLegendItems)}
+                                        {renderStandingsFooter(standingsLegendItems)}
                                     </div>
                                 )}
                             </>
