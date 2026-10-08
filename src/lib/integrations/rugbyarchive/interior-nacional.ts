@@ -234,8 +234,8 @@ export const COMPETENCIAS: CompetenciaInterior[] = [
  *  - 1240 "U.N.S.J." es la Universidad Nacional de San Juan; en la base existe
  *    `universidad-nacional-de-san-juan` pero es la entidad de HOCKEY: se crea
  *    la de rugby aparte.
- *  - 1343 "Cordoba Rugby" → `cordoba-rugby-club` (el actual), NO `cordoba-r-c`
- *    (el histórico desaparecido): rugbyarchive los distingue y G22 también.
+ *  - 1343 "Cordoba Rugby" → `cordoba-rugby-club`. El "Cordoba R.C." histórico
+ *    (1346) es el mismo club: se unieron el 2026-10-08 (ver `torneo122.ts`).
  */
 export const CLUB_MAP_INTERIOR: Record<number, string> = {
   // ── Buenos Aires (URBA) ───────────────────────────────────────────────────
@@ -464,7 +464,7 @@ export const CLUB_MAP_INTERIOR: Record<number, string> = {
   // ── Se crean (tanda URBA/NEA/Litoral) ─────────────────────────────────────
   // Históricos de la Primera/Segunda porteña. 1331 "Buenos Aires FC" NO es
   // `buenos-aires-crc`: son el pre y el post fusión de 1951, y la fuente los
-  // distingue (mismo criterio que `cordoba-r-c` vs `cordoba-rugby-club`).
+  // distingue.
   // 2957 "Flores A.C." NO es `floresta` (club moderno). 2933 "Oeste R.C." no
   // se fusiona con `del-oeste-rugby` (identidad no comprobada). 9335 "San
   // Ignacio R.C." es porteño (región Buenos Aires en la ficha), NO el de MDP.
