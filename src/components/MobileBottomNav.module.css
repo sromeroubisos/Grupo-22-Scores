@@ -16,8 +16,10 @@
     box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.22);
     /* Capa propia: Safari de iPhone repinta un fixed con backdrop-filter en
        cada cuadro del scroll con inercia y lo deja atrasado respecto del
-       viewport. Ver el bloque "Teléfono" en globals.css. */
-    transform: translateZ(0);
+       viewport. Ver el bloque "Teléfono" en globals.css. `--nav-shift` lo
+       pone MobileBottomNav cuando el layout viewport queda más corto que la
+       pantalla (web app instalada). */
+    transform: translate3d(0, var(--nav-shift, 0px), 0);
 }
 
 .navList {
