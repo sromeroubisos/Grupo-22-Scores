@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from './MobileBottomNav.module.css';
@@ -103,15 +104,85 @@ function NavIcon({ name, active }: { name: string; active?: boolean }) {
     }
 }
 
+/**
+ * Ancla la barra al borde de abajo de lo que se VE, no al del layout viewport.
+ *
+ * En la web app instalada del iPhone (standalone), después de abrir y cerrar el
+ * teclado o de volver de segundo plano, Safari deja el layout viewport más
+ * corto que la pantalla: un `fixed; bottom: 0` queda flotando ~85 px arriba
+ * del borde, con contenido pasando por debajo, y el scroll termina antes de
+ * tiempo (captura del usuario, 2026-10-08). `visualViewport` sí sabe dónde
+ * está el borde real: la diferencia se corrige con un `translateY`, y además se
+ * fuerza un re-scroll para que Safari recalcule el viewport.
+ *
+ * Con zoom (scale ≠ 1) o con el teclado abierto (diferencia negativa) no se
+ * toca nada: ahí la barra tiene que comportarse como siempre.
+ */
+function useAnchorToVisualViewport(enabled: boolean) {
+    const ref = useRef<HTMLElement>(null);
+
+    useEffect(() => {
+        const vv = window.visualViewport;
+        if (!enabled || !vv) return;
+
+        let frame = 0;
+        const apply = () => {
+            frame = 0;
+            const nav = ref.current;
+            if (!nav) return;
+            const gap = vv.offsetTop + vv.height - window.innerHeight;
+            const shift = Math.abs(vv.scale - 1) < 0.01 && gap > 1 ? Math.round(gap) : 0;
+            nav.style.setProperty('--nav-shift', `${shift}px`);
+        };
+        const schedule = () => {
+            if (!frame) frame = requestAnimationFrame(apply);
+        };
+        // Al cerrar el teclado o volver a la app, Safari a veces no rehace el
+        // viewport hasta el próximo scroll: se lo pedimos en el lugar.
+        const relayout = () => {
+            setTimeout(() => {
+                window.scrollTo(window.scrollX, window.scrollY);
+                schedule();
+            }, 80);
+        };
+        const onVisible = () => {
+            if (document.visibilityState === 'visible') relayout();
+        };
+
+        schedule();
+        vv.addEventListener('resize', schedule);
+        vv.addEventListener('scroll', schedule);
+        window.addEventListener('scroll', schedule, { passive: true });
+        window.addEventListener('orientationchange', relayout);
+        window.addEventListener('pageshow', relayout);
+        document.addEventListener('focusout', relayout);
+        document.addEventListener('visibilitychange', onVisible);
+        return () => {
+            if (frame) cancelAnimationFrame(frame);
+            vv.removeEventListener('resize', schedule);
+            vv.removeEventListener('scroll', schedule);
+            window.removeEventListener('scroll', schedule);
+            window.removeEventListener('orientationchange', relayout);
+            window.removeEventListener('pageshow', relayout);
+            document.removeEventListener('focusout', relayout);
+            document.removeEventListener('visibilitychange', onVisible);
+        };
+    }, [enabled]);
+
+    return ref;
+}
+
 export default function MobileBottomNav() {
     const pathname = usePathname();
+    const hidden = BOTTOM_NAV_HIDDEN_PREFIXES.some((prefix) => pathname?.startsWith(prefix));
+    const navRef = useAnchorToVisualViewport(!hidden);
 
-    if (BOTTOM_NAV_HIDDEN_PREFIXES.some((prefix) => pathname?.startsWith(prefix))) {
+    if (hidden) {
         return null;
     }
 
     return (
-        <nav className={styles.nav} aria-label="Navegacion principal">
+        <nav ref={navRef} className={styles.nav} aria-label="Navegacion principal">
             <div className={styles.navList}>
                 {navItems.map((item) => {
                     const active = isActive(pathname, item.href, item.matchPrefixes);
