@@ -4831,3 +4831,16 @@
 @container tabla (max-width: 440px) {
     .colValPJ.historicalSeasons { display: none; }
 }
+
+/* En el celular la leyenda es una línea de referencia: minúscula normal y peso
+   medio. En mayúsculas espaciadas competía con la tabla que explica. */
+@media (max-width: 600px) {
+    .standingsLegendItems { gap: 10px 16px; }
+    .standingsLegendText {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+    .standingsLegendSwatch { width: 10px; height: 10px; box-shadow: inset 0 0 0 3px var(--standings-legend-accent, rgba(255, 255, 255, 0.9)); }
+}

@@ -4365,6 +4365,24 @@ export default function TournamentDetailPage({
         <>
             {renderStandingsFooterControls(items)}
             {bonusNote && <p className={timelineStyles.reconstructedNote}>{bonusNote}</p>}
+            {/* En el celular la pestaña Histórica queda fuera de pantalla, al final
+                de la barra de pestañas: desde la tabla se llega con un toque. */}
+            {hasHistoricalTable && (
+                <button
+                    type="button"
+                    className={timelineStyles.historicalLink}
+                    onClick={() => {
+                        setActiveTab('historical');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                >
+                    <span>
+                        <strong>Tabla histórica</strong>
+                        <span className={timelineStyles.historicalLinkSub}>Todas las temporadas sumadas</span>
+                    </span>
+                    <ChevronRight size={16} aria-hidden="true" />
+                </button>
+            )}
         </>
     );
     const renderStandingsFooterControls = (items: StandingsLegendItem[]) => {

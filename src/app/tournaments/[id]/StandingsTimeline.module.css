@@ -522,3 +522,66 @@
     line-height: 1.4;
     color: var(--fl-text-muted);
 }
+
+/* ── Acceso a la tabla histórica, al pie de la tabla ──────────────────── */
+.historicalLink {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    margin-top: 20px;
+    padding: 10px 14px 10px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--fl-border);
+    background: var(--fl-surface);
+    color: var(--fl-text-muted);
+    text-align: left;
+    cursor: pointer;
+    transition: background 160ms var(--fl-ease-out-quart, ease-out), border-color 160ms var(--fl-ease-out-quart, ease-out);
+}
+.historicalLink > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.historicalLink strong { color: var(--fl-text); font-size: 0.85rem; font-weight: 700; }
+.historicalLinkSub { font-size: 0.72rem; color: var(--fl-text-muted); }
+.historicalLink:hover { background: var(--fl-surface-alt); border-color: var(--fl-border-strong, var(--fl-border)); }
+.historicalLink:active { transform: scale(0.99); }
+.historicalLink:focus-visible { outline: 2px solid var(--fl-accent, #00a365); outline-offset: 2px; }
+
+/* ── Celular: los dos controles son UNA barra ────────────────────────────
+   Antes eran dos cajas sueltas —el botón del gráfico y el selector— con anchos
+   y pesos distintos, y se leían como dos componentes que no se conocían. Ahora
+   comparten contenedor y un divisor fino; todo a 44px, el alto del pulgar. La
+   leyenda baja con aire: es una referencia de la tabla, no parte de la barra. */
+@media (max-width: 600px) {
+    .mobileControls {
+        justify-content: flex-start;
+        gap: 0;
+        margin-top: 16px;
+        padding: 3px;
+        border-radius: 14px;
+        border: 1px solid var(--fl-border);
+        background: var(--fl-surface);
+    }
+    .mobileControls > .evolutionToggle.evolutionToggleCompact {
+        min-height: 44px;
+        padding: 0 14px 0 12px;
+        border: none;
+        border-radius: 11px;
+        background: transparent;
+    }
+    .mobileControls > .evolutionToggle.evolutionToggleCompact:hover { background: var(--fl-surface-alt); }
+    .mobileControls > .barMobile {
+        margin-left: auto;
+        padding-left: 6px;
+        border-left: 1px solid var(--fl-border-sub, var(--fl-border));
+    }
+    .barMobile .picker { padding: 0; border: none; background: transparent; }
+    .barMobile .trigger { height: 44px; border-radius: 11px; }
+    .barMobile .stepBtn { width: 40px; height: 44px; border-radius: 11px; }
+
+    .flipRoot [aria-label='Leyenda de posiciones'] { margin-top: 20px; padding: 0 4px; }
+    /* Con el gráfico disponible la leyenda va dentro de .legendRow, que en el
+       celular es una columna sin margen: el aire se lo da la fila. */
+    .legendRow { margin-top: 20px; }
+}
