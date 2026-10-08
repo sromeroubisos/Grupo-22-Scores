@@ -332,6 +332,47 @@ function buildClubLookup(participants: TournamentParticipantRow[]): Map<string, 
     return clubsById;
 }
 
+/**
+ * Los clubes que juegan partidos del torneo sin ser participantes: un cruce
+ * con otra división, un amistoso contra un club de afuera. Sin esto el partido
+ * se dibuja "Local"/"Visitante" sin escudo (pasó con la CRAA: los rivales de
+ * la D1A en el torneo de la D1AA). Se suman al lookup, NO a los participantes:
+ * no entran en la tabla ni en la pestaña Equipos.
+ */
+async function addMatchOnlyClubs(
+    supabase: Awaited<ReturnType<typeof getReadClient>>,
+    clubsById: Map<string, TournamentClubLookup>,
+    matches: TournamentMatchRow[],
+): Promise<void> {
+    const faltan = [...new Set(matches
+        .flatMap((match) => [match.home_club_id, match.away_club_id])
+        .filter(Boolean)
+        .map(String)
+        .filter((id) => !clubsById.has(id)))];
+    if (!faltan.length) return;
+
+    try {
+        const { data, error } = await supabase
+            .from('clubs')
+            .select('id, name, logo_url, short_name, slug')
+            .in('id', faltan.slice(0, 500));
+        if (error || !data) return;
+        for (const club of data as TournamentClubSource[]) {
+            if (!club?.id) continue;
+            clubsById.set(String(club.id), {
+                id: String(club.id),
+                name: club.name ?? null,
+                // Un escudo embebido en base64 no viaja en la respuesta del torneo.
+                logo_url: sanitizeInlineAssetUrl(club.logo_url),
+                short_name: club.short_name ?? null,
+                slug: club.slug ?? null,
+            });
+        }
+    } catch {
+        // Sin los rivales de afuera el torneo se dibuja igual, como antes.
+    }
+}
+
 function hydrateMatches(matches: TournamentMatchRow[], clubsById: Map<string, TournamentClubLookup>) {
     return matches.map((match) => ({
         ...match,
@@ -878,6 +919,7 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
         }
 
         const clubsById = buildClubLookup(sanitizedParticipants);
+        await addMatchOnlyClubs(supabase, clubsById, matchesRes.data);
         // Los eventos cargados en vivo desde el Match Center viven solo en
         // `match_events`; el JSON `matches.events` queda vacio. Sin este paso la
         // pestaña Estadisticas > Jugadores no ve ni un try.

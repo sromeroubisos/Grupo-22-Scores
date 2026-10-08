@@ -49,6 +49,8 @@ for (const u of pendientes) {
       buf = await bajar(ESCUDO_CRAA(u.craa));
       if (buf) deLaCraa.push(u.key);
     }
+    // Los que no están en ESPN ni en la CRAA (los canadienses, Indiana Tech): Wikipedia.
+    if (!buf && u.wiki) buf = await bajar(u.wiki);
     if (!buf) { sinEscudo.push(u.key); continue; }
     fs.writeFileSync(destino, buf);
   }
