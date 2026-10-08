@@ -100,8 +100,24 @@
     min-height: 100vh;
     background: var(--fl-bg);
     padding-bottom: 80px;
-    width: 100%;
     font-family: 'Inter', sans-serif;
+
+    /* Borde a borde. El layout del sitio (ConditionalLayout .mainContent) deja
+       un margen alrededor de cada pantalla, y esta pinta su propio fondo: el del
+       sitio asomaba en ese margen —más claro y con el brillo verde— y la página
+       se leía como un bloque recortado. El margen negativo lleva el fondo hasta
+       el borde y el padding devuelve el contenido a donde estaba. Los valores
+       son los del layout, en sus mismos cortes. */
+    --page-bleed: var(--spacing-lg);
+    margin: calc(-1 * var(--page-bleed)) calc(-1 * var(--page-bleed)) 0;
+    padding-top: var(--page-bleed);
+    padding-inline: var(--page-bleed);
+}
+@media (max-width: 1024px) {
+    .page { --page-bleed: var(--spacing-md); }
+}
+@media (max-width: 900px) {
+    .page { --page-bleed: 0.475rem; }
 }
 
 /* ── Light Mode Token Override ───────────────────────────────────── */
