@@ -12,21 +12,50 @@
 }
 
 /* En la barra de herramientas ocupa el espacio libre y empuja Exportar al
-   borde; en el celular esa barra no se ve y el selector baja a su fila. */
+   borde. En el celular esa barra no se ve: los controles bajan a una sola fila
+   debajo de la tabla (.mobileControls). */
 .barToolbar { flex: 1; margin: 0; min-width: 0; }
-.barMobile { display: none; }
+.mobileControls { display: none; }
 @media (max-width: 600px) {
     .barToolbar { display: none; }
-    /* En el celular va debajo de la tabla, a la derecha: la lista se abre
-       hacia arriba para no meterse debajo de la barra de navegación. */
-    .barMobile { display: flex; margin: 12px 0 0; }
-    .barMobile .barCaption { order: 0; text-align: right; }
+    .legendRow .toggleSlot { display: none; }
+    /* Una fila de 343px no alcanza para todo: en el celular quedan las flechas,
+       que es lo que se usa con el pulgar; el recorrido automático, en escritorio. */
+    .barMobile .playBtn { display: none; }
+
+    .mobileControls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 14px;
+    }
+    .barMobile { margin: 0; min-height: 0; flex: none; }
+    /* El botón ya dice qué fecha se mira y queda marcado: la frase sobra. */
+    .barMobile .barCaption { display: none; }
+    .barMobile .triggerSub { display: none; }
+    .barMobile .trigger { min-width: 0; height: 38px; padding: 0 8px 0 12px; gap: 6px; }
+    .barMobile .stepBtn { width: 38px; height: 38px; }
+    /* Abajo de la pantalla: la lista se abre hacia arriba para no quedar
+       debajo de la barra de navegación. */
     .barMobile .list {
         top: auto;
+        right: -42px;
         bottom: calc(100% + 8px);
         transform-origin: bottom right;
         animation-name: tl-pop-up;
     }
+
+    /* La leyenda pierde la caja: es una línea de referencia, no un panel. */
+    .flipRoot [aria-label='Leyenda de posiciones'] {
+        margin-top: 16px;
+        padding: 0 2px;
+        border: none;
+        background: transparent;
+        flex-direction: row;
+        gap: 0;
+    }
+    .flipRoot [aria-label='Leyenda de posiciones'] > :first-child { display: none; }
 }
 @keyframes tl-pop-up {
     from { opacity: 0; transform: translateY(4px) scale(0.96); }
@@ -242,7 +271,19 @@
     gap: 10px;
     margin-top: 14px;
 }
-.legendRow > :first-child:not(.evolutionToggle) { flex: 1; min-width: 0; margin-top: 0; }
+.legendRow > :first-child:not(.toggleSlot) { flex: 1; min-width: 0; margin-top: 0; }
+.toggleSlot { display: flex; margin-left: auto; }
+
+/* En el celular el gráfico comparte fila con la fecha: botón de texto, sin
+   caja, con el mismo alto que el selector. */
+.evolutionToggle.evolutionToggleCompact {
+    /* 38 del botón + 3+3 de relleno + 1+1 de borde: la altura del selector. */
+    min-height: 46px;
+    margin-left: 0;
+    padding: 0 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+}
 
 .evolutionToggle {
     display: inline-flex;
@@ -424,22 +465,7 @@
     .picker { margin-left: auto; }
     .trigger { min-width: 128px; }
     .list { right: -90px; }
-    /* En el celular el botón no compite con la tabla: chico, sin caja, abajo a
-       la derecha de la leyenda. El área de toque sigue siendo de 44px de alto. */
-    .legendRow { flex-direction: column; gap: 2px; }
-    .evolutionToggle {
-        align-self: flex-end;
-        margin-left: 0;
-        padding: 0 4px;
-        gap: 6px;
-        border-color: transparent;
-        background: transparent;
-        color: var(--fl-text-muted);
-        font-size: 0.72rem;
-        font-weight: 600;
-    }
-    .evolutionToggle:hover { border-color: transparent; }
-    .evolutionToggleOn { background: transparent; border-color: transparent; }
+    .legendRow { flex-direction: column; gap: 0; margin-top: 0; }
     .chartPanel { padding: 14px 10px 12px; }
 }
 

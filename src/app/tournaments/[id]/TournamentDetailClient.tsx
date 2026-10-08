@@ -4246,19 +4246,34 @@ export default function TournamentDetailPage({
     const evolutionPanelId = 'standings-evolution';
     const renderStandingsFooter = (items: StandingsLegendItem[]) => {
         const legend = renderStandingsLegend(items);
-        if (evolutionColumns.length < 2) return legend;
+        const hasEvolution = evolutionColumns.length >= 2;
+        if (!hasEvolution && !showTimelinePicker) return legend;
+
+        const toggle = (compact: boolean) => (
+            <EvolutionToggle
+                open={evolutionOpen}
+                onToggle={() => setEvolutionOpen((open) => !open)}
+                controls={evolutionPanelId}
+                compact={compact}
+            />
+        );
 
         return (
             <>
-                <div className={timelineStyles.legendRow}>
-                    {legend}
-                    <EvolutionToggle
-                        open={evolutionOpen}
-                        onToggle={() => setEvolutionOpen((open) => !open)}
-                        controls={evolutionPanelId}
-                    />
+                {/* Celular: una sola fila de controles debajo de la tabla, el
+                    gráfico a la izquierda y la fecha a la derecha. En escritorio
+                    no se ve: la fecha va en la barra de arriba. */}
+                <div className={timelineStyles.mobileControls}>
+                    {hasEvolution ? toggle(true) : <span aria-hidden="true" />}
+                    {showTimelinePicker && renderTimelineBar('mobile')}
                 </div>
-                {evolutionOpen && (
+                {hasEvolution ? (
+                    <div className={timelineStyles.legendRow}>
+                        {legend}
+                        <div className={timelineStyles.toggleSlot}>{toggle(false)}</div>
+                    </div>
+                ) : legend}
+                {hasEvolution && evolutionOpen && (
                     <StandingsEvolutionChart
                         id={evolutionPanelId}
                         columns={evolutionChartColumns}
@@ -5483,9 +5498,6 @@ export default function TournamentDetailPage({
                                                     </div>
                                                 </div>
                                         )}
-                                        {/* En el celular la barra de herramientas se esconde: el
-                                            selector va abajo a la derecha de la tabla. */}
-                                        {showTimelinePicker && renderTimelineBar('mobile')}
                                         {renderStandingsFooter(standingsLegendItems)}
                                     </div>
                                 )}

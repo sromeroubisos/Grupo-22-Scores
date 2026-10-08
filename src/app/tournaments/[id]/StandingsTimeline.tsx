@@ -396,17 +396,24 @@ export function StandingsRoundPicker({ options, value, onChange }: PickerProps) 
 
 // ── Botón que abre el gráfico ─────────────────────────────────────────────
 
-export function EvolutionToggle({ open, onToggle, controls }: { open: boolean; onToggle: () => void; controls: string }) {
+export function EvolutionToggle({ open, onToggle, controls, compact = false }: {
+    open: boolean;
+    onToggle: () => void;
+    controls: string;
+    /** En el celular comparte fila con el selector de fecha: rótulo corto. */
+    compact?: boolean;
+}) {
     return (
         <button
             type="button"
-            className={`${styles.evolutionToggle} ${open ? styles.evolutionToggleOn : ''}`}
+            className={`${styles.evolutionToggle} ${compact ? styles.evolutionToggleCompact : ''} ${open ? styles.evolutionToggleOn : ''}`}
             onClick={onToggle}
             aria-expanded={open}
             aria-controls={controls}
+            aria-label={open ? 'Ocultar la evolución de posiciones' : 'Ver la evolución de posiciones'}
         >
             <LineChart size={14} aria-hidden="true" />
-            <span>{open ? 'Ocultar evolución' : 'Ver evolución'}</span>
+            <span>{compact ? 'Evolución' : (open ? 'Ocultar evolución' : 'Ver evolución')}</span>
         </button>
     );
 }
