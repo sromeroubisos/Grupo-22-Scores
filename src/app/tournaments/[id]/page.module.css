@@ -4874,3 +4874,58 @@
     }
     .standingsLegendSwatch { width: 10px; height: 10px; box-shadow: inset 0 0 0 3px var(--standings-legend-accent, rgba(255, 255, 255, 0.9)); }
 }
+
+/* ── Botones de la cabecera ─────────────────────────────────────────────
+   La estrella es un ícono, no un carácter: ☆ y ★ se dibujan con la fuente del
+   sistema y no alinean con el texto. */
+.followBtn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+
+/* En el celular eran cinco piezas de tres familias distintas: CTAs de 46px,
+   el Exportar de 27 (otro componente, otro estilo) y Seguir solo en una
+   segunda línea, con otro fondo. Ahora es un sistema: 44px de alto, esquinas de
+   12px como la barra de la tabla, 8px de aire. Ver Fixture y Ver Tabla se van:
+   las pestañas que hacen lo mismo están justo debajo. Seguir es la acción
+   principal y toma el ancho que sobra. */
+@media (max-width: 600px) {
+    .heroCTAs { gap: 8px; margin-top: 4px; }
+
+    .heroCTAs > .followBtn,
+    .heroCTAs > .ctaBtnSecondary,
+    .heroCTAs .mobileHeroExportAction > button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        height: 44px;
+        min-height: 44px;
+        padding: 0 16px;
+        border-radius: 12px;
+        border: 1px solid var(--fl-border);
+        background: var(--fl-surface);
+        color: var(--fl-text);
+        font-family: inherit;
+        font-size: 0.8rem;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: 0;
+        white-space: nowrap;
+        transform: none;
+    }
+    .heroCTAs .mobileHeroExportAction { flex: 0 0 auto; }
+
+    .heroCTAs > .followBtn {
+        order: -1;
+        flex: 1 1 auto;
+        border-color: rgba(0, 163, 101, 0.45);
+        color: var(--fl-primary-text);
+    }
+    /* Después de la regla común, y con su mismo peso: si no, la gana. */
+    .heroCTAs > .heroNavShortcut { display: none; }
+
+    .heroCTAs > .followBtn.followBtnActive {
+        background: var(--fl-primary);
+        border-color: var(--fl-primary);
+        color: #04130c;
+        box-shadow: none;
+    }
+}

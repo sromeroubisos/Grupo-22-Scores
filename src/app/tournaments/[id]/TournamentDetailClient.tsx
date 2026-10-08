@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 import { getTournamentById } from '@/lib/data/tournaments';
-import { ArrowLeft, Calendar, Trophy, Users, ChevronRight, Share2, MapPin } from 'lucide-react';
+import { ArrowLeft, Calendar, Trophy, Users, ChevronRight, Share2, MapPin, Star } from 'lucide-react';
 import ExportImage from '@/components/ExportImage';
 import { useFavorites } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
@@ -5029,15 +5029,17 @@ export default function TournamentDetailPage({
                                 {tournamentStatus === 'active' ? 'En Curso' : tournamentStatus === 'upcoming' ? 'Próximamente' : 'Finalizado'}
                             </span>
                             <div className={styles.heroCTAs}>
+                                {/* Atajos a pestañas: en el celular las pestañas están justo
+                                    debajo, así que se esconden (heroNavShortcut). */}
                                 <button
-                                    className={styles.ctaBtnSecondary}
+                                    className={`${styles.ctaBtnSecondary} ${styles.heroNavShortcut}`}
                                     onClick={() => setActiveTab(isMotorsportTournament ? 'results' : 'fixtures')}
                                     type="button"
                                 >
                                     {isMotorsportTournament ? 'Ver Calendario' : 'Ver Fixture'}
                                 </button>
                                 <button
-                                    className={styles.ctaBtnSecondary}
+                                    className={`${styles.ctaBtnSecondary} ${styles.heroNavShortcut}`}
                                     onClick={() => setActiveTab(hasDedicatedPlayoffTab ? 'playoff' : 'standings')}
                                     type="button"
                                 >
@@ -5065,7 +5067,12 @@ export default function TournamentDetailPage({
                                     })}
                                     type="button"
                                 >
-                                    {isLeagueFavorite(favoriteTournamentId) ? '★ Siguiendo' : '☆ Seguir'}
+                                    <Star
+                                        size={15}
+                                        aria-hidden="true"
+                                        fill={isLeagueFavorite(favoriteTournamentId) ? 'currentColor' : 'none'}
+                                    />
+                                    {isLeagueFavorite(favoriteTournamentId) ? 'Siguiendo' : 'Seguir'}
                                     </button>
                                 )}
                             </div>
