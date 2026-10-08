@@ -22,7 +22,8 @@
  * La CRAA publica los escudos a 50×50 (medido el 2026-10-08: los 98). Los
  * equipos usan el de su universidad, así que va primero el de ESPN a 500 px
  * (`espn`, id de equipo de la NCAA en ESPN) y el de la CRAA (`craa`, ruta bajo
- * wp-content/uploads) queda de respaldo. `espn: null` a propósito donde el de
+ * wp-content/uploads) queda de respaldo. Los que no están en ninguna de las dos
+ * (los canadienses, Indiana Tech) salen de Wikipedia (`wiki`, URL del archivo). `espn: null` a propósito donde el de
  * ESPN es de OTRA universidad con el mismo nombre (St. Thomas de Minnesota,
  * Wayne State de Michigan, Life Pacific).
  */
@@ -87,11 +88,11 @@ export const UNIVERSIDADES = [
   { key: 'fresno-state', name: 'Fresno State', ciudad: 'Fresno', estado: 'California', zona: PT, espn: 278, craa: '2026/05/Fresno.png', m: ['Fresno State'], f: ['Fresno State'] },
   { key: 'gonzaga', name: 'Gonzaga', ciudad: 'Spokane', estado: 'Washington', zona: PT, espn: 2250, craa: '2026/06/gonzaga.png', f: ['Gonzaga'] },
   { key: 'grand-canyon', name: 'Grand Canyon', ciudad: 'Phoenix', estado: 'Arizona', zona: AZ, espn: 2253, craa: '2026/05/GCU.png', m: ['Grand Canyon'], f: ['Grand Canyon'] },
-  { key: 'guelph', name: 'Guelph', ciudad: 'Guelph', estado: 'Ontario', pais: 'Canadá', zona: TOR, espn: null, craa: null, m: ['Guelph (Can.)'] },
+  { key: 'guelph', name: 'Guelph', ciudad: 'Guelph', estado: 'Ontario', pais: 'Canadá', zona: TOR, espn: null, craa: null, wiki: 'https://upload.wikimedia.org/wikipedia/en/5/54/Guelph_Gryphons.png', m: ['Guelph (Can.)'] },
   { key: 'illinois', name: 'Illinois', ciudad: 'Champaign', estado: 'Illinois', zona: CT, espn: 356, craa: '2026/05/Illini.png', m: ['Illinois'] },
   // El segundo XV de Indiana juega la D1AA: ficha propia, escudo de la universidad.
   { key: 'indiana-ii', name: 'Indiana II', ciudad: 'Bloomington', estado: 'Indiana', zona: IN, escudoDe: 'indiana', m: ['Indiana II'] },
-  { key: 'indiana-tech', name: 'Indiana Tech', ciudad: 'Fort Wayne', estado: 'Indiana', zona: IN, espn: null, craa: null, m: ['Indiana Tech'] },
+  { key: 'indiana-tech', name: 'Indiana Tech', ciudad: 'Fort Wayne', estado: 'Indiana', zona: IN, espn: null, craa: null, wiki: 'https://upload.wikimedia.org/wikipedia/en/2/23/IndianaInstituteofTechnologySeal.jpg', m: ['Indiana Tech'] },
   { key: 'indiana', name: 'Indiana', ciudad: 'Bloomington', estado: 'Indiana', zona: IN, espn: 84, craa: '2026/08/indiana.png', m: ['Indiana'] },
   { key: 'iowa-state', name: 'Iowa State', ciudad: 'Ames', estado: 'Iowa', zona: CT, espn: 66, craa: '2026/05/IowaState.png', m: ['Iowa State'] },
   { key: 'iowa', name: 'Iowa', ciudad: 'Iowa City', estado: 'Iowa', zona: CT, espn: 2294, craa: '2026/05/Iowa.png', m: ['Iowa'] },
@@ -145,10 +146,10 @@ export const UNIVERSIDADES = [
   { key: 'stanford', name: 'Stanford', ciudad: 'Stanford', estado: 'California', zona: PT, espn: 24, craa: '2026/05/Stanford.png', m: ['Stanford'], f: ['Stanford'] },
   { key: 'texas-am', name: 'Texas A&M', ciudad: 'College Station', estado: 'Texas', zona: CT, espn: 245, craa: null, m: ['Texas A&M'] },
   { key: 'trine', name: 'Trine', ciudad: 'Angola', estado: 'Indiana', zona: IN, espn: 2651, craa: '2026/05/Trine.png', m: ['Trine'] },
-  { key: 'trinity-western', name: 'Trinity Western', ciudad: 'Langley', estado: 'British Columbia', pais: 'Canadá', zona: VAN, espn: null, craa: null, m: ['Trinity Western (Can.)'] },
+  { key: 'trinity-western', name: 'Trinity Western', ciudad: 'Langley', estado: 'British Columbia', pais: 'Canadá', zona: VAN, espn: null, craa: null, wiki: 'https://upload.wikimedia.org/wikipedia/en/f/fe/Trinity_western_athletics_logo.png', m: ['Trinity Western (Can.)'] },
   { key: 'truman-state', name: 'Truman State', ciudad: 'Kirksville', estado: 'Missouri', zona: CT, espn: 2654, craa: '2026/05/TrumanState.png', m: ['Truman State'] },
   { key: 'tulane', name: 'Tulane', ciudad: 'New Orleans', estado: 'Louisiana', zona: CT, espn: 2655, craa: null, m: ['Tulane'] },
-  { key: 'victoria', name: 'Victoria', ciudad: 'Victoria', estado: 'British Columbia', pais: 'Canadá', zona: VAN, espn: null, craa: null, m: ['U. of Victoria (Can.)'] },
+  { key: 'victoria', name: 'Victoria', ciudad: 'Victoria', estado: 'British Columbia', pais: 'Canadá', zona: VAN, espn: null, craa: null, wiki: 'https://upload.wikimedia.org/wikipedia/en/b/bf/Victoria_Vikes_Logo.png', m: ['U. of Victoria (Can.)'] },
   { key: 'uc-davis', name: 'UC Davis', ciudad: 'Davis', estado: 'California', zona: PT, espn: 302, craa: '2026/05/Davis.png', m: ['UC Davis'], f: ['UC Davis'] },
   { key: 'uc-irvine', name: 'UC Irvine', ciudad: 'Irvine', estado: 'California', zona: PT, espn: 300, craa: '2026/06/uci.png', f: ['UC Irvine'] },
   { key: 'uc-riverside', name: 'UC Riverside', ciudad: 'Riverside', estado: 'California', zona: PT, espn: 27, craa: '2026/05/UCRiverside.png', m: ['UC Riverside'], f: ['UC Riverside'] },
