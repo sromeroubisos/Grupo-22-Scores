@@ -140,6 +140,14 @@
     {
       "path": "/api/cron/craa-sync",
       "schedule": "13 * * * *"
+    },
+    {
+      "path": "/api/cron/superxv-sync",
+      "schedule": "27 12-23 * * 5,6,0"
+    },
+    {
+      "path": "/api/cron/superxv-sync",
+      "schedule": "27 9 * * *"
     }
   ]
 }
