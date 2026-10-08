@@ -5458,10 +5458,6 @@ export default function TournamentDetailPage({
                             <>
                                 {activeRows.length === 0 && <p className={styles.emptyState}>Tabla no disponible.</p>}
 
-                                {/* En el celular la barra de herramientas se esconde: el
-                                    selector baja a su propia fila, arriba de la tabla. */}
-                                {showTimelinePicker && renderTimelineBar('mobile')}
-
                                 {activeRows.length > 0 && activeStandingsRenderer === 'standard' && (
                                     <div
                                         ref={standingsFlipRef}
@@ -5487,6 +5483,9 @@ export default function TournamentDetailPage({
                                                     </div>
                                                 </div>
                                         )}
+                                        {/* En el celular la barra de herramientas se esconde: el
+                                            selector va abajo a la derecha de la tabla. */}
+                                        {showTimelinePicker && renderTimelineBar('mobile')}
                                         {renderStandingsFooter(standingsLegendItems)}
                                     </div>
                                 )}

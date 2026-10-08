@@ -17,7 +17,20 @@
 .barMobile { display: none; }
 @media (max-width: 600px) {
     .barToolbar { display: none; }
-    .barMobile { display: flex; }
+    /* En el celular va debajo de la tabla, a la derecha: la lista se abre
+       hacia arriba para no meterse debajo de la barra de navegación. */
+    .barMobile { display: flex; margin: 12px 0 0; }
+    .barMobile .barCaption { order: 0; text-align: right; }
+    .barMobile .list {
+        top: auto;
+        bottom: calc(100% + 8px);
+        transform-origin: bottom right;
+        animation-name: tl-pop-up;
+    }
+}
+@keyframes tl-pop-up {
+    from { opacity: 0; transform: translateY(4px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .barCaption {
