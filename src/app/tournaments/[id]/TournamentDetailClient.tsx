@@ -18,6 +18,7 @@ import TournamentScoresPanel, { hasRatedLineups, sondaDePuntajes } from './Tourn
 import TournamentChampionsTab, { ClubCrest, type ChampionRef } from './TournamentChampionsTab';
 import TournamentSofascoreStats from './TournamentSofascoreStats';
 import TournamentHistoricalTab from './TournamentHistoricalTab';
+import type { StandingsData } from '@/components/ExportImage';
 import TournamentNavigation from './TournamentNavigation';
 import {
     EvolutionToggle,
@@ -2209,6 +2210,9 @@ export default function TournamentDetailPage({
     // Índice de la fecha que se mira; null es la tabla actual.
     const [timelineRound, setTimelineRound] = useState<number | null>(null);
     const [evolutionOpen, setEvolutionOpen] = useState(false);
+    // La placa de la tabla histórica, armada por su pestaña: en el celular el
+    // botón de exportar vive en la cabecera, no en la pestaña.
+    const [historicalExportData, setHistoricalExportData] = useState<StandingsData | null>(null);
     const [standingsForm, setStandingsForm] = useState<any[]>([]);
     const [standingsFormTeamLabels, setStandingsFormTeamLabels] = useState<any[]>([]);
     const [standingsHtFt, setStandingsHtFt] = useState<any[]>([]);
@@ -3920,6 +3924,18 @@ export default function TournamentDetailPage({
                     template="playoffBracket"
                     filename={`cuadro-${tournamentData?.name}`}
                     data={bracketExportData}
+                />
+            );
+        }
+
+        if (activeTab === 'historical') {
+            if (!historicalExportData) return null;
+            return (
+                <ExportImage
+                    className={styles.mobileHeroExportAction}
+                    template="standings"
+                    filename={`tabla-historica-${tournamentData?.name}`}
+                    data={historicalExportData}
                 />
             );
         }
@@ -5847,7 +5863,13 @@ export default function TournamentDetailPage({
 
                 {/* ── HISTORICAL TAB ────────────────────────────────────── */}
                 {activeTab === 'historical' && seasonOptionsLoaded && hasHistoricalTable && (
-                    <TournamentHistoricalTab tournamentId={String(tournamentData?.id || id)} seasons={seasonOptions} />
+                    <TournamentHistoricalTab
+                        tournamentId={String(tournamentData?.id || id)}
+                        tournamentName={tournamentData?.name}
+                        tournamentLogo={tournamentLogo}
+                        seasons={seasonOptions}
+                        onExportData={setHistoricalExportData}
+                    />
                 )}
 
                 {/* ── ARCHIVE TAB ───────────────────────────────────────── */}

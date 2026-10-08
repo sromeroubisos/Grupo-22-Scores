@@ -4808,10 +4808,24 @@
 
 /* ── Tabla histórica ─────────────────────────────────────────────────── */
 .historicalIntro {
-    margin: 0 0 10px;
-    font-size: 0.78rem;
-    line-height: 1.45;
+    margin: 14px 4px 0;
+    font-size: 0.75rem;
+    line-height: 1.5;
     color: var(--fl-text-muted);
+}
+/* En la barra, donde la tabla de una temporada pone sus pestañas: qué suma. */
+.historicalToolbarTitle {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fl-text-dim);
+    font-family: var(--fl-mono);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 /* Sumada en décadas, la diferencia llega a cinco caracteres ("+7072") y los
    puntos a cuatro: las columnas de la tabla de una temporada no alcanzan. */

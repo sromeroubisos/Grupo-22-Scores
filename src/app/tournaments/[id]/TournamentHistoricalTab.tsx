@@ -8,6 +8,11 @@
  * (/api/db/tournaments/[id]/historical-standings): son todas las temporadas, y
  * pedir los datos de cada una desde acá serían cuarenta viajes.
  *
+ * Se ve y se exporta como la tabla de Clasificación: mismas clases (sectionCard,
+ * tableCard, filas), misma barra con Exportar en escritorio y el mismo botón en
+ * la cabecera del celular — para eso le pasa a la página la placa ya armada
+ * (onExportData), porque en el celular la barra de herramientas no se ve.
+ *
  * Los títulos salen de las mismas SeasonOption que alimentan Campeones, con la
  * misma regla que el palmarés: un título compartido suma uno a cada club. Pero
  * solo los de las temporadas que suman puntos: el Top 14 tiene campeones desde
@@ -17,9 +22,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { type StandingsData } from '@/components/ExportImage';
 import { formatDifference } from '@/lib/utils/formatDifference';
-import { ClubCrest, type ChampionSeasonItem } from './TournamentChampionsTab';
+import { type ChampionSeasonItem } from './TournamentChampionsTab';
 import styles from './page.module.css';
+
+// ~900 KB que solo hacen falta si alguien abre el modal: entra en diferido.
+const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
 
 type HistoricalRow = {
     position: number;
@@ -50,12 +60,49 @@ type LoadState =
     | { kind: 'error'; message: string }
     | { kind: 'ok'; data: HistoricalPayload };
 
+function seasonSpan(data: HistoricalPayload): string | null {
+    const { firstSeason, lastSeason } = data;
+    if (firstSeason && lastSeason && firstSeason !== lastSeason) return `${firstSeason}–${lastSeason}`;
+    return firstSeason || lastSeason;
+}
+
+/** La placa: la misma tabla que se ve, con la bajada que dice qué suma. */
+function buildHistoricalExportData(
+    data: HistoricalPayload,
+    { tournamentName, tournamentLogo }: { tournamentName?: string; tournamentLogo?: string },
+): StandingsData {
+    const span = seasonSpan(data);
+    return {
+        title: tournamentName?.trim() || 'Tabla histórica',
+        subtitle: `Tabla histórica${span ? ` · ${span}` : ''}`,
+        tournamentLogo,
+        rows: data.rows.map((row) => ({
+            pos: row.position,
+            team: row.club.name,
+            teamFull: row.club.name,
+            teamLogo: row.club.logo || undefined,
+            played: row.played,
+            won: row.won,
+            lost: row.lost,
+            diff: String(row.scored - row.conceded),
+            points: row.points,
+        })),
+        showPositionDelta: false,
+    };
+}
+
 export default function TournamentHistoricalTab({
     tournamentId,
+    tournamentName,
+    tournamentLogo,
     seasons,
+    onExportData,
 }: {
     tournamentId: string;
+    tournamentName?: string;
+    tournamentLogo?: string;
     seasons: ChampionSeasonItem[];
+    onExportData?: (data: StandingsData | null) => void;
 }) {
     const [state, setState] = useState<LoadState>({ kind: 'loading' });
 
@@ -79,6 +126,19 @@ export default function TournamentHistoricalTab({
         return () => controller.abort();
     }, [tournamentId]);
 
+    const exportData = useMemo(
+        () => (state.kind === 'ok' && state.data.rows.length > 0
+            ? buildHistoricalExportData(state.data, { tournamentName, tournamentLogo })
+            : null),
+        [state, tournamentLogo, tournamentName],
+    );
+
+    useEffect(() => {
+        onExportData?.(exportData);
+    }, [exportData, onExportData]);
+    // Al salir de la pestaña, la cabecera del celular deja de ofrecer esta placa.
+    useEffect(() => () => onExportData?.(null), [onExportData]);
+
     const countedKeys = state.kind === 'ok' ? state.data.seasonKeys : null;
     const titlesByClub = useMemo(() => {
         const out = new Map<string, number>();
@@ -100,64 +160,90 @@ export default function TournamentHistoricalTab({
         return <p className={styles.emptyState}>{state.message}</p>;
     }
 
-    const { rows, seasonsCounted, firstSeason, lastSeason } = state.data;
+    const { rows, seasonsCounted } = state.data;
     if (rows.length === 0) {
         return <p className={styles.emptyState}>Todavía no hay temporadas con resultados para sumar.</p>;
     }
 
     const hasBonus = rows.some((row) => row.bonus > 0);
     const hasTitles = rows.some((row) => (titlesByClub.get(row.club.id) ?? 0) > 0);
-    const span = firstSeason && lastSeason && firstSeason !== lastSeason
-        ? `${firstSeason}–${lastSeason}`
-        : firstSeason || lastSeason;
+    const span = seasonSpan(state.data);
+    const optional = `${styles.colVal} ${styles.historicalOptional}`;
 
     return (
-        <div className={styles.standingsContainer}>
-            <p className={styles.historicalIntro}>
-                Fase regular de {seasonsCounted} {seasonsCounted === 1 ? 'temporada' : 'temporadas'}
-                {span ? ` (${span})` : ''}. Cada temporada suma los puntos de su tabla, con el sistema de puntos de ese año.
-            </p>
-            <div className={styles.tableCard}>
-            <div className={styles.tableHeader}>
-                <div className={styles.colPos}>#</div>
-                <div className={styles.colTeam}>Club</div>
-                <div className={`${styles.colVal} ${styles.colValPJ} ${styles.historicalSeasons}`} title="Temporadas jugadas">Tem</div>
-                {hasTitles && <div className={`${styles.colVal} ${styles.colValPJ}`} title="Títulos">Tít</div>}
-                <div className={`${styles.colVal} ${styles.colValPJ}`}>J</div>
-                <div className={`${styles.colVal} ${styles.historicalOptional}`}>G</div>
-                <div className={`${styles.colVal} ${styles.historicalOptional}`}>E</div>
-                <div className={`${styles.colVal} ${styles.historicalOptional}`}>P</div>
-                <div className={`${styles.colVal} ${styles.colValDG} ${styles.historicalDiff}`}>DG</div>
-                {hasBonus && <div className={`${styles.colVal} ${styles.historicalOptional}`}>B</div>}
-                <div className={`${styles.colPts} ${styles.historicalPts}`}>PTS</div>
+        <>
+            <div className={styles.standingsToolbar}>
+                <span className={styles.historicalToolbarTitle}>
+                    {seasonsCounted} {seasonsCounted === 1 ? 'temporada' : 'temporadas'}{span ? ` · ${span}` : ''}
+                </span>
+                {exportData && (
+                    <ExportImage
+                        template="standings"
+                        filename={`tabla-historica-${tournamentName || 'torneo'}`}
+                        data={exportData}
+                    />
+                )}
             </div>
-            {rows.map((row) => (
-                <div key={row.club.id} className={styles.tableRow}>
-                    <div className={styles.colPos}>{row.position}</div>
-                    <div className={styles.colTeam}>
-                        <ClubCrest club={row.club} size={22} />
-                        <div className={styles.colTeamMeta}>
-                            <Link href={`/clubs/${encodeURIComponent(row.club.id)}`} className={styles.colTeamName}>
-                                {row.club.name}
-                            </Link>
+
+            <div className={styles.standingsContainer}>
+                <div className={styles.sectionCard}>
+                    <div className={styles.tableCard}>
+                        <div className={styles.tableHeader}>
+                            <div className={styles.colPos}>#</div>
+                            <div className={styles.colTeam}>Equipo</div>
+                            <div className={`${styles.colVal} ${styles.colValPJ} ${styles.historicalSeasons}`} title="Temporadas jugadas">Tem</div>
+                            {hasTitles && <div className={`${styles.colVal} ${styles.colValPJ}`} title="Títulos">Tít</div>}
+                            <div className={`${styles.colVal} ${styles.colValPJ}`}>J</div>
+                            <div className={optional}>G</div>
+                            <div className={optional}>E</div>
+                            <div className={optional}>P</div>
+                            <div className={`${styles.colVal} ${styles.colValDG} ${styles.historicalDiff}`}>DG</div>
+                            {hasBonus && <div className={optional}>B</div>}
+                            <div className={`${styles.colPts} ${styles.historicalPts}`}>PTS</div>
                         </div>
+                        {rows.map((row) => (
+                            <div key={row.club.id} className={styles.tableRow}>
+                                <div className={styles.colPos}>{row.position}</div>
+                                <div className={styles.colTeam}>
+                                    {row.club.logo
+                                        ? (
+                                            <img
+                                                src={row.club.logo}
+                                                alt=""
+                                                className={styles.teamLogo}
+                                                loading="lazy"
+                                                onError={(event) => { (event.target as HTMLImageElement).style.visibility = 'hidden'; }}
+                                            />
+                                        )
+                                        : <div className={styles.teamLogoPlaceholder} />}
+                                    <div className={styles.colTeamMeta}>
+                                        <Link href={`/clubs/${encodeURIComponent(row.club.id)}`} className={styles.colTeamName}>
+                                            {row.club.name}
+                                        </Link>
+                                    </div>
+                                </div>
+                                <div className={`${styles.colVal} ${styles.colValPJ} ${styles.historicalSeasons}`}>{row.seasons}</div>
+                                {hasTitles && (
+                                    <div className={`${styles.colVal} ${styles.colValPJ}`}>{titlesByClub.get(row.club.id) || '–'}</div>
+                                )}
+                                <div className={`${styles.colVal} ${styles.colValPJ}`}>{row.played}</div>
+                                <div className={optional}>{row.won}</div>
+                                <div className={optional}>{row.drawn}</div>
+                                <div className={optional}>{row.lost}</div>
+                                <div className={`${styles.colVal} ${styles.colValDG} ${styles.historicalDiff}`}>
+                                    {formatDifference(row.scored - row.conceded)}
+                                </div>
+                                {hasBonus && <div className={optional}>{row.bonus}</div>}
+                                <div className={`${styles.colPts} ${styles.historicalPts}`}>{row.points}</div>
+                            </div>
+                        ))}
                     </div>
-                    <div className={`${styles.colVal} ${styles.colValPJ} ${styles.historicalSeasons}`}>{row.seasons}</div>
-                    {hasTitles && (
-                        <div className={`${styles.colVal} ${styles.colValPJ}`}>{titlesByClub.get(row.club.id) || '–'}</div>
-                    )}
-                    <div className={`${styles.colVal} ${styles.colValPJ}`}>{row.played}</div>
-                    <div className={`${styles.colVal} ${styles.historicalOptional}`}>{row.won}</div>
-                    <div className={`${styles.colVal} ${styles.historicalOptional}`}>{row.drawn}</div>
-                    <div className={`${styles.colVal} ${styles.historicalOptional}`}>{row.lost}</div>
-                    <div className={`${styles.colVal} ${styles.colValDG} ${styles.historicalDiff}`}>
-                        {formatDifference(row.scored - row.conceded)}
-                    </div>
-                    {hasBonus && <div className={`${styles.colVal} ${styles.historicalOptional}`}>{row.bonus}</div>}
-                    <div className={`${styles.colPts} ${styles.historicalPts}`}>{row.points}</div>
                 </div>
-            ))}
+                <p className={styles.historicalIntro}>
+                    Fase regular de {seasonsCounted} {seasonsCounted === 1 ? 'temporada' : 'temporadas'}
+                    {span ? ` (${span})` : ''}. Cada temporada suma los puntos de su tabla, con el sistema de puntos de ese año.
+                </p>
             </div>
-        </div>
+        </>
     );
 }
