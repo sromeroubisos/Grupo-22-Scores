@@ -136,6 +136,10 @@
     {
       "path": "/api/cron/sporti-sync",
       "schedule": "37 8 * * *"
+    },
+    {
+      "path": "/api/cron/craa-sync",
+      "schedule": "13 * * * *"
     }
   ]
 }
