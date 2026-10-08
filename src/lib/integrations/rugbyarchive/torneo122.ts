@@ -36,8 +36,10 @@ export function normalizeKey(value: string): string {
  *    actual: mismo deporte, misma ciudad chica. REVISABLE.
  *  - 1387 "Los Zorros" (Río Tercero) se mapea a Río Tercero R.C. por el mismo
  *    criterio. REVISABLE.
- *  - 1346 "Cordoba R.C." (campeón 1937-38) NO es el Córdoba Rugby actual (1343):
- *    rugbyarchive los tiene como entidades distintas, así que acá también.
+ *  - 1346 "Cordoba R.C." (campeón 1937-38) ES el Córdoba Rugby actual (1343),
+ *    aunque rugbyarchive los tenga como entidades distintas. Confirmado por el
+ *    usuario el 2026-10-08: el `cordoba-r-c` que creó la primera carga se unió
+ *    a `cordoba-rugby-club`.
  */
 export const CLUB_MAP: Record<number, string> = {
   1204: 'san-martin-de-villa-maria',
@@ -55,7 +57,7 @@ export const CLUB_MAP: Record<number, string> = {
   1343: 'cordoba-rugby-club',
   1344: 'escuela-de-aviacion',
   1345: 'gimnasia-y-esgrima-cordoba',
-  1346: 'cordoba-r-c',
+  1346: 'cordoba-rugby-club',
   1347: 'universidad-nacional-de-cordoba',
   1379: 'san-francisco-r-c',
   1380: 'universidad-tecnologica-cordoba',
@@ -78,12 +80,11 @@ const UNION_CORDOBESA = '0c515ac1-af49-4699-b3c5-7273bc424357';
 /**
  * Clubes que el catálogo de G22 todavía no tiene. Se crean tal cual antes de
  * importar (la fila calca la forma de un club existente de la misma unión).
- * Tres son clubes desaparecidos que solo aparecen como campeones históricos.
+ * Dos son clubes desaparecidos que solo aparecen como campeones históricos.
  */
 export const CLUBES_NUEVOS: Array<Record<string, unknown>> = [
   { id: 'escuela-de-aviacion', name: 'Escuela de Aviación', short_name: 'Escuela de Aviación', city: 'Córdoba' },
   { id: 'gimnasia-y-esgrima-cordoba', name: 'Gimnasia y Esgrima de Córdoba', short_name: 'GyE Córdoba', city: 'Córdoba' },
-  { id: 'cordoba-r-c', name: 'Córdoba R.C.', short_name: 'Córdoba R.C.', city: 'Córdoba' },
   { id: 'universidad-nacional-de-cordoba', name: 'Universidad Nacional de Córdoba', short_name: 'U.N.C.', city: 'Córdoba' },
   { id: 'universidad-tecnologica-cordoba', name: 'Universidad Tecnológica Córdoba', short_name: 'UTN Córdoba', city: 'Córdoba' },
   { id: 'universidad-catolica-de-cordoba', name: 'Universidad Católica de Córdoba', short_name: 'U.C.C.', city: 'Córdoba' },
