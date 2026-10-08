@@ -4805,3 +4805,29 @@
     .topStatsCard { padding: 4px 14px 8px; }
     .topStatsHeading { font-size: 16px; }
 }
+
+/* ── Tabla histórica ─────────────────────────────────────────────────── */
+.historicalIntro {
+    margin: 0 0 10px;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--fl-text-muted);
+}
+/* Sumada en décadas, la diferencia llega a cinco caracteres ("+7072") y los
+   puntos a cuatro: las columnas de la tabla de una temporada no alcanzan. */
+.historicalDiff { width: 52px; }
+.historicalPts { width: 48px; }
+/* Nueve columnas en vez de siete: G, E, P y B se van antes que en la tabla de
+   una temporada, para que el nombre del club siga entrando. */
+@container tabla (max-width: 560px) {
+    .historicalOptional { display: none; }
+}
+@supports not (container-type: inline-size) {
+    @media (max-width: 900px) {
+        .historicalOptional { display: none; }
+    }
+}
+/* En un teléfono el nombre del club pesa más que las temporadas jugadas. */
+@container tabla (max-width: 440px) {
+    .colValPJ.historicalSeasons { display: none; }
+}

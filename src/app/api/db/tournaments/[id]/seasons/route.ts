@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
-import { fetchTournamentData } from '@/lib/server/fetchTournamentData';
 import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
-import {
-    collectSeasonLinkedTournamentIds,
-    collectTournamentSeasonFamilyRows,
-    mergeSlugSeasonFamilyIntoSet,
-    mergeSlugSeasonFamilyIntoSetLoose,
-    type TournamentSeasonFamilyRow,
-} from '@/lib/tournamentSeasonChain';
+import { type TournamentSeasonFamilyRow } from '@/lib/tournamentSeasonChain';
+import { resolveTournamentSeasonFamily, type TournamentRow } from '@/lib/server/tournamentSeasonFamily';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -17,18 +11,6 @@ const NO_STORE_HEADERS = {
     'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
     Pragma: 'no-cache',
     Expires: '0',
-};
-
-type TournamentRow = {
-    id: string;
-    name: string | null;
-    display_name: string | null;
-    slug: string | null;
-    season_id: string | null;
-    status: string | null;
-    is_visible: boolean | null;
-    sport_id?: string | null;
-    country_id?: string | null;
 };
 
 type SeasonChampionRef = {
@@ -87,94 +69,6 @@ function compareSeasonLabels(a: SeasonOption, b: SeasonOption): number {
     return String(b.label).localeCompare(String(a.label), 'es');
 }
 
-const ANCHOR_SELECT =
-    'id, name, display_name, slug, season_id, status, is_visible, sport_id, country_id';
-// Cinco grupos, no cuatro. Al que estaba acá le faltaba el tercer bloque de 4
-// (8-4-4-12 en vez de 8-4-4-4-12), así que NINGÚN uuid real lo pasaba: la
-// búsqueda por `id` no se intentaba nunca y un torneo abierto por uuid caía
-// siempre en la rama de slug, no encontraba nada y se quedaba sin el
-// desplegable de temporadas.
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function coerceTournamentRow(value: Record<string, unknown> | null | undefined): TournamentRow | null {
-    const id = typeof value?.id === 'string' ? value.id.trim() : '';
-    if (!id) return null;
-
-    return {
-        id,
-        name: typeof value?.name === 'string' ? value.name : null,
-        display_name: typeof value?.display_name === 'string' ? value.display_name : null,
-        slug: typeof value?.slug === 'string' ? value.slug : null,
-        season_id: typeof value?.season_id === 'string' ? value.season_id : null,
-        status: typeof value?.status === 'string' ? value.status : null,
-        is_visible: typeof value?.is_visible === 'boolean' ? value.is_visible : null,
-        sport_id: typeof value?.sport_id === 'string' ? value.sport_id : null,
-        country_id: typeof value?.country_id === 'string' ? value.country_id : null,
-    };
-}
-
-/** DB `external_id` is often stored without the public route prefix (see favorites migrations). */
-function stripPublicRoutePrefix(routeId: string): string {
-    return routeId.replace(/^(fs-|ras-league-|espn-league-|espn-racing-league-)/i, '');
-}
-
-async function resolveSeasonAnchorRow(
-    supabase: Awaited<ReturnType<typeof getReadClient>>,
-    routeId: string,
-): Promise<TournamentRow | null> {
-    const routeKey = routeId.trim();
-
-    if (UUID_RE.test(routeKey)) {
-        const { data: byIdData } = await supabase
-            .from('tournaments')
-            .select(ANCHOR_SELECT)
-            .eq('id', routeKey)
-            .maybeSingle();
-        const byId = byIdData as TournamentRow | null;
-        if (byId) return byId;
-    }
-
-    const { data: bySlugData } = await supabase
-        .from('tournaments')
-        .select(ANCHOR_SELECT)
-        .eq('slug', routeKey)
-        .maybeSingle();
-    const bySlug = bySlugData as TournamentRow | null;
-
-    if (bySlug) return bySlug;
-
-    const tryExternalId = async (value: string) => {
-        if (!value.trim()) return null;
-        const { data, error } = await supabase
-            .from('tournaments')
-            .select(ANCHOR_SELECT)
-            .eq('external_id', value)
-            .limit(1);
-        if (error || !data?.length) return null;
-        return data[0] as TournamentRow;
-    };
-
-    const direct = await tryExternalId(routeKey);
-    if (direct) return direct;
-
-    const stripped = stripPublicRoutePrefix(routeKey);
-    if (stripped !== routeKey) {
-        const byStripped = await tryExternalId(stripped);
-        if (byStripped) return byStripped;
-    }
-
-    if (!/^fs-/i.test(routeKey)) {
-        const withFs = await tryExternalId(`fs-${routeKey}`);
-        if (withFs) return withFs;
-    }
-
-    const fallback = await fetchTournamentData(routeKey);
-    const fallbackTournament = coerceTournamentRow(fallback?.tournament);
-    if (fallbackTournament) return fallbackTournament;
-
-    return null;
-}
-
 export async function GET(
     req: NextRequest,
     { params }: { params: Promise<{ id: string }> },
@@ -182,56 +76,25 @@ export async function GET(
     const { id } = await params;
     const supabase = await getReadClient();
 
-    const lookup = await resolveSeasonAnchorRow(supabase, id);
-
-    if (!lookup) {
-        return jsonNoStore({ ok: false, seasons: [] }, { status: 404 });
-    }
-
-    const currentId = lookup.id;
     const requestedSeasonId =
         req.nextUrl.searchParams.get('seasonId') ||
         req.nextUrl.searchParams.get('season_id') ||
         req.nextUrl.searchParams.get('season');
 
-    const involvedIds = new Set<string>([currentId]);
+    let family: Awaited<ReturnType<typeof resolveTournamentSeasonFamily>>;
     try {
-        const linkedIds = await collectSeasonLinkedTournamentIds(supabase as any, currentId);
-        linkedIds.forEach((linkedId) => involvedIds.add(linkedId));
-    } catch {
-        // Keep the public switcher useful even if relation metadata is temporarily unavailable.
+        family = await resolveTournamentSeasonFamily(supabase, id, requestedSeasonId);
+    } catch (error) {
+        return jsonNoStore({ ok: false, seasons: [], error: (error as Error).message }, { status: 500 });
     }
 
-    await mergeSlugSeasonFamilyIntoSet(supabase as any, {
-        id: lookup.id,
-        slug: lookup.slug,
-        sport_id: lookup.sport_id ?? null,
-        country_id: lookup.country_id ?? null,
-    }, involvedIds);
-
-    if (involvedIds.size <= 1) {
-        await mergeSlugSeasonFamilyIntoSetLoose(supabase as any, { slug: lookup.slug }, involvedIds);
+    if (!family) {
+        return jsonNoStore({ ok: false, seasons: [] }, { status: 404 });
     }
 
-    const seasonRows = await collectTournamentSeasonFamilyRows(supabase as any, involvedIds, requestedSeasonId);
-    seasonRows.forEach((season) => {
-        if (season.tournament_id) involvedIds.add(season.tournament_id);
-        if (season.legacy_tournament_id) involvedIds.add(season.legacy_tournament_id);
-    });
-
-    const { data: tournamentRowsData, error: tournamentRowsError } = await supabase
-        .from('tournaments')
-        .select('id, name, display_name, slug, season_id, status, is_visible')
-        .in('id', Array.from(involvedIds));
-
-    if (tournamentRowsError) {
-        return jsonNoStore({ ok: false, seasons: [], error: tournamentRowsError.message }, { status: 500 });
-    }
-
-    const rows = ((tournamentRowsData ?? []) as TournamentRow[]);
-    if (!rows.some((row) => row.id === lookup.id)) {
-        rows.push(lookup);
-    }
+    const { lookup, seasonRows } = family;
+    const currentId = lookup.id;
+    const rows: TournamentRow[] = family.tournaments;
     const tournamentById = new Map(rows.map((row) => [row.id, row]));
     const currentTournamentSeasons = seasonRows.filter((season) => season.tournament_id === currentId);
     const activeSeason =

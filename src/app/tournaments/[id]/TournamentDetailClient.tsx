@@ -17,6 +17,7 @@ import TournamentPublicStats from './TournamentPublicStats';
 import TournamentScoresPanel, { hasRatedLineups, sondaDePuntajes } from './TournamentScoresPanel';
 import TournamentChampionsTab, { ClubCrest, type ChampionRef } from './TournamentChampionsTab';
 import TournamentSofascoreStats from './TournamentSofascoreStats';
+import TournamentHistoricalTab from './TournamentHistoricalTab';
 import TournamentNavigation from './TournamentNavigation';
 import {
     EvolutionToggle,
@@ -66,6 +67,7 @@ const BASE_TABS = [
     { id: 'scores', label: 'Puntajes' },
     { id: 'stats', label: 'Estadísticas' },
     { id: 'champions', label: 'Campeones' },
+    { id: 'historical', label: 'Histórica' },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -1360,7 +1362,25 @@ function buildCalculatedStandings(dbData: TournamentInitialData, preferredPhaseI
 
     if (phaseParticipants.length === 0) return [];
 
-    const engineParticipants = phaseParticipants.map((participant: any) => ({
+    // Una temporada importada no dice quién jugó cada fase: el plantel es el de
+    // toda la temporada, y un club que solo jugó la permanencia aparecía en la
+    // tabla de la fase regular con cero partidos. Ahí la fase es de quien tiene
+    // partidos en ella (jugados o no: la tabla de una fecha temprana no puede
+    // perder a un club que todavía no debutó).
+    let scopedParticipants = phaseParticipants;
+    if (activePhaseId && isReconstructedManualPhase(dbData, activePhaseId)) {
+        const clubsInPhase = new Set<string>();
+        matches
+            .filter((match: any) => String(match?.phase_id ?? '') === String(activePhaseId))
+            .forEach((match: any) => {
+                if (match?.home_club_id) clubsInPhase.add(String(match.home_club_id));
+                if (match?.away_club_id) clubsInPhase.add(String(match.away_club_id));
+            });
+        const inPhase = phaseParticipants.filter((participant: any) => clubsInPhase.has(String(participant?.club_id ?? '')));
+        if (inPhase.length > 0) scopedParticipants = inPhase;
+    }
+
+    const engineParticipants = scopedParticipants.map((participant: any) => ({
         ...participant,
         clubs: participant.clubs || participant.club,
     }));
@@ -1431,8 +1451,13 @@ function buildStandingsSnapshot(dbData: TournamentInitialData, preferredPhaseId?
     // the phase (otherwise fall back to the recompute so the table isn't blank).
     const carryOverPhaseWithPersistedRows =
         isPhaseCarryOverEnabled(activePhase?.settings) && persistedStandings.length > 0;
+    // Una fase manual SIN tabla cargada se arma con los partidos. Es el caso de
+    // las temporadas importadas de rugbyarchive que trajeron los resultados y no
+    // la tabla oficial (el Top 14 de 2000 a 2025): antes la temporada se quedaba
+    // sin pestaña Clasificación aunque tuviera todos los partidos.
     const shouldUsePersistedStandings =
-        resolvedRules?.calculation_mode === 'fully_manual' || carryOverPhaseWithPersistedRows;
+        (resolvedRules?.calculation_mode === 'fully_manual' && persistedStandings.length > 0) ||
+        carryOverPhaseWithPersistedRows;
 
     if (!shouldUsePersistedStandings && canSafelyCalculate) {
         const calculatedStandings = buildCalculatedStandings(dbData, preferredPhaseId);
@@ -1451,12 +1476,73 @@ function buildStandingsSnapshot(dbData: TournamentInitialData, preferredPhaseId?
     return grouped.length > 0 ? grouped : persistedStandings;
 }
 
+/**
+ * Fase manual sin tabla cargada: la que se ve es la armada con los partidos.
+ * Los partidos importados no traen bonus, así que la pantalla lo aclara.
+ */
+function isReconstructedManualPhase(dbData: TournamentInitialData, phaseId: string | null): boolean {
+    const { activePhaseId, resolvedRules } = getDbStandingsContext(dbData, phaseId);
+    if (resolvedRules?.calculation_mode !== 'fully_manual') return false;
+    return filterStandingsToActivePhase(
+        Array.isArray(dbData.standings) ? (dbData.standings as any[]) : [],
+        activePhaseId,
+        { strict: true },
+    ).length === 0;
+}
+
+/**
+ * ¿La tabla cargada a mano de esta fase sale de sus partidos?
+ *
+ * - 'exact': mismos PJ, G, E, P y puntos, club por club (o no hay tabla
+ *   cargada y la que se ve ya es la calculada).
+ * - 'without-bonus': todo coincide salvo el bonus. Es lo normal en lo
+ *   importado de rugbyarchive: la tabla oficial trae el bonus total de cada
+ *   club y los partidos no dicen en cuál se ganó. Las fechas se pueden armar,
+ *   sin bonus.
+ * - null: no cuadra (falta un partido, hay una quita, otra fase arrastrada).
+ */
+function manualTableMatchesResults(
+    dbData: TournamentInitialData,
+    phaseId: string | null,
+): 'exact' | 'without-bonus' | null {
+    const official = filterStandingsToActivePhase(
+        (Array.isArray(dbData.standings) ? dbData.standings : []).map(mapPersistedDbStanding),
+        phaseId,
+        { strict: true },
+    );
+    if (official.length === 0) return 'exact';
+
+    const calculated = new Map<string, any>();
+    flattenStandingsRows(buildCalculatedStandings(dbData, phaseId)).forEach((row: any) => {
+        const teamId = String(row?.team?.id ?? '');
+        if (teamId) calculated.set(teamId, row);
+    });
+    if (calculated.size !== official.length) return null;
+
+    const pairs = official.map((row: any) => [row, calculated.get(String(row?.team?.id ?? ''))] as const);
+    const sameRecord = pairs.every(([row, mine]) =>
+        Boolean(mine) &&
+        (['matches_total', 'wins_total', 'draws_total', 'losses_total'] as const)
+            .every((field) => Number(mine[field] ?? 0) === Number(row[field] ?? 0)),
+    );
+    if (!sameRecord) return null;
+
+    const pointsOf = (row: any) => Number(row?.points_total ?? 0);
+    if (pairs.every(([row, mine]) => pointsOf(mine) === pointsOf(row))) return 'exact';
+
+    // Sin el bonus de ninguno de los dos lados, ¿dan lo mismo?
+    const withoutBonus = (row: any) => pointsOf(row) - Number(row?.bonus_points ?? 0);
+    return pairs.every(([row, mine]) => withoutBonus(mine) === withoutBonus(row)) ? 'without-bonus' : null;
+}
+
 type StandingsTimelineEntry = {
     round: number;
     dayKey: string;
     fromDayKey: string;
     matchesPlayed: number;
     standings: any[];
+    /** Foto armada sin el bonus que la tabla oficial sí tiene. */
+    withoutBonus: boolean;
 };
 
 /**
@@ -1464,16 +1550,21 @@ type StandingsTimelineEntry = {
  * decide dónde cierra cada una). Cada foto es la MISMA cuenta que la tabla
  * actual —buildCalculatedStandings— con los partidos jugados hasta ese día.
  *
- * Vacío cuando la tabla no sale de los partidos: carga manual (la tabla
- * oficial se copia a mano y no hay de dónde reconstruir el pasado) y fases que
- * arrastran puntos de otra fase, que acá no se ven. Mostrar una foto vieja
- * calculada distinta de la tabla publicada sería peor que no mostrar nada.
+ * Una tabla cargada a mano (la oficial, copiada) también tiene fechas, pero
+ * solo si los partidos la explican (manualTableMatchesResults). Si la única
+ * diferencia es el bonus, las fechas salen sin bonus —`withoutBonus`, y la
+ * pantalla lo dice— y la última, la que cierra la fase, es la tabla oficial.
+ * Si no cuadra —una quita, un partido que falta— no hay fotos: una fecha
+ * calculada distinta de la tabla publicada sería peor que no mostrar nada. Por
+ * lo mismo quedan afuera las fases que arrastran puntos de otra fase.
  */
 function buildStandingsTimeline(dbData: TournamentInitialData, phaseId: string | null): StandingsTimelineEntry[] {
     if (dbData.queryErrors?.matches || dbData.queryErrors?.participants) return [];
 
     const { activePhase, activePhaseId, resolvedRules, matches } = getDbStandingsContext(dbData, phaseId);
-    if (resolvedRules?.calculation_mode === 'fully_manual') return [];
+    const isManual = resolvedRules?.calculation_mode === 'fully_manual';
+    const fit = isManual ? manualTableMatchesResults(dbData, activePhaseId) : 'exact';
+    if (!fit) return [];
     if (isPhaseCarryOverEnabled(activePhase?.settings)) return [];
     if (activePhase && isKnockoutPhaseType(activePhase.phase_type)) return [];
 
@@ -1490,18 +1581,27 @@ function buildStandingsTimeline(dbData: TournamentInitialData, phaseId: string |
         APP_TIMEZONE,
     );
 
-    return cutoffs.map((cutoff) => {
+    const entries: StandingsTimelineEntry[] = cutoffs.map((cutoff) => {
         const scoped = {
             ...dbData,
-            matches: matches.filter((match: any) => {
-                if (!isDbFinalStatus(match?.status)) return true;
-                if (!match?.date_time) return false;
-                const key = dayKeyInZone(match.date_time, APP_TIMEZONE);
-                return key !== null && key <= cutoff.dayKey;
+            // Lo jugado después del cierre vuelve a estar "por jugar" en vez de
+            // desaparecer: el partido sigue diciendo quién juega la fase.
+            matches: matches.map((match: any) => {
+                if (!isDbFinalStatus(match?.status)) return match;
+                const key = match?.date_time ? dayKeyInZone(match.date_time, APP_TIMEZONE) : null;
+                return key !== null && key <= cutoff.dayKey ? match : { ...match, status: 'scheduled' };
             }),
         } as TournamentInitialData;
-        return { ...cutoff, standings: buildCalculatedStandings(scoped, activePhaseId) };
+        return { ...cutoff, standings: buildCalculatedStandings(scoped, activePhaseId), withoutBonus: fit === 'without-bonus' };
     });
+
+    // La fecha que cierra la fase es la tabla oficial, con su bonus.
+    const last = entries[entries.length - 1];
+    const totalPlayed = phaseMatches.filter((match: any) => isDbFinalStatus(match?.status)).length;
+    if (last && fit === 'without-bonus' && last.matchesPlayed >= totalPlayed) {
+        entries[entries.length - 1] = { ...last, standings: buildStandingsSnapshot(dbData, activePhaseId), withoutBonus: false };
+    }
+    return entries;
 }
 
 function buildPhaseFlatStandingsRows(dbData: TournamentInitialData, phaseId: string) {
@@ -2725,6 +2825,10 @@ export default function TournamentDetailPage({
     const shouldForceStandingsTabVisible = tournamentData?.sportId === 'basketball';
     const hasEspnSoccerTopScorers = isEspnSoccerSource && topScorers.length > 0;
     const hasChampionSeasons = seasonOptions.some((season) => Boolean(season.champion));
+    // La tabla histórica suma las tablas de cada temporada: hace falta más de
+    // una, y que sean de un torneo cargado acá (de un proveedor externo no hay
+    // tablas viejas guardadas para sumar).
+    const hasHistoricalTable = Boolean((tournamentData as any)?.__isDbOnly) && seasonOptions.length > 1;
 
     /* ── ¿La pestaña Puntajes tiene algo que mostrar? ─────────────────────
        Una pestaña que abre a "Sin puntajes cargados" no es una pestaña: es un
@@ -2771,6 +2875,7 @@ export default function TournamentDetailPage({
             .filter((tab: { id: string; label: string }) => !(tab.id === 'standings' && !shouldUseIntegratedBracketView && !hasVisibleStandingsData && !shouldForceStandingsTabVisible))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'playoff' && !hasDedicatedPlayoffTab))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'champions' && !hasChampionSeasons))
+            .filter((tab: { id: string; label: string }) => !(tab.id === 'historical' && !hasHistoricalTable))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'scores' && !scoresTabConDatos))
             .map((tab: { id: string; label: string }) => {
                 if (tab.id === 'standings' && shouldUseIntegratedBracketView) {
@@ -2799,13 +2904,13 @@ export default function TournamentDetailPage({
         }
 
         return tabs;
-    }, [hasChampionSeasons, hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, scoresTabConDatos, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
+    }, [hasChampionSeasons, hasHistoricalTable, hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, scoresTabConDatos, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
 
     useEffect(() => {
         if (navigationTabs.some((tab: { id: string; label: string }) => tab.id === activeTab)) return;
         // Deep link a Campeones: el tab recién existe cuando llegó la lista de
         // temporadas — no lo patees a Resumen mientras el fetch está en vuelo.
-        if (activeTab === 'champions' && !seasonOptionsLoaded) return;
+        if ((activeTab === 'champions' || activeTab === 'historical') && !seasonOptionsLoaded) return;
         /* Mismo criterio para todo lo que depende de los datos del torneo:
            Clasificación no existe hasta que llega la tabla, y en un torneo
            externo (sin snapshot del servidor) eso tarda un fetch entero. Patear
@@ -4244,7 +4349,25 @@ export default function TournamentDetailPage({
     // La leyenda de la tabla principal, con el botón del gráfico de evolución al
     // lado. Si la tabla no tiene etiquetas, el botón queda solo.
     const evolutionPanelId = 'standings-evolution';
-    const renderStandingsFooter = (items: StandingsLegendItem[]) => {
+    // Temporada importada sin tabla oficial: la tabla sale de los resultados y
+    // los partidos viejos no traen bonus. Que no se lea como la tabla publicada.
+    const standingsReconstructed = Boolean(
+        timelineDbData &&
+        timelinePhaseId !== undefined &&
+        isReconstructedManualPhase(timelineDbData, timelinePhaseId),
+    );
+    const bonusNote = standingsReconstructed
+        ? 'Tabla armada con los resultados de los partidos: no incluye puntos bonus.'
+        : timelineEntry?.withoutBonus || (evolutionOpen && timelineEntries.some((entry) => entry.withoutBonus))
+            ? 'Las fechas se arman con los resultados y no incluyen puntos bonus. La tabla actual es la oficial, con bonus.'
+            : null;
+    const renderStandingsFooter = (items: StandingsLegendItem[]) => (
+        <>
+            {renderStandingsFooterControls(items)}
+            {bonusNote && <p className={timelineStyles.reconstructedNote}>{bonusNote}</p>}
+        </>
+    );
+    const renderStandingsFooterControls = (items: StandingsLegendItem[]) => {
         const legend = renderStandingsLegend(items);
         const hasEvolution = evolutionColumns.length >= 2;
         if (!hasEvolution && !showTimelinePicker) return legend;
@@ -5702,6 +5825,11 @@ export default function TournamentDetailPage({
                        tab=summary en el href, pero cambiar seasonId no desmonta la
                        página y el estado activeTab seguiría clavado en Campeones. */
                     <TournamentChampionsTab seasons={seasonOptions} onNavigate={() => setActiveTab('summary')} />
+                )}
+
+                {/* ── HISTORICAL TAB ────────────────────────────────────── */}
+                {activeTab === 'historical' && seasonOptionsLoaded && hasHistoricalTable && (
+                    <TournamentHistoricalTab tournamentId={String(tournamentData?.id || id)} seasons={seasonOptions} />
                 )}
 
                 {/* ── ARCHIVE TAB ───────────────────────────────────────── */}
