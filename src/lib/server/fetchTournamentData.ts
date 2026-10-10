@@ -169,6 +169,9 @@ type TournamentMatchRow = Record<string, unknown> & {
     venue: string | null;
     round_label: string | null;
     notes: string | null;
+    bracket_match_code?: string | null;
+    home_source_label?: string | null;
+    away_source_label?: string | null;
     home_club_id: string | null;
     away_club_id: string | null;
     phase_id: string | null;
@@ -721,6 +724,7 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
             .from('matches')
             .select(`
                 id, date_time, status, score, events, lineups, venue, round_label, notes,
+                bracket_match_code, home_source_label, away_source_label,
                 home_club_id, away_club_id,
                 phase_id, group_id, round_uuid,
                 home_base_points, away_base_points,
@@ -734,6 +738,7 @@ export async function fetchTournamentData(id: string, options: FetchTournamentDa
             .from('matches')
             .select(`
                 id, date_time, status, score, lineups, venue, round_label, notes,
+                bracket_match_code, home_source_label, away_source_label,
                 home_club_id, away_club_id,
                 phase_id, group_id, round_uuid,
                 home_base_points, away_base_points,

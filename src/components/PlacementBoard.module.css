@@ -1,0 +1,503 @@
+/* Fase final por puestos (seven). Misma familia que PlayoffBracket: tarjetas
+   sobre el fondo de la página, verde de acento, dorado de campeón (#d4a72c).
+   El dorado y el bronce como TEXTO se oscurecen en claro: sobre blanco no
+   llegan a 4,5:1. */
+.board {
+    --pb-gold: #d4a72c;
+    --pb-gold-ink: #e3b93c;
+    --pb-gold-soft: rgba(212, 167, 44, 0.12);
+    --pb-bronze: #c07a43;
+    --pb-bronze-soft: rgba(192, 122, 67, 0.12);
+    --pb-live: #ef4444;
+    --pb-card: rgba(255, 255, 255, 0.02);
+    --pb-card-hover: rgba(255, 255, 255, 0.045);
+
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-top: 1rem;
+}
+
+:global([data-theme="light"]) .board {
+    --pb-gold-ink: #8a6500;
+    --pb-gold-soft: rgba(212, 167, 44, 0.14);
+    --pb-bronze: #a35f2b;
+    --pb-live: #dc2626;
+    --pb-card: #ffffff;
+    --pb-card-hover: #f9fafb;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sectionTitle::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+.sectionTitleGold {
+    color: var(--pb-gold-ink);
+}
+
+/* ── Bloque del título ─────────────────────────────────────────────────── */
+.titleGrid {
+    display: grid;
+    gap: 16px;
+}
+
+.titleGridWithPool {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.podium {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.titleGrid .podium {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-items: start;
+}
+
+.finalWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+@media (max-width: 860px) {
+    .titleGridWithPool,
+    .titleGrid .podium {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    /* En el teléfono lo primero que se busca es la final. */
+    .titleGridWithPool .podium {
+        order: -1;
+    }
+}
+
+/* ── Zona ───────────────────────────────────────────────────────────────── */
+.pool {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: var(--pb-card);
+    min-width: 0;
+}
+
+.blockHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.blockTitle {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.blockHint {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-tertiary);
+}
+
+.poolTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+.poolTable th {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    text-align: center;
+    padding: 6px 4px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.poolTable td {
+    text-align: center;
+    padding: 8px 4px;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.poolTable tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.poolTable .colPos {
+    width: 28px;
+    font-weight: 800;
+    color: var(--color-text-tertiary);
+    box-shadow: inset 3px 0 0 transparent;
+}
+
+.poolTable .colTeam {
+    text-align: left;
+    color: var(--color-text-primary);
+}
+
+.rowFinal .colPos {
+    color: var(--pb-gold-ink);
+    box-shadow: inset 3px 0 0 var(--pb-gold);
+}
+
+.rowThird .colPos {
+    color: var(--pb-bronze);
+    box-shadow: inset 3px 0 0 var(--pb-bronze);
+}
+
+.poolTeam {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.poolNote {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--color-text-tertiary);
+}
+
+.legendSwatch {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    margin: 0 4px 0 0;
+    vertical-align: 0;
+}
+
+.legendThird {
+    margin-left: 10px;
+}
+
+.legendFinal {
+    background: var(--pb-gold);
+}
+
+.legendThird {
+    background: var(--pb-bronze);
+}
+
+.poolMatches {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 4px;
+}
+
+@media (max-width: 520px) {
+    .poolMatches {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ── Escaleras ──────────────────────────────────────────────────────────── */
+/* Dos escaleras (5°-8° y 9°-12°) lado a lado en pantalla ancha: de a una,
+   cada tarjeta de dos renglones se estiraba a 640 px. */
+.ladders {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+    gap: 28px 32px;
+}
+
+.ladder {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+}
+
+.ladderCol {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.ladderColTitle {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent-ink);
+}
+
+.ladderArrow {
+    display: flex;
+    justify-content: center;
+    color: var(--color-text-muted);
+}
+
+@media (max-width: 640px) {
+    .ladder {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+    }
+    .ladderArrow {
+        transform: rotate(90deg);
+    }
+}
+
+.singles {
+    display: grid;
+    /* auto-fit: con dos definiciones, cada una ocupa la mitad y no queda una
+       columna vacía. */
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+}
+
+/* ── Tarjeta de partido ─────────────────────────────────────────────────── */
+.card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--pb-card);
+    color: inherit;
+    text-decoration: none;
+    overflow: hidden;
+    transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+    min-width: 0;
+}
+
+.card:hover {
+    border-color: var(--color-border-light);
+    background: var(--pb-card-hover);
+    transform: translateY(-1px);
+}
+
+.card:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.cardHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.cardStake {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chip {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.chipDone {
+    color: var(--color-text-tertiary);
+}
+
+.chipLive {
+    color: var(--pb-live);
+}
+
+.liveDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--pb-live);
+    animation: pbPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pbPulse {
+    50% { opacity: 0.35; }
+}
+
+.cardLive {
+    border-color: color-mix(in srgb, var(--pb-live) 45%, var(--color-border));
+}
+
+.side {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+.side + .side {
+    border-top: 1px solid var(--color-border);
+}
+
+.sideName {
+    font-weight: 700;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.sideSource {
+    font-weight: 600;
+    font-style: italic;
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.sideScore {
+    font-weight: 800;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+    min-width: 1.5ch;
+    text-align: right;
+}
+
+.sideWinner .sideScore {
+    color: var(--color-accent-ink);
+}
+
+.sideLoser .sideName,
+.sideLoser .sideScore {
+    color: var(--color-text-tertiary);
+    font-weight: 600;
+}
+
+.crest {
+    object-fit: contain;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.crestEmpty {
+    display: inline-block;
+    border-radius: 50%;
+    border: 1.5px dashed var(--color-border-light);
+    flex-shrink: 0;
+}
+
+.crestInitials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    font-size: 9px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+/* La final: borde y cabecera dorados, lados más grandes. */
+.cardFinal {
+    border-color: color-mix(in srgb, var(--pb-gold) 55%, var(--color-border));
+    background: linear-gradient(180deg, var(--pb-gold-soft), transparent 70%), var(--pb-card);
+}
+
+.cardFinal:hover {
+    border-color: var(--pb-gold);
+}
+
+.cardFinal .cardHead {
+    padding: 9px 14px;
+}
+
+.cardFinal .cardStake {
+    color: var(--pb-gold-ink);
+    font-size: 11px;
+}
+
+.cardFinal .side {
+    padding: 12px 14px;
+    font-size: 15px;
+}
+
+.cardFinal .sideScore {
+    font-size: 20px;
+}
+
+.cardThird {
+    border-color: color-mix(in srgb, var(--pb-bronze) 40%, var(--color-border));
+    background: linear-gradient(180deg, var(--pb-bronze-soft), transparent 70%), var(--pb-card);
+}
+
+.cardThird .cardStake {
+    color: var(--pb-bronze);
+}
+
+.champion {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: var(--pb-gold-soft);
+    color: var(--pb-gold-ink);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.champion strong {
+    color: var(--color-text-primary);
+    font-size: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card,
+    .liveDot {
+        transition: none;
+        animation: none;
+    }
+}

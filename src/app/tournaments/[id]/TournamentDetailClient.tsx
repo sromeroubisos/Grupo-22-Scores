@@ -12,6 +12,8 @@ import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { setCachedLogo } from '@/lib/utils/logoCache';
 import PlayoffBracket from '@/components/PlayoffBracket';
 import { splitPlayoffDraw, tagBracketRound } from '@/lib/playoff/bracketSplit';
+import { buildPlacementBoard } from '@/lib/playoff/placementBoard';
+import PlacementBoard from '@/components/PlacementBoard';
 import RadialBracketPredictor from '@/components/RadialBracketPredictor';
 import TournamentPublicStats from './TournamentPublicStats';
 import TournamentScoresPanel, { hasRatedLineups, sondaDePuntajes } from './TournamentScoresPanel';
@@ -1849,11 +1851,18 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
     // principal + Reválida).
     const knockoutBrackets = sortTournamentPhases(phases)
         .filter((phase: any) => isKnockoutPhaseType(phase?.phase_type))
-        .map((phase: any) => ({
-            phaseId: String(phase.id),
-            phase,
-            draw: buildDbPlayoffDraw(dbData, phase.id),
-        }))
+        .map((phase: any) => {
+            const allMatches = Array.isArray(dbData.matches) ? (dbData.matches as any[]) : [];
+            const phaseMatches = allMatches.filter((match: any) => String(match?.phase_id ?? '') === String(phase.id));
+            return {
+                phaseId: String(phase.id),
+                phase,
+                draw: buildDbPlayoffDraw(dbData, phase.id),
+                // Una fase de definiciones por puesto (seven) no es una llave:
+                // si los rótulos lo dicen, la pestaña dibuja el tablero.
+                placement: buildPlacementBoard(phaseMatches, allMatches),
+            };
+        })
         .filter((entry) => Array.isArray(entry.draw) && entry.draw.length > 0);
 
     return {
@@ -3357,6 +3366,9 @@ export default function TournamentDetailPage({
     // copa. El export y el predictor toman el principal (el primero), que es el
     // que define al campeón: una llave mezclada no tiene un campeón coherente.
     const playoffBrackets = splitPlayoffDraw(draw);
+    const placementBoard = knockoutBrackets.find(
+        (entry: any) => entry.phaseId === String(bracketPhase?.id ?? ''),
+    )?.placement ?? null;
     const primaryBracket = playoffBrackets[0] ?? null;
     const primaryBracketRounds = primaryBracket?.rounds ?? draw;
     // "Cuadro - Copa Oro · Copa Oro" cuando la fase se llama como una de sus copas.
@@ -5408,6 +5420,14 @@ export default function TournamentDetailPage({
                 {/* ── PLAYOFF TAB ───────────────────────────────────────── */}
                 {activeTab === 'playoff' && (
                     <div className={styles.section}>
+                        {/* Definiciones por puesto: sin predictor ni afiche de
+                            llave, que suponen un árbol que esta fase no tiene. */}
+                        {placementBoard ? (
+                            <>
+                                {bracketPhaseSelector}
+                                <PlacementBoard board={placementBoard} />
+                            </>
+                        ) : (<>
                         <div className={`${styles.standingsToolbar} ${styles.bracketToolbar}`}>
                             <div />
                             <div className={styles.bracketToolbarActions}>
@@ -5429,6 +5449,7 @@ export default function TournamentDetailPage({
                         </div>
                         {bracketPhaseSelector}
                         {renderPlayoffBrackets(`Cuadro - ${getKnockoutPhaseDisplayTitle(bracketPhase, tournamentName)}`)}
+                        </>)}
                     </div>
                 )}
 
