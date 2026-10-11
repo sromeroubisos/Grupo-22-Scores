@@ -24,7 +24,8 @@ import { parseActa, parseClasificacion, parseResultados, type ActaIsquad, type F
 
 export const ISQUAD_WEB = 'https://resultadosrugby.isquad.es';
 const ISQUAD_API = 'https://rugby.isquad.es/json/api/call.php';
-const TOKEN_PUBLICO = '0637d0dcc2655d3a804f66da887a8ce2';
+// Rota: el 2026-10-11 el anterior (0637d0dc…) daba 500 y el del HTML era este.
+const TOKEN_PUBLICO = '1e4106c4f7944d9495daee13e5ffdecf';
 export const PAUSA_MS = 250;
 export const HTTP_FORMA_INESPERADA = -1;
 const TIMEOUT_MS = 20_000;

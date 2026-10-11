@@ -11,9 +11,13 @@
  * Cada equipo es su propia ficha (convención de la casa: `-femenino`, `-m23`,
  * `-b`), y las filiales comparten el ARCHIVO de escudo del club madre.
  *
- * Afuera a propósito: la DH masculina (416), que sigue saliendo de FlashScore
- * —meterla también en la base duplicaría sus partidos en el feed—, y la
- * "Cobertura de plaza" (429), que es una final suelta de promoción.
+ * La DH masculina (416) salía de FlashScore y pasó a iSquad el 2026-10-11, porque
+ * la actualización de FlashScore no era confiable: el torneo viejo
+ * (`rugby-spain-division-de-honor`) se congela —sin proveedor— y la temporada
+ * 2026/27 vive en `es-division-de-honor`. Nunca conviven los dos con proveedor.
+ *
+ * Afuera a propósito: la "Cobertura de plaza" (429), que es una final suelta
+ * de promoción.
  */
 
 export const TEMPORADA = '2627';
@@ -34,6 +38,11 @@ const ISQUAD = (afil, archivo) => `https://rugby.isquad.es/images/afiliacion_clu
  * zonas (`group_stage` + `tournament_groups`).
  */
 export const TORNEOS = [
+  {
+    campeonato: '416', slug: 'es-division-de-honor', nombre: 'División de Honor',
+    categoria: 'División de Honor', genero: 'masculino', edad: 'mayores',
+    fases: [{ nombre: '1ª Fase', grupos: [{ id: '1296', nombre: null }] }],
+  },
   {
     campeonato: '419', slug: 'es-liga-iberdrola', nombre: 'Liga Iberdrola de Rugby',
     categoria: 'Femenino', genero: 'femenino', edad: 'mayores',
@@ -184,6 +193,9 @@ export const CLUBES = [
 
 /** `id_equipo` de iSquad → club. Medido en las tablas de cada grupo el 2026-10-01. */
 export const EQUIPOS = {
+  // DH masculina (1296) — medido el 2026-10-11 en la tabla del grupo
+  251: 'valladolid-rac', 253: 'el-salvador', 2060: 'burgos', 344: 'ampo-ordizia', 245: 'ue-santboiana',
+  208: 'alcobendas', 1710: 'liceo-frances', 1405: 'cr-la-vila', 188: 'complutense-cisneros', 196: 'pozuelo',
   // DH Élite (1297)
   2064: 'getxo-rugby', 2057: 'barca-rugbi', 1736: 'fenix-rugby', 1717: 'ingenieros-industriales-las-rozas',
   1724: 'bizkaia-gernika', 1709: 'valencia-rc', 2048: 'real-ciencias-sevilla', 1722: 'cp-les-abelles',
