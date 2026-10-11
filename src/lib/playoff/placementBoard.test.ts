@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildPlacementBoard, parsePlacementStake, type RawPlacementMatch } from './placementBoard.ts';
+import { buildPlacementBoard, buildPlacementTabs, parsePlacementStake, type RawPlacementMatch } from './placementBoard.ts';
 
 /**
  * La fase final del Sudamericano de Seven se dibujaba como una llave: columnas
@@ -140,4 +140,60 @@ test('ganador y perdedor sólo con el partido terminado; en vivo hay marcador si
     assert.equal(fifth?.home.isWinner, false);
     assert.equal(seventh?.away.isWinner, true);
     assert.equal(seventh?.home.isLoser, true);
+});
+
+test('pestañas: la zona sola con su tabla y un cuadro por cada definición', () => {
+    const board = buildPlacementBoard([
+        m('Semifinal 9° puesto', '12:44', { bracket_match_code: 'P13' }),
+        m('Semifinal 9° puesto', '13:09', { bracket_match_code: 'P14' }),
+        m('Semifinal 5° puesto', '13:34', { bracket_match_code: 'P15' }),
+        m('Semifinal 5° puesto', '13:59', { bracket_match_code: 'P16' }),
+        m('Zona Oro', '14:24', { home_source_label: '1º Grupo B', away_source_label: '2º Grupo A' }),
+        m('11° puesto', '16:36', { home_source_label: 'Perdedor P13', away_source_label: 'Perdedor P14' }),
+        m('9° puesto', '17:01', { home_source_label: 'Ganador P13', away_source_label: 'Ganador P14' }),
+        m('7° puesto', '18:10'),
+        m('5° puesto', '19:25', { home_source_label: 'Ganador P15', away_source_label: 'Ganador P16' }),
+        m('3° puesto', '20:40'),
+        m('Final', '21:05'),
+    ]);
+    assert.ok(board);
+    const tabs = buildPlacementTabs(board);
+    assert.deepEqual(tabs.map((t) => [t.kind, t.label]), [
+        ['pool', 'Zona Oro'],
+        ['bracket', 'Por el título'],
+        ['bracket', 'Por el 5° puesto'],
+        ['bracket', 'Por el 9° puesto'],
+    ]);
+    const title = tabs[1];
+    assert.equal(title.kind === 'bracket' && title.rounds.map((r) => r.name).join('|'), 'Final|3° puesto');
+    const fifth = tabs[2];
+    assert.equal(fifth.kind === 'bracket' && fifth.rounds.map((r) => r.name).join('|'), 'Semifinales|5° puesto|7° puesto');
+    // Sin equipo, el cuadro dice de dónde sale; nunca queda vacío.
+    const fifthMatch = fifth.kind === 'bracket' ? fifth.rounds[1].matches[0] : null;
+    assert.equal(fifthMatch?.home_participant.participant_name, 'Ganador semi 1');
+});
+
+test('pestañas: el femenino arma el título y una pestaña con el 5° y el 7°, sin zona', () => {
+    const board = buildPlacementBoard([
+        m('7° puesto', '18:35'), m('5° puesto', '19:00'), m('3° puesto', '19:50'), m('Final', '20:15'),
+    ]);
+    assert.ok(board);
+    const tabs = buildPlacementTabs(board);
+    assert.deepEqual(tabs.map((t) => t.label), ['Por el título', 'Por el 5° y 7° puesto']);
+});
+
+test('pestañas: ganador y marcador pasan al cuadro sólo con el partido terminado', () => {
+    const board = buildPlacementBoard([
+        m('5° puesto', '19:25', { status: 'live', score: { home: 7, away: 0 }, home_club_id: 'a', away_club_id: 'b', home: club('a'), away: club('b') }),
+        m('7° puesto', '18:10', { status: 'final', score: { home: 12, away: 17 }, home_club_id: 'c', away_club_id: 'd', home: club('c'), away: club('d') }),
+        m('Final', '21:05'),
+    ]);
+    assert.ok(board);
+    const tab = buildPlacementTabs(board).find((t) => t.id === 'puestos');
+    assert.ok(tab && tab.kind === 'bracket');
+    const [fifth, seventh] = tab.rounds.map((r) => r.matches[0]);
+    assert.equal(fifth.winner_id, undefined);
+    assert.equal(fifth.score_home, 7);
+    assert.equal(seventh.winner_id, 'club:d');
+    assert.equal(seventh.home_participant.image_path, '/logos/c.png');
 });

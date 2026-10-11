@@ -370,3 +370,97 @@ function buildPool(
 
     return { name, rows: sorted, matches, carried };
 }
+
+// ── Pestañas ────────────────────────────────────────────────────────────────
+// El tablero se muestra como el resto de los playoffs: un cuadro por cada
+// definición (el título, el 5°, el 9°…), en pestañas, y la tabla de la zona
+// aparte. Los cuadros los dibuja `PlayoffBracket`; acá sólo se le arma la
+// forma que él lee.
+
+export type BracketMatchData = {
+    match_id: string;
+    home_participant: { participant_id: string; participant_name: string; image_path?: string };
+    away_participant: { participant_id: string; participant_name: string; image_path?: string };
+    score_home: number | null;
+    score_away: number | null;
+    match_start_iso?: string;
+    status: string;
+    winner_id?: string;
+};
+
+export type BracketRoundData = { round_id: string; name: string; matches: BracketMatchData[] };
+
+export type PlacementTab =
+    | { id: string; label: string; kind: 'pool'; pool: PlacementPool }
+    | { id: string; label: string; kind: 'bracket'; title: string; rounds: BracketRoundData[] };
+
+function bracketMatch(match: PlacementMatch): BracketMatchData {
+    const participant = (side: PlacementSide) => ({
+        participant_id: side.key,
+        // Sin equipo todavía, el cuadro dice de dónde sale: nunca "TBD".
+        participant_name: side.teamId ? (side.name || 'Equipo') : (side.source || 'A definir'),
+        ...(side.teamId && side.logo ? { image_path: side.logo } : {}),
+    });
+    const winner = match.home.isWinner ? match.home : match.away.isWinner ? match.away : null;
+    return {
+        match_id: match.id,
+        home_participant: participant(match.home),
+        away_participant: participant(match.away),
+        score_home: match.home.score,
+        score_away: match.away.score,
+        ...(match.dateTime ? { match_start_iso: match.dateTime } : {}),
+        // Sin empezar, vacío: el cuadro rotula con lo que reciba y "scheduled" se leería crudo.
+        status: match.status === 'finished' ? 'finished' : match.status === 'live' ? 'En vivo' : '',
+        ...(winner ? { winner_id: winner.key } : {}),
+    };
+}
+
+const round = (id: string, name: string, matches: PlacementMatch[]): BracketRoundData => ({
+    round_id: id,
+    name,
+    matches: matches.map(bracketMatch),
+});
+
+function placesLabel(places: number[]): string {
+    return places.length === 1 ? `${places[0]}°` : `${places.slice(0, -1).join('°, ')}° y ${places[places.length - 1]}°`;
+}
+
+/**
+ * Una pestaña por definición: la zona (con su tabla), el título (Final y 3°),
+ * cada escalera de puestos y las definiciones sueltas. Con nada que mostrar,
+ * lista vacía.
+ */
+export function buildPlacementTabs(board: PlacementBoard): PlacementTab[] {
+    const tabs: PlacementTab[] = [];
+    if (board.pool) {
+        tabs.push({ id: 'zona', label: board.pool.name, kind: 'pool', pool: board.pool });
+    }
+    if (board.final || board.third) {
+        const rounds: BracketRoundData[] = [];
+        if (board.final) rounds.push(round('final', 'Final', [board.final]));
+        if (board.third) rounds.push(round('third', '3° puesto', [board.third]));
+        tabs.push({ id: 'titulo', label: 'Por el título', kind: 'bracket', title: 'Playoff por el título', rounds });
+    }
+    for (const ladder of board.ladders) {
+        const rounds: BracketRoundData[] = [round(`semi-${ladder.from}`, 'Semifinales', ladder.semis)];
+        for (const { place, match } of ladder.finals) rounds.push(round(`place-${place}`, `${place}° puesto`, [match]));
+        tabs.push({
+            id: `escalera-${ladder.from}`,
+            label: `Por el ${ladder.from}° puesto`,
+            kind: 'bracket',
+            title: `Playoff del ${ladder.from}° al ${ladder.to}° puesto`,
+            rounds,
+        });
+    }
+    if (board.singles.length > 0) {
+        const places = board.singles.map((entry) => entry.place);
+        tabs.push({
+            id: 'puestos',
+            label: `Por el ${placesLabel(places)} puesto`,
+            kind: 'bracket',
+            title: `Playoff por el ${placesLabel(places)} puesto`,
+            rounds: board.singles.map(({ place, match }) => round(`place-${place}`, `${place}° puesto`, [match])),
+        });
+    }
+    return tabs;
+}
