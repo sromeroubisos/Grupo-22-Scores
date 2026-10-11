@@ -1,6 +1,9 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import PlayoffBracket from '@/components/PlayoffBracket';
+import { buildPlacementTabs } from '@/lib/playoff/placementBoard';
 import type {
     PlacementBoard as PlacementBoardData,
     PlacementMatch,
@@ -10,13 +13,14 @@ import type {
 import styles from './PlacementBoard.module.css';
 
 /**
- * La fase final de un seven por puestos (Sudamericano): no es una llave, es
- * una tabla de lo que se juega. Arriba el título —la zona, la final y el 3°—,
- * abajo cada escalera de puestos (semis → definiciones) y las definiciones
- * sueltas. Mientras un lado no tiene equipo, dice de dónde sale ("1º Grupo A",
- * "Ganador semi 1"), nunca "TBD".
+ * La fase final de un seven por puestos (Sudamericano). Cada definición es un
+ * playoff como los demás —el título, el 5°, el 9°— y se ve en su pestaña con
+ * `PlayoffBracket`; la tabla de la zona va aparte, en la suya. Mientras un
+ * lado no tiene equipo, dice de dónde sale ("1º Grupo A", "Ganador semi 1"),
+ * nunca "TBD".
  *
- * Los datos los arma `buildPlacementBoard`; acá sólo se dibuja.
+ * Los datos los arma `buildPlacementBoard` / `buildPlacementTabs`; acá sólo
+ * se elige la pestaña y se dibuja.
  */
 
 type Props = {
@@ -65,7 +69,7 @@ function Crest({ side, size }: { side: PlacementSide; size: number }) {
     return <img src={side.logo} alt="" width={size} height={size} loading="lazy" className={styles.crest} />;
 }
 
-function SideRow({ side, big }: { side: PlacementSide; big?: boolean }) {
+function SideRow({ side }: { side: PlacementSide }) {
     const className = [
         styles.side,
         side.isWinner ? styles.sideWinner : '',
@@ -73,7 +77,7 @@ function SideRow({ side, big }: { side: PlacementSide; big?: boolean }) {
     ].filter(Boolean).join(' ');
     return (
         <div className={className}>
-            <Crest side={side} size={big ? 28 : 20} />
+            <Crest side={side} size={20} />
             {side.teamId ? (
                 <span className={styles.sideName}>{side.name || 'Equipo'}</span>
             ) : (
@@ -84,15 +88,12 @@ function SideRow({ side, big }: { side: PlacementSide; big?: boolean }) {
     );
 }
 
-function MatchCard({ match, variant, title }: {
+function MatchCard({ match, title }: {
     match: PlacementMatch;
-    variant?: 'final' | 'third';
     title?: string;
 }) {
     const className = [
         styles.card,
-        variant === 'final' ? styles.cardFinal : '',
-        variant === 'third' ? styles.cardThird : '',
         match.status === 'live' ? styles.cardLive : '',
     ].filter(Boolean).join(' ');
     const label = `${title ?? match.stake}: ${match.home.name || match.home.source || 'A definir'} contra ${match.away.name || match.away.source || 'A definir'}`;
@@ -102,25 +103,9 @@ function MatchCard({ match, variant, title }: {
                 <span className={styles.cardStake}>{title ?? match.stake}</span>
                 <StatusChip match={match} />
             </div>
-            <SideRow side={match.home} big={variant === 'final'} />
-            <SideRow side={match.away} big={variant === 'final'} />
+            <SideRow side={match.home} />
+            <SideRow side={match.away} />
         </Link>
-    );
-}
-
-function Champion({ match }: { match: PlacementMatch }) {
-    if (match.status !== 'finished') return null;
-    const winner = match.home.isWinner ? match.home : match.away.isWinner ? match.away : null;
-    if (!winner) return null;
-    return (
-        <div className={styles.champion}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z" />
-                <path d="M17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3" />
-            </svg>
-            <span>Campeón</span>
-            <strong>{winner.name}</strong>
-        </div>
     );
 }
 
@@ -192,68 +177,43 @@ function PoolTable({ pool }: { pool: PlacementPool }) {
 }
 
 export default function PlacementBoard({ board }: Props) {
-    const hasTitleBlock = Boolean(board.pool || board.final || board.third);
+    const tabs = useMemo(() => buildPlacementTabs(board), [board]);
+    const [activeId, setActiveId] = useState<string | null>(null);
+    if (tabs.length === 0) return null;
+    const active = tabs.find((tab) => tab.id === activeId) ?? tabs[0];
+
     return (
         <div className={styles.board}>
-            {hasTitleBlock && (
-                <section className={styles.section} aria-labelledby="placement-title">
-                    <h2 id="placement-title" className={styles.sectionTitle}>
-                        <span className={styles.sectionTitleGold}>Por el título</span>
-                    </h2>
-                    <div className={board.pool ? styles.titleGridWithPool : styles.titleGrid}>
-                        {board.pool && <PoolTable pool={board.pool} />}
-                        <div className={styles.podium}>
-                            {board.final && (
-                                <div className={styles.finalWrap}>
-                                    <MatchCard match={board.final} variant="final" />
-                                    <Champion match={board.final} />
-                                </div>
-                            )}
-                            {board.third && <MatchCard match={board.third} variant="third" />}
-                        </div>
-                    </div>
-                </section>
+            {tabs.length > 1 && (
+                <div className={styles.tabs} role="tablist" aria-label="Definiciones de la fase final">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            type="button"
+                            role="tab"
+                            id={`placement-tab-${tab.id}`}
+                            aria-selected={tab.id === active.id}
+                            aria-controls="placement-panel"
+                            className={`${styles.tab} ${tab.id === active.id ? styles.tabActive : ''}`}
+                            onClick={() => setActiveId(tab.id)}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
             )}
-
-            {board.ladders.length > 0 && (
-            <div className={styles.ladders}>
-            {board.ladders.map((ladder) => (
-                <section key={ladder.from} className={styles.section} aria-label={`Del ${ladder.from}° al ${ladder.to}° puesto`}>
-                    <h2 className={styles.sectionTitle}>Del {ladder.from}° al {ladder.to}° puesto</h2>
-                    <div className={styles.ladder}>
-                        <div className={styles.ladderCol}>
-                            <span className={styles.ladderColTitle}>Semifinales</span>
-                            {ladder.semis.map((match, index) => (
-                                <MatchCard key={match.id} match={match} title={`Semi ${index + 1}`} />
-                            ))}
-                        </div>
-                        <div className={styles.ladderArrow} aria-hidden="true">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M5 12h14M13 6l6 6-6 6" />
-                            </svg>
-                        </div>
-                        <div className={styles.ladderCol}>
-                            <span className={styles.ladderColTitle}>Definiciones</span>
-                            {ladder.finals.map(({ place, match }) => (
-                                <MatchCard key={match.id} match={match} title={`${place}° puesto`} />
-                            ))}
-                        </div>
-                    </div>
-                </section>
-            ))}
+            <div
+                id="placement-panel"
+                role="tabpanel"
+                aria-labelledby={`placement-tab-${active.id}`}
+                className={active.kind === 'pool' ? `${styles.tabPanel} ${styles.poolPanel}` : styles.tabPanel}
+            >
+                {active.kind === 'pool' ? (
+                    <PoolTable pool={active.pool} />
+                ) : (
+                    <PlayoffBracket data={active.rounds} title={active.title} />
+                )}
             </div>
-            )}
-
-            {board.singles.length > 0 && (
-                <section className={styles.section} aria-label="Definiciones por puesto">
-                    <h2 className={styles.sectionTitle}>Definiciones por puesto</h2>
-                    <div className={styles.singles}>
-                        {board.singles.map(({ place, match }) => (
-                            <MatchCard key={match.id} match={match} title={`${place}° puesto`} />
-                        ))}
-                    </div>
-                </section>
-            )}
         </div>
     );
 }
