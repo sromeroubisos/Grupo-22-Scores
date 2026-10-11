@@ -27,48 +27,7 @@
     --pb-card-hover: #f9fafb;
 }
 
-/* ── Pestañas ──────────────────────────────────────────────────────────── */
-.tabs {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    scrollbar-width: none;
-}
-
-.tabs::-webkit-scrollbar {
-    display: none;
-}
-
-.tab {
-    flex: 0 0 auto;
-    padding: 8px 14px;
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--color-text-secondary);
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.tab:hover {
-    color: var(--color-text-primary);
-}
-
-.tab:focus-visible {
-    outline: 2px solid var(--color-accent-ink);
-    outline-offset: 2px;
-}
-
-.tabActive {
-    border-color: var(--color-accent-ink);
-    background: color-mix(in srgb, var(--color-accent-ink) 12%, transparent);
-    color: var(--color-accent-ink);
-}
-
+/* ── Panel de la pestaña ───────────────────────────────────────────────── */
 .tabPanel {
     min-width: 0;
 }

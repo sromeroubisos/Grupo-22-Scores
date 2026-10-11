@@ -5823,7 +5823,16 @@ export default function TournamentDetailPage({
                         {placementBoard ? (
                             <>
                                 {bracketPhaseSelector}
-                                <PlacementBoard board={placementBoard} />
+                                <PlacementBoard
+                                    board={placementBoard}
+                                    scopeClasses={{
+                                        bar: styles.standingsScopeBar,
+                                        label: styles.standingsScopeLabel,
+                                        group: styles.pillsGroup,
+                                        pill: styles.pillBtn,
+                                        pillActive: styles.pillBtnActive,
+                                    }}
+                                />
                             </>
                         ) : (<>
                         <div className={`${styles.standingsToolbar} ${styles.bracketToolbar}`}>
