@@ -23,8 +23,18 @@ import styles from './PlacementBoard.module.css';
  * se elige la pestaña y se dibuja.
  */
 
+/** Clases del selector de cuadros de la página del torneo: es el mismo de los otros torneos. */
+export type ScopeClasses = {
+    bar: string;
+    label: string;
+    group: string;
+    pill: string;
+    pillActive: string;
+};
+
 type Props = {
     board: PlacementBoardData;
+    scopeClasses: ScopeClasses;
 };
 
 function kickoffLabel(iso: string | null): string {
@@ -176,7 +186,7 @@ function PoolTable({ pool }: { pool: PlacementPool }) {
     );
 }
 
-export default function PlacementBoard({ board }: Props) {
+export default function PlacementBoard({ board, scopeClasses }: Props) {
     const tabs = useMemo(() => buildPlacementTabs(board), [board]);
     const [activeId, setActiveId] = useState<string | null>(null);
     if (tabs.length === 0) return null;
@@ -185,21 +195,24 @@ export default function PlacementBoard({ board }: Props) {
     return (
         <div className={styles.board}>
             {tabs.length > 1 && (
-                <div className={styles.tabs} role="tablist" aria-label="Definiciones de la fase final">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.id}
-                            type="button"
-                            role="tab"
-                            id={`placement-tab-${tab.id}`}
-                            aria-selected={tab.id === active.id}
-                            aria-controls="placement-panel"
-                            className={`${styles.tab} ${tab.id === active.id ? styles.tabActive : ''}`}
-                            onClick={() => setActiveId(tab.id)}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+                <div className={scopeClasses.bar}>
+                    <span className={scopeClasses.label}>Playoff</span>
+                    <div className={scopeClasses.group} role="tablist" aria-label="Definiciones de la fase final">
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab.id}
+                                type="button"
+                                role="tab"
+                                id={`placement-tab-${tab.id}`}
+                                aria-selected={tab.id === active.id}
+                                aria-controls="placement-panel"
+                                className={`${scopeClasses.pill} ${tab.id === active.id ? scopeClasses.pillActive : ''}`}
+                                onClick={() => setActiveId(tab.id)}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             )}
             <div
