@@ -339,10 +339,6 @@ export const RUGBY_TOURNAMENTS_BY_COUNTRY: Record<string, Tournament[]> = {
         },
     ],
 
-    'spain': [
-        { id: 'rugby-spain-division-de-honor', name: 'Division de Honor', url: '/rugby-union/spain/division-de-honor/', type: 'local', sportId: 'rugby', countryId: 'spain', priority: 100, categories: ['men'], format: 'league' },
-    ],
-
     'usa': [
         { id: 'rugby-usa-major-league-rugby', name: 'Major League Rugby', url: '/rugby-union/usa/major-league-rugby/', type: 'local', sportId: 'rugby', countryId: 'usa', priority: 100, categories: ['men'], format: 'league' },
     ],
