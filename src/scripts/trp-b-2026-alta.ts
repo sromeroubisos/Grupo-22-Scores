@@ -213,6 +213,14 @@ async function main() {
                 sourcePhaseId: faseId.get('E1'),
             };
             settings.carryOverPreviousPhase = true;
+            // Con los puntos arrastrados hay empates (Unión del Sur y Biguá
+            // terminaron con 37): desempata el mano a mano, antes que la diferencia.
+            settings.tiebreakers = [
+                { order: 1, metric: 'points_table', enabled: true, priority: 1 },
+                { order: 2, metric: 'head_to_head', enabled: true, priority: 2 },
+                { order: 3, metric: 'points_diff', enabled: true, priority: 3 },
+                { order: 4, metric: 'pointsFor', enabled: true, priority: 4 },
+            ];
         }
         const id = randomUUID();
         const { error } = await supabase.from('tournament_phases').insert([{
