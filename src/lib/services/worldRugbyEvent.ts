@@ -34,12 +34,14 @@ import {
     parseWrSummary,
     parseWrTimeline,
     pickWrStandings,
+    resolveWrPlacements,
     wrCountryEs,
     wrLiveLabel,
     wrMatchIdOf,
     wrPeriodScores,
     wrRefereeOf,
     wrRefreshTtlSeconds,
+    wrStandingsTeamLabels,
     wrTeamIdOf,
     wrTriesOf,
     type WrEventDef,
@@ -159,7 +161,24 @@ async function getEventFixtures(event: WrEventDef): Promise<WrFixture[]> {
         getManualResults(),
     ]);
     const now = Date.now();
-    return applyWrManualResults(parseWrSchedule(json, event, now), manual, now);
+    const fixtures = applyWrManualResults(parseWrSchedule(json, event, now), manual, now);
+    return withResolvedPlacements(event, fixtures);
+}
+
+/**
+ * Un cruce que nombra lugares ("1.º Grupo A") toma su equipo de la tabla en
+ * cuanto el grupo cerró. Si la tabla no se puede armar, el lugar queda como
+ * está: mejor un cruce sin nombre que uno equivocado.
+ */
+async function withResolvedPlacements(event: WrEventDef, fixtures: WrFixture[]): Promise<WrFixture[]> {
+    const pending = fixtures.some((fixture) => !fixture.pool && (fixture.home.placeholder || fixture.away.placeholder));
+    if (!pending) return fixtures;
+    try {
+        return resolveWrPlacements(fixtures, await getPoolTables(event, fixtures));
+    } catch (error) {
+        console.warn('[World Rugby] no pude resolver los cruces desde la tabla:', error instanceof Error ? error.message : error);
+        return fixtures;
+    }
 }
 
 /** Las cargas manuales de G22, por id de World Rugby. Ver `applyWrManualResults`. */
@@ -525,7 +544,7 @@ export async function getWorldRugbyTournamentBundle(event: WrEventDef) {
         standingsForm: [] as unknown[],
         standingsHtFt: [] as unknown[],
         standingsOverUnder: [] as unknown[],
-        teamLabels: [] as unknown[],
+        teamLabels: wrStandingsTeamLabels(event) as unknown[],
         topScorers: [] as unknown[],
         draw: [] as unknown[],
         archives: [] as unknown[],

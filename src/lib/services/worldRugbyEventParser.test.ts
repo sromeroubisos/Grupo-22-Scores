@@ -18,6 +18,7 @@ import {
     parseWrSummary,
     parseWrTimeline,
     pickWrStandings,
+    resolveWrPlacements,
     wrEventByTournamentId,
     wrLiveLabel,
     wrMatchIdOf,
@@ -26,6 +27,7 @@ import {
     wrPlaceholderLabel,
     wrRefereeOf,
     wrRefreshTtlSeconds,
+    wrStandingsTeamLabels,
     wrTimelineTotals,
     wrTriesOf,
 } from './worldRugbyEventParser.ts';
@@ -463,4 +465,79 @@ test('carga manual: el bonus ofensivo declarado cuenta sin tries, y con tries ma
 
     const conTries = parseWrManualResult({ status: 'final', homeScore: 22, awayScore: 15, homeTries: 3, awayTries: 2, homeTryBonus: true });
     assert.equal(conTries?.homeTryBonus, false);
+});
+
+// --- Cruces por puesto y etiquetas -----------------------------------------
+
+function poolMatch(id: string, pool: string, home: string, away: string, homeScore: number, awayScore: number, final = true) {
+    return {
+        matchId: id, number: null, pool, phase: '', stageLabel: `Grupo ${pool}`, round: 1,
+        kickoffMs: KICKOFF_1, kickoffIso: null, venue: '', city: '',
+        home: { teamId: home, name: `${home} M20`, country: home, abbreviation: null, placeholder: false, score: final ? homeScore : null },
+        away: { teamId: away, name: `${away} M20`, country: away, abbreviation: null, placeholder: false, score: final ? awayScore : null },
+        rawStatus: final ? 'C' : 'U', state: final ? 'final' : 'scheduled', clockSecs: null,
+    } as const;
+}
+
+function cruce(id: string, home: string, away: string) {
+    const side = (name: string) => ({ teamId: null, name, country: '', abbreviation: null, placeholder: true, score: null });
+    return {
+        matchId: id, number: null, pool: null, phase: 'Final', stageLabel: 'Final', round: 4,
+        kickoffMs: KICKOFF_4, kickoffIso: null, venue: '', city: '',
+        home: side(home), away: side(away), rawStatus: 'U', state: 'scheduled', clockSecs: null,
+    } as const;
+}
+
+test('cruces: un grupo cerrado le da dueño a su lugar, uno abierto lo deja', () => {
+    const groups = [
+        poolMatch('a1', 'A', 'Chile', 'Brazil', 80, 7),
+        poolMatch('b1', 'B', 'Belgium', 'Namibia', 47, 22),
+        poolMatch('b2', 'B', 'Canada', 'Portugal', 0, 0, false),
+    ];
+    const fixtures = [...groups, cruce('f1', '1.º Grupo A', '1.º Grupo B')];
+    const tables = computeWrPoolTables(fixtures as never, new Map());
+    const [, , , final] = resolveWrPlacements(fixtures as never, tables);
+    assert.equal(final.home.name, 'Chile M20');
+    assert.equal(final.home.placeholder, false);
+    assert.equal(final.away.name, '1.º Grupo B');
+    assert.equal(final.away.placeholder, true);
+});
+
+test('cruces: con los dos grupos cerrados salen los cuatro partidos', () => {
+    const groups = [
+        poolMatch('a1', 'A', 'Chile', 'Brazil', 80, 7),
+        poolMatch('a2', 'A', 'Romania', 'Chile', 9, 50),
+        poolMatch('a3', 'A', 'Brazil', 'Romania', 26, 27),
+        poolMatch('b1', 'B', 'Belgium', 'Namibia', 47, 22),
+        poolMatch('b2', 'B', 'Canada', 'Portugal', 26, 28),
+        poolMatch('b3', 'B', 'Belgium', 'Canada', 41, 14),
+    ];
+    const cruces = [
+        cruce('f1', '1.º Grupo A', '1.º Grupo B'),
+        cruce('f2', '2.º Grupo A', '2.º Grupo B'),
+    ];
+    const fixtures = [...groups, ...cruces];
+    const tables = computeWrPoolTables(fixtures as never, new Map());
+    const resolved = resolveWrPlacements(fixtures as never, tables).slice(6);
+    assert.deepEqual(resolved.map((f) => [f.home.name, f.away.name]), [
+        ['Chile M20', 'Belgium M20'],
+        ['Romania M20', 'Portugal M20'],
+    ]);
+    // No tocar los partidos de grupo ni inventar marcador.
+    assert.equal(resolved[0].home.score, null);
+});
+
+test('cruces: un lado que la fuente ya nombró no se pisa', () => {
+    const named = { ...cruce('f1', '1.º Grupo A', '1.º Grupo B'), home: { teamId: 'x', name: 'Chile M20', country: 'Chile', abbreviation: null, placeholder: false, score: null } };
+    const out = resolveWrPlacements([named as never], []);
+    assert.equal(out[0].home.name, 'Chile M20');
+});
+
+test('etiquetas: una por puesto, sin fase ni grupo, hacia el cruce del 17/10', () => {
+    const labels = wrStandingsTeamLabels(CHALLENGER);
+    assert.deepEqual(labels.map((l) => [l.position, l.label.name]), [
+        [1, 'Final'], [2, 'Por el 3.º puesto'], [3, 'Por el 5.º puesto'], [4, 'Por el 7.º puesto'],
+    ]);
+    assert.ok(labels.every((l) => l.phase_id === null && l.group_id === null && l.club_id === null));
+    assert.equal(new Set(labels.map((l) => l.id)).size, 4);
 });

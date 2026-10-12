@@ -1094,3 +1094,84 @@ export function applyWrManualResults(
         };
     });
 }
+
+// --------------------------------------------------------------------------
+// Cruces por puesto y etiquetas de la tabla
+// --------------------------------------------------------------------------
+
+const PLACEMENT_RE = /^(\d+)\.º Grupo ([A-Z])$/;
+
+/**
+ * Los cruces del último día nombran lugares ("1.º Grupo A") hasta que World
+ * Rugby los publica con equipos. En cuanto un grupo cerró sus partidos, el
+ * lugar tiene dueño: lo dice la tabla, no hace falta cargarlo a mano. Un grupo
+ * con algún partido sin terminar deja su lugar como está. Si la fuente ya
+ * publicó el equipo, el lado no es un lugar y no se toca.
+ */
+export function resolveWrPlacements(
+    fixtures: readonly WrFixture[],
+    tables: readonly WrPoolTable[],
+): WrFixture[] {
+    const closed = new Set<string>();
+    const open = new Set<string>();
+    for (const fixture of fixtures) {
+        if (!fixture.pool) continue;
+        const done = fixture.state === 'final' && fixture.home.score !== null && fixture.away.score !== null;
+        (done ? closed : open).add(fixture.pool);
+    }
+    for (const pool of open) closed.delete(pool);
+
+    const resolveSide = (side: WrSide): WrSide => {
+        if (!side.placeholder) return side;
+        const found = side.name.match(PLACEMENT_RE);
+        if (!found) return side;
+        const [, place, pool] = found;
+        if (!closed.has(pool)) return side;
+        const row = tables.find((table) => table.pool === pool)?.rows[Number(place) - 1];
+        if (!row) return side;
+        return {
+            teamId: row.teamId,
+            name: row.name,
+            country: row.country,
+            abbreviation: null,
+            placeholder: false,
+            score: side.score,
+        };
+    };
+
+    return fixtures.map((fixture) => {
+        if (fixture.pool || (!fixture.home.placeholder && !fixture.away.placeholder)) return fixture;
+        return { ...fixture, home: resolveSide(fixture.home), away: resolveSide(fixture.away) };
+    });
+}
+
+/**
+ * Hacia dónde va cada posición de grupo: el puesto del 17/10. Etiquetas con la
+ * misma forma que las asignaciones de la base, sin fase ni grupo, así la
+ * banda de color cae en el mismo puesto de los dos grupos.
+ */
+const WR_PLACEMENT_LABELS = [
+    { position: 1, name: 'Final', color: '#16a34a' },
+    { position: 2, name: 'Por el 3.º puesto', color: '#2563eb' },
+    { position: 3, name: 'Por el 5.º puesto', color: '#d97706' },
+    { position: 4, name: 'Por el 7.º puesto', color: '#6b7280' },
+] as const;
+
+export function wrStandingsTeamLabels(event: Pick<WrEventDef, 'tournamentId'>) {
+    return WR_PLACEMENT_LABELS.map((label) => ({
+        id: `${event.tournamentId}:placement-${label.position}`,
+        label_id: `${event.tournamentId}:placement-${label.position}`,
+        club_id: null,
+        position: label.position,
+        tournament_id: event.tournamentId,
+        phase_id: null,
+        group_id: null,
+        created_at: null,
+        label: {
+            id: `${event.tournamentId}:placement-${label.position}`,
+            name: label.name,
+            color: label.color,
+            scope: 'standings',
+        },
+    }));
+}
