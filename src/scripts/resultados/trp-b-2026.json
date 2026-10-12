@@ -1,0 +1,50 @@
+[
+  { "etapa": "E1", "fecha": "2026-06-06", "home": "club-los-50", "away": "estudiantes-de-olavarria", "homeScore": 64, "awayScore": 8, "ofensivo": "home" },
+  { "etapa": "E1", "fecha": "2026-06-06", "home": "bigua-rugby-club", "away": "universitario-de-bahia-blanca", "homeScore": 41, "awayScore": 15, "ofensivo": "home" },
+  { "etapa": "E1", "fecha": "2026-06-06", "home": "union-del-sur", "away": "uncas-r-c", "homeScore": 27, "awayScore": 20, "ofensivo": null },
+  { "etapa": "E1", "fecha": "2026-06-07", "home": "pueyrredon", "away": "los-miuras", "homeScore": 45, "awayScore": 12, "ofensivo": "home" },
+
+  { "etapa": "E1", "fecha": "2026-06-13", "home": "club-los-50", "away": "bigua-rugby-club", "homeScore": 43, "awayScore": 6, "ofensivo": "home" },
+  { "etapa": "E1", "fecha": "2026-06-13", "home": "uncas-r-c", "away": "pueyrredon", "homeScore": 24, "awayScore": 23, "ofensivo": null },
+  { "etapa": "E1", "fecha": "2026-06-14", "home": "universitario-de-bahia-blanca", "away": "union-del-sur", "homeScore": 15, "awayScore": 35, "ofensivo": null },
+  { "etapa": "E1", "fecha": "2026-06-14", "home": "estudiantes-de-olavarria", "away": "los-miuras", "homeScore": 22, "awayScore": 13, "ofensivo": null },
+
+  { "etapa": "E1", "fecha": "2026-06-27", "home": "union-del-sur", "away": "club-los-50", "homeScore": 19, "awayScore": 22, "ofensivo": null },
+  { "etapa": "E1", "fecha": "2026-06-27", "home": "los-miuras", "away": "uncas-r-c", "homeScore": 36, "awayScore": 31, "ofensivo": null },
+  { "etapa": "E1", "fecha": "2026-06-28", "home": "pueyrredon", "away": "universitario-de-bahia-blanca", "homeScore": 88, "awayScore": 5, "ofensivo": "home" },
+  { "etapa": "E1", "fecha": "2026-06-28", "home": "bigua-rugby-club", "away": "estudiantes-de-olavarria", "homeScore": 73, "awayScore": 0, "ofensivo": "home" },
+
+  { "etapa": "E1", "fecha": "2026-07-04", "home": "club-los-50", "away": "pueyrredon", "homeScore": 27, "awayScore": 17, "ofensivo": null },
+  { "etapa": "E1", "fecha": "2026-07-04", "home": "bigua-rugby-club", "away": "union-del-sur", "homeScore": 24, "awayScore": 10, "ofensivo": "home" },
+  { "etapa": "E1", "fecha": "2026-07-04", "home": "estudiantes-de-olavarria", "away": "uncas-r-c", "homeScore": 12, "awayScore": 19, "ofensivo": null },
+  { "etapa": "E1", "fecha": "2026-07-05", "home": "universitario-de-bahia-blanca", "away": "los-miuras", "homeScore": 40, "awayScore": 42, "ofensivo": null },
+
+  { "etapa": "E1", "fecha": "2026-07-11", "home": "pueyrredon", "away": "bigua-rugby-club", "homeScore": 18, "awayScore": 39, "ofensivo": "away" },
+  { "etapa": "E1", "fecha": "2026-07-11", "home": "los-miuras", "away": "club-los-50", "homeScore": 26, "awayScore": 36, "ofensivo": null },
+  { "etapa": "E1", "fecha": "2026-07-12", "home": "union-del-sur", "away": "estudiantes-de-olavarria", "homeScore": 46, "awayScore": 32, "ofensivo": "home" },
+  { "etapa": "E1", "fecha": "2026-07-18", "home": "uncas-r-c", "away": "universitario-de-bahia-blanca", "homeScore": 54, "awayScore": 10, "ofensivo": "home" },
+
+  { "etapa": "E1", "fecha": "2026-08-08", "home": "club-los-50", "away": "uncas-r-c", "homeScore": 22, "awayScore": 0, "ofensivo": "home" },
+  { "etapa": "E1", "fecha": "2026-08-08", "home": "union-del-sur", "away": "pueyrredon", "homeScore": 46, "awayScore": 22, "ofensivo": "home" },
+  { "etapa": "E1", "fecha": "2026-08-09", "home": "bigua-rugby-club", "away": "los-miuras", "homeScore": 68, "awayScore": 5, "ofensivo": "home" },
+  { "etapa": "E1", "fecha": "2026-08-09", "home": "estudiantes-de-olavarria", "away": "universitario-de-bahia-blanca", "homeScore": 7, "awayScore": 28, "ofensivo": "away" },
+
+  { "etapa": "E1", "fecha": "2026-08-22", "home": "universitario-de-bahia-blanca", "away": "club-los-50", "homeScore": 31, "awayScore": 36, "ofensivo": null },
+  { "etapa": "E1", "fecha": "2026-08-22", "home": "uncas-r-c", "away": "bigua-rugby-club", "homeScore": 23, "awayScore": 31, "ofensivo": null },
+  { "etapa": "E1", "fecha": "2026-08-23", "home": "los-miuras", "away": "union-del-sur", "homeScore": 12, "awayScore": 36, "ofensivo": "away" },
+  { "etapa": "E1", "fecha": "2026-08-23", "home": "pueyrredon", "away": "estudiantes-de-olavarria", "homeScore": 54, "awayScore": 12, "ofensivo": "home" },
+
+  { "etapa": "CAMPEONATO", "fecha": "2026-09-05", "home": "pueyrredon", "away": "club-los-50", "homeScore": 26, "awayScore": 29, "ofensivo": null },
+  { "etapa": "CAMPEONATO", "fecha": "2026-09-05", "home": "union-del-sur", "away": "bigua-rugby-club", "homeScore": 24, "awayScore": 0, "ofensivo": null },
+  { "etapa": "CAMPEONATO", "fecha": "2026-09-19", "home": "bigua-rugby-club", "away": "club-los-50", "homeScore": 15, "awayScore": 12, "ofensivo": null },
+  { "etapa": "CAMPEONATO", "fecha": "2026-09-19", "home": "pueyrredon", "away": "union-del-sur", "homeScore": 8, "awayScore": 29, "ofensivo": "away" },
+  { "etapa": "CAMPEONATO", "fecha": "2026-10-03", "home": "club-los-50", "away": "union-del-sur", "homeScore": 17, "awayScore": 38, "ofensivo": null },
+  { "etapa": "CAMPEONATO", "fecha": "2026-10-03", "home": "bigua-rugby-club", "away": "pueyrredon", "homeScore": 38, "awayScore": 12, "ofensivo": null },
+
+  { "etapa": "PERMANENCIA", "fecha": "2026-09-05", "home": "uncas-r-c", "away": "estudiantes-de-olavarria", "homeScore": 31, "awayScore": 17, "ofensivo": null },
+  { "etapa": "PERMANENCIA", "fecha": "2026-09-05", "home": "los-miuras", "away": "universitario-de-bahia-blanca", "homeScore": 33, "awayScore": 13, "ofensivo": "home" },
+  { "etapa": "PERMANENCIA", "fecha": "2026-09-19", "home": "uncas-r-c", "away": "los-miuras", "homeScore": 64, "awayScore": 7, "ofensivo": "home" },
+  { "etapa": "PERMANENCIA", "fecha": "2026-09-20", "home": "universitario-de-bahia-blanca", "away": "estudiantes-de-olavarria", "homeScore": 41, "awayScore": 16, "ofensivo": "home" },
+  { "etapa": "PERMANENCIA", "fecha": "2026-09-26", "home": "universitario-de-bahia-blanca", "away": "uncas-r-c", "homeScore": 31, "awayScore": 17, "ofensivo": null },
+  { "etapa": "PERMANENCIA", "fecha": "2026-10-04", "home": "los-miuras", "away": "estudiantes-de-olavarria", "homeScore": 22, "awayScore": 6, "ofensivo": "home" }
+]
