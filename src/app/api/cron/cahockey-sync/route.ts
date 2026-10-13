@@ -53,6 +53,10 @@
  * seguían mostrando una tabla mezclada. Son dos consultas chicas por corrida y
  * en régimen no escriben nada.
  *
+ * Y los torneos que se cargaron desde el PDF antes de que la CAH los subiera
+ * (`cahockey-pendiente:…`) se vinculan solos en la pasada completa, en cuanto
+ * aparecen en el listado: ver `vincularPendientes` y `pendientes.ts`.
+ *
  * Todo lo que no se entiende viaja en la respuesta (`omitidos`, `errors`): un
  * scraper caído que responde "sin novedades" es peor que uno que grita.
  */
@@ -61,17 +65,30 @@ import { NextResponse } from 'next/server';
 import { authorizeCronRequest } from '@/lib/server/cronAuth';
 import { createAdminClient } from '@/lib/supabase/admin';
 import {
-  AMBITO_CAH,
   CAHOCKEY_ID_PREFIX,
   CAHOCKEY_PROVIDER,
   buildMatchExternalId,
-  buildTeamAlias,
   esClubReal,
-  idDeClub,
   nombreLimpio,
+  resolverClubCah,
 } from '@/lib/integrations/cahockey/nombres.ts';
+import {
+  CAHOCKEY_PENDIENTE_PREFIX,
+  candidatosDelListado,
+  parsearListadoCah,
+  parsearPendiente,
+  planAdopcion,
+  type FilaPendiente,
+  type TorneoListadoCah,
+} from '@/lib/integrations/cahockey/pendientes.ts';
 import { planTournamentMatches, type ExistenteCah } from '@/lib/integrations/cahockey/planMatches.ts';
-import { esEtapaDeZona, fetchSicahHtml, fetchSicahUrl, parsearSicah } from '@/lib/integrations/cahockey/sicah.ts';
+import {
+  esEtapaDeZona,
+  fetchListadoSelecciones,
+  fetchSicahHtml,
+  fetchSicahUrl,
+  parsearSicah,
+} from '@/lib/integrations/cahockey/sicah.ts';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -134,6 +151,12 @@ export async function sincronizarCahockey(opts: {
   const supabase = createAdminClient();
   const errors: string[] = [];
 
+  // ── torneos cargados desde el PDF que la CAH acaba de publicar ───────────
+  // Antes de leer los vinculados: el que se vincula ahora entra en esta corrida.
+  const vinculacion = !enJuego && !torneoPedido
+    ? await vincularPendientes({ supabase, enSeco, dias, ahora, errors })
+    : null;
+
   // ── torneos vinculados ───────────────────────────────────────────────────
   const { data: torneosRaw, error: errTorneos } = await supabase
     .from('tournaments')
@@ -178,7 +201,7 @@ export async function sincronizarCahockey(opts: {
     : null;
 
   if (!activos.length) {
-    return responder({ ok: errors.length === 0, dry: enSeco, modo: enJuego ? 'en-juego' : 'completa', torneos: [], sinActividad: true, ventanaDias: dias, ...(reparacion && { reparacion }), errors });
+    return responder({ ok: errors.length === 0, dry: enSeco, modo: enJuego ? 'en-juego' : 'completa', torneos: [], sinActividad: true, ventanaDias: dias, ...(reparacion && { reparacion }), ...(vinculacion && { vinculacion }), errors });
   }
 
   // ── alias y clubes conocidos (una sola vez para todos los torneos) ───────
@@ -250,7 +273,7 @@ export async function sincronizarCahockey(opts: {
       torneoExternalId: t.external_id,
       sicah,
       existentes,
-      resolverClub: (nombre) => alias.get(buildTeamAlias(t.external_id, nombre)) ?? null,
+      resolverClub: (nombre) => resolverClubCah(alias, t.external_id, nombre),
       clubConocido: (id) => clubesConocidos.has(id),
       ahora: ahoraIso,
     });
@@ -408,9 +431,135 @@ export async function sincronizarCahockey(opts: {
     torneosActivos: activos.map((t) => t.external_id),
     torneos: resumen,
     ...(reparacion && { reparacion }),
+    ...(vinculacion && { vinculacion }),
     escrituras,
     errors,
   });
+}
+
+type EstadoVinculacion = {
+  torneo: string;
+  nombre: string;
+  estado: 'fuera de la ventana' | 'esperando a la CAH' | 'publicado sin partidos' | 'sin pareja' | 'varios candidatos' | 'a vincular' | 'vinculado';
+  cah?: { id: string; nombre: string }[];
+  adoptados?: number;
+};
+
+/**
+ * Los torneos cargados desde el PDF (`cahockey-pendiente:…`, ver
+ * `pendientes.ts`) se vinculan a la CAH apenas ésta los publica. Sólo mira
+ * los que tienen partidos en la ventana —fuera de esos días no le pide nada a
+ * la fuente— y pide el listado UNA vez por corrida.
+ *
+ * "Esperando a la CAH" no es un error: es el estado normal hasta que suben el
+ * torneo. Sí lo son dos candidatos o un partido sin pareja en SICAH, porque
+ * eso no se arregla solo esperando.
+ */
+async function vincularPendientes(args: {
+  supabase: ClienteAdmin;
+  enSeco: boolean;
+  dias: number;
+  ahora: Date;
+  errors: string[];
+}): Promise<EstadoVinculacion[]> {
+  const { supabase, enSeco, dias, ahora, errors } = args;
+  const salida: EstadoVinculacion[] = [];
+
+  const { data: pendRaw, error: errPend } = await supabase
+    .from('tournaments')
+    .select('id, name, external_id')
+    .like('external_id', `${CAHOCKEY_PENDIENTE_PREFIX}%`)
+    .limit(50);
+  if (errPend) { errors.push(`vinculación: no se pudieron leer los torneos pendientes (${errPend.message})`); return salida; }
+  const pendientes = (pendRaw ?? []) as { id: string; name: string; external_id: string }[];
+  if (!pendientes.length) return salida;
+
+  let listado: TorneoListadoCah[] | null = null;
+  const desdeVentana = ahora.getTime() - dias * 86_400_000;
+  const hastaVentana = ahora.getTime() + dias * 86_400_000;
+
+  for (const t of pendientes) {
+    const pendiente = parsearPendiente(t.external_id);
+    if (!pendiente) { errors.push(`vinculación: ${t.external_id} no dice categoría y rama (cahockey-pendiente:<categoría>:<damas|caballeros>)`); continue; }
+
+    const { data: filasRaw, error: errFilas } = await supabase
+      .from('matches')
+      .select('id, external_id, home_club_id, away_club_id, date_time')
+      .eq('tournament_id', t.id)
+      .limit(500);
+    if (errFilas) { errors.push(`vinculación: ${t.external_id}: no se pudieron leer los partidos (${errFilas.message})`); continue; }
+    const filas = (filasRaw ?? []) as FilaPendiente[];
+    const instantes = filas.map((f) => Date.parse(f.date_time)).filter(Number.isFinite).sort((a, b) => a - b);
+    if (!instantes.length || instantes.at(-1)! < desdeVentana || instantes[0] > hastaVentana) {
+      salida.push({ torneo: t.external_id, nombre: t.name, estado: 'fuera de la ventana' });
+      continue;
+    }
+    const diaAr = (ms: number) => new Date(ms - 3 * 3_600_000).toISOString().slice(0, 10);
+    const rango = { desde: diaAr(instantes[0]), hasta: diaAr(instantes.at(-1)!) };
+
+    if (!listado) {
+      const r = await fetchListadoSelecciones();
+      if (!r.ok) { errors.push(`vinculación: cahockey.org.ar no devolvió el listado de selecciones (HTTP ${r.status})`); return salida; }
+      listado = parsearListadoCah(r.data);
+      if (!listado.length) { errors.push('vinculación: el listado de selecciones llegó sin torneos (cambió la forma)'); return salida; }
+    }
+
+    const candidatos = candidatosDelListado(listado, pendiente, rango);
+    const cah = candidatos.map((c) => ({ id: c.id, nombre: c.nombre }));
+    if (!candidatos.length) { salida.push({ torneo: t.external_id, nombre: t.name, estado: 'esperando a la CAH' }); continue; }
+    if (candidatos.length > 1) {
+      errors.push(`vinculación: ${t.external_id} tiene ${candidatos.length} candidatos en la CAH (${cah.map((c) => `${c.id} ${c.nombre}`).join(' · ')}): vincular a mano`);
+      salida.push({ torneo: t.external_id, nombre: t.name, estado: 'varios candidatos', cah });
+      continue;
+    }
+
+    const nuevo = `${CAHOCKEY_ID_PREFIX}${candidatos[0].id}`;
+    const { data: yaRaw, error: errYa } = await supabase.from('tournaments').select('id').eq('external_id', nuevo).limit(1);
+    if (errYa) { errors.push(`vinculación: ${t.external_id}: no se pudo verificar ${nuevo} (${errYa.message})`); continue; }
+    if ((yaRaw ?? []).length) {
+      errors.push(`vinculación: ${t.external_id} apunta a ${nuevo}, que ya es de otro torneo`);
+      continue;
+    }
+
+    const rUrl = await fetchSicahUrl(candidatos[0].id);
+    const rHtml = rUrl.ok ? await fetchSicahHtml(rUrl.data) : null;
+    if (!rUrl.ok || !rHtml?.ok) {
+      errors.push(`vinculación: ${nuevo}: no se pudo leer SICAH (HTTP ${rHtml?.status ?? rUrl.status})`);
+      continue;
+    }
+    const sicah = parsearSicah(rHtml.data);
+    // La CAH publica el torneo antes de cargar el fixture: se espera.
+    if (!sicah.partidos.length) { salida.push({ torneo: t.external_id, nombre: t.name, estado: 'publicado sin partidos', cah }); continue; }
+
+    const adopcion = planAdopcion({
+      filas,
+      sicah,
+      nuevoTorneoExternalId: nuevo,
+      resolverClub: (nombre) => resolverClubCah(new Map(), nuevo, nombre),
+    });
+    if (adopcion.sinPareja.length) {
+      errors.push(`vinculación: ${t.external_id} → ${nuevo}: ${adopcion.sinPareja.length} partido(s) del PDF sin pareja en SICAH, no se vincula: ${adopcion.sinPareja.slice(0, 4).join(' · ')}`);
+      salida.push({ torneo: t.external_id, nombre: t.name, estado: 'sin pareja', cah, adoptados: adopcion.adoptados.length });
+      continue;
+    }
+
+    if (enSeco) { salida.push({ torneo: t.external_id, nombre: t.name, estado: 'a vincular', cah, adoptados: adopcion.adoptados.length }); continue; }
+
+    // Primero los partidos y al final el torneo: si algo se corta en el medio,
+    // el torneo sigue pendiente y la próxima corrida re-adopta lo mismo.
+    let fallo = false;
+    for (const a of adopcion.adoptados) {
+      if (a.de === a.a) continue;
+      const { error } = await supabase.from('matches').update({ external_id: a.a }).eq('id', a.id);
+      if (error) { errors.push(`vinculación: ${a.de} → ${a.a} falló (${error.message})`); fallo = true; break; }
+    }
+    if (fallo) continue;
+    const { error: errT } = await supabase.from('tournaments').update({ external_id: nuevo, updated_at: ahora.toISOString() }).eq('id', t.id);
+    if (errT) { errors.push(`vinculación: ${t.external_id} → ${nuevo} falló (${errT.message})`); continue; }
+    salida.push({ torneo: nuevo, nombre: t.name, estado: 'vinculado', cah, adoptados: adopcion.adoptados.length });
+  }
+
+  return salida;
 }
 
 /**
@@ -541,7 +690,7 @@ async function sincronizarZonas(args: {
     for (const lado of [p.local, p.visitante]) {
       const nombre = nombreLimpio(lado?.equipo ?? '');
       if (!esClubReal(nombre)) continue;
-      zonaPorClub.set(alias.get(buildTeamAlias(t.external_id, nombre)) ?? idDeClub(nombre, AMBITO_CAH), p.etapa);
+      zonaPorClub.set(resolverClubCah(alias, t.external_id, nombre), p.etapa);
     }
   }
 

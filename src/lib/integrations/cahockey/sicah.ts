@@ -74,6 +74,21 @@ export async function fetchSicahUrl(torneoId: string): Promise<ResultadoHttp<str
   return { ok: true, data: src.replace(/&amp;/g, '&'), status: 200 };
 }
 
+/**
+ * La sección del Argentino de Selecciones: el acordeón por años con todos sus
+ * torneos (lo parsea `parsearListadoCah`). Es UTF-8, a diferencia de SICAH.
+ */
+export async function fetchListadoSelecciones(): Promise<ResultadoHttp<string>> {
+  let res: Response;
+  try {
+    res = await fetch(`${BASE}/argentino-de-selecciones`, { headers: { 'user-agent': USER_AGENT }, cache: 'no-store' });
+  } catch {
+    return { ok: false, data: null, status: 0 };
+  }
+  if (!res.ok) return { ok: false, data: null, status: res.status };
+  return { ok: true, data: await res.text(), status: res.status };
+}
+
 /** La página de SICAH, decodificada con el charset que declara (iso-8859-1). */
 export async function fetchSicahHtml(url: string): Promise<ResultadoHttp<string>> {
   let res: Response;

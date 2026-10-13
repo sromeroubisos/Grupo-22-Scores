@@ -80,3 +80,25 @@ export function buildMatchExternalId(torneoExternalId: string, nro: string): str
 export function buildTeamAlias(torneoExternalId: string, nombreEquipo: string): string {
   return `${torneoExternalId}|${claveDeNombre(nombreEquipo)}`;
 }
+
+/**
+ * Otras grafías de una MISMA federación, válidas en cualquier torneo de la CAH.
+ *
+ * Los alias de `club_external_ids` son por torneo, y un torneo que el cron
+ * vincula solo (ver `pendientes.ts`) no tiene ninguno: el resolvedor cae en el
+ * id derivado del nombre, y "Asociación de Buenos Aires" deriva un id que no
+ * existe —el club se llama AAHSBA desde la cosecha de 2026—. Sólo entran acá
+ * nombres de federaciones, que son únicos en el país; nunca un club, por la
+ * misma razón por la que `idDeClub` lleva ámbito.
+ */
+export const ALIAS_CURADOS_CAH: Readonly<Record<string, string>> = {
+  'asociacion de buenos aires': 'asociacion-amateur-de-hockey-sobre-cesped-de-buenos-aires-cah-hockey',
+  'asociacion del centro pcia buenos aires': 'asociacion-hockey-del-centro-pcia-buenos-aires-cah-hockey',
+};
+
+/** El club de un nombre de la fuente: el alias del torneo, después la grafía curada, después el id derivado. */
+export function resolverClubCah(alias: ReadonlyMap<string, string>, torneoExternalId: string, nombre: string): string {
+  return alias.get(buildTeamAlias(torneoExternalId, nombre))
+    ?? ALIAS_CURADOS_CAH[claveDeNombre(nombre)]
+    ?? idDeClub(nombre, AMBITO_CAH);
+}
