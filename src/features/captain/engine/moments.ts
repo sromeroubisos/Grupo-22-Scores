@@ -297,6 +297,21 @@ function buildPending(
 }
 
 /**
+ * UNA JUGADA SUELTA, PARA LA ZONA DE ENTRENAMIENTO.
+ *
+ * La misma construcción que la de la carrera (`buildPending`) sobre un estado
+ * de práctica, con el minijuego elegido en vez de sorteado y la presión que
+ * fija la dificultad. No consume azar: la variedad entre intentos sale de
+ * `attempt`, que entra en `momentSeed` igual que el índice de la carrera. Así
+ * el minijuego que se practica es EXACTAMENTE el que después decide una
+ * temporada —mismo setup, misma regla, misma pantalla—, no una copia.
+ */
+export function practiceMoment(state: CaptainState, kind: MomentKind, pressure: number, attempt: number): PendingMoment {
+    const p = Math.max(0, Math.min(1, pressure));
+    return buildPending(state, kind, { minute: 72, scoreDelta: 0, pressure: Math.round(p * 100) / 100 }, attempt, false);
+}
+
+/**
  * Se decide al cerrar el reparto de tiempo, ANTES de simular.
  *
  * Usa `playingTimeOf`, que es pura: el que no juega no tiene jugada decisiva, y

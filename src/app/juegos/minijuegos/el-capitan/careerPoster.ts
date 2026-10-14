@@ -84,6 +84,8 @@ export interface PosterModel {
     verdict: string;
     /** El dorado es del final que se gana. «Se terminó» no es un trofeo. */
     verdictTone: 'gold' | 'plain';
+    /** Título de la carrera, legado y objetivo, en un renglón. Opcional. */
+    tagline?: string;
     stats: { label: string; value: string }[];
     awards: PosterAward[];
     stints: PosterStint[];
@@ -592,7 +594,19 @@ export async function buildCareerPoster(
     ctx.font = display(900, veredictoPx);
     ctx.fillStyle = model.verdictTone === 'gold' ? GOLD : SOFT;
     ctx.fillText(model.verdict, M, y);
-    y += veredictoPx + u(32);
+    y += veredictoPx + u(14);
+
+    // El renglón de QUÉ FUISTE. En la monoespaciada de la ficha y apagado:
+    // es el subtítulo del veredicto, no compite con el apellido.
+    if (model.tagline) {
+        espaciado('1px');
+        ctx.font = mono(u(20));
+        ctx.fillStyle = SOFT;
+        ctx.fillText(ellipsize(model.tagline, contenido), M, y);
+        espaciado('0px');
+        y += u(26);
+    }
+    y += u(18);
 
     // ── Los números ─────────────────────────────────────────────────────────
     // Sin cajas: dos reglas y una separación vertical alcanzan. Cuatro tarjetas

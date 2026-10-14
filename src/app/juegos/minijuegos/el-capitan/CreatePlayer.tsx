@@ -1,385 +1,377 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import type { CreateCaptainInput, PositionFamilyId } from '@/features/captain';
-import { ALL_FAMILIES, getFamily, startingClubPool } from '@/features/captain';
-import { findCountry } from '@/features/captain/data/catalogs';
-import ClubPicker from './ClubPicker';
-import CountryPicker from './CountryPicker';
+import {
+    ALL_FAMILIES,
+    ATTRIBUTE_LABEL,
+    archetypeDelta,
+    archetypesFor,
+    baseAttributes,
+    clubLabel,
+    getFamily,
+    startingClubPool,
+} from '@/features/captain';
+import { FREQUENT_COUNTRY_CODES, SELECTABLE_NATIONALITIES, findCountry, flagPathOf } from '@/features/captain/data/catalogs';
+import { FIRST_NAMES, SURNAMES } from '@/features/captain/data/names';
 import Jersey from './Jersey';
+import ClubBadge from './ClubBadge';
+import PickerSelect, { type PickerOption } from './PickerSelect';
+import { careerGoals, type CareerGoalId } from './legacy';
 import styles from './capitan.module.css';
 
 /**
- * Los pasos del registro, en orden. La etiqueta es la del riel de arriba y va
- * corta a propósito: en 360 px tienen que entrar todos en un renglón sin
- * cortarse.
+ * EL ARRANQUE, EN UN SOLO PANEL.
  *
- * El club va ÚLTIMO y no pegado al país, aunque salga de él: es la única
- * pregunta que se puede no contestar —el sorteo la contesta por vos— y la
- * pantalla que la hace es también la que dice «Empezar la carrera», así que lo
- * último que ves antes de arrancar es dónde arrancás.
+ * Antes eran seis pantallas con un riel de pasos: nombre, país, puesto, perfil,
+ * meta y club, una por vez. Seis «Siguiente» para empezar a jugar es un trámite,
+ * y el jugador no veía nunca el conjunto de lo que estaba armando.
+ *
+ * Ahora es la ficha de inscripción de un juego de deportes: todo a la vista y
+ * en el orden en que se lee una ficha —de dónde sos y dónde arrancás, cómo te
+ * llamás, qué puesto, qué clase de jugador, qué querés que quede— con un botón
+ * «Al azar» arriba que la llena entera para el que quiere jugar ya, y un botón
+ * grande abajo que dice qué falta mientras falte algo (CLAUDE.md §6).
+ *
+ * El país y el club van en desplegables nativos: en el teléfono abren la rueda
+ * del sistema, que es el control más cómodo que existe para elegir uno entre
+ * doscientos, y no le roban media pantalla a la ficha.
+ *
+ * El nombre es OPCIONAL: vacío, sale uno de la lista de nombres del juego al
+ * empezar. Nadie tiene que inventar un apellido para probar.
  */
-const PASOS = [
-    { id: 'nombre', crumb: 'Nombre' },
-    { id: 'pais', crumb: 'País' },
-    { id: 'puesto', crumb: 'Puesto' },
-    { id: 'club', crumb: 'Club' },
-] as const;
 
-type PasoId = (typeof PASOS)[number]['id'];
+const DESTACADOS = SELECTABLE_NATIONALITIES.filter((c) => FREQUENT_COUNTRY_CODES.includes(c.code));
+const RESTO = SELECTABLE_NATIONALITIES.filter((c) => !FREQUENT_COUNTRY_CODES.includes(c.code));
 
-/**
- * El alta del jugador, UNA PREGUNTA POR PANTALLA.
- *
- * Antes las tres entraban juntas en una tarjeta y el formulario medía 717 px de
- * alto: en un teléfono el puesto —«la decisión más determinante del juego»—
- * aparecía después de doscientos y pico de países, o sea que se elegía a las
- * apuradas y de scroll. Partido en pasos, cada pregunta tiene la pantalla para
- * ella sola y el botón de avanzar está siempre a la vista.
- *
- * La camiseta NO se parte: acompaña a los pasos y va sumando lo que el jugador
- * decide —el apellido, los colores de su unión, el dorsal—. Es lo único de esta
- * pantalla que no pide nada, devuelve, y es lo que hace que varias pantallas se
- * lean como una sola cosa que se está armando.
- */
-export default function CreatePlayer({ onStart }: { onStart: (input: CreateCaptainInput) => void }) {
-    const [paso, setPaso] = useState(0);
+/** La bandera chica de una opción. Decorativa: el nombre va al lado. */
+function Bandera({ code }: { code: string }) {
+    // eslint-disable-next-line @next/next/no-img-element -- SVG local estático
+    return <img src={flagPathOf(code)} alt="" width={26} height={18} className={styles.pickerFlag} loading="lazy" />;
+}
+
+/** Los países, con los de siempre primero. Se arma una vez: el catálogo no cambia. */
+const PAISES: readonly PickerOption[] = [
+    ...DESTACADOS.map((c) => ({ value: c.code, label: c.nameEs, icon: <Bandera code={c.code} />, group: 'Los de siempre' })),
+    ...RESTO.map((c) => ({ value: c.code, label: c.nameEs, icon: <Bandera code={c.code} />, group: 'Todos' })),
+];
+
+/** El valor del sorteo en el desplegable de club. */
+const AL_AZAR = '__al-azar__';
+
+export default function CreatePlayer({
+    onStart,
+    sortear,
+}: {
+    onStart: (input: CreateCaptainInput) => void;
+    /**
+     * Los dados de la PANTALLA, para «Al azar» y el nombre vacío: un número en
+     * [0, 1). Llegan del orquestador porque es el único archivo del juego con
+     * permiso de usar `Math.random` (CLAUDE.md de captain §1). No tocan la
+     * carrera: lo que sortean son elecciones del formulario, y la carrera sale
+     * igual de la semilla más esas elecciones.
+     */
+    sortear: () => number;
+}) {
+    const ids = useId();
     const [name, setName] = useState('');
     const [surname, setSurname] = useState('');
-    const [family, setFamily] = useState<PositionFamilyId | null>(null);
     const [countryCode, setCountryCode] = useState('ar');
-    /**
-     * El dorsal DENTRO de la familia: es lo que distingue al pilar izquierdo del
-     * derecho sin partir la familia en dos, y el motor ya lo acepta por entrada
-     * (`CreateCaptainInput.number`). Sin puesto elegido todavía no hay ninguno,
-     * y la espalda va limpia.
-     *
-     * No es un cuarto paso: no se elige un dorsal suelto, se elige el puesto y
-     * el dorsal es cuál de ese puesto. Vive adentro del paso tres.
-     */
+    const [family, setFamily] = useState<PositionFamilyId | null>(null);
     const [number, setNumber] = useState<number | null>(null);
-    /**
-     * El club de origen. `sorteo` es el default y es el juego de siempre: el
-     * motor te ubica, y pondera a los chicos porque hay muchos más clubes de
-     * barrio que clubes grandes. `clubId` sólo viaja al motor con el sorteo
-     * apagado — con él prendido, un id viejo que quedó de una vuelta atrás no
-     * puede colarse.
-     */
-    const [sorteo, setSorteo] = useState(true);
+    const [archetype, setArchetype] = useState<string | null>(null);
+    const [goal, setGoal] = useState<CareerGoalId | null>(null);
+    /** El club de arranque: `null` es el sorteo del motor, que es el default. */
     const [clubId, setClubId] = useState<string | null>(null);
 
-    /**
-     * DÓNDE PUEDE EMPEZAR ESTE JUGADOR. Sale del motor y no de un filtro de acá:
-     * es el mismo conjunto del que sortea `startingClub` (§1.9 del CLAUDE.md de
-     * captain). Vacío en las uniones que no tienen clubes en el catálogo —la
-     * mayoría—, y ahí la carrera arranca sin club, que es lo que ya hacía.
-     */
-    const pool = useMemo(() => startingClubPool(countryCode), [countryCode]);
-
-    /**
-     * El paso del club NO EXISTE cuando no hay nada que elegir. Una pantalla con
-     * una sola salida no es una pregunta, y el riel diría «4 de 4» para algo que
-     * el jugador no decide.
-     */
-    const pasos = useMemo(() => PASOS.filter((p) => p.id !== 'club' || pool.length > 0), [pool]);
-    /**
-     * El índice se acota en la lectura y no con un efecto: cambiar de país achica
-     * la lista de pasos, y un `paso` que quedó afuera tiene que resolverse en el
-     * mismo render, sin una pasada intermedia leyendo `pasos[3]` inexistente.
-     */
-    const pasoIx = Math.min(paso, pasos.length - 1);
-    const actual: PasoId = pasos[pasoIx].id;
-    const ultimo = pasos.length - 1;
-
-    /**
-     * Cambiar de pantalla sin mover el foco deja al lector de pantalla parado en
-     * un botón que ahora dice otra cosa, y al teclado en el pie de una tarjeta
-     * que ya no existe. Se manda al título del paso nuevo, que además arrastra
-     * el scroll hasta arriba de la tarjeta —justo lo que hace falta cuando venís
-     * de tocar «Siguiente» al fondo de la lista de países—.
-     *
-     * En el primer render no: ahí el foco todavía es del navegador.
-     */
-    const tituloRef = useRef<HTMLHeadingElement>(null);
-    const montado = useRef(false);
-    useEffect(() => {
-        if (!montado.current) {
-            montado.current = true;
-            return;
-        }
-        tituloRef.current?.focus();
-    }, [pasoIx]);
-
-    const numbers = family === null ? [] : getFamily(family).numbers;
     const pais = findCountry(countryCode);
+    const pool = useMemo(
+        () => [...startingClubPool(countryCode)].sort((a, b) => clubLabel(a.id).localeCompare(clubLabel(b.id), 'es')),
+        [countryCode],
+    );
+    const goals = useMemo(() => careerGoals(countryCode), [countryCode]);
+    const perfiles = useMemo(() => (family ? archetypesFor(family) : []), [family]);
+    const metaElegida = goals.find((g) => g.id === goal) ?? null;
 
-    const nombreListo = name.trim().length > 0 && surname.trim().length > 0;
-    /**
-     * Qué paso está resuelto. El país no puede faltar —arranca en Argentina y el
-     * selector no ofrece vaciarlo—, así que su casilla es siempre verdadera; la
-     * del club lo es mientras el sorteo esté prendido, que es el default.
-     */
-    const resuelto: Record<PasoId, boolean> = {
-        nombre: nombreListo,
-        pais: true,
-        puesto: family !== null,
-        club: sorteo || clubId !== null,
-    };
-    const pasoListo = resuelto[actual];
-    /** Al riel sólo se salta si todo lo de antes ya está resuelto. */
-    const alcanzable = (i: number) => pasos.slice(0, i).every((p) => resuelto[p.id]);
+    /** Los clubes, con su escudo, y el sorteo arriba de todo. */
+    const clubes = useMemo<PickerOption[]>(() => [
+        {
+            value: AL_AZAR,
+            label: pool.length === 0 ? 'Sin clubes de tu país' : 'Al azar',
+            hint: pool.length === 0 ? undefined : 'Casi siempre uno chico',
+            icon: <span className={styles.pickerEmoji}>🎲</span>,
+        },
+        ...pool.map((c) => ({
+            value: c.id,
+            label: clubLabel(c.id),
+            icon: <ClubBadge clubId={c.id} clubName={clubLabel(c.id)} size={26} />,
+        })),
+    ], [pool]);
 
-    /** Al cambiar de puesto, el dorsal viejo no pertenece más: se cae al primero. */
-    function pickFamily(id: PositionFamilyId) {
-        setFamily(id);
-        setNumber(getFamily(id).numbers[0]);
-    }
+    /** Las metas, con su ícono y lo que cuestan. */
+    const metas = useMemo<PickerOption[]>(
+        () => goals.map((g) => ({ value: g.id, label: g.label, hint: g.hint, icon: <span className={styles.pickerEmoji}>{g.icon}</span> })),
+        [goals],
+    );
 
-    /**
-     * Al cambiar de país, el club elegido deja de existir para este jugador: era
-     * de otro sistema. Se vuelve al sorteo, que es el default.
-     */
+    const elegir = <T,>(xs: readonly T[]): T => xs[Math.floor(sortear() * xs.length) % xs.length];
+
     function pickCountry(code: string) {
         setCountryCode(code);
-        setSorteo(true);
+        // El club era de otro sistema: se vuelve al sorteo.
         setClubId(null);
     }
 
-    function avanzar() {
-        if (!pasoListo) return;
-        if (pasoIx < ultimo) {
-            setPaso(pasoIx + 1);
-            return;
-        }
-        if (!family) return;
+    function pickFamily(id: PositionFamilyId) {
+        setFamily(id);
+        setNumber(getFamily(id).numbers[0]);
+        // El arquetipo es de un puesto: cambiar de puesto lo deja sin sentido.
+        setArchetype(null);
+    }
+
+    /** «Al azar»: llena la ficha entera. El nombre queda como está si ya hay uno. */
+    function alAzar() {
+        const code = elegir(DESTACADOS).code;
+        const fam = elegir(ALL_FAMILIES);
+        setCountryCode(code);
+        setClubId(null);
+        setFamily(fam);
+        setNumber(elegir(getFamily(fam).numbers));
+        setArchetype(elegir(archetypesFor(fam)).id);
+        setGoal(elegir(careerGoals(code)).id);
+    }
+
+    const faltan: string[] = [];
+    if (!family) faltan.push('un puesto');
+    if (family && !archetype) faltan.push('qué clase de jugador sos');
+    if (!goal) faltan.push('tu objetivo');
+    const listo = faltan.length === 0;
+    /** «un puesto y tu objetivo»: la lista en castellano, con «y» antes del último. */
+    const queFalta = faltan.length > 1 ? `${faltan.slice(0, -1).join(', ')} y ${faltan[faltan.length - 1]}` : faltan[0];
+
+    function jugar() {
+        if (!listo || !family) return;
         onStart({
-            name: name.trim(),
-            surname: surname.trim(),
+            name: name.trim() || elegir(FIRST_NAMES),
+            surname: surname.trim() || elegir(SURNAMES),
             family,
             countryCode,
             ...(number !== null ? { number } : {}),
-            ...(!sorteo && clubId !== null ? { clubId } : {}),
+            ...(clubId !== null ? { clubId } : {}),
+            ...(goal !== null ? { goal } : {}),
+            ...(archetype !== null ? { archetype } : {}),
         });
     }
 
     return (
-        <div className={styles.card}>
-            <span className={styles.eyebrow}>Paso {pasoIx + 1} de {pasos.length}</span>
+        <div className={`${styles.card} ${styles.signup}`}>
+            <div className={styles.signupHead}>
+                <span className={styles.signupTitle}>Tu arranque</span>
+                <button type="button" className={styles.signupDice} onClick={alAzar}>
+                    <span aria-hidden="true">🎲</span> Al azar
+                </button>
+            </div>
 
-            {/* El riel no es adorno: dice cuántas pantallas faltan —sin eso, un
-                formulario partido se siente más largo que el entero— y deja
-                volver a lo que ya contestaste sin perder el resto. */}
-            <ol className={styles.stepRail} aria-label="Pasos de la creación">
-                {pasos.map((p, i) => (
-                    // Con cuatro casillas en 360 px el nombre del paso no entra en
-                    // ninguna: la casilla da ~62 px y "Nombre" pide 45 más el
-                    // número. El riel marca cuál es la actual y le da a ESA el
-                    // ancho —el resto queda en el número, que es lo que cuenta las
-                    // pantallas—. El reparto vive en la hoja; acá va la marca.
-                    <li key={p.id} className={`${styles.stepSlot} ${i === pasoIx ? styles.stepSlotOn : ''}`}>
-                        <button
-                            type="button"
-                            className={`${styles.crumb} ${i === pasoIx ? styles.crumbOn : ''} ${i < pasoIx ? styles.crumbDone : ''}`}
-                            aria-current={i === pasoIx ? 'step' : undefined}
-                            disabled={!alcanzable(i)}
-                            onClick={() => setPaso(i)}
-                        >
-                            <span className={styles.crumbNum}>{i + 1}</span>
-                            <span className={styles.crumbName}>{p.crumb}</span>
-                        </button>
-                    </li>
-                ))}
-            </ol>
+            <div className={styles.signupGrid}>
+                <div className={styles.signupMain}>
+                    {/* ── De dónde sos y dónde arrancás ────────────────────── */}
+                    <div className={`${styles.signupPair} ${styles.signupPairWide}`}>
+                        <PickerSelect
+                            label="Nacionalidad"
+                            value={countryCode}
+                            options={PAISES}
+                            onChange={pickCountry}
+                        />
+                        <PickerSelect
+                            label="Club"
+                            value={clubId ?? AL_AZAR}
+                            options={clubes}
+                            onChange={(v) => setClubId(v === AL_AZAR ? null : v)}
+                            disabled={pool.length === 0}
+                        />
+                    </div>
 
-            {/* Izquierda la pregunta del paso, derecha la camiseta. En teléfono
-                esto es un `div` y la camiseta cae abajo del campo; el reparto lo
-                enciende el escalón de 980 px, al final de la hoja. */}
-            <div className={styles.createGrid}>
-                <div className={styles.createStep}>
-                    {actual === 'nombre' && (
-                        <>
-                            <h2 className={styles.cardTitle} ref={tituloRef} tabIndex={-1}>¿Quién sos?</h2>
-                            {/* Los dieciséis siguen a `START_AGE`, no al revés. */}
-                            <p className={styles.cardText}>
-                                Tenés dieciséis y recién empezás a entrenar con los grandes. Lo que
-                                venga después lo vas a escribir vos.
-                            </p>
+                    {/* ── Cómo te llamás ───────────────────────────────────── */}
+                    <div className={styles.signupPair}>
+                        <label className={styles.signupField}>
+                            <span className={styles.signupLabel}>Nombre</span>
+                            <input
+                                className={styles.signupInput}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Opcional"
+                                maxLength={20}
+                                autoComplete="off"
+                            />
+                        </label>
+                        <label className={styles.signupField}>
+                            <span className={styles.signupLabel}>Apellido</span>
+                            <input
+                                className={styles.signupInput}
+                                value={surname}
+                                onChange={(e) => setSurname(e.target.value)}
+                                placeholder="Opcional"
+                                maxLength={20}
+                                autoComplete="off"
+                            />
+                        </label>
+                    </div>
 
-                            <div className={styles.field}>
-                                <label className={styles.fieldLabel} htmlFor="cap-nombre">Nombre y apellido</label>
-                                <div className={styles.nameRow}>
-                                    <input
-                                        id="cap-nombre"
-                                        className={styles.input}
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') avanzar(); }}
-                                        placeholder="Bautista"
-                                        maxLength={20}
-                                    />
-                                    <input
-                                        className={styles.input}
-                                        value={surname}
-                                        onChange={(e) => setSurname(e.target.value)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') avanzar(); }}
-                                        placeholder="Uriarte"
-                                        maxLength={20}
-                                        aria-label="Apellido"
-                                    />
-                                </div>
-                            </div>
-                        </>
+                    {/* ── El puesto: la decisión más determinante del juego ── */}
+                    <span className={styles.signupLabel} id={`${ids}-puesto`}>Puesto</span>
+                    <div className={styles.signupPositions} role="radiogroup" aria-labelledby={`${ids}-puesto`}>
+                        {ALL_FAMILIES.map((id) => {
+                            const def = getFamily(id);
+                            return (
+                                <button
+                                    key={id}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={family === id}
+                                    className={`${styles.signupPos} ${family === id ? styles.signupPosOn : ''}`}
+                                    onClick={() => pickFamily(id)}
+                                >
+                                    <span className={styles.signupPosNum}>{def.numbers.join('·')}</span>
+                                    <span className={styles.signupPosName}>{def.labelEs}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Un solo dorsal no es una elección: la fila aparece sólo
+                        cuando el puesto tiene más de uno. */}
+                    {family && getFamily(family).numbers.length > 1 && (
+                        <div className={styles.signupNumbers} role="radiogroup" aria-label="Tu dorsal">
+                            <span className={styles.signupLabel}>Dorsal</span>
+                            {getFamily(family).numbers.map((n) => (
+                                <button
+                                    key={n}
+                                    type="button"
+                                    role="radio"
+                                    aria-checked={number === n}
+                                    className={`${styles.numberChip} ${number === n ? styles.numberChipOn : ''}`}
+                                    onClick={() => setNumber(n)}
+                                >
+                                    {n}
+                                </button>
+                            ))}
+                        </div>
                     )}
 
-                    {actual === 'pais' && (
+                    {/* ── Qué clase de jugador sos ─────────────────────────────
+                        Aparece cuando hay puesto: es una pregunta SOBRE el
+                        puesto. Mueve puntos entre dos atributos de la media sin
+                        subirla (`data/archetypes.ts`). */}
+                    {family && (
                         <>
-                            <h2 className={styles.cardTitle} ref={tituloRef} tabIndex={-1}>¿De dónde sos?</h2>
-                            <p className={styles.cardText}>
-                                De acá salen el club donde empezás y la unión que te puede convocar.
-                            </p>
-
-                            <div className={styles.field}>
-                                <span className={styles.fieldLabel}>Tu nacionalidad</span>
-                                <CountryPicker value={countryCode} onChange={pickCountry} />
-                            </div>
-                        </>
-                    )}
-
-                    {actual === 'puesto' && (
-                        <>
-                            <h2 className={styles.cardTitle} ref={tituloRef} tabIndex={-1}>¿Qué puesto jugás?</h2>
-                            {/* Corto a propósito: en 390 px cada renglón de más
-                                empuja el botón otros 23 px de scroll. */}
-                            <p className={styles.cardText}>
-                                Es la decisión más determinante del juego.
-                            </p>
-
-                            <div className={styles.field}>
-                                <span className={styles.fieldLabel} id="cap-puesto">Tu puesto</span>
-                                <div className={styles.choices} role="radiogroup" aria-labelledby="cap-puesto">
-                                    {ALL_FAMILIES.map((id) => {
-                                        const def = getFamily(id);
-                                        return (
-                                            <button
-                                                key={id}
-                                                type="button"
-                                                role="radio"
-                                                aria-checked={family === id}
-                                                className={`${styles.choice} ${family === id ? styles.choiceOn : ''}`}
-                                                onClick={() => pickFamily(id)}
-                                            >
-                                                <span className={styles.choiceName}>{def.labelEs}</span>
-                                                <span className={styles.choiceNumbers}>{def.numbers.join(' · ')}</span>
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            {/* Un solo dorsal no es una elección: el hooker es el 2 y no
-                                hay nada que preguntarle. La fila aparece únicamente
-                                cuando la familia tiene más de uno. */}
-                            {numbers.length > 1 && (
-                                <div className={styles.field}>
-                                    <span className={styles.fieldLabel} id="cap-dorsal">Tu dorsal</span>
-                                    <div className={styles.numbers} role="radiogroup" aria-labelledby="cap-dorsal">
-                                        {numbers.map((n) => (
-                                            <button
-                                                key={n}
-                                                type="button"
-                                                role="radio"
-                                                aria-checked={number === n}
-                                                className={`${styles.numberChip} ${number === n ? styles.numberChipOn : ''}`}
-                                                onClick={() => setNumber(n)}
-                                            >
-                                                {n}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
-
-                    {actual === 'club' && (
-                        <>
-                            <h2 className={styles.cardTitle} ref={tituloRef} tabIndex={-1}>¿Dónde te hacés?</h2>
-                            {/* Las dos cosas que hay que saber para elegir: que la
-                                lista es la de abajo —a primera se llega— y que el
-                                club de origen es el único que después puede
-                                ponerle tu nombre a la cancha. */}
-                            <p className={styles.cardText}>
-                                Un club de los de abajo. Es el que te espera si volvés.
-                            </p>
-
-                            <div className={styles.field}>
-                                <span className={styles.fieldLabel} id="cap-club">Tu primer club</span>
-                                <div className={styles.choices} role="radiogroup" aria-labelledby="cap-club">
+                            <span className={styles.signupLabel} id={`${ids}-perfil`}>
+                                ¿Qué clase de {getFamily(family).labelEs.toLowerCase()} sos?
+                            </span>
+                            <div className={styles.signupArchetypes} role="radiogroup" aria-labelledby={`${ids}-perfil`}>
+                                {perfiles.map((a, i) => (
                                     <button
+                                        key={a.id}
                                         type="button"
                                         role="radio"
-                                        aria-checked={sorteo}
-                                        className={`${styles.choice} ${sorteo ? styles.choiceOn : ''}`}
-                                        onClick={() => setSorteo(true)}
+                                        aria-checked={archetype === a.id}
+                                        className={`${styles.signupArch} ${archetype === a.id ? styles.signupArchOn : ''}`}
+                                        onClick={() => setArchetype(a.id)}
                                     >
-                                        <span className={styles.choiceName}>Al azar</span>
-                                        <span className={styles.choiceHint}>Casi siempre uno chico</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        role="radio"
-                                        aria-checked={!sorteo}
-                                        className={`${styles.choice} ${!sorteo ? styles.choiceOn : ''}`}
-                                        onClick={() => setSorteo(false)}
-                                    >
-                                        <span className={styles.choiceName}>Elegir el club</span>
-                                        <span className={styles.choiceHint}>
-                                            {pool.length} en {pais?.nameEs ?? 'tu país'}
+                                        <span className={styles.signupArchNum} aria-hidden="true">{['I', 'II', 'III'][i]}</span>
+                                        <span className={styles.signupArchName}>{a.label}</span>
+                                        <span className={styles.signupArchChips}>
+                                            {Object.entries(archetypeDelta(a)).map(([k, d]) => (
+                                                <span key={k} className={d! < 0 ? styles.signupChipMinus : styles.signupChip}>
+                                                    {d! > 0 ? `+${d}` : d} {ATTRIBUTE_LABEL[k as keyof typeof ATTRIBUTE_LABEL]}
+                                                </span>
+                                            ))}
                                         </span>
                                     </button>
-                                </div>
+                                ))}
                             </div>
-
-                            {!sorteo && (
-                                <div className={styles.field}>
-                                    <ClubPicker clubs={pool} value={clubId} onChange={setClubId} />
-                                </div>
+                            {archetype && (
+                                <p className={styles.signupNote}>
+                                    {perfiles.find((a) => a.id === archetype)?.text}
+                                </p>
                             )}
                         </>
                     )}
+
+                    {/* ── Qué querés que quede ─────────────────────────────── */}
+                    <PickerSelect
+                        label="Tu objetivo"
+                        value={goal}
+                        options={metas}
+                        onChange={(v) => setGoal(v as CareerGoalId)}
+                        placeholder="Elegí qué querés que quede"
+                    />
+                    {metaElegida && <p className={styles.signupNote}>{metaElegida.hint}</p>}
                 </div>
 
-                <div className={styles.createKit}>
+                {/* La camiseta y los cuatro atributos que hacen tu media: lo que
+                    estás armando, a la vista mientras lo armás. En el teléfono
+                    va abajo; en escritorio, a la derecha. */}
+                <div className={styles.signupSide}>
                     <Jersey
-                        surname={surname}
+                        surname={surname || 'Apellido'}
                         number={number}
                         countryCode={countryCode}
                         countryName={pais?.nameEs}
                     />
+                    {family && <Arranque family={family} archetypeId={archetype} />}
                 </div>
             </div>
 
-            <button
-                type="button"
-                className={styles.primary}
-                disabled={!pasoListo}
-                onClick={avanzar}
-            >
-                {pasoIx < ultimo ? 'Siguiente' : 'Empezar la carrera'}
+            <button type="button" className={styles.signupPlay} disabled={!listo} onClick={jugar}>
+                <span aria-hidden="true">▶</span> Empezar la carrera
             </button>
             {/* El botón deshabilitado siempre dice qué falta (CLAUDE.md §6). */}
-            {!pasoListo && (
-                <span className={styles.primaryHint}>
-                    {actual === 'nombre' && 'Poné tu nombre y tu apellido para seguir.'}
-                    {actual === 'puesto' && 'Elegí un puesto para empezar.'}
-                    {actual === 'club' && 'Elegí un club de la lista, o volvé al azar.'}
-                </span>
-            )}
-            {pasoIx > 0 && (
-                <button type="button" className={styles.ghost} onClick={() => setPaso(pasoIx - 1)}>
-                    Volver
-                </button>
-            )}
+            {!listo && <span className={styles.primaryHint}>Elegí {queFalta} para empezar.</span>}
+        </div>
+    );
+}
+
+/**
+ * Los cuatro atributos de la media del puesto, con su peso, como arrancan con
+ * el perfil elegido. Misma plantilla y mismo traspaso que el motor
+ * (`baseAttributes`, `archetypeDelta`): lo que se ve es lo que se juega, menos
+ * el ±3 del sorteo.
+ */
+function Arranque({ family, archetypeId }: { family: PositionFamilyId; archetypeId: string | null }) {
+    const def = getFamily(family);
+    const base = baseAttributes(family);
+    const elegido = archetypesFor(family).find((a) => a.id === archetypeId) ?? null;
+    const delta: Partial<Record<string, number>> = elegido ? archetypeDelta(elegido) : {};
+
+    return (
+        <div className={styles.attrPreview} aria-label="Tus atributos de arranque, aproximados">
+            <span className={styles.attrPreviewHead}>
+                <span>Tus atributos</span>
+                <span className={styles.attrPreviewNote}>aprox.</span>
+            </span>
+            {def.attributes.map((k, i) => {
+                const d = delta[k] ?? 0;
+                const valor = Math.max(20, Math.min(99, base[k] + d));
+                return (
+                    <div key={k} className={styles.attrPreviewRow}>
+                        <span className={styles.attrPreviewLabel}>
+                            {ATTRIBUTE_LABEL[k]}
+                            <span className={styles.attrPreviewWeight}>{def.weights[i]}%</span>
+                        </span>
+                        <span className={styles.attrPreviewTrack} aria-hidden="true">
+                            <span className={styles.attrPreviewFill} style={{ transform: `scaleX(${valor / 99})` }} />
+                        </span>
+                        <span className={styles.attrPreviewValue}>
+                            {valor}
+                            {d !== 0 && (
+                                <span className={d > 0 ? styles.attrPreviewUp : styles.attrPreviewDown}>
+                                    {d > 0 ? ` +${d}` : ` ${d}`}
+                                </span>
+                            )}
+                        </span>
+                    </div>
+                );
+            })}
         </div>
     );
 }

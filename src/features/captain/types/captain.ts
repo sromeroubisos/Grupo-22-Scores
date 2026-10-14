@@ -1087,8 +1087,22 @@ import type { PendingTournament } from './tournament.ts';
  *
  *        NO SUBE `schema`: no hay un campo nuevo en el estado. La camiseta de una
  *        temporada se DERIVA de la edad que la fila ya guarda (§1.9).
+ *
+ * 0.40.0 EL CLUB TAMBIÉN LE PASA COSAS AL JUGADOR, Y LA CINTA PESA.
+ *
+ *          · TRES TARJETAS de club: `club-la-crisis` (bancar al club o pedir el
+ *            pase), `club-el-nuevo-entrenador` (adaptarte o defender tu juego) y
+ *            `club-el-vestuario`, que es la primera tarjeta que LEE una decisión
+ *            anterior: sólo aparece si agarraste la cinta en «La cinta».
+ *          · `requires.flags`, la precondición general que lo permite. La
+ *            bandera `capitan` se escribía desde el primer día y nadie la leía.
+ *
+ *        Mueve el azar —el pool tiene tres cartas más— así que la misma semilla
+ *        ya no produce la misma carrera. NO SUBE `schema`: ningún campo nuevo.
+ *        El objetivo de la carrera (`CreateCaptainInput.goal`) entra en la misma
+ *        versión y NO mueve nada: es una bandera que el motor no lee.
  */
-export const CAPTAIN_ENGINE_VERSION = '0.39.0';
+export const CAPTAIN_ENGINE_VERSION = '0.40.0';
 
 /**
  * Las fases del ciclo. `offseason` es propia de este juego y no la tiene
@@ -1313,7 +1327,24 @@ export interface CreateCaptainInput {
     number?: number;
     /** Club del catálogo. Si no viene o no existe, arranca sin club resuelto. */
     clubId?: string;
+    /**
+     * EL OBJETIVO DE LA CARRERA, por id (`app/.../el-capitan/legacy.ts` declara
+     * los cinco). Se anota como `player.flags['objetivo-<id>']` y el motor NO lo
+     * lee: no consume azar ni mueve una sola cuenta. Es la vara contra la que la
+     * pantalla de retiro juzga la carrera. Va en `flags`, que ya se persiste,
+     * para no sumar un campo al estado ni subir `schema`.
+     */
+    goal?: string;
+    /**
+     * EL ARQUETIPO dentro del puesto (`data/archetypes.ts`): un traspaso de
+     * puntos entre dos atributos de la media, sin azar. Se anota como
+     * `player.flags['arquetipo-<id>']`. Uno de otra familia se ignora.
+     */
+    archetype?: string;
 }
+
+/** El prefijo de la bandera del objetivo. `legacy.ts` lo importa de acá: una sola fuente. */
+export const GOAL_FLAG_PREFIX = 'objetivo-';
 
 export interface CaptainState {
     // ── Versiones congeladas al empezar la partida ──────────────────────────

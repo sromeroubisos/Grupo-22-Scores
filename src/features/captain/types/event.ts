@@ -281,6 +281,15 @@ export interface EventRequirements {
      * esto y funciona sola.
      */
     secondFlagMonths?: number;
+    /**
+     * BANDERAS QUE TIENEN QUE ESTAR PRENDIDAS (todas, `> 0`).
+     *
+     * Es la forma de que una decisión vieja abra una tarjeta nueva: agarrar la
+     * cinta en «La cinta» deja `flags.capitan`, y hasta acá esa bandera no la
+     * leía nadie — la capitanía se decidía y no tenía consecuencia. Escrito como
+     * precondición general y no como un `if` con el id (§3 del CLAUDE raíz).
+     */
+    flags?: string[];
 }
 
 export interface CaptainEvent {

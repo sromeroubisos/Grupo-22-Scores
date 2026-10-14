@@ -1,5 +1,6 @@
 import type { CaptainState } from '@/features/captain';
-import { careerTally, getFamily } from '@/features/captain';
+import { belongingTier, careerTally, getFamily } from '@/features/captain';
+import { CLUB_CAPTAIN_FLAG } from './legacy';
 
 /**
  * EL TÍTULO DE LA CARRERA.
@@ -47,6 +48,17 @@ interface Medidas {
     clubes: number;
     /** La Pertenencia más alta que alcanzaste en cualquier club. */
     pertenencia: number;
+    /**
+     * El ESCALÓN de esa Pertenencia, y no el número. Las reglas preguntan por
+     * lo que la cosa ES (§1.5 del CLAUDE de captain): decían `>= 95` y `>= 75`,
+     * que eran los pisos de «Vitalicio» y «Capitán» antes de que los escalones
+     * se reanclaran a 70 y 48 — dos títulos quedaron apuntando a un número
+     * suelto que casi nadie alcanzaba. `calibration.test.ts` ya había corregido
+     * la misma deriva de su lado.
+     */
+    escalon: string;
+    /** Te dieron la cinta: la del club (carta «La cinta») o la de la selección. */
+    cinta: boolean;
     hia: number;
     desgaste: number;
     cartel: number;
@@ -76,13 +88,13 @@ const TITULOS: readonly { id: string; label: string; hint: string; gana: (m: Med
         id: 'leyenda',
         label: 'La leyenda del club',
         hint: 'Vitalicio en tu club y campeón del mundo de tu propia carrera.',
-        gana: (m) => m.pertenencia >= 95 && m.titulos >= 5 && m.caps >= 20,
+        gana: (m) => m.escalon === 'vitalicio' && m.titulos >= 5 && m.caps >= 20,
     },
     {
         id: 'vitalicio',
         label: 'El vitalicio',
         hint: 'La cancha 1 lleva tu nombre. No hace falta decir más.',
-        gana: (m) => m.pertenencia >= 95,
+        gana: (m) => m.escalon === 'vitalicio',
     },
     {
         id: 'mundialista',
@@ -126,7 +138,7 @@ const TITULOS: readonly { id: string; label: string; hint: string; gana: (m: Med
         id: 'capitan',
         label: 'El capitán',
         hint: 'Te dieron la cinta y te la dejaron puesta diez años.',
-        gana: (m) => m.pertenencia >= 75 && m.temporadas >= 10,
+        gana: (m) => m.cinta && m.temporadas >= 10,
     },
     {
         id: 'internacional',
@@ -188,7 +200,7 @@ const TITULOS: readonly { id: string; label: string; hint: string; gana: (m: Med
         id: 'de-la-casa',
         label: 'El de la casa',
         hint: 'Empezaste y terminaste en el mismo club, con vueltas en el medio.',
-        gana: (m) => m.clubes >= 2 && m.pertenencia >= 60 && m.temporadas >= 8,
+        gana: (m) => m.clubes >= 2 && (m.escalon === 'capitan' || m.escalon === 'vitalicio') && m.temporadas >= 8,
     },
     {
         id: 'profesional',
@@ -288,6 +300,9 @@ export function careerTitleOf(state: CaptainState): CareerTitle {
         premios: state.awards.length,
         clubes: Math.max(1, clubes),
         pertenencia: pertenencias.length > 0 ? Math.max(...pertenencias) : 0,
+        escalon: belongingTier(pertenencias.length > 0 ? Math.max(...pertenencias) : 0),
+        cinta: (state.player.flags[CLUB_CAPTAIN_FLAG] ?? 0) > 0
+            || state.milestones.some((h) => h.id === 'capitan-de-la-seleccion'),
         hia: state.damage.hia,
         desgaste: state.damage.cuerpo,
         cartel: state.fame,

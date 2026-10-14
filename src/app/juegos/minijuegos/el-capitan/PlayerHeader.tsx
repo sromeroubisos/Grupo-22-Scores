@@ -21,6 +21,8 @@ import {
 import ClubBadge from './ClubBadge';
 import Wallet from './Wallet';
 import { statTier, statTierClass } from './statTier';
+import { GOAL_STATUS_LABEL, goalProgressOf } from './legacy';
+import { archetypeOfFlags } from '@/features/captain';
 import styles from './capitan.module.css';
 
 /**
@@ -157,6 +159,9 @@ export default function PlayerHeader({
     const [plegada, setPlegada] = useState(false);
     const abierta = !plegada;
 
+    const meta = goalProgressOf(state);
+    const arquetipo = archetypeOfFlags(player.flags);
+
     return (
         <>
             {/* ── LA PANTALLA, EN UN ATRIBUTO ─────────────────────────────────
@@ -212,7 +217,10 @@ export default function PlayerHeader({
                         quién es y no cómo llegó. Lo que va en su lugar es la
                         planilla: partidos, tries, puntos y tackles. */}
                     <p className={styles.role}>
-                        {family.labelEs} · {player.number} · {player.age} años
+                        {family.labelEs}
+                        {/* El arquetipo es identidad: «Apertura · El cerebro». Las
+                            carreras de antes de que existiera no lo tienen. */}
+                        {arquetipo ? ` · ${arquetipo.label}` : ''} · {player.number} · {player.age} años
                     </p>
                 </div>
 
@@ -344,6 +352,23 @@ export default function PlayerHeader({
                     <span className={styles.statLabel}>Temporadas</span>
                 </div>
             </div>
+
+            {/* ── LA META ────────────────────────────────────────────────────
+                Lo que te propusiste al empezar, y dónde estás. Sin esta fila el
+                objetivo se elegía en el registro y se reencontraba recién en el
+                retiro, veinte temporadas después: una vara que no se ve no
+                orienta ninguna decisión. Las partidas que arrancaron antes de
+                que existiera no tienen objetivo, y la fila no aparece. */}
+            {meta && (
+                <p className={styles.goalLine} data-status={meta.status}>
+                    <span className={styles.goalIcon} aria-hidden="true">{meta.goal.icon}</span>
+                    <span className={styles.goalText}>
+                        <b className={styles.goalLabel}>{meta.goal.label}</b>
+                        <span className={styles.goalProgress}>{meta.line}</span>
+                    </span>
+                    <span className={styles.goalStatus}>{GOAL_STATUS_LABEL[meta.status].live}</span>
+                </p>
+            )}
 
             {/* ── LOS ATRIBUTOS ──────────────────────────────────────────────
                 El jugador elegía un puesto que el propio juego llama «la

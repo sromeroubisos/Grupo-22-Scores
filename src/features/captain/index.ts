@@ -442,6 +442,7 @@ export {
     momentSeed,
     nextChain,
     pickMomentKind,
+    practiceMoment,
     proficiencyFor,
     rollMoment,
     shirtOfKind,
@@ -651,3 +652,7 @@ export {
  * un torneo que el digest no puede atravesar.
  */
 export { quemarPolicy, playTournament } from './state/captain-autoplay.ts';
+
+// ── El arquetipo: qué clase de jugador sos dentro del puesto ────────────────
+export type { Archetype } from './data/archetypes.ts';
+export { ARCHETYPES, archetypeDelta, archetypeOfFlags, archetypesFor, getArchetype } from './data/archetypes.ts';
