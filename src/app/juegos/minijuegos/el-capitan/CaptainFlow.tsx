@@ -53,7 +53,7 @@ const TIMELINE_MIN_SEASONS = 3;
  * jugador, así que el `<h1>` queda solo para el lector de pantalla y el
  * buscador. Sin esto, todas las pantallas de juego se quedaban sin ninguno.
  */
-function GameTitle() {
+export function GameTitle() {
     return <h1 className={styles.srOnly}>El Capitán</h1>;
 }
 
@@ -82,7 +82,7 @@ function GameTitle() {
  * cabecera del sitio, esta pantalla se queda sin puerta y la flecha deja de ser
  * opcional.
  */
-function Shell({ children, salida = true }: { children?: React.ReactNode; salida?: boolean }) {
+export function Shell({ children, salida = true }: { children?: React.ReactNode; salida?: boolean }) {
     const caja = useRef<HTMLDivElement>(null);
 
     /**
@@ -322,6 +322,16 @@ export default function CaptainFlow() {
         setCareer(next);
         if (!saveCaptain(next)) setSaveFailed(true);
     }, []);
+
+    /**
+     * LOS DADOS DE LA PANTALLA: «Al azar» en la ficha y el nombre que sale
+     * cuando se deja vacío. Viven acá porque este es el único archivo con
+     * permiso de `Math.random` (CLAUDE.md de captain §1), y no tocan el
+     * determinismo: sortean ELECCIONES del formulario, que después entran al
+     * motor como cualquier otra elección. La carrera sigue saliendo entera de
+     * la semilla de abajo más esas elecciones.
+     */
+    const dadosDePantalla = useCallback(() => Math.random(), []);
 
     const start = useCallback((input: CreateCaptainInput) => {
         // El único Math.random del juego.
@@ -661,6 +671,18 @@ export default function CaptainFlow() {
                             </button>
                         )}
                     </div>
+
+                    {/* LA OTRA PUERTA: los minijuegos de la carrera, sueltos, con
+                        récord y desafío del día. Va abajo de la carrera y no al
+                        lado porque la carrera es el juego; esto es la práctica. */}
+                    <Link href="/juegos/minijuegos/el-capitan/entrenamiento" className={styles.trainEntry}>
+                        <span className={styles.trainEntryIcon} aria-hidden="true">🏉</span>
+                        <span className={styles.trainEntryBody}>
+                            <span className={styles.trainEntryTitle}>Zona de entrenamiento</span>
+                            <span className={styles.trainEntryText}>Los 65 minijuegos, el desafío del día y tus récords.</span>
+                        </span>
+                        <span aria-hidden="true">›</span>
+                    </Link>
                 </div>
             </Shell>
         );
@@ -670,7 +692,7 @@ export default function CaptainFlow() {
         return (
             <Shell>
                 <GameTitle />
-                <CreatePlayer onStart={start} />
+                <CreatePlayer onStart={start} sortear={dadosDePantalla} />
             </Shell>
         );
     }

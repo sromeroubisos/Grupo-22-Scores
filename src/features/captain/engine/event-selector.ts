@@ -117,6 +117,8 @@ export function eligible(event: CaptainEvent, state: CaptainState): boolean {
         if (!otra || otra.remaining <= 0 || otra.months < req.secondFlagMonths) return false;
     }
 
+    if (req.flags && !req.flags.every((f) => (player.flags[f] ?? 0) > 0)) return false;
+
     const pertenencia = belongingOf(state.belonging, player.clubId);
     if (req.minBelonging !== undefined && pertenencia < req.minBelonging) return false;
     if (req.maxBelonging !== undefined && pertenencia > req.maxBelonging) return false;

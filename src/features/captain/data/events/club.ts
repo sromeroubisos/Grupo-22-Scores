@@ -290,4 +290,102 @@ export const CLUB_EVENTS: CaptainEvent[] = [
             },
         ],
     },
+
+    // ── 0.40.0 · LO QUE LE PASA AL CLUB, Y LO QUE PASA CUANDO SOS EL CAPITÁN ──
+    // Tres tarjetas que faltaban en un juego de carrera de rugby: el club que se
+    // cae, el entrenador que llega con otra idea y el vestuario que el capitán
+    // tiene que sostener. La tercera es la primera que LEE una decisión vieja:
+    // sólo aparece si agarraste la cinta, que hasta acá no tenía consecuencia.
+    {
+        id: 'club-la-crisis',
+        category: 'club',
+        title: 'El club se viene abajo',
+        text: 'Se cayó el sponsor principal, se fueron tres titulares y la primera arranca la pretemporada con lo justo. En la reunión de plantel todos te miran.',
+        weight: 6,
+        repeatable: true,
+        cooldown: 8,
+        requires: { needsClub: true, minSeasons: 3, minAge: 19 },
+        options: [
+            {
+                id: 'bancar-al-club',
+                label: 'Bancar al club',
+                hint: 'Te quedás a ponerle el pecho. Con menos plantel, jugás más y te rompés más.',
+                outcomes: [
+                    { weight: 70, effect: { belonging: 7, playingTime: 1, body: 6, attrs: { liderazgo: 1 } }, resultText: 'Jugaste todo y el club no descendió. En la cena de fin de año te aplaudieron de pie.' },
+                    { weight: 30, effect: { belonging: 5, body: 10, fame: -1 }, resultText: 'Pusiste todo y no alcanzó: fue un año para olvidar. En el club no se olvidan de quién se quedó.' },
+                ],
+            },
+            {
+                id: 'pedir-el-pase',
+                label: 'Pedir el pase',
+                hint: 'Tu carrera primero. En el club lo van a leer como lo que es.',
+                outcomes: [
+                    { weight: 60, effect: { belonging: -8, fame: 2 }, resultText: 'Lo dijiste en voz alta y se supo. Te llamaron de dos clubes, y en el tuyo te dejaron de saludar.' },
+                    { weight: 40, effect: { belonging: -6, playingTime: -1 }, resultText: 'Pediste el pase y nadie vino a buscarte. Volviste al plantel con menos cartel que antes.' },
+                ],
+            },
+        ],
+    },
+
+    {
+        id: 'club-el-nuevo-entrenador',
+        category: 'club',
+        title: 'Entrenador nuevo',
+        text: 'Llega un entrenador nuevo con otra idea de juego. En la primera práctica te pone con los suplentes y te dice que tu lugar se gana de nuevo.',
+        weight: 7,
+        repeatable: true,
+        cooldown: 6,
+        requires: { needsClub: true, minAge: 19, minSeasons: 2 },
+        options: [
+            {
+                id: 'adaptarte',
+                label: 'Adaptarte a su idea',
+                hint: 'Aprendés lo que te pide. Mientras tanto, otro juega en tu lugar.',
+                outcomes: [
+                    { weight: 70, effect: { attrs: { vision: 2 }, playingTime: -1 }, resultText: 'Te costó medio año, pero ahora entendés el juego de otra manera. Terminaste la temporada de titular.' },
+                    { weight: 30, effect: { attrs: { vision: 1 }, playingTime: -2 }, resultText: 'Hiciste todo lo que pidió y no te eligió igual. Hay entrenadores que ya traen su quince.' },
+                ],
+            },
+            {
+                id: 'defender-tu-juego',
+                label: 'Defender tu juego',
+                hint: 'Le demostrás en la cancha que se equivoca. Si no sale, se termina la discusión.',
+                outcomes: [
+                    { weight: 50, effect: { playingTime: 1, fame: 2 }, resultText: 'En el tercer partido entraste a los veinte y lo diste vuelta. El lunes eras titular otra vez.' },
+                    { weight: 50, effect: { playingTime: -2, belonging: -2 }, resultText: 'Chocaron en el primer video y no se volvieron a hablar. Jugaste en intermedia casi todo el año.' },
+                ],
+            },
+        ],
+    },
+
+    {
+        id: 'club-el-vestuario',
+        category: 'club',
+        title: 'El vestuario',
+        text: 'Después de una derrota fea, dos de los grandes del plantel se van a las manos en el vestuario. Sos el capitán: todos esperan que hagas algo.',
+        weight: 8,
+        rarity: 'especial',
+        repeatable: true,
+        cooldown: 6,
+        requires: { needsClub: true, flags: ['capitan'] },
+        options: [
+            {
+                id: 'cerrar-la-puerta',
+                label: 'Cerrar la puerta y hablar',
+                hint: 'Lo arreglás adentro, sin la comisión. Si sale mal, queda en tu cuenta.',
+                outcomes: [
+                    { weight: 70, effect: { belonging: 5, attrs: { liderazgo: 2 } }, resultText: 'Hablaste media hora con la puerta cerrada. Salieron abrazados y el sábado ganaron el clásico.' },
+                    { weight: 30, effect: { belonging: -2, attrs: { liderazgo: 1 }, playingTime: -1 }, resultText: 'No alcanzó con hablar. Uno de los dos se fue del club y el plantel quedó partido.' },
+                ],
+            },
+            {
+                id: 'que-decida-la-comision',
+                label: 'Que decida la comisión',
+                hint: 'No te ensuciás. El plantel nota que el capitán no se metió.',
+                outcomes: [
+                    { weight: 100, effect: { belonging: -3, attrs: { liderazgo: -1 } }, resultText: 'La comisión suspendió a los dos. En el vestuario alguien dijo que para eso no hacía falta un capitán.' },
+                ],
+            },
+        ],
+    },
 ];

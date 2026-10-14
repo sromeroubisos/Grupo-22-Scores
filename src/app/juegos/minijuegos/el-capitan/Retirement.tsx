@@ -17,6 +17,7 @@ import {
     unionName,
 } from '@/features/captain';
 import { careerTitleOf } from './careerTitle';
+import { chronicleOf, GOAL_STATUS_LABEL, goalProgressOf, LEGACY_LEVELS, legacyOf } from './legacy';
 import { flagPathOf } from '@/features/captain/data/catalogs';
 import ClubBadge from './ClubBadge';
 import { awardArtOf } from './awardArt';
@@ -312,6 +313,16 @@ export default function Retirement({
      */
     const titulo = useMemo(() => careerTitleOf(state), [state]);
 
+    /**
+     * EL LEGADO, en cinco ejes, y el OBJETIVO contra el que se juzga la carrera.
+     * El título dice qué fuiste; el legado dice dónde quedó tu nombre y cuánto;
+     * el objetivo dice si fue lo que querías. Los tres salen de la carrera ya
+     * cerrada y ninguno se guarda (`legacy.ts`).
+     */
+    const legado = useMemo(() => legacyOf(state), [state]);
+    const meta = useMemo(() => goalProgressOf(state), [state]);
+    const cronica = useMemo(() => chronicleOf(state), [state]);
+
     /* La media más alta que tuviste, que es la única celda de la grilla que es
        una ESTADÍSTICA y no un contador: por eso es la única que se pinta con el
        escalafón (`statTier.ts`). Un 91 de partidos no es élite de nada.
@@ -326,7 +337,9 @@ export default function Retirement({
                 ? 'Te fuiste cuando quisiste vos.'
                 : 'Llegó la edad y se notó.';
 
-    const vitalicio = mejorPertenencia >= 95;
+    // Por el escalón y no por un número: decía `>= 95`, el piso viejo, y desde
+    // que «Vitalicio» se reancló a 70 el veredicto dorado no salía casi nunca.
+    const vitalicio = belongingTier(mejorPertenencia) === 'vitalicio';
     const veredicto = vitalicio ? 'La cancha 1 lleva tu nombre' : 'Se terminó';
 
     // La selección sólo ocupa lugar si existió. Un jugador que nunca fue
@@ -407,6 +420,15 @@ export default function Retirement({
             flagSrc: flagPathOf(player.countryCode),
             verdict: veredicto,
             verdictTone: vitalicio ? 'gold' : 'plain',
+            // Lo que se comparte tiene que decir QUÉ FUISTE, no sólo que se
+            // terminó: el título, el legado principal y el objetivo.
+            tagline: [
+                titulo.label,
+                legado.main?.headline,
+                meta ? `${meta.goal.label}: ${GOAL_STATUS_LABEL[meta.status].final.toLowerCase()}` : null,
+            ]
+                .filter((x): x is string => Boolean(x))
+                .join(' · '),
             stats: [
                 { label: 'Temporadas', value: String(state.history.length) },
                 { label: 'Partidos', value: String(partidos) },
@@ -440,7 +462,7 @@ export default function Retirement({
         family.labelEs, huboSeleccion, mejorMedia, metaNacional, partidos, player.age,
         player.countryCode, player.name, player.number, player.surname, seleccion,
         state.awards, state.history.length, state.national.caps, state.titles.length,
-        trail, veredicto, vitalicio,
+        trail, veredicto, vitalicio, titulo.label, legado.main, meta,
     ]);
 
     useEffect(() => {
@@ -527,6 +549,17 @@ export default function Retirement({
                     <span className={styles.careerTitleHint}>{titulo.hint}</span>
                 </p>
 
+                {meta && (
+                    <p className={styles.goalLine} data-status={meta.status}>
+                        <span className={styles.goalIcon} aria-hidden="true">{meta.goal.icon}</span>
+                        <span className={styles.goalText}>
+                            <b className={styles.goalLabel}>{meta.goal.label}</b>
+                            <span className={styles.goalProgress}>{meta.line}</span>
+                        </span>
+                        <span className={styles.goalStatus}>{GOAL_STATUS_LABEL[meta.status].final}</span>
+                    </p>
+                )}
+
                 <p className={styles.finalLead}>
                     {/* ── LA BANDERA, CON EL NOMBRE ───────────────────────────
                         De dónde sos es identidad, y en la pantalla que cierra la
@@ -598,6 +631,53 @@ export default function Retirement({
             </div>
 
             <div className={styles.finalBody}>
+                {/* ── EL LEGADO ───────────────────────────────────────────────
+                    Va ANTES que la trayectoria porque contesta lo que el jugador
+                    pregunta primero: qué quedó. Los cinco ejes siempre, en orden
+                    fijo, también los vacíos: «Sin huella» en la selección es
+                    parte de la respuesta para el que eligió quedarse en su club.
+                    Los porqués se despliegan; cerrados, el eje entra en una
+                    línea y la trayectoria sigue a la vista. */}
+                <section className={styles.legacy} aria-labelledby="cap-legado">
+                    <span className={styles.eyebrow} id="cap-legado">El legado</span>
+                    <p className={styles.legacyMain}>
+                        {legado.main
+                            ? <>Te van a recordar como <b>{legado.main.headline.toLowerCase()}</b>.</>
+                            : 'Pasaste por el rugby sin dejar una marca grande. También es una carrera.'}
+                    </p>
+                    {legado.axes.map((eje) => (
+                        <details key={eje.id} className={styles.legacyAxis} data-level={eje.level}>
+                            <summary>
+                                <span className={styles.legacyIcon} aria-hidden="true">{eje.icon}</span>
+                                <span className={styles.legacyWho}>
+                                    <span className={styles.legacyLabel}>{eje.label}</span>
+                                    <span className={styles.legacyHeadline}>
+                                        {eje.headline || LEGACY_LEVELS.find((l) => l.id === eje.level)?.labelEs}
+                                    </span>
+                                </span>
+                                <span className={styles.legacyScore} aria-label={`${eje.score} de 100`}>{eje.score}</span>
+                                <span className={styles.legacyBar} aria-hidden="true">
+                                    <span className={styles.legacyBarFill} style={{ transform: `scaleX(${eje.score / 100})` }} />
+                                </span>
+                            </summary>
+                            {eje.reasons.length > 0 ? (
+                                <ul className={styles.legacyReasons}>
+                                    {eje.reasons.map((r) => (
+                                        <li key={r.text}>
+                                            <span>{r.text}</span>
+                                            <b className={r.points < 0 ? styles.legacyMinus : undefined}>
+                                                {r.points > 0 ? `+${r.points}` : r.points}
+                                            </b>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className={styles.legacyMain}>Nada sumó en este eje.</p>
+                            )}
+                        </details>
+                    ))}
+                </section>
+
                 <section className={styles.trail}>
                     <span className={styles.eyebrow}>La trayectoria</span>
 
@@ -662,6 +742,27 @@ export default function Retirement({
                         </article>
                     )}
                 </section>
+
+                {/* ── LO QUE TE MARCÓ ─────────────────────────────────────────
+                    Los hitos y las decisiones que no fueron rutina. Sin esto, la
+                    carta que te dio la cinta o la que te hizo cambiar de bandera
+                    se perdían en el cierre de su temporada y el retiro no se
+                    acordaba de ninguna. Colapsa si no hay nada (CLAUDE.md §6). */}
+                {cronica.length > 0 && (
+                    <section className={styles.trail} aria-labelledby="cap-cronica">
+                        <span className={styles.eyebrow} id="cap-cronica">Lo que te marcó</span>
+                        <ol className={styles.chronicle}>
+                            {cronica.map((c, i) => (
+                                <li key={`${c.season}-${c.kind}-${i}`}>
+                                    <span className={styles.chronicleSeason}>T{c.season}</span>
+                                    <span className={c.kind === 'hito' ? styles.chronicleMilestone : undefined}>
+                                        {c.title ? <b>{c.title}. </b> : null}{c.text}
+                                    </span>
+                                </li>
+                            ))}
+                        </ol>
+                    </section>
+                )}
             </div>
 
             <div className={styles.finalActions}>

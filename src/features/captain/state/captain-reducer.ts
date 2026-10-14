@@ -33,7 +33,7 @@ import type { MatchBucket, MatchBudget } from '../types/season.ts';
 import type { CaptainAction } from './captain-actions.ts';
 import type { Rng } from '../engine/random.ts';
 
-import { CAPTAIN_ENGINE_VERSION, SQUAD_TRACKS } from '../types/captain.ts';
+import { CAPTAIN_ENGINE_VERSION, GOAL_FLAG_PREFIX, SQUAD_TRACKS } from '../types/captain.ts';
 import {
     POTENTIAL_MAX_GAP,
     POTENTIAL_MEAN_GAP,
@@ -44,6 +44,7 @@ import {
 import { FAME_MAX, FAME_MIN, MONEY_START, OVR_MAX } from '../types/currencies.ts';
 import { MATCH_BUCKETS, MATCH_CAP_PER_SEASON } from '../types/season.ts';
 import { CAPTAIN_POSITIONS_VERSION, baseAttributes, getFamily } from '../data/positions.ts';
+import { ARCHETYPE_FLAG_PREFIX, applyArchetype, getArchetype } from '../data/archetypes.ts';
 import { NORMALIZED_CATALOG_VERSION, clubExists } from '../data/catalogs.ts';
 import { createRng, truncatedNormal } from '../engine/random.ts';
 import { emptyBelonging } from '../engine/belonging.ts';
@@ -128,6 +129,14 @@ export function createInitialCaptain(input: CreateCaptainInput, seed: number): C
         attrs[key] = Math.max(1, attrs[key] + rng.int(-BASE_SPREAD, BASE_SPREAD));
     }
 
+    // 2b · EL ARQUETIPO, si se eligió: un traspaso entre dos atributos del
+    //      puesto, sin azar y casi neutro para la media (`data/archetypes.ts`).
+    //      Va DESPUÉS del sorteo para no mover ninguna tirada.
+    const arquetipo = input.archetype ? getArchetype(input.archetype) : null;
+    if (arquetipo && arquetipo.family === input.family) {
+        Object.assign(attrs, applyArchetype(attrs, arquetipo));
+    }
+
     // 3 · EL MATERIAL: la media de hoy más lo que le queda por crecer.
     //     Es la mitad SORTEADA del techo y nada más: la otra mitad arranca en
     //     cero y se construye jugando (`player.built`). Por eso lo que sale de
@@ -178,7 +187,12 @@ export function createInitialCaptain(input: CreateCaptainInput, seed: number): C
         countryCode: input.countryCode,
         retired: false,
         retirementReason: null,
-        flags: {},
+        // El objetivo es la única bandera que nace con la carrera. Sin azar:
+        // la misma semilla con o sin objetivo juega la misma carrera.
+        flags: {
+            ...(input.goal ? { [`${GOAL_FLAG_PREFIX}${input.goal}`]: 1 } : {}),
+            ...(arquetipo && arquetipo.family === input.family ? { [`${ARCHETYPE_FLAG_PREFIX}${arquetipo.id}`]: 1 } : {}),
+        },
         shop: [],
         injuryLoss: {},
     };
