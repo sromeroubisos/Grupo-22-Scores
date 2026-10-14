@@ -1,0 +1,4143 @@
+/* ===== EL ENTRENADOR ===== */
+/* Sistema propio y autocontenido, apoyado en los tokens globales (--color-*)
+   para respetar claro y oscuro sin tocar el CSS legacy. El tema lo fija
+   `data-theme` en <html>: acá no se consulta prefers-color-scheme. */
+
+.page {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 24px 16px 96px;
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.backLink:hover {
+    color: var(--color-text-primary);
+}
+
+.backLink svg {
+    width: 16px;
+    height: 16px;
+}
+
+.eyebrow {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-accent);
+    margin-bottom: 8px;
+}
+
+.title {
+    font-size: clamp(1.7rem, 4vw, 2.4rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+    margin: 0 0 10px;
+}
+
+.lead {
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+    max-width: 62ch;
+    margin: 0 0 22px;
+}
+
+/* ===== CABECERA DEL CLUB ===== */
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    margin-bottom: 18px;
+}
+
+.headerMain {
+    min-width: 0;
+    flex: 1;
+}
+
+.clubName {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin: 0;
+    /* El nombre largo nunca empuja al resto: se corta con puntos suspensivos. */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.clubMeta {
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+    margin: 2px 0 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.headerStats {
+    display: flex;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+.stat {
+    text-align: right;
+}
+
+.statLabel {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+}
+
+.statValue {
+    display: block;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Bandas de presión. Los tonos se eligieron para que el texto tenga contraste
+   suficiente sobre la superficie en los dos temas: el ámbar como texto sobre
+   fondo claro no llega, así que en claro va el ámbar oscuro. */
+.pressureTranquila { color: #15803d; }
+.pressureAtenta { color: var(--color-text-primary); }
+.pressureCaliente { color: #b45309; }
+.pressureTerminal { color: #b91c1c; }
+
+:global([data-theme='dark']) .pressureTranquila { color: #4ade80; }
+:global([data-theme='dark']) .pressureCaliente { color: #fbbf24; }
+:global([data-theme='dark']) .pressureTerminal { color: #f87171; }
+
+/* ===== ESCUDO ===== */
+
+.crest {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+}
+
+.crestSm {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    font-size: 0.6rem;
+}
+
+/* El escudo real: la imagen entera adentro del cuadro, sobre un fondo neutro. */
+.crestImg {
+    object-fit: contain;
+    background: var(--color-bg-tertiary);
+    padding: 3px;
+}
+
+/* Un club que existe pero todavía no se puede dirigir. */
+.clubOptionPending {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.clubOptionPending:hover {
+    border-color: var(--color-border);
+}
+
+.pendingTitle {
+    margin: 14px 0 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+/* ===== PANELES ===== */
+
+.panel {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    padding: 18px;
+    margin-bottom: 16px;
+}
+
+.panelTitle {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-text-secondary);
+    margin: 0 0 10px;
+}
+
+.objective {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 4px;
+    line-height: 1.35;
+}
+
+.objectiveNote {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.ledger {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.ledgerItem {
+    padding: 9px 11px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+}
+
+.ledgerLabel {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+}
+
+.ledgerValue {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+}
+
+.ledgerHint {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+/* ===== BOTONES ===== */
+
+.primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 18px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--color-accent);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter var(--transition-fast, 0.15s);
+}
+
+.primary:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+.primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.ghost:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-text-secondary);
+}
+
+.disabledNote {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    text-align: center;
+    margin: 10px 0 0;
+}
+
+/* ===== TARJETA DE DECISIÓN ===== */
+
+.eventCard {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.eventFamily {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+}
+
+.eventTitle {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin: 6px 0 8px;
+    line-height: 1.2;
+}
+
+.eventText {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin: 0 0 18px;
+}
+
+.options {
+    display: grid;
+    gap: 10px;
+}
+
+.option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 13px 15px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color var(--transition-fast, 0.15s);
+}
+
+.option:hover {
+    border-color: var(--color-accent);
+}
+
+.optionLabel {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.optionHint {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+    margin-top: 3px;
+    line-height: 1.45;
+}
+
+.odds {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 9px;
+}
+
+.odd {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ===== REVELADO ===== */
+
+.reveal {
+    border: 1px solid var(--color-border);
+    border-left-width: 4px;
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.revealGood { border-left-color: #16a34a; }
+.revealBad { border-left-color: #dc2626; }
+.revealNeutral { border-left-color: var(--color-text-secondary); }
+
+.revealText {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-text-primary);
+    margin: 8px 0 14px;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.chipLabel {
+    color: var(--color-text-secondary);
+    font-weight: 600;
+}
+
+.chipValue {
+    font-weight: 800;
+}
+
+.chipGood { color: #15803d; }
+.chipBad { color: #b91c1c; }
+.chipNeutral { color: var(--color-text-secondary); }
+
+:global([data-theme='dark']) .chipGood { color: #4ade80; }
+:global([data-theme='dark']) .chipBad { color: #f87171; }
+
+/* ===== TABLA DE POSICIONES ===== */
+
+.tableWrap {
+    /* El ancho lo resuelve el contenedor: la página nunca scrollea al costado. */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    width: 100%;
+    min-width: 420px;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.table th {
+    text-align: right;
+    padding: 7px 6px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+
+.table th:first-child,
+.table th:nth-child(2) {
+    text-align: left;
+}
+
+.table td {
+    text-align: right;
+    padding: 8px 6px;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.table td:first-child,
+.table td:nth-child(2) {
+    text-align: left;
+}
+
+.teamCell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.teamName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.myRow td {
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+
+.myRow .teamName {
+    font-weight: 800;
+}
+
+.zonePlayoff {
+    box-shadow: inset 3px 0 0 #16a34a;
+}
+
+.zoneRelegation {
+    box-shadow: inset 3px 0 0 #dc2626;
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 10px;
+    font-size: 0.72rem;
+    color: var(--color-text-secondary);
+}
+
+.legendDot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    margin-right: 5px;
+}
+
+/* ===== SELECCIÓN DE CLUB Y PERFIL ===== */
+
+.searchRow {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.search,
+.select {
+    flex: 1 1 180px;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.clubGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 8px;
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+.clubOption {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 11px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.clubOption:hover {
+    border-color: var(--color-accent);
+}
+
+.clubOptionSelected {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.clubOptionText {
+    min-width: 0;
+}
+
+.clubOptionName {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.clubOptionMeta {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profileGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.profileOption {
+    padding: 13px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.profileOption:hover {
+    border-color: var(--color-accent);
+}
+
+.profileSelected {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.profileName {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.profileText {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+    line-height: 1.45;
+}
+
+.attrRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.attr {
+    font-size: 0.68rem;
+    padding: 2px 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ===== RESULTADO DE TEMPORADA ===== */
+
+.verdict {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0 0 12px;
+}
+
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.badgeGood {
+    border-color: #16a34a;
+    color: #15803d;
+}
+
+.badgeBad {
+    border-color: #dc2626;
+    color: #b91c1c;
+}
+
+:global([data-theme='dark']) .badgeGood { color: #4ade80; }
+:global([data-theme='dark']) .badgeBad { color: #f87171; }
+
+/* ===== TRAYECTORIA ===== */
+
+.timeline {
+    display: grid;
+    gap: 8px;
+}
+
+.season {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    min-width: 0;
+}
+
+.seasonYear {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    width: 3.2em;
+}
+
+.seasonBody {
+    min-width: 0;
+    flex: 1;
+}
+
+.seasonComp {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.seasonNote {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.seasonPos {
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.actions > * {
+    flex: 1 1 160px;
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* =====================================================================
+   TABLERO: cabecera con medidores, pestañas, plantel, caja y torneo
+   ===================================================================== */
+
+.negative {
+    color: #b91c1c;
+}
+
+:global([data-theme='dark']) .negative {
+    color: #f87171;
+}
+
+/* ----- Cabecera ----- */
+
+.header {
+    display: block;
+}
+
+.headerTop {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.headerSeason {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.headerGrid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1.4fr;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.headerCell {
+    padding: 9px 11px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    min-width: 0;
+}
+
+.statHint {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.statText {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--color-text-primary);
+    margin-top: 2px;
+}
+
+.debtChip {
+    display: inline-block;
+    margin-top: 3px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+    border: 1px solid currentColor;
+}
+
+.debtSana { color: #15803d; }
+.debtAjustada { color: var(--color-text-secondary); }
+.debtComplicada { color: #b45309; }
+.debtGrave { color: #b91c1c; }
+
+:global([data-theme='dark']) .debtSana { color: #4ade80; }
+:global([data-theme='dark']) .debtComplicada { color: #fbbf24; }
+:global([data-theme='dark']) .debtGrave { color: #f87171; }
+
+.progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+}
+
+.progressText {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.progressHint {
+    font-size: 0.74rem;
+    color: var(--color-text-secondary);
+}
+
+.dots {
+    display: inline-flex;
+    gap: 6px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--color-border);
+    background: transparent;
+}
+
+.dotDone {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.dotNow {
+    border-color: var(--color-accent);
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 55%, transparent); }
+    50% { box-shadow: 0 0 0 5px transparent; }
+}
+
+@media (max-width: 680px) {
+    .headerGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ----- Medidor de presión ----- */
+
+.gauge {
+    min-width: 0;
+}
+
+.gaugeHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.gaugeLabel {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+}
+
+.gaugeBand {
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.gaugeDelta {
+    font-weight: 600;
+    font-size: 0.74rem;
+}
+
+.gaugeTrack {
+    position: relative;
+    display: flex;
+    height: 10px;
+    margin-top: 7px;
+    border-radius: var(--radius-full);
+    overflow: visible;
+    background: var(--color-bg-secondary);
+}
+
+.gaugeCompact .gaugeTrack {
+    height: 8px;
+}
+
+.gaugeZoneTranquila,
+.gaugeZoneAtenta,
+.gaugeZoneCaliente,
+.gaugeZoneTerminal {
+    display: block;
+    height: 100%;
+    opacity: 0.55;
+}
+
+.gaugeZoneTranquila { width: 35%; background: #16a34a; border-radius: 99px 0 0 99px; }
+.gaugeZoneAtenta { width: 25%; background: #a3a3a3; }
+.gaugeZoneCaliente { width: 25%; background: #f59e0b; }
+.gaugeZoneTerminal { width: 15%; background: #dc2626; border-radius: 0 99px 99px 0; }
+
+.gaugeNeedle {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    width: 4px;
+    margin-left: -2px;
+    border-radius: 2px;
+    background: var(--color-text-primary);
+    box-shadow: 0 0 0 2px var(--color-bg-secondary);
+    transition: left 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.gaugeGhost {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--color-text-secondary);
+    opacity: 0.7;
+}
+
+.gaugeHint {
+    font-size: 0.74rem;
+    color: var(--color-text-secondary);
+    margin: 8px 0 0;
+    line-height: 1.45;
+}
+
+/* ----- Pestañas ----- */
+
+.tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.tab {
+    flex: 0 0 auto;
+    padding: 9px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-family: inherit;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.tab:hover {
+    color: var(--color-text-primary);
+}
+
+.tabActive {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+}
+
+.ledgerLink {
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color var(--transition-fast, 0.15s);
+}
+
+.ledgerLink:hover {
+    border-color: var(--color-accent);
+}
+
+.ledgerSoft {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: 0.85em;
+}
+
+.primaryHint {
+    display: block;
+    width: 100%;
+    font-size: 0.72rem;
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+.primary {
+    flex-wrap: wrap;
+}
+
+/* ----- Cómo se juega ----- */
+
+.howto {
+    list-style: none;
+    padding: 0;
+    margin: 14px 0 4px;
+    display: grid;
+    gap: 8px;
+}
+
+.howto li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+}
+
+.howto strong {
+    color: var(--color-text-primary);
+}
+
+.howtoNum,
+.stepNum {
+    flex-shrink: 0;
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.stepNum {
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.callout {
+    display: grid;
+    gap: 4px;
+    margin-top: 12px;
+    padding: 11px 13px;
+    border-left: 3px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+}
+
+.calloutTitle {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+}
+
+.calloutText {
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--color-text-primary);
+}
+
+/* ----- Plantel ----- */
+
+.squadStats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.squadLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: 14px;
+}
+
+@media (max-width: 720px) {
+    .squadLayout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pitch {
+    display: grid;
+    gap: 6px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background:
+        repeating-linear-gradient(
+            180deg,
+            transparent 0 44px,
+            color-mix(in srgb, var(--color-text-secondary) 14%, transparent) 44px 45px
+        ),
+        color-mix(in srgb, #16a34a 10%, var(--color-bg-tertiary));
+    border: 1px solid var(--color-border);
+}
+
+.pitchRow {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    align-items: center;
+    gap: 8px;
+}
+
+/* En un teléfono el rótulo va arriba de la fila: al costado se comía a los jugadores. */
+@media (max-width: 480px) {
+    .pitchRow {
+        grid-template-columns: 1fr;
+        gap: 3px;
+    }
+
+    .pitchRowLabel {
+        text-align: center;
+    }
+}
+
+.pitchRowLabel {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+}
+
+.pitchRowPlayers {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.player {
+    display: inline-grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    font-family: inherit;
+    cursor: pointer;
+    min-width: 0;
+    max-width: 100%;
+    text-align: left;
+    position: relative;
+}
+
+.player:hover,
+.playerSelected {
+    border-color: var(--color-accent);
+}
+
+.playerSelected {
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-bg-secondary));
+}
+
+.playerNumber {
+    font-size: 0.66rem;
+    font-weight: 800;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+    width: 1.6em;
+}
+
+.playerName {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 9ch;
+}
+
+.playerLevel {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.levelHigh { color: #15803d; }
+.levelLow { color: #b45309; }
+
+:global([data-theme='dark']) .levelHigh { color: #4ade80; }
+:global([data-theme='dark']) .levelLow { color: #fbbf24; }
+
+.playerTag {
+    position: absolute;
+    top: -6px;
+    right: -4px;
+    font-size: 0.55rem;
+    color: var(--color-accent);
+}
+
+.bench {
+    min-width: 0;
+}
+
+.benchTitle {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+    margin: 0 0 8px;
+}
+
+.benchList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.playerSheet {
+    display: grid;
+    gap: 5px;
+    margin-top: 12px;
+    padding: 11px 13px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-bg-tertiary));
+}
+
+.playerSheetName {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.playerSheetMeta {
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+}
+
+.playerSheetBar {
+    position: relative;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    overflow: visible;
+}
+
+.playerSheetFill {
+    display: block;
+    height: 100%;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+}
+
+.playerSheetCeil {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 2px;
+    background: var(--color-text-primary);
+}
+
+.noteList {
+    list-style: none;
+    padding: 0;
+    margin: 14px 0 0;
+    display: grid;
+    gap: 6px;
+}
+
+.noteList li {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+    padding-left: 14px;
+    position: relative;
+}
+
+.noteList li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-text-secondary);
+}
+
+.noteOk::before { background: #16a34a !important; }
+.noteWarn { color: #b45309; }
+.noteWarn::before { background: #f59e0b !important; }
+
+:global([data-theme='dark']) .noteWarn { color: #fbbf24; }
+
+/* ----- Caja ----- */
+
+.stacks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.stackHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+}
+
+.stackTitle {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+}
+
+.stackTotal {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.stackBar {
+    display: flex;
+    height: 14px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    background: var(--color-bg-tertiary);
+}
+
+.stackSeg {
+    display: block;
+    height: 100%;
+    min-width: 2px;
+}
+
+.stackLegend {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+    display: grid;
+    gap: 4px;
+}
+
+.stackItem {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+}
+
+.stackItemLabel {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    min-width: 0;
+}
+
+.stackItemHint {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: var(--color-text-secondary);
+}
+
+.stackItemValue {
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+/* ----- Torneo ----- */
+
+.rivalList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.rival {
+    display: grid;
+    grid-template-columns: 1.6em 26px minmax(0, 1fr) minmax(60px, 1.2fr) 3em;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+}
+
+.rivalMine {
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    border-color: var(--color-accent);
+}
+
+.rivalPos {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.zoneTdi .rivalPos {
+    color: #2563eb;
+}
+
+.zoneRelegation .rivalPos {
+    color: #dc2626;
+}
+
+.rivalName {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rivalMine .rivalName {
+    font-weight: 800;
+}
+
+.rivalBar {
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-tertiary);
+    overflow: hidden;
+}
+
+.rivalFill {
+    display: block;
+    height: 100%;
+    background: var(--color-text-secondary);
+    opacity: 0.6;
+}
+
+.rivalMine .rivalFill {
+    background: var(--color-accent);
+    opacity: 1;
+}
+
+.rivalRating {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: right;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ----- Tarjeta de decisión ----- */
+
+.eventHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.eventStep {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.eventFamily {
+    padding: 3px 9px;
+    border-radius: var(--radius-full);
+    border: 1px solid currentColor;
+}
+
+.famClub { color: #7c3aed; }
+.famPlantel { color: #2563eb; }
+.famCantera { color: #15803d; }
+.famLesiones { color: #b91c1c; }
+.famPrensa { color: #b45309; }
+.famViaje { color: #0891b2; }
+
+:global([data-theme='dark']) .famClub { color: #c4b5fd; }
+:global([data-theme='dark']) .famPlantel { color: #93c5fd; }
+:global([data-theme='dark']) .famCantera { color: #4ade80; }
+:global([data-theme='dark']) .famLesiones { color: #f87171; }
+:global([data-theme='dark']) .famPrensa { color: #fbbf24; }
+:global([data-theme='dark']) .famViaje { color: #67e8f9; }
+
+.optionsLead {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-text-secondary);
+    margin: 0 0 8px;
+}
+
+.option {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.option:hover .optionIndex {
+    background: var(--color-accent);
+    color: #fff;
+    border-color: var(--color-accent);
+}
+
+.optionIndex {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: var(--color-text-secondary);
+    transition: background var(--transition-fast, 0.15s);
+}
+
+.optionBody {
+    min-width: 0;
+}
+
+.odds {
+    display: grid;
+    gap: 5px;
+    margin-top: 9px;
+}
+
+.oddsBar {
+    display: flex;
+    height: 6px;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    gap: 2px;
+}
+
+.oddsSeg {
+    display: block;
+    height: 100%;
+    background: var(--color-accent);
+}
+
+.oddsSeg:nth-child(2) { opacity: 0.55; }
+.oddsSeg:nth-child(3) { opacity: 0.3; }
+.oddsSeg:nth-child(n + 4) { opacity: 0.2; }
+
+.oddsText {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+    margin-top: 4px;
+}
+
+/* ----- Revelado ----- */
+
+.revealTone {
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.chip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 9px 13px;
+    border-radius: var(--radius-md);
+    min-width: 110px;
+}
+
+.chip .chipValue {
+    font-size: 1.15rem;
+}
+
+.chipHint {
+    font-size: 0.66rem;
+    color: var(--color-text-secondary);
+}
+
+.chipIn {
+    animation: chipIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes chipIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.continueBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--color-text-secondary);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.continueBtn:hover {
+    border-color: var(--color-text-primary);
+}
+
+/* ----- Resultado de temporada ----- */
+
+.hero {
+    border-left-width: 4px;
+}
+
+.heroGood { border-left-color: #16a34a; }
+.heroBad { border-left-color: #dc2626; }
+
+.heroPosition {
+    font-size: clamp(2rem, 6vw, 2.8rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+    margin: 4px 0 8px;
+    font-variant-numeric: tabular-nums;
+}
+
+.heroOf {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    letter-spacing: 0;
+}
+
+.formStrip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.pill {
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.pillWin { background: #16a34a; }
+.pillDraw { background: #737373; }
+.pillLoss { background: #dc2626; }
+
+.details {
+    border-top: 1px solid var(--color-border);
+    padding-top: 8px;
+}
+
+.details + .details {
+    margin-top: 8px;
+}
+
+.summary {
+    cursor: pointer;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    flex-wrap: wrap;
+}
+
+.summaryHint {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.matchList,
+.tieList {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+    display: grid;
+    gap: 4px;
+}
+
+.matchRow {
+    display: grid;
+    grid-template-columns: 2.4em 24px 3.6em minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: var(--radius-md);
+    font-size: 0.82rem;
+}
+
+.matchRow:nth-child(odd) {
+    background: var(--color-bg-tertiary);
+}
+
+.matchRound {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+.matchScore {
+    font-weight: 800;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.matchRival {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.matchVenue {
+    font-size: 0.68rem;
+    color: var(--color-text-secondary);
+}
+
+.matchNote {
+    grid-column: 2 / -1;
+    font-size: 0.72rem;
+    color: #b45309;
+}
+
+:global([data-theme='dark']) .matchNote {
+    color: #fbbf24;
+}
+
+.ties {
+    display: grid;
+    gap: 6px;
+}
+
+.tie {
+    display: grid;
+    grid-template-columns: 5.2em minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: var(--radius-md);
+    font-size: 0.82rem;
+    border: 1px solid transparent;
+}
+
+.tieMine {
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    border-color: var(--color-accent);
+}
+
+.tieStage {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+}
+
+.tieSide {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    color: var(--color-text-secondary);
+}
+
+.tieSide:last-child {
+    justify-content: flex-end;
+}
+
+.tieSide .teamName {
+    color: inherit;
+    font-weight: 600;
+}
+
+.tieWinner {
+    color: var(--color-text-primary);
+}
+
+.tieWinner .teamName {
+    font-weight: 800;
+}
+
+.tieScore {
+    font-weight: 800;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ----- La temporada fecha a fecha ----- */
+
+.playbackHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.playbackControls {
+    display: flex;
+    gap: 6px;
+}
+
+.playbackControls .ghost {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+}
+
+.playbackBar {
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-tertiary);
+    overflow: hidden;
+    margin: 8px 0 14px;
+}
+
+.playbackFill {
+    display: block;
+    height: 100%;
+    background: var(--color-accent);
+    transition: width 0.4s ease;
+}
+
+.matchHero {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    border-left-width: 4px;
+    background: var(--color-bg-tertiary);
+    animation: chipIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.matchHero .pill {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+}
+
+.matchHeroScore {
+    font-size: 1.7rem;
+    font-weight: 900;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.matchHeroRival {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.matchHeroText {
+    display: grid;
+    min-width: 0;
+}
+
+.matchHeroPos {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.posUp { color: #15803d; }
+.posDown { color: #b91c1c; }
+
+:global([data-theme='dark']) .posUp { color: #4ade80; }
+:global([data-theme='dark']) .posDown { color: #f87171; }
+
+.playbackGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 14px;
+    margin-top: 14px;
+}
+
+@media (max-width: 720px) {
+    .playbackGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .matchHero {
+        grid-template-columns: auto auto minmax(0, 1fr);
+    }
+
+    .matchHeroPos {
+        grid-column: 1 / -1;
+    }
+}
+
+.miniFixture,
+.miniTable {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 3px;
+    align-content: start;
+}
+
+.miniMatch {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    font-size: 0.76rem;
+    color: var(--color-text-secondary);
+}
+
+.miniSide {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.miniAway {
+    text-align: right;
+}
+
+.miniScore {
+    font-weight: 800;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.miniRow {
+    display: grid;
+    grid-template-columns: 1.6em 1em 26px minmax(0, 1fr) 2.4em;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    font-size: 0.8rem;
+    transition: background 0.3s ease;
+}
+
+.miniMove {
+    font-size: 0.6rem;
+    color: var(--color-text-secondary);
+}
+
+.miniPts {
+    text-align: right;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ----- Trayectoria ----- */
+
+.seasonGood {
+    border-left: 3px solid #16a34a;
+}
+
+.seasonBad {
+    border-left: 3px solid #dc2626;
+}
+
+.seasonOf {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.clubRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0 10px;
+}
+
+.clubChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 5px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+/* ----- Creación ----- */
+
+.attrBars {
+    display: grid;
+    gap: 3px;
+    margin-top: 10px;
+}
+
+.attrBar {
+    display: grid;
+    grid-template-columns: 5.6em 1fr 1.4em;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    color: var(--color-text-secondary);
+}
+
+.attrBarTrack {
+    height: 5px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    overflow: hidden;
+}
+
+.attrBarFill {
+    display: block;
+    height: 100%;
+    background: var(--color-accent);
+}
+
+.attrBarValue {
+    text-align: right;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.preview {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 7%, var(--color-bg-tertiary));
+}
+
+.previewHead {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.previewLine {
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    margin: 0 0 4px;
+}
+
+.previewLine strong {
+    color: var(--color-text-primary);
+}
+
+.previewStats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.previewStats > span {
+    display: block;
+}
+
+/* ===== LO QUE SE TRAJO DE EL INTERINO ===== */
+
+.linkButton {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-accent);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.linkButton:hover {
+    filter: brightness(1.15);
+}
+
+/* ----- Ajuste del perfil ----- */
+
+.tuner {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+}
+
+.tunerHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.tunerTitle {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.tunerPool {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.tunerPoolOpen {
+    color: #b45309;
+}
+
+.tunerRows {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.tunerRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 32px minmax(60px, 140px) 3.2em 32px;
+    align-items: center;
+    gap: 8px;
+}
+
+.tunerLabel {
+    min-width: 0;
+}
+
+.tunerName {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.tunerHint {
+    display: block;
+    font-size: 0.7rem;
+    line-height: 1.35;
+    color: var(--color-text-secondary);
+}
+
+.tunerBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color var(--transition-fast, 0.15s), transform var(--transition-fast, 0.15s);
+}
+
+.tunerBtn:hover:not(:disabled) {
+    border-color: var(--color-accent);
+}
+
+.tunerBtn:active:not(:disabled) {
+    transform: scale(0.92);
+}
+
+.tunerBtn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.tunerValue {
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-align: right;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.tunerUp,
+.tunerDown {
+    display: block;
+    font-size: 0.66rem;
+    font-weight: 700;
+}
+
+.tunerUp { color: #15803d; }
+.tunerDown { color: #b91c1c; }
+
+@media (max-width: 480px) {
+    .tunerRow {
+        grid-template-columns: minmax(0, 1fr) 32px 2.6em 32px;
+    }
+
+    .tunerRow > .attrBarTrack {
+        display: none;
+    }
+
+    .tunerHint {
+        display: none;
+    }
+}
+
+/* ----- Ofertas de trabajo ----- */
+
+.offerGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.offerCard {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 13px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    min-width: 0;
+    transition: border-color var(--transition-fast, 0.15s), transform var(--transition-fast, 0.15s);
+}
+
+.offerCard:hover {
+    border-color: var(--color-accent);
+}
+
+.offerCard:active {
+    transform: scale(0.99);
+}
+
+.offerSelected {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg-tertiary));
+    box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.offerHead {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.offerHead > .clubOptionText {
+    flex: 1;
+}
+
+.tierChip {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid currentColor;
+}
+
+.tierA { color: #15803d; }
+.tierB { color: #b45309; }
+.tierC { color: #b91c1c; }
+
+.offerLine {
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+}
+
+.offerAsk {
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--color-text-primary);
+}
+
+.offerStats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border);
+}
+
+.offerStats > span {
+    display: block;
+}
+
+/* ----- Mejoras del club ----- */
+
+.upgradeGrid {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+}
+
+.upgradeCard {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 13px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+}
+
+.upgradeHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.upgradeName {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.upgradePips {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.upgradePip {
+    width: 14px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.upgradePipOn {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.upgradeText {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+}
+
+.upgradeEffect {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.upgradeBuy {
+    margin-top: auto;
+    padding: 9px 12px;
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-accent);
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-variant-numeric: tabular-nums;
+    transition: background var(--transition-fast, 0.15s), color var(--transition-fast, 0.15s);
+}
+
+.upgradeBuy:hover:not(:disabled) {
+    background: var(--color-accent);
+    color: #fff;
+}
+
+.upgradeBuy:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.upgradeDone {
+    margin: auto 0 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #15803d;
+}
+
+/* ----- La subcomisión en tres ejes ----- */
+
+.boardList {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+}
+
+.boardItem {
+    display: grid;
+    grid-template-columns: 3em 5.5em minmax(0, 1fr);
+    align-items: baseline;
+    gap: 8px;
+    font-size: 0.82rem;
+}
+
+.boardWeight {
+    font-weight: 800;
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+}
+
+.boardAxis {
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.boardText {
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.boardPanel {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+}
+
+.boardHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.boardTitle {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+}
+
+.boardNota {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.boardNotaOf {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.boardBars {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+}
+
+.boardBar {
+    display: grid;
+    grid-template-columns: 8.5em minmax(0, 1fr) 2.2em;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--color-text-primary);
+}
+
+.boardBarWeight {
+    color: var(--color-text-secondary);
+    font-weight: 600;
+}
+
+.boardBarValue {
+    text-align: right;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.boardFillLow {
+    background: #dc2626;
+}
+
+@media (max-width: 480px) {
+    .offerStats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .boardItem {
+        grid-template-columns: 3em minmax(0, 1fr);
+    }
+
+    .boardText {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tunerBtn,
+    .offerCard,
+    .upgradeBuy {
+        transition: none;
+    }
+
+    .tunerBtn:active:not(:disabled),
+    .offerCard:active {
+        transform: none;
+    }
+}
+
+/* =====================================================================
+   DIRECCIÓN DE ARTE 2026-10 — mobile primero, sin scroll innecesario
+   ---------------------------------------------------------------------
+   Reglas de este bloque (ver replica/design/components.md):
+   · Arriba del pliegue van el marcador, la tarjeta y la acción principal.
+   · La acción principal vive en `.actionBar`, pegada arriba de la barra de
+     navegación del sitio y del área segura: nunca hay que ir a buscarla.
+   · Lo secundario se pliega (<details>), no se esconde.
+   · Colores SOLO de los tokens del sitio (--color-*): claro y oscuro salen
+     solos. El único color propio es el del club (--club), y como acento.
+   ===================================================================== */
+
+.page {
+    /* El verde de G22 da 3,27:1 con blanco y 3,13:1 como texto sobre fondo
+       claro: no llega a AA (replica/design/contrast). El juego usa dos derivados
+       del MISMO verde: uno más profundo para el fondo de los botones (blanco
+       encima ≥ 4,5:1) y uno para texto, que en el tema claro se oscurece. */
+    --e-accent-ink: color-mix(in srgb, var(--color-accent) 72%, #000);
+    --e-accent-text: var(--color-accent);
+    max-width: 960px;
+    padding: 12px 12px 24px;
+    background:
+        radial-gradient(120% 60% at 50% -10%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 60%);
+}
+
+@media (min-width: 768px) {
+    .page {
+        padding: 20px 20px 32px;
+    }
+}
+
+/* ----- Barra superior: volver + título, en una línea ----- */
+
+.topBar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+}
+
+.topBack {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    transition: border-color var(--transition-fast, 0.15s), transform var(--transition-fast, 0.15s);
+}
+
+.topBack:hover {
+    border-color: var(--color-accent);
+}
+
+.topBack:active {
+    transform: scale(0.94);
+}
+
+.topBack svg {
+    width: 18px;
+    height: 18px;
+}
+
+.title {
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    margin: 0;
+    line-height: 1.1;
+}
+
+.topTag {
+    margin-left: auto;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+@media (max-width: 380px) {
+    .topTag {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .title {
+        font-size: 1.5rem;
+    }
+}
+
+/* ----- El marcador (cabecera del club) ----- */
+
+.board {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 12px 14px 12px 18px;
+    margin-bottom: 12px;
+    background: linear-gradient(
+        120deg,
+        color-mix(in srgb, var(--club, var(--color-accent)) 26%, var(--color-bg-secondary)) 0%,
+        var(--color-bg-secondary) 58%
+    );
+}
+
+/* La franja del club, a la izquierda, como la de una camiseta. */
+.board::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 5px;
+    background: linear-gradient(180deg, var(--club, var(--color-accent)), var(--color-accent));
+}
+
+/* Las líneas de la cancha: cada 10 % del ancho, apenas visibles. */
+.board::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent 0 calc(10% - 1px),
+        color-mix(in srgb, var(--color-text-primary) 6%, transparent) calc(10% - 1px) 10%
+    );
+    mask-image: linear-gradient(90deg, transparent 0%, #000 35%, #000 75%, transparent 100%);
+}
+
+.boardTop {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.boardClub {
+    min-width: 0;
+}
+
+.boardName {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--color-text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.boardMeta {
+    margin: 2px 0 0;
+    font-size: 0.72rem;
+    color: var(--color-text-secondary);
+}
+
+.boardStats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 10px 0 0;
+}
+
+.boardStat {
+    min-width: 0;
+    padding: 7px 9px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--color-bg-primary, #0f1117) 35%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+}
+
+.boardStat dt {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+}
+
+.boardStat dd {
+    margin: 2px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 5px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+}
+
+.boardSub {
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+.boardMeter {
+    display: block;
+    height: 4px;
+    margin-top: 5px;
+    border-radius: 999px;
+    background: var(--color-bg-tertiary);
+    overflow: hidden;
+}
+
+.boardMeterFill {
+    display: block;
+    height: 100%;
+    background: currentColor;
+    border-radius: inherit;
+    transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.boardAsk {
+    margin: 8px 0 0;
+    font-size: 0.78rem;
+    line-height: 1.35;
+    color: var(--color-text-primary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.boardAskLabel {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-right: 4px;
+}
+
+.boardProgress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+}
+
+.boardProgress .progressHint {
+    margin-left: auto;
+}
+
+/* ----- La barra de acción: siempre a mano ----- */
+
+/*
+ * FIXED, no sticky: el <main> del sitio lleva overflow-x hidden y eso deja
+ * muerto cualquier sticky de la app, sin error (memoria del proyecto
+ * "sticky muerto por main overflow"). La página le reserva el alto abajo
+ * (`.page { padding-bottom }`) para que no tape el final del contenido.
+ */
+.page {
+    padding-bottom: 120px;
+}
+
+.actionBar {
+    position: fixed;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+    width: min(936px, calc(100% - 24px));
+    z-index: 40;
+    padding: 8px;
+    border-radius: 18px;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-bg-primary, #0f1117) 82%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 900px) {
+    .actionBar {
+        bottom: calc(var(--mobile-nav-height, 74px) + env(safe-area-inset-bottom) + 8px);
+    }
+}
+
+.actionBar .disabledNote {
+    margin: 6px 0 2px;
+    text-align: center;
+}
+
+.actionBar .continueBtn,
+.actionBar .primary {
+    margin: 0;
+}
+
+.primary {
+    min-height: 52px;
+    border-radius: 14px;
+    flex-direction: column;
+    gap: 2px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--color-accent) 88%, #fff), var(--color-accent));
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--color-accent) 30%, transparent);
+    transition: filter 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.primary:active:not(:disabled) {
+    transform: scale(0.985);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+
+.primary:focus-visible,
+.continueBtn:focus-visible,
+.option:focus-visible,
+.offerCard:focus-visible,
+.profileOption:focus-visible,
+.stepItem:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.primary:disabled {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    box-shadow: none;
+    opacity: 1;
+}
+
+/* ----- Pasos de la creación ----- */
+
+.stepper {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.stepItem {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.stepItem .stepNum {
+    margin-right: 0;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.stepItemOn {
+    border-color: var(--color-accent);
+    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg-secondary));
+}
+
+.stepItemOn .stepNum {
+    background: var(--color-accent);
+    color: #fff;
+}
+
+.stepItem:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.profileList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.profileList .profileOption {
+    padding: 10px 12px;
+    transition: border-color 0.15s, transform 0.15s, background 0.15s;
+}
+
+.profileList .profileOption:active {
+    transform: scale(0.985);
+}
+
+.profileList .profileText {
+    font-size: 0.76rem;
+    margin-top: 2px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.profileSelected {
+    box-shadow: inset 3px 0 0 var(--color-accent);
+}
+
+/* ----- Paneles, pestañas y plegables: más densos ----- */
+
+.panel {
+    padding: 14px;
+    margin-bottom: 12px;
+    border-radius: 16px;
+}
+
+@media (min-width: 768px) {
+    .panel {
+        padding: 18px;
+    }
+}
+
+.tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-bottom: 10px;
+    padding-bottom: 2px;
+}
+
+.tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tab {
+    flex-shrink: 0;
+}
+
+.howtoBox {
+    margin-top: 10px;
+}
+
+.howtoSummary,
+.foldSummary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.howtoSummary::-webkit-details-marker,
+.foldSummary::-webkit-details-marker {
+    display: none;
+}
+
+.howtoSummary {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+.howtoSummary::after,
+.foldSummary::after {
+    content: '';
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.2s;
+    color: var(--color-text-secondary);
+}
+
+details[open] > .howtoSummary::after,
+details[open] > .foldSummary::after {
+    transform: rotate(-135deg);
+}
+
+.foldSummary .panelTitle {
+    margin: 0;
+}
+
+.fold[open] > .foldSummary {
+    margin-bottom: 10px;
+}
+
+.boardList {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.boardItem {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 9px 11px;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+}
+
+.boardItemMain {
+    grid-column: 1 / -1;
+    border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-border));
+}
+
+.boardItemHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.boardItem .boardText {
+    font-size: 0.76rem;
+    grid-column: auto;
+}
+
+.boardItemMain .boardText {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.ledger {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* ----- La tarjeta de decisión ----- */
+
+.eventCard,
+.reveal {
+    padding: 14px;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    animation: cardIn 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.eventTitle {
+    font-size: 1.12rem;
+    margin: 4px 0 6px;
+}
+
+.eventText {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin: 0 0 12px;
+}
+
+.optionsLead {
+    display: none;
+}
+
+.options {
+    gap: 8px;
+}
+
+.option {
+    padding: 11px 12px;
+    border-radius: 12px;
+    transition: border-color 0.15s, transform 0.15s, background 0.15s;
+}
+
+.option:hover {
+    background: color-mix(in srgb, var(--color-accent) 6%, var(--color-bg-tertiary));
+}
+
+.option:active {
+    transform: scale(0.985);
+}
+
+@media (min-width: 768px) {
+    .eventCard,
+    .reveal {
+        padding: 20px;
+    }
+
+    .eventTitle {
+        font-size: 1.3rem;
+    }
+
+    .optionsLead {
+        display: block;
+    }
+}
+
+/* ----- El cierre del año ----- */
+
+.hero {
+    padding: 14px;
+}
+
+@media (max-width: 767px) {
+    .heroPosition {
+        font-size: 2.4rem;
+    }
+
+    .verdict {
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+    }
+
+    .badges {
+        margin-bottom: 10px;
+    }
+}
+
+/* ----- Ofertas y ajuste: compactos en el celular ----- */
+
+@media (max-width: 480px) {
+    .offerGrid {
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .offerCard {
+        padding: 10px 12px;
+        gap: 5px;
+    }
+
+    .offerStats {
+        grid-template-columns: repeat(4, 1fr);
+        padding-top: 6px;
+    }
+
+    .offerStats .statValue {
+        font-size: 0.85rem;
+    }
+
+    .offerStats .statLabel {
+        font-size: 0.56rem;
+    }
+
+    .tuner {
+        padding: 10px 12px;
+        margin-top: 10px;
+    }
+
+    .tunerRows {
+        gap: 4px;
+        margin-top: 8px;
+    }
+
+    .tunerBtn {
+        width: 34px;
+        height: 34px;
+    }
+
+    .boardStats {
+        gap: 6px;
+    }
+
+    .boardStat {
+        padding: 6px 7px;
+    }
+
+    .boardStat dd {
+        font-size: 0.95rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .eventCard,
+    .reveal {
+        animation: none;
+    }
+
+    .primary,
+    .option,
+    .topBack,
+    .boardMeterFill,
+    .profileList .profileOption {
+        transition: none;
+    }
+
+    .primary:active:not(:disabled),
+    .option:active,
+    .topBack:active,
+    .profileList .profileOption:active {
+        transform: none;
+    }
+}
+
+/* ----- Ajustes de pantalla angosta (medidos a 360 y 390 px) ----- */
+
+.profileChosenText {
+    display: none;
+}
+
+@media (max-width: 520px) {
+    .topTag {
+        display: none;
+    }
+}
+
+@media (max-width: 600px) {
+    /* Los perfiles, como botones de una línea: la descripción del elegido va
+       una sola vez, arriba del ajuste. Así perfil y ajuste entran juntos. */
+    .profileList {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+    }
+
+    .profileList .profileOption {
+        padding: 9px 10px;
+    }
+
+    .profileList .profileText {
+        display: none;
+    }
+
+    .profileList .profileName {
+        font-size: 0.85rem;
+    }
+
+    .profileChosenText {
+        display: block;
+        margin: 10px 0 0;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: color-mix(in srgb, var(--color-accent) 9%, var(--color-bg-tertiary));
+        font-size: 0.8rem;
+        line-height: 1.4;
+        color: var(--color-text-primary);
+    }
+
+    .gaugeHint {
+        display: none;
+    }
+
+    /* El ajuste se explica con su contador: la regla larga sobra en el celular. */
+    .tuner > .objectiveNote {
+        display: none;
+    }
+}
+
+/* ----- El playoff, partido a partido ----- */
+
+.poBanner {
+    margin: 0 0 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: color-mix(in srgb, #16a34a 14%, var(--color-bg-tertiary));
+    color: var(--color-text-primary);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.poMatch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 6px 0 8px;
+}
+
+.poTeam {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 8px;
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    text-align: center;
+    min-width: 0;
+}
+
+.poTeamMine {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg-tertiary));
+}
+
+.poTeamName {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+}
+
+.poSeed {
+    font-size: 0.68rem;
+    color: var(--color-text-secondary);
+}
+
+.poBracket {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 10px 0 0;
+    border-top: 1px solid var(--color-border);
+    display: grid;
+    gap: 6px;
+}
+
+.poTie {
+    display: grid;
+    grid-template-columns: 4.6em minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+}
+
+.poTieMine {
+    color: var(--color-text-primary);
+}
+
+.poStage {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.poSide {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.poSideAway {
+    text-align: right;
+}
+
+.poWin {
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.poScore {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+}
+
+
+/* ----- Contraste AA: el verde como fondo de botón y como texto ----- */
+
+:global([data-theme='light']) .page {
+    --e-accent-text: color-mix(in srgb, var(--color-accent) 66%, #000);
+}
+
+.primary {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--e-accent-ink) 90%, #fff), var(--e-accent-ink));
+}
+
+.stepItemOn .stepNum,
+.stepNum {
+    background-color: var(--e-accent-ink);
+}
+
+.linkButton,
+.boardAskLabel,
+.boardWeight,
+.howtoSummary,
+.eventFamily,
+.calloutTitle {
+    color: var(--e-accent-text);
+}
+
+/* ----- Mercado de entrenadores ----- */
+
+.jobBoard {
+    display: grid;
+    gap: 12px;
+}
+
+.jobCard {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding: 13px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    min-width: 0;
+}
+
+.jobReasons {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 3px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--color-text-primary);
+}
+
+.jobInterest {
+    display: grid;
+    gap: 4px;
+}
+
+.jobInterestText {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+.jobActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 4px;
+}
+
+.jobActions > button {
+    flex: 1 1 140px;
+}
+
+.newsList {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 6px;
+}
+
+.newsItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--color-text-secondary);
+}
+
+.newsItem strong {
+    color: var(--color-text-primary);
+}
+
+.tabCount {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    margin-left: 6px;
+    padding: 0 5px;
+    border-radius: var(--radius-full);
+    background: #dc2626;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.zoneReducido {
+    box-shadow: inset 3px 0 0 #b45309;
+}
+
+.zoneAscenso {
+    box-shadow: inset 3px 0 0 #2563eb;
+}
+
+.zoneAscenso .rivalPos {
+    color: #2563eb;
+}
+
+.formatRules {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 6px;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--color-text-primary);
+}
+
+.formatSource {
+    font-size: 0.72rem;
+    color: var(--color-text-secondary);
+}
+
+/* ----- El Entrenador v2, etapa 1: objetivos, proyecto, plantel ----- */
+
+.objectiveDetail {
+    font-size: 0.74rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.objectiveMet,
+.objectiveMissed {
+    font-size: 0.72rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.objectiveMet { color: #15803d; }
+.objectiveMissed { color: #b91c1c; }
+:global([data-theme='dark']) .objectiveMet { color: #4ade80; }
+:global([data-theme='dark']) .objectiveMissed { color: #f87171; }
+
+.projectBar {
+    display: block;
+    position: relative;
+    height: 8px;
+    margin: 6px 0;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-tertiary);
+    overflow: hidden;
+}
+
+.projectFill {
+    display: block;
+    height: 100%;
+    background: var(--e-accent-ink, var(--color-accent));
+}
+
+.squadTable {
+    margin-top: 12px;
+}
+
+.squadTable td:nth-child(2) {
+    max-width: 11em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===== LA TEMPORADA EN TRAMOS (etapa 2) ===== */
+
+/* Opciones excluyentes (radiogroup): carga, foco y la política del XV. */
+.segRow,
+.segRowWide {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.segRowWide {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+}
+
+.seg {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-height: 36px;
+    padding: 7px 11px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.seg:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-text-secondary);
+}
+
+.seg:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.segOn {
+    border-color: var(--color-accent);
+    color: var(--color-text-primary);
+    background: color-mix(in srgb, var(--color-accent) 14%, var(--color-bg-tertiary));
+}
+
+.segLabel {
+    font-weight: 700;
+}
+
+.segHint {
+    font-size: 0.7rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--color-text-secondary);
+}
+
+.trainDays {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.trainDay {
+    display: grid;
+    grid-template-columns: 6.5em minmax(0, auto) minmax(0, 1fr);
+    align-items: center;
+    gap: 8px 12px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+@media (max-width: 720px) {
+    .trainDay {
+        grid-template-columns: 1fr;
+    }
+}
+
+.trainDayName {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.trainRival {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.trainFix {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 14px 0 4px;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.trainFix input {
+    margin-top: 3px;
+    accent-color: var(--color-accent);
+}
+
+/* Dos botones en la barra de abajo: simular (secundario) y jugar (principal). */
+.actionRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 8px;
+    align-items: stretch;
+}
+
+.actionRow .ghost {
+    min-height: 52px;
+    border-radius: 14px;
+    text-align: center;
+}
+
+@media (max-width: 520px) {
+    .actionRow {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* El partido clave. */
+.keyScore {
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.keyFacts {
+    margin: 12px 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 4px;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+}
+
+/* Los nombres del año. */
+.starList {
+    list-style: none;
+    margin: 0 0 10px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+}
+
+.starItem {
+    padding: 9px 11px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+}
+
+.starBest {
+    border-color: var(--color-accent);
+}
+
+.starName {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin-top: 2px;
+}
+
+.statsTableWrap {
+    overflow-x: auto;
+    margin-top: 8px;
+}
+
+.statsTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.statsTable th,
+.statsTable td {
+    padding: 5px 6px;
+    text-align: right;
+    white-space: nowrap;
+    color: var(--color-text-primary);
+}
+
+.statsTable thead th {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.statsTable th[scope='row'],
+.statsTable thead th:first-child {
+    text-align: left;
+    font-weight: 600;
+}
+
+.statsTable tbody tr:nth-child(odd) {
+    background: var(--color-bg-tertiary);
+}
+
+.statsNumber {
+    display: inline-block;
+    min-width: 1.6em;
+    color: var(--color-text-secondary);
+    font-weight: 700;
+}
+
+/* ===== MERCADO DE JUGADORES (etapa 3) ===== */
+
+.market {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.marketTitle {
+    margin: 10px 0 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.marketList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px;
+}
+
+.marketCard {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 13px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    min-width: 0;
+}
+
+.marketRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 0.82rem;
+    color: var(--color-text-primary);
+    grid-column: 1 / -1;
+}
+
+.marketActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.marketAction {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.marketAction .disabledNote {
+    margin: 0;
+    text-align: left;
+    font-size: 0.74rem;
+}
+
+.marketReasons {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+}
+
+.chanceBadge {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
+    font-size: 0.78rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ----- La negociación (minijuego 3) ----- */
+
+.negotiation {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border: 2px solid var(--color-accent);
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-secondary);
+}
+
+.negBoard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+}
+
+.patienceDots {
+    display: inline-flex;
+    gap: 5px;
+    padding: 6px 0;
+}
+
+.patienceDot {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+}
+
+.patienceDotOn {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+}
+
+.negRounds {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+}
+
+.negOffer {
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.negReply {
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.negControls {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.negLabel {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.negStepper {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    max-width: 320px;
+}
+
+.negInput {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ */
+/* El M19 y la jornada de captación (etapa 4)                          */
+/* ------------------------------------------------------------------ */
+
+/* El rango estimado sobre una escala de 0 a 100: la franja es lo que se sabe del
+   techo; la marca, el nivel de hoy (si se conoce). Nunca el techo real. */
+.rangeBar {
+    display: block;
+    position: relative;
+    height: 10px;
+    margin: 6px 0 2px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-tertiary);
+}
+
+.rangeFill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: var(--radius-full);
+    background: var(--e-accent-ink, var(--color-accent));
+    opacity: 0.55;
+}
+
+.rangeLevel {
+    position: absolute;
+    top: -3px;
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    background: var(--color-text-primary);
+}
+
+.academyTag {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
