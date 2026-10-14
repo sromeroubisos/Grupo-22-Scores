@@ -5,10 +5,11 @@ import coverIdle from '@/img/7.png';
 import coverActive from '@/img/8.png';
 import capitanIdle from '@/img/11.png';
 import capitanActive from '@/img/12.png';
+import entrenadorIdle from '@/img/13.png';
+import entrenadorActive from '@/img/14.png';
 import soonIdle from '@/img/9.png';
 import soonActive from '@/img/10.png';
 import styles from '../juegos.module.css';
-import EntrenadorPoster from './EntrenadorPoster.tsx';
 
 export const metadata: Metadata = {
     title: 'Minijuegos | G22 Scores',
@@ -95,15 +96,21 @@ export default function MinijuegosPage() {
                     <span className={styles.playBtn}>Jugar <ChevronRight /></span>
                 </Link>
 
-                {/* El Entrenador entra con un afiche dibujado en SVG (no hay foto
-                    todavía): mismo encuadre, mismo reposo gris y hover verde que
-                    los otros dos. Cuando haya arte en píxeles, se cambian las dos
-                    piezas por dos <Image> y nada más. */}
                 <Link href="/juegos/minijuegos/el-entrenador" className={`${styles.card} ${styles.cardPoster}`}>
                     <h2 className={styles.srOnly}>El Entrenador</h2>
                     <span className={styles.cover}>
-                        <EntrenadorPoster active={false} className={`${styles.coverImg} ${styles.coverIdle}`} />
-                        <EntrenadorPoster active className={`${styles.coverImg} ${styles.coverActive}`} />
+                        <Image
+                            src={entrenadorIdle}
+                            alt=""
+                            className={`${styles.coverImg} ${styles.coverIdle}`}
+                            sizes="(max-width: 640px) 100vw, 520px"
+                        />
+                        <Image
+                            src={entrenadorActive}
+                            alt=""
+                            className={`${styles.coverImg} ${styles.coverActive}`}
+                            sizes="(max-width: 640px) 100vw, 520px"
+                        />
                     </span>
                     <span className={styles.badgeOnPoster}>Nuevo</span>
                     <span className={styles.playBtn}>Jugar <ChevronRight /></span>
