@@ -164,6 +164,25 @@
     white-space: nowrap;
 }
 
+/* La pastilla "Nuevo" sobre un afiche: arriba a la izquierda, oscura como el
+   botón de jugar, para apoyarse en la imagen y no competir con ella. */
+.badgeOnPoster {
+    position: absolute;
+    left: 8px;
+    top: 8px;
+    z-index: 2;
+    font-size: 0.66rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(4, 18, 12, 0.82);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.34);
+    color: var(--color-accent);
+    backdrop-filter: blur(6px);
+}
+
 .badgeMuted {
     background: var(--color-bg-tertiary);
     color: var(--color-text-tertiary);
