@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
 
-import { esEtapaDeZona, fechaDelDia, parsearLado, parsearSicah } from './sicah.ts';
+import { esEtapaDeZona, fechaDelDia, parsearLado, parsearSicah, urlSicahDelAnio } from './sicah.ts';
 
 /**
  * El Sub 14 A Damas 2026, ya jugado: 12 partidos de zona y 8 de llave, con una
@@ -71,4 +71,11 @@ test('la zona es fase de grupos; el resto es llave', () => {
   assert.equal(esEtapaDeZona('Cuadrangular'), false);
   assert.equal(esEtapaDeZona('Semifinales'), false);
   assert.equal(esEtapaDeZona(null), false);
+});
+
+test('el iframe con el año viejo se corrige al año pedido (el 1622 de 2026 apuntaba a 2025)', () => {
+  const vieja = 'https://sicah.cahockey.org.ar/?pub=consultatorneo&torneo=2025+-+Selecciones+Damas+Mayores+Campeonato';
+  assert.equal(urlSicahDelAnio(vieja, 2026), 'https://sicah.cahockey.org.ar/?pub=consultatorneo&torneo=2026+-+Selecciones+Damas+Mayores+Campeonato');
+  assert.equal(urlSicahDelAnio(vieja, 2025), null);
+  assert.equal(urlSicahDelAnio('https://sicah.cahockey.org.ar/?pub=consultatorneo&torneo=LNH+Damas', 2026), null);
 });

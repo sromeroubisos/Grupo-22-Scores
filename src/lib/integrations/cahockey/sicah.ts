@@ -109,6 +109,54 @@ export async function fetchSicahHtml(url: string): Promise<ResultadoHttp<string>
   return { ok: true, data: html, status: res.status };
 }
 
+/**
+ * La URL de SICAH con el torneo de OTRO año: `…&torneo=2025+-+Selecciones…` →
+ * `…&torneo=2026+-+Selecciones…`. Null si la URL no empieza el nombre con un
+ * año o ya es ése.
+ *
+ * Existe por un error medido de la CAH: el 1622 (Damas Mayores Campeonato
+ * 2026) se publicó con el iframe apuntando a la edición 2025, que en SICAH es
+ * otro torneo, ya jugado. El de 2026 estaba cargado con el nombre de siempre.
+ */
+export function urlSicahDelAnio(url: string, anio: number): string | null {
+  const m = url.match(/([?&]torneo=)(\d{4})(?=\+|%20|\s|-)/);
+  if (!m || Number(m[2]) === anio) return null;
+  return url.replace(m[0], `${m[1]}${anio}`);
+}
+
+export type LecturaSicah =
+  | { ok: true; sicah: TorneoSicah; url: string; corregida: boolean }
+  | { ok: false; error: string };
+
+/**
+ * Los dos pedidos y el parseo de un torneo de la CAH. Si el iframe trae un
+ * torneo de un año anterior al de la corrida (el error de copiar y pegar de la
+ * CAH, ver `urlSicahDelAnio`), prueba el mismo nombre con el año en curso y
+ * se queda con ése sólo si existe y cae en este año. Un torneo viejo de
+ * verdad también trae un año anterior: por eso la corregida tiene que existir
+ * con partidos, si no se devuelve la original.
+ */
+export async function leerTorneoSicah(torneoId: string, anioEnCurso: number): Promise<LecturaSicah> {
+  const rUrl = await fetchSicahUrl(torneoId);
+  if (!rUrl.ok) return { ok: false, error: `cahockey.org.ar no devolvió el iframe de SICAH (HTTP ${rUrl.status})` };
+  const rHtml = await fetchSicahHtml(rUrl.data);
+  if (!rHtml.ok) return { ok: false, error: `SICAH contestó HTTP ${rHtml.status}` };
+  const sicah = parsearSicah(rHtml.data);
+
+  const anioDeLaPagina = Number(sicah.desde?.slice(0, 4));
+  const otra = Number.isFinite(anioDeLaPagina) && anioDeLaPagina < anioEnCurso ? urlSicahDelAnio(rUrl.data, anioEnCurso) : null;
+  if (otra) {
+    const rOtra = await fetchSicahHtml(otra);
+    if (rOtra.ok) {
+      const corregido = parsearSicah(rOtra.data);
+      if (corregido.partidos.length && corregido.desde?.startsWith(String(anioEnCurso))) {
+        return { ok: true, sicah: corregido, url: otra, corregida: true };
+      }
+    }
+  }
+  return { ok: true, sicah, url: rUrl.data, corregida: false };
+}
+
 // ---------------------------------------------------------------- parser
 
 const ENTIDADES: Record<string, string> = {

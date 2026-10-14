@@ -13,11 +13,11 @@
  * o cuatro por año: el cron corre seguido pero fuera de esos días hace UNA
  * consulta y se va, sin tocar la fuente.
  *
- * Dos cadencias, porque un resultado tiene que entrar cuando termina el
- * partido y no un cuarto de hora después: cada 2 minutos la pasada `en-juego`
- * (torneos con algún partido que empezó hace menos de tres horas o empieza en
- * menos de una), y cada 15 la pasada completa de ±3 días, que además levanta
- * los cambios de fixture y los cruces recién definidos.
+ * Una sola cadencia agendada: la pasada completa cada 15 minutos (±3 días),
+ * que levanta resultados, cambios de fixture y cruces recién definidos. La
+ * pasada `en-juego` (cada 2 minutos) se desagendó el 2026-10-14: la CAH no
+ * carga en vivo sino al final, así que eran llamadas en vano. El modo sigue
+ * disponible a mano con `?modo=en-juego`.
  *
  * El ciclo por torneo: `POST /updateTorneo` da la URL del iframe de SICAH; la
  * página (iso-8859-1) se parsea; `planTournamentMatches` decide qué se crea y
@@ -82,13 +82,7 @@ import {
   type TorneoListadoCah,
 } from '@/lib/integrations/cahockey/pendientes.ts';
 import { planTournamentMatches, type ExistenteCah } from '@/lib/integrations/cahockey/planMatches.ts';
-import {
-  esEtapaDeZona,
-  fetchListadoSelecciones,
-  fetchSicahHtml,
-  fetchSicahUrl,
-  parsearSicah,
-} from '@/lib/integrations/cahockey/sicah.ts';
+import { esEtapaDeZona, fetchListadoSelecciones, leerTorneoSicah, parsearSicah } from '@/lib/integrations/cahockey/sicah.ts';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -233,24 +227,6 @@ export async function sincronizarCahockey(opts: {
     if (i > 0) await pausa(400);
     const torneoId = t.external_id.slice(CAHOCKEY_ID_PREFIX.length);
 
-    const rUrl = await fetchSicahUrl(torneoId);
-    if (!rUrl.ok) {
-      errors.push(`${t.external_id}: cahockey.org.ar no devolvió el iframe de SICAH (HTTP ${rUrl.status})`);
-      continue;
-    }
-    const rHtml = await fetchSicahHtml(rUrl.data);
-    if (!rHtml.ok) {
-      errors.push(`${t.external_id}: SICAH contestó HTTP ${rHtml.status}`);
-      continue;
-    }
-    const sicah = parsearSicah(rHtml.data);
-    if (!sicah.desde || !sicah.partidos.length) {
-      // Página que llegó pero no se entiende: cambió la forma, o el torneo fue
-      // despublicado. Nunca "sin novedades".
-      errors.push(`${t.external_id}: la página de SICAH no trae rango ni partidos (cambió la forma)`);
-      continue;
-    }
-
     const { data: yaRaw, error: errYa } = await supabase
       .from('matches')
       .select('id, external_id, home_club_id, away_club_id, date_time, status, score, phase_id, round_label, venue')
@@ -258,6 +234,19 @@ export async function sincronizarCahockey(opts: {
       .limit(2000);
     if (errYa) { errors.push(`${t.external_id}: no se pudieron leer los partidos (${errYa.message})`); continue; }
     const existentes = (yaRaw ?? []) as ExistenteCah[];
+
+    // El año del torneo es el de sus partidos, no el de hoy: un torneo viejo
+    // forzado con ?torneo= no puede saltar a la edición actual al corregir el
+    // año del iframe (ver `leerTorneoSicah`).
+    const lectura = await leerTorneoSicah(torneoId, anioDelTorneo(existentes, ahora));
+    if ('error' in lectura) { errors.push(`${t.external_id}: ${lectura.error}`); continue; }
+    const { sicah } = lectura;
+    if (!sicah.desde || !sicah.partidos.length) {
+      // Página que llegó pero no se entiende: cambió la forma, o el torneo fue
+      // despublicado. Nunca "sin novedades".
+      errors.push(`${t.external_id}: la página de SICAH no trae rango ni partidos (cambió la forma)`);
+      continue;
+    }
 
     const { data: fasesRaw, error: errFases } = await supabase
       .from('tournament_phases')
@@ -437,6 +426,16 @@ export async function sincronizarCahockey(opts: {
   });
 }
 
+/**
+ * El año de un torneo según sus partidos en la base (el del primero), en hora
+ * argentina; sin partidos, el de la corrida.
+ */
+function anioDelTorneo(partidos: { date_time: string }[], ahora: Date): number {
+  const instantes = partidos.map((p) => Date.parse(p.date_time)).filter(Number.isFinite).sort((a, b) => a - b);
+  const ms = instantes[0] ?? ahora.getTime();
+  return new Date(ms - 3 * 3_600_000).getUTCFullYear();
+}
+
 type EstadoVinculacion = {
   torneo: string;
   nombre: string;
@@ -511,10 +510,9 @@ async function vincularPendientes(args: {
     const revisados: { id: string; nombre: string; motivo: string }[] = [];
     const validos: { id: string; nombre: string; adoptados: ReturnType<typeof planAdopcion>['adoptados'] }[] = [];
     for (const c of candidatos) {
-      const rUrl = await fetchSicahUrl(c.id);
-      const rHtml = rUrl.ok ? await fetchSicahHtml(rUrl.data) : null;
-      if (!rUrl.ok || !rHtml?.ok) { revisados.push({ id: c.id, nombre: c.nombre, motivo: `SICAH HTTP ${rHtml?.status ?? rUrl.status}` }); continue; }
-      const sicah = parsearSicah(rHtml.data);
+      const lectura = await leerTorneoSicah(c.id, Number(rango.desde.slice(0, 4)));
+      if ('error' in lectura) { revisados.push({ id: c.id, nombre: c.nombre, motivo: lectura.error }); continue; }
+      const { sicah } = lectura;
       const nuevoC = `${CAHOCKEY_ID_PREFIX}${c.id}`;
       const adopcion = planAdopcion({ filas, sicah, nuevoTorneoExternalId: nuevoC, resolverClub: (n) => resolverClubCah(new Map(), nuevoC, n) });
       if (!adopcion.sinPareja.length && adopcion.adoptados.length === filas.length) {
