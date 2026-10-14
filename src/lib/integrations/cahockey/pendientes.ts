@@ -13,19 +13,20 @@
  * (`cahockey-pendiente:` no empieza con `cahockey:`: el sync normal no lo
  * levanta ni le pide nada a SICAH.)
  *
- * Cada pasada completa del cron mira el listado de la CAH. Cuando aparece UN
- * torneo de esa categoría y esa rama en las fechas del PDF, lo vincula: el
- * torneo pasa a `cahockey:<id>` y cada partido del PDF adopta el número de
- * SICAH del partido que juegan los mismos dos equipos ese día. Desde ahí lo
- * sigue el sync de siempre — resultados, cruces, tablas.
+ * Cada pasada completa del cron mira el listado de la CAH, toma los torneos de
+ * esa rama en las fechas del PDF y lee el SICAH de cada uno. Cuando hay UNO que
+ * tiene todos los partidos del PDF, lo vincula: el torneo pasa a
+ * `cahockey:<id>` y cada partido del PDF adopta el número de SICAH del partido
+ * que juegan los mismos dos equipos ese día. Desde ahí lo sigue el sync de
+ * siempre — resultados, cruces, tablas.
  *
  * La adopción es por PAR DE EQUIPOS Y DÍA, no por el número del PDF: nada
  * garantiza que SICAH numere igual, y un número que no coincide le cambiaría
  * los equipos a un partido. Y es todo o nada: si un partido del PDF no tiene
  * pareja en SICAH, no se vincula —el sync crearía el de SICAH al lado del
  * huérfano y quedaría duplicado—, se avisa en `errors` y se reintenta en la
- * corrida siguiente. Lo mismo si hay dos candidatos (la CAH partió Campeonato
- * y Ascenso en dos torneos): eso lo decide una persona.
+ * corrida siguiente. Dos candidatos válidos también es error: eso lo decide
+ * una persona.
  *
  * Es puro: el listado y la página de SICAH llegan parseados.
  */
@@ -75,10 +76,16 @@ const RAMA_CONTRARIA = { damas: 'caballeros', caballeros: 'damas' } as const;
 const DIA_MS = 86_400_000;
 
 /**
- * Los torneos del listado que pueden ser el pendiente: nombran la categoría y
- * la rama, no la rama contraria, no son de pista (salvo que la categoría lo
- * sea), y empiezan dentro del rango de fechas del PDF (con tres días de
- * gracia: la CAH a veces pone de "desde" el día de la reunión técnica).
+ * Los torneos del listado que PUEDEN ser el pendiente: nombran la rama (y no
+ * la contraria), no son de otra categoría de edad ni de pista (salvo que la
+ * pendiente lo sea), y empiezan dentro del rango de fechas del PDF (con tres
+ * días de gracia: la CAH a veces pone de "desde" la reunión técnica).
+ *
+ * El nombre NO alcanza para elegir. Medido en 2026: el de Córdoba se publicó
+ * como "…SELECCIONADOS CAMPEONATOS CABALLEROS", sin "mayor", y el mismo fin de
+ * semana la CAH subió los Ascenso B y C de Mayores de otras sedes. Esto filtra
+ * lo grueso; el que se queda es el único cuyo SICAH tiene TODOS los partidos
+ * del PDF (`planAdopcion` sin huérfanos), y eso lo decide el cron.
  */
 export function candidatosDelListado(
   listado: TorneoListadoCah[],
@@ -90,9 +97,8 @@ export function candidatosDelListado(
   const fin = Date.parse(`${rango.hasta}T12:00:00Z`);
   return listado.filter((t) => {
     const clave = ` ${claveDeNombre(t.nombre)} `;
-    // "mayores" y "mayor" (2023: "Seleccionados Mayor Ascenso") son lo mismo
-    if (!palabras.every((p) => clave.includes(` ${p} `) || clave.includes(` ${p.replace(/es$/, '')} `))) return false;
     if (!clave.includes(` ${pendiente.rama} `) || clave.includes(` ${RAMA_CONTRARIA[pendiente.rama]} `)) return false;
+    if (/ sub ?\d/.test(clave) && !palabras.includes('sub')) return false;
     if (clave.includes(' pista ') && !palabras.includes('pista')) return false;
     if (!t.desde) return false;
     const desde = Date.parse(`${t.desde}T12:00:00Z`);

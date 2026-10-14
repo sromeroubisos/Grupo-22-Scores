@@ -504,44 +504,46 @@ async function vincularPendientes(args: {
       if (!listado.length) { errors.push('vinculación: el listado de selecciones llegó sin torneos (cambió la forma)'); return salida; }
     }
 
+    // El nombre filtra lo grueso; decide el CONTENIDO: el candidato válido es
+    // el único cuyo SICAH tiene pareja para cada partido del PDF.
     const candidatos = candidatosDelListado(listado, pendiente, rango);
-    const cah = candidatos.map((c) => ({ id: c.id, nombre: c.nombre }));
     if (!candidatos.length) { salida.push({ torneo: t.external_id, nombre: t.name, estado: 'esperando a la CAH' }); continue; }
-    if (candidatos.length > 1) {
-      errors.push(`vinculación: ${t.external_id} tiene ${candidatos.length} candidatos en la CAH (${cah.map((c) => `${c.id} ${c.nombre}`).join(' · ')}): vincular a mano`);
-      salida.push({ torneo: t.external_id, nombre: t.name, estado: 'varios candidatos', cah });
+    const revisados: { id: string; nombre: string; motivo: string }[] = [];
+    const validos: { id: string; nombre: string; adoptados: ReturnType<typeof planAdopcion>['adoptados'] }[] = [];
+    for (const c of candidatos) {
+      const rUrl = await fetchSicahUrl(c.id);
+      const rHtml = rUrl.ok ? await fetchSicahHtml(rUrl.data) : null;
+      if (!rUrl.ok || !rHtml?.ok) { revisados.push({ id: c.id, nombre: c.nombre, motivo: `SICAH HTTP ${rHtml?.status ?? rUrl.status}` }); continue; }
+      const sicah = parsearSicah(rHtml.data);
+      const nuevoC = `${CAHOCKEY_ID_PREFIX}${c.id}`;
+      const adopcion = planAdopcion({ filas, sicah, nuevoTorneoExternalId: nuevoC, resolverClub: (n) => resolverClubCah(new Map(), nuevoC, n) });
+      if (!adopcion.sinPareja.length && adopcion.adoptados.length === filas.length) {
+        validos.push({ id: c.id, nombre: c.nombre, adoptados: adopcion.adoptados });
+      } else {
+        revisados.push({ id: c.id, nombre: c.nombre, motivo: `${sicah.nombre ?? 'sin nombre'} (${sicah.desde ?? '?'}): ${adopcion.adoptados.length}/${filas.length} partidos con pareja` });
+      }
+    }
+    const cah = [...validos, ...revisados].map((c) => ({ id: c.id, nombre: c.nombre }));
+    if (validos.length !== 1) {
+      // Ninguno: la CAH todavía no cargó el fixture, o cargó otro (en 2026 el
+      // SICAH de Damas Campeonato mostraba la edición 2025). No es un error
+      // hasta que el torneo empieza: se reintenta cada pasada.
+      const estado = validos.length ? 'varios candidatos' : 'sin pareja';
+      if (validos.length > 1 || instantes[0] <= ahora.getTime()) {
+        errors.push(`vinculación: ${t.external_id}: ${validos.length} candidatos válidos en la CAH · ${revisados.map((r) => `${r.id} ${r.motivo}`).join(' · ')}`);
+      }
+      salida.push({ torneo: t.external_id, nombre: t.name, estado, cah });
       continue;
     }
 
-    const nuevo = `${CAHOCKEY_ID_PREFIX}${candidatos[0].id}`;
+    const nuevo = `${CAHOCKEY_ID_PREFIX}${validos[0].id}`;
     const { data: yaRaw, error: errYa } = await supabase.from('tournaments').select('id').eq('external_id', nuevo).limit(1);
     if (errYa) { errors.push(`vinculación: ${t.external_id}: no se pudo verificar ${nuevo} (${errYa.message})`); continue; }
     if ((yaRaw ?? []).length) {
       errors.push(`vinculación: ${t.external_id} apunta a ${nuevo}, que ya es de otro torneo`);
       continue;
     }
-
-    const rUrl = await fetchSicahUrl(candidatos[0].id);
-    const rHtml = rUrl.ok ? await fetchSicahHtml(rUrl.data) : null;
-    if (!rUrl.ok || !rHtml?.ok) {
-      errors.push(`vinculación: ${nuevo}: no se pudo leer SICAH (HTTP ${rHtml?.status ?? rUrl.status})`);
-      continue;
-    }
-    const sicah = parsearSicah(rHtml.data);
-    // La CAH publica el torneo antes de cargar el fixture: se espera.
-    if (!sicah.partidos.length) { salida.push({ torneo: t.external_id, nombre: t.name, estado: 'publicado sin partidos', cah }); continue; }
-
-    const adopcion = planAdopcion({
-      filas,
-      sicah,
-      nuevoTorneoExternalId: nuevo,
-      resolverClub: (nombre) => resolverClubCah(new Map(), nuevo, nombre),
-    });
-    if (adopcion.sinPareja.length) {
-      errors.push(`vinculación: ${t.external_id} → ${nuevo}: ${adopcion.sinPareja.length} partido(s) del PDF sin pareja en SICAH, no se vincula: ${adopcion.sinPareja.slice(0, 4).join(' · ')}`);
-      salida.push({ torneo: t.external_id, nombre: t.name, estado: 'sin pareja', cah, adoptados: adopcion.adoptados.length });
-      continue;
-    }
+    const adopcion = { adoptados: validos[0].adoptados };
 
     if (enSeco) { salida.push({ torneo: t.external_id, nombre: t.name, estado: 'a vincular', cah, adoptados: adopcion.adoptados.length }); continue; }
 

@@ -52,6 +52,15 @@ test('candidato: categoría y rama en las fechas del PDF, nunca pista ni la otra
   assert.deepEqual(candidatosDelListado(l, { categoria: 'mayores', rama: 'caballeros' }, RANGO), []);
 });
 
+test('candidato: el nombre no tiene que decir la categoría (Córdoba 2026 salió sin "mayor")', () => {
+  const l = parsearListadoCah(`<li><a href="#" class="ampliar_torneo" id="1624">CAMPEONATOS ARGENTINOS DE SELECCIONADOS CAMPEONATOS CABALLEROS</a><br>
+Desde el 14/10/2026 al 18/10/2026<br></li>
+<li><a href="#" class="ampliar_torneo" id="1628">CAMPEONATOS ARGENTINOS DE SELECCIONADOS MAYOR ASCENSO B CABALLEROS</a><br>
+Desde el 15/10/2026 al 18/10/2026<br></li>`);
+  // los dos pasan el filtro grueso; el cron elige por el contenido de SICAH
+  assert.deepEqual(candidatosDelListado(l, { categoria: 'mayores', rama: 'caballeros' }, RANGO).map((t) => t.id), ['1624', '1628']);
+});
+
 test('candidato: si la CAH parte Campeonato y Ascenso aparecen los dos', () => {
   const l = parsearListadoCah(`${LISTADO}
 <li><a href="#" class="ampliar_torneo" id="9002">CAMPEONATO ARGENTINO DE SELECCIONADOS MAYORES ASCENSO DAMAS</a><br>
