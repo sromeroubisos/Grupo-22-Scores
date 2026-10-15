@@ -12,6 +12,7 @@ import {
     type MembershipScope,
 } from '@/lib/auth/roles';
 import { getReservedAdminRole } from '@/lib/types/user';
+import { isGlobalAdminRole } from '@/lib/auth/roles';
 
 // Why this endpoint exists: there was NO way for an admin to onboard a
 // worker. A staff member had to (1) self-register at /register, (2) click
@@ -21,6 +22,13 @@ import { getReservedAdminRole } from '@/lib/types/user';
 // worker permanently locked out — exactly the Tucumán case. This creates
 // the account already CONFIRMED, with a password and the role/scope set in
 // one shot, with zero dependency on email delivery or Google OAuth.
+//
+// Lo que NO hace, a proposito: tocar una cuenta que ya existe. Antes, si el
+// email ya tenia cuenta, le pisaba la contraseña, la forzaba confirmada y
+// devolvia la contraseña nueva en el JSON: cualquier admin global podia
+// quedarse con la cuenta de cualquiera (incluida la de otro super admin)
+// tipeando su email. Ahora a una cuenta existente solo se le asigna rol y
+// alcance; la contraseña la recupera su dueño con "Olvidé mi contraseña".
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // No ambiguous chars (0/O, 1/I/l) so the password can be dictated by phone.
@@ -45,10 +53,14 @@ function generateTempPassword(): string {
     return `${segment()}-${segment()}-${segment()}`;
 }
 
+/** Los roles que pueden tocar todo: solo un super_admin exacto los reparte. */
+const GLOBAL_ROLES = new Set(['super_admin', 'admin_general']);
+
 export async function POST(request: NextRequest) {
+    let actor: Awaited<ReturnType<typeof requireGlobalAdminContext>>;
     try {
         const supabase = await createClient();
-        await requireGlobalAdminContext(supabase);
+        actor = await requireGlobalAdminContext(supabase);
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Unauthorized';
         return jsonError(message, message === 'Forbidden' ? 403 : 401);
@@ -88,15 +100,22 @@ export async function POST(request: NextRequest) {
         return jsonError('La contraseña debe tener al menos 8 caracteres.', 400);
     }
 
-    // Mirror the reserved-role guard used by every other roles endpoint:
-    // accounts whose email is hardwired to super_admin/admin_general must
-    // not be created with a conflicting role.
+    // Las cuentas con rol reservado por email (SUPER_ADMIN_ROLE_EMAILS) no se
+    // crean ni se tocan desde acá, con ningun rol: son las llaves maestras y
+    // su rol ya sale del allowlist, no de esta pantalla.
     const reservedRole = getReservedAdminRole(email);
-    if (reservedRole && role !== reservedRole) {
+    if (reservedRole) {
         return jsonError(
-            `Este email tiene un rol reservado (${reservedRole}) y no puede recibir el rol ${role}.`,
-            400,
+            `Este email tiene un rol reservado (${reservedRole}) y no se gestiona desde esta pantalla.`,
+            403,
         );
+    }
+
+    // Jerarquia: un admin_general no fabrica admins globales. Si pudiera, el
+    // escalon de abajo se clonaria a si mismo (o a un super_admin) sin que
+    // nadie de arriba lo apruebe.
+    if (GLOBAL_ROLES.has(role) && actor.role !== 'super_admin') {
+        return jsonError('Solo un super admin puede asignar roles globales.', 403);
     }
 
     // Validate scope coherence when the role is club/tournament-scoped.
@@ -116,6 +135,8 @@ export async function POST(request: NextRequest) {
         effectiveScopeType = scopeType as MembershipScope;
     }
 
+    // Solo se usa si la cuenta es NUEVA. Para una existente no se genera ni se
+    // devuelve nada.
     const password = customPassword || generateTempPassword();
 
     try {
@@ -145,18 +166,33 @@ export async function POST(request: NextRequest) {
         let userId: string | null = existingLookup.data?.id ?? null;
         const alreadyExisted = Boolean(userId);
 
+        // Nadie se cambia el rol a si mismo por esta puerta.
+        if (userId && userId === actor.userId) {
+            return jsonError('No podés cambiar tu propio rol.', 403);
+        }
+
+        let existingName: string | null = null;
+
         if (userId) {
-            // Existing account: (re)set the password and force-confirm it.
-            // This is also the repair path for an OAuth-only or
-            // never-confirmed account that can't log in by email.
-            const { error: updateError } = await authAdmin.updateUserById(userId, {
-                password,
-                email_confirm: true,
-                ...(name ? { user_metadata: { full_name: name } } : {}),
-            });
-            if (updateError) {
-                return jsonError('No se pudo actualizar la cuenta existente.', 500, updateError.message);
+            // Cuenta existente: NO se toca contraseña, confirmacion ni
+            // metadata de auth. Solo rol y alcance, mas abajo. Si el dueño no
+            // puede entrar, que use "Olvidé mi contraseña" (el mail le llega a
+            // EL, no a quien la esta dando de alta).
+            const { data: profileRow } = await (admin.from('users') as any)
+                .select('name, role')
+                .eq('id', userId)
+                .maybeSingle();
+
+            // Jerarquia, del lado del DESTINO: la regla de arriba mira solo el
+            // rol nuevo, y por esta puerta un admin_general podia pasarle el
+            // email de un super_admin y degradarlo. Misma regla que
+            // personas-roles/[userId] y users/[id]/access.
+            if (isGlobalAdminRole(profileRow?.role) && actor.role !== 'super_admin') {
+                return jsonError('Solo un super admin puede asignar o quitar roles globales.', 403);
             }
+            existingName = typeof profileRow?.name === 'string' && profileRow.name.trim()
+                ? profileRow.name
+                : null;
         } else {
             const { data: created, error: createError } = await authAdmin.createUser({
                 email,
@@ -182,7 +218,8 @@ export async function POST(request: NextRequest) {
             {
                 id: userId,
                 email,
-                name: name ?? email.split('@')[0],
+                // A una cuenta existente no se le pisa el nombre que ya tenia.
+                name: name ?? existingName ?? email.split('@')[0],
                 role,
             },
             { onConflict: 'id' },
@@ -242,9 +279,18 @@ export async function POST(request: NextRequest) {
                 userId,
                 email,
                 role,
-                password,
+                // La contraseña viaja SOLO en el alta: es la que el admin le
+                // dicta al trabajador nuevo. De una cuenta existente no se
+                // devuelve nada porque no se cambio nada.
+                password: alreadyExisted ? null : password,
                 created: !alreadyExisted,
                 updated: alreadyExisted,
+                ...(alreadyExisted
+                    ? {
+                        passwordUnchanged: true,
+                        message: 'La cuenta ya existía: se asignó el rol sin tocar la contraseña. Si no puede entrar, que use "Olvidé mi contraseña" en /login.',
+                    }
+                    : {}),
             },
         });
     } catch (error) {
