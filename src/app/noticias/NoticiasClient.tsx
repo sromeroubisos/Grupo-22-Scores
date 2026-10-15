@@ -46,6 +46,7 @@ export interface NewsItem {
     sport?: string;
     scope?: 'global' | 'tournament' | 'club' | 'union' | string;
     tags?: string[] | null;
+    view_count?: number | null;
 }
 
 interface NoticiasClientProps {
@@ -177,6 +178,12 @@ function NewsCard({ item, canManage, menuOpen, onToggleMenu, onToggleStatus, onD
 
             {canManage && (
                 <div className={styles.newsAdmin}>
+                    {published && typeof item.view_count === 'number' && (
+                        <span className={styles.newsViews} title="Vistas de la nota">
+                            <Eye size={14} aria-hidden="true" />
+                            {item.view_count.toLocaleString('es-AR')} {item.view_count === 1 ? 'vista' : 'vistas'}
+                        </span>
+                    )}
                     <ProtectedLink href={`/admin/noticias/editar/${item.id}`} className={`${styles.btn} ${styles.btnSm}`}>
                         <Pencil size={14} aria-hidden="true" /> Editar
                     </ProtectedLink>

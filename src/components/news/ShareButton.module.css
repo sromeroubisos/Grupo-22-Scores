@@ -1,0 +1,96 @@
+.root {
+    position: relative;
+    display: inline-flex;
+}
+
+.trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--edge-strong, var(--color-border, rgba(127, 127, 127, 0.4)));
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink, var(--color-text-primary));
+    font: inherit;
+    font-size: 0.94rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.trigger:hover,
+.trigger:focus-visible,
+.trigger[aria-expanded='true'] {
+    border-color: var(--ink-muted, var(--color-text-secondary));
+    background: var(--raised, rgba(127, 127, 127, 0.1));
+}
+
+.trigger:focus-visible,
+.item:focus-visible {
+    outline: 2px solid var(--accent-ink, #22c55e);
+    outline-offset: 2px;
+}
+
+.menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    min-width: 200px;
+    padding: 6px;
+    border: 1px solid var(--edge-strong, var(--color-border, rgba(127, 127, 127, 0.4)));
+    border-radius: 14px;
+    background: var(--color-bg-elevated, var(--raised, Canvas));
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+}
+
+.menuUp {
+    top: auto;
+    bottom: calc(100% + 8px);
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink, var(--color-text-primary));
+    font: inherit;
+    font-size: 0.92rem;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.item:hover {
+    background: var(--raised, rgba(127, 127, 127, 0.12));
+}
+
+.manualLink {
+    min-height: 40px;
+    margin: 2px 4px 6px;
+    padding: 0 10px;
+    border: 1px solid var(--edge-strong, var(--color-border, rgba(127, 127, 127, 0.4)));
+    border-radius: 10px;
+    background: transparent;
+    color: var(--ink, var(--color-text-primary));
+    font: inherit;
+    font-size: 0.8rem;
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}

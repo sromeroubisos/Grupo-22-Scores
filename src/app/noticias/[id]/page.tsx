@@ -15,6 +15,8 @@ import { cache } from 'react';
 
 import NewsBody from '@/components/news/NewsBody';
 import NewsMentionsStrip from '@/components/news/NewsMentionsStrip';
+import NewsViewBeacon from '@/components/news/NewsViewBeacon';
+import ShareButton from '@/components/news/ShareButton';
 import ProtectedLink from '@/components/ProtectedLink';
 import { getServerAuthRole } from '@/lib/auth/newsAccess';
 import { hasNewsManagementAccess } from '@/lib/auth/roles';
@@ -49,6 +51,7 @@ interface NewsRow {
     status: string;
     sport: string | null;
     author_name?: string | null;
+    view_count?: number | null;
     scope: string | null;
     tags?: string[] | null;
 }
@@ -373,13 +376,18 @@ export default async function NewsPage({ params }: NewsPageProps) {
             {jsonLd && (
                 <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
             )}
+            {/* Quien administra no suma: sus visitas para editar no son lectores. */}
+            {!canManageNews && news.status === 'published' && <NewsViewBeacon newsId={news.id} />}
             <div className={styles.readerLayout}>
                 <div className={styles.readerShell}>
                     <div className={styles.readerTopBar}>
                         <Link href="/noticias" className={styles.backLink}>
                             Volver a noticias
                         </Link>
-                        <span className={styles.topBarMeta}>{readingMinutes} min de lectura</span>
+                        <div className={styles.topBarActions}>
+                            <span className={styles.topBarMeta}>{readingMinutes} min de lectura</span>
+                            <ShareButton url={canonicalUrl} title={news.title} />
+                        </div>
                     </div>
 
                     <article className={styles.heroCard}>
@@ -401,6 +409,14 @@ export default async function NewsPage({ params }: NewsPageProps) {
                                 )}
                                 <span className={styles.dateDivider}></span>
                                 <span className={styles.dateLabel}>{readingMinutes} min</span>
+                                {canManageNews && news.status === 'published' && typeof news.view_count === 'number' && (
+                                    <>
+                                        <span className={styles.dateDivider}></span>
+                                        <span className={styles.dateLabel} title="Solo lo ven quienes administran noticias">
+                                            {news.view_count.toLocaleString('es-AR')} {news.view_count === 1 ? 'vista' : 'vistas'}
+                                        </span>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -458,6 +474,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
                             >
                                 Ver más noticias
                             </Link>
+                            <ShareButton url={canonicalUrl} title={news.title} placement="up" />
                             {canManageNews && (
                                 <ProtectedLink
                                     href={`/admin/noticias/editar/${news.id}`}
