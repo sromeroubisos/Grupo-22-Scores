@@ -541,6 +541,7 @@ export type Database = {
       news: {
         Row: {
           author_id: string | null
+          author_name: string | null
           content: string | null
           created_at: string
           id: string
@@ -557,6 +558,7 @@ export type Database = {
         }
         Insert: {
           author_id?: string | null
+          author_name?: string | null
           content?: string | null
           created_at?: string
           id?: string
@@ -573,6 +575,7 @@ export type Database = {
         }
         Update: {
           author_id?: string | null
+          author_name?: string | null
           content?: string | null
           created_at?: string
           id?: string

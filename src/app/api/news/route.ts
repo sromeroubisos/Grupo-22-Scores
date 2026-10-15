@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server';
 import { getServerAuthRole, requireNewsSuperAdminServer } from '@/lib/auth/newsAccess';
 import { hasNewsManagementAccess } from '@/lib/auth/roles';
 import type { Database } from '@/lib/database.types';
+import { AUTHOR_MAX, cleanAuthorName } from '@/lib/news/byline';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
@@ -24,6 +25,7 @@ type NewsRequestBody = {
     image_url?: unknown;
     status?: unknown;
     sport?: unknown;
+    author_name?: unknown;
     scope?: unknown;
     scope_id?: unknown;
     tags?: unknown;
@@ -166,6 +168,16 @@ function cleanText(value: unknown, max: number, label: string): string | null | 
     return text || null;
 }
 
+/** El autor es opcional: vacío se guarda como null y la nota la firma la redacción. */
+function cleanAuthor(value: unknown): string | null | undefined {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    if (typeof value !== 'string') throw new NewsValidationError('El autor tiene que ser texto.');
+    const name = cleanAuthorName(value);
+    if (name.length > AUTHOR_MAX) throw new NewsValidationError(`El autor no puede pasar los ${AUTHOR_MAX} caracteres.`);
+    return name || null;
+}
+
 function cleanImageUrl(value: unknown): string | null | undefined {
     const text = cleanText(value, IMAGE_URL_MAX, 'El link de la imagen');
     if (text && !/^https?:\/\//i.test(text)) {
@@ -302,6 +314,7 @@ export async function POST(req: Request) {
             image_url: cleanImageUrl(body.image_url) ?? null,
             status,
             sport: cleanText(body.sport, SPORT_MAX, 'El deporte') ?? null,
+            author_name: cleanAuthor(body.author_name) ?? null,
             scope,
             scope_id: scope === 'global' ? null : scopeId,
             tags: cleanTags(body.tags) ?? [],
@@ -336,6 +349,8 @@ export async function PUT(req: Request) {
         if (imageUrl !== undefined) updateData.image_url = imageUrl;
         const sport = cleanText(body.sport, SPORT_MAX, 'El deporte');
         if (sport !== undefined) updateData.sport = sport;
+        const authorName = cleanAuthor(body.author_name);
+        if (authorName !== undefined) updateData.author_name = authorName;
 
         const scope = cleanScope(body.scope);
         if (scope !== undefined) updateData.scope = scope;

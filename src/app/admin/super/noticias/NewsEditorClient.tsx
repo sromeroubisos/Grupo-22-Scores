@@ -27,6 +27,7 @@ import { sessionFetch } from '@/lib/supabase/freshSession';
 
 import LinkInserter, { type InsertMode } from './LinkInserter';
 import MentionPicker, { type MentionPickerHandle } from './MentionPicker';
+import { AUTHOR_MAX, bylineOf, newsroomOf } from '@/lib/news/byline';
 import styles from './NewsEditor.module.css';
 
 type NewsStatus = 'draft' | 'published' | 'archived';
@@ -37,6 +38,7 @@ interface NewsForm {
     content: string;
     image_url: string;
     sport: string;
+    author_name: string;
     scope: string;
     tags: string[];
 }
@@ -52,6 +54,7 @@ interface NewsRecord {
     content?: string | null;
     image_url?: string | null;
     sport?: string | null;
+    author_name?: string | null;
     scope?: string | null;
     tags?: string[] | null;
 }
@@ -60,7 +63,7 @@ type NewsEditorClientProps = {
     newsId?: string;
 };
 
-const EMPTY: NewsForm = { title: '', summary: '', content: '', image_url: '', sport: 'rugby', scope: 'global', tags: [] };
+const EMPTY: NewsForm = { title: '', summary: '', content: '', image_url: '', sport: 'rugby', author_name: '', scope: 'global', tags: [] };
 
 // Los mismos topes que valida la API.
 const TITLE_MAX = 140;
@@ -75,7 +78,9 @@ const TAGS_MAX = 10;
 const CUSTOM_SPORT = '__custom';
 const NEWS_COLUMNS_MIGRATION = '20260826150000_news_sport_scope_tags.sql';
 /** Las columnas que la base puede no tener todavía, con su nombre para el aviso. */
-const DROPPABLE_FIELDS: Partial<Record<FormField, string>> = { sport: 'el deporte', scope: 'el alcance', tags: 'las etiquetas' };
+const DROPPABLE_FIELDS: Partial<Record<FormField, string>> = { sport: 'el deporte', author_name: 'el autor', scope: 'el alcance', tags: 'las etiquetas' };
+/** La migración de las columnas que no son de la primera tanda. */
+const FIELD_MIGRATIONS: Partial<Record<FormField, string>> = { author_name: '20261015120000_news_author_name.sql' };
 
 /** Los ids que entiende la portada (sus carpetas por deporte). */
 const SPORTS = [
@@ -126,6 +131,7 @@ function toForm(record: NewsRecord): NewsForm {
         content: record.content ?? '',
         image_url: record.image_url ?? '',
         sport: record.sport ?? 'rugby',
+        author_name: record.author_name ?? '',
         scope: record.scope ?? 'global',
         tags: Array.isArray(record.tags) ? record.tags.filter((tag): tag is string => typeof tag === 'string' && tag.trim() !== '') : [],
     };
@@ -141,6 +147,7 @@ function validate(form: NewsForm): Partial<Record<FormField, string>> {
     const image = form.image_url.trim();
     if (image && !isHttpUrl(image)) errors.image_url = 'Tiene que ser un link que empiece con https://, o subí el archivo desde acá.';
     if (form.sport.trim().length > SPORT_MAX) errors.sport = `El deporte no puede pasar los ${SPORT_MAX} caracteres.`;
+    if (form.author_name.trim().length > AUTHOR_MAX) errors.author_name = `El autor no puede pasar los ${AUTHOR_MAX} caracteres.`;
     return errors;
 }
 
@@ -700,6 +707,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                     content: form.content.trim(),
                     image_url: image || null,
                     sport: form.sport.trim() || null,
+                    author_name: form.author_name.trim() || null,
                     scope: form.scope,
                     tags: form.tags,
                     ...(nextStatus ? { status: nextStatus } : {}),
@@ -719,7 +727,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
             const kept = Object.fromEntries(lost.map((field) => [field, form[field]])) as Partial<NewsForm>;
             const snapshot: NewsForm = record ? { ...toForm(record), ...kept } : { ...form };
             setWarning(lost.length > 0
-                ? `No se guardaron ${lost.map((field) => DROPPABLE_FIELDS[field]).join(', ')}: falta correr la migración ${NEWS_COLUMNS_MIGRATION} en Supabase. El resto de la nota sí se guardó.`
+                ? `No se guardaron ${lost.map((field) => DROPPABLE_FIELDS[field]).join(', ')}: falta correr la migración ${[...new Set(lost.map((field) => FIELD_MIGRATIONS[field] ?? NEWS_COLUMNS_MIGRATION))].join(' y ')} en Supabase. El resto de la nota sí se guardó.`
                 : null);
 
             setSaved(snapshot);
@@ -1188,6 +1196,28 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
 
                         <div className={styles.field}>
                             <div className={styles.labelRow}>
+                                <label htmlFor="news-author" className={styles.label}>Redactado por <span className={styles.labelSoft}>(opcional)</span></label>
+                                <span className={`${styles.counter} ${form.author_name.length > AUTHOR_MAX ? styles.counterOver : ''}`}>{form.author_name.length}/{AUTHOR_MAX}</span>
+                            </div>
+                            <input
+                                id="news-author"
+                                className={`${styles.input} ${showError('author_name') ? styles.inputInvalid : ''}`}
+                                type="text"
+                                value={form.author_name}
+                                placeholder={newsroomOf(form.sport)}
+                                autoComplete="off"
+                                onChange={(event) => update('author_name', event.target.value)}
+                                onBlur={() => touch('author_name')}
+                                aria-invalid={Boolean(showError('author_name'))}
+                                aria-describedby="news-author-hint"
+                            />
+                            <p id="news-author-hint" className={`${styles.hint} ${showError('author_name') ? styles.hintError : ''}`}>
+                                {showError('author_name') ?? `Si lo dejás vacío, la nota sale firmada por «${newsroomOf(form.sport)}».`}
+                            </p>
+                        </div>
+
+                        <div className={styles.field}>
+                            <div className={styles.labelRow}>
                                 <label htmlFor="news-tags" className={styles.label}>Etiquetas <span className={styles.labelSoft}>(SEO)</span></label>
                                 <span className={styles.counter}>{form.tags.length}/{TAGS_MAX}</span>
                             </div>
@@ -1326,6 +1356,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                         <div id="preview-panel" role="tabpanel" aria-labelledby="preview-tab-article" className={styles.articlePreview}>
                             {form.title.trim() && <h3 className={styles.articlePreviewTitle}>{form.title.trim()}</h3>}
                             {form.summary.trim() && <p className={styles.articlePreviewSummary}>{form.summary.trim()}</p>}
+                            <p className={styles.articlePreviewSummary}>Redactado por {bylineOf(form).name}</p>
                             <NewsBody
                                 content={form.content}
                                 mentions={previewMentions}

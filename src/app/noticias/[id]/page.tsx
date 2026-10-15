@@ -18,6 +18,7 @@ import NewsMentionsStrip from '@/components/news/NewsMentionsStrip';
 import ProtectedLink from '@/components/ProtectedLink';
 import { getServerAuthRole } from '@/lib/auth/newsAccess';
 import { hasNewsManagementAccess } from '@/lib/auth/roles';
+import { bylineOf } from '@/lib/news/byline';
 import type { MentionRef, ResolvedMention } from '@/lib/news/mentions';
 import { newsIdFromSegment, newsPath, newsSegment } from '@/lib/news/newsUrl';
 import { collectMentions, plainTextOf, wordCountOf } from '@/lib/news/richText';
@@ -47,6 +48,7 @@ interface NewsRow {
     updated_at?: string | null;
     status: string;
     sport: string | null;
+    author_name?: string | null;
     scope: string | null;
     tags?: string[] | null;
 }
@@ -327,6 +329,7 @@ export default async function NewsPage({ params }: NewsPageProps) {
     const sport = sportLabel(news.sport);
     const scope = SCOPE_LABELS[(news.scope || 'global').toLowerCase()] ?? news.scope ?? 'General';
     const image = publicImageOf(news);
+    const byline = bylineOf(news);
     const description = descriptionOf(news);
     const matchesSportId = sportKeyOf(news.sport);
     const matchesSportLabel = SPORT_NAMES[matchesSportId] ?? 'Rugby';
@@ -351,7 +354,9 @@ export default async function NewsPage({ params }: NewsPageProps) {
             keywords: [...tags, ...(sport ? [sport] : [])].join(', ') || undefined,
             articleSection: sport ?? undefined,
             inLanguage: 'es-AR',
-            author: { '@type': 'Organization', name: 'G22 Scores', url: absoluteUrl('/') },
+            author: byline.isPerson
+                ? { '@type': 'Person', name: byline.name }
+                : { '@type': 'Organization', name: byline.name, url: absoluteUrl('/') },
             publisher: {
                 '@type': 'Organization',
                 name: 'G22 Scores',
@@ -402,6 +407,9 @@ export default async function NewsPage({ params }: NewsPageProps) {
                         <header className={styles.headline}>
                             <h1>{news.title}</h1>
                             {news.summary && <p className={styles.summary}>{news.summary}</p>}
+                            <p className={styles.byline}>
+                                Redactado por <span className={styles.bylineName}>{byline.name}</span>
+                            </p>
                         </header>
 
                         {image && (
