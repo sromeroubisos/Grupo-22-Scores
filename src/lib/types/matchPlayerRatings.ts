@@ -65,6 +65,44 @@ export function toPeopleScore(counts: { 1: number; 2: number; 3: number }): numb
     return Math.round(scaled * 10) / 10;
 }
 
+/**
+ * Topes del voto. El servidor no conoce la formación de cada partido (puede ser
+ * de un proveedor), así que la clave y el nombre del jugador llegan del cliente:
+ * sin topes, una cuenta inventaba jugadores sin límite y con cualquier nombre.
+ * 60 alcanza para dos planteles de 23 con suplentes de sobra.
+ */
+export const PLAYER_KEY_MAX = 120;
+export const PLAYER_NAME_MAX = 80;
+export const MAX_RATED_PLAYERS_PER_MATCH = 60;
+
+export function isValidPlayerKey(key: string): boolean {
+    return key.length > 0 && key.length <= PLAYER_KEY_MAX && !/[\u0000-\u001f\u007f]/.test(key);
+}
+
+/** Nombre visible: sin caracteres de control, espacios colapsados y con tope. */
+export function cleanPlayerName(raw: string): string {
+    return raw.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, PLAYER_NAME_MAX);
+}
+
+/**
+ * La figura: la más votada; a igualdad de votos gana la mejor nota, y si
+ * también empatan queda la primera por nombre para que el orden no baile entre
+ * recargas. Con `allowedKeys` solo compiten los jugadores de la formación: una
+ * clave que no está en la cancha no puede quedarse con la figura y dejar el
+ * lugar vacío.
+ */
+export function pickMvp(
+    players: readonly PlayerRatingSummary[],
+    allowedKeys?: ReadonlySet<string>,
+): PlayerRatingSummary | null {
+    const candidates = players.filter((p) => p.mvpVotes > 0 && (!allowedKeys || allowedKeys.has(p.playerKey)));
+    candidates.sort((a, b) =>
+        b.mvpVotes - a.mvpVotes ||
+        (b.score ?? 0) - (a.score ?? 0) ||
+        a.playerName.localeCompare(b.playerName, 'es'));
+    return candidates[0] ?? null;
+}
+
 /** El color del semáforo que le corresponde a una nota sobre 10. */
 export function scoreTone(score: number | null): 'low' | 'mid' | 'high' | 'none' {
     if (score == null) return 'none';

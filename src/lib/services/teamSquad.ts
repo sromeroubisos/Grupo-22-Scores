@@ -78,16 +78,24 @@ export async function resolveClubIdForTeamKey(
     if (!key) return null;
 
     // 1. ¿Es directamente un club de la plataforma? (id o slug)
-    try {
-        const { data } = await client
-            .from('clubs')
-            .select('id, name')
-            .or(`id.eq.${key},slug.eq.${key}`)
-            .limit(1)
-            .maybeSingle();
-        if (data?.id) return { clubId: data.id as string, clubName: texto(data.name) };
-    } catch {
-        // Sigue por los otros caminos.
+    //
+    // Dos `.eq()` y no un `.or()` armado con el valor: `key` viene de la URL de
+    // un endpoint público, y dentro de un `.or()` la coma y el punto son
+    // gramática de PostgREST (`?team=x,is_visible.eq.false` agregaba filtros
+    // que corrían con service role). `.eq()` lo manda como valor, nunca como
+    // filtro.
+    for (const column of ['id', 'slug'] as const) {
+        try {
+            const { data } = await client
+                .from('clubs')
+                .select('id, name')
+                .eq(column, key)
+                .limit(1)
+                .maybeSingle();
+            if (data?.id) return { clubId: data.id as string, clubName: texto(data.name) };
+        } catch {
+            // Sigue por los otros caminos.
+        }
     }
 
     const crudo = stripTeamPrefix(key);

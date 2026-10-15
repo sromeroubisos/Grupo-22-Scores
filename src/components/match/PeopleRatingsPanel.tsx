@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     RATING_LABELS,
     createEmptyPlayerRatingsSummary,
+    pickMvp as pickMvpAmong,
     scoreTone,
     type MatchPlayerRatingsSummary,
     type PlayerRatingValue,
@@ -136,7 +137,10 @@ export default function PeopleRatingsPanel({
     };
 
     const shown = players.filter((p) => p.team === side);
-    const mvp = summary.mvp;
+    // La figura se elige entre los de la formación, no se toma `summary.mvp`
+    // tal cual: el servidor no conoce la formación y una clave inventada con
+    // muchos votos de figura dejaba el lugar vacío.
+    const mvp = pickMvpAmong(summary.players, new Set(players.map((p) => p.key)));
     const mvpPlayer = mvp ? players.find((p) => p.key === mvp.playerKey) : null;
 
     if (players.length === 0) return null;

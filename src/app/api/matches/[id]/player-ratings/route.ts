@@ -3,7 +3,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import {
+    MAX_RATED_PLAYERS_PER_MATCH,
+    PLAYER_KEY_MAX,
+    cleanPlayerName,
     createEmptyPlayerRatingsSummary,
+    isValidPlayerKey,
+    pickMvp,
     toPeopleScore,
     type MatchPlayerRatingsSummary,
     type PlayerRatingSummary,
@@ -113,15 +118,6 @@ function buildSummary(rows: LooseRow[], userId: string | null): MatchPlayerRatin
 
     const players = Array.from(byPlayer.values()).map((p) => ({ ...p, score: toPeopleScore(p.counts) }));
 
-    // La figura es la mas votada; a igualdad de votos gana la mejor nota, y si
-    // tambien empatan queda la primera por nombre para que el orden no baile
-    // entre recargas.
-    const withMvp = players.filter((p) => p.mvpVotes > 0);
-    withMvp.sort((a, b) =>
-        b.mvpVotes - a.mvpVotes ||
-        (b.score ?? 0) - (a.score ?? 0) ||
-        a.playerName.localeCompare(b.playerName, 'es'));
-
     players.sort((a, b) =>
         (b.score ?? -1) - (a.score ?? -1) ||
         b.votes - a.votes ||
@@ -137,7 +133,7 @@ function buildSummary(rows: LooseRow[], userId: string | null): MatchPlayerRatin
             }))
         : [];
 
-    return { players, voters: voters.size, mvp: withMvp[0] ?? null, mine };
+    return { players, voters: voters.size, mvp: pickMvp(players), mine };
 }
 
 async function resolveUserId() {
@@ -204,13 +200,16 @@ export async function POST(
 
         const payload = await request.json() as RatingPayload;
         const playerKey = str(payload.playerKey).trim();
-        const playerName = str(payload.playerName).trim();
+        const playerName = cleanPlayerName(str(payload.playerName));
         const team = toTeam(payload.team);
         const rating = payload.rating === null ? null : toRating(payload.rating);
         const isMvp = payload.isMvp === true;
 
         if (!playerKey || !team) {
             return NextResponse.json({ error: 'Falta el jugador.' }, { status: 400 });
+        }
+        if (!isValidPlayerKey(playerKey) || !matchId || matchId.length > PLAYER_KEY_MAX) {
+            return NextResponse.json({ error: 'No encontramos ese jugador en el partido.' }, { status: 400 });
         }
         if (payload.rating != null && rating == null) {
             return NextResponse.json({ error: 'El puntaje va de 1 a 3.' }, { status: 400 });
@@ -267,6 +266,26 @@ export async function POST(
                 return NextResponse.json({ error: friendlyError(removed.error) }, { status: 500 });
             }
             return NextResponse.json(await fetchSummary(admin, matchId, userId));
+        }
+
+        // Tope de jugadores distintos por cuenta y partido: el servidor no sabe
+        // la formacion, asi que sin esto una cuenta inventaba jugadores sin fin.
+        // Re-votar a uno que ya tiene fila no cuenta como nuevo.
+        const ownRows = await admin
+            .from(TABLE)
+            .select('player_key')
+            .eq('match_id', matchId)
+            .eq('user_id', userId);
+        if (ownRows.error && !isMissingTable(ownRows.error)) {
+            console.error('[POST player-ratings] contar votos propios', ownRows.error);
+            return NextResponse.json({ error: friendlyError(ownRows.error) }, { status: 500 });
+        }
+        const ownKeys = new Set((ownRows.data || []).map((row) => str(row.player_key)));
+        if (!ownKeys.has(playerKey) && ownKeys.size >= MAX_RATED_PLAYERS_PER_MATCH) {
+            return NextResponse.json(
+                { error: 'Ya puntuaste a todos los jugadores que se pueden puntuar en este partido.' },
+                { status: 400 },
+            );
         }
 
         const saved = await admin
