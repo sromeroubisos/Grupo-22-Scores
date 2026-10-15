@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getReservedAdminRole, User } from '@/lib/types/user'
 import { isGlobalAdminRole, resolveBestUserRole } from '@/lib/auth/roles'
+import { assertMfaSatisfied } from '@/lib/auth/mfa'
 
 /**
  * Get the current authenticated user from the session
@@ -72,6 +73,12 @@ export async function requireSuperAdmin(): Promise<User> {
     if (!isGlobalAdminRole(user.role)) {
         throw new Error('Forbidden: Super admin access required')
     }
+
+    // Despues del rol, como en todos los guards de admin. Solo exige algo si
+    // el usuario tiene un factor verificado (o MFA_REQUIRED_FOR_ADMINS=true):
+    // un super admin sin factor sigue entrando. Lanza MFA_CHALLENGE_ERROR /
+    // MFA_ENROLL_ERROR, que el llamador tiene que contestar con 403.
+    await assertMfaSatisfied(user.role)
 
     return user
 }

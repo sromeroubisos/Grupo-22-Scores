@@ -5,13 +5,16 @@ type AuthErrorLike = {
     status?: unknown;
 };
 
+// Un mensaje EN BLANCO no es un mensaje. Supabase manda errores con `message`
+// vacio y el dato util en `code`, y un string con un espacio adentro es truthy:
+// se comia el `code`, despues se comia el fallback de getAuthErrorMessage y
+// terminaba en la pantalla como un cartel rojo sin texto adentro. Por eso cada
+// rama exige `.trim()` antes de dar por bueno lo que encontro.
 function getAuthErrorText(error: unknown): string {
-    if (error instanceof Error) return error.message;
-    if (typeof error === 'string') return error;
-
     const maybeError = error as AuthErrorLike;
-    if (typeof maybeError?.message === 'string') return maybeError.message;
-    if (typeof maybeError?.code === 'string') return maybeError.code;
+    if (typeof maybeError?.message === 'string' && maybeError.message.trim()) return maybeError.message;
+    if (typeof error === 'string' && error.trim()) return error;
+    if (typeof maybeError?.code === 'string' && maybeError.code.trim()) return maybeError.code;
     return '';
 }
 
@@ -57,5 +60,5 @@ export function getAuthErrorMessage(
         return 'Tu email todavia no fue confirmado. Revisa tu correo y abre el enlace de confirmacion antes de iniciar sesion.';
     }
 
-    return message || fallback;
+    return message.trim() || fallback;
 }

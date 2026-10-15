@@ -8,7 +8,7 @@ import { logRefreshFlow } from '@/lib/debug/refreshFlow'
 import { logRefreshLoop } from '@/lib/debug/refreshLoop'
 import { updateSession, readUserFromCookie, PROTECTED_AUTH_REFRESH_TIMEOUT_MS } from '@/lib/supabase/proxy'
 import { measureAsync } from '@/lib/perf/measure';
-import { GUEST_CLUB_ACCESS_COOKIE, isGuestClubAccessEnabled } from '@/lib/auth/guestClubAccess';
+import { GUEST_CLUB_ACCESS_COOKIE, isGuestClubAccessEnabled, verifyGuestClubCookie } from '@/lib/auth/guestClubAccess';
 
 // Only refresh the Supabase session on routes that genuinely depend on auth.
 // This avoids hitting `auth/v1/user` on public traffic, which is what was
@@ -55,7 +55,7 @@ function isProtectedRoute(pathname: string): boolean {
     return PROTECTED_ROUTE_PREFIXES.some(prefix => pathname.startsWith(prefix));
 }
 
-function hasGuestClubAccess(request: NextRequest): boolean {
+async function hasGuestClubAccess(request: NextRequest): Promise<boolean> {
     // Tercer punto donde se chequea el flag, ademas de la ruta que emite la
     // cookie y de getGuestAccessContext(). Este es el que mas importa: saltea
     // el redirect a /login por completo, asi que con el flag apagado y solo los
@@ -65,12 +65,10 @@ function hasGuestClubAccess(request: NextRequest): boolean {
     const rawValue = request.cookies.get(GUEST_CLUB_ACCESS_COOKIE)?.value;
     if (!rawValue) return false;
 
-    try {
-        const parsed = JSON.parse(rawValue) as { kind?: unknown; clubHint?: unknown };
-        return parsed.kind === 'club_family_guest' && typeof parsed.clubHint === 'string';
-    } catch {
-        return false;
-    }
+    // Se verifica la firma HMAC tambien acá: con mirar solo la forma del JSON,
+    // una cookie fabricada a mano salteaba el login (aunque despues el
+    // resolutor la rechazara, el bypass ya habia ocurrido).
+    return (await verifyGuestClubCookie(rawValue)) !== null;
 }
 
 function redirectToLogin(request: NextRequest) {
@@ -136,7 +134,7 @@ export async function proxy(request: NextRequest) {
         )
     }
 
-    if (protectedRoute && pathname.startsWith('/club-admin') && hasGuestClubAccess(request)) {
+    if (protectedRoute && pathname.startsWith('/club-admin') && await hasGuestClubAccess(request)) {
         logRefreshLoop('proxy_fast_path', {
             path: pathname,
             reason: 'guest_club_access_cookie',

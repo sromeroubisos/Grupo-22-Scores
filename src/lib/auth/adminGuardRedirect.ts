@@ -30,6 +30,29 @@ function withReturnTo(base: string, pathname: string): string {
     return pathname ? `${base}?returnTo=${encodeURIComponent(pathname)}` : base
 }
 
+const ADMIN_MATCH_EDITOR = /^\/admin\/(?:super|torneo)\/partidos\/([^/?#]+)\/?$/
+
+/**
+ * El editor de partido vive en tres lugares: `/admin/super/partidos/[id]`,
+ * `/admin/torneo/partidos/[id]` y `/matches/[id]/editar`. Los tres montan el
+ * mismo MatchCenterClient con la misma guarda por partido; los dos primeros
+ * además exigen un ROL (super admin, gestor de torneos).
+ *
+ * Hay varios botones que llevan a los de `/admin` sin mirar el rol —el control
+ * de partido del gestor de torneos, el buscador del admin, enlaces guardados—,
+ * y un admin de club o de un torneo por membresía rebotaba a la portada. En vez
+ * de perseguir cada botón, el rebote de rol sobre un editor de partido manda al
+ * editor sin rol propio, que decide partido por partido (y da 404, no la
+ * portada, si de verdad no le corresponde).
+ */
+export function matchEditorFallback(pathname: string): string | null {
+    const match = ADMIN_MATCH_EDITOR.exec(pathname)
+    if (!match) return null
+    const id = match[1]
+    if (id === 'crear') return null
+    return `/matches/${id}/editar`
+}
+
 export async function resolveAdminGuardRedirect(error: unknown): Promise<string> {
     const message = error instanceof Error ? error.message : ''
 
@@ -45,7 +68,7 @@ export async function resolveAdminGuardRedirect(error: unknown): Promise<string>
     }
 
     if (message !== 'Unauthorized') {
-        return '/'
+        return matchEditorFallback(await currentPathname()) ?? '/'
     }
 
     const pathname = await currentPathname()

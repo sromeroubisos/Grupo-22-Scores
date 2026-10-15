@@ -19,7 +19,13 @@ import {
     type MembershipScope,
 } from '@/lib/auth/roles';
 import { getReservedAdminRole } from '@/lib/types/user';
-import { GUEST_CLUB_ACCESS_COOKIE, isGuestClubAccessEnabled } from '@/lib/auth/guestClubAccess';
+import {
+    GUEST_CLUB_ACCESS_COOKIE,
+    GUEST_CLUB_MEMBERSHIP_ROLE,
+    isGuestClubAccessEnabled,
+    verifyGuestClubCookie,
+} from '@/lib/auth/guestClubAccess';
+import { assertMfaSatisfied } from '@/lib/auth/mfa';
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 type AllowedMembershipRoles = ReadonlySet<string>;
@@ -31,12 +37,6 @@ export interface UserAccessContext {
     role: AppUserRole;
     memberships: MembershipLike[];
 }
-
-type GuestClubCookiePayload = {
-    kind?: string;
-    clubHint?: string;
-    membershipRole?: string;
-};
 
 export interface TournamentManagementTarget {
     tournamentId: string;
@@ -96,19 +96,6 @@ function normalizeLookupToken(value: string) {
 function isAllowedGuestClubHint(value: string) {
     const normalized = normalizeLookupToken(value);
     return normalized === 'la tablada' || normalized === 'tablada';
-}
-
-function parseGuestClubCookie(rawValue?: string | null): GuestClubCookiePayload | null {
-    if (!rawValue) {
-        return null;
-    }
-
-    try {
-        const parsed = JSON.parse(rawValue) as GuestClubCookiePayload;
-        return parsed?.kind === 'club_family_guest' ? parsed : null;
-    } catch {
-        return null;
-    }
 }
 
 async function resolveGuestClubIdFromHint(clubHint: string): Promise<string | null> {
@@ -181,9 +168,12 @@ async function getGuestAccessContext(): Promise<UserAccessContext | null> {
     }
 
     const cookieStore = await cookies();
-    const payload = parseGuestClubCookie(cookieStore.get(GUEST_CLUB_ACCESS_COOKIE)?.value);
+    // La cookie va firmada con HMAC (GUEST_ACCESS_SECRET). Antes era JSON plano
+    // y el rol salia del payload: cualquiera escribia `membershipRole:'admin'`
+    // en su navegador y quedaba admin de la familia del club.
+    const payload = await verifyGuestClubCookie(cookieStore.get(GUEST_CLUB_ACCESS_COOKIE)?.value);
 
-    if (!payload?.clubHint) {
+    if (!payload) {
         return null;
     }
 
@@ -203,7 +193,9 @@ async function getGuestAccessContext(): Promise<UserAccessContext | null> {
         memberships: [{
             scopeType: 'club_family',
             scopeId: clubId,
-            role: payload.membershipRole === 'admin' ? 'admin' : 'editor',
+            // El rol lo fija el servidor, nunca el payload: aunque la firma
+            // fallara alguna vez, un invitado no pasa de editor.
+            role: GUEST_CLUB_MEMBERSHIP_ROLE,
         }],
     };
 }
@@ -309,6 +301,12 @@ export async function requireRequestGlobalAdminContext(): Promise<UserAccessCont
         throw new Error('Forbidden');
     }
 
+    // Despues del rol, como en /admin/layout.tsx: a quien no tiene permiso se
+    // lo rebota, no se le pide un segundo factor. El error lo traduce
+    // resolveAdminGuardRedirect a /auth/mfa, y resolveMfaState esta memoizado
+    // por request: el layout padre ya pago la consulta.
+    await assertMfaSatisfied(context.role);
+
     return context;
 }
 
@@ -319,6 +317,8 @@ export async function requireRequestTournamentAdminContext(): Promise<UserAccess
     if (!isGlobalAdminRole(context.role) && !isTournamentAdminRole(context.role)) {
         throw new Error('Forbidden');
     }
+
+    await assertMfaSatisfied(context.role);
 
     return context;
 }
@@ -344,6 +344,15 @@ export async function requireGlobalAdminContext(
         throw new Error('Forbidden');
     }
 
+    // Sin esto el segundo factor era decorativo: el layout de /admin lo pide,
+    // pero las rutas de API y las server actions que cuelgan de este guard se
+    // podian llamar directo con una sesion aal1. assertMfaSatisfied solo exige
+    // algo si el usuario TIENE un factor verificado (o si se prende
+    // MFA_REQUIRED_FOR_ADMINS): un admin sin factor sigue entrando igual.
+    // El error es MFA_CHALLENGE_ERROR / MFA_ENROLL_ERROR, que el llamador
+    // tiene que contestar con 403 (getApiErrorStatus / guardRejection).
+    await assertMfaSatisfied(context.role);
+
     return context;
 }
 
@@ -355,6 +364,8 @@ export async function requireTournamentAdminContext(
     if (!isGlobalAdminRole(context.role) && !isTournamentAdminRole(context.role)) {
         throw new Error('Forbidden');
     }
+
+    await assertMfaSatisfied(context.role);
 
     return context;
 }

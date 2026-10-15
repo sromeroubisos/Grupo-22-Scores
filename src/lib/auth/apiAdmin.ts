@@ -3,8 +3,23 @@ import { getUserAccessContext, type UserAccessContext } from '@/lib/auth/permiss
 import { createClient } from '@/lib/supabase/server';
 import { assertMfaSatisfied, isMfaError, MFA_CHALLENGE_ERROR, MFA_ENROLL_ERROR } from '@/lib/auth/mfa';
 
-export async function requireAdminApiUser(): Promise<string> {
-  const context = await requireAdminApiContext();
+export type AdminApiGuardOptions = {
+  /**
+   * Deja pasar al invitado de la demo de club (`userId` = `guest:<clubId>`).
+   * Apagado por defecto: el invitado sale de una cookie sin credenciales y
+   * resuelve a `familia_club`, que `isAdminUser` acepta, asi que sin este
+   * corte podia crear partidos, tocar planteles o inscripciones de temporada.
+   * Prenderlo solo en rutas de LECTURA que el panel de club de la demo usa.
+   */
+  allowGuest?: boolean;
+};
+
+export function isGuestUserId(userId: string | null | undefined): boolean {
+  return typeof userId === 'string' && userId.startsWith('guest:');
+}
+
+export async function requireAdminApiUser(options: AdminApiGuardOptions = {}): Promise<string> {
+  const context = await requireAdminApiContext(options);
   return context.userId;
 }
 
@@ -13,11 +28,16 @@ export async function requireGlobalAdminApiUser(): Promise<string> {
   return context.userId;
 }
 
-export async function requireAdminApiContext(): Promise<UserAccessContext> {
+export async function requireAdminApiContext(options: AdminApiGuardOptions = {}): Promise<UserAccessContext> {
   const supabase = await createClient();
   const context = await getUserAccessContext(supabase);
 
   if (!context) {
+    throw new Error('Unauthorized');
+  }
+
+  // 401 y no 403: el invitado no tiene sesion; si quiere esto, que se loguee.
+  if (isGuestUserId(context.userId) && !options.allowGuest) {
     throw new Error('Unauthorized');
   }
 
@@ -68,6 +88,16 @@ export function getApiErrorStatus(error: unknown, fallback = 500): number {
   if (isMfaError(error)) return 403;
   if (isForbiddenApiError(error)) return 403;
   return isUnauthorizedApiError(error) ? 401 : fallback;
+}
+
+/**
+ * Para los `catch` de guard que contestaban 401 a cualquier error: el segundo
+ * factor va con 403 y su mensaje accionable, el resto queda como estaba.
+ * Se usa como `return err(...guardRejection(error))`.
+ */
+export function guardRejection(error: unknown): [message: string, status: 401 | 403] {
+  if (isMfaError(error)) return [getApiErrorMessageForClient(error), 403];
+  return ['Unauthorized', 401];
 }
 
 /** Mensaje accionable para el 403 de segundo factor. */

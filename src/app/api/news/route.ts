@@ -1,14 +1,23 @@
-// Las noticias: leer (público solo lo publicado), crear, editar y borrar
-// (solo el super admin de noticias). Lo que llega se valida acá y se
+// Las noticias: leer (público solo lo publicado), crear, editar y borrar.
+// Escribir tiene dos alcances: la editorial global (super_admin, admin_general,
+// redactor) toca todo; el editor de un club, solo noticias scope='club' de SUS
+// clubes. Cada PUT/DELETE lee la fila antes y valida el alcance: con
+// service_role no hay RLS que lo frene. Lo que llega se valida acá y se
 // contesta con un 400 que dice qué está mal; el error crudo de Supabase
 // va al log, nunca a la pantalla.
 
 import { NextResponse } from 'next/server';
 
-import { getServerAuthRole, requireNewsSuperAdminServer } from '@/lib/auth/newsAccess';
-import { hasNewsManagementAccess } from '@/lib/auth/roles';
-import type { Database } from '@/lib/database.types';
+import {
+    canEditClubNews,
+    getNewsEditorScope,
+    listEditableClubIds,
+    requireNewsEditorScope,
+    type NewsEditorScope,
+} from '@/lib/auth/newsAccess';
 import { AUTHOR_MAX, cleanAuthorName } from '@/lib/news/byline';
+import { getReadClient } from '@/lib/supabase/read';
+import type { Database } from '@/lib/database.types';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
@@ -50,6 +59,34 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Un dato que no sirve: se contesta 400 con el mensaje, tal cual. */
 class NewsValidationError extends Error {}
+
+/** Tiene permiso de noticias, pero no sobre ESTA noticia o este alcance. */
+class NewsScopeError extends Error {}
+
+/**
+ * Corta si un editor de club intenta escribir fuera de sus clubes. La
+ * editorial global pasa siempre.
+ */
+async function assertCanWriteScope(editor: NewsEditorScope, scope: string, scopeId: string | null) {
+    if (editor.isGlobalEditor) return;
+    if (scope !== 'club') {
+        throw new NewsScopeError('Desde un club solo se publican noticias del club.');
+    }
+    if (!scopeId || !UUID.test(scopeId) || !(await canEditClubNews(editor, scopeId))) {
+        throw new NewsScopeError('No administrás ese club.');
+    }
+}
+
+/** La fila tal como está hoy: de acá sale el alcance, nunca del body. */
+async function loadNewsScope(admin: ReturnType<typeof createAdminClient>, id: string) {
+    const { data, error } = await admin
+        .from('news')
+        .select('id, scope, scope_id')
+        .eq('id', id)
+        .maybeSingle();
+    if (error) throw error;
+    return (data as { id: string; scope: string | null; scope_id: string | null } | null) ?? null;
+}
 
 function parseNewsLimit(value: string | null, fallback: number) {
     const parsed = Number.parseInt(value || String(fallback), 10);
@@ -236,6 +273,9 @@ function errorResponse(scope: string, error: unknown) {
     if (error instanceof NewsValidationError) {
         return NextResponse.json({ error: error.message }, { status: 400 });
     }
+    if (error instanceof NewsScopeError) {
+        return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     const message = getErrorMessage(error);
     if (message === 'Unauthorized') {
         return NextResponse.json({ error: 'No tenés permiso para administrar noticias.' }, { status: 403 });
@@ -250,14 +290,25 @@ export async function GET(req: Request) {
     const requestedLimit = parseNewsLimit(searchParams.get('limit'), DEFAULT_NEWS_LIMIT);
 
     try {
-        const { supabase, role } = await getServerAuthRole();
-        const canManageNews = hasNewsManagementAccess(role);
+        const editor = await getNewsEditorScope();
+        const supabase = editor?.supabase ?? await getReadClient();
+        // Los borradores solo los ve quien los puede editar: la editorial global
+        // todos; un editor de club, los de sus clubes. El filtro va en la query
+        // porque la RLS de `news` hoy no distingue alcance.
+        const draftClubIds = editor && !editor.isGlobalEditor ? await listEditableClubIds(editor) : [];
+        const scopeDraftFilter = draftClubIds.length > 0
+            ? `status.eq.published,and(scope.eq.club,scope_id.in.(${draftClubIds.join(',')}))`
+            : null;
 
         if (id) {
             let singleQuery = supabase.from('news').select('*').eq('id', id);
 
-            if (!canManageNews) {
+            if (!editor) {
                 singleQuery = singleQuery.eq('status', 'published');
+            } else if (!editor.isGlobalEditor) {
+                singleQuery = scopeDraftFilter
+                    ? singleQuery.or(scopeDraftFilter)
+                    : singleQuery.eq('status', 'published');
             }
 
             const { data, error } = await singleQuery.maybeSingle();
@@ -269,8 +320,11 @@ export async function GET(req: Request) {
         let query = supabase.from('news').select('*').order('published_at', { ascending: false });
 
         // El público solo ve lo publicado, y con tope.
-        if (!canManageNews) {
+        if (!editor) {
             query = query.eq('status', 'published').limit(PUBLIC_NEWS_LIMIT);
+        } else if (!editor.isGlobalEditor) {
+            query = (scopeDraftFilter ? query.or(scopeDraftFilter) : query.eq('status', 'published'))
+                .limit(requestedLimit);
         } else {
             query = query.limit(requestedLimit);
         }
@@ -295,7 +349,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
-        const { session } = await requireNewsSuperAdminServer();
+        const editor = await requireNewsEditorScope();
+        const session = editor.session;
         const admin = createAdminClient();
         const body = (await req.json().catch(() => ({}))) as NewsRequestBody;
 
@@ -305,6 +360,7 @@ export async function POST(req: Request) {
         const status = cleanStatus(body.status) ?? 'draft';
         const scope = cleanScope(body.scope) ?? 'global';
         const scopeId = cleanText(body.scope_id, 128, 'El id del alcance') ?? null;
+        await assertCanWriteScope(editor, scope, scope === 'global' ? null : scopeId);
 
         const payload: NewsInsert = {
             author_id: session!.user.id,
@@ -330,11 +386,16 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
     try {
-        await requireNewsSuperAdminServer();
+        const editor = await requireNewsEditorScope();
         const admin = createAdminClient();
         const body = (await req.json().catch(() => ({}))) as NewsRequestBody;
 
         const id = cleanId(body.id);
+        const current = await loadNewsScope(admin, id);
+        if (!current) throw new NewsValidationError('Esa noticia no existe.');
+        // Primero la fila de HOY: un editor de club no puede tomar una nota
+        // ajena y "mudarla" a su club con el body.
+        await assertCanWriteScope(editor, current.scope ?? 'global', current.scope_id);
         const updateData: NewsUpdate = {};
 
         const title = cleanText(body.title, TITLE_MAX, 'El título');
@@ -371,6 +432,15 @@ export async function PUT(req: Request) {
         const tags = cleanTags(body.tags);
         if (tags !== undefined) updateData.tags = tags;
 
+        // Y después el alcance en el que QUEDA: tampoco puede sacarla de su club.
+        if (updateData.scope !== undefined || updateData.scope_id !== undefined) {
+            const nextScope = updateData.scope ?? current.scope ?? 'global';
+            const nextScopeId = nextScope === 'global'
+                ? null
+                : (updateData.scope_id !== undefined ? updateData.scope_id : current.scope_id);
+            await assertCanWriteScope(editor, nextScope, nextScopeId ?? null);
+        }
+
         if (Object.keys(updateData).length === 0) throw new NewsValidationError('No hay nada para guardar.');
 
         const { data, dropped } = await updateNewsWithSchemaFallback(admin, id, updateData);
@@ -382,10 +452,14 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
-        await requireNewsSuperAdminServer();
+        const editor = await requireNewsEditorScope();
         const admin = createAdminClient();
         const { searchParams } = new URL(req.url);
         const id = cleanId(searchParams.get('id'));
+
+        const current = await loadNewsScope(admin, id);
+        if (!current) return NextResponse.json({ success: true });
+        await assertCanWriteScope(editor, current.scope ?? 'global', current.scope_id);
 
         const { error } = await admin.from('news').delete().eq('id', id);
         if (error) throw error;
