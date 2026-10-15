@@ -228,12 +228,18 @@ export function resolveBestUserRole({
     reservedRole,
     profileRole,
     appMetadata,
-    userMetadata,
     fallback = 'fan',
 }: {
     reservedRole?: string | null;
     profileRole?: string | null;
     appMetadata?: Record<string, unknown> | null;
+    /**
+     * Se acepta y se IGNORA. user_metadata lo escribe el propio usuario con
+     * auth.updateUser({ data: { role: 'super_admin' } }): leer un rol de ahi
+     * le entregaba el panel a cualquiera que se registrara (y syncUserProfile
+     * lo persistia en users.role con la service key). Queda en el tipo solo
+     * para que los llamadores que todavia lo pasan sigan compilando.
+     */
     userMetadata?: Record<string, unknown> | null;
     fallback?: AppUserRole;
 }): AppUserRole {
@@ -243,11 +249,9 @@ export function resolveBestUserRole({
     const profile = normalizeStoredRole(profileRole);
     if (profile && !isDefaultRoleValue(profileRole)) return profile;
 
+    // SOLO app_metadata: ese objeto se toca unicamente con la service key.
     const appMetadataRole = getRoleFromMetadata(appMetadata);
     if (appMetadataRole) return appMetadataRole;
-
-    const userMetadataRole = getRoleFromMetadata(userMetadata);
-    if (userMetadataRole) return userMetadataRole;
 
     return profile ?? fallback;
 }
