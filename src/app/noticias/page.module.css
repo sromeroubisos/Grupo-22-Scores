@@ -1052,6 +1052,16 @@
     flex: 1;
 }
 
+.newsViews {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    gap: 6px;
+    color: var(--ink-muted);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
 .menuWrap {
     position: relative;
     flex: none;

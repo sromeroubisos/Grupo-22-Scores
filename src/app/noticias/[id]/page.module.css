@@ -92,6 +92,14 @@
     transform: rotate(45deg) translate(2px, -2px);
 }
 
+.topBarActions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
 .topBarMeta {
     color: var(--ink-muted);
     font-family: var(--font-mono);
