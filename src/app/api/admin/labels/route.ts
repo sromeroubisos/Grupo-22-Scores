@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 
 export async function GET(request: NextRequest) {
@@ -44,7 +45,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
     }
 
-    const { data, error } = await supabase
+    // Escribe con service role: la RLS de ui_labels solo deja a admins globales
+    // (20261015120000_cerrar_escrituras_rls_abiertas.sql) y el chequeo de rol ya
+    // corrio arriba.
+    const { data, error } = await createAdminClient()
       .from('ui_labels')
       .insert({ name: name.trim(), color, scope, created_by: user.id })
       .select()

@@ -17,6 +17,7 @@ import { isMissingColumnError, isMissingTableError } from '@/lib/utils/supabaseS
 import { isUuid } from '@/lib/utils/postgrest';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import { isMatchRosterLocked } from '@/lib/tournament/fixedRoster';
+import { assertEventIdsBelongToMatch } from '@/lib/server/matchEventOwnership';
 import {
   deriveFixedRosterLineups,
   loadFixedRosterConfigForMatch,
@@ -2024,6 +2025,7 @@ export async function persistMatchCenterSupplementalData(
 
     const eventRows = resolvedEvents.map((event) => mapEventToInsert(match, event));
     if (eventRows.length > 0) {
+      await assertEventIdsBelongToMatch(client, matchId, eventRows.map((row) => row.id));
       const { error: upsertError } = await client
         .from('match_events')
         .upsert(eventRows, { onConflict: 'id' });
@@ -2065,6 +2067,7 @@ export async function persistMatchCenterSupplementalData(
         upsertEvents,
       );
       const eventRows = resolvedUpsertEvents.map((event) => mapEventToInsert(match, event));
+      await assertEventIdsBelongToMatch(client, matchId, eventRows.map((row) => row.id));
       const { error: upsertError } = await client
         .from('match_events')
         .upsert(eventRows, { onConflict: 'id' });

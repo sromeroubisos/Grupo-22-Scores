@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 
 /**
@@ -11,7 +12,10 @@ import { requireTournamentAdminContext } from '@/lib/auth/permissions';
 async function requireLabelAdmin() {
   const supabase = await createClient();
   await requireTournamentAdminContext(supabase);
-  return supabase;
+  // La RLS de ui_labels solo deja escribir a admins globales
+  // (20261015120000_cerrar_escrituras_rls_abiertas.sql); el gestor de torneo
+  // escribe con service role una vez pasado el chequeo de rol de arriba.
+  return createAdminClient();
 }
 
 export async function PATCH(
