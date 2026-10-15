@@ -1,6 +1,11 @@
 // La imagen de una noticia, subida desde el editor al bucket público `news`
-// (el mismo del que ya salen las notas con imagen). Solo el super admin de
-// noticias. Devuelve la URL pública, que el editor guarda en `image_url`.
+// (el mismo del que ya salen las notas con imagen). Quien tenga permiso de
+// noticias (global o de club). Devuelve la URL pública, que el editor guarda
+// en `image_url`.
+//
+// El tipo sale de los BYTES, no de `file.type` (lo pone el cliente): un HTML
+// declarado como image/png quedaba servido con ese contenido desde el bucket.
+// La extensión y el content-type salen del tipo real.
 //
 // El nombre del archivo sale del CONTENIDO (hash), como en persistClubLogo:
 // subir dos veces la misma foto escribe el mismo archivo en vez de acumular
@@ -9,22 +14,17 @@
 import { createHash } from 'node:crypto';
 import { NextResponse } from 'next/server';
 
+import sharp from 'sharp';
+
 import { requireNewsSuperAdminServer } from '@/lib/auth/newsAccess';
+import { IMAGE_MAX_BYTES, RASTER_IMAGE_KINDS, sniffFile } from '@/lib/server/fileSniff';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const BUCKET = 'news';
-const MAX_NEWS_IMAGE_BYTES = 5 * 1024 * 1024;
-
-const EXTENSION_BY_MIME: Record<string, string> = {
-    'image/jpeg': 'jpg',
-    'image/jpg': 'jpg',
-    'image/png': 'png',
-    'image/webp': 'webp',
-    'image/gif': 'gif',
-    'image/avif': 'avif',
-};
+const MAX_NEWS_IMAGE_BYTES = IMAGE_MAX_BYTES;
 
 function fail(message: string, status: number) {
     return NextResponse.json({ error: message }, { status });
@@ -47,13 +47,22 @@ export async function POST(request: Request) {
     const file = form.get('file');
     if (!(file instanceof File)) return fail('Elegí un archivo de imagen.', 400);
 
-    const mime = file.type.toLowerCase();
-    const ext = EXTENSION_BY_MIME[mime];
-    if (!ext) return fail('Formato no soportado: usá JPG, PNG, WebP, GIF o AVIF.', 415);
     if (file.size === 0) return fail('El archivo llegó vacío.', 400);
     if (file.size > MAX_NEWS_IMAGE_BYTES) return fail('La imagen pesa más de 5 MB. Achicala antes de subirla.', 413);
 
     const bytes = Buffer.from(await file.arrayBuffer());
+    const sniffed = sniffFile(bytes);
+    if (!sniffed || !RASTER_IMAGE_KINDS.has(sniffed.kind)) {
+        return fail('Formato no soportado: usá JPG, PNG, WebP, GIF o AVIF.', 415);
+    }
+    // Que la firma coincida no alcanza: tiene que decodificar como imagen.
+    try {
+        await sharp(bytes, { limitInputPixels: 50_000_000 }).metadata();
+    } catch {
+        return fail('No pudimos leer la imagen. Probá exportarla de nuevo como PNG o JPG.', 422);
+    }
+    const mime = sniffed.mime;
+    const ext = sniffed.ext;
     const digest = createHash('sha256').update(bytes).digest('hex').slice(0, 20);
     const path = `${digest}.${ext}`;
 
