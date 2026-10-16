@@ -88,6 +88,8 @@ type PublicTournamentRow = {
     gender: string | null;
     /** Quién carga este torneo. Agrupa el filtro de temporada — ver tournamentSeasonFilter. */
     union_id: string | null;
+    /** `regional` si lo juegan varias uniones (o es el regional de su provincia); null = de una unión. */
+    scope?: string | null;
 };
 
 type PublicTournamentQueryResult = {
@@ -180,6 +182,19 @@ type PublicDbTournamentListItem = {
      * elemento sería un desplegable que se abre para ofrecer una sola cosa.
      */
     season_id: string | null;
+    /**
+     * La división del torneo (categoría, edad, género y grado). El selector de
+     * ligas la usa para agrupar los hermanos de una división en una sola entrada;
+     * sin esto cada zona de la URBA era una fila.
+     */
+    category?: string | null;
+    age_grade?: string | null;
+    subcategory?: string | null;
+    gender?: string | null;
+    /** La unión organizadora: de ahí sale la región en el selector de ligas. */
+    union_id?: string | null;
+    /** `regional` | `nacional` | null (de una unión). Ordena y rotula en el selector de ligas. */
+    scope?: string | null;
 };
 
 type PublicTournamentCountryFilter = {
@@ -1012,6 +1027,12 @@ function filterPublicDbTournaments(args: {
             slug: tournament.slug,
             priority: typeof tournament.priority === 'number' ? tournament.priority : 0,
             season_id: tournament.season_id ?? null,
+            category: tournament.category ?? null,
+            age_grade: tournament.age_grade ?? null,
+            subcategory: tournament.subcategory ?? null,
+            gender: tournament.gender ?? null,
+            union_id: tournament.union_id ?? null,
+            scope: tournament.scope ?? null,
         })));
 }
 
@@ -1256,9 +1277,25 @@ function resolveAudienceFilter(rawAudience: string | null): TournamentAudience {
     return rawAudience === 'juveniles' ? 'juveniles' : 'mayores';
 }
 
+let scopeColumnCheck: { ok: boolean; at: number } | null = null;
+
+/**
+ * `tournaments.scope` es una columna nueva. Si la migración todavía no corrió en
+ * esa base, pedirla rompería la lista pública entera: se sondea y, si falta, se
+ * sigue sin ella. El resultado se recuerda unos minutos para no sondear en cada
+ * pedido.
+ */
+async function scopeColumnAvailable(supabase: Awaited<ReturnType<typeof getReadClient>>): Promise<boolean> {
+    if (scopeColumnCheck && Date.now() - scopeColumnCheck.at < 5 * 60_000) return scopeColumnCheck.ok;
+    const { error } = await supabase.from('tournaments').select('scope').limit(1);
+    scopeColumnCheck = { ok: !error, at: Date.now() };
+    return !error;
+}
+
 async function queryVisiblePublicTournaments(
     supabase: Awaited<ReturnType<typeof getReadClient>>,
 ): Promise<PublicTournamentQueryResult> {
+    const conScope = await scopeColumnAvailable(supabase);
     const attempts: Array<{ select: string; usesLegacySport: boolean; usesPriority: boolean }> = [
         { select: SELECT_WITH_LEGACY_SPORT_AND_PRIORITY_REVIEW, usesLegacySport: true, usesPriority: true },
         { select: SELECT_WITHOUT_LEGACY_SPORT_AND_PRIORITY_REVIEW, usesLegacySport: false, usesPriority: true },
@@ -1282,7 +1319,7 @@ async function queryVisiblePublicTournaments(
         for (let desde = 0; desde < PUBLIC_TOURNAMENTS_DB_QUERY_LIMIT; desde += PUBLIC_TOURNAMENTS_DB_PAGE_SIZE) {
             let query = supabase
                 .from('tournaments')
-                .select(attempt.select)
+                .select(conScope ? `${attempt.select}, scope` : attempt.select)
                 .neq('is_visible', false);
 
             if (attempt.usesPriority) {

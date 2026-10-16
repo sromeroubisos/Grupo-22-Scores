@@ -1,0 +1,233 @@
+/* Navegación por niveles del selector de ligas: países > uniones > competiciones.
+   Cada nivel REEMPLAZA al anterior (no se despliega debajo), así que la pantalla
+   nunca muestra más que un nivel de opciones a la vez. */
+
+.root {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    /* Deja libre el encabezado fijo del sitio cuando se sube al inicio del selector. */
+    scroll-margin-top: 84px;
+}
+
+/* La entrada viene del lado hacia el que se navega: al avanzar, de la derecha; al
+   volver, de la izquierda. Es la misma trayectoria de ida y de vuelta. */
+.view {
+    animation: enterForward 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.viewBack {
+    animation: enterBack 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes enterForward {
+    from { opacity: 0; transform: translateX(28px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes enterBack {
+    from { opacity: 0; transform: translateX(-28px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .view, .viewBack { animation: fade 120ms ease both; }
+}
+
+.bar {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0 8px;
+    margin-bottom: 4px;
+    background: var(--color-bg-primary, transparent);
+    border-bottom: 1px solid var(--color-border);
+}
+.back {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 48px;
+    padding: 0 16px 0 6px;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--color-accent);
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 120ms ease, transform 100ms ease-out;
+}
+.back:hover { background: var(--color-bg-tertiary); }
+.back:active { transform: scale(0.97); }
+.back:focus-visible, .row:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+.title {
+    margin: 0;
+    padding: 0 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+    outline: none;
+}
+
+.eyebrow {
+    padding: 14px 8px 4px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+}
+
+.row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 0.88rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 120ms ease, transform 100ms ease-out;
+}
+.row:hover { background: var(--color-bg-tertiary); }
+.row:active { transform: scale(0.985); background: var(--color-bg-tertiary); }
+.rowMain {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+.rowLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.rowTail {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-tertiary);
+}
+.count {
+    min-width: 22px;
+    height: 20px;
+    padding: 0 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: var(--color-bg-tertiary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* El bloque de una unión: mosaico con el logo + degradé con los colores del logo. */
+.block {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    margin: 0 0 8px;
+    padding: 10px 12px 10px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 120ms ease-out, filter 120ms ease;
+}
+.block:hover { filter: brightness(1.08); }
+.block:active { transform: scale(0.985); }
+.block:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.tile {
+    flex: none;
+    width: 50px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+}
+/* Sin mosaico: el logo o la bandera van directo sobre el degradé. La sombra clara
+   por detrás es lo que mantiene a la vista los escudos de trazo negro o gris. */
+.tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.55)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+}
+.initials {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1.5px solid var(--color-border);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
+}
+.blockText { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.blockTitle {
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    line-height: 1.2;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.blockMeta { font-size: 0.72rem; color: var(--color-text-secondary); }
+
+/* Países: el mismo bloque, más bajo, para que la lista de países no se haga eterna. */
+.blockCompact { min-height: 54px; margin-bottom: 6px; padding: 8px 12px 8px 8px; border-radius: 12px; }
+.blockCompact .tile { width: 42px; height: 38px; }
+.blockCompact .blockTitle { font-size: 0.88rem; }
+
+/* El banner del encabezado: el mismo bloque, sin ser un botón. */
+.banner { margin: 6px 0 0; cursor: default; }
+.banner:hover { filter: none; }
+.banner:active { transform: none; }
+.bannerTitle {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    color: var(--color-text-primary);
+    outline: none;
+}
+
+.memberLink {
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 10px;
+    border-radius: 10px;
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+.memberLink:hover { background: var(--color-bg-tertiary); color: var(--color-text-primary); }
+
+.skeleton { display: flex; flex-direction: column; gap: 8px; padding: 8px; }
+.skeletonRow { height: 32px; border-radius: 10px; background: var(--color-bg-tertiary); opacity: 0.6; }
+.note { padding: 8px 10px; font-size: 0.78rem; color: var(--color-text-tertiary); }

@@ -4,6 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Star } from 'lucide-react';
 import pageStyles from '../page.module.css';
+import LeagueDrilldown, { type DrillCountry } from '@/components/LeagueDrilldown';
+import { agruparPorRegion, seccionesDeRegion, type UnionConRegion } from '@/lib/leagueRegions';
+import { completarConFilasLocales } from '@/lib/leagueFamilies';
+import { gruposPorTipo } from '@/lib/leagueSections';
+import { etiquetaDeTemporada } from '@/lib/tournamentSeasonFilter';
 import { useSport } from '@/context/SportContext';
 import { getTournamentsBySport, getInternationalTournamentsBySport } from '@/lib/data/tournaments';
 import { buildEspnFootballTournaments, getEspnFootballInternationalTournaments } from '@/lib/data/tournaments/espnFootballCatalog';
@@ -64,6 +69,13 @@ type PublicTournamentListItem = {
     url?: string | null;
     /** La temporada de esta edición. Null en los torneos del catálogo externo. */
     season_id?: string | null;
+    /** La división: sólo los torneos de la base la traen (no el catálogo externo). */
+    category?: string | null;
+    age_grade?: string | null;
+    subcategory?: string | null;
+    gender?: string | null;
+    union_id?: string | null;
+    scope?: string | null;
     seasons?: Array<{
         seasonId?: string | null;
         season?: string | number | null;
@@ -90,6 +102,9 @@ type ManualTournamentApiItem = {
     is_visible?: boolean | null;
     age_grade?: string | null;
     format?: Tournament['format'] | null;
+    subcategory?: string | null;
+    gender?: string | null;
+    union_id?: string | null;
 };
 
 const ALL_COUNTRIES = getAllCountries();
@@ -309,7 +324,12 @@ function mapPublicTournamentToTournament(item: PublicTournamentListItem): Tourna
         countryId,
         priority: typeof item.priority === 'number' ? item.priority : 0,
         logoUrl: item.logo_url || null,
-        categories: [],
+        categories: item.category ? [item.category.toLowerCase()] : [],
+        ageGroup: item.age_grade || undefined,
+        subcategory: item.subcategory ?? null,
+        gender: item.gender ?? null,
+        unionId: item.union_id ?? null,
+        scope: item.scope ?? null,
         seasons,
         seasonId: item.season_id || null,
         isApiManaged: true,
@@ -323,6 +343,18 @@ export default function TorneosPage() {
     const { isLeagueFavorite } = useFavorites();
 
     const [manualTournamentsList, setManualTournamentsList] = useState<Tournament[]>([]);
+    // Las uniones con región: de ahí sale el orden territorial de cada país.
+    const [leagueUnions, setLeagueUnions] = useState<UnionConRegion[]>([]);
+    useEffect(() => {
+        const controller = new AbortController();
+        fetch('/api/public/unions', { signal: controller.signal })
+            .then((response) => response.json())
+            .then((payload) => {
+                if (Array.isArray(payload?.data)) setLeagueUnions(payload.data as UnionConRegion[]);
+            })
+            .catch(() => { /* sin regiones el selector queda como lista plana */ });
+        return () => controller.abort();
+    }, []);
     const [rugbyCountrySummaries, setRugbyCountrySummaries] = useState<RugbyPublicCountrySummary[]>([]);
     const [rugbyCountryGroups, setRugbyCountryGroups] = useState<Record<string, RugbyCountryGroupState>>({});
     const [rugbyPublicCatalogReady, setRugbyPublicCatalogReady] = useState(false);
@@ -565,30 +597,6 @@ export default function TorneosPage() {
         return compareTournamentsByPriority(left, right);
     }, [hasRugbyPublicCatalog, isLeagueFavorite]);
 
-    const recommendedTournaments = useMemo(() => {
-        const recommended = new Map<string, Tournament>();
-
-        recommendedCatalog
-            .filter((tournament) => isLeagueFavorite(tournament.id))
-            .sort(compareSidebarTournaments)
-            .forEach((tournament) => {
-                recommended.set(tournament.id, tournament);
-            });
-
-        if (userCountryId) {
-            recommendedCatalog
-                .filter((tournament) => (
-                    normalizeLookupValue(tournament.countryId) === userCountryId &&
-                    !recommended.has(tournament.id)
-                ))
-                .sort(compareSidebarTournaments)
-                .forEach((tournament) => {
-                    recommended.set(tournament.id, tournament);
-                });
-        }
-
-        return [...recommended.values()].slice(0, 8);
-    }, [compareSidebarTournaments, isLeagueFavorite, recommendedCatalog, userCountryId]);
 
     // Internacional se carga como cualquier otro grupo. Excluirlo venia de cuando
     // era un bloque aparte con lista fija: quedaba mostrando solo lo del catalogo
@@ -726,6 +734,51 @@ export default function TorneosPage() {
             return filteredGroups[left].countryName.localeCompare(filteredGroups[right].countryName);
         }), [filteredGroups, getCountryTournamentCount]);
 
+    // El selector por niveles: cada país con sus competiciones ya agrupadas en
+    // familias, y sus uniones cuando el país tiene regiones.
+    const drillCountries = useMemo<Array<DrillCountry<Tournament>>>(() => sortedCountryIds.map((countryId) => {
+        const group = filteredGroups[countryId];
+        // Se parte y se agrupa en familias ADENTRO de cada sección (ver leagueSections).
+        const crudos = completarConFilasLocales(group.tournaments, manualTournamentsList)
+            .slice()
+            .sort(compareSidebarTournaments);
+        const regiones = agruparPorRegion(crudos, leagueUnions);
+        const sections = regiones
+            ? seccionesDeRegion(regiones).map((seccion) => {
+                const groups = gruposPorTipo(seccion.tournaments);
+                return { ...seccion, groups, tournaments: groups.flatMap((g) => g.tournaments) };
+            })
+            : null;
+        const groups = gruposPorTipo(crudos);
+        const tournaments = groups.flatMap((g) => g.tournaments);
+        return {
+            id: countryId,
+            name: group.countryName,
+            // El número de lo que se ve, no el del catálogo crudo.
+            count: group.loaded || !group.externalCountryId ? tournaments.length : getCountryTournamentCount(group),
+            loading: group.loading,
+            error: group.error,
+            notice: !group.loading && !group.error && group.externalUnavailable
+                ? (tournaments.length > 0
+                    ? "El catálogo externo no respondió: puede faltar alguna liga."
+                    : "El catálogo externo no respondió. Probá de nuevo en un rato.")
+                : null,
+            sections,
+            groups,
+            tournaments,
+        };
+    }), [sortedCountryIds, filteredGroups, manualTournamentsList, leagueUnions, compareSidebarTournaments, getCountryTournamentCount]);
+
+    // Con búsqueda, la lista plana de todo lo que coincide: buscar no tiene por qué
+    // pasar por países y uniones.
+    const drillSearchResults = useMemo<Tournament[] | null>(() => {
+        if (!searchQuery.trim()) return null;
+        const vistos = new Set<string>();
+        return drillCountries
+            .flatMap((country) => country.tournaments)
+            .filter((tournament) => (vistos.has(tournament.id) ? false : (vistos.add(tournament.id), true)));
+    }, [drillCountries, searchQuery]);
+
     useEffect(() => {
         if (typeof navigator === 'undefined') {
             return;
@@ -774,9 +827,13 @@ export default function TorneosPage() {
                     priority: typeof tournament.priority === 'number' ? tournament.priority : 0,
                     logoUrl: tournament.logo_url || null,
                     categories: tournament.category ? [tournament.category.toLowerCase()] : [],
-                    seasons: tournament.season_id
-                        ? [{ seasonId: String(tournament.season_id), teamsCount: 0, isActive: true }]
-                        : [],
+                    // La temporada es un escalar y no una lista de un elemento: con
+                    // `seasons` cada fila dibujaba un desplegable que ofrecía una sola
+                    // opción. La etiqueta sólo sale cuando no es la temporada en curso.
+                    seasonId: tournament.season_id ? String(tournament.season_id) : null,
+                    subcategory: tournament.subcategory ?? null,
+                    gender: tournament.gender ?? null,
+                    unionId: tournament.union_id ?? null,
                     isVisible: tournament.is_visible ?? undefined,
                     isWomen: isWomenCategory(tournament.category),
                     isYouth: resolveTournamentAudience({
@@ -1132,212 +1189,24 @@ export default function TorneosPage() {
                         </div>
                     )}
 
-                    {recommendedTournaments.length > 0 && (
-                        <div style={{ marginBottom: '16px' }}>
-                            <div className={pageStyles.sidebarSectionTitle} style={{ height: 'auto', marginBottom: '8px' }}>
-                                Recomendados
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                {recommendedTournaments.map((tournament) => (
-                                    <Link
-                                        key={tournament.id}
-                                        href={getTournamentHref(tournament)}
-                                        className={pageStyles.accordionItemLink}
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '6px',
-                                            paddingLeft: '16px',
-                                            background: 'rgba(255,255,255,0.02)',
-                                            borderRadius: '10px',
-                                        }}
-                                    >
-                                        {isLeagueFavorite(tournament.id) && (
-                                            <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
-                                        )}
-                                        <span>{tournament.name}</span>
-                                        <TournamentSeasonTag seasonId={tournament.seasonId} />
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                    )}
 
                     <div className={pageStyles.accordionList}>
-                        {sortedCountryIds.map((countryId) => {
-                            const group = filteredGroups[countryId];
-                            const isExpanded = expandedCountries.has(countryId);
-                            const countryTournamentCount = getCountryTournamentCount(group);
-
-                            return (
-                                <div key={countryId} className={pageStyles.accordionItem}>
-                                    <button
-                                        type="button"
-                                        onClick={() => toggleCountry(countryId)}
-                                        aria-expanded={isExpanded}
-                                        className={`${pageStyles.accordionHeader} ${isExpanded ? pageStyles.active : ''}`}
-                                    >
-                                        <div className={pageStyles.accordionHeaderContent}>
-                                            <CountryFlag countryId={countryId} countryName={group.countryName} />
-                                            <span className={pageStyles.accordionHeaderName}>{group.countryName}</span>
-                                        </div>
-                                        <div className={pageStyles.accordionHeaderTail}>
-                                            {countryTournamentCount !== null && (
-                                                <span className={pageStyles.accordionCount}>{countryTournamentCount}</span>
-                                            )}
-                                            <svg
-                                                className={pageStyles.chevron}
-                                                style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                                                width="16"
-                                                height="16"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                            >
-                                                <path d="M6 9l6 6 6-6" />
-                                            </svg>
-                                        </div>
-                                    </button>
-
-                                    <div className={`${pageStyles.accordionContent} ${isExpanded ? pageStyles.open : ''}`}>
-                                        <div className={pageStyles.accordionContentInner}>
-                                        {group.loading && group.tournaments.length === 0 && (
-                                            <div className={pageStyles.accordionSkeleton} role="status" aria-label="Cargando ligas">
-                                                <span className={pageStyles.accordionSkeletonRow} />
-                                                <span className={pageStyles.accordionSkeletonRow} />
-                                                <span className={pageStyles.accordionSkeletonRow} />
-                                            </div>
-                                        )}
-                                        {!group.loading && group.error && group.tournaments.length === 0 && (
-                                            <div className={pageStyles.audienceEmptyState}>{group.error}</div>
-                                        )}
-                                        {!group.loading && !group.error && group.externalUnavailable && (
-                                            <div className={pageStyles.audienceEmptyState}>
-                                                {group.tournaments.length > 0
-                                                    ? 'El catálogo externo no respondió: puede faltar alguna liga.'
-                                                    : 'El catálogo externo no respondió. Probá de nuevo en un rato.'}
-                                            </div>
-                                        )}
-                                        {!group.loading && group.tournaments
-                                            .slice()
-                                            .sort(compareSidebarTournaments)
-                                            .map((tournament) => {
-                                                const hasSubItems = Boolean(tournament.seasons && tournament.seasons.length > 0);
-                                                const isLeagueExpanded = expandedLeagueIds.has(tournament.id);
-                                                const isFavLeague = isLeagueFavorite(tournament.id);
-
-                                                if (hasSubItems) {
-                                                    return (
-                                                        <div key={tournament.id} className={pageStyles.accordionItemLinkWrapper}>
-                                                            <div
-                                                                className={`${pageStyles.accordionItemHeader} ${isLeagueExpanded ? pageStyles.active : ''}`}
-                                                                style={{ display: 'flex', alignItems: 'center', padding: 0, width: '100%' }}
-                                                            >
-                                                                <Link
-                                                                    href={getTournamentHref(tournament)}
-                                                                    className={pageStyles.leagueRowLink}
-                                                                    style={{
-                                                                        flex: 1,
-                                                                        minHeight: 32,
-                                                                        padding: '4px 8px',
-                                                                        color: 'inherit',
-                                                                        textDecoration: 'none',
-                                                                        textAlign: 'left',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        gap: '6px',
-                                                                    }}
-                                                                >
-                                                                    {isFavLeague && (
-                                                                        <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
-                                                                    )}
-                                                                    {tournament.name}
-                                                                </Link>
-                                                                <button
-                                                                    type="button"
-                                                                    aria-label={`${isLeagueExpanded ? 'Ocultar' : 'Ver'} temporadas de ${tournament.name}`}
-                                                                    aria-expanded={isLeagueExpanded}
-                                                                    onClick={(event) => {
-                                                                        event.preventDefault();
-                                                                        event.stopPropagation();
-                                                                        toggleLeague(tournament.id);
-                                                                    }}
-                                                                    style={{
-                                                                        padding: '0 8px',
-                                                                        minWidth: 32,
-                                                                        minHeight: 32,
-                                                                        background: 'transparent',
-                                                                        border: 'none',
-                                                                        cursor: 'pointer',
-                                                                        color: 'inherit',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                    }}
-                                                                >
-                                                                    <svg
-                                                                        className={pageStyles.chevron}
-                                                                        width="14"
-                                                                        height="14"
-                                                                        viewBox="0 0 24 24"
-                                                                        fill="none"
-                                                                        stroke="currentColor"
-                                                                        strokeWidth="2"
-                                                                        style={{ transform: isLeagueExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                                                                    >
-                                                                        <path d="M9 18l6-6-6-6" />
-                                                                    </svg>
-                                                                </button>
-                                                            </div>
-                                                            <div className={`${pageStyles.accordionItemContent} ${isLeagueExpanded ? pageStyles.open : ''}`}>
-                                                                <div className={pageStyles.accordionItemContentInner}>
-                                                                {tournament.seasons!.map((season) => (
-                                                                    <Link
-                                                                        key={season.seasonId}
-                                                                        href={appendTournamentSeasonHref(getTournamentHref(tournament), season.seasonId)}
-                                                                        className={pageStyles.accordionSubItemLink}
-                                                                    >
-                                                                        Temporada {season.seasonId}
-                                                                    </Link>
-                                                                ))}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                }
-
-                                                return (
-                                                    <Link
-                                                        key={tournament.id}
-                                                        href={getTournamentHref(tournament)}
-                                                        className={pageStyles.accordionItemLink}
-                                                        style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-                                                    >
-                                                        {isFavLeague && (
-                                                            <Star size={11} fill="currentColor" style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
-                                                        )}
-                                                        <span>{tournament.name}</span>
-                                                        <TournamentSeasonTag seasonId={tournament.seasonId} />
-                                                    </Link>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-
-                        {sortedCountryIds.length === 0 && (
-                            <div className={pageStyles.audienceEmptyState}>
-                                {searchQuery
-                                    ? (isRemoteSearching
-                                        ? `Buscando "${searchQuery}"...`
-                                        : `No encontramos nada con "${searchQuery}".`)
-                                    : selectedAudience === 'juveniles'
-                                        ? 'No hay torneos juveniles ni de reserva cargados para este deporte.'
-                                        : 'No hay torneos disponibles para este deporte.'}
-                            </div>
-                        )}
+                        <LeagueDrilldown
+                            countries={drillCountries}
+                            searchResults={drillSearchResults}
+                            hrefFor={getTournamentHref}
+                            isFavorite={(tournament) => isLeagueFavorite(tournament.id)}
+                            seasonLabel={(tournament) => etiquetaDeTemporada(tournament.seasonId)}
+                            onOpenCountry={(countryId) => { if (!expandedCountries.has(countryId)) toggleCountry(countryId); }}
+                            rootLabel={selectedSport.nameEs}
+                            emptyMessage={searchQuery
+                                ? (isRemoteSearching
+                                    ? `Buscando "${searchQuery}"...`
+                                    : `No encontramos nada con "${searchQuery}".`)
+                                : selectedAudience === "juveniles"
+                                    ? "No hay torneos juveniles ni de reserva cargados para este deporte."
+                                    : "No hay torneos disponibles para este deporte."}
+                        />
                     </div>
                 </div>
             </div>
