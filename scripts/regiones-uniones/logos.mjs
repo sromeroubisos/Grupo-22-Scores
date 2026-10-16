@@ -44,6 +44,18 @@ const LOGOS = {
   'union-de-rugby-de-tierra-del-fuego': 'WEB/Tierra del Fuego.png',
   'e558d0d9-c01b-40ce-a1c7-e533cb81f97c': 'WEB/Tucumán.png',
   'union-de-rugby-de-misiones': 'MISIONES.png',
+  // Hockey: las únicas entidades con logo en la carpeta de recursos.
+  'federacion-internacional-de-hockey': '../../HOCKEY/FIH-STARS-2026.png',
+  '39b95e30-ede4-48e1-a5e5-588b0fb3eb3c': '../../HOCKEY/PAHF.png',
+  // Asociaciones de hockey: __GRUPO 22/RECURSOS/HOCKEY (sube tres niveles, hasta ________S22).
+  'confederacion-argentina-de-hockey': '../../../__GRUPO 22/RECURSOS/HOCKEY/SELECCIONES/ARGENTINA.png',
+  'asociacion-amateur-de-hockey-sobre-cesped-buenos-aires': '../../../__GRUPO 22/RECURSOS/HOCKEY/UNIONES/BUENOS AIRES.png',
+  'asociacion-amateur-marplatense-de-hockey': '../../../__GRUPO 22/RECURSOS/HOCKEY/UNIONES/MAR DEL PLATA.png',
+  'federacion-cordobesa-de-hockey': '../../../__GRUPO 22/RECURSOS/HOCKEY/UNIONES/CORDOBESA.png',
+  'asociacion-de-hockey-del-litoral': '../../../__GRUPO 22/RECURSOS/HOCKEY/UNIONES/LITORAL.png',
+  'asociacion-tucumana-amateur-de-hockey': '../../../__GRUPO 22/RECURSOS/HOCKEY/UNIONES/TUCUMAN.png',
+  'asociacion-mendocina-de-hockey-sobre-cesped': '../../../__GRUPO 22/RECURSOS/HOCKEY/UNIONES/MENDOZA.png',
+  'federacion-chilena-de-hockey-cesped': '../../../__GRUPO 22/RECURSOS/HOCKEY/UNIONES/Chilena.png',
 };
 
 const TAM = 160;

@@ -12,8 +12,9 @@
 
 /** El orden de las regiones en pantalla, y cómo se leen. */
 export const REGIONES = [
+  { code: 'internacional', label: 'Internacional' },
   { code: 'nacional', label: 'Nacional' },
-  { code: 'amba', label: 'AMBA' },
+  { code: 'amba', label: 'Buenos Aires' },
   { code: 'pampeana', label: 'Pampeana' },
   { code: 'centro', label: 'Centro' },
   { code: 'litoral', label: 'Litoral' },
@@ -29,6 +30,13 @@ const ETIQUETA_DE_REGION = new Map<string, string>(REGIONES.map((r) => [r.code, 
 const ORDEN_DE_REGION = new Map<string, number>(REGIONES.map((r, i) => [r.code, i]));
 
 export const REGION_SIN_DATO = 'otras';
+
+/**
+ * Regiones cuyos regionales los juegan TODAS sus uniones, no solo la que los
+ * organiza: el Regional Patagónico es de Alto Valle, Austral, Chubut y Tierra del
+ * Fuego a la vez. En estas regiones el regional se repite en cada unión.
+ */
+const REGIONES_CON_REGIONAL_COMPARTIDO = new Set(['patagonia']);
 
 /** Lo que devuelve `/api/public/unions`. */
 export interface UnionConRegion {
@@ -150,6 +158,28 @@ export function agruparPorRegion<T extends { unionId?: string | null; scope?: st
     }
   }
 
+  // El regional compartido se ve también en las demás uniones de su región. No
+  // entra en el total de la región: es el mismo torneo, no uno más.
+  const repetidos = new Map<string, number>();
+  for (const [region, deLaRegion] of regiones) {
+    if (!REGIONES_CON_REGIONAL_COMPARTIDO.has(region)) continue;
+    const compartidos = regionales.get(region) ?? [];
+    if (compartidos.length === 0) continue;
+    const hermanas = uniones
+      .filter((u) => u.region_code === region)
+      .sort((a, b) => a.id.localeCompare(b.id));
+    for (const u of hermanas) {
+      let grupo = deLaRegion.get(u.id);
+      if (!grupo) {
+        grupo = { unionId: u.id, unionName: u.name, tournaments: [] };
+        deLaRegion.set(u.id, grupo);
+      }
+      const nuevos = compartidos.filter((t) => !grupo!.tournaments.includes(t));
+      grupo.tournaments.push(...nuevos);
+      repetidos.set(region, (repetidos.get(region) ?? 0) + nuevos.length);
+    }
+  }
+
   const conRegion = [...regiones.keys()].filter((r) => r !== REGION_SIN_DATO);
   if (conRegion.length < 2) return null;
 
@@ -162,7 +192,7 @@ export function agruparPorRegion<T extends { unionId?: string | null; scope?: st
         // La unión con más competiciones primero: es la que se busca.
         return b.tournaments.length - a.tournaments.length || a.unionName.localeCompare(b.unionName, 'es');
       });
-      const total = groups.reduce((n, g) => n + g.tournaments.length, 0);
+      const total = groups.reduce((n, g) => n + g.tournaments.length, 0) - (repetidos.get(code) ?? 0);
       const delRegion = regionales.get(code);
       if (delRegion?.length) {
         groups.unshift({

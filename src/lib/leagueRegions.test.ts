@@ -18,7 +18,7 @@ test('agrupa por región en el orden fijo y por unión adentro', () => {
     uniones,
   );
   assert.deepEqual(r?.map((g) => g.code), ['nacional', 'amba', 'centro', 'noa']);
-  assert.equal(r?.[1].label, 'AMBA');
+  assert.equal(r?.[1].label, 'Buenos Aires');
   assert.deepEqual(r?.[1].unions[0].tournaments.map((x) => x.id), ['2', '5']);
   assert.equal(r?.[1].total, 2);
 });
@@ -62,7 +62,7 @@ test('seccionesDeRegion aplana los grupos conservando el orden y la región como
   const grupos = agruparPorRegion([t('1', 'tuc'), t('2', 'urba'), t('3', 'urba'), t('4', 'cba')], uniones);
   const secciones = seccionesDeRegion(grupos ?? []);
   assert.deepEqual(secciones.map((s) => [s.title, s.eyebrow, s.tournaments.length]), [
-    ['URBA', 'AMBA', 2],
+    ['URBA', 'Buenos Aires', 2],
     ['Unión Cordobesa de Rugby', 'Centro', 1],
     ['Unión de Rugby de Tucumán', 'NOA', 1],
   ]);
@@ -95,4 +95,21 @@ test('seccionesDeRegion marca el bloque de regionales con su propio tipo y clave
   assert.equal(reg?.key, 'centro:regionales');
   assert.equal(reg?.unionId, null);
   assert.equal(new Set(secciones.map((s) => s.key)).size, secciones.length);
+});
+
+test('el regional patagónico se ve en todas las uniones de la Patagonia, sin inflar el total', () => {
+  const uniones = [
+    { id: 'alto-valle', name: 'Alto Valle', region_code: 'patagonia' },
+    { id: 'austral', name: 'Austral', region_code: 'patagonia' },
+    { id: 'urba', name: 'URBA', region_code: 'amba' },
+  ];
+  const lista = [
+    { id: 'pat', unionId: 'alto-valle', scope: 'regional' },
+    { id: 'urb', unionId: 'urba', scope: null },
+  ];
+  const patagonia = agruparPorRegion(lista, uniones)?.find((g) => g.code === 'patagonia');
+  const porUnion = (id: string) => patagonia?.unions.find((u) => u.unionId === id)?.tournaments.map((t) => t.id);
+  assert.deepEqual(porUnion('alto-valle'), ['pat']);
+  assert.deepEqual(porUnion('austral'), ['pat']);
+  assert.equal(patagonia?.total, 1);
 });

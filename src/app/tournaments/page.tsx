@@ -108,6 +108,8 @@ type ManualTournamentApiItem = {
 };
 
 const ALL_COUNTRIES = getAllCountries();
+// Las "regiones" del catálogo de países que son continentes, no países.
+const CONTINENT_IDS = new Set(['africa', 'asia', 'europe', 'north-central-america', 'south-america', 'oceania']);
 
 function extractRegionFromLocale(locale: string): string | null {
     const safeLocale = locale.trim();
@@ -727,11 +729,12 @@ export default function TorneosPage() {
 
             return getCountryTournamentCount(group) !== 0;
         })
-        // Internacional primero, el resto alfabetico.
+        // Internacional primero, después los continentes (torneos continentales) y
+        // recién ahí los países, cada tramo alfabético.
         .sort((left, right) => {
-            if (left === 'international') return -1;
-            if (right === 'international') return 1;
-            return filteredGroups[left].countryName.localeCompare(filteredGroups[right].countryName);
+            const rank = (id: string) => (id === 'international' ? 0 : CONTINENT_IDS.has(id) ? 1 : 2);
+            return rank(left) - rank(right)
+                || filteredGroups[left].countryName.localeCompare(filteredGroups[right].countryName, 'es');
         }), [filteredGroups, getCountryTournamentCount]);
 
     // El selector por niveles: cada país con sus competiciones ya agrupadas en
