@@ -8,6 +8,7 @@ import { COLORES_DE_BANDERA } from '@/lib/flagColors';
 import { findCountryRecord, getCountryFlagCode } from '@/lib/data/countries';
 import CountryFlag from '@/components/CountryFlag';
 import { getNationalTeamFlag } from '@/lib/utils/teamLogoOverrides';
+import { competitionLogoByName } from '@/lib/competitionLogos';
 import styles from './LeagueDrilldown.module.css';
 
 /**
@@ -155,7 +156,28 @@ function lookDeUnion(section: SeccionDeLista<unknown>): Look {
   };
 }
 
+/** Internacional y los continentes: un mapa en vez de bandera, con el color de cada mapa. */
+const MARCAS_DE_CONTINENTE: Record<string, { logo: string; c1: string }> = {
+  international: { logo: '/continentes/international.png', c1: '#a78bfa' },
+  africa: { logo: '/continentes/africa.png', c1: '#f59e0b' },
+  asia: { logo: '/continentes/asia.png', c1: '#ef4444' },
+  europe: { logo: '/continentes/europe.png', c1: '#3b82f6' },
+  'north-central-america': { logo: '/continentes/north-central-america.png', c1: '#22c55e' },
+  oceania: { logo: '/continentes/oceania.png', c1: '#06b6d4' },
+  'south-america': { logo: '/continentes/south-america.png', c1: '#eab308' },
+};
+
 function lookDePais(country: DrillCountry<unknown>): Look {
+  const continente = MARCAS_DE_CONTINENTE[country.id];
+  if (continente) {
+    return {
+      tile: imagen(continente.logo, 40),
+      title: country.name,
+      meta: country.count !== null ? cuenta(country.count, 'competición', 'competiciones') : null,
+      c1: continente.c1,
+      c2: null,
+    };
+  }
   const code = getCountryFlagCode(findCountryRecord(country.id, country.name));
   const colores = code ? COLORES_DE_BANDERA[code] : undefined;
   // La misma bandera recortada que se ve en los resultados; si el país no la tiene, la SVG.
@@ -176,8 +198,8 @@ function lookDeTorneo(t: Navegable, extra: { favorito: boolean; temporada: strin
   const marca = t.unionId ? MARCAS_DE_UNION[t.unionId] : undefined;
   // Sólo los logos curados de /competiciones son transparentes; los demás (subidos a
   // mano) traen fondo y quedarían como un cuadrado blanco sobre el degradé.
-  const propio = t.logoUrl && t.logoUrl.startsWith('/competiciones/') ? t.logoUrl : null;
-  const logo = propio ?? marca?.logo ?? null;
+  const propio = t.logoUrl && (t.logoUrl.startsWith('/competiciones/') || t.logoUrl.startsWith('/uniones/')) ? t.logoUrl : null;
+  const logo = propio ?? competitionLogoByName(t.name) ?? marca?.logo ?? null;
   const meta = t.familyMembers
     ? cuenta(t.familyMembers.length, 'división', 'divisiones')
     : t.scope === 'regional' ? 'Regional' : extra.temporada;
