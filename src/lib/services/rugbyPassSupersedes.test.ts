@@ -275,3 +275,15 @@ test('cada competicion protegida dice POR QUE lo esta', () => {
         assert.ok(c.reason.length > 20, `${c.name} tiene que explicar el motivo`);
     }
 });
+
+test('la Champions Cup de FlashScore ("Europe: European Rugby Champions Cup") se apaga', () => {
+    assert.equal(
+        matchesSupersededTournament({ tournamentName: 'Europe: European Rugby Champions Cup' }),
+        true
+    );
+    assert.equal(
+        matchesSupersededTournament({ tournamentName: 'European Rugby Champions Cup' }),
+        false,
+        'sin pais el nombre solo no alcanza'
+    );
+});
