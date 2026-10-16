@@ -126,6 +126,18 @@ export interface Tournament {
      * `seasons` es para cuando el proveedor externo trae varias.
      */
     seasonId?: string | null;
+    /** El grado dentro de su división: `Superior`, `Intermedia`, `G1 Zona A`. */
+    subcategory?: string | null;
+    gender?: string | null;
+    /** La unión organizadora; de ella sale la región en el selector de ligas. */
+    unionId?: string | null;
+    /** `regional` | `nacional` | null: de qué alcance es el torneo (null = de una unión). */
+    scope?: string | null;
+    /**
+     * Sólo en el selector de ligas: los hermanos de esta división colapsados en
+     * esta entrada (`agruparEnFamilias`). Si viene, la fila despliega los grados.
+     */
+    familyMembers?: Array<{ id: string; label: string; detalle: string | null }>;
     isWomen?: boolean;
     isYouth?: boolean;
     ageGroup?: string;

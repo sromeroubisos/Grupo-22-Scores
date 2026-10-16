@@ -5,6 +5,7 @@ import { getReadClient } from '@/lib/supabase/read';
 import { isMissingColumnError } from '@/lib/utils/supabaseSchema';
 import { sortTournamentsByPriority } from '@/lib/utils/tournamentOrdering';
 import { resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
+import { filtrarPorTemporada } from '@/lib/tournamentSeasonFilter';
 
 // Rugby se guarda con tres sport_id distintos y los tres son el mismo deporte
 // para quien mira la pagina.
@@ -38,6 +39,10 @@ type ManualTournamentRow = {
     age_grade: string | null;
     format: string | null;
     priority: number | null;
+    /** Para el filtro de temporada y para agrupar en familias en el selector. */
+    union_id: string | null;
+    subcategory: string | null;
+    gender: string | null;
 };
 
 type ManualTournamentQueryResult = {
@@ -126,7 +131,7 @@ async function queryVisibleManualTournaments(
     for (const attempt of attempts) {
         let query = supabase
             .from('tournaments')
-            .select(attempt.select)
+            .select(`${attempt.select}, union_id, subcategory, gender`)
             .neq('is_visible', false);
 
         if (attempt.usesPriority) {
@@ -204,7 +209,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const visibleTournaments = sortTournamentsByPriority((data || []).filter((tournament) => {
+        const deLosDeportes = (data || []).filter((tournament) => {
             const status = tournament.status?.toLowerCase?.() || null;
             if (status === 'archived' || status === 'deleted') return false;
 
@@ -212,7 +217,15 @@ export async function GET(request: NextRequest) {
 
             const sportId = tournament.sport_id || tournament.legacy_sport || 'rugby';
             return sportFilter.includes(sportId);
-        }).map((tournament) => ({
+        });
+
+        // Una sola temporada por unión que carga calendarios enteros. Sin esto la
+        // URBA mandaba sus seis temporadas (811 filas) y el selector de ligas
+        // mostraba "Menores de 16" de 2021 al lado del Top 14 de 2026. La misma
+        // regla que ya usa el listado público: los torneos cargados a mano no
+        // filtran, y el filtro no se puede aplicar en la consulta porque la
+        // temporada "en curso" de una unión depende de qué más tiene cargado.
+        const visibleTournaments = sortTournamentsByPriority(filtrarPorTemporada(deLosDeportes).map((tournament) => ({
             ...tournament,
             sport_id: tournament.sport_id || tournament.legacy_sport || 'rugby',
             logo_url: resolveSerializableLogoUrl(tournament.logo_url, {
