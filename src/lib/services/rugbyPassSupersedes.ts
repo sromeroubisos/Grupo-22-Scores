@@ -133,7 +133,7 @@ export const RUGBYPASS_SUPERSEDES: readonly SupersededTournament[] = [
         // No tiene ficha en `data/tournaments/rugby.ts`: va por URL y nombre.
         tournamentIds: [],
         urlFragments: ['/europe/champions-cup/', '/europe/european-champions-cup/'],
-        names: ['champions cup', 'european champions cup', 'investec champions cup', 'heineken champions cup'],
+        names: ['champions cup', 'european champions cup', 'investec champions cup', 'heineken champions cup', 'european rugby champions cup'],
         countries: ['europe', 'europa', 'international', 'internacional'],
     },
     {
@@ -144,7 +144,7 @@ export const RUGBYPASS_SUPERSEDES: readonly SupersededTournament[] = [
         // a `/europe/`: sin eso, sumar la copa europea apagaba la galesa.
         tournamentIds: [],
         urlFragments: ['/europe/challenge-cup/', '/europe/european-challenge-cup/'],
-        names: ['challenge cup', 'european challenge cup', 'epcr challenge cup'],
+        names: ['challenge cup', 'european challenge cup', 'european rugby challenge cup', 'epcr challenge cup'],
         countries: ['europe', 'europa', 'international', 'internacional'],
     },
 ] as const;
