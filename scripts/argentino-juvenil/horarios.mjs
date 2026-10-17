@@ -70,7 +70,7 @@ async function main() {
     // La llave de un partido de zona son sus dos clubes; la de un cruce, su
     // código — todavía no tiene equipos.
     const esperado = new Map([
-      ...t.grupos.map((g) => [`${g.local}>${g.visitante}`, { iso: instanteDe(g.fecha, g.hora), rotulo: `${g.local} vs ${g.visitante}` }]),
+      ...t.grupos.map((g) => [`${g.local}>${g.visitante}`, { iso: instanteDe(g.fecha, g.hora, g.dia), rotulo: `${g.local} vs ${g.visitante}` }]),
       ...t.final.map((f) => [`P${f.n}`, { iso: instanteDe(f.fecha, f.hora), rotulo: `P${f.n} · ${f.definicion}` }]),
     ]);
 

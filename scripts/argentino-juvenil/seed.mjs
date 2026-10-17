@@ -368,7 +368,7 @@ async function escribirTorneo2026(t, tournamentId, seasonId) {
   const partidos = t.grupos.map((g) => ({
     ...comun, id: crypto.randomUUID(), phase_id: faseGrupos,
     group_id: groupIdDe.get(g.zona), round_uuid: rondas.get(g.fecha), round_label: `Fecha ${g.fecha}`,
-    home_club_id: g.local, away_club_id: g.visitante, date_time: instanteDe(g.fecha, g.hora),
+    home_club_id: g.local, away_club_id: g.visitante, date_time: instanteDe(g.fecha, g.hora, g.dia),
     is_visible: true, notes: g.zona,
   }));
 

@@ -34,7 +34,7 @@ export const CLUBES_M18 = [
   { id: 'rosario-m18',      name: 'Rosario M18',      union_id: null,   region: 'Rosario',      country: 'ARG' },
 ];
 
-/** El día de cada fecha. La hora va por partido, abajo. */
+/** El día de cada fecha. La hora va por partido, abajo; un partido que se juega otro día lleva `dia`. */
 export const DIAS = {
   1: '2026-08-22',
   2: '2026-09-19',
@@ -57,8 +57,8 @@ export const HORA_POR_DEFECTO = '12:00';
  * revisar si algún día lo mueve, y acá el error serían 40 partidos a la hora
  * equivocada sin que nada falle.
  */
-export function instanteDe(fecha, hora = HORA_POR_DEFECTO) {
-  return new Date(`${DIAS[fecha]}T${hora}:00-03:00`).toISOString();
+export function instanteDe(fecha, hora = HORA_POR_DEFECTO, dia = DIAS[fecha]) {
+  return new Date(`${dia}T${hora}:00-03:00`).toISOString();
 }
 
 /**
@@ -88,10 +88,10 @@ export const TORNEOS = [
       { fecha: 2, n: 10, zona: 'Zona 2', local: 'rosario-m17',      visitante: 'cuyo-m17' },
       { fecha: 2, n: 11, zona: 'Zona 1', local: 'buenos-aires-m17', visitante: 'cordobesa-m17' },
       { fecha: 2, n: 12, zona: 'Zona 2', local: 'santafesina-m17',  visitante: 'salta-m17' },
-      { fecha: 3, n: 17, zona: 'Zona 1', local: 'buenos-aires-m17', visitante: 'tucuman-m17' },
-      { fecha: 3, n: 18, zona: 'Zona 2', local: 'santafesina-m17',  visitante: 'rosario-m17' },
-      { fecha: 3, n: 19, zona: 'Zona 1', local: 'cordobesa-m17',    visitante: 'uruguay-m17' },
-      { fecha: 3, n: 20, zona: 'Zona 2', local: 'salta-m17',        visitante: 'cuyo-m17' },
+      { fecha: 3, n: 17, zona: 'Zona 1', hora: '14:00', local: 'buenos-aires-m17', visitante: 'tucuman-m17' },
+      { fecha: 3, n: 18, zona: 'Zona 2', hora: '15:00', local: 'santafesina-m17',  visitante: 'rosario-m17' },
+      { fecha: 3, n: 19, zona: 'Zona 1', hora: '16:00', local: 'cordobesa-m17',    visitante: 'uruguay-m17' },
+      { fecha: 3, n: 20, zona: 'Zona 2', hora: '12:00', local: 'salta-m17',        visitante: 'cuyo-m17' },
     ],
     final: [
       { fecha: 4, n: 30, definicion: 'Semifinal',      local: { pos: 1, zona: 'Zona 1' },       visitante: { pos: 2, zona: 'Zona 2' } },
@@ -122,10 +122,10 @@ export const TORNEOS = [
       { fecha: 2, n: 14, zona: 'Zona 4', local: 'mar-del-plata-m17', visitante: 'oeste-m17' },
       { fecha: 2, n: 15, zona: 'Zona 3', local: 'alto-valle-m17',    visitante: 'nordeste-m17' },
       { fecha: 2, n: 16, zona: 'Zona 4', local: 'sanjuanina-m17',    visitante: 'chile-m17' },
-      { fecha: 3, n: 21, zona: 'Zona 3', local: 'alto-valle-m17',    visitante: 'entrerriana-m17' },
-      { fecha: 3, n: 22, zona: 'Zona 4', local: 'sanjuanina-m17',    visitante: 'mar-del-plata-m17' },
-      { fecha: 3, n: 23, zona: 'Zona 3', local: 'nordeste-m17',      visitante: 'austral-m17' },
-      { fecha: 3, n: 24, zona: 'Zona 4', local: 'chile-m17',         visitante: 'oeste-m17' },
+      { fecha: 3, n: 21, zona: 'Zona 3', hora: '16:00', local: 'alto-valle-m17',    visitante: 'entrerriana-m17' },
+      { fecha: 3, n: 22, zona: 'Zona 4', hora: '12:00', local: 'sanjuanina-m17',    visitante: 'mar-del-plata-m17' },
+      { fecha: 3, n: 23, zona: 'Zona 3', dia: '2026-10-18', hora: '11:00', local: 'nordeste-m17',      visitante: 'austral-m17' },
+      { fecha: 3, n: 24, zona: 'Zona 4', dia: '2026-10-24', hora: '12:00', local: 'chile-m17',         visitante: 'oeste-m17' },
     ],
     final: [
       { fecha: 4, n: 29, definicion: 'Semifinal',          local: { pos: 1, zona: 'Zona 3' },      visitante: { pos: 2, zona: 'Zona 4' } },

@@ -93,7 +93,7 @@ async function main() {
     igual('  de zona', zona.length, 12);
     igual('  de fase final', finales.length, 8);
     const esperadoPorCodigo = new Map([
-      ...t.grupos.map((g) => [`${g.local}>${g.visitante}`, instanteDe(g.fecha, g.hora)]),
+      ...t.grupos.map((g) => [`${g.local}>${g.visitante}`, instanteDe(g.fecha, g.hora, g.dia)]),
       ...t.final.map((f) => [`P${f.n}`, instanteDe(f.fecha, f.hora)]),
     ]);
     const horaMal = partidos.filter((p) => {
@@ -121,7 +121,7 @@ async function main() {
     // Fixture, cruce por cruce
     const clave = (p) => `${p.home_club_id}>${p.away_club_id}@${p.date_time.slice(0, 10)}`;
     const reales = new Set(zona.map(clave));
-    const faltan = t.grupos.filter((g) => !reales.has(`${g.local}>${g.visitante}@${DIAS[g.fecha]}`));
+    const faltan = t.grupos.filter((g) => !reales.has(`${g.local}>${g.visitante}@${g.dia ?? DIAS[g.fecha]}`));
     faltan.length ? mal(`faltan del fixture: ${faltan.map((g) => `P${g.n}`).join(', ')}`) : ok('el fixture de zona coincide partido por partido');
 
     // Avance automático
