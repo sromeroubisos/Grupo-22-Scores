@@ -360,7 +360,8 @@ export default function TorneosPage() {
     const [rugbyCountrySummaries, setRugbyCountrySummaries] = useState<RugbyPublicCountrySummary[]>([]);
     const [rugbyCountryGroups, setRugbyCountryGroups] = useState<Record<string, RugbyCountryGroupState>>({});
     const [rugbyPublicCatalogReady, setRugbyPublicCatalogReady] = useState(false);
-    const [selectedAudience, setSelectedAudience] = useState<TournamentAudience>('mayores');
+    // Sin pestañas Mayores / Juveniles: se pide todo y cada unión lo separa por dentro.
+    const selectedAudience = 'all' as const;
     const [expandedCountries, setExpandedCountries] = useState<Set<string>>(new Set(['international']));
     const [expandedLeagueIds, setExpandedLeagueIds] = useState<Set<string>>(new Set());
     const [searchQuery, setSearchQuery] = useState('');
@@ -979,7 +980,7 @@ export default function TorneosPage() {
     }, [selectedAudience, selectedSport.id]);
 
     useEffect(() => {
-        setExpandedCountries(new Set(selectedAudience === 'mayores' ? ['international'] : []));
+        setExpandedCountries(new Set());
         setExpandedLeagueIds(new Set());
     }, [selectedAudience]);
 
@@ -1125,21 +1126,6 @@ export default function TorneosPage() {
                         </div>
                     </div>
 
-                    <div className={pageStyles.audienceSwitch} role="tablist" aria-label="Segmento de torneos">
-                        {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
-                            <button
-                                key={audience}
-                                type="button"
-                                role="tab"
-                                aria-selected={selectedAudience === audience}
-                                className={`${pageStyles.audienceSwitchBtn} ${selectedAudience === audience ? pageStyles.audienceSwitchBtnActive : ''}`}
-                                onClick={() => setSelectedAudience(audience)}
-                            >
-                                {AUDIENCE_LABELS[audience]}
-                            </button>
-                        ))}
-                    </div>
-
                     <div className={pageStyles.sidebarSearchArea}>
                         <svg
                             className={pageStyles.sidebarSearchIcon}
@@ -1156,12 +1142,10 @@ export default function TorneosPage() {
                         <input
                             id="tournaments-search"
                             type="text"
-                            aria-label={`Buscar ${selectedAudience === 'juveniles' ? 'torneos de juveniles y reserva' : 'ligas y torneos'} de ${selectedSport.nameEs}`}
-                            placeholder={selectedAudience === 'juveniles'
-                                ? `Filtrar juveniles y reserva de ${selectedSport.nameEs}...`
-                                : selectedSport.id === 'tennis'
-                                    ? `Filtrar torneos de ${selectedSport.nameEs}...`
-                                    : `Filtrar ligas de ${selectedSport.nameEs}...`}
+                            aria-label={`Buscar ligas y torneos de ${selectedSport.nameEs}`}
+                            placeholder={selectedSport.id === 'tennis'
+                                ? `Filtrar torneos de ${selectedSport.nameEs}...`
+                                : `Filtrar ligas de ${selectedSport.nameEs}...`}
                             value={searchQuery}
                             onChange={(event) => setSearchQuery(event.target.value)}
                             className={pageStyles.sidebarSearchInput}
@@ -1206,9 +1190,7 @@ export default function TorneosPage() {
                                 ? (isRemoteSearching
                                     ? `Buscando "${searchQuery}"...`
                                     : `No encontramos nada con "${searchQuery}".`)
-                                : selectedAudience === "juveniles"
-                                    ? "No hay torneos juveniles ni de reserva cargados para este deporte."
-                                    : "No hay torneos disponibles para este deporte."}
+                                : "No hay torneos disponibles para este deporte."}
                         />
                     </div>
                 </div>

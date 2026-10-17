@@ -203,8 +203,11 @@ export function isDualAudienceTournament(input: TournamentAudienceInput): boolea
  */
 export function matchesTournamentAudience(
     input: TournamentAudienceInput,
-    audience: TournamentAudience,
+    audience: TournamentAudience | 'all',
 ): boolean {
+    // "all": el selector de ligas ya no se parte en pestañas; cada unión separa
+    // Competiciones / Reserva / Juveniles por dentro.
+    if (audience === 'all') return true;
     if (isDualAudienceTournament(input)) return true;
     return resolveTournamentAudience(input) === audience;
 }

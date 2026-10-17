@@ -306,6 +306,13 @@ interface ManualTournamentApiItem {
   union_id?: string | null;
 }
 
+/**
+ * El selector de ligas de la barra lateral no se parte por audiencia: se pide todo y
+ * cada unión separa Competiciones / Reserva / Juveniles por dentro. La audiencia que
+ * queda (`selectedAudience`) es sólo la de los PARTIDOS del día.
+ */
+const SIDEBAR_AUDIENCE = 'all' as const;
+
 function isFlashScoreTournamentId(value: string): boolean {
   return /^fs-/i.test(value);
 }
@@ -923,9 +930,9 @@ export default function HomePage() {
         name: tournament.name,
         displayName: tournament.displayName || tournament.nameEs,
         originalName: tournament.originalName,
-      }, selectedAudience);
+      }, SIDEBAR_AUDIENCE);
     });
-  }, [allTournaments, loadedRugbyPublicTournaments, manualTournamentsList, selectedAudience, selectedSport.id]);
+  }, [allTournaments, loadedRugbyPublicTournaments, manualTournamentsList, selectedSport.id]);
 
   const groupedTournaments = useMemo(() => {
     const grouped = groupTournamentsByCountry(localTournaments);
@@ -1084,7 +1091,7 @@ export default function HomePage() {
         name: tournament.name,
         displayName: tournament.displayName || tournament.nameEs,
         originalName: tournament.originalName,
-      }, selectedAudience)
+      }, SIDEBAR_AUDIENCE)
     ));
 
     // Sort by priority (descending) so the most important tournaments
@@ -1101,7 +1108,7 @@ export default function HomePage() {
     return sortedByPriority.filter(t =>
       t.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [internationalTournaments, searchQuery, selectedAudience, selectedSport.id]);
+  }, [internationalTournaments, searchQuery, selectedSport.id]);
 
   // Sub-grouping for football's international section (CONMEBOL / UEFA / FIFA / etc.)
   const internationalConfederationGroups = useMemo(() => {
@@ -1404,7 +1411,7 @@ export default function HomePage() {
       const searchParams = new URLSearchParams({
         sport: 'rugby',
         scope: 'country',
-        audience: selectedAudience,
+        audience: SIDEBAR_AUDIENCE,
         external_country_id: externalCountryIds[0],
         external_country_ids: externalCountryIds.join(','),
         country_name: group.countryName,
@@ -1455,7 +1462,7 @@ export default function HomePage() {
         },
       }));
     }
-  }, [groupedTournaments, hasRugbyPublicCatalog, selectedAudience]);
+  }, [groupedTournaments, hasRugbyPublicCatalog]);
 
   const toggleCountry = useCallback((countryId: string) => {
     setExpandedCountries(prev => {
@@ -1631,7 +1638,7 @@ export default function HomePage() {
     if (selectedSport.id === 'rugby') {
       setRugbyCountryGroups({});
     }
-  }, [selectedAudience, selectedSport.id]);
+  }, [selectedSport.id]);
 
   // Catalogo entero de una vez: al llegar el resumen se pide todo el deporte y
   // se arman los paises antes de que alguien los abra, asi abrir es instantaneo.
@@ -1642,7 +1649,7 @@ export default function HomePage() {
     if (typeof window !== 'undefined' && !window.matchMedia('(min-width: 1101px)').matches) return;
 
     const controller = new AbortController();
-    const audience = selectedAudience;
+    const audience: string = SIDEBAR_AUDIENCE;
 
     const applyCatalog = (items: PublicTournamentListItem[]) => {
       const tournaments = items.map((item) => mapPublicTournamentToTournament(item));
@@ -1701,7 +1708,7 @@ export default function HomePage() {
     })();
 
     return () => controller.abort();
-  }, [hasRugbyPublicCatalog, rugbyCountrySummaries, selectedAudience]);
+  }, [hasRugbyPublicCatalog, rugbyCountrySummaries]);
 
   useEffect(() => {
     if (!hasRugbyPublicCatalog) {
@@ -1889,19 +1896,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className={styles.audienceSwitch} role="tablist" aria-label="Segmento de torneos">
-              {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
-                <button
-                  key={audience}
-                  type="button"
-                  className={`${styles.audienceSwitchBtn} ${selectedAudience === audience ? styles.audienceSwitchBtnActive : ''}`}
-                  onClick={() => setSelectedAudience(audience)}
-                >
-                  {AUDIENCE_LABELS[audience]}
-                </button>
-              ))}
-            </div>
-
             {/* Search */}
             <div className={styles.sidebarSearchArea}>
               <svg className={styles.sidebarSearchIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1910,11 +1904,9 @@ export default function HomePage() {
               </svg>
               <input
                 type="text"
-                placeholder={selectedAudience === 'juveniles'
-                  ? `Filtrar juveniles y reserva de ${selectedSport.nameEs}...`
-                  : selectedSport.id === 'tennis'
-                    ? `Filtrar torneos de ${selectedSport.nameEs}...`
-                    : `Filtrar ligas de ${selectedSport.nameEs}...`}
+                placeholder={selectedSport.id === 'tennis'
+                  ? `Filtrar torneos de ${selectedSport.nameEs}...`
+                  : `Filtrar ligas de ${selectedSport.nameEs}...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={styles.sidebarSearchInput}
@@ -1957,9 +1949,7 @@ export default function HomePage() {
 
               {filteredInternational.length === 0 && sortedCountryIds.length === 0 && (
                 <div className={styles.audienceEmptyState}>
-                  {selectedAudience === 'juveniles'
-                    ? 'No hay torneos juveniles ni de reserva cargados para este deporte.'
-                    : 'No hay torneos disponibles para este deporte.'}
+                  No hay torneos disponibles para este deporte.
                 </div>
               )}
               </>
@@ -1980,6 +1970,24 @@ export default function HomePage() {
               no tiene el link. Se apaga solo al día siguiente del cierre. */}
           <SantaFe2026Acceso />
 
+          {/* El interruptor de los PARTIDOS del día en escritorio. Antes vivía dentro
+              del selector de ligas; ahora el selector no depende de él. En el teléfono
+              sigue el de abajo, dentro de los controles móviles. */}
+          <div className={styles.desktopAudienceSwitch} role="tablist" aria-label="Segmento de partidos">
+            {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
+              <button
+                key={audience}
+                type="button"
+                role="tab"
+                aria-selected={selectedAudience === audience}
+                className={`${styles.mobileAudienceSwitchBtn} ${selectedAudience === audience ? styles.mobileAudienceSwitchBtnActive : ''}`}
+                onClick={() => setSelectedAudience(audience)}
+              >
+                {AUDIENCE_LABELS[audience]}
+              </button>
+            ))}
+          </div>
+
           <div className={styles.mobileTopControls}>
             {/* Sport Selector (Mobile) */}
             <div className={styles.mobileSportSelector}>
@@ -1997,7 +2005,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className={styles.mobileAudienceSwitch} role="tablist" aria-label="Segmento de torneos">
+            <div className={styles.mobileAudienceSwitch} role="tablist" aria-label="Segmento de partidos">
               {(['mayores', 'juveniles'] as TournamentAudience[]).map((audience) => (
                 <button
                   key={audience}

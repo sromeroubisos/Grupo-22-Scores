@@ -202,3 +202,12 @@ test('la puerta no se lleva puesto ningún otro torneo', () => {
     assert.equal(matchesTournamentAudience({ name: 'Top 14' }, 'mayores'), true);
     assert.equal(matchesTournamentAudience({ name: 'Top 14' }, 'juveniles'), false);
 });
+
+test('"all" deja pasar todo: es el selector de ligas sin pestañas', () => {
+    // Mayores, juveniles, reserva y un torneo dual entran juntos; cada unión los
+    // separa por dentro (Competiciones / Reserva / Juveniles).
+    assert.equal(matchesTournamentAudience({ name: 'Top 14' }, 'all'), true);
+    assert.equal(matchesTournamentAudience({ name: 'Menores de 19' }, 'all'), true);
+    assert.equal(matchesTournamentAudience({ name: 'URBA: Top 14 - Intermedia', subcategory: 'Intermedia' }, 'all'), true);
+    assert.equal(matchesTournamentAudience({ name: 'Campeonato Argentino Juvenil M17' }, 'all'), true);
+});
