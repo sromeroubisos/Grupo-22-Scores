@@ -33,6 +33,12 @@
     display: none;
 }
 
+.desktopAudienceSwitch {
+    display: flex;
+    gap: 8px;
+    padding: 2px 4px 0;
+}
+
 .mobileAudienceSwitch {
     display: none;
     gap: 8px;
@@ -2048,6 +2054,11 @@
 
     .mobileAudienceSwitch {
         display: flex;
+    }
+
+    /* En el teléfono el interruptor de partidos vive en los controles móviles. */
+    .desktopAudienceSwitch {
+        display: none;
     }
 
     .mobileTournamentList {

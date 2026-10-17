@@ -211,7 +211,7 @@ type PublicTournamentsRequestParams = {
     scope: string | null;
     forceFullCatalog: boolean;
     search: string;
-    audience: TournamentAudience;
+    audience: TournamentAudience | 'all';
     externalCountryId: string | null;
     externalCountryIds: string[];
     countryName: string | null;
@@ -593,7 +593,7 @@ async function queryRugbyCountryTournaments(args: {
     countryName: string;
     flag?: string | null;
     search: string;
-    audience: TournamentAudience;
+    audience: TournamentAudience | 'all';
 }) {
     const externalCountryIds = uniqueNormalizedIdentifiers([
         ...(args.externalCountryIds || []),
@@ -671,7 +671,7 @@ async function queryFlashScoreCountryTournaments(args: {
     countryName: string;
     flag?: string | null;
     search: string;
-    audience: TournamentAudience;
+    audience: TournamentAudience | 'all';
 }) {
     const payload = await getTournamentsBySportAndEntity(args.sportKey, args.externalCountryId);
     const entity: FlashScoreTournamentEntity = {
@@ -707,7 +707,7 @@ async function queryFlashScoreCountryTournaments(args: {
 
 async function queryPublicRugbyFlashScoreTournaments(args: {
     search: string;
-    audience: TournamentAudience;
+    audience: TournamentAudience | 'all';
 }) {
     const countries = await queryRugbyCountrySummaries();
     if (countries.length === 0) {
@@ -741,7 +741,7 @@ async function queryPublicRugbyFlashScoreTournaments(args: {
 async function queryPublicFlashScoreTournaments(args: {
     sportKey: string;
     search: string;
-    audience: TournamentAudience;
+    audience: TournamentAudience | 'all';
 }) {
     const countries = await queryFlashScoreCountrySummaries(args.sportKey);
     if (countries.length === 0) {
@@ -808,7 +808,7 @@ const externalCatalogInFlight = new Map<string, Promise<PublicExternalTournament
 type ExternalCatalogArgs = {
     sportKey: string;
     shouldAggregateRugby: boolean;
-    audience: TournamentAudience;
+    audience: TournamentAudience | 'all';
 };
 
 function buildExternalCatalogCacheKey(args: ExternalCatalogArgs) {
@@ -973,7 +973,8 @@ function filterPublicDbTournaments(args: {
     // Superior de 2026 tapaba las Preintermedias de 2025 —el mismo grado, otro
     // año— y las hacía desaparecer de las dos vistas a la vez.
     const deLaTemporada = filtrarPorTemporada(visibles, args.season);
-    const base = args.audience === 'juveniles' ? deLaTemporada : ocultarGradosSubordinados(deLaTemporada);
+    // Con `all` tampoco se ocultan: la reserva se ve en su propia sección de la unión.
+    const base = args.audience === 'mayores' ? ocultarGradosSubordinados(deLaTemporada) : deLaTemporada;
 
     return sortTournamentsByPriority(base
         .filter((tournament) => {
@@ -1273,7 +1274,9 @@ function resolveSportFilter(rawSport: string | null) {
     return [rawSport];
 }
 
-function resolveAudienceFilter(rawAudience: string | null): TournamentAudience {
+function resolveAudienceFilter(rawAudience: string | null): TournamentAudience | 'all' {
+    // `all`: el selector de ligas pide todo junto y separa por dentro de cada unión.
+    if (rawAudience === 'all') return 'all';
     return rawAudience === 'juveniles' ? 'juveniles' : 'mayores';
 }
 
