@@ -4125,7 +4125,40 @@ const PREVIEW_RENDER_MAX_WAIT_MS = 350;
 function buildDefaultMatchSelection(template: ExportTemplate, data: ExportData): Set<number> {
     if (template !== 'dailyMatches') return new Set<number>();
     const matches = (data as DailyMatchesData).matches ?? [];
-    return new Set(Array.from({ length: Math.min(matches.length, 10) }, (_, index) => index));
+    const firstTen = () => new Set(Array.from({ length: Math.min(matches.length, 10) }, (_, index) => index));
+
+    // Por defecto va UN dia, no la temporada entera: el de hoy; si hoy no se
+    // juega, el ultimo que se jugo; si todavia no se jugo nada, el proximo. Los
+    // otros dias quedan en la lista para sumarlos a mano.
+    const dayKeyOf = (time: number) => {
+        const date = new Date(time);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    };
+    const dated = matches.map((match, index) => {
+        const raw = match.kickoffAt;
+        const time = raw == null || raw === '' ? NaN : new Date(raw).getTime();
+        return Number.isFinite(time) ? { index, time, key: dayKeyOf(time) } : null;
+    }).filter((entry): entry is { index: number; time: number; key: string } => entry !== null);
+    if (dated.length === 0) return firstTen();
+
+    const now = Date.now();
+    const todayKey = dayKeyOf(now);
+    let targetKey: string;
+    if (dated.some((entry) => entry.key === todayKey)) {
+        targetKey = todayKey;
+    } else {
+        const past = dated.filter((entry) => entry.time <= now);
+        targetKey = past.length > 0
+            ? past.reduce((best, entry) => (entry.time > best.time ? entry : best)).key
+            : dated.reduce((best, entry) => (entry.time < best.time ? entry : best)).key;
+    }
+
+    const selected = dated
+        .filter((entry) => entry.key === targetKey)
+        .map((entry) => entry.index)
+        .sort((a, b) => a - b)
+        .slice(0, 10);
+    return selected.length > 0 ? new Set(selected) : firstTen();
 }
 
 // Cuanto se permite densificar el preview por encima de su caja. Un telefono
