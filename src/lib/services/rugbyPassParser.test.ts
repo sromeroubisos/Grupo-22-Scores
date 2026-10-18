@@ -647,3 +647,17 @@ test('parseRugbyPassUpdateStandings: las copas europeas traen un bloque por Pool
     assert.equal(liga[0].group, undefined);
     assert.deepEqual(agruparPorGrupo([{ group_name: '' }], 'Top 14').map((b) => b.group_name), ['Top 14']);
 });
+
+test('las copas europeas marcan los tres primeros de CADA grupo y nada mas', async () => {
+    const { rugbyPassZonesFor } = await import('./rugbyPassCatalog.ts');
+    for (const oid of [242, 243]) {
+        const zonas = rugbyPassZonesFor(oid, 6);
+        assert.deepEqual(zonas.map((z) => [z.position, z.kind, z.name]), [
+            [1, 'primary', 'Octavos de final'],
+            [2, 'primary', 'Octavos de final'],
+            [3, 'primary', 'Octavos de final'],
+        ]);
+        // Si un grupo cambia de tamano, el reglamento guardado ya no vale.
+        assert.deepEqual(rugbyPassZonesFor(oid, 24), []);
+    }
+});
