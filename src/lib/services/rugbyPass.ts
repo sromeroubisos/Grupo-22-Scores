@@ -46,6 +46,7 @@ import {
     parseRugbyPassTournamentCards,
     parseRugbyPassTournamentIds,
     parseRugbyPassStandings,
+    parseRugbyPassUpdateStandings,
     type RugbyPassStandingRow,
 } from './rugbyPassCatalog.ts';
 import {
@@ -594,6 +595,22 @@ async function pedirStandings(
     awaySlug: string
 ): Promise<RugbyPassStandingRow[]> {
     const pedir = async (url: string) => {
+        // FORMATO NUEVO (2026-10): la tabla viaja en `action=update`, con los
+        // grupos de las copas europeas (`Pool 1`…). `live-poll-data` ya
+        // devuelve la pagina entera y queda de respaldo.
+        try {
+            const nuevo = await rugbyPassJson(url, {
+                method: 'POST',
+                body: formBody({ action: 'update', comments: '0', events: '0' }),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', Referer: url },
+            });
+            if (nuevo && typeof nuevo === 'object' && 'game' in nuevo) {
+                const filas = parseRugbyPassUpdateStandings(nuevo);
+                if (filas.length > 0) return filas;
+            }
+        } catch {
+            // Slug invertido o formato viejo: sigue con el respaldo.
+        }
         const payload = await rugbyPassJson(url, {
             method: 'POST',
             body: formBody({ action: 'live-poll-data', event: gameId, liveStandings: '1' }),

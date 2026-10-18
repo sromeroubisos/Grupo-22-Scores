@@ -110,6 +110,26 @@ function partidoVista(fila: CachedRow, nombreTorneo: string, logoTorneo: string)
 }
 
 /**
+ * Un bloque por grupo, en el orden en que llegan (`Pool 1`, `Pool 2`…). Una liga
+ * no tiene grupos y sale como un solo bloque con el nombre de la competicion,
+ * que es lo que la pantalla ya esperaba.
+ */
+export function agruparPorGrupo<T extends { group_name: string }>(
+    filas: T[],
+    nombreCompeticion: string
+): { group_name: string; name: string; note: string; rows: T[] }[] {
+    if (filas.length === 0) return [];
+    const bloques = new Map<string, T[]>();
+    for (const fila of filas) {
+        const clave = fila.group_name || nombreCompeticion;
+        bloques.set(clave, [...(bloques.get(clave) ?? []), fila]);
+    }
+    return [...bloques.entries()].map(([nombre, rows]) => ({
+        group_name: nombre, name: nombre, note: '', rows,
+    }));
+}
+
+/**
  * Una fila de la tabla a la forma de la pantalla.
  *
  * El equipo de la tabla se empareja por NOMBRE con el de los partidos, porque la
@@ -145,7 +165,7 @@ function filaTablaVista(
         team_url: '',
         team: identidad,
         participant: identidad,
-        group_name: '',
+        group_name: fila.group ?? '',
         matches_played: fila.played,
         matches_total: fila.played,
         played: fila.played,
@@ -272,7 +292,11 @@ export async function getRugbyPassTournamentBundle(
     // Las etiquetas de zona van por POSICION y en la forma que ya entiende
     // `resolveStandingsRowLabel`, para no abrir un segundo camino de pintado.
     // RugbyPass no las publica: el reglamento sale de `RUGBYPASS_ZONES`.
-    const teamLabels = rugbyPassZonesFor(competitionId, standings.length).map((zona) => ({
+    // Con grupos (`Pool 1`…) las zonas se miden sobre UNA tabla, no sobre la
+    // suma de todas.
+    const grupos = agruparPorGrupo(standings, competicion.name);
+    const tamanoTabla = grupos.length > 0 ? grupos[0].rows.length : 0;
+    const teamLabels = rugbyPassZonesFor(competitionId, tamanoTabla).map((zona) => ({
         id: `rp-zone-${competitionId}-${zona.position}`,
         label_id: `rp-zone-${competitionId}-${zona.kind}`,
         club_id: null,
@@ -336,9 +360,7 @@ export async function getRugbyPassTournamentBundle(
         },
         results,
         fixtures,
-        standings: standings.length > 0
-            ? [{ group_name: competicion.name, name: competicion.name, note: '', rows: standings }]
-            : [],
+        standings: grupos,
         standingsForm: [] as unknown[],
         standingsHtFt: [] as unknown[],
         standingsOverUnder: [] as unknown[],
