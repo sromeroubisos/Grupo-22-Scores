@@ -775,6 +775,29 @@ export const RUGBYPASS_ZONES: readonly RugbyPassCompetitionZones[] = [
             { from: 1, to: 4, kind: 'primary', name: 'Semifinal' },
         ],
     },
+    {
+        // Investec Champions Cup 2026-27. Cuatro grupos de seis: los tres
+        // primeros de cada uno van directo a octavos (antes eran cuatro). Los
+        // cuatro lugares restantes son comodines para los mejores del resto por
+        // puntos de partido, SIN importar el grupo: no se pueden pintar por
+        // posicion y por eso no se marcan, antes que prometer un cuarto puesto
+        // que puede no clasificar. La tabla es la de UN grupo (6 equipos).
+        competitionId: 242,
+        teams: 6,
+        zones: [
+            { from: 1, to: 3, kind: 'primary', name: 'Octavos de final' },
+        ],
+    },
+    {
+        // EPCR Challenge Cup 2026-27. Tres grupos de seis: los tres primeros de
+        // cada uno van directo a octavos; el resto de los lugares son comodines
+        // entre grupos y no se marcan (mismo criterio que la Champions).
+        competitionId: 243,
+        teams: 6,
+        zones: [
+            { from: 1, to: 3, kind: 'primary', name: 'Octavos de final' },
+        ],
+    },
     // "Internationals" (oid 3) no lleva zonas y no es un olvido: no tiene tabla.
     // Es un cajon de test matches, y RugbyPass contesta "No live data".
 ] as const;
