@@ -265,6 +265,25 @@ export async function getRugbyPassPlayerStats(
     homeSlug: string,
     awaySlug: string
 ): Promise<RugbyPassPlayerStat[]> {
+    // FORMATO NUEVO (2026-10): los rankings de TODOS los rubros vienen en la
+    // misma respuesta de `action=update`, asi que es una llamada y no veintidos.
+    // `filter-players-stats` ya devuelve la pagina entera y queda de respaldo.
+    for (const url of [rugbyPassMatchUrl(gameId, homeSlug, awaySlug), rugbyPassMatchUrl(gameId, awaySlug, homeSlug)]) {
+        try {
+            const nuevo = await rugbyPassJson(url, {
+                method: 'POST',
+                body: formBody({ action: 'update', comments: '0', events: '0' }),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', Referer: url },
+            });
+            if (nuevo && typeof nuevo === 'object' && 'game' in nuevo) {
+                const filas = parseRugbyPassUpdate(nuevo).playerStats;
+                if (filas.length > 0) return filas;
+            }
+        } catch {
+            // Slug invertido (el 301 pierde el POST): prueba el otro orden.
+        }
+    }
+
     const pedir = async (url: string, kind: (typeof RUGBYPASS_PLAYER_STAT_KINDS)[number]) => {
         try {
             const payload = await rugbyPassJson(url, {
