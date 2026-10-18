@@ -531,6 +531,56 @@ export interface RugbyPassStandingRow {
     /** El total de bonus, que es la suma de los dos de arriba. */
     bonusPoints: number;
     points: number;
+    /**
+     * El grupo (`Pool 1`) cuando la competicion se juega por zonas, como las
+     * copas europeas. Vacio en una liga, que tiene una sola tabla.
+     */
+    group?: string;
+}
+
+/**
+ * La tabla del formato NUEVO de la ficha (`action=update`, `stats.standings`).
+ *
+ * Una competicion por grupos —Champions y Challenge Cup— trae `groups`, una
+ * lista de `{ name: 'Pool 1', standings: [...] }`; una liga trae las filas
+ * sueltas en `standings`. Se aceptan las dos y cada fila lleva su grupo.
+ */
+export function parseRugbyPassUpdateStandings(payload: unknown): RugbyPassStandingRow[] {
+    const bloque = ((payload ?? {}) as { stats?: { standings?: Record<string, unknown> } }).stats?.standings;
+    if (!bloque || typeof bloque !== 'object') return [];
+
+    const num = (v: unknown) => {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : 0;
+    };
+    const aFilas = (filas: unknown, group: string): RugbyPassStandingRow[] =>
+        (Array.isArray(filas) ? filas : []).flatMap((f: any, i: number) => {
+            const teamName = decodeRugbyPassEntities(String(f?.name ?? '')).trim();
+            if (!teamName) return [];
+            const tryBonus = num(f?.tryBonusPoints);
+            const losingBonus = num(f?.loosingBonusPoints);
+            return [{
+                position: num(f?.position) || i + 1,
+                teamName,
+                logo: String(f?.logo ?? ''),
+                played: num(f?.played),
+                won: num(f?.won),
+                drawn: num(f?.drawn),
+                lost: num(f?.lost),
+                pointsFor: num(f?.pointsFor),
+                pointsAgainst: num(f?.pointsAgainst),
+                pointsDiff: num(f?.pointsDifference),
+                tryBonus,
+                losingBonus,
+                bonusPoints: f?.bonusPoints !== undefined ? num(f.bonusPoints) : tryBonus + losingBonus,
+                points: num(f?.points),
+                ...(group ? { group } : {}),
+            }];
+        });
+
+    const grupos = Array.isArray(bloque.groups) ? bloque.groups : [];
+    const porGrupo = grupos.flatMap((g: any) => aFilas(g?.standings, String(g?.name ?? '').trim()));
+    return porGrupo.length > 0 ? porGrupo : aFilas(bloque.standings, '');
 }
 
 /**

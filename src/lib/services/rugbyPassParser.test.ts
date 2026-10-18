@@ -619,3 +619,31 @@ test('parseRugbyPassUpdate: lee formaciones, cronologia y estadisticas del JSON 
         { category: 'carries', rank: 2, playerName: 'Cris Medio', teamName: 'Exeter Chiefs', total: 9 },
     ]);
 });
+
+test('parseRugbyPassUpdateStandings: las copas europeas traen un bloque por Pool', async () => {
+    const { parseRugbyPassUpdateStandings } = await import('./rugbyPassCatalog.ts');
+    const { agruparPorGrupo } = await import('./rugbyPassTournamentBundle.ts');
+    const fila = (name: string, position: number, points: number) => ({
+        name, position, points, played: 1, won: 1, lost: 0, drawn: 0,
+        pointsFor: 20, pointsAgainst: 10, pointsDifference: 10,
+        tryBonusPoints: 1, loosingBonusPoints: 0, bonusPoints: 1, logo: '',
+    });
+    const filas = parseRugbyPassUpdateStandings({
+        stats: { standings: { groups: [
+            { name: 'Pool 1', standings: [fila('Leinster', 1, 5), fila('Pau', 2, 4)] },
+            { name: 'Pool 2', standings: [fila('Toulouse', 1, 5)] },
+        ] } },
+    });
+    assert.deepEqual(filas.map((f) => [f.group, f.teamName, f.position]), [
+        ['Pool 1', 'Leinster', 1], ['Pool 1', 'Pau', 2], ['Pool 2', 'Toulouse', 1],
+    ]);
+    assert.equal(filas[0].tryBonus, 1);
+
+    const bloques = agruparPorGrupo(filas.map((f) => ({ group_name: f.group ?? '', n: f.teamName })), 'Champions');
+    assert.deepEqual(bloques.map((b) => [b.group_name, b.rows.length]), [['Pool 1', 2], ['Pool 2', 1]]);
+
+    // Una liga: filas sueltas, un solo bloque con el nombre de la competicion.
+    const liga = parseRugbyPassUpdateStandings({ stats: { standings: { groups: [], standings: [fila('Pau', 1, 9)] } } });
+    assert.equal(liga[0].group, undefined);
+    assert.deepEqual(agruparPorGrupo([{ group_name: '' }], 'Top 14').map((b) => b.group_name), ['Top 14']);
+});
