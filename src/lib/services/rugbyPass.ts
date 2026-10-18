@@ -26,6 +26,7 @@ import {
     parseRugbyPassEvents,
     parseRugbyPassPlayerStatRanking,
     parseRugbyPassMatchDetail,
+    parseRugbyPassUpdate,
     parseRugbyPassFeed,
     parseRugbyPassPoll,
     unwrapRugbyPassBody,
@@ -324,6 +325,21 @@ export async function getRugbyPassMatchDetail(
 ): Promise<RugbyPassMatchDetail | null> {
     const url = rugbyPassMatchUrl(gameId, homeSlug, awaySlug);
     const intentar = async (u: string) => {
+        // FORMATO NUEVO (2026-10): `action=update` contesta `{ game, stats }`.
+        // `live-poll-data` ya devuelve la pagina entera en HTML, asi que solo
+        // queda de respaldo por si el sitio vuelve atras en alguna competicion.
+        try {
+            const nuevo = await rugbyPassJson(u, {
+                method: 'POST',
+                body: formBody({ action: 'update', comments: '0', events: '0' }),
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', Referer: u },
+            });
+            if (nuevo && typeof nuevo === 'object' && 'game' in nuevo) {
+                return parseRugbyPassUpdate(nuevo);
+            }
+        } catch {
+            // Slug invertido (301 que pierde el POST) o formato viejo: sigue.
+        }
         const payload = await rugbyPassJson(u, {
             method: 'POST',
             body: formBody({ action: 'live-poll-data', event: String(gameId), liveStandings: '0' }),
