@@ -1206,6 +1206,36 @@ function minutoDe(valor: unknown): number | null {
     return Number.isFinite(n) ? n : null;
 }
 
+/**
+ * `stats.playerStats.stats` es `{ <rubro>: [{ name, home, total }] }`, ordenado
+ * de mayor a menor. Solo pasan los rubros del catalogo (`points` y `last_try`
+ * no son rubros de planilla). El equipo sale de `home`, que dice de que lado es.
+ */
+function playerStatsDeUpdate(bloques: unknown, game: Record<string, unknown>): RugbyPassPlayerStat[] {
+    if (!bloques || typeof bloques !== 'object') return [];
+    const rubros = new Set(RUGBYPASS_PLAYER_STAT_KINDS.map((k) => k.id));
+    const nombreLocal = textoDe((game.homeTeam as { name?: unknown } | undefined)?.name);
+    const nombreVisita = textoDe((game.awayTeam as { name?: unknown } | undefined)?.name);
+
+    const salida: RugbyPassPlayerStat[] = [];
+    for (const [category, filas] of Object.entries(bloques as Record<string, unknown>)) {
+        if (!rubros.has(category) || !Array.isArray(filas)) continue;
+        filas.forEach((f: any, i: number) => {
+            const total = Number(f?.total);
+            const playerName = decodeRugbyPassEntities(textoDe(f?.name)).trim();
+            if (!playerName || !Number.isFinite(total)) return;
+            salida.push({
+                category,
+                rank: i + 1,
+                playerName,
+                teamName: f?.home === true ? nombreLocal : nombreVisita,
+                total,
+            });
+        });
+    }
+    return salida;
+}
+
 export function parseRugbyPassUpdate(payload: unknown): RugbyPassMatchDetail {
     const raiz = (payload ?? {}) as {
         game?: Record<string, unknown>;
@@ -1329,9 +1359,10 @@ export function parseRugbyPassUpdate(payload: unknown): RugbyPassMatchDetail {
         awayScore: Number.isFinite(marcadorVisita) ? marcadorVisita : null,
         events,
         stats: salidaStats,
-        // El ranking por jugador sale de `filter-players-stats` (una llamada por
-        // rubro), no de esta respuesta.
-        playerStats: [],
+        // Los rankings por jugador vienen en esta misma respuesta, completos
+        // (cada rubro lista a todos los que registraron algo): reemplazan a las
+        // veintidos llamadas a `filter-players-stats`, que ya no contesta JSON.
+        playerStats: playerStatsDeUpdate(stats.playerStats?.stats, game),
         possession: {
             home: porcentaje(teamStats.possession && (teamStats.possession as any).homePercent),
             away: porcentaje(teamStats.possession && (teamStats.possession as any).awayPercent),

@@ -547,8 +547,8 @@ test('parseRugbyPassUpdate: lee formaciones, cronologia y estadisticas del JSON 
     const detalle = parseRugbyPassUpdate({
         game: {
             finished: true,
-            homeTeam: { score: 12 },
-            awayTeam: { score: 7 },
+            homeTeam: { score: 12, name: 'Toulouse' },
+            awayTeam: { score: 7, name: 'Exeter Chiefs' },
             homePlayers: [
                 { id: 1, cls: 'p1', fname: 'Ana Prop', uri: 'ana-prop' },
                 { id: 16, cls: 'p16', fname: 'Beto Banco', uri: 'beto-banco' },
@@ -556,6 +556,16 @@ test('parseRugbyPassUpdate: lee formaciones, cronologia y estadisticas del JSON 
             awayPlayers: [{ id: 2, cls: 'p9', fname: 'Cris Medio', uri: 'cris-medio' }],
         },
         stats: {
+            playerStats: {
+                stats: {
+                    carries: [
+                        { name: 'Ana Prop', home: true, total: 12 },
+                        { name: 'Cris Medio', home: false, total: 9 },
+                    ],
+                    // No es un rubro de planilla: no pasa.
+                    points: [{ name: 'Ana Prop', home: true, total: 7 }],
+                },
+            },
             substitutions: {
                 homeTeam: [{ minute: 51, subOff: { id: 1 }, subOn: { id: 16 } }],
                 awayTeam: [],
@@ -602,4 +612,10 @@ test('parseRugbyPassUpdate: lee formaciones, cronologia y estadisticas del JSON 
     assert.equal(detalle.stats.filter((s) => s.label === 'Tries').length, 1);
     assert.equal(detalle.possession.home, 48);
     assert.equal(detalle.territory.away, 45);
+
+    // Rankings por jugador: solo rubros del catalogo, con el equipo segun `home`.
+    assert.deepEqual(detalle.playerStats, [
+        { category: 'carries', rank: 1, playerName: 'Ana Prop', teamName: 'Toulouse', total: 12 },
+        { category: 'carries', rank: 2, playerName: 'Cris Medio', teamName: 'Exeter Chiefs', total: 9 },
+    ]);
 });
