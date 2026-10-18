@@ -1165,3 +1165,181 @@ export function parseRugbyPassMatchDetail(payload: RawDetail): RugbyPassMatchDet
         },
     };
 }
+
+// ── La ficha nueva: action=update ───────────────────────────────────────────
+
+/**
+ * RugbyPass rehizo el match centre (2026-10): `live-poll-data` pasó a devolver
+ * la pagina entera —un Vue— en lugar de JSON, y el dato real viaja por
+ * `POST /live/<slug>/?g=<id>` con `action=update`, que contesta
+ * `{ game, stats }` en JSON puro. Misma informacion, otra forma: este parser la
+ * devuelve como el mismo `RugbyPassMatchDetail` de siempre para que nada de
+ * aguas abajo se entere.
+ *
+ * A diferencia del formato viejo, aca ya no hay HTML que raspar: la formacion
+ * son `game.homePlayers` / `awayPlayers`, la cronologia es
+ * `stats.keyEvents.eventList` y las estadisticas son listas de
+ * `{ title, home, away }`.
+ */
+const NEW_EVENT_TYPE: Readonly<Record<string, string>> = {
+    'try': 'try',
+    'try-conversion': 'conversion',
+    'conversion': 'conversion',
+    'penalty-goal': 'penalty_goal',
+    'penalty': 'penalty_goal',
+    'drop-goal': 'drop_goal',
+    'penalty-try': 'penalty_try',
+    'yellow-card': 'card_yellow',
+    'red-card': 'card_red',
+};
+
+interface UpdatePlayer {
+    id?: unknown; cls?: unknown; fname?: unknown; name?: unknown; uri?: unknown;
+}
+
+function textoDe(valor: unknown): string {
+    return typeof valor === 'string' ? valor : '';
+}
+
+function minutoDe(valor: unknown): number | null {
+    const n = parseInt(String(valor ?? ''), 10);
+    return Number.isFinite(n) ? n : null;
+}
+
+export function parseRugbyPassUpdate(payload: unknown): RugbyPassMatchDetail {
+    const raiz = (payload ?? {}) as {
+        game?: Record<string, unknown>;
+        stats?: Record<string, unknown>;
+    };
+    const game = (raiz.game ?? {}) as Record<string, unknown>;
+    const stats = (raiz.stats ?? {}) as Record<string, any>;
+
+    const local = (game.homeTeam ?? {}) as { score?: unknown };
+    const visita = (game.awayTeam ?? {}) as { score?: unknown };
+    const homePlayers = (Array.isArray(game.homePlayers) ? game.homePlayers : []) as UpdatePlayer[];
+    const awayPlayers = (Array.isArray(game.awayPlayers) ? game.awayPlayers : []) as UpdatePlayer[];
+
+    // id de jugador -> slug (`uri`): es lo que arma el link a su ficha.
+    const slugPorId = new Map<string, string>();
+    for (const p of [...homePlayers, ...awayPlayers]) {
+        if (p.id !== undefined && textoDe(p.uri)) slugPorId.set(String(p.id), textoDe(p.uri));
+    }
+
+    // Cambios: quien salio y quien entro, y a que minuto.
+    const salio = new Map<string, number | null>();
+    const entro = new Map<string, number | null>();
+    const cambios = stats.substitutions ?? {};
+    for (const lado of ['homeTeam', 'awayTeam'] as const) {
+        for (const c of (Array.isArray(cambios[lado]) ? cambios[lado] : []) as any[]) {
+            if (c?.subOff?.id !== undefined) salio.set(String(c.subOff.id), minutoDe(c.minute));
+            if (c?.subOn?.id !== undefined) entro.set(String(c.subOn.id), minutoDe(c.minute));
+        }
+    }
+
+    const toLineup = (jugadores: UpdatePlayer[]): RugbyPassLineupPlayer[] =>
+        jugadores.map((p, i) => {
+            const numero = parseInt(textoDe(p.cls).replace(/^p/i, ''), 10);
+            const number = Number.isFinite(numero) ? numero : i + 1;
+            const id = String(p.id ?? '');
+            return {
+                number,
+                name: decodeRugbyPassEntities(textoDe(p.fname) || textoDe(p.name)),
+                slug: textoDe(p.uri) || null,
+                role: number <= 15 ? 'starter' : 'substitute',
+                onMinute: entro.get(id) ?? null,
+                offMinute: salio.get(id) ?? null,
+            } satisfies RugbyPassLineupPlayer;
+        }).filter((p) => p.name);
+
+    // La cronologia: la ficha la lista del final para atras.
+    const events: RugbyPassEvent[] = [];
+    const lista = (Array.isArray(stats.keyEvents?.eventList) ? stats.keyEvents.eventList : []) as any[];
+    for (const e of lista) {
+        if (e?.type === 'interval') {
+            const tipo = CLOCK_TYPE_BY_LABEL[textoDe(e.label).trim().toLowerCase()]
+                ?? CLOCK_TYPE_BY_LABEL[textoDe(e.interval).trim().toLowerCase()];
+            if (tipo) {
+                events.push({
+                    type: tipo, side: null, minute: null,
+                    playerName: null, playerSlug: null, homeScore: null, awayScore: null,
+                });
+            }
+            continue;
+        }
+        const crudo = textoDe(e?.type).toLowerCase();
+        const tipo = NEW_EVENT_TYPE[crudo];
+        if (!tipo) continue;
+        const marcador = textoDe(e.score).match(/^(\d+)\s*-\s*(\d+)$/);
+        const esTryPenal = tipo === 'penalty_try';
+        const nombre = esTryPenal ? '' : decodeRugbyPassEntities(textoDe(e.player)).trim();
+        const side = e.side === 'home' || e.side === 'away' ? e.side : null;
+        const base = {
+            side,
+            minute: minutoDe(e.time),
+            playerName: nombre || null,
+            playerSlug: nombre ? slugPorId.get(String(e.playerId)) ?? null : null,
+        } as const;
+        const home = marcador ? Number(marcador[1]) : null;
+        const away = marcador ? Number(marcador[2]) : null;
+
+        // `try-conversion` es UN evento que junta el try y la patada, y su
+        // marcador es el de DESPUES DEL TRY (5 puntos). El resto del sistema
+        // los espera separados: el try con ese marcador y la conversion con +2.
+        // El orden de la lista es del final para atras, asi que la conversion
+        // se empuja primero y el `reverse()` la deja despues del try.
+        if (crudo === 'try-conversion') {
+            events.push({
+                ...base, type: 'conversion',
+                homeScore: home !== null && side === 'home' ? home + 2 : home,
+                awayScore: away !== null && side === 'away' ? away + 2 : away,
+            });
+            events.push({ ...base, type: 'try', homeScore: home, awayScore: away });
+            continue;
+        }
+        events.push({ ...base, type: tipo, homeScore: home, awayScore: away });
+    }
+    events.reverse();
+
+    // Las estadisticas: cada bloque es una lista de `{ title, home, away }`.
+    const salidaStats: RugbyPassMatchStat[] = [];
+    const vistos = new Set<string>();
+    const teamStats = (stats.teamStats ?? {}) as Record<string, unknown>;
+    for (const grupo of RUGBYPASS_STAT_GROUPS) {
+        const filas = teamStats[grupo];
+        if (!Array.isArray(filas)) continue;
+        for (const f of filas as any[]) {
+            const label = textoDe(f?.title).trim();
+            if (!label || vistos.has(label)) continue;
+            vistos.add(label);
+            salidaStats.push({
+                label: STAT_LABEL_ES[label] ?? label,
+                home: String(f?.home ?? '').trim(),
+                away: String(f?.away ?? '').trim(),
+            });
+        }
+    }
+
+    const terminado = game.finished === true;
+    const marcadorLocal = Number(local.score);
+    const marcadorVisita = Number(visita.score);
+    return {
+        status: terminado ? 'result' : textoDe(stats.keyEvents?.status) || null,
+        minutes: terminado ? null : textoDe(game.dateStatus) || null,
+        homeScore: Number.isFinite(marcadorLocal) ? marcadorLocal : null,
+        awayScore: Number.isFinite(marcadorVisita) ? marcadorVisita : null,
+        events,
+        stats: salidaStats,
+        // El ranking por jugador sale de `filter-players-stats` (una llamada por
+        // rubro), no de esta respuesta.
+        playerStats: [],
+        possession: {
+            home: porcentaje(teamStats.possession && (teamStats.possession as any).homePercent),
+            away: porcentaje(teamStats.possession && (teamStats.possession as any).awayPercent),
+        },
+        territory: {
+            home: porcentaje(teamStats.territory && (teamStats.territory as any).homePercent),
+            away: porcentaje(teamStats.territory && (teamStats.territory as any).awayPercent),
+        },
+        lineups: { home: toLineup(homePlayers), away: toLineup(awayPlayers) },
+    };
+}

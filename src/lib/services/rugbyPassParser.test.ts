@@ -18,6 +18,7 @@ import {
     RUGBYPASS_PLAYER_STAT_KINDS,
     parseRugbyPassAllStats,
     parseRugbyPassStatsSummary,
+    parseRugbyPassUpdate,
     parseRugbyPassPoll,
     rugbyPassMatchId,
     rugbyPassTeamId,
@@ -538,4 +539,67 @@ test('toda competicion declara su mes de inicio de temporada', () => {
             `${c.name} no declara un mes de inicio valido`
         );
     }
+});
+
+// ── La ficha nueva (action=update) ──────────────────────────────────────────
+
+test('parseRugbyPassUpdate: lee formaciones, cronologia y estadisticas del JSON nuevo', () => {
+    const detalle = parseRugbyPassUpdate({
+        game: {
+            finished: true,
+            homeTeam: { score: 12 },
+            awayTeam: { score: 7 },
+            homePlayers: [
+                { id: 1, cls: 'p1', fname: 'Ana Prop', uri: 'ana-prop' },
+                { id: 16, cls: 'p16', fname: 'Beto Banco', uri: 'beto-banco' },
+            ],
+            awayPlayers: [{ id: 2, cls: 'p9', fname: 'Cris Medio', uri: 'cris-medio' }],
+        },
+        stats: {
+            substitutions: {
+                homeTeam: [{ minute: 51, subOff: { id: 1 }, subOn: { id: 16 } }],
+                awayTeam: [],
+            },
+            keyEvents: {
+                // La ficha lista del final para atras.
+                eventList: [
+                    { type: 'interval', label: 'Full Time' },
+                    { type: 'line' },
+                    { type: 'try-conversion', side: 'home', time: "8'", score: '5-7', player: 'Prop', playerId: 1 },
+                    { type: 'penalty-try', side: 'away', time: "4'", score: '0-7', player: 'Penalty Try', playerId: 0 },
+                    { type: 'interval', label: 'Start' },
+                ],
+            },
+            teamStats: {
+                possession: { homePercent: '48%', awayPercent: '52%' },
+                territory: { homePercent: 55, awayPercent: 45 },
+                statsSummary: [{ title: 'Tries', home: '1', away: '1' }],
+                attack: [{ title: 'Tries', home: '1', away: '1' }, { title: 'Passes', home: '90', away: '80' }],
+            },
+        },
+    });
+
+    assert.equal(detalle.homeScore, 12);
+    assert.equal(detalle.lineups.home.length, 2);
+    assert.equal(detalle.lineups.home[0].role, 'starter');
+    assert.equal(detalle.lineups.home[0].offMinute, 51);
+    assert.equal(detalle.lineups.home[1].role, 'substitute');
+    assert.equal(detalle.lineups.home[1].onMinute, 51);
+    assert.equal(detalle.lineups.home[1].slug, 'beto-banco');
+
+    // Orden cronologico, y el try-conversion queda partido en try + conversion.
+    assert.deepEqual(
+        detalle.events.map((e) => e.type),
+        ['match_start', 'penalty_try', 'try', 'conversion', 'match_end']
+    );
+    const conversion = detalle.events[3];
+    assert.equal(conversion.homeScore, 7);
+    assert.equal(conversion.awayScore, 7);
+    assert.equal(detalle.events[2].playerSlug, 'ana-prop');
+    assert.equal(detalle.events[1].playerName, null);
+
+    // 'Tries' esta en dos bloques y se cuenta una sola vez.
+    assert.equal(detalle.stats.filter((s) => s.label === 'Tries').length, 1);
+    assert.equal(detalle.possession.home, 48);
+    assert.equal(detalle.territory.away, 45);
 });
