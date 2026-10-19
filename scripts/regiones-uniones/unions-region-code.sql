@@ -55,10 +55,11 @@ update public.unions u
     ('urne',                                                    'nea'),
     ('union-de-rugby-de-formosa',                               'nea'),
     ('union-de-rugby-de-misiones',                              'nea'),
+    -- Centro: la Andina coordina con la Unión Cordobesa los torneos regionales.
+    ('union-andina-de-rugby',                                   'centro'),
     -- Cuyo
     ('40159cd1-5876-4720-b953-d639b09d5f5b',                    'cuyo'),       -- Unión de Rugby de Cuyo
     ('765e6c46-b1c1-4e44-8490-aa0085ebeb99',                    'cuyo'),       -- Unión Sanjuanina
-    ('union-andina-de-rugby',                                   'cuyo'),       -- duda 1
     ('asociacion-mendocina-de-hockey-sobre-cesped',             'cuyo'),
     -- Patagonia
     ('union-austral',                                           'patagonia'),

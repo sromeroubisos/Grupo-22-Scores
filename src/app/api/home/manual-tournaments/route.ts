@@ -41,6 +41,8 @@ type ManualTournamentRow = {
     priority: number | null;
     /** Para el filtro de temporada y para agrupar en familias en el selector. */
     union_id: string | null;
+    /** 'union' | 'regional' | 'nacional': separa los regionales de los de cada unión. */
+    scope?: string | null;
     subcategory: string | null;
     gender: string | null;
 };
@@ -128,10 +130,14 @@ async function queryVisibleManualTournaments(
         { select: SELECT_WITHOUT_LEGACY_SPORT, usesLegacySport: false, usesPriority: false },
     ];
 
-    for (const attempt of attempts) {
+    // `scope` es una columna nueva: si esa base todavía no la tiene se pide sin ella.
+    let conScope = true;
+
+    for (let i = 0; i < attempts.length; i += 1) {
+        const attempt = attempts[i];
         let query = supabase
             .from('tournaments')
-            .select(`${attempt.select}, union_id, subcategory, gender`)
+            .select(`${attempt.select}, union_id, subcategory, gender${conScope ? ', scope' : ''}`)
             .neq('is_visible', false);
 
         if (attempt.usesPriority) {
@@ -144,6 +150,12 @@ async function queryVisibleManualTournaments(
 
         if (!result.error) {
             return result;
+        }
+
+        if (conScope && isMissingColumnError(result.error, 'scope')) {
+            conScope = false;
+            i -= 1;
+            continue;
         }
 
         const missingSport = attempt.usesLegacySport && isMissingColumnError(result.error, 'sport');
