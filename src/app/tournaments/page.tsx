@@ -105,6 +105,7 @@ type ManualTournamentApiItem = {
     subcategory?: string | null;
     gender?: string | null;
     union_id?: string | null;
+    scope?: string | null;
 };
 
 const ALL_COUNTRIES = getAllCountries();
@@ -838,6 +839,7 @@ export default function TorneosPage() {
                     subcategory: tournament.subcategory ?? null,
                     gender: tournament.gender ?? null,
                     unionId: tournament.union_id ?? null,
+                    scope: tournament.scope ?? null,
                     isVisible: tournament.is_visible ?? undefined,
                     isWomen: isWomenCategory(tournament.category),
                     isYouth: resolveTournamentAudience({
