@@ -1487,6 +1487,33 @@ export default function HomePage() {
     });
   };
 
+  // En el celular, los torneos que la persona NO sigue vienen cerrados (solo el
+  // encabezado y la cantidad de partidos): un sábado eran 48 grupos abiertos,
+  // 17.900 px de página, para alguien a quien le importan uno o dos
+  // (auditoría de densidad, 2026-10-20). Lo que se abre a mano se recuerda.
+  const [isPhone, setIsPhone] = useState(false);
+  const [openedLeagues, setOpenedLeagues] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 768px)');
+    const update = () => setIsPhone(query.matches);
+    update();
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+
+  const toggleLeagueCard = (leagueId: string, followed: boolean) => {
+    if (isPhone && !followed) {
+      setOpenedLeagues(prev => {
+        const next = new Set(prev);
+        if (next.has(leagueId)) next.delete(leagueId);
+        else next.add(leagueId);
+        return next;
+      });
+      return;
+    }
+    toggleCompetitionCollapse(leagueId);
+  };
+
   const toggleCompetitionCollapse = (leagueId: string) => {
     setCollapsedLeagues(prev => {
       const next = new Set(prev);
@@ -1990,7 +2017,9 @@ export default function HomePage() {
           <MyTournaments variant="home" />
 
           {/* Titulares y los partidos de los clubes que sigue. Si no hay nada, no se dibuja. */}
-          <TickerTitulares favorites={favorites} />
+          <div className={styles.tickerWrap}>
+            <TickerTitulares favorites={favorites} />
+          </div>
 
           {/* Juegos Suramericanos Santa Fe 2026: solo en el teléfono, donde el nav
               no tiene el link. Se apaga solo al día siguiente del cierre. */}
@@ -2304,8 +2333,10 @@ export default function HomePage() {
               )}
 
               {!esTenis && !loading && displayedMatchesByLeague.map((league, leagueIndex) => {
-                const isCollapsed = collapsedLeagues.has(league.leagueId);
                 const isFavoriteLeague = isLeagueGroupFavorite(league);
+                const isCollapsed = isPhone && !isFavoriteLeague
+                  ? !openedLeagues.has(league.leagueId)
+                  : collapsedLeagues.has(league.leagueId);
                 const leagueColorStyle = getLeagueColorStyle(
                   leagueIndex + (displayedFavoriteClubMatches.length > 0 ? 1 : 0)
                 );
@@ -2323,7 +2354,7 @@ export default function HomePage() {
                  * en que la promo no existe.
                  */
                 const conPromo = (bloque: ReactNode) => (
-                  leagueIndex === PROMO_DESPUES_DEL_BLOQUE
+                  leagueIndex === PROMO_DESPUES_DEL_BLOQUE && !isPhone
                     ? (
                       <Fragment key={league.leagueId}>
                         {bloque}
@@ -2365,7 +2396,7 @@ export default function HomePage() {
                 return conPromo(
                   <div key={league.leagueId} className={styles.leagueSection} style={leagueColorStyle}>
                     <div className={`${styles.leagueSectionHeader} ${isCollapsed ? styles.collapsed : ''}`}
-                      onClick={() => toggleCompetitionCollapse(league.leagueId)}
+                      onClick={() => toggleLeagueCard(league.leagueId, isFavoriteLeague)}
                       style={{ cursor: 'pointer' }}
                     >
                       <Link
@@ -2383,6 +2414,11 @@ export default function HomePage() {
                       </Link>
 
                       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {isCollapsed ? (
+                          <span className={styles.leagueMatchCount}>
+                            {league.matches.length} {league.matches.length === 1 ? 'partido' : 'partidos'}
+                          </span>
+                        ) : null}
                         {FAVORITES_ENABLED && (
                           <button
                             className={styles.leagueFavoriteBtn}
@@ -2427,7 +2463,7 @@ export default function HomePage() {
               })}
 
               {/* Menos de dos bloques: la tarjeta no encontró su lugar arriba. */}
-              {!loading && displayedMatchesByLeague.length <= PROMO_DESPUES_DEL_BLOQUE && (
+              {!loading && !isPhone && displayedMatchesByLeague.length <= PROMO_DESPUES_DEL_BLOQUE && (
                 <ClubsPromoCard variant="feed" />
               )}
 
@@ -2440,7 +2476,7 @@ export default function HomePage() {
                 partidos, después la lectura— y arriba de 1500 no se dibujan
                 porque ahí la columna existe y es de clubes.
               */}
-              {!loading && news.length > 0 && (
+              {!loading && !isPhone && news.length > 0 && (
                 <section className={styles.feedNews} aria-labelledby="feed-news-titulo">
                   <div className={styles.feedNewsHeader}>
                     <h2 id="feed-news-titulo" className={styles.feedNewsTitle}>Noticias Recientes</h2>
@@ -2492,7 +2528,7 @@ export default function HomePage() {
           único que un mobile ve.
         */}
         <aside className={styles.sidebarRight}>
-          <ClubsPromoCard variant="sidebar" />
+          {!isPhone && <ClubsPromoCard variant="sidebar" />}
         </aside>
       </div >
     </div >

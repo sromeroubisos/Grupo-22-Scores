@@ -4971,3 +4971,44 @@
         font-family: inherit;
     }
 }
+
+/* ==========================================================================
+   Densidad en el celular (auditoría con 3 usuarios, 2026-10-20)
+   El Resumen era 2.200 px y la tabla quedaba a 1.100 px de scroll. Ahora:
+   próximo partido, posiciones, 3 resultados y 2 partidos, sin las fichas
+   que repetían lo que ya dice la cabecera.
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Contenido y barra lateral pasan a una sola columna ordenable. */
+    .contentGrid {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .contentGrid > .contentArea,
+    .contentGrid > .sidebar {
+        display: contents;
+    }
+
+    /* Orden: lo destacado, la tabla, los resultados, los próximos. */
+    .contentArea > *,
+    .sidebar > * { order: 5; }
+    .contentArea > :first-child { order: 0; }
+    .summaryStandingsCard { order: 1; }
+    .summaryResultsCard { order: 2; }
+    .summaryFixturesCard { order: 4; }
+
+    /* "Cuadro" e "Información" repetían la cabecera. */
+    .hideOnPhone { display: none; }
+
+    /* 3 resultados, 2 próximos, 6 posiciones; el resto está en su pestaña. */
+    .summaryMatchList > :nth-child(n + 4) { display: none; }
+    .summaryFixturesList > :nth-child(n + 3) { display: none; }
+    .summaryStandingsCard :global([aria-label="Leyenda de posiciones"]),
+    .summaryStandingsCard .standingsLegend { display: none; }
+
+    /* El "Exportar" del cuerpo repetía el de la cabecera. */
+    .tabPanel :global([class*="ExportImage-module"]) { display: none; }
+}

@@ -574,6 +574,8 @@
 }
 
 .accountNote {
+    border: 0 !important;
+    padding: 0 !important;
     display: grid;
     gap: 10px;
     margin-top: 22px;
@@ -626,4 +628,17 @@
 .errorContainer p {
     margin: 0;
     color: var(--color-text-secondary);
+}
+
+.accountLink {
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-accent);
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
 }

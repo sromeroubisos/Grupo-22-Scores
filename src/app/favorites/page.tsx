@@ -41,9 +41,7 @@ export default function FavoritesPage() {
             <div className={styles.myContainer}>
                 <header className={styles.myHeader}>
                     <h1 className={styles.myTitle}>Mis torneos</h1>
-                    <p className={styles.myLead}>
-                        Los torneos y clubes que seguís, siempre a un toque.
-                    </p>
+
                 </header>
 
                 {error ? (
@@ -99,16 +97,12 @@ export default function FavoritesPage() {
 
                 {!user && !loading ? (
                     <aside className={styles.accountNote}>
-                        <p>
-                            Lo que seguís se guarda en este teléfono. Si querés verlo también
-                            en otro dispositivo, iniciá sesión y se pasa solo a tu cuenta.
-                        </p>
                         <button
                             type="button"
-                            className={styles.accountButton}
+                            className={styles.accountLink}
                             onClick={() => login('fan', '/favorites')}
                         >
-                            Iniciar sesión
+                            Iniciá sesión para verlo en otros dispositivos
                         </button>
                     </aside>
                 ) : null}

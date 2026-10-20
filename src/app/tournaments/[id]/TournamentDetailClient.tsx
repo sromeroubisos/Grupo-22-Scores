@@ -63,11 +63,12 @@ import {
 // Tabs
 const BASE_TABS = [
     { id: 'summary', label: 'Resumen' },
+    // "Tabla" es como lo dice la gente ("¿cómo está la tabla?"); "Clasificación"
+    // obligaba a traducir. Va segunda: era lo que dos de tres personas buscaban
+    // y quedaba cortada en el borde de la barra (auditoría, 2026-10-20).
+    { id: 'standings', label: 'Tabla' },
     { id: 'results', label: 'Resultados' },
     { id: 'fixtures', label: 'Fixture' },
-    // "Tabla" es como lo dice la gente ("¿cómo está la tabla?"); "Clasificación"
-    // obligaba a traducir (auditoría mobile, 2026-10-19).
-    { id: 'standings', label: 'Tabla' },
     { id: 'playoff', label: 'Playoff' },
     { id: 'teams', label: 'Equipos' },
     { id: 'scores', label: 'Puntajes' },
@@ -3765,7 +3766,7 @@ export default function TournamentDetailPage({
             ? (motorsportOverallGroups?.drivers.length
                 ? motorsportOverallGroups.drivers.slice(0, 8)
                 : (motorsportOverallGroups?.ungrouped || []).slice(0, 8))
-            : overallRows.slice(0, 8);
+            : overallRows.slice(0, 6);
     // For grouped standings (e.g. World Cup), keep group separation in the sidebar preview.
     const standingsPreviewGroups: Array<{ name: string | null; rows: any[] }> = (() => {
         if (shouldUseIntegratedBracketView || isMotorsportTournament) return [];
@@ -5249,7 +5250,7 @@ export default function TournamentDetailPage({
 
                             {/* Latest Results */}
                             {(isMotorsportTournament || results.length > 0) && (
-                                <div className={styles.sectionCard}>
+                                <div className={`${styles.sectionCard} ${styles.summaryResultsCard}`}>
                                     <div className={styles.sectionHeader}>
                                         <h2 className={styles.sectionTitle}>{isMotorsportTournament ? 'Clasificacion de pilotos' : summaryResultsTitle}</h2>
                                         <button className={styles.linkButton} onClick={() => setActiveTab(isMotorsportTournament ? 'standings' : 'results')}>{isMotorsportTournament ? 'Ver clasificacion' : 'Ver todos'}</button>
@@ -5260,7 +5261,7 @@ export default function TournamentDetailPage({
                                         emptyLabel: 'Clasificacion de pilotos no disponible.',
                                         raceColumns: motorsportDriverRaceColumns,
                                     }) : (
-                                        <div className={styles.matchList}>
+                                        <div className={`${styles.matchList} ${styles.summaryMatchList}`}>
                                             {results.slice(0, 5).map((m, idx) => renderCompetitionItem(m, true, idx))}
                                         </div>
                                     )}
@@ -5269,7 +5270,7 @@ export default function TournamentDetailPage({
 
                             {/* Upcoming Matches */}
                             {(isMotorsportTournament || fixtures.length > 0 || motorsportSeasonEvents.length > 0) && (
-                                <div className={styles.sectionCard}>
+                                <div className={`${styles.sectionCard} ${styles.summaryFixturesCard}`}>
                                     <div className={styles.sectionHeader}>
                                         <h2 className={styles.sectionTitle}>{isMotorsportTournament ? 'Calendario de la temporada' : summaryFixturesTitle}</h2>
                                         <button className={styles.linkButton} onClick={() => setActiveTab(isMotorsportTournament ? 'results' : 'fixtures')}>{isMotorsportTournament ? 'Ver calendario' : 'Ver todos'}</button>
@@ -5281,7 +5282,7 @@ export default function TournamentDetailPage({
                                                 : <p className={styles.emptyState}>No hay carreras cargadas aun.</p>}
                                         </div>
                                     ) : (
-                                        <div className={styles.matchList}>
+                                        <div className={`${styles.matchList} ${styles.summaryMatchList} ${styles.summaryFixturesList}`}>
                                             {fixtures.slice(0, 5).map((m, idx) => renderCompetitionItem(m, false, idx))}
                                         </div>
                                     )}
@@ -5302,7 +5303,7 @@ export default function TournamentDetailPage({
                         <aside className={styles.sidebar}>
 
                             {(hasDedicatedPlayoffTab || shouldUseIntegratedBracketView) && (
-                                <div className={styles.infoCard}>
+                                <div className={`${styles.infoCard} ${styles.hideOnPhone}`}>
                                     <div className={styles.sectionHeader}>
                                         <h2 className={styles.sectionTitle}>Cuadro</h2>
                                         <button
@@ -5395,7 +5396,7 @@ export default function TournamentDetailPage({
 
                             {/* Standings Preview */}
                             {!isMotorsportTournament && standingsPreviewRows.length > 0 && (
-                                <div className={styles.standingsPreviewCard}>
+                                <div className={`${styles.standingsPreviewCard} ${styles.summaryStandingsCard}`}>
                                     <div className={styles.sectionHeader}>
                                         <h2 className={styles.sectionTitle}>{standingsCardTitle}</h2>
                                         <button className={styles.linkButton} onClick={() => setActiveTab('standings')}>
@@ -5435,7 +5436,7 @@ export default function TournamentDetailPage({
                             )}
 
                             {/* Tournament Info Card */}
-                            {!isMotorsportTournament && <div className={styles.infoCard}>
+                            {!isMotorsportTournament && <div className={`${styles.infoCard} ${styles.hideOnPhone}`}>
                                 <div className={styles.infoCardHeader}>
                                     <h3 className={styles.infoCardTitle}>Información</h3>
                                 </div>

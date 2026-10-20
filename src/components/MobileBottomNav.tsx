@@ -225,20 +225,24 @@ function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
 
     if (!open) return null;
 
+    // Cinco renglones, de lo que más se usa a lo que menos. Solo "Iniciar sesión"
+    // lleva una línea de ayuda: el resto se explica con su nombre. "Organizá tu
+    // torneo" es la puerta de dirigentes y va al final, lejos de quien viene a
+    // mirar resultados (auditoría de densidad, 2026-10-20).
     const links: MoreLink[] = [
-        { href: '/search', label: 'Buscar', hint: 'Torneos, clubes y jugadores', icon: 'search' },
-        { href: '/juegos', label: 'Juegos y Prode', hint: 'Pronósticos y minijuegos', icon: 'games' },
-        { href: `/rankings?sport=${encodeURIComponent(selectedSport.id)}`, label: 'Rankings', hint: 'Ranking de clubes y selecciones', icon: 'trophy' },
+        { href: '/search', label: 'Buscar', hint: '', icon: 'search' },
+        { href: '/juegos', label: 'Juegos y Prode', hint: '', icon: 'games' },
+        { href: `/rankings?sport=${encodeURIComponent(selectedSport.id)}`, label: 'Rankings', hint: '', icon: 'trophy' },
+        user
+            ? { href: '/profile', label: 'Mi cuenta', hint: '', icon: 'user' }
+            : { href: '/login', label: 'Iniciar sesión', hint: 'Para ver lo que seguís en otros dispositivos', icon: 'user' },
         {
             href: hrefParaTorneos('nav'),
             label: 'Organizá tu torneo',
-            hint: 'Para clubes y uniones',
+            hint: '',
             icon: 'building',
             onClick: () => trackEvent('clubs_promo_click', { location: 'nav' }),
         },
-        user
-            ? { href: '/profile', label: 'Mi cuenta', hint: user.email || 'Perfil y avisos', icon: 'user' }
-            : { href: '/login', label: 'Iniciar sesión', hint: 'Para guardar lo que seguís en todos tus dispositivos', icon: 'user' },
     ];
 
     return (
@@ -271,7 +275,7 @@ function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
                                     <span className={styles.sheetIcon}><SheetIcon name={link.icon} /></span>
                                     <span className={styles.sheetText}>
                                         <strong>{link.label}</strong>
-                                        <small>{link.hint}</small>
+                                        {link.hint ? <small>{link.hint}</small> : null}
                                     </span>
                                 </button>
                             ) : (
@@ -286,7 +290,7 @@ function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
                                     <span className={styles.sheetIcon}><SheetIcon name={link.icon} /></span>
                                     <span className={styles.sheetText}>
                                         <strong>{link.label}</strong>
-                                        <small>{link.hint}</small>
+                                        {link.hint ? <small>{link.hint}</small> : null}
                                     </span>
                                 </Link>
                             )}

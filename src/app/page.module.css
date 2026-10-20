@@ -2606,3 +2606,30 @@
         max-width: none;
     }
 }
+
+/* ==========================================================================
+   Densidad (auditoría con 3 usuarios, 2026-10-20)
+   ========================================================================== */
+.leagueMatchCount {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    /* El ticker se mueve solo, repite las noticias (que ya tienen pestaña) y
+       empujaba los resultados hacia abajo. */
+    .tickerWrap {
+        display: none;
+    }
+
+    /* Encabezado de torneo cerrado: una línea cómoda de tocar. */
+    .leagueSectionHeader {
+        min-height: 52px;
+    }
+
+    .matchRow {
+        min-height: 52px;
+    }
+}
