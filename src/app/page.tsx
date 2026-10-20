@@ -22,6 +22,7 @@ import CountryFlag from '@/components/CountryFlag';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useMatchesStore } from '@/hooks/useMatchesStore';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { loadManualTournaments } from '@/lib/catalog/manualTournaments';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
 import TickerTitulares from '@/components/ticker/TickerTitulares';
@@ -285,25 +286,6 @@ interface PublicTournamentListItem {
     isActive?: boolean | null;
     current?: boolean | null;
   }> | null;
-}
-
-interface ManualTournamentApiItem {
-  id: string;
-  name: string;
-  display_name?: string | null;
-  sport_id?: string | null;
-  country?: string | null;
-  country_id?: string | null;
-  priority?: number | null;
-  logo_url?: string | null;
-  category?: string | null;
-  season_id?: string | number | null;
-  is_visible?: boolean | null;
-  age_grade?: string | null;
-  format?: Tournament['format'] | null;
-  subcategory?: string | null;
-  gender?: string | null;
-  union_id?: string | null;
 }
 
 /**
@@ -1736,46 +1718,10 @@ export default function HomePage() {
       })
       .catch(err => console.error('Error fetching news:', err));
 
-    // Fetch manual tournaments
-    async function fetchManualTournaments() {
-      try {
-        const response = await fetch('/api/home/manual-tournaments', { cache: 'default' });
-        const payload = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          console.error('Error fetching manual tournaments:', payload.error || `HTTP ${response.status}`);
-          return;
-        }
-
-        const data = Array.isArray(payload.data) ? payload.data as ManualTournamentApiItem[] : [];
-        const mapped: Tournament[] = data.map((t) => ({
-          id: t.id,
-          name: t.display_name || t.name,
-          nameEs: t.display_name || t.name,
-          url: `/tournaments/${t.id}`,
-          type: 'local',
-          sportId: t.sport_id as Tournament['sportId'],
-          countryId: resolveCountryId(t.country_id, t.country),
-          priority: typeof t.priority === 'number' ? t.priority : 0,
-          logoUrl: t.logo_url,
-          categories: t.category ? [t.category.toLowerCase()] : [],
-          // Escalar y no lista de un elemento: ver el mismo mapeo en /tournaments.
-          seasonId: t.season_id ? String(t.season_id) : null,
-          subcategory: t.subcategory ?? null,
-          gender: t.gender ?? null,
-          unionId: t.union_id ?? null,
-          isVisible: t.is_visible,
-          isWomen: t.category?.toLowerCase() === 'women',
-          isYouth: resolveTournamentAudience({ ageGrade: t.age_grade, category: t.category }) === 'juveniles',
-          ageGroup: t.age_grade,
-          format: t.format,
-        }));
-        setManualTournamentsList(mapped);
-      } catch (error) {
-        console.error('Error fetching manual tournaments:', error instanceof Error ? error.message : 'Unknown error');
-      }
-    }
-    fetchManualTournaments();
+    // Torneos del gestor: pedido compartido con el onboarding (lib/catalog).
+    loadManualTournaments()
+      .then(setManualTournamentsList)
+      .catch((error) => console.error('Error fetching manual tournaments:', error instanceof Error ? error.message : 'Unknown error'));
   }, [userTimeZone]);
 
   // Precise scroll centering logic

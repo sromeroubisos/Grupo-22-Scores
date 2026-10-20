@@ -1,144 +1,162 @@
 'use client';
 
 import Link from 'next/link';
-import { Shield, Star, Trophy } from 'lucide-react';
+import { Star } from 'lucide-react';
 import TeamLogo from '@/components/TeamLogo';
-import { useFavorites } from '@/hooks/useFavorites';
+import { useAuth } from '@/context/AuthContext';
+import { useFavorites, type FavoriteItem } from '@/hooks/useFavorites';
+import { getSportById } from '@/lib/data/sports';
 import { FAVORITES_DISABLED_MESSAGE, FAVORITES_ENABLED } from '@/lib/favorites/config';
+import type { SportId } from '@/lib/types';
 
 import styles from './favorites.module.css';
 
-function getFavoriteHref(entityType: string, entityId: string, name?: string): string {
-    if (entityType === 'club') {
-        return `/clubs/${entityId}`;
-    }
+const EDIT_HREF = '/onboarding/preferences?edit=true&returnTo=%2Ffavorites';
 
-    // Pass the known name so external (FlashScore/ESPN) tournaments render their
-    // title immediately instead of falling back to "Cargando…" when the upstream
-    // details fetch is cold/slow. Harmless for local tournaments (DB name wins).
-    const query = name ? `?name=${encodeURIComponent(name)}` : '';
-    return `/tournaments/${entityId}${query}`;
+function getFavoriteHref(item: FavoriteItem): string {
+    if (item.entity_type === 'club') return `/clubs/${encodeURIComponent(item.id)}`;
+
+    // El nombre viaja en el enlace: un torneo externo (FlashScore/ESPN) pinta su título
+    // enseguida en vez de quedarse en "Cargando…" si el proveedor tarda.
+    return `/tournaments/${encodeURIComponent(item.id)}?name=${encodeURIComponent(item.name)}`;
 }
 
-function FavoriteIcon({ entityType }: { entityType: string }) {
-    if (entityType === 'club') {
-        return <Shield size={20} />;
-    }
+function sportLabel(item: FavoriteItem): string | null {
+    if (!item.sport_id) return null;
+    const sport = getSportById(item.sport_id as SportId);
+    return sport ? `${sport.icon} ${sport.nameEs}` : null;
+}
 
-    return <Trophy size={20} />;
+function plural(count: number, one: string, many: string) {
+    return `${count} ${count === 1 ? one : many}`;
+}
+
+function FavoriteRow({ item, onUnfollow }: { item: FavoriteItem; onUnfollow: (item: FavoriteItem) => void }) {
+    const sport = sportLabel(item);
+    return (
+        <li className={styles.row}>
+            <Link href={getFavoriteHref(item)} className={styles.rowLink}>
+                {item.entity_type === 'club' ? (
+                    <TeamLogo name={item.name} teamId={item.id} logoUrl={item.logo_url} className={styles.logo} size={44} radius="round" />
+                ) : item.logo_url ? (
+                    // Decorativo: el nombre ya está escrito al lado.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={item.logo_url} alt="" loading="lazy" className={styles.logo} />
+                ) : (
+                    <span className={`${styles.logo} ${styles.logoFallback}`} aria-hidden="true">{item.name.charAt(0).toUpperCase()}</span>
+                )}
+                <span className={styles.rowText}>
+                    <span className={styles.rowName}>{item.name}</span>
+                    {sport ? <span className={styles.rowSub}>{sport}</span> : null}
+                </span>
+            </Link>
+            <button
+                type="button"
+                className={styles.unfollow}
+                aria-label={`Dejar de seguir ${item.name}`}
+                title="Dejar de seguir"
+                onClick={() => onUnfollow(item)}
+            >
+                <Star size={20} fill="currentColor" />
+            </button>
+        </li>
+    );
 }
 
 export default function FavoritesPage() {
-    const { favorites, loading, error, toggleFavorite } = useFavorites();
+    const { user } = useAuth();
+    const { favorites, ready, error, toggleFavorite, refresh } = useFavorites();
 
     if (!FAVORITES_ENABLED) {
         return (
-            <div className={styles.page}>
-                <div className={styles.container}>
-                    <div className={styles.favoritesSection}>
-                        <div className={styles.emptyState}>
-                            <Star size={48} className={styles.emptyIcon} />
-                            <p>{FAVORITES_DISABLED_MESSAGE}</p>
-                        </div>
-                    </div>
+            <main className={styles.page}>
+                <div className={styles.empty}>
+                    <span className={styles.emptyIcon}><Star size={28} /></span>
+                    <h1 className={styles.emptyTitle}>{FAVORITES_DISABLED_MESSAGE}</h1>
                 </div>
-            </div>
+            </main>
         );
     }
 
+    const leagues = favorites.filter((item) => item.entity_type !== 'club');
+    const clubs = favorites.filter((item) => item.entity_type === 'club');
+
+    const unfollow = (item: FavoriteItem) => {
+        void toggleFavorite({
+            id: item.id,
+            entity_type: item.entity_type,
+            name: item.name,
+            logo_url: item.logo_url,
+            type_label: item.type_label,
+            forceIsFavorite: false,
+        });
+    };
+
     return (
-        <div className={styles.page}>
-            <div className={styles.container}>
-                <div className={styles.favoritesSection}>
-                    <div className={styles.favoriteHeader}>
-                        <div>
-                            <h1 className={styles.sectionTitle}>Siguiendo</h1>
-                            <p className={styles.favoriteDate}>
-                                Torneos y clubes que queres tener a mano en la app.
-                            </p>
-                        </div>
-                    </div>
-
-                    {loading ? <div className={styles.loading}>Cargando seguidos...</div> : null}
-
-                    {!loading && error ? (
-                        <div className={styles.errorContainer}>
-                            <h3>No se pudieron cargar tus seguidos</h3>
-                            <p>{error}</p>
-                        </div>
-                    ) : null}
-
-                    {!loading && !error && favorites.length === 0 ? (
-                        <div className={styles.emptyState}>
-                            <Star size={48} className={styles.emptyIcon} />
-                            <p>{FAVORITES_DISABLED_MESSAGE}</p>
-                            <small>Segui torneos o clubes desde el home y las paginas de detalle.</small>
-                        </div>
-                    ) : null}
-
-                    {!loading && !error && favorites.length > 0 ? (
-                        <div className={styles.favoritesGrid}>
-                            {favorites.map((favorite) => (
-                                <div key={`${favorite.entity_type}:${favorite.id}`} className={styles.favoriteCard}>
-                                    <Link
-                                        href={getFavoriteHref(favorite.entity_type, favorite.id, favorite.name)}
-                                        className={styles.favoriteContent}
-                                    >
-                                        {favorite.entity_type === 'club' ? (
-                                            <TeamLogo
-                                                name={favorite.name}
-                                                teamId={favorite.id}
-                                                logoUrl={favorite.logo_url}
-                                                className={styles.favoriteImage}
-                                                size={48}
-                                                radius="round"
-                                            />
-                                        ) : favorite.logo_url ? (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img
-                                                src={favorite.logo_url}
-                                                alt={favorite.name}
-                                                className={styles.favoriteImage}
-                                            />
-                                        ) : (
-                                            <div className={styles.favoriteIconPlaceholder}>
-                                                <FavoriteIcon entityType={favorite.entity_type} />
-                                            </div>
-                                        )}
-
-                                        <div className={styles.favoriteInfo}>
-                                            <div className={styles.favoriteType}>{favorite.type_label}</div>
-                                            <div className={styles.favoriteName}>{favorite.name}</div>
-                                            <div className={styles.favoriteMeta}>
-                                                {new Date(favorite.created_at).toLocaleDateString('es-AR')}
-                                            </div>
-                                        </div>
-                                    </Link>
-
-                                    <button
-                                        type="button"
-                                        className={styles.favoriteAction}
-                                        aria-label={`Dejar de seguir ${favorite.name}`}
-                                        title="Dejar de seguir"
-                                        onClick={() => {
-                                            void toggleFavorite({
-                                                id: favorite.id,
-                                                entity_type: favorite.entity_type,
-                                                name: favorite.name,
-                                                logo_url: favorite.logo_url,
-                                                type_label: favorite.type_label,
-                                                forceIsFavorite: false,
-                                            });
-                                        }}
-                                    >
-                                        <Star size={16} fill="currentColor" />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    ) : null}
+        <main className={styles.page}>
+            <header className={styles.header}>
+                <div>
+                    <h1 className={styles.title}>Mis favoritos</h1>
+                    <p className={styles.summary}>
+                        {!ready
+                            ? 'Cargando…'
+                            : favorites.length === 0
+                                ? 'Todavía no seguís nada.'
+                                : `${plural(leagues.length, 'competición', 'competiciones')} · ${plural(clubs.length, 'club', 'clubes')}`}
+                    </p>
                 </div>
-            </div>
-        </div>
+                <div className={styles.actions}>
+                    <Link href={EDIT_HREF} className={`${styles.btn} ${styles.btnPrimary}`}>Editar</Link>
+                    <Link href="/tournaments" className={styles.btn}>Explorar</Link>
+                </div>
+            </header>
+
+            {error ? (
+                <div className={styles.notice} role="alert">
+                    <span>No pudimos actualizar tus favoritos. Lo que ves puede estar desactualizado.</span>
+                    <button type="button" className={styles.noticeBtn} onClick={() => void refresh()}>Reintentar</button>
+                </div>
+            ) : null}
+
+            {!ready ? (
+                <ul className={styles.list} aria-hidden="true">
+                    {[0, 1, 2].map((index) => <li key={index} className={styles.skeleton} />)}
+                </ul>
+            ) : favorites.length === 0 ? (
+                <div className={styles.empty}>
+                    <span className={styles.emptyIcon}><Star size={28} /></span>
+                    <h2 className={styles.emptyTitle}>{FAVORITES_DISABLED_MESSAGE}</h2>
+                    <p className={styles.emptyText}>
+                        Elegí tus competiciones y clubes para ver sus partidos primero, o seguilos con la estrella desde la portada y las fichas.
+                    </p>
+                    <Link href={EDIT_HREF} className={`${styles.btn} ${styles.btnPrimary}`}>Elegir mis favoritos</Link>
+                </div>
+            ) : (
+                <>
+                    {leagues.length > 0 && (
+                        <section className={styles.section} aria-labelledby="fav-competitions">
+                            <h2 id="fav-competitions" className={styles.sectionTitle}>Competiciones <span>{leagues.length}</span></h2>
+                            <ul className={styles.list}>
+                                {leagues.map((item) => <FavoriteRow key={`l-${item.id}`} item={item} onUnfollow={unfollow} />)}
+                            </ul>
+                        </section>
+                    )}
+                    {clubs.length > 0 && (
+                        <section className={styles.section} aria-labelledby="fav-clubs">
+                            <h2 id="fav-clubs" className={styles.sectionTitle}>Clubes <span>{clubs.length}</span></h2>
+                            <ul className={styles.list}>
+                                {clubs.map((item) => <FavoriteRow key={`c-${item.id}`} item={item} onUnfollow={unfollow} />)}
+                            </ul>
+                        </section>
+                    )}
+                </>
+            )}
+
+            {ready && !user ? (
+                <p className={styles.deviceNote}>
+                    Tus favoritos quedan guardados en este dispositivo. <Link href="/register">Creá una cuenta</Link> para llevarlos a otro.
+                </p>
+            ) : null}
+        </main>
     );
 }

@@ -67,7 +67,7 @@ export function SportProvider({ children }: { children: ReactNode }) {
             }
         }
         // Sin deporte en la URL: el que el visitante eligió en este dispositivo
-        // (FirstVisitSportPicker). Si después hay login con favoritos, el
+        // (PreferencesWizard). Si después hay login con favoritos, el
         // efecto de abajo lo pisa; si no, esto es lo que ve.
         const deviceSportId = getDeviceSportId();
         if (!deviceSportId) return;
