@@ -348,6 +348,11 @@ export async function GET(req: Request) {
     }
   }
 
+  // Un 200 con `ok: false` no deja rastro en los logs de Vercel: la corrida
+  // figuraba como exitosa y el conector pudo estar días sin escribir. Cada error
+  // sale por consola y la corrida con errores contesta 502.
+  for (const e of errors) console.error(`[sporti-sync] ${e}`);
+
   return NextResponse.json({
     ok: errors.length === 0,
     dry: enSeco,
@@ -355,7 +360,7 @@ export async function GET(req: Request) {
     fases: resumen,
     ...(fasesSinMapear.length && { fasesSinMapear }),
     errors,
-  });
+  }, { status: errors.length > 0 && !enSeco ? 502 : 200 });
 }
 
 /**
