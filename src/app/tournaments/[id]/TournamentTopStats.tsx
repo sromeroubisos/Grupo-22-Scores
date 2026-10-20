@@ -56,9 +56,11 @@ type Props = {
     kind: 'teams' | 'players';
     /** Ordena la tabla de abajo por esa metrica. */
     onPick: (metric: string, direction: 'asc' | 'desc') => void;
+    /** En jugadores, tocar un nombre del podio abre su ficha. */
+    onOpenPlayer?: (row: any) => void;
 };
 
-export default function TournamentTopStats({ rows, cards, unmeasured, kind, onPick }: Props) {
+export default function TournamentTopStats({ rows, cards, unmeasured, kind, onPick, onOpenPlayer }: Props) {
     const visibles = cards
         .filter((card) => !unmeasured.has(card.metric))
         .map((card) => {
@@ -89,10 +91,9 @@ export default function TournamentTopStats({ rows, cards, unmeasured, kind, onPi
                             type="button"
                             className={styles.topStatsCardHead}
                             onClick={() => onPick(card.metric, card.lowerIsBetter ? 'asc' : 'desc')}
-                            title={`Ordenar la tabla por ${card.title}`}
+                            title={`Ver el ranking completo: ${card.title}`}
                         >
-                            <span className={styles.topStatsCardTitle}>{card.title}</span>
-                            <span className={styles.topStatsCardChevron} aria-hidden="true">›</span>
+                            <span className={styles.topStatsCardTitle}>{card.title}</span>                            <span className={styles.topStatsCardChevron} aria-hidden="true">›</span>
                         </button>
 
                         <ol className={styles.topStatsList}>
@@ -107,7 +108,18 @@ export default function TournamentTopStats({ rows, cards, unmeasured, kind, onPi
                                         className={styles.topStatsCrest}
                                     />
                                     <span className={styles.topStatsIdentity}>
-                                        <span className={styles.topStatsName}>{row.entityName}</span>
+                                        {onOpenPlayer ? (
+                                            <button
+                                                type="button"
+                                                className={`${styles.topStatsName} ${styles.topStatsNameButton}`}
+                                                onClick={() => onOpenPlayer(row)}
+                                                aria-haspopup="dialog"
+                                            >
+                                                {row.entityName}
+                                            </button>
+                                        ) : (
+                                            <span className={styles.topStatsName}>{row.entityName}</span>
+                                        )}
                                         {kind === 'players' && row.secondary && (
                                             <span className={styles.topStatsTeam}>{row.secondary}</span>
                                         )}
