@@ -54,6 +54,7 @@ import { useAuth } from '@/context/AuthContext';
 import { SponsorShowcase } from '@/components/sponsors/SponsorShowcase';
 import { getTournamentFlashScoreConfig, getTournamentRugbyApiSportsConfig } from '@/lib/externalProviderPolicy';
 import { parseOdesurTournamentId } from '@/lib/services/odesur2026Parser';
+import { readLastDirectoryHref, rememberTournament } from '@/lib/recentTournaments';
 import {
     getPlayoffTeamsCount,
     resolvePlayoffStagesForTeams,
@@ -64,13 +65,15 @@ const BASE_TABS = [
     { id: 'summary', label: 'Resumen' },
     { id: 'results', label: 'Resultados' },
     { id: 'fixtures', label: 'Fixture' },
-    { id: 'standings', label: 'Clasificación' },
+    // "Tabla" es como lo dice la gente ("¿cómo está la tabla?"); "Clasificación"
+    // obligaba a traducir (auditoría mobile, 2026-10-19).
+    { id: 'standings', label: 'Tabla' },
     { id: 'playoff', label: 'Playoff' },
     { id: 'teams', label: 'Equipos' },
     { id: 'scores', label: 'Puntajes' },
     { id: 'stats', label: 'Estadísticas' },
     { id: 'champions', label: 'Campeones' },
-    { id: 'historical', label: 'Histórica' },
+    { id: 'historical', label: 'Historial' },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -3122,6 +3125,29 @@ export default function TournamentDetailPage({
             : externalSeasonOptions;
     const currentSeasonOption = availableSeasonOptions.find((s) => s.isCurrent);
 
+    // "Vistos hace poco": cada torneo que se abre queda a un toque en Inicio y
+    // en Torneos, sin cuenta. Se guarda la URL con la que se entró porque los
+    // torneos externos la necesitan entera para volver a cargar.
+    useEffect(() => {
+        if (loading || error) return;
+        const name = details?.name || details?.tournament?.name || tournamentData?.name;
+        if (!name) return;
+        rememberTournament({
+            id,
+            name: String(name),
+            href: `${window.location.pathname}${window.location.search}`,
+            logoUrl: getTournamentLogo(details, tournamentData) || null,
+            sportId: tournamentData?.sportId ?? tournamentData?.sport_id ?? null,
+        });
+    }, [details, error, id, loading, tournamentData]);
+
+    // A dónde vuelve la flecha del celular: el nivel de Torneos desde el que
+    // se llegó (lo deja LeagueDrilldown) o, si se entró por otro lado, Torneos.
+    const [backToDirectory, setBackToDirectory] = useState('/tournaments');
+    useEffect(() => {
+        setBackToDirectory(readLastDirectoryHref() ?? '/tournaments');
+    }, []);
+
     if (loading) {
         return (
             <div className={styles.page}>
@@ -4557,7 +4583,7 @@ export default function TournamentDetailPage({
                             )}
                         </div>
                         {hasScore && !isLive && (
-                            <span className={styles.featuredScoreTime}>{suspendido ? estado.etiqueta : 'FT'}</span>
+                            <span className={styles.featuredScoreTime}>{suspendido ? estado.etiqueta : 'Final'}</span>
                         )}
                     </div>
 
@@ -4926,6 +4952,15 @@ export default function TournamentDetailPage({
                 }
             >
                 <div className="g22-container">
+                    {/* En el celular las migas se ocultan: esta flecha es la salida
+                        visible, con el destino escrito (auditoría mobile). */}
+                    <Link href={backToDirectory} className={styles.mobileBackLink}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
+                            <path d="M15 18l-6-6 6-6" />
+                        </svg>
+                        Torneos
+                    </Link>
+
                     {/* Breadcrumb */}
                     <nav className={styles.breadcrumb}>
                         <Link href="/">Partidos</Link>

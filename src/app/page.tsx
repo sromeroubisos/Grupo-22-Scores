@@ -25,6 +25,8 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import ClubsPromoCard from '@/components/clubs-promo/ClubsPromoCard';
 import TickerTitulares from '@/components/ticker/TickerTitulares';
+import MyTournaments from '@/components/MyTournaments';
+import { displayCompetitionName } from '@/lib/displayCompetitionName';
 import GanaConTuClubBanner from '@/components/marcas/GanaConTuClubBanner';
 import SantaFe2026Acceso from '@/components/odesur/SantaFe2026Acceso';
 import TennisMatchList from '@/components/tennis/TennisMatchList';
@@ -611,7 +613,7 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
             En vivo
           </span>
         ) : match.status === 'finished' ? (
-          <span className={styles.matchFinished}>FT</span>
+          <span className={styles.matchFinished}>Final</span>
         ) : match.status === 'suspended' ? (
           /* Sin horario: anunciar la hora de un partido que no se juega manda
              a la gente a una cancha vacía. */
@@ -1815,6 +1817,29 @@ export default function HomePage() {
 
   const selectedDateInfo = dates.find(d => d.date === selectedDate);
 
+  // Atajos para el día vacío: el sábado anterior y el próximo dentro de la
+  // ventana de ±7 días. El rugby y el hockey de clubes se juegan el fin de
+  // semana; entre semana, eso es lo que la persona viene a buscar.
+  const weekendShortcuts = (() => {
+    const index = dates.findIndex((d) => d.date === selectedDate);
+    const isSaturday = (key: string) => new Date(`${key}T12:00:00Z`).getUTCDay() === 6;
+    const describe = (entry: (typeof dates)[number]) => ({
+      date: entry.date,
+      label: `${entry.dayName} ${Number(entry.date.slice(8, 10))}`,
+    });
+    let previous: { date: string; label: string } | null = null;
+    let next: { date: string; label: string } | null = null;
+    if (index >= 0) {
+      for (let i = index - 1; i >= 0; i -= 1) {
+        if (isSaturday(dates[i].date)) { previous = describe(dates[i]); break; }
+      }
+      for (let i = index + 1; i < dates.length; i += 1) {
+        if (isSaturday(dates[i].date)) { next = describe(dates[i]); break; }
+      }
+    }
+    return { previous, next };
+  })();
+
   const isIndividualSport = INDIVIDUAL_SPORTS.has(selectedSport.id);
   const isMotorsportSport = selectedSport.id === 'motorsport';
 
@@ -1960,11 +1985,12 @@ export default function HomePage() {
 
         {/* Main Content - Matches */}
         <main className={styles.mainContent}>
+          {/* Lo que la persona sigue y lo que vio hace poco, antes que nada: es
+              la respuesta a "no encuentro mis torneos" (auditoría mobile). */}
+          <MyTournaments variant="home" />
+
           {/* Titulares y los partidos de los clubes que sigue. Si no hay nada, no se dibuja. */}
           <TickerTitulares favorites={favorites} />
-
-          {/* La placa de Ganá con tu club: entre los titulares y el selector de día. */}
-          <GanaConTuClubBanner />
 
           {/* Juegos Suramericanos Santa Fe 2026: solo en el teléfono, donde el nav
               no tiene el link. Se apaga solo al día siguiente del cierre. */}
@@ -2017,8 +2043,6 @@ export default function HomePage() {
                 </button>
               ))}
             </div>
-
-            <InstallAppButton />
 
             {/* Date Selector */}
             <section className={styles.dateSelector}>
@@ -2188,6 +2212,34 @@ export default function HomePage() {
                         ? 'No se encontraron encuentros de juveniles ni de reserva para esta fecha.'
                         : 'No se encontraron encuentros para esta fecha.'}
                   </p>
+                  {/* Un día sin partidos no puede ser un callejón: de lunes a
+                      jueves era lo primero que veía la gente. Se ofrece el fin
+                      de semana que pasó, el que viene y la lista de torneos. */}
+                  {!showLiveOnly ? (
+                    <div className={styles.noMatchesActions}>
+                      {weekendShortcuts.previous ? (
+                        <button
+                          type="button"
+                          className={styles.noMatchesAction}
+                          onClick={() => setSelectedDate(weekendShortcuts.previous!.date)}
+                        >
+                          Ver resultados del {weekendShortcuts.previous.label}
+                        </button>
+                      ) : null}
+                      {weekendShortcuts.next ? (
+                        <button
+                          type="button"
+                          className={styles.noMatchesAction}
+                          onClick={() => setSelectedDate(weekendShortcuts.next!.date)}
+                        >
+                          Ver partidos del {weekendShortcuts.next.label}
+                        </button>
+                      ) : null}
+                      <Link href="/tournaments" className={`${styles.noMatchesAction} ${styles.noMatchesActionSecondary}`}>
+                        Ver todos los torneos
+                      </Link>
+                    </div>
+                  ) : null}
                 </div>
               )}
 
@@ -2324,7 +2376,7 @@ export default function HomePage() {
                         <div className={styles.leagueInfo}>
                           <span className={styles.leagueFlag}>{league.flag}</span>
                           <div className={styles.leagueMeta}>
-                            <span className={styles.leagueSectionName}>{league.league}</span>
+                            <span className={styles.leagueSectionName}>{displayCompetitionName(league.league)}</span>
                             {/* <span className={styles.leagueRound}>{league.round}</span> */}
                           </div>
                         </div>
@@ -2419,6 +2471,13 @@ export default function HomePage() {
                 </section>
               )}
             </div>
+          </div>
+
+          {/* Promociones al final del feed: antes estaban ARRIBA del primer
+              partido y empujaban el contenido medio pantalla hacia abajo. */}
+          <div className={styles.feedPromos}>
+            <GanaConTuClubBanner />
+            <InstallAppButton />
           </div>
         </main>
 

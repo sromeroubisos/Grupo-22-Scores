@@ -2445,3 +2445,164 @@
         min-height: 55.1px;
     }
 }
+
+/* ==========================================================================
+   Auditoría mobile (2026-10-19): tamaños, nombres y salidas del inicio.
+   Va al final a propósito: pisa reglas viejas repartidas por el archivo sin
+   tener que reescribirlas, y se lee como un solo cambio.
+   ========================================================================== */
+
+/* Día sin partidos: tres salidas en vez de un callejón. */
+.noMatches h2 {
+    color: var(--color-text-primary);
+}
+
+.noMatches p {
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+}
+
+.noMatchesActions {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+    max-width: 360px;
+    margin-top: 18px;
+}
+
+.noMatchesAction {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 16px;
+    border: 1px solid rgba(var(--color-accent-rgb), 0.55);
+    border-radius: 12px;
+    background: rgba(var(--color-accent-rgb), 0.14);
+    color: var(--color-accent);
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.noMatchesActionSecondary {
+    border-color: var(--color-border);
+    background: transparent;
+    color: var(--color-text-primary);
+}
+
+/* Promos al pie del feed. */
+.feedPromos {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+/* La estrella de seguir torneo: el ícono sigue siendo chico, el área no. */
+.leagueFavoriteBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    margin: -10px -6px -10px 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+}
+
+.leagueFavoriteBtn:focus-visible,
+.noMatchesAction:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+@media (max-width: 1100px) {
+    /* Deportes con nombre: un emoji de 20 px no distingue rugby de fútbol
+       americano. */
+    .mobileSportSelector .sportChip {
+        width: auto;
+        min-width: 76px;
+        height: auto;
+        min-height: 60px;
+        padding: 6px 12px;
+        gap: 4px;
+    }
+
+    .mobileSportSelector .sportName {
+        display: block !important;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .mobileAudienceSwitchBtn {
+        height: 44px;
+        font-size: 0.9rem;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    /* Flechas de día: 44 px de área táctil (eran 30). */
+    .mobileNavArrow {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+    }
+
+    .mobileCurrentDate {
+        font-size: 1.05rem;
+    }
+}
+
+@media (max-width: 768px) {
+    /* En el teléfono, la estrella por club al lado del marcador se tocaba sin
+       querer al abrir el partido y se confundía con una calificación. Seguir
+       un club se hace desde su ficha. */
+    .clubFavoriteBtn {
+        display: none;
+    }
+
+    .leagueSectionName {
+        font-size: 1rem;
+    }
+}
+
+/* Torneos: "Mis torneos" entre el buscador y la lista de países. */
+.myTournamentsSlot {
+    padding: 4px 0 2px;
+}
+
+@media (max-width: 768px) {
+    .tournamentsPageTitle {
+        font-size: 1.6rem;
+    }
+
+    .sidebarSearchInput {
+        font-size: 1rem;
+        min-height: 48px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* El día vacío: menos aire alrededor, título de 22 px y botones de ancho
+       completo, que en 375 px se partían en dos renglones. */
+    .noMatches {
+        padding: 28px 4px 20px;
+    }
+
+    .noMatches h2 {
+        font-size: 1.4rem;
+        line-height: 1.2;
+        margin: 0 0 6px;
+    }
+
+    .noMatchesActions {
+        max-width: none;
+    }
+}

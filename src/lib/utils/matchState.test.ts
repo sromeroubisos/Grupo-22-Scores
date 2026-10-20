@@ -22,7 +22,7 @@ test("'final' se lee como finalizado — era el agujero que tenía la página", 
     // por la propia app no se mostraba como terminado.
     const r = resolverEstado('final', { estaEnResultados: false });
     assert.equal(r.estado, 'finalizado');
-    assert.equal(r.etiqueta, 'FT');
+    assert.equal(r.etiqueta, 'Final');
     assert.equal(r.muestraMarcador, true);
 });
 

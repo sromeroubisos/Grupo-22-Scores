@@ -209,7 +209,7 @@ export default function FirstVisitSportPicker() {
                             ¿Qué deporte querés ver primero?
                         </h2>
                         <p className={styles.subtitle}>
-                            Lo guardamos en este dispositivo. Lo cambiás cuando quieras desde el menú.
+                            Lo guardamos en este dispositivo. Lo cambiás cuando quieras con los deportes de arriba del inicio.
                         </p>
 
                         <div className={styles.grid} role="radiogroup" aria-label="Deporte favorito">

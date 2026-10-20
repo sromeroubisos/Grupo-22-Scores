@@ -1,8 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { hrefParaTorneos } from '@/content/embudo';
+import { useAuth } from '@/context/AuthContext';
+import { useSport } from '@/context/SportContext';
+import { trackEvent } from '@/lib/analytics';
 import styles from './MobileBottomNav.module.css';
 
 /**
@@ -33,15 +37,24 @@ export const BOTTOM_NAV_HIDDEN_PREFIXES = [
     '/juegos/minijuegos/el-capitan',
 ];
 
+/**
+ * Las cinco pestañas, ordenadas por lo que la gente viene a hacer.
+ *
+ * La auditoría mobile (2026-10-19) mostró que el torneo es la unidad con la
+ * que piensa el usuario —"¿cómo salió el Top 14?"— y que la barra no lo decía:
+ * la pestaña se llamaba "Ligas" y lo que uno sigue vivía escondido detrás del
+ * avatar. Por eso "Torneos" y "Mis torneos" tienen lugar propio, y lo
+ * secundario (buscar, juegos, rankings, cuenta) va a "Más".
+ */
 const navItems = [
-    { href: '/', label: 'Partidos', icon: 'matches', matchPrefixes: ['/', '/matches'] },
+    { href: '/', label: 'Inicio', icon: 'home', matchPrefixes: ['/', '/matches'] },
+    { href: '/tournaments', label: 'Torneos', icon: 'trophy', matchPrefixes: ['/tournaments'] },
+    { href: '/favorites', label: 'Mis torneos', icon: 'star', matchPrefixes: ['/favorites'] },
     { href: '/noticias', label: 'Noticias', icon: 'news', matchPrefixes: ['/noticias'] },
-    { href: '/tournaments', label: 'Ligas', icon: 'trophy', matchPrefixes: ['/tournaments'] },
-    // El Prode entra por Juegos: no tiene pestaña propia, pero la de Juegos
-    // queda activa mientras se navega el prode.
-    { href: '/juegos', label: 'Juegos', icon: 'games', matchPrefixes: ['/juegos', '/prode'] },
-    { href: '/search', label: 'Buscar', icon: 'search', matchPrefixes: ['/search'] },
 ];
+
+/** Rutas que, sin pestaña propia, encienden "Más". */
+const MORE_PREFIXES = ['/search', '/juegos', '/prode', '/rankings', '/profile', '/para-torneos', '/para-clubes', '/notifications'];
 
 function isActive(pathname: string | null, href: string, matchPrefixes: string[]) {
     if (!pathname) return false;
@@ -55,13 +68,24 @@ function NavIcon({ name, active }: { name: string; active?: boolean }) {
     const strokeWidth = active ? 3 : 2;
 
     switch (name) {
-        case 'matches':
+        case 'home':
             return (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth}>
-                    <path d="M3 6h18" />
-                    <path d="M6 10h12" />
-                    <path d="M8 14h8" />
-                    <path d="M10 18h4" />
+                <svg viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2} strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" />
+                </svg>
+            );
+        case 'star':
+            return (
+                <svg viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2} strokeLinejoin="round" aria-hidden="true">
+                    <path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" />
+                </svg>
+            );
+        case 'more':
+            return (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" aria-hidden="true">
+                    <path d="M4 7h16" />
+                    <path d="M4 12h16" />
+                    <path d="M4 17h16" />
                 </svg>
             );
         case 'news':
@@ -172,33 +196,178 @@ function useAnchorToVisualViewport(enabled: boolean) {
     return ref;
 }
 
+type MoreLink = {
+    href: string;
+    label: string;
+    hint: string;
+    icon: string;
+    onClick?: () => void;
+};
+
+/**
+ * La hoja de "Más": lo que no entra en la barra, con nombre y una línea que
+ * dice qué hay adentro. Una lista de íconos sueltos obligaba a adivinar.
+ */
+function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+    const { user, login } = useAuth();
+    const { selectedSport } = useSport();
+    const panelRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!open) return;
+        const onKey = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') onClose();
+        };
+        document.addEventListener('keydown', onKey);
+        panelRef.current?.querySelector<HTMLElement>('a, button')?.focus();
+        return () => document.removeEventListener('keydown', onKey);
+    }, [onClose, open]);
+
+    if (!open) return null;
+
+    const links: MoreLink[] = [
+        { href: '/search', label: 'Buscar', hint: 'Torneos, clubes y jugadores', icon: 'search' },
+        { href: '/juegos', label: 'Juegos y Prode', hint: 'Pronósticos y minijuegos', icon: 'games' },
+        { href: `/rankings?sport=${encodeURIComponent(selectedSport.id)}`, label: 'Rankings', hint: 'Ranking de clubes y selecciones', icon: 'trophy' },
+        {
+            href: hrefParaTorneos('nav'),
+            label: 'Organizá tu torneo',
+            hint: 'Para clubes y uniones',
+            icon: 'building',
+            onClick: () => trackEvent('clubs_promo_click', { location: 'nav' }),
+        },
+        user
+            ? { href: '/profile', label: 'Mi cuenta', hint: user.email || 'Perfil y avisos', icon: 'user' }
+            : { href: '/login', label: 'Iniciar sesión', hint: 'Para guardar lo que seguís en todos tus dispositivos', icon: 'user' },
+    ];
+
+    return (
+        <div className={styles.sheetRoot}>
+            <button type="button" className={styles.scrim} aria-label="Cerrar" onClick={onClose} />
+            <div
+                ref={panelRef}
+                className={styles.sheet}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="more-sheet-title"
+            >
+                <div className={styles.sheetHandle} aria-hidden="true" />
+                <div className={styles.sheetHeader}>
+                    <h2 id="more-sheet-title" className={styles.sheetTitle}>Más</h2>
+                    <button type="button" className={styles.sheetClose} onClick={onClose}>Cerrar</button>
+                </div>
+                <ul className={styles.sheetList}>
+                    {links.map((link) => (
+                        <li key={link.label}>
+                            {link.href === '/login' ? (
+                                <button
+                                    type="button"
+                                    className={styles.sheetItem}
+                                    onClick={() => {
+                                        onClose();
+                                        login('fan', `${window.location.pathname}${window.location.search}`);
+                                    }}
+                                >
+                                    <span className={styles.sheetIcon}><SheetIcon name={link.icon} /></span>
+                                    <span className={styles.sheetText}>
+                                        <strong>{link.label}</strong>
+                                        <small>{link.hint}</small>
+                                    </span>
+                                </button>
+                            ) : (
+                                <Link
+                                    href={link.href}
+                                    className={styles.sheetItem}
+                                    onClick={() => {
+                                        link.onClick?.();
+                                        onClose();
+                                    }}
+                                >
+                                    <span className={styles.sheetIcon}><SheetIcon name={link.icon} /></span>
+                                    <span className={styles.sheetText}>
+                                        <strong>{link.label}</strong>
+                                        <small>{link.hint}</small>
+                                    </span>
+                                </Link>
+                            )}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+    );
+}
+
+function SheetIcon({ name }: { name: string }) {
+    if (name === 'building') {
+        return (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 21h18" />
+                <path d="M5 21V7l7-4 7 4v14" />
+                <path d="M10 21v-6h4v6" />
+            </svg>
+        );
+    }
+    if (name === 'user') {
+        return (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21a8 8 0 0 1 16 0" />
+            </svg>
+        );
+    }
+    return <NavIcon name={name} />;
+}
+
 export default function MobileBottomNav() {
     const pathname = usePathname();
     const hidden = BOTTOM_NAV_HIDDEN_PREFIXES.some((prefix) => pathname?.startsWith(prefix));
     const navRef = useAnchorToVisualViewport(!hidden);
+    const [moreOpen, setMoreOpen] = useState(false);
+    const closeMore = useCallback(() => setMoreOpen(false), []);
+
+    // Navegar cierra la hoja aunque el destino sea la misma ruta.
+    useEffect(() => {
+        setMoreOpen(false);
+    }, [pathname]);
 
     if (hidden) {
         return null;
     }
 
+    const moreActive = moreOpen || MORE_PREFIXES.some((prefix) => pathname === prefix || pathname?.startsWith(`${prefix}/`));
+
     return (
-        <nav ref={navRef} className={styles.nav} aria-label="Navegacion principal">
-            <div className={styles.navList}>
-                {navItems.map((item) => {
-                    const active = isActive(pathname, item.href, item.matchPrefixes);
-                    return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
-                        >
-                            <NavIcon name={item.icon} active={active} />
-                            <span>{item.label}</span>
-                            <span className={styles.navDot} />
-                        </Link>
-                    );
-                })}
-            </div>
-        </nav>
+        <>
+            <nav ref={navRef} className={styles.nav} aria-label="Navegación principal">
+                <div className={styles.navList}>
+                    {navItems.map((item) => {
+                        const active = !moreOpen && isActive(pathname, item.href, item.matchPrefixes);
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`${styles.navItem} ${active ? styles.navItemActive : ''}`}
+                                aria-current={active ? 'page' : undefined}
+                            >
+                                <NavIcon name={item.icon} active={active} />
+                                <span className={styles.navLabel}>{item.label}</span>
+                            </Link>
+                        );
+                    })}
+                    <button
+                        type="button"
+                        className={`${styles.navItem} ${moreActive ? styles.navItemActive : ''}`}
+                        aria-expanded={moreOpen}
+                        aria-haspopup="dialog"
+                        onClick={() => setMoreOpen((current) => !current)}
+                    >
+                        <NavIcon name="more" active={moreActive} />
+                        <span className={styles.navLabel}>Más</span>
+                    </button>
+                </div>
+            </nav>
+            <MoreSheet open={moreOpen} onClose={closeMore} />
+        </>
     );
 }

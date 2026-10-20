@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
     FAVORITES_ENABLED,
@@ -14,6 +13,7 @@ import {
     favoriteEventMatches,
     type FavoriteUpdatedDetail,
 } from '@/lib/favorites/events';
+import { clearGuestFollows, readGuestFollows, writeGuestFollows } from '@/lib/favorites/guestFollows';
 import { createClient } from '@/lib/supabase/client';
 import {
     getFollowingErrorMessage,
@@ -170,8 +170,7 @@ function applyClubDetail(rows: ClubFollowRow[], detail: FavoriteUpdatedDetail): 
 }
 
 export function useFavorites() {
-    const pathname = usePathname();
-    const { login, user, isLoading: authLoading, isSessionVerified } = useAuth();
+    const { user, isLoading: authLoading, isSessionVerified } = useAuth();
     const supabase = useMemo(() => createClient(), []);
 
     const [leagueRows, setLeagueRows] = useState<LeagueFollowRow[]>([]);
@@ -180,9 +179,20 @@ export function useFavorites() {
     const [error, setError] = useState<string | null>(null);
 
     const refresh = useCallback(async () => {
-        if (!FAVORITES_ENABLED || authLoading || !isSessionVerified || !user?.id) {
+        if (!FAVORITES_ENABLED) {
             setLeagueRows([]);
             setClubRows([]);
+            setError(null);
+            setLoading(false);
+            return;
+        }
+
+        // Sin sesión (o mientras se resuelve): lo que el visitante siguió en
+        // este dispositivo. Seguir ya no exige cuenta.
+        if (authLoading || !isSessionVerified || !user?.id) {
+            const guest = readGuestFollows();
+            setLeagueRows(FAVORITE_LEAGUES_ENABLED ? guest.leagues : []);
+            setClubRows(FAVORITE_CLUBS_ENABLED ? guest.clubs : []);
             setError(null);
             setLoading(false);
             return;
@@ -219,8 +229,48 @@ export function useFavorites() {
                 throw blockingError;
             }
 
-            setLeagueRows(leaguesResult.data ?? []);
-            setClubRows(clubsResult.data ?? []);
+            let nextLeagueRows = leaguesResult.data ?? [];
+            let nextClubRows = clubsResult.data ?? [];
+
+            // Lo que siguió como invitado se sube a la cuenta la primera vez
+            // que hay sesión, y la copia local se vacía.
+            const guest = readGuestFollows();
+            if (guest.leagues.length > 0 || guest.clubs.length > 0) {
+                const pendingLeagues = FAVORITE_LEAGUES_ENABLED
+                    ? guest.leagues.filter((row) => !nextLeagueRows.some((existing) => matchesLeagueFollow(existing, row.league_id)))
+                    : [];
+                const pendingClubs = FAVORITE_CLUBS_ENABLED
+                    ? guest.clubs.filter((row) => !nextClubRows.some((existing) => matchesClubFollow(existing, row.club_id)))
+                    : [];
+                const results = await Promise.all([
+                    ...pendingLeagues.map((row) => settleFollowing(toggleLeagueFollow(supabase, user.id, {
+                        entityId: row.league_id,
+                        name: row.display_name,
+                        logoUrl: row.logo_url,
+                        sportId: row.sport_id,
+                        canonicalLeagueId: row.canonical_league_id,
+                        forceIsFavorite: true,
+                        existingRows: [],
+                    }))),
+                    ...pendingClubs.map((row) => settleFollowing(toggleClubFollow(supabase, user.id, {
+                        entityId: row.club_id,
+                        name: row.display_name,
+                        logoUrl: row.logo_url,
+                        sportId: row.sport_id,
+                        canonicalClubId: row.canonical_club_id,
+                        forceIsFavorite: true,
+                        existingRows: [],
+                    }))),
+                ]);
+                if (results.every((result) => !result.error)) {
+                    clearGuestFollows();
+                }
+                nextLeagueRows = [...pendingLeagues, ...nextLeagueRows];
+                nextClubRows = [...pendingClubs, ...nextClubRows];
+            }
+
+            setLeagueRows(nextLeagueRows);
+            setClubRows(nextClubRows);
             setError(null);
         } catch (err) {
             const message = isFollowingSchemaMissingError(err)
@@ -268,13 +318,15 @@ export function useFavorites() {
     }, [refresh, supabase]);
 
     useEffect(() => {
-        if (typeof window === 'undefined' || !user?.id) return;
+        if (typeof window === 'undefined') return;
+        const currentUserId = user?.id ?? null;
 
         const handleFavoritesUpdated = (event: Event) => {
             const customEvent = event as CustomEvent<FavoriteUpdatedDetail>;
             const detail = customEvent.detail;
             if (!detail) return;
-            if (detail.userId && detail.userId !== user.id) return;
+            // Un evento de invitado no toca la lista de una sesión, ni al revés.
+            if ((detail.userId ?? null) !== currentUserId) return;
 
             if (isLeagueEntityType(detail.entityType)) {
                 setLeagueRows((current) => applyLeagueDetail(current, detail));
@@ -299,16 +351,56 @@ export function useFavorites() {
         ].sort((left, right) => right.created_at.localeCompare(left.created_at))
     ), [clubRows, leagueRows]);
 
-    const ensureAuthenticated = useCallback(() => {
-        if (user) return true;
-        if (authLoading || !isSessionVerified) return false;
+    /**
+     * Seguir sin cuenta: el cambio va a localStorage y se avisa por el mismo
+     * evento que usan las sesiones, con `userId: null`, para que las demás
+     * instancias del hook (cabecera, inicio, torneo) se actualicen juntas.
+     * Devuelve `true` si lo resolvió acá (no hay sesión).
+     */
+    const toggleGuestFollow = useCallback((detail: Omit<FavoriteUpdatedDetail, 'userId' | 'isFavorite' | 'created_at'> & {
+        forceIsFavorite?: boolean;
+        sportId?: string | null;
+    }): boolean => {
+        if (user?.id) return false;
+        // Mientras se confirma la sesión no se escribe nada: podría ser un
+        // usuario logueado cuyo perfil todavía no llegó.
+        if (authLoading || !isSessionVerified) return true;
 
-        const returnTo = typeof window !== 'undefined'
-            ? `${window.location.pathname}${window.location.search}`
-            : pathname || undefined;
-        login('fan', returnTo);
-        return false;
-    }, [authLoading, isSessionVerified, login, pathname, user]);
+        const guest = readGuestFollows();
+        const isLeague = isLeagueEntityType(detail.entityType);
+        const currentlyFavorite = isLeague
+            ? guest.leagues.some((row) => matchesLeagueFollow(row, detail.entityId))
+            : guest.clubs.some((row) => matchesClubFollow(row, detail.entityId));
+        const nextIsFavorite = typeof detail.forceIsFavorite === 'boolean'
+            ? detail.forceIsFavorite
+            : !currentlyFavorite;
+        const fullDetail: FavoriteUpdatedDetail = {
+            userId: null,
+            entityId: detail.entityId,
+            entityType: isLeague ? 'league' : 'club',
+            isFavorite: nextIsFavorite,
+            name: detail.name,
+            logo_url: detail.logo_url,
+            type_label: detail.type_label,
+            created_at: new Date().toISOString(),
+        };
+
+        if (isLeague) {
+            const leagues = applyLeagueDetail(guest.leagues, fullDetail).map((row) => (
+                row.league_id === detail.entityId ? { ...row, sport_id: detail.sportId ?? row.sport_id } : row
+            ));
+            writeGuestFollows({ ...guest, leagues });
+        } else {
+            const clubs = applyClubDetail(guest.clubs, fullDetail).map((row) => (
+                row.club_id === detail.entityId ? { ...row, sport_id: detail.sportId ?? row.sport_id } : row
+            ));
+            writeGuestFollows({ ...guest, clubs });
+        }
+
+        dispatchFavoriteUpdated(fullDetail);
+        setError(null);
+        return true;
+    }, [authLoading, isSessionVerified, user?.id]);
 
     const isLeagueFavorite = useCallback((entityId: string) => {
         if (!FAVORITES_ENABLED || !FAVORITE_LEAGUES_ENABLED) return false;
@@ -334,11 +426,20 @@ export function useFavorites() {
         nameOrOptions?: string | ToggleLeagueFavoriteOptions,
     ) => {
         if (!FAVORITES_ENABLED || !FAVORITE_LEAGUES_ENABLED) return;
-        if (!ensureAuthenticated() || !user?.id) return;
 
         const options = typeof nameOrOptions === 'string'
             ? { name: nameOrOptions }
             : (nameOrOptions || {});
+        if (toggleGuestFollow({
+            entityId,
+            entityType: 'league',
+            name: options.name,
+            logo_url: options.logo_url,
+            type_label: options.type_label || 'Torneo',
+            forceIsFavorite: options.forceIsFavorite,
+            sportId: options.sportId,
+        })) return;
+        if (!user?.id) return;
         const matchedRows = leagueRows.filter((row) => matchesLeagueFollow(row, entityId));
         const currentlyFavorite = matchedRows.length > 0;
         const nextIsFavorite = typeof options.forceIsFavorite === 'boolean'
@@ -388,13 +489,23 @@ export function useFavorites() {
             console.error('[useFavorites] toggleLeagueFavorite error:', message, err);
             setError(message);
         }
-    }, [ensureAuthenticated, leagueRows, supabase, user?.id]);
+    }, [leagueRows, supabase, toggleGuestFollow, user?.id]);
 
     const toggleFavorite = useCallback(async (item: ToggleFavoriteInput) => {
         if (!FAVORITES_ENABLED) return;
-        if (!ensureAuthenticated() || !user?.id) return;
 
         if (isClubEntityType(item.entity_type) && FAVORITE_CLUBS_ENABLED) {
+            if (toggleGuestFollow({
+                entityId: item.id,
+                entityType: 'club',
+                name: item.name,
+                logo_url: item.logo_url,
+                type_label: item.type_label || 'Club',
+                forceIsFavorite: item.forceIsFavorite,
+                sportId: item.sport_id,
+            })) return;
+            if (!user?.id) return;
+
             const matchedRows = clubRows.filter((row) => matchesClubFollow(row, item.id));
             const currentlyFavorite = matchedRows.length > 0;
             const nextIsFavorite = typeof item.forceIsFavorite === 'boolean'
@@ -457,7 +568,7 @@ export function useFavorites() {
                 type_label: item.type_label,
             });
         }
-    }, [clubRows, ensureAuthenticated, supabase, toggleLeagueFavorite, user?.id]);
+    }, [clubRows, supabase, toggleGuestFollow, toggleLeagueFavorite, user?.id]);
 
     const loadMore = useCallback(() => {}, []);
 

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Star } from 'lucide-react';
 import pageStyles from '../page.module.css';
 import LeagueDrilldown, { type DrillCountry } from '@/components/LeagueDrilldown';
+import MyTournaments from '@/components/MyTournaments';
 import { agruparPorRegion, seccionesDeRegion, type UnionConRegion } from '@/lib/leagueRegions';
 import { completarConFilasLocales } from '@/lib/leagueFamilies';
 import { gruposPorTipo } from '@/lib/leagueSections';
@@ -111,6 +112,8 @@ type ManualTournamentApiItem = {
 const ALL_COUNTRIES = getAllCountries();
 // Las "regiones" del catálogo de países que son continentes, no países.
 const CONTINENT_IDS = new Set(['africa', 'asia', 'europe', 'north-central-america', 'south-america', 'oceania']);
+/** El país que va primero cuando el teléfono no dice de dónde es la persona. */
+const PRIMARY_COUNTRY_ID = 'argentina';
 
 function extractRegionFromLocale(locale: string): string | null {
     const safeLocale = locale.trim();
@@ -181,7 +184,11 @@ function groupTournamentsByCountry(tournaments: Tournament[]) {
     tournaments.forEach((tournament) => {
         const safeCountryId = tournament.countryId || 'international';
         const country = findCountryRecord(safeCountryId);
-        const countryName = country?.name || safeCountryId;
+        // En castellano: la lista decía "England", "Czech Republic" e
+        // "International" al lado de "Argentina" (auditoría mobile).
+        const countryName = safeCountryId === 'international'
+            ? 'Internacional'
+            : country?.nameEs || country?.name || safeCountryId;
         const flagEmoji = country?.flagEmoji || '';
 
         if (!groups[safeCountryId]) {
@@ -368,6 +375,7 @@ export default function TorneosPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [isSportMenuOpen, setIsSportMenuOpen] = useState(false);
     const [userCountryId, setUserCountryId] = useState<string | null>(null);
+    const [drillDepth, setDrillDepth] = useState(0);
     const [remoteSearchTournaments, setRemoteSearchTournaments] = useState<Tournament[]>([]);
     const [isRemoteSearching, setIsRemoteSearching] = useState(false);
     const [catalogUnavailable, setCatalogUnavailable] = useState(false);
@@ -688,14 +696,14 @@ export default function TorneosPage() {
         }
     }, [groupedTournaments, hasRugbyPublicCatalog, selectedAudience]);
 
-    const toggleCountry = useCallback((countryId: string) => {
+    // Abrir es idempotente: el nivel que llega por URL puede pedirlo más de
+    // una vez (React corre los efectos dos veces en desarrollo) y un toggle lo
+    // abría y lo cerraba.
+    const openCountry = useCallback((countryId: string) => {
         setExpandedCountries((prev) => {
+            if (prev.has(countryId)) return prev;
             const next = new Set(prev);
-            if (next.has(countryId)) {
-                next.delete(countryId);
-            } else {
-                next.add(countryId);
-            }
+            next.add(countryId);
             return next;
         });
     }, []);
@@ -731,13 +739,18 @@ export default function TorneosPage() {
 
             return getCountryTournamentCount(group) !== 0;
         })
-        // Internacional primero, después los continentes (torneos continentales) y
-        // recién ahí los países, cada tramo alfabético.
+        // El país de la persona primero (Argentina si el teléfono no lo dice: es
+        // el público de G22), después Internacional, los países y al final los
+        // continentes. Antes Argentina aparecía octava, detrás de seis
+        // continentes, y era el país que buscaba casi todo el mundo.
         .sort((left, right) => {
-            const rank = (id: string) => (id === 'international' ? 0 : CONTINENT_IDS.has(id) ? 1 : 2);
+            const primary = userCountryId && filteredGroups[userCountryId] ? userCountryId : PRIMARY_COUNTRY_ID;
+            const rank = (id: string) => (
+                id === primary ? 0 : id === 'international' ? 1 : CONTINENT_IDS.has(id) ? 3 : 2
+            );
             return rank(left) - rank(right)
                 || filteredGroups[left].countryName.localeCompare(filteredGroups[right].countryName, 'es');
-        }), [filteredGroups, getCountryTournamentCount]);
+        }), [filteredGroups, getCountryTournamentCount, userCountryId]);
 
     // El selector por niveles: cada país con sus competiciones ya agrupadas en
     // familias, y sus uniones cuando el país tiene regiones.
@@ -1016,7 +1029,9 @@ export default function TorneosPage() {
 
                     next[countryId] = {
                         externalCountryId,
-                        countryName: summary.name,
+                        countryName: countryId === 'international'
+                            ? 'Internacional'
+                            : findCountryRecord(countryId)?.nameEs || summary.name,
                         flagEmoji: summary.flag || '',
                         tournaments: matches,
                         tournamentCount: matches.length,
@@ -1073,7 +1088,7 @@ export default function TorneosPage() {
             }}
         >
             <div style={{ maxWidth: 760, margin: '0 auto' }}>
-                <h1 className={pageStyles.tournamentsPageTitle}>Torneos y ligas</h1>
+                <h1 className={pageStyles.tournamentsPageTitle}>Torneos</h1>
 
                 <div className={pageStyles.sidebarUnifiedCard}>
                     <div className={pageStyles.sportSwitch}>
@@ -1145,9 +1160,7 @@ export default function TorneosPage() {
                             id="tournaments-search"
                             type="text"
                             aria-label={`Buscar ligas y torneos de ${selectedSport.nameEs}`}
-                            placeholder={selectedSport.id === 'tennis'
-                                ? `Filtrar torneos de ${selectedSport.nameEs}...`
-                                : `Filtrar ligas de ${selectedSport.nameEs}...`}
+                            placeholder={`Buscar un torneo de ${selectedSport.nameEs}`}
                             value={searchQuery}
                             onChange={(event) => setSearchQuery(event.target.value)}
                             className={pageStyles.sidebarSearchInput}
@@ -1179,14 +1192,24 @@ export default function TorneosPage() {
                     )}
 
 
+                    {/* Lo propio antes que el catálogo, y solo en la raíz: adentro de
+                        un país estorba. */}
+                    {drillDepth === 0 && !searchQuery ? (
+                        <div className={pageStyles.myTournamentsSlot}>
+                            <MyTournaments variant="directory" />
+                        </div>
+                    ) : null}
+
                     <div className={pageStyles.accordionList}>
                         <LeagueDrilldown
+                            syncWithUrl
+                            onDepthChange={setDrillDepth}
                             countries={drillCountries}
                             searchResults={drillSearchResults}
                             hrefFor={getTournamentHref}
                             isFavorite={(tournament) => isLeagueFavorite(tournament.id)}
                             seasonLabel={(tournament) => etiquetaDeTemporada(tournament.seasonId)}
-                            onOpenCountry={(countryId) => { if (!expandedCountries.has(countryId)) toggleCountry(countryId); }}
+                            onOpenCountry={openCountry}
                             rootLabel={selectedSport.nameEs}
                             emptyMessage={searchQuery
                                 ? (isRemoteSearching

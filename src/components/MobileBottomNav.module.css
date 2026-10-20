@@ -59,20 +59,10 @@
     background: rgba(var(--color-accent-rgb), 0.08);
 }
 
-.navItemActive .navDot {
-    opacity: 1;
-    transform: scale(1.5);
-    box-shadow: 0 0 8px var(--color-accent);
-}
-
-.navDot {
-    width: 4px;
-    height: 4px;
-    border-radius: 999px;
-    background: var(--color-accent);
-    opacity: 0;
-    transition: all 0.2s;
-    margin-top: 2px;
+/* La pestaña activa se marca con el fondo y el color del acento (no con un
+   punto de 4 px que no se distinguía). */
+.navItemActive {
+    color: var(--color-accent);
 }
 
 [data-theme="light"] .nav {
@@ -86,42 +76,213 @@
 }
 
 [data-theme="light"] .navItemActive {
-    color: #0f172a;
+    color: #047a4b;
     background: rgba(var(--color-accent-rgb), 0.1);
 }
 
-[data-theme="light"] .navItemActive .navDot {
-    box-shadow: 0 0 10px rgba(var(--color-accent-rgb), 0.28);
-}
-
+/*
+ * Etiquetas legibles: antes medían 9,3 px en MAYÚSCULAS (0.58rem) y eran lo
+ * primero que una persona mayor no alcanzaba a leer. Ahora 12 px, en el
+ * casing del texto, con el ícono un poco más grande. "Mis torneos" es la
+ * etiqueta más larga y entra en 375 px con dos líneas como máximo.
+ */
 @media (max-width: 900px) {
     .nav {
         display: flex;
-        padding: 7.6px max(11.4px, env(safe-area-inset-right)) calc(7.6px + env(safe-area-inset-bottom)) max(11.4px, env(safe-area-inset-left));
+        padding: 6px max(8px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
     }
 
     .navList {
-        gap: 4px;
+        gap: 2px;
         max-width: 532px;
     }
 
     .navItem {
-        gap: 4.5px;
-        font-size: 0.58rem;
-        letter-spacing: 0.01em;
-        padding: 7.6px 0 5.7px;
+        gap: 4px;
+        min-height: 56px;
+        font-size: 0.75rem;
+        line-height: 1.1;
+        letter-spacing: 0;
+        text-transform: none;
+        padding: 6px 2px;
         border-radius: 12px;
-        white-space: nowrap;
+        text-align: center;
     }
 
     .navItem svg {
-        width: 19px;
-        height: 19px;
+        width: 23px;
+        height: 23px;
     }
+}
 
-    .navDot {
-        width: 3.8px;
-        height: 3.8px;
-        margin-top: 1.9px;
-    }
+.navLabel {
+    display: block;
+    max-width: 100%;
+}
+
+button.navItem {
+    border: 0;
+    background: transparent;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+button.navItem.navItemActive {
+    background: rgba(var(--color-accent-rgb), 0.08);
+}
+
+.navItem:focus-visible,
+.sheetItem:focus-visible,
+.sheetClose:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.navItemActive {
+    font-weight: 700;
+}
+
+/* ===== Hoja "Más" ===== */
+.sheetRoot {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+}
+
+.scrim {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.55);
+    animation: scrimIn 200ms ease-out;
+}
+
+.sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: var(--color-bg-secondary);
+    border-top: 1px solid var(--color-border);
+    border-radius: 20px 20px 0 0;
+    padding: 8px max(16px, env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.4);
+    animation: sheetIn 280ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.sheetHandle {
+    width: 40px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--color-border);
+    margin: 4px auto 8px;
+}
+
+.sheetHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.sheetTitle {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.sheetClose {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    background: transparent;
+    color: var(--color-accent);
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.sheetList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.sheetItem {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    min-height: 60px;
+    padding: 10px 8px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+
+.sheetItem:active {
+    background: rgba(var(--color-accent-rgb), 0.1);
+}
+
+.sheetIcon {
+    flex: 0 0 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(var(--color-accent-rgb), 0.12);
+    color: var(--color-accent);
+}
+
+.sheetIcon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.sheetText {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.sheetText strong {
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.sheetText small {
+    font-size: 0.875rem;
+    line-height: 1.3;
+    color: var(--color-text-secondary);
+}
+
+[data-theme="light"] .sheet {
+    background: #ffffff;
+    border-top-color: rgba(15, 23, 42, 0.08);
+}
+
+@keyframes sheetIn {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+@keyframes scrimIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sheet { animation: scrimIn 150ms ease-out; }
 }

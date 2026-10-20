@@ -295,7 +295,7 @@ export default function Header() {
                     <button 
                         className="g22-mobile-search-btn" 
                         aria-label="Buscar" 
-                        style={{ background: 'transparent', border: 'none', padding: '8px', cursor: 'pointer', color: 'inherit', display: 'flex' }}
+                        style={{ background: 'transparent', border: 'none', padding: '10px', minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'inherit', display: 'flex' }}
                         onClick={() => router.push('/search')}
                         suppressHydrationWarning
                     >
@@ -370,7 +370,7 @@ export default function Header() {
                                         {FAVORITES_ENABLED && (
                                             <Link href="/favorites" onClick={() => setIsUserMenuOpen(false)}>
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l3.1 6.3 7 1-5 4.9 1.2 6.9L12 18l-6.3 3.1 1.2-6.9-5-4.9 7-1L12 3z" /></svg>
-                                                Mis Seguidos
+                                                Mis torneos
                                             </Link>
                                         )}
 

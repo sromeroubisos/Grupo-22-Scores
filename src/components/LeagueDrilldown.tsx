@@ -9,6 +9,7 @@ import { findCountryRecord, getCountryFlagCode } from '@/lib/data/countries';
 import CountryFlag from '@/components/CountryFlag';
 import { getNationalTeamFlag } from '@/lib/utils/teamLogoOverrides';
 import { competitionLogoByName } from '@/lib/competitionLogos';
+import { saveLastDirectoryHref } from '@/lib/recentTournaments';
 import styles from './LeagueDrilldown.module.css';
 
 /**
@@ -77,9 +78,58 @@ interface LeagueDrilldownProps<T extends Navegable> {
   /** Cómo se llama el nivel de países en el botón de volver ("Rugby"). */
   rootLabel: string;
   emptyMessage: ReactNode;
+  /**
+   * Guardar el nivel en la URL (`?nivel=`). Con esto el botón Atrás del
+   * teléfono vuelve un nivel —antes sacaba de la pantalla—, una recarga no
+   * manda al principio y "los torneos de la URBA" se pueden compartir.
+   * Solo la pantalla de Torneos lo pide: en la barra lateral del inicio
+   * ensuciaría la URL de la portada.
+   */
+  syncWithUrl?: boolean;
 }
 
 type Step = { kind: 'country' | 'section' | 'family'; id: string };
+
+const URL_PARAM = 'nivel';
+const STEP_KINDS = new Set<Step['kind']>(['country', 'section', 'family']);
+
+function parseSteps(value: string | null): Step[] {
+  if (!value) return [];
+  const steps: Step[] = [];
+  for (const segment of value.split('/')) {
+    const colon = segment.indexOf(':');
+    if (colon <= 0) return [];
+    const kind = segment.slice(0, colon) as Step['kind'];
+    if (!STEP_KINDS.has(kind)) return [];
+    try {
+      steps.push({ kind, id: decodeURIComponent(segment.slice(colon + 1)) });
+    } catch {
+      return [];
+    }
+  }
+  return steps;
+}
+
+function serializeSteps(steps: Step[]): string {
+  return steps.map((step) => `${step.kind}:${encodeURIComponent(step.id)}`).join('/');
+}
+
+function readStepsFromUrl(): Step[] {
+  if (typeof window === 'undefined') return [];
+  return parseSteps(new URL(window.location.href).searchParams.get(URL_PARAM));
+}
+
+/** pushState nativo: Next lo refleja en useSearchParams sin re-renderizar la ruta. */
+function writeStepsToUrl(steps: Step[], mode: 'push' | 'replace') {
+  const url = new URL(window.location.href);
+  if (steps.length > 0) url.searchParams.set(URL_PARAM, serializeSteps(steps));
+  else url.searchParams.delete(URL_PARAM);
+  const next = `${url.pathname}${url.search}${url.hash}`;
+  saveLastDirectoryHref(`${url.pathname}${url.search}`);
+  if (next === `${window.location.pathname}${window.location.search}${window.location.hash}`) return;
+  if (mode === 'push') window.history.pushState(window.history.state, '', next);
+  else window.history.replaceState(window.history.state, '', next);
+}
 
 const rgba = (hex: string, alpha: number): string => {
   const n = parseInt(hex.slice(1), 16);
@@ -246,21 +296,80 @@ export default function LeagueDrilldown<T extends Navegable>({
   onDepthChange,
   rootLabel,
   emptyMessage,
+  syncWithUrl = false,
 }: LeagueDrilldownProps<T>) {
   const [path, setPath] = useState<Step[]>([]);
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
   const titleRef = useRef<HTMLHeadingElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const firstRender = useRef(true);
+  const pathRef = useRef<Step[]>([]);
+  pathRef.current = path;
+  // Cuántos niveles empujó ESTA visita al historial: solo esos se deshacen con
+  // history.back(). Si se entró directo a ?nivel=..., volver no puede sacar
+  // de la página: se reemplaza la URL por el nivel de arriba.
+  const pushedRef = useRef(0);
+  const onOpenCountryRef = useRef(onOpenCountry);
+  onOpenCountryRef.current = onOpenCountry;
+  // Un camino que llega por URL (recarga, link compartido) se sostiene hasta
+  // que el país termina de cargar sus uniones: antes de eso la sección todavía
+  // no existe y el camino se descartaba por "roto". Con tope de tiempo, para no
+  // quedar esperando un país que nunca carga.
+  //   waiting: se pidió el país, todavía no empezó a cargar
+  //   loading: el país está cargando
+  //   idle:    no hay nada que esperar
+  const [restoreState, setRestoreState] = useState<'idle' | 'waiting' | 'loading'>('idle');
 
   const push = useCallback((step: Step) => {
     setDirection('forward');
-    setPath((prev) => [...prev, step]);
-  }, []);
+    const next = [...pathRef.current, step];
+    if (syncWithUrl) {
+      writeStepsToUrl(next, 'push');
+      pushedRef.current += 1;
+    }
+    setPath(next);
+  }, [syncWithUrl]);
   const back = useCallback(() => {
+    if (syncWithUrl && pushedRef.current > 0) {
+      // popstate pone el nivel; así el botón de la pantalla y el del
+      // teléfono hacen exactamente lo mismo.
+      window.history.back();
+      return;
+    }
     setDirection('back');
-    setPath((prev) => prev.slice(0, -1));
-  }, []);
+    const next = pathRef.current.slice(0, -1);
+    if (syncWithUrl) writeStepsToUrl(next, 'replace');
+    setPath(next);
+  }, [syncWithUrl]);
+
+  // El nivel sale de la URL al entrar y cada vez que se navega con Atrás /
+  // Adelante. Al país del camino se le pide su carga, como si se lo tocara.
+  useEffect(() => {
+    if (!syncWithUrl) return;
+    const apply = (dir: 'forward' | 'back') => {
+      const steps = readStepsFromUrl();
+      const countryStep = steps.find((step) => step.kind === 'country');
+      if (countryStep) onOpenCountryRef.current(countryStep.id);
+      saveLastDirectoryHref(`${window.location.pathname}${window.location.search}`);
+      setDirection(dir);
+      setPath(steps);
+    };
+    let giveUp: number | undefined;
+    if (readStepsFromUrl().length > 0) {
+      setRestoreState('waiting');
+      giveUp = window.setTimeout(() => setRestoreState('idle'), 10000);
+    }
+    apply('forward');
+    const onPop = () => {
+      pushedRef.current = Math.max(0, pushedRef.current - 1);
+      apply(readStepsFromUrl().length < pathRef.current.length ? 'back' : 'forward');
+    };
+    window.addEventListener('popstate', onPop);
+    return () => {
+      window.clearTimeout(giveUp);
+      window.removeEventListener('popstate', onPop);
+    };
+  }, [syncWithUrl]);
 
   useEffect(() => { onDepthChange?.(path.length); }, [path.length, onDepthChange]);
 
@@ -289,7 +398,24 @@ export default function LeagueDrilldown<T extends Navegable>({
     || (!!country
       && (path.length < 2 || path[1].kind !== 'section' || !!section)
       && (!familyStep || !!family));
-  useEffect(() => { if (!valid) { setDirection('back'); setPath([]); } }, [valid]);
+  // Entrando por URL, el país todavía puede estar cargando (o la lista de
+  // países vacía): eso no es un camino roto, es un camino que llega.
+  const countryLoading = !!country?.loading;
+  useEffect(() => {
+    if (restoreState === 'waiting' && countryLoading) setRestoreState('loading');
+    else if (restoreState === 'loading' && !countryLoading) setRestoreState('idle');
+  }, [countryLoading, restoreState]);
+  const pending = path.length > 0 && (countries.length === 0 || countryLoading || restoreState !== 'idle');
+  useEffect(() => {
+    if (valid) {
+      if (path.length > 0 && restoreState !== 'idle') setRestoreState('idle');
+      return;
+    }
+    if (pending) return;
+    setDirection('back');
+    setPath([]);
+    if (syncWithUrl) writeStepsToUrl([], 'replace');
+  }, [path.length, pending, restoreState, syncWithUrl, valid]);
 
   const openCountry = (id: string) => {
     onOpenCountry(id);
@@ -334,6 +460,14 @@ export default function LeagueDrilldown<T extends Navegable>({
 
   if (searchResults) {
     body = searchResults.length > 0 ? renderList(searchResults) : <div className={styles.note}>{emptyMessage}</div>;
+  } else if (!valid && pending) {
+    // El camino de la URL todavía está llegando: esqueleto, no la lista de
+    // países (que parpadeaba antes de saltar al nivel pedido).
+    body = (
+      <div className={styles.skeleton} role="status" aria-label="Cargando torneos">
+        <span className={styles.skeletonRow} /><span className={styles.skeletonRow} /><span className={styles.skeletonRow} />
+      </div>
+    );
   } else if (path.length === 0 || !valid) {
     body = countries.length > 0
       ? countries.map((c) => <Block key={c.id} compact look={lookDePais(c)} onOpen={() => openCountry(c.id)} />)

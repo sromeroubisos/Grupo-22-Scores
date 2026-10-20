@@ -132,7 +132,9 @@ function describir(estado: EstadoDePartido, tokenOriginal = ''): EstadoResuelto 
             };
         case 'finalizado':
             return {
-                estado, etiqueta: 'FT', descripcion: 'Partido finalizado',
+                // "Final" y no "FT": la sigla en inglés no la reconoce quien no
+                // sigue fútbol europeo (auditoría mobile, 2026-10-19).
+                estado, etiqueta: 'Final', descripcion: 'Partido finalizado',
                 muestraMarcador: true, relojCorriendo: false,
             };
         default:
