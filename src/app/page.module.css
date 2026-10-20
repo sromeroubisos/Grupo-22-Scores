@@ -1927,13 +1927,15 @@
     scrollbar-width: none;
 }
 
-/* El sidebar de ligas es una lista larga (Argentina: 20 secciones) dentro de una
-   altura fija: sin barra visible parecía cortada. Se muestra una barra fina. */
+/* El sidebar de ligas es una lista larga (Argentina: 20 secciones). Con altura fija
+   y scroll interno el final quedaba inalcanzable: ahora lo scrollea la página y
+   la barra de volver del drilldown queda pegada bajo el encabezado. */
 .sidebarLeft {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-border) transparent;
-    scrollbar-gutter: stable;
-    padding-bottom: 24px;
+    position: relative;
+    top: auto;
+    height: auto;
+    overflow: visible;
+    align-self: start;
 }
 
 .sidebarRight {
@@ -1946,8 +1948,6 @@
     display: none;
 }
 
-.sidebarLeft::-webkit-scrollbar { width: 6px; }
-.sidebarLeft::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 
 /* Mobile Tournament List */
 .mobileTournamentList {
