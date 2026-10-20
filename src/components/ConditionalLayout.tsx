@@ -6,10 +6,12 @@ import Footer from '@/components/Footer';
 import MobileBottomNav, { BOTTOM_NAV_HIDDEN_PREFIXES } from '@/components/MobileBottomNav';
 import WorldCupTicker from '@/components/WorldCupTicker';
 import ProdeWorldCupBanner from '@/components/ProdeWorldCupBanner';
-import FirstVisitSportPicker from '@/components/FirstVisitSportPicker';
+import PreferencesGate from '@/components/PreferencesGate';
 import { SportProvider } from '@/context/SportContext';
 import { useAuth } from '@/context/AuthContext';
-import { useEffect } from 'react';
+import { hasCompletedLocalOnboarding, readLocalPreferences } from '@/lib/localPreferences';
+import { setOnboardingStorageStatus } from '@/lib/onboardingStatus';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './ConditionalLayout.module.css';
 
@@ -20,7 +22,9 @@ interface ConditionalLayoutProps {
 export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
     const pathname = usePathname();
     const router = useRouter();
-    const { user, isAuthenticated, isLoading } = useAuth();
+    const { user, isAuthenticated, isLoading, refreshOnboardingStatus } = useAuth();
+    // Evita repetir el pedido si el efecto corre de nuevo mientras responde el servidor.
+    const completingFromDevice = useRef<string | null>(null);
     const isManagementPage = pathname?.startsWith('/admin');
     const isOnboardingPage = pathname?.startsWith('/onboarding');
     const isClubAdminPage = pathname?.startsWith('/club-admin');
@@ -65,9 +69,34 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
             user.onboardingCompleted === false &&
             !isOnboardingPage
         ) {
+            // Se pregunta UNA vez: quien ya pasó por el asistente en este dispositivo (o lo salteó)
+            // y después se registra no lo repite. Se marca completo en su cuenta; los favoritos que
+            // eligió suben solos (favoritesStore) y el deporte se guarda acá.
+            if (hasCompletedLocalOnboarding()) {
+                if (completingFromDevice.current === user.id) return;
+                completingFromDevice.current = user.id;
+                const local = readLocalPreferences();
+                void fetch('/api/onboarding/preferences', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(local.skipped ? { skipped: true } : { skipped: false, sportIds: local.sportIds }),
+                })
+                    .then(async (response) => {
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        setOnboardingStorageStatus(user.id, { skipped: local.skipped });
+                        await refreshOnboardingStatus();
+                    })
+                    .catch(() => {
+                        // Si no se pudo guardar, vale el recorrido normal: nunca se pierde el onboarding.
+                        completingFromDevice.current = null;
+                        router.push(`/onboarding/preferences?returnTo=${encodeURIComponent(returnTo)}`);
+                    });
+                return;
+            }
             router.push(`/onboarding/preferences?returnTo=${encodeURIComponent(returnTo)}`);
         }
-    }, [isLoading, isManagementPage, isAuthenticated, user, isOnboardingPage, returnTo, router]);
+    }, [isLoading, isManagementPage, isAuthenticated, user, isOnboardingPage, returnTo, router, refreshOnboardingStatus]);
 
     // Onboarding pages get a blank layout (no header/footer/nav)
     if (isOnboardingPage || isProdeFullScreen) {
@@ -127,9 +156,10 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
             <Footer />
             <MobileBottomNav />
             <ProdeWorldCupBanner />
-            {/* Primera visita sin cuenta: elegir deporte. Se muestra solo en `/`
-                y una vez por dispositivo; el componente decide por sí mismo. */}
-            <FirstVisitSportPicker />
+            {/* Primera visita sin cuenta: asistente de preferencias (deporte,
+                competiciones, clubes). Solo en `/` y una vez por dispositivo; el
+                componente decide por sí mismo. */}
+            <PreferencesGate />
         </SportProvider>
     );
 }

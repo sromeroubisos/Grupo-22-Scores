@@ -50,7 +50,10 @@ export default function FavoriteButton(props: FavoriteButtonProps) {
         sportId,
         canonicalId,
     } = props;
-    const { isFavorited, loading, toggle } = useFavorite(entityType, entityId);
+    const { isFavorited, ready, toggle } = useFavorite(entityType, entityId);
+    // Hasta que se sabe si lo sigue, la estrella queda neutra: decir "Seguir" y
+    // saltar después a "Siguiendo" es el parpadeo que se veía en las listas.
+    const label = !ready ? 'Cargando seguidos' : isFavorited ? 'Dejar de seguir' : 'Seguir';
 
     if (!FAVORITES_ENABLED || !isSupportedEntityType(entityType)) {
         return null;
@@ -60,9 +63,10 @@ export default function FavoriteButton(props: FavoriteButtonProps) {
         <button
             type="button"
             className={`${styles.favoriteButton} ${className}`.trim()}
-            aria-label={isFavorited ? 'Dejar de seguir' : 'Seguir'}
-            title={isFavorited ? 'Dejar de seguir' : 'Seguir'}
-            disabled={loading}
+            aria-label={label}
+            title={label}
+            aria-busy={!ready}
+            disabled={!ready}
             onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -79,9 +83,9 @@ export default function FavoriteButton(props: FavoriteButtonProps) {
             <Star
                 size={size}
                 className={styles.star}
-                fill={isFavorited ? 'currentColor' : 'none'}
+                fill={ready && isFavorited ? 'currentColor' : 'none'}
             />
-            {showLabel ? <span className={styles.label}>{isFavorited ? 'Siguiendo' : 'Seguir'}</span> : null}
+            {showLabel ? <span className={styles.label}>{!ready ? 'Seguir' : isFavorited ? 'Siguiendo' : 'Seguir'}</span> : null}
         </button>
     );
 }

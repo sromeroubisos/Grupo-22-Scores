@@ -359,6 +359,12 @@ function buildExternalSeasonHref(
     return `/tournaments/${routeId}${query ? `?${query}` : ''}`;
 }
 
+// Temporadas ya conocidas de cada torneo. El selector sale de acá en el primer
+// pintado y se revalida por detrás: antes arrancaba vacío en cada visita, y un
+// fallo de red (tras tres reintentos) lo dejaba sin temporadas hasta recargar.
+const seasonOptionsCache = new Map<string, SeasonOption[]>();
+const lastKnownSeasonOptions = new Map<string, SeasonOption[]>();
+
 function buildExternalSeasonOptions(
     archives: any[],
     routeId: string,
@@ -2230,11 +2236,11 @@ export default function TournamentDetailPage({
     const [standingsOverUnderTeamLabels, setStandingsOverUnderTeamLabels] = useState<any[]>([]);
     const [customStandingsTables, setCustomStandingsTables] = useState<any[]>([]);
     const [archives, setArchives] = useState<any[]>([]);
-    const [seasonOptions, setSeasonOptions] = useState<SeasonOption[]>([]);
+    const [seasonOptions, setSeasonOptions] = useState<SeasonOption[]>(() => lastKnownSeasonOptions.get(id) ?? []);
     // El tab Campeones depende de datos que llegan por fetch: hasta que la
     // lista de temporadas no resolvió, un deep link a ?tab=champions no se
     // puede juzgar (el fallback lo patearía a Resumen antes de tiempo).
-    const [seasonOptionsLoaded, setSeasonOptionsLoaded] = useState(false);
+    const [seasonOptionsLoaded, setSeasonOptionsLoaded] = useState(() => lastKnownSeasonOptions.has(id));
     const [seasonMenuOpen, setSeasonMenuOpen] = useState(false);
     const [results, setResults] = useState<any[]>(preloaded?.results ?? []);
     const [fixtures, setFixtures] = useState<any[]>(preloaded?.fixtures ?? []);
@@ -2698,6 +2704,12 @@ export default function TournamentDetailPage({
                     ((initialData?.season as any)?.id ? String((initialData?.season as any).id) : null);
                 if (selectedSeasonParam) query.set('seasonId', selectedSeasonParam);
                 const url = `/api/db/tournaments/${encodeURIComponent(id)}/seasons${query.size ? `?${query.toString()}` : ''}`;
+                // Misma lista y misma temporada marcada: se muestra al instante, sin esperar al servidor.
+                const cached = seasonOptionsCache.get(url);
+                if (cached) {
+                    setSeasonOptions(cached);
+                    setSeasonOptionsLoaded(true);
+                }
                 /* El endpoint falla intermitente (ok:false o 5xx transitorio) y
                    un solo fallo dejaba el selector sin el histórico y sin el tab
                    de Campeones. Dos reintentos con espera corta antes de caer al
@@ -2714,11 +2726,19 @@ export default function TournamentDetailPage({
                         break;
                     }
                 }
-                setSeasonOptions(seasons ?? []);
+                if (seasons) {
+                    seasonOptionsCache.set(url, seasons);
+                    lastKnownSeasonOptions.set(id, seasons);
+                    setSeasonOptions(seasons);
+                } else {
+                    // Si el servidor no contestó, se conserva lo último que se supo de este torneo:
+                    // una caída pasajera no puede hacer desaparecer el selector.
+                    setSeasonOptions((current) => (current.length > 0 ? current : lastKnownSeasonOptions.get(id) ?? []));
+                }
                 setSeasonOptionsLoaded(true);
             } catch (err: any) {
                 if (err?.name !== 'AbortError') {
-                    setSeasonOptions([]);
+                    setSeasonOptions((current) => (current.length > 0 ? current : lastKnownSeasonOptions.get(id) ?? []));
                     setSeasonOptionsLoaded(true);
                 }
             }

@@ -194,6 +194,39 @@ const DEFAULT_CLUBS_LIMIT = 500;
 const DEFAULT_ADMIN_CLUBS_LIMIT = 2000;
 const MAX_CLUBS_LIMIT = 2000;
 
+/**
+ * club derivado → club base, para los clubes de esta página del listado. Quien
+ * consume decide qué hacer si el base no está entre los que tiene (el onboarding
+ * lo muestra como club suelto). Si la tabla no contesta, se devuelve vacío: la
+ * lista sirve igual sin familias.
+ */
+async function loadDerivativeBases(
+    client: { from: (table: string) => any },
+    ids: Set<string>,
+): Promise<Map<string, string>> {
+    const bases = new Map<string, string>();
+    const PAGE = 1000; // PostgREST no devuelve más por pedido
+
+    for (let page = 0; page < 6; page++) {
+        const { data, error } = await client
+            .from('club_derivatives')
+            .select('base_club_id, derived_club_id')
+            .order('derived_club_id')
+            .range(page * PAGE, page * PAGE + PAGE - 1);
+        if (error) break;
+
+        const rows = (data ?? []) as Array<{ base_club_id: string; derived_club_id: string }>;
+        for (const row of rows) {
+            // El base puede caer en otra página del listado: acá solo se exige que el derivado esté en ESTA.
+            if (ids.has(row.derived_club_id) && row.base_club_id !== row.derived_club_id) {
+                bases.set(row.derived_club_id, row.base_club_id);
+            }
+        }
+        if (rows.length < PAGE) break;
+    }
+    return bases;
+}
+
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const unionId = searchParams.get('union_id');
@@ -260,6 +293,13 @@ export async function GET(request: NextRequest) {
         return sportFilter.includes(normalizedSport);
     });
 
+    // Opcional: a qué club base pertenece cada club derivado (categorías, rama
+    // femenina, plantel juvenil...). Lo usa el onboarding para agrupar "Aero Club
+    // Río IV M16" bajo "Aero Club Río IV" en vez de listarlos como clubes sueltos.
+    const basesByDerived = searchParams.get('families') === '1'
+        ? await loadDerivativeBases(readClient, new Set(clubs.map((club) => club.id)))
+        : null;
+
     const response = NextResponse.json({
         data: clubs.map((club) => ({
             id: club.id,
@@ -271,6 +311,7 @@ export async function GET(request: NextRequest) {
             is_visible: club.is_visible !== false,
             sport: club.sport || club.sport_id || 'rugby',
             status: club.status ?? 'published',
+            ...(basesByDerived ? { base_club_id: basesByDerived.get(club.id) ?? null } : {}),
         }))
     });
 

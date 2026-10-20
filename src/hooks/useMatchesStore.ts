@@ -57,6 +57,11 @@ function cacheKey(date: string, sportId: string) {
   return `${MATCHES_STORE_CACHE_VERSION}__${date}__${sportId}`;
 }
 
+/** Partidos de ese día ya bajados por la portada (null si no se pidieron): el onboarding los reusa en vez de repetir el pedido. */
+export function getCachedMatches(date: string, sportId: string): any[] | null {
+  return matchesCache.get(cacheKey(date, sportId)) ?? null;
+}
+
 // La conciliación del sondeo de en vivo vive en `@/lib/matches/liveOverlay`:
 // es una función pura con test propio. Acá vivía una copia de tres líneas que
 // daba por terminado todo lo que faltara del sondeo, sin preguntar si el
