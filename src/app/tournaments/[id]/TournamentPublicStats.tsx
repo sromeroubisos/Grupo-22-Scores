@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import type { StandingsData } from '@/components/ExportImage';
 import styles from './page.module.css';
@@ -16,6 +16,7 @@ import { isRugbySport } from '@/lib/externalProviderPolicy';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import TeamLogo from '@/components/TeamLogo';
 import TournamentTopStats, { type TarjetaDeTop } from './TournamentTopStats';
+import TournamentPlayerSheet, { type TournamentPlayerSheetSubject } from './TournamentPlayerSheet';
 
 const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
 
@@ -52,6 +53,12 @@ interface TournamentPublicStatsProps {
 }
 
 const MOBILE_BREAKPOINT = 640;
+const DEFAULT_ROW_LIMIT = 25;
+const ROW_LIMIT_OPTIONS: Array<{ value: number; label: string }> = [
+    { value: 10, label: 'Top 10' },
+    { value: 25, label: 'Top 25' },
+    { value: 0, label: 'Todos' },
+];
 
 const TEAM_STATS_VIEW_OPTIONS: Array<{ id: TeamStatsView; label: string; description: string }> = [
     { id: 'summary', label: 'Resumen', description: 'Forma, puntos y balance general' },
@@ -282,12 +289,23 @@ function normalizeEvent(raw: unknown) {
     const type = t(event.type || event.event_type).toLowerCase();
     const teamText = t(event.team || event.side || event.club_side).toLowerCase();
     const playerName = t(event.playerName || event.player_name || (event.player as Record<string, unknown> | undefined)?.name || event.name) || null;
+    // El id es lo que permite mandar del ranking al perfil: puede venir plano, en
+    // snake_case, anidado en `player` o dentro del JSONB `details`.
+    const details = (event.details && typeof event.details === 'object' ? event.details : {}) as Record<string, unknown>;
+    const playerId = t(
+        event.playerId
+        || event.player_id
+        || (event.player as Record<string, unknown> | undefined)?.id
+        || details.playerId
+        || details.player_id,
+    ) || null;
     const detail = t(event.detail || (event as Record<string, unknown>).notes || '');
     if (!type) return null;
     return {
         type,
         team: ['home', 'local', 'h'].includes(teamText) ? 'home' : ['away', 'visitante', 'a'].includes(teamText) ? 'away' : null,
         playerName,
+        playerId,
         detail,
     };
 }
@@ -314,7 +332,12 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTeamId, setSelectedTeamId] = useState('all');
-    const [showTopOnly, setShowTopOnly] = useState(false);
+    // Cuántas filas se dibujan. 0 = todas. Antes arrancaba en "Todos": un torneo
+    // con 340 jugadores armaba 340 tarjetas de 500px en el celular.
+    const [rowLimit, setRowLimit] = useState<number>(DEFAULT_ROW_LIMIT);
+    const [sheetRow, setSheetRow] = useState<any | null>(null);
+    const [expandedTeamId, setExpandedTeamId] = useState<string | null>(null);
+    const listRef = useRef<HTMLDivElement | null>(null);
 
     const handleSubTabChange = (tab: StatsSubTab) => {
         setActiveSubTab(tab);
@@ -520,6 +543,7 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                         entityName: event!.playerName,
                         entityLogo: side.teamLogo,
                         teamId: side.teamId,
+                        playerId: event!.playerId,
                         secondary: side.teamName,
                         matches_played: 0,
                         points: 0,
@@ -542,6 +566,8 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                         mauls_lost: 0,
                     });
                 }
+                // Un evento sin id no pisa el que otro evento del mismo jugador sí trajo.
+                if (!byId.get(id)!.playerId && event!.playerId) byId.get(id)!.playerId = event!.playerId;
                 if (!counted.has(id)) {
                     byId.get(id)!.matches_played = n(byId.get(id)!.matches_played) + 1;
                     counted.add(id);
@@ -668,7 +694,7 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
         });
     }, [filteredRows, sortKey, sortDirection]);
 
-    const displayRows = showTopOnly ? sortedRows.slice(0, 10) : sortedRows;
+    const displayRows = rowLimit > 0 ? sortedRows.slice(0, rowLimit) : sortedRows;
 
     const handleSort = (key: string) => {
         if (sortKey === key) {
@@ -678,6 +704,51 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             setSortDirection('desc');
         }
     };
+
+    // Tocar una tarjeta del podio ordena la lista Y lleva la vista hasta ella.
+    // Antes sólo reordenaba: la lista quedaba 800px más abajo y el toque se leía
+    // como un botón roto.
+    const handlePickMetric = (metric: string, direction: SortDirection) => {
+        setSortKey(metric);
+        setSortDirection(direction);
+        setRowLimit((current) => (current === 0 ? current : Math.max(current, DEFAULT_ROW_LIMIT)));
+        window.requestAnimationFrame(() => {
+            const top = listRef.current?.getBoundingClientRect().top;
+            if (top === undefined) return;
+            // 120px de aire: deja a la vista la barra de orden y los filtros.
+            window.scrollTo({ top: window.scrollY + top - 120, behavior: 'smooth' });
+        });
+    };
+
+    /** Las cifras de un jugador en este torneo, listas para la ficha. */
+    const openPlayerSheet = (row: any) => {
+        setSheetRow(row);
+    };
+
+    const sheetSubject = useMemo<TournamentPlayerSheetSubject | null>(() => {
+        if (!sheetRow) return null;
+        const position = sortedRows.findIndex((row) => row.entityId === sheetRow.entityId);
+        const sortColumn = PLAYER_COLUMNS.find((column) => column.id === sortKey && column.id !== 'entity' && column.id !== 'secondary');
+        return {
+            name: String(sheetRow.entityName ?? 'Jugador'),
+            teamName: String(sheetRow.secondary ?? ''),
+            teamId: sheetRow.teamId ?? null,
+            logoUrl: sheetRow.entityLogo ?? null,
+            playerId: sheetRow.playerId ?? null,
+            rankLabel: position >= 0 && sortColumn && !unmeasuredMetrics.has(sortColumn.id)
+                ? `${position + 1}.º en ${sortColumn.title || sortColumn.label}`
+                : null,
+            stats: PLAYER_COLUMNS
+                .filter((column) => column.id !== 'entity' && column.id !== 'secondary')
+                .map((column) => ({
+                    label: column.label,
+                    title: column.title,
+                    value: formatStatValue(sheetRow, column, unmeasuredMetrics),
+                    tone: column.tone === 'attack' || column.tone === 'defense' || column.tone === 'danger' ? column.tone : undefined,
+                    accent: column.id === sortKey,
+                })),
+        };
+    }, [sheetRow, sortedRows, sortKey, unmeasuredMetrics]);
 
     const hasStats = finalMatches.length > 0 && (activeSubTab === 'teams' ? teamRows.length > 0 : playerRows.length > 0);
 
@@ -765,7 +836,7 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
         </div>
     );
 
-    const renderTeamCard = (row: any, idx: number) => {
+    const renderTeamCard = (row: any) => {
         const summaryGroups = [
             // El balance como proporción: PG/PE/PP sueltos no dicen si 11-0-6 es
             // una buena temporada hasta que uno los suma. La barra sí.
@@ -835,44 +906,72 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
         ];
 
         return (
-            <div key={row.entityId} className={styles.statsMobileCard}>
-                <div className={styles.statsMobileIdentity}>
-                    <span className={styles.statsRank}>{idx + 1}</span>
-                    <EscudoDeFila row={row} kind="teams" />
-                    <span className={styles.statsEntityName}>{row.entityName}</span>
-                </div>
+            <>
                 {teamStatsView === 'attack' ? attackGroups : teamStatsView === 'defense' ? defenseGroups : summaryGroups}
-            </div>
+            </>
         );
     };
 
-    const renderPlayerCard = (row: any, idx: number) => (
-        <div key={row.entityId} className={styles.statsMobileCard}>
-            <div className={styles.statsMobileIdentity}>
+    /**
+     * Una fila del ranking en el celular: ~64px en vez de los ~500px de la
+     * tarjeta anterior. Lleva lo que contesta "cómo va en esto" —la métrica por
+     * la que está ordenada, grande— y tres cifras de contexto en una línea.
+     * El detalle completo vive en la ficha (jugadores) o en el desplegable
+     * (equipos), no repetido en cada fila.
+     */
+    const renderCompactRow = (row: any, idx: number) => {
+        const esJugador = activeSubTab === 'players';
+        const metricColumns = currentColumns.filter((column) => column.id !== 'entity' && column.id !== 'secondary');
+        const primary = metricColumns.find((column) => column.id === sortKey) ?? metricColumns.find((column) => column.accent) ?? metricColumns[0];
+        const contextIds = esJugador ? ['matches_played', 'points', 'tries', 'tackles'] : ['matches_played', 'points_for', 'points_difference', 'tries_scored'];
+        const context = contextIds
+            .filter((id) => id !== primary?.id && !unmeasuredMetrics.has(id))
+            .map((id) => metricColumns.find((column) => column.id === id))
+            .filter((column): column is StatColumn => Boolean(column))
+            .slice(0, 3);
+        const expanded = !esJugador && expandedTeamId === String(row.entityId);
+
+        const identity = (
+            <>
                 <span className={styles.statsRank}>{idx + 1}</span>
-                <EscudoDeFila row={row} kind="players" />
+                <EscudoDeFila row={row} kind={activeSubTab} />
                 <span className={styles.statsMobileIdentityText}>
                     <span className={styles.statsEntityName}>{row.entityName}</span>
-                    <span className={styles.statsEntitySecondary}>{row.secondary}</span>
+                    <span className={styles.statsCompactContext}>
+                        {esJugador && <span className={styles.statsCompactTeam}>{row.secondary}</span>}
+                        {context.map((column) => (
+                            <span key={column.id} title={column.title}>
+                                {column.label} <b>{formatStatValue(row, column, unmeasuredMetrics)}</b>
+                            </span>
+                        ))}
+                    </span>
                 </span>
+            </>
+        );
+
+        return (
+            <div key={row.entityId} className={`${styles.statsCompactRow} ${expanded ? styles.statsCompactRowOpen : ''}`}>
+                <button
+                    type="button"
+                    className={styles.statsCompactButton}
+                    onClick={() => (esJugador ? openPlayerSheet(row) : setExpandedTeamId(expanded ? null : String(row.entityId)))}
+                    aria-haspopup={esJugador ? 'dialog' : undefined}
+                    aria-expanded={esJugador ? undefined : expanded}
+                    aria-label={esJugador ? `Ver ficha de ${row.entityName}` : undefined}
+                >
+                    {identity}
+                    {primary && (
+                        <span className={styles.statsCompactValue} title={primary.title}>
+                            <b>{formatStatValue(row, primary, unmeasuredMetrics)}</b>
+                            <i>{primary.label}</i>
+                        </span>
+                    )}
+                    <span className={styles.statsCompactChevron} aria-hidden="true">{esJugador ? '›' : expanded ? '⌃' : '⌄'}</span>
+                </button>
+                {expanded && <div className={styles.statsCompactDetail}>{renderTeamCard(row)}</div>}
             </div>
-            {renderMobileStatGroup('Producción', [
-                { label: 'PJ', value: fmt(row.matches_played) },
-                { label: 'PTS', value: fmt(row.points), accent: true },
-                { label: 'TRIES', value: fmt(row.tries), accent: true },
-            ])}
-            {renderMobileStatGroup('Juego', [
-                { label: 'CONV', value: measured('conversions', row.conversions), accent: true },
-                { label: 'PEN', value: measured('penalty_goals', row.penalty_goals) },
-                { label: 'TACK', value: measured('tackles', row.tackles) },
-            ])}
-            {renderMobileStatGroup('Otros', [
-                { label: 'M PAT', value: measured('kick_meters', row.kick_meters) },
-                { label: 'TA', value: fmt(row.yellow_cards), danger: n(row.yellow_cards) > 0 },
-                { label: 'TR', value: fmt(row.red_cards), danger: n(row.red_cards) > 0 },
-            ])}
-        </div>
-    );
+        );
+    };
 
     return (
         <div className={styles.section}>
@@ -942,10 +1041,8 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                     cards={!esRugby ? GENERIC_TEAM_TOP_CARDS : activeSubTab === 'teams' ? TEAM_TOP_CARDS : PLAYER_TOP_CARDS}
                     unmeasured={unmeasuredMetrics}
                     kind={activeSubTab}
-                    onPick={(metric, direction) => {
-                        setSortKey(metric);
-                        setSortDirection(direction);
-                    }}
+                    onPick={handlePickMetric}
+                    onOpenPlayer={activeSubTab === 'players' ? openPlayerSheet : undefined}
                 />
             )}
 
@@ -970,23 +1067,18 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                             <option key={team.id} value={team.id}>{team.name}</option>
                         ))}
                     </select>
-                    <div className={styles.statsLimitGroup} aria-label="Cantidad de filas">
-                        <button
-                            type="button"
-                            className={`${styles.statsLimitButton} ${showTopOnly ? styles.statsLimitButtonActive : ''}`}
-                            onClick={() => setShowTopOnly(true)}
-                            aria-pressed={showTopOnly}
-                        >
-                            Top 10
-                        </button>
-                        <button
-                            type="button"
-                            className={`${styles.statsLimitButton} ${!showTopOnly ? styles.statsLimitButtonActive : ''}`}
-                            onClick={() => setShowTopOnly(false)}
-                            aria-pressed={!showTopOnly}
-                        >
-                            Todos
-                        </button>
+                    <div className={styles.statsLimitGroup} role="group" aria-label="Cantidad de filas">
+                        {ROW_LIMIT_OPTIONS.map((option) => (
+                            <button
+                                key={option.value}
+                                type="button"
+                                className={`${styles.statsLimitButton} ${rowLimit === option.value ? styles.statsLimitButtonActive : ''}`}
+                                onClick={() => setRowLimit(option.value)}
+                                aria-pressed={rowLimit === option.value}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
                     </div>
                     <div className={styles.statsSortHint}>
                         Orden: <strong>{activeSortColumn?.label || sortKey} {sortDirection === 'desc' ? '↓' : '↑'}</strong>
@@ -1039,15 +1131,27 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                 </div>
             ) : hasStats ? (
                 isMobile ? (
-                    <div>
+                    <div ref={listRef} className={styles.statsCompactList}>
+                        {activeSortColumn && activeSortColumn.id !== 'entity' && activeSortColumn.id !== 'secondary' && (
+                            <p className={styles.statsCompactCaption}>
+                                Ranking por <strong>{activeSortColumn.title || activeSortColumn.label}</strong> {sortDirection === 'desc' ? '↓' : '↑'}
+                            </p>
+                        )}
                         {displayRows.length === 0 ? (
                             <p className={styles.emptyState}>No hay resultados con los filtros actuales.</p>
-                        ) : activeSubTab === 'teams'
-                            ? displayRows.map((row, idx) => renderTeamCard(row, idx))
-                            : displayRows.map((row, idx) => renderPlayerCard(row, idx))}
+                        ) : displayRows.map((row, idx) => renderCompactRow(row, idx))}
+                        {rowLimit > 0 && sortedRows.length > displayRows.length && (
+                            <button
+                                type="button"
+                                className={styles.statsShowMore}
+                                onClick={() => setRowLimit((current) => (current + 25 >= sortedRows.length ? 0 : current + 25))}
+                            >
+                                Ver más · {displayRows.length} de {sortedRows.length}
+                            </button>
+                        )}
                     </div>
                 ) : (
-                    <div className={styles.sectionCard}>
+                    <div ref={listRef} className={styles.sectionCard}>
                         <div className={`${styles.tableCard} ${styles.statsTableWrap}`}>
                             <div className={`${styles.tableHeader} ${styles.statsTableHeaderRow}`} style={{ gridTemplateColumns: gridTemplate, minWidth: tableMinWidth }}>
                                 {currentColumns.map((col, colIndex) => (
@@ -1096,7 +1200,19 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                                                         <span className={styles.statsRank}>{idx + 1}</span>
                                                         <EscudoDeFila row={row} kind={activeSubTab} />
                                                         <span className={styles.statsEntityText}>
-                                                            <span className={styles.statsEntityName}>{row.entityName}</span>
+                                                            {activeSubTab === 'players' ? (
+                                                                <button
+                                                                    type="button"
+                                                                    className={styles.statsNameButton}
+                                                                    onClick={() => openPlayerSheet(row)}
+                                                                    aria-haspopup="dialog"
+                                                                    title={`Ver ficha de ${row.entityName}`}
+                                                                >
+                                                                    {row.entityName}
+                                                                </button>
+                                                            ) : (
+                                                                <span className={styles.statsEntityName}>{row.entityName}</span>
+                                                            )}
                                                             <span className={styles.statsEntitySecondary}>
                                                                 {activeSubTab === 'players' ? row.secondary : `${fmt(row.matches_played)} PJ`}
                                                             </span>
@@ -1122,6 +1238,8 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                         : 'No hay estadísticas disponibles para esta sección.'}
                 </p>
             )}
+
+            <TournamentPlayerSheet subject={sheetSubject} onClose={() => setSheetRow(null)} />
         </div>
     );
 }

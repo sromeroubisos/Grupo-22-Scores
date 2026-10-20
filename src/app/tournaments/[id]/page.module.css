@@ -4929,3 +4929,194 @@
         box-shadow: none;
     }
 }
+
+/* ── Estadísticas: ranking compacto, nombres tocables y podio en carrusel ───
+   Antes cada jugador era una tarjeta de ~500px y el podio ocupaba ~850px: la
+   lista arrancaba dos pantallas más abajo. Ahora la fila mide ~64px, el podio
+   se desliza de costado en el celular y tocar su cabecera lleva a la lista. */
+
+.statsNameButton,
+.topStatsNameButton {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    color: var(--fl-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.statsNameButton {
+    font-size: 0.84rem;
+    font-weight: 850;
+}
+.statsNameButton:hover,
+.topStatsNameButton:hover {
+    color: var(--fl-primary-text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.statsNameButton:focus-visible,
+.topStatsNameButton:focus-visible {
+    outline: 2px solid var(--fl-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.topStatsCardMore {
+    margin-left: auto;
+    color: var(--fl-text-dim);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.statsCompactList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    scroll-margin-top: 120px;
+}
+
+.statsCompactRow {
+    background: var(--fl-surface-alt);
+    border: 1px solid var(--fl-border);
+    border-radius: var(--fl-radius-sm);
+    overflow: hidden;
+}
+.statsCompactRowOpen { border-color: rgba(0, 163, 101, 0.4); }
+
+.statsCompactButton {
+    width: 100%;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 10px 8px 12px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.statsCompactButton:active { background: var(--fl-hover-bg); }
+.statsCompactButton:focus-visible {
+    outline: 2px solid var(--fl-primary);
+    outline-offset: -2px;
+}
+
+.statsCompactContext {
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 9px;
+    color: var(--fl-text-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.5;
+}
+.statsCompactContext b {
+    color: var(--fl-text-soft);
+    font-family: var(--fl-mono);
+    font-weight: 800;
+}
+.statsCompactTeam {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.statsCompactValue {
+    margin-left: auto;
+    flex-shrink: 0;
+    min-width: 46px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.1;
+}
+.statsCompactValue b {
+    color: var(--fl-primary-text);
+    font-size: 1.15rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+.statsCompactValue i {
+    color: var(--fl-text-dim);
+    font-size: 0.6rem;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.statsCompactChevron {
+    flex-shrink: 0;
+    width: 14px;
+    color: var(--fl-text-dim);
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.statsCompactDetail {
+    display: grid;
+    gap: 12px;
+    padding: 0 12px 12px;
+}
+
+.statsShowMore {
+    min-height: 44px;
+    margin-top: 4px;
+    border: 1px solid var(--fl-border);
+    border-radius: var(--fl-radius-sm);
+    background: var(--fl-surface);
+    color: var(--fl-text);
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+.statsShowMore:hover { background: var(--fl-hover-bg); }
+.statsShowMore:focus-visible { outline: 2px solid var(--fl-primary); outline-offset: 2px; }
+
+/* El podio en carrusel: cada tarjeta ocupa casi todo el ancho y se ve el borde
+   de la siguiente, que es la pista de que se desliza. */
+@media (max-width: 640px) {
+    .topStatsSection { margin-bottom: 14px; gap: 10px; }
+    .topStatsGrid {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        margin: 0 -16px;
+        padding: 0 16px 6px;
+        scrollbar-width: none;
+    }
+    .topStatsGrid::-webkit-scrollbar { display: none; }
+    .topStatsGrid > .topStatsCard {
+        flex: 0 0 82%;
+        scroll-snap-align: start;
+    }
+}
+
+.statsCompactCaption {
+    margin: 0 2px 2px;
+    color: var(--fl-text-muted);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+.statsCompactCaption strong { color: var(--fl-text); }
+
+/* Respuesta al apoyar: el feedback llega con el dedo, no al soltar. */
+.statsCompactButton { transition: background 0.12s ease-out, transform 0.12s ease-out; }
+.statsCompactButton:active { transform: scale(0.985); }
+.statsShowMore:active { transform: scale(0.98); }
+.statsCompactValue b { letter-spacing: -0.02em; }
+.statsEntityName { letter-spacing: -0.005em; }
+
+@media (prefers-reduced-motion: reduce) {
+    .statsCompactButton:active, .statsShowMore:active { transform: none; }
+}

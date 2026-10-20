@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import styles from './page.module.css';
+import TournamentPlayerSheet, { type TournamentPlayerSheetSubject } from './TournamentPlayerSheet';
 
 type SubTab = 'teams' | 'players';
 type SortDirection = 'asc' | 'desc';
@@ -81,6 +82,19 @@ function fmt(value: number | string | undefined, format?: StatColumn['format']):
     return num.toFixed(1);
 }
 
+/** Dónde queda un jugador con el orden activo (-1 si no está). */
+function sortedPlayersIndex(rows: PlayerRow[], sortKey: string, sortDir: SortDirection, playerId: number): number {
+    const toNum = (value: unknown) => {
+        const num = typeof value === 'number' ? value : Number(value);
+        return Number.isFinite(num) ? num : -Infinity;
+    };
+    const sorted = [...rows].sort((a, b) => {
+        const delta = toNum(b.stats?.[sortKey]) - toNum(a.stats?.[sortKey]);
+        return sortDir === 'desc' ? delta : -delta;
+    });
+    return sorted.findIndex((row) => row.player_id === playerId);
+}
+
 function initials(name: string): string {
     return name
         .split(/\s+/)
@@ -116,6 +130,25 @@ export default function TournamentSofascoreStats({ sofascoreLeague, seasonYear }
     const [error, setError] = useState<string | null>(null);
     const [sortKey, setSortKey] = useState<string>('goalsScored');
     const [sortDir, setSortDir] = useState<SortDirection>('desc');
+    const [sheetPlayer, setSheetPlayer] = useState<PlayerRow | null>(null);
+
+    const sheetSubject = useMemo<TournamentPlayerSheetSubject | null>(() => {
+        if (!sheetPlayer) return null;
+        const position = sortedPlayersIndex(playerRows, sortKey, sortDir, sheetPlayer.player_id);
+        const sortColumn = PLAYER_COLUMNS.find((column) => column.id === sortKey);
+        return {
+            name: sheetPlayer.player_name,
+            teamName: sheetPlayer.team_name ?? '',
+            playerId: String(sheetPlayer.player_id),
+            rankLabel: position >= 0 && sortColumn ? `${position + 1}.º en ${sortColumn.title || sortColumn.label}` : null,
+            stats: PLAYER_COLUMNS.map((column) => ({
+                label: column.label,
+                title: column.title,
+                value: fmt(sheetPlayer.stats?.[column.id], column.format),
+                accent: column.id === sortKey,
+            })),
+        };
+    }, [sheetPlayer, playerRows, sortKey, sortDir]);
 
     const season = seasonYear || String(new Date().getUTCFullYear());
 
@@ -289,7 +322,17 @@ export default function TournamentSofascoreStats({ sofascoreLeague, seasonYear }
                                         <span className={styles.statsRank}>{idx + 1}</span>
                                         <span className={styles.statsAvatar}>{initials(name)}</span>
                                         <span className={styles.statsEntityName}>
-                                            {name}
+                                            {isTeam ? name : (
+                                                <button
+                                                    type="button"
+                                                    className={styles.statsNameButton}
+                                                    onClick={() => setSheetPlayer(r)}
+                                                    aria-haspopup="dialog"
+                                                    title={`Ver ficha de ${name}`}
+                                                >
+                                                    {name}
+                                                </button>
+                                            )}
                                             {secondary && (
                                                 <span className={styles.statsEntitySecondary}>
                                                     {' · '}{secondary}
@@ -308,6 +351,8 @@ export default function TournamentSofascoreStats({ sofascoreLeague, seasonYear }
                     })}
                 </div>
             )}
+
+            <TournamentPlayerSheet subject={sheetSubject} onClose={() => setSheetPlayer(null)} />
         </div>
     );
 }
