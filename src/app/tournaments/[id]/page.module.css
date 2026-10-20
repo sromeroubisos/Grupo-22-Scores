@@ -705,6 +705,11 @@
     background: var(--fl-follow-hov);
     transform: translateY(-1px);
 }
+.followBtn:disabled {
+    opacity: 0.55;
+    cursor: progress;
+}
+
 .followBtnActive {
     background: var(--fl-primary);
     color: #000;

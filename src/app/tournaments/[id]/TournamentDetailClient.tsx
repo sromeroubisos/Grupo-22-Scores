@@ -2131,7 +2131,7 @@ export default function TournamentDetailPage({
         query.delete("tab");
         return query.toString();
     }, [searchParams]);
-    const { isLeagueFavorite, toggleLeagueFavorite } = useFavorites();
+    const { isLeagueFavorite, toggleLeagueFavorite, ready: favoritesReady } = useFavorites();
     const { user, isLoading: authLoading } = useAuth();
 
     // FIFA World Cup 26 visual identity — applied only for the ESPN soccer FIFA World Cup tournament.
@@ -5070,7 +5070,10 @@ export default function TournamentDetailPage({
                                 )}
                                 {FAVORITES_ENABLED && (
                                     <button
-                                        className={`${styles.followBtn} ${isLeagueFavorite(favoriteTournamentId) ? styles.followBtnActive : ''}`}
+                                        className={`${styles.followBtn} ${favoritesReady && isLeagueFavorite(favoriteTournamentId) ? styles.followBtnActive : ''}`}
+                                    // Sin saber qué sigue la persona el botón no afirma ni "Seguir" ni "Siguiendo".
+                                    disabled={!favoritesReady}
+                                    aria-busy={favoritesReady ? undefined : true}
                                     onClick={() => toggleLeagueFavorite(favoriteTournamentId, {
                                         name: tournamentName,
                                         logo_url: tournamentLogo || null,
@@ -5082,9 +5085,9 @@ export default function TournamentDetailPage({
                                     <Star
                                         size={15}
                                         aria-hidden="true"
-                                        fill={isLeagueFavorite(favoriteTournamentId) ? 'currentColor' : 'none'}
+                                        fill={favoritesReady && isLeagueFavorite(favoriteTournamentId) ? 'currentColor' : 'none'}
                                     />
-                                    {isLeagueFavorite(favoriteTournamentId) ? 'Siguiendo' : 'Seguir'}
+                                    {favoritesReady && isLeagueFavorite(favoriteTournamentId) ? 'Siguiendo' : 'Seguir'}
                                     </button>
                                 )}
                             </div>

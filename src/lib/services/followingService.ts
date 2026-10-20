@@ -343,3 +343,86 @@ export async function toggleClubFollow(
 
     return { isFollowing: true };
 }
+
+export type BulkFollowInput = {
+    entityId: string;
+    name?: string | null;
+    logoUrl?: string | null;
+    sportId?: string | null;
+};
+
+/**
+ * Alta masiva de torneos seguidos: UN upsert, no tres consultas por torneo.
+ *
+ * `toggleLeagueFollow` resuelve alias y canónicos con consultas extra porque
+ * sirve a ids de cualquier origen (FlashScore, ESPN, base propia). El onboarding
+ * solo ofrece torneos de la base, cuyo id ya es el preferido, así que acá no hay
+ * nada que resolver. Cada fila queda sin `canonical_league_id` y
+ * `matchesLeagueFollow` la reconoce por `league_id`.
+ */
+export async function followLeaguesBulk(
+    supabase: BrowserSupabaseClient,
+    userId: string,
+    inputs: BulkFollowInput[],
+): Promise<LeagueFollowRow[]> {
+    const rows = uniqueBulkInputs(inputs).map((input) => ({
+        user_id: userId,
+        league_id: input.entityId,
+        canonical_league_id: null,
+        sport_id: normalizeValue(input.sportId) || null,
+        display_name: normalizeValue(input.name) || input.entityId,
+        logo_url: normalizeValue(input.logoUrl) || null,
+    }));
+    if (rows.length === 0) return [];
+
+    const supabaseAny = supabase as any;
+    const { data, error } = await supabaseAny
+        .from('user_favorite_leagues')
+        .upsert(rows, { onConflict: 'user_id,league_id' })
+        .select('league_id, canonical_league_id, sport_id, display_name, logo_url, created_at');
+    if (error) throw error;
+
+    return ((data ?? []) as unknown[])
+        .map((row: unknown) => normalizeLeagueFollowRow(row))
+        .filter((row: LeagueFollowRow | null): row is LeagueFollowRow => Boolean(row));
+}
+
+/** Alta masiva de clubes seguidos. Mismo criterio que `followLeaguesBulk`. */
+export async function followClubsBulk(
+    supabase: BrowserSupabaseClient,
+    userId: string,
+    inputs: BulkFollowInput[],
+): Promise<ClubFollowRow[]> {
+    const rows = uniqueBulkInputs(inputs).map((input) => ({
+        user_id: userId,
+        club_id: input.entityId,
+        canonical_club_id: null,
+        sport_id: normalizeValue(input.sportId) || null,
+        display_name: normalizeValue(input.name) || input.entityId,
+        logo_url: normalizeValue(input.logoUrl) || null,
+    }));
+    if (rows.length === 0) return [];
+
+    const supabaseAny = supabase as any;
+    const { data, error } = await supabaseAny
+        .from('user_favorite_clubs')
+        .upsert(rows, { onConflict: 'user_id,club_id' })
+        .select('club_id, canonical_club_id, sport_id, display_name, logo_url, created_at');
+    if (error) throw error;
+
+    return ((data ?? []) as unknown[])
+        .map((row: unknown) => normalizeClubFollowRow(row))
+        .filter((row: ClubFollowRow | null): row is ClubFollowRow => Boolean(row));
+}
+
+function uniqueBulkInputs(inputs: BulkFollowInput[]): BulkFollowInput[] {
+    const seen = new Set<string>();
+    const result: BulkFollowInput[] = [];
+    for (const input of inputs) {
+        const entityId = normalizeValue(input.entityId);
+        if (!entityId || seen.has(entityId)) continue;
+        seen.add(entityId);
+        result.push({ ...input, entityId });
+    }
+    return result;
+}

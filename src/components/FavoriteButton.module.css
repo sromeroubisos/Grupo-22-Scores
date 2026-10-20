@@ -33,3 +33,12 @@
     font-size: 13px;
     font-weight: 600;
 }
+/* Sin saber todavía qué sigue la persona: misma caja, sin estado ni etiqueta. */
+.favoriteButton[data-pending='true'] {
+    opacity: 0.4;
+    cursor: progress;
+}
+
+.favoriteButton[data-pending='true'] .label {
+    visibility: hidden;
+}

@@ -30,6 +30,8 @@ function FavoriteIcon({ entityType }: { entityType: string }) {
 
 export default function FavoritesPage() {
     const { favorites, loading, error, toggleFavorite } = useFavorites();
+    // Con una copia local el error de red no tapa la lista: se avisa y se sigue mostrando.
+    const showBlockingError = Boolean(error) && favorites.length === 0;
 
     if (!FAVORITES_ENABLED) {
         return (
@@ -61,14 +63,14 @@ export default function FavoritesPage() {
 
                     {loading ? <div className={styles.loading}>Cargando seguidos...</div> : null}
 
-                    {!loading && error ? (
+                    {!loading && showBlockingError ? (
                         <div className={styles.errorContainer}>
                             <h3>No se pudieron cargar tus seguidos</h3>
                             <p>{error}</p>
                         </div>
                     ) : null}
 
-                    {!loading && !error && favorites.length === 0 ? (
+                    {!loading && !showBlockingError && favorites.length === 0 ? (
                         <div className={styles.emptyState}>
                             <Star size={48} className={styles.emptyIcon} />
                             <p>{FAVORITES_DISABLED_MESSAGE}</p>
@@ -76,7 +78,7 @@ export default function FavoritesPage() {
                         </div>
                     ) : null}
 
-                    {!loading && !error && favorites.length > 0 ? (
+                    {!loading && favorites.length > 0 ? (
                         <div className={styles.favoritesGrid}>
                             {favorites.map((favorite) => (
                                 <div key={`${favorite.entity_type}:${favorite.id}`} className={styles.favoriteCard}>

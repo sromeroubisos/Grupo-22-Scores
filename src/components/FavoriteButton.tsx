@@ -50,7 +50,7 @@ export default function FavoriteButton(props: FavoriteButtonProps) {
         sportId,
         canonicalId,
     } = props;
-    const { isFavorited, loading, toggle } = useFavorite(entityType, entityId);
+    const { isFavorited, loading, ready, toggle } = useFavorite(entityType, entityId);
 
     if (!FAVORITES_ENABLED || !isSupportedEntityType(entityType)) {
         return null;
@@ -62,7 +62,12 @@ export default function FavoriteButton(props: FavoriteButtonProps) {
             className={`${styles.favoriteButton} ${className}`.trim()}
             aria-label={isFavorited ? 'Dejar de seguir' : 'Seguir'}
             title={isFavorited ? 'Dejar de seguir' : 'Seguir'}
-            disabled={loading}
+            // Mientras no se sabe qué sigue la persona, la estrella ni se llena ni se
+            // vacía: un "no seguido" provisorio que después salta a "seguido" es el
+            // parpadeo que se evita. Mismo tamaño, sin estado.
+            data-pending={ready ? undefined : 'true'}
+            aria-busy={ready ? undefined : true}
+            disabled={loading || !ready}
             onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
