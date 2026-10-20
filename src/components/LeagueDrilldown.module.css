@@ -45,7 +45,7 @@
     margin-bottom: 4px;
     /* Material translúcido: el degradé de la página se ve a través, en vez de una
        franja opaca que lo corta. Sin divisor duro: el desenfoque ya separa. */
-    background: color-mix(in srgb, var(--color-bg-primary, #0b0b0b) 55%, transparent);
+    background: color-mix(in srgb, var(--color-bg-primary, #0b0b0b) 85%, transparent);
     -webkit-backdrop-filter: blur(20px) saturate(160%);
     backdrop-filter: blur(20px) saturate(160%);
     border-radius: 16px;
