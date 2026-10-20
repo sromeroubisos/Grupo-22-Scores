@@ -1927,16 +1927,27 @@
     scrollbar-width: none;
 }
 
+/* El sidebar de ligas es una lista larga (Argentina: 20 secciones) dentro de una
+   altura fija: sin barra visible parecía cortada. Se muestra una barra fina. */
+.sidebarLeft {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+    scrollbar-gutter: stable;
+    padding-bottom: 24px;
+}
+
 .sidebarRight {
     height: auto;
     max-height: none;
     overflow: visible;
 }
 
-.sidebarLeft::-webkit-scrollbar,
 .sidebarRight::-webkit-scrollbar {
     display: none;
 }
+
+.sidebarLeft::-webkit-scrollbar { width: 6px; }
+.sidebarLeft::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
 
 /* Mobile Tournament List */
 .mobileTournamentList {
