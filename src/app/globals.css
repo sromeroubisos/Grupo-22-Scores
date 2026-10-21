@@ -1778,8 +1778,13 @@ main:has([data-sticky-tabs]) {
  * mira tambien esas URLs, no solo la ruta local.
  */
 html[data-theme="dark"] img[src*="/clubs/tala-rugby-club.png"],
+html[data-theme="dark"] img[src*="/clubs/sb-tala-rugby-club.png"],
 html[data-theme="dark"] img[src*="team-logo?key=tala-rugby-club"],
 html[data-theme="dark"] img[src*="team-logo?key=tala-rc-"],
 html[data-theme="dark"] img[src*="team-logo?key=el-tala-r-c"] {
     content: url("/clubs/tala-rugby-club-dark.png");
+}
+
+html[data-theme="dark"] img[src*="/clubs/sb-tala-rugby-club.png"] {
+    content: url("/clubs/sb-tala-rugby-club-dark.png");
 }
