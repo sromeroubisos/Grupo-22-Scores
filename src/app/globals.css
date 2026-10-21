@@ -1773,9 +1773,13 @@ main:has([data-sticky-tabs]) {
 
 /*
  * Escudo del Tala con dos tintas: en modo noche cualquier <img> que lo pida usa la
- * version de letras blancas (public/clubs/tala-rugby-club-dark.png). TeamLogo ya lo
- * resuelve por su cuenta; esto cubre los <img> sueltos (cabecera del partido, etc.).
+ * version de letras blancas (public/clubs/tala-rugby-club-dark.png). El sitio pide los
+ * escudos por el proxy /api/assets/team-logo (que redirige al PNG), asi que el selector
+ * mira tambien esas URLs, no solo la ruta local.
  */
-html[data-theme="dark"] img[src*="/clubs/tala-rugby-club.png"] {
+html[data-theme="dark"] img[src*="/clubs/tala-rugby-club.png"],
+html[data-theme="dark"] img[src*="team-logo?key=tala-rugby-club"],
+html[data-theme="dark"] img[src*="team-logo?key=tala-rc-"],
+html[data-theme="dark"] img[src*="team-logo?key=el-tala-r-c"] {
     content: url("/clubs/tala-rugby-club-dark.png");
 }
