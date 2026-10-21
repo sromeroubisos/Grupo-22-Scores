@@ -2230,6 +2230,7 @@ export default function TournamentDetailPage({
     // La placa de la tabla histórica, armada por su pestaña: en el celular el
     // botón de exportar vive en la cabecera, no en la pestaña.
     const [historicalExportData, setHistoricalExportData] = useState<StandingsData | null>(null);
+    const [squadExportData, setSquadExportData] = useState<StandingsData | null>(null);
     const [standingsForm, setStandingsForm] = useState<any[]>([]);
     const [standingsFormTeamLabels, setStandingsFormTeamLabels] = useState<any[]>([]);
     const [standingsHtFt, setStandingsHtFt] = useState<any[]>([]);
@@ -3994,6 +3995,18 @@ export default function TournamentDetailPage({
                     template="standings"
                     filename={`tabla-historica-${tournamentData?.name}`}
                     data={historicalExportData}
+                />
+            );
+        }
+
+        if (activeTab === 'squads') {
+            if (!squadExportData) return null;
+            return (
+                <ExportImage
+                    className={styles.mobileHeroExportAction}
+                    template="standings"
+                    filename={`tabla-de-planteles-${tournamentData?.name}`}
+                    data={squadExportData}
                 />
             );
         }
@@ -5957,7 +5970,12 @@ export default function TournamentDetailPage({
 
                 {/* ── SQUADS TAB ────────────────────────────────────────── */}
                 {activeTab === 'squads' && hasSquadTable && squadData && (
-                    <TournamentSquadTab data={squadData} />
+                    <TournamentSquadTab
+                        data={squadData}
+                        tournamentName={tournamentData?.name}
+                        tournamentLogo={tournamentLogo}
+                        onExportData={setSquadExportData}
+                    />
                 )}
 
                 {/* ── ARCHIVE TAB ───────────────────────────────────────── */}
