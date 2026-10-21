@@ -20,6 +20,7 @@ import TournamentScoresPanel, { hasRatedLineups, sondaDePuntajes } from './Tourn
 import TournamentChampionsTab, { ClubCrest, type ChampionRef } from './TournamentChampionsTab';
 import TournamentSofascoreStats from './TournamentSofascoreStats';
 import TournamentHistoricalTab from './TournamentHistoricalTab';
+import TournamentSquadTab, { type SquadTableData } from './TournamentSquadTab';
 import type { StandingsData } from '@/components/ExportImage';
 import TournamentNavigation from './TournamentNavigation';
 import {
@@ -71,6 +72,7 @@ const BASE_TABS = [
     { id: 'stats', label: 'Estadísticas' },
     { id: 'champions', label: 'Campeones' },
     { id: 'historical', label: 'Histórica' },
+    { id: 'squads', label: 'Tabla de Planteles' },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -2863,6 +2865,28 @@ export default function TournamentDetailPage({
     // tablas viejas guardadas para sumar).
     const hasHistoricalTable = Boolean((tournamentData as any)?.__isDbOnly) && seasonOptions.length > 1;
 
+    /* Tabla de planteles: solo existe si el torneo pertenece a una agrupación
+       (tournament_squad_members). Se pregunta una vez; mientras no contesta, la
+       pestaña no se muestra y un deep link ?tab=squads espera. */
+    const isDbOnlyTournament = Boolean((tournamentData as any)?.__isDbOnly);
+    const [squadData, setSquadData] = useState<SquadTableData | null>(null);
+    const [squadLoaded, setSquadLoaded] = useState(false);
+    useEffect(() => {
+        setSquadData(null);
+        setSquadLoaded(false);
+        if (!isDbOnlyTournament) return;
+        const controller = new AbortController();
+        fetch(`/api/db/tournaments/${encodeURIComponent(id)}/squad-table`, { signal: controller.signal })
+            .then((response) => (response.ok ? response.json() : null))
+            .then((payload) => {
+                if (payload?.ok && payload.available) setSquadData(payload as SquadTableData);
+                setSquadLoaded(true);
+            })
+            .catch(() => { if (!controller.signal.aborted) setSquadLoaded(true); });
+        return () => controller.abort();
+    }, [id, isDbOnlyTournament]);
+    const hasSquadTable = Boolean(squadData?.available);
+
     /* ── ¿La pestaña Puntajes tiene algo que mostrar? ─────────────────────
        Una pestaña que abre a "Sin puntajes cargados" no es una pestaña: es un
        callejón. La sonda contesta en el acto con los ratings locales; cuando
@@ -2909,6 +2933,7 @@ export default function TournamentDetailPage({
             .filter((tab: { id: string; label: string }) => !(tab.id === 'playoff' && !hasDedicatedPlayoffTab))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'champions' && !hasChampionSeasons))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'historical' && !hasHistoricalTable))
+            .filter((tab: { id: string; label: string }) => !(tab.id === 'squads' && !hasSquadTable))
             .filter((tab: { id: string; label: string }) => !(tab.id === 'scores' && !scoresTabConDatos))
             .map((tab: { id: string; label: string }) => {
                 if (tab.id === 'standings' && shouldUseIntegratedBracketView) {
@@ -2937,13 +2962,14 @@ export default function TournamentDetailPage({
         }
 
         return tabs;
-    }, [hasChampionSeasons, hasHistoricalTable, hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, scoresTabConDatos, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
+    }, [hasChampionSeasons, hasHistoricalTable, hasSquadTable, hasDedicatedPlayoffTab, hasEspnSoccerTopScorers, hasVisibleStandingsData, isLimitedExternalProvider, isEspnSoccerSource, isMotorsportTournament, scoresTabConDatos, shouldForceStandingsTabVisible, shouldUseIntegratedBracketView, isFifaWorldCup, isPhoneViewport]);
 
     useEffect(() => {
         if (navigationTabs.some((tab: { id: string; label: string }) => tab.id === activeTab)) return;
         // Deep link a Campeones: el tab recién existe cuando llegó la lista de
         // temporadas — no lo patees a Resumen mientras el fetch está en vuelo.
         if ((activeTab === 'champions' || activeTab === 'historical') && !seasonOptionsLoaded) return;
+        if (activeTab === 'squads' && !squadLoaded) return;
         /* Mismo criterio para todo lo que depende de los datos del torneo:
            Clasificación no existe hasta que llega la tabla, y en un torneo
            externo (sin snapshot del servidor) eso tarda un fetch entero. Patear
@@ -5927,6 +5953,11 @@ export default function TournamentDetailPage({
                         seasons={seasonOptions}
                         onExportData={setHistoricalExportData}
                     />
+                )}
+
+                {/* ── SQUADS TAB ────────────────────────────────────────── */}
+                {activeTab === 'squads' && hasSquadTable && squadData && (
+                    <TournamentSquadTab data={squadData} />
                 )}
 
                 {/* ── ARCHIVE TAB ───────────────────────────────────────── */}

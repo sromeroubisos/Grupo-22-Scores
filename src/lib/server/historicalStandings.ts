@@ -129,9 +129,21 @@ function calculatePhaseRows(phase: PhaseRow, matches: any[], ruleset: any): Seas
     }));
 }
 
+export type HistoricalStandingsOptions = {
+    /**
+     * Solo la temporada vigente de ESTE torneo (sin las del resto de la
+     * familia). Es lo que usa la tabla de planteles: una categoría aporta lo de
+     * su temporada en curso, no su historia.
+     */
+    currentSeasonOfTournamentId?: string;
+    /** Conserva a los inscriptos sin partidos jugados. */
+    keepUnplayed?: boolean;
+};
+
 export async function buildTournamentHistoricalStandings(
     supabase: ReadClient,
     routeId: string,
+    options: HistoricalStandingsOptions = {},
 ): Promise<HistoricalStandingsResult | null> {
     const family = await resolveTournamentSeasonFamily(supabase, routeId);
     if (!family) return null;
@@ -153,6 +165,17 @@ export async function buildTournamentHistoricalStandings(
             tournamentId: row.id,
             seasonId: null,
         }));
+
+    if (options.currentSeasonOfTournamentId) {
+        const ownId = options.currentSeasonOfTournamentId;
+        const own = units.filter((unit) => unit.tournamentId === ownId);
+        const { data: ownRow } = await supabase.from('tournaments').select('current_season_id').eq('id', ownId).maybeSingle();
+        const currentSeasonId = (ownRow as any)?.current_season_id ? String((ownRow as any).current_season_id) : null;
+        const picked = own.find((unit) => unit.seasonId && unit.seasonId === currentSeasonId)
+            ?? own.slice().sort((a, b) => b.label.localeCompare(a.label, 'es', { numeric: true }))[0];
+        units.length = 0;
+        if (picked) units.push(picked);
+    }
 
     const tournamentIds = [...new Set(units.map((unit) => unit.tournamentId))];
 
@@ -285,12 +308,12 @@ export async function buildTournamentHistoricalStandings(
                 const source = carry.sourcePhaseId ? phaseById.get(carry.sourcePhaseId) : unitPhases[index - 1];
                 if (source && unitOfPhase.has(source.id)) rows = withoutCarriedOver(rows, tableOf(source));
             }
-            if (rows.some((row) => row.played > 0)) countedUnits.add(unit.key);
+            if (rows.some((row) => row.played > 0 || (options.keepUnplayed && row.clubId))) countedUnits.add(unit.key);
             tables.push({ seasonKey: unit.key, rows });
         });
     }
 
-    const table = buildHistoricalTable(tables);
+    const table = buildHistoricalTable(tables, { keepUnplayed: options.keepUnplayed });
 
     // ── Nombre y escudo de cada club. El logo pasa por el proxy: un base64 de
     //    `clubs.logo_url` por fila inflaría la respuesta (ver /api/teams).

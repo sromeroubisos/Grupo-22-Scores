@@ -46,7 +46,10 @@ function finite(value: unknown): number {
  * Orden: puntos, victorias, diferencia, tantos a favor. Los empates totales se
  * resuelven por id para que la tabla no baile entre una carga y otra.
  */
-export function buildHistoricalTable(tables: SeasonTable[]): HistoricalRow[] {
+export function buildHistoricalTable(
+    tables: SeasonTable[],
+    { keepUnplayed = false }: { keepUnplayed?: boolean } = {},
+): HistoricalRow[] {
     const totals = new Map<string, SeasonTableRow & { seasonKeys: Set<string> }>();
 
     for (const table of tables) {
@@ -54,7 +57,8 @@ export function buildHistoricalTable(tables: SeasonTable[]): HistoricalRow[] {
             const clubId = String(row.clubId ?? '').trim();
             if (!clubId) continue;
             // Una fila sin partidos es un inscripto que no jugó esa fase.
-            if (finite(row.played) <= 0) continue;
+            // (la tabla de planteles la conserva: inscripto = participa).
+            if (!keepUnplayed && finite(row.played) <= 0) continue;
 
             let total = totals.get(clubId);
             if (!total) {
