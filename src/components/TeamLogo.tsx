@@ -23,6 +23,17 @@ type TeamLogoProps = {
     disableLookup?: boolean;
 };
 
+/**
+ * Escudos con dos versiones de tinta: la positiva (letras negras) para el tema
+ * claro y la negativa (letras blancas) para el oscuro. Cada archivo local tiene
+ * su hermano `-dark.png` en la misma carpeta; el tema lo decide el CSS.
+ */
+const DARK_LOGO_VARIANTS = new Set(['/clubs/tala-rugby-club.png']);
+
+function darkVariantOf(src: string) {
+    return DARK_LOGO_VARIANTS.has(src) ? src.replace(/\.png$/, '-dark.png') : '';
+}
+
 function joinClasses(...values: Array<string | undefined | null | false>) {
     return values.filter(Boolean).join(' ');
 }
@@ -114,6 +125,8 @@ export default function TeamLogo({
     );
     const currentSrc = candidateSources.find((value) => !failedSources.includes(value)) || '';
 
+    const darkSrc = darkVariantOf(currentSrc);
+
     const initials = useMemo(() => getInitials(name, shortName), [name, shortName]);
     const mergedStyle: CSSProperties = {
         ...(typeof size === 'number' ? { width: size, height: size } : null),
@@ -128,11 +141,12 @@ export default function TeamLogo({
             aria-hidden={false}
         >
             {currentSrc ? (
-                // eslint-disable-next-line @next/next/no-img-element
+                <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                     src={currentSrc}
                     alt={title || name}
-                    className={joinClasses(styles.image, imgClassName)}
+                    className={joinClasses(styles.image, imgClassName, darkSrc && styles.onLight)}
                     loading="lazy"
                     decoding="async"
                     onError={() => {
@@ -141,6 +155,18 @@ export default function TeamLogo({
                         ));
                     }}
                 />
+                {darkSrc ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={darkSrc}
+                        alt=""
+                        aria-hidden
+                        className={joinClasses(styles.image, imgClassName, styles.onDark)}
+                        loading="lazy"
+                        decoding="async"
+                    />
+                ) : null}
+                </>
             ) : (
                 <span className={joinClasses(styles.fallback, fallbackClassName)}>
                     {initials}
