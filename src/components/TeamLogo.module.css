@@ -35,3 +35,16 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
+
+/* Escudo con dos tintas: la positiva en claro, la negativa en oscuro. */
+.onDark {
+    display: none;
+}
+
+:global([data-theme='dark']) .onLight {
+    display: none;
+}
+
+:global([data-theme='dark']) .onDark {
+    display: block;
+}
