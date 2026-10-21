@@ -1770,3 +1770,12 @@ main:has([data-sticky-tabs]) {
         }
     }
 }
+
+/*
+ * Escudo del Tala con dos tintas: en modo noche cualquier <img> que lo pida usa la
+ * version de letras blancas (public/clubs/tala-rugby-club-dark.png). TeamLogo ya lo
+ * resuelve por su cuenta; esto cubre los <img> sueltos (cabecera del partido, etc.).
+ */
+html[data-theme="dark"] img[src*="/clubs/tala-rugby-club.png"] {
+    content: url("/clubs/tala-rugby-club-dark.png");
+}
