@@ -190,21 +190,25 @@ function etiquetasDe(tabla, ids, otras, t, nombreMadre) {
 
 // ── Plan de un torneo ────────────────────────────────────────────────────────
 function armarPlan(t, nombreMadre) {
-  const partidos = leerPartidos(t).filter((p) => !esAmistoso(p)).map((p) => ({ ...p, ronda: nombreDeRonda(p.ronda) }));
+  const partidos = leerPartidos(t).filter((p) => !esAmistoso(p) && !(t.omitirSinResultado && !jugado(p))).map((p) => ({ ...p, ronda: nombreDeRonda(p.ronda) }));
   const permitidos = new Set(t.fueraDeTabla ?? []);
   let fases;
 
   if (t.fases) {
     fases = t.fases.map((cfg) => {
-      const ps = partidos.filter((p) => p.instancia === cfg.instancia);
-      if (!ps.length) throw new Error(`${t.clave}: la fase "${cfg.instancia}" no tiene partidos`);
+      // `prefijo`: dos fases comparten instancia y se separan por cómo arranca la ronda ("CENTRO - Fecha 3").
+      const ps = partidos.filter((p) => p.instancia === cfg.instancia && (!cfg.prefijo || cfg.prefijo.test(p.ronda)))
+        .map((p) => (cfg.prefijo ? { ...p, ronda: p.ronda.replace(cfg.prefijo, '') } : p));
+      if (!ps.length) throw new Error(`${t.clave}: la fase "${cfg.nombre}" no tiene partidos`);
       const equipos = new Set(ps.flatMap((p) => [claveDe(p.local), claveDe(p.visitante)]));
       // La planilla de la tabla trae a todos los equipos del torneo: sólo cuentan los que jugaron esa fase.
-      const tabla = leerTabla(t, cfg.tabla).filter((r) => equipos.has(claveDe(r.club)));
+      // Si la tabla parte un equipo en dos filas (un combinado que cambió de nombre), queda la de más partidos.
+      const filas = leerTabla(t, cfg.tabla).filter((r) => equipos.has(claveDe(r.club)));
+      const tabla = filas.filter((r) => !filas.some((o) => o !== r && claveDe(o.club) === claveDe(r.club) && (o.pj > r.pj || (o.pj === r.pj && filas.indexOf(o) < filas.indexOf(r)))));
       return { nombre: cfg.nombre, liga: true, partidos: ps, rondas: ordenarRondas(ps), tabla };
     });
-    const resto = partidos.filter((p) => !t.fases.some((c) => c.instancia === p.instancia));
-    if (resto.length) throw new Error(`${t.clave}: instancias sin fase configurada: ${[...new Set(resto.map((p) => p.instancia))].join(', ')}`);
+    const cubiertos = fases.reduce((n, f) => n + f.partidos.length, 0);
+    if (cubiertos !== partidos.length) throw new Error(`${t.clave}: ${partidos.length - cubiertos} partidos no caen en ninguna fase configurada (instancias: ${[...new Set(partidos.map((p) => p.instancia))].join(', ')})`);
   } else {
     const liga = partidos.filter((p) => p.instancia === 'CAMPEONATO');
     const llaves = new Map();
@@ -246,7 +250,7 @@ async function escribirTorneo(plan, nombreMadre) {
   const seasonId = crypto.randomUUID();
   const id = (c) => fichaId(t, c, nombreMadre);
   const todosPartidos = plan.fases.flatMap((f) => f.partidos);
-  const hayPendientes = todosPartidos.some((p) => p.estado === 'scheduled' || p.estado === 'suspended') || (!t.fases && plan.fases.length > 1);
+  const hayPendientes = todosPartidos.some((p) => p.estado === 'scheduled' || p.estado === 'suspended') || (!t.fases && plan.fases.length > 1) || Boolean(t.enCurso);
   const fechas = todosPartidos.map((p) => p.fecha).sort();
   try {
     await insertar('tournaments', [{

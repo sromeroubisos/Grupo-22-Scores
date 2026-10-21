@@ -64,6 +64,13 @@ const MASCULINOS = [
   ['los-tordos-hernando', 'Los Tordos (Hernando)', 'Hernando'],
   ['nautico-fitz-simon', 'Náutico Fitz Simon', null],
   ['oliva-rugby-club', 'Oliva Rugby Club', 'Oliva'],
+  // Combinados de Juveniles Desarrollo M2 (sin escudo propio).
+  ['combinado-capital', 'Combinado Capital', 'Córdoba'],
+  ['combinado-punilla', 'Combinado Punilla', null],
+  ['combinado-centro', 'Combinado Centro', null],
+  ['buitres-san-basilio-mackenna-mirage', 'Buitres / San Basilio / Mackenna / Mirage', null],
+  ['jockey-rio-iv-aguilas-adelia-maria', 'Jockey Río IV / Águilas / Adelia María', 'Río Cuarto'],
+  ['hurones-portena-oncativo', 'Hurones / Porteña / Oncativo', null],
 ];
 
 /** [id, nombre, club base (para el escudo y la familia) o null si es un combinado] */

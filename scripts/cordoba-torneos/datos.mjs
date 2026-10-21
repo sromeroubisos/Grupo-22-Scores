@@ -56,6 +56,18 @@ export const TORNEOS = [
     ],
   },
   // Taborín "Verde" y Mañke juegan todos los partidos pero la tabla oficial no los ordena.
+  // Juveniles Desarrollo M2 (M18 y M17): equipos combinados de varios clubes. La Fase I son dos zonas en una misma planilla
+  // (la ronda arranca con "CENTRO - " / "SUR - "). Los partidos sin resultado (suspendidos, sin jugar) no se cargan.
+  {
+    clave: 'des-m2', nombre: 'UCR Juveniles Desarrollo M2', slug: 'ucr-juveniles-desarrollo-m2', original: 'UCR 2026 - JUVENILES DESARROLLO - M2',
+    category: 'Juvenil', ageGrade: 'M17', ficha: { tipo: 'madre' }, letra: null, activa: 'Final Four Oro', enCurso: true, omitirSinResultado: true,
+    fases: [
+      { instancia: 'Fase I', prefijo: /^CENTRO - /i, nombre: 'Fase I - Zona Centro', tabla: 'des-m2.fase1.xlsx' },
+      { instancia: 'Fase I', prefijo: /^SUR - /i, nombre: 'Fase I - Zona Sur', tabla: 'des-m2.fase1.xlsx' },
+      { instancia: 'FINAL FOUR ORO', nombre: 'Final Four Oro', tabla: 'des-m2.oro.xlsx' },
+      { instancia: 'FINAL FIVE PLATA', nombre: 'Final Five Plata', tabla: 'des-m2.plata.xlsx' },
+    ],
+  },
   { clave: 'fem-top8', nombre: 'Torneo Femenino Top 8', slug: 'torneo-femenino-top-8', original: 'TORNEO FEMENINO TOP 8 - MAYORES', category: 'Femenino', ageGrade: 'Mayores', gender: 'femenino', ficha: { tipo: 'fem' }, letra: null, fueraDeTabla: ['taborin-rc|VERDE', 'manke-la-calera|'] },
   { clave: 'fem-reg', nombre: 'Torneo Regional del Centro Femenino', slug: 'torneo-regional-del-centro-femenino', original: 'TORNEO REGIONAL DEL CENTRO - FEM - MAYORES', category: 'Femenino', ageGrade: 'Mayores', gender: 'femenino', ficha: { tipo: 'fem' }, letra: null },
 ];
@@ -70,6 +82,14 @@ export const EXISTENTES = [
 
 /** Patrón del nombre de la planilla → club madre de la base. El orden importa: lo específico va antes. */
 const MADRES = [
+  // Combinados de Juveniles Desarrollo M2. "ONCATIVO" y "M2 - ONCATIVO" son el mismo equipo que "CUISES PORTEÑA / LAGARTOS (ONCATIVO)".
+  [/^COMBINADO CAPITAL\b/, 'combinado-capital'],
+  [/^COMBINADO PUNILLA\b/, 'combinado-punilla'],
+  [/^COMBINADO CENTRO\b/, 'combinado-centro'],
+  [/^BUITRES\b/, 'buitres-san-basilio-mackenna-mirage'],
+  [/^JOCKEY RIO IV ?\/ ?AGUILAS/, 'jockey-rio-iv-aguilas-adelia-maria'],
+  [/^HURONES ?\/ ?PORTE[ÑN]A/, 'hurones-portena-oncativo'],
+  [/^(M2 - )?ONCATIVO$/, 'cuises-portena-rugby'],
   // Combinados femeninos (dos clubes, un equipo) y los clubes de la Liga Desarrollo.
   [/^PALERMO BAJO ?\/ ?CARLOS PAZ/, 'palermo-bajo-carlos-paz'],
   [/^CORDOBA R\.C\. ?\/ ?LA TABLADA/, 'cordoba-rc-la-tablada'],
@@ -135,7 +155,7 @@ export const esDescanso = (s) => /^(LIBRE|\.)?$/i.test(limpio(s));
 export function resolverClub(nombre, letraPorDefecto) {
   // "M15 A - PALERMO BAJO": la planilla a veces antepone la categoría y la letra.
   const prefijo = /^M\d+ ([A-Z]) - /.exec(limpio(nombre).toUpperCase());
-  const n = limpio(nombre).toUpperCase().replace(/^M\d+ [A-Z] - /, '');
+  const n = limpio(nombre).toUpperCase().replace(/^M\d+ [A-Z] - /, '').replace(/^M2 - /, '');
   const hit = MADRES.find(([re]) => re.test(n));
   if (!hit) throw new Error(`club sin madre: "${nombre}"`);
   // La letra es la del equipo: "B", pero también "BLANCO" / "VERDE" (los dos equipos de Taborín).
@@ -187,7 +207,7 @@ const hoja = (f) => {
 };
 
 /** "Fecha 01" → "Fecha 1": mismo nombre de ronda que usa el resto de G22. */
-const normalizarRonda = (r) => limpio(r).replace(/\bFecha 0(\d)\b/, 'Fecha $1');
+const normalizarRonda = (r) => limpio(r).replace(/\bFecha ?0?(\d)\b/, 'Fecha $1');
 
 export function leerPartidos(torneo) {
   const file = `${torneo.clave}.partidos.xlsx`;
@@ -214,14 +234,15 @@ export function leerPartidos(torneo) {
     return {
       id: limpio(r[5]), instancia: limpio(r[2]), ronda: normalizarRonda(r[3]), fecha, hora: propia ? (h ?? null) : null, sinFecha: !propia,
       local: resolverClub(r[6], torneo.letra), visitante: resolverClub(r[10], torneo.letra), hs: a, as: b,
-      estado: estado === 'Pendiente' ? 'scheduled' : estado === 'Suspendido' ? 'suspended' : /walkover/i.test(estado) ? 'walkover' : 'final',
+      // "Pendiente" con marcador distinto de 0-0 es un partido jugado cuya acta todavía no se cerró.
+      estado: estado === 'Pendiente' ? (Number.isFinite(a) && Number.isFinite(b) && (a || b) ? 'final' : 'scheduled') : estado === 'Suspendido' ? 'suspended' : /walkover/i.test(estado) ? 'walkover' : 'final',
       arbitro: r[13] ? limpio(r[13]) : null,
     };
   });
 }
 
 export function leerTabla(torneo, archivo) {
-  return hoja(archivo ?? `${torneo.clave}.posiciones.xlsx`).slice(2).filter((r) => r[0] && !esDescanso(r[0])).map((r) => ({
+  return hoja(archivo ?? `${torneo.clave}.posiciones.xlsx`).slice(2).filter((r) => r[0] && !esDescanso(r[0]) && !/^GRUPO\b/i.test(limpio(r[0]))).map((r) => ({
     club: resolverClub(r[0], torneo.letra),
     pts: Number(r[1] ?? 0), bTry: Number(r[2] ?? 0), bTantos: Number(r[3] ?? 0), bDestrezas: Number(r[4] ?? 0),
     pj: Number(r[5] ?? 0), pg: Number(r[6] ?? 0), pe: Number(r[7] ?? 0), pp: Number(r[8] ?? 0),
