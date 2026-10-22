@@ -17,6 +17,7 @@ import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import TeamLogo from '@/components/TeamLogo';
 import TournamentTopStats, { type TarjetaDeTop } from './TournamentTopStats';
 import TournamentPlayerSheet, { type TournamentPlayerSheetSubject } from './TournamentPlayerSheet';
+import { buildOfficialPlayerRows, readOfficialLeaders } from './officialLeaders';
 
 const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
 
@@ -50,6 +51,11 @@ interface TournamentPublicStatsProps {
      * no informa, confunde.
      */
     sportId?: string | null;
+    /**
+     * `ruleset` del torneo. Si trae `official_player_leaders`, la tabla de Jugadores
+     * sale de ese ranking oficial aunque no haya eventos por partido.
+     */
+    ruleset?: unknown;
 }
 
 const MOBILE_BREAKPOINT = 640;
@@ -274,6 +280,8 @@ function findUnmeasuredMetrics(rows: any[]): Set<string> {
 function formatStatValue(row: any, column: StatColumn, unmeasured?: Set<string>) {
     if (unmeasured?.has(column.id)) return '—';
     const value = row[column.id];
+    // Dato que la fuente no publica (ranking oficial): no es un cero.
+    if (value === undefined || value === null) return '—';
     const numeric = n(value);
     if (column.format === 'percent') return `${fmt(numeric, Number.isInteger(numeric) ? 0 : 1)}%`;
     if (column.format === 'signed') return formatDifference(numeric, Number.isInteger(numeric) ? 0 : 1);
@@ -325,7 +333,8 @@ function useIsMobile() {
     return isMobile;
 }
 
-export default function TournamentPublicStats({ matches, topScorers, tournamentName, tournamentLogo, sportId }: TournamentPublicStatsProps) {
+export default function TournamentPublicStats({ matches, topScorers, tournamentName, tournamentLogo, sportId, ruleset }: TournamentPublicStatsProps) {
+    const officialLeaders = useMemo(() => readOfficialLeaders(ruleset), [ruleset]);
     const isMobile = useIsMobile();
     // Sin deporte declarado se asume rugby: es lo que la pestaña siempre fue.
     const esRugby = !sportId || isRugbySport(sportId);
@@ -535,6 +544,9 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
     }, [finalMatches]);
 
     const playerRows = useMemo(() => {
+        // Con ranking oficial la tabla sale de los totales publicados: sumar los
+        // pocos eventos cargados daria cifras parciales que contradicen al total.
+        if (officialLeaders) return buildOfficialPlayerRows(officialLeaders);
         const byId = new Map<string, any>();
         finalMatches.forEach((match) => {
             const counted = new Set<string>();
@@ -637,7 +649,7 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             });
         });
         return Array.from(byId.values());
-    }, [finalMatches]);
+    }, [finalMatches, officialLeaders]);
 
     const teamColumns = esRugby ? TEAM_COLUMNS[teamStatsView] : GENERIC_TEAM_COLUMNS;
     const playerColumns = PLAYER_COLUMNS;
@@ -845,6 +857,9 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                 points: mainColumn?.label || 'PTS',
             },
             showPositionDelta: false,
+            // Cada estadistica va en una columna de la tabla de posiciones; la ultima se
+            // dibujaba como diferencia ("+18"). Una estadistica es una cifra, no un saldo.
+            plainDiff: true,
             activeColumn: 'points',
             activeColor: highlightColor,
             unusedColumns,
@@ -1172,6 +1187,13 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                         ))}
                     </select>
                 </div>
+            )}
+
+            {officialLeaders && activeSubTab === 'players' && (
+                <p className={styles.statsCompactCaption}>
+                    Ranking oficial{officialLeaders.source ? ` · ${officialLeaders.source}` : ''}
+                    {officialLeaders.captured_at ? ` · al ${officialLeaders.captured_at.split('-').reverse().join('/')}` : ''}
+                </p>
             )}
 
             {showTopScorersFallback ? (

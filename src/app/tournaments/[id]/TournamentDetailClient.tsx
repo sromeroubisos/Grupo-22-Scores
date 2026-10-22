@@ -5935,6 +5935,7 @@ export default function TournamentDetailPage({
                             tournamentName={tournamentData?.name}
                             tournamentLogo={tournamentLogo}
                             sportId={tournamentData?.sportId}
+                            ruleset={tournamentData?.ruleset}
                         />
                     );
                 })()}
