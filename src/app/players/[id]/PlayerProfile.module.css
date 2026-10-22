@@ -1,0 +1,808 @@
+/*
+ * Ficha de jugador. Todo el color sale de los tokens de `globals.css`, que ya
+ * estan definidos por tema (`[data-theme]`). Dos cosas para no romper:
+ *
+ * - EL ACENTO QUE PINTA TEXTO ES `--color-accent-ink`, nunca `--color-accent`.
+ *   El segundo esta calibrado para fondos; como texto sobre el fondo claro da
+ *   3,05:1 y no llega al 4,5:1 de AA. Lo dice el comentario de globals.css.
+ * - NADA DE HEX SUELTOS. La version anterior de esta pagina pintaba el
+ *   esqueleto con `#0f1117` a mano y en tema claro entraba un bloque negro.
+ */
+
+.page {
+    --tag-ink: var(--color-accent-ink);
+    --pill-win-ink: var(--color-success);
+    --pill-loss-ink: var(--color-error);
+    --card-ink: var(--color-warning);
+
+    min-height: 100vh;
+    background: var(--color-bg-primary);
+    padding-bottom: 64px;
+}
+
+/*
+ * En claro, un verde calibrado para texto sobre BLANCO ya no llega cuando el
+ * fondo es su propio tinte: `--color-accent-ink` sobre el chip daba 3,8:1 y el
+ * verde de "ganó" sobre su pastilla, 2,18:1. Se corren un tono mas y listo.
+ */
+:global([data-theme='light']) .page {
+    --tag-ink: #05603a;
+    --pill-win-ink: #09592a;
+    --pill-loss-ink: #a3121d;
+    --card-ink: #8a5a00;
+}
+
+/* ── Cabecera ─────────────────────────────────────────────────────────── */
+
+.hero {
+    background: linear-gradient(180deg, var(--color-bg-secondary), var(--color-bg-primary));
+    border-bottom: 1px solid var(--color-border);
+    padding-top: 16px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    margin-bottom: 20px;
+}
+
+.breadcrumb a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    color: var(--color-accent-ink);
+    text-decoration: underline;
+}
+
+.breadcrumbCurrent {
+    color: var(--color-text-primary);
+    font-weight: 600;
+}
+
+.identity {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.avatar {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatarInitials {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
+}
+
+.identityBody {
+    min-width: 0;
+    flex: 1;
+}
+
+.name {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+    margin: 0 0 8px;
+}
+
+.chips {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip,
+.clubChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.clubChip {
+    padding-left: 4px;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.clubChip:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent-ink);
+}
+
+.clubChipCrest,
+.matchCrest {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.chipHint {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    opacity: 0.65;
+}
+
+.fichaNote {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.shareBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 16px;
+    margin-left: auto;
+    align-self: flex-start;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.shareBtn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent-ink);
+}
+
+/* ── Cinta de numeros ─────────────────────────────────────────────────── */
+
+.statRibbon {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 20px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.statRibbon::-webkit-scrollbar {
+    display: none;
+}
+
+.stat {
+    flex: 1 1 0;
+    min-width: 84px;
+    max-width: 168px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    text-align: center;
+}
+
+/* El numero primero y la etiqueta abajo, aunque en el DOM `<dt>` vaya antes:
+   la lista de definicion es la semantica correcta (etiqueta -> valor) y el
+   orden visual es cosa del layout. */
+.stat {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.statValue {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+}
+
+.statLabel {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+}
+
+.toneCaution {
+    color: var(--card-ink);
+}
+
+.toneDanger {
+    color: var(--color-error);
+}
+
+/* ── Pestanas ─────────────────────────────────────────────────────────── */
+
+.tabs {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 2px;
+    border: none;
+    background: none;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+}
+
+.tab:hover {
+    color: var(--color-text-primary);
+}
+
+.tabActive {
+    color: var(--color-accent-ink);
+}
+
+.tabActive::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 -1px 0;
+    height: 2px;
+    border-radius: 2px 2px 0 0;
+    background: var(--color-accent);
+}
+
+.tabCount {
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-tertiary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+}
+
+/* ── Contenido ────────────────────────────────────────────────────────── */
+
+.panel {
+    padding-top: 24px;
+}
+
+.section + .section {
+    margin-top: 32px;
+}
+
+.sectionHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.sectionTitle {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 12px;
+}
+
+.sectionHead .sectionTitle {
+    margin-bottom: 12px;
+}
+
+.linkBtn {
+    border: none;
+    background: none;
+    padding: 4px 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-accent-ink);
+    cursor: pointer;
+}
+
+.linkBtn:hover {
+    text-decoration: underline;
+}
+
+.inlineLink {
+    color: var(--color-accent-ink);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.inlineLink:hover {
+    text-decoration: underline;
+}
+
+/* ── Lista de partidos ────────────────────────────────────────────────── */
+
+.matchList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.matchItem {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    overflow: hidden;
+}
+
+.matchLink {
+    display: block;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.2s ease;
+}
+
+.matchLink:hover {
+    background: var(--color-bg-hover);
+}
+
+.matchMeta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 8px;
+}
+
+.matchTournament {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.matchTeams {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    gap: 4px 12px;
+}
+
+.matchTeam {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    color: var(--color-text-secondary);
+}
+
+/* El club del jugador va en negrita: es la unica forma de leer de un vistazo
+   de que lado estaba en un cruce entre dos clubes que no conoces. */
+.matchTeamOwn {
+    color: var(--color-text-primary);
+    font-weight: 700;
+}
+
+.matchTeamName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9375rem;
+}
+
+.matchScore {
+    margin-left: auto;
+    font-size: 1rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+}
+
+.matchScoreWon {
+    color: var(--color-text-primary);
+}
+
+.resultPill {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.result_win {
+    background: color-mix(in srgb, var(--color-success) 16%, transparent);
+    border-color: color-mix(in srgb, var(--color-success) 40%, transparent);
+    color: var(--pill-win-ink);
+}
+
+.result_draw {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-border);
+    color: var(--color-text-secondary);
+}
+
+.result_loss {
+    background: color-mix(in srgb, var(--color-error) 14%, transparent);
+    border-color: color-mix(in srgb, var(--color-error) 38%, transparent);
+    color: var(--pill-loss-ink);
+}
+
+.matchContribution {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-border-light);
+}
+
+.roleTag,
+.eventTag,
+.pointsTag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.roleTag {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.eventTag {
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    color: var(--tag-ink);
+}
+
+.eventTagCard {
+    background: color-mix(in srgb, var(--color-warning) 16%, transparent);
+    color: var(--card-ink);
+}
+
+.pointsTag {
+    margin-left: auto;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Ficha ────────────────────────────────────────────────────────────── */
+
+.fichaGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+
+.fichaItem {
+    padding: 12px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+}
+
+.fichaLabel {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    margin-bottom: 4px;
+}
+
+.fichaValue {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+/* ── Trayectoria ──────────────────────────────────────────────────────── */
+
+/* La tabla no puede empujar la pagina: scrollea adentro de su caja. */
+.tableScroll {
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.tableCaption {
+    caption-side: bottom;
+    padding: 10px 16px;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    text-align: left;
+}
+
+.table thead th {
+    background: var(--color-bg-tertiary);
+    padding: 10px 12px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+.table thead abbr {
+    text-decoration: none;
+    cursor: help;
+}
+
+.thText {
+    text-align: left;
+}
+
+.thNum {
+    text-align: center;
+}
+
+.table tbody tr:hover {
+    background: var(--color-bg-hover);
+}
+
+.tdText {
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    border-top: 1px solid var(--color-border);
+    min-width: 180px;
+}
+
+.tdNum {
+    padding: 10px 12px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+    border-top: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+
+.seasonName {
+    display: block;
+}
+
+.seasonMeta {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+}
+
+.cardCounts {
+    display: inline-flex;
+    gap: 6px;
+    font-weight: 700;
+}
+
+.table tfoot th,
+.table tfoot td {
+    border-top: 2px solid var(--color-border);
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+/* ── Vacio ────────────────────────────────────────────────────────────── */
+
+.empty {
+    padding: 32px 24px;
+    border-radius: var(--radius-lg);
+    border: 1px dashed var(--color-border);
+    background: var(--color-bg-secondary);
+    text-align: center;
+}
+
+.emptyTitle {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.emptyBody {
+    margin: 0 auto;
+    max-width: 46ch;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+}
+
+.emptyCta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    margin-top: 16px;
+    padding: 0 18px;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.emptyCta:hover {
+    filter: brightness(1.06);
+}
+
+/* ── Foco y movimiento ────────────────────────────────────────────────── */
+
+.tab:focus-visible,
+.shareBtn:focus-visible,
+.linkBtn:focus-visible,
+.matchLink:focus-visible,
+.clubChip:focus-visible,
+.emptyCta:focus-visible,
+.inlineLink:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .clubChip,
+    .shareBtn,
+    .tab,
+    .matchLink {
+        transition: none;
+    }
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+    .identity {
+        gap: 12px;
+    }
+
+    .avatar {
+        width: 56px;
+        height: 56px;
+    }
+
+    .avatarInitials {
+        font-size: 1.125rem;
+    }
+
+    /* El boton baja a icono: el texto empujaba el nombre a tres lineas. */
+    .shareLabel {
+        display: none;
+    }
+
+    .chipHint {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    opacity: 0.65;
+}
+
+.fichaNote {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.shareBtn {
+        width: 44px;
+        padding: 0;
+    }
+
+    .stat {
+        min-width: 76px;
+        padding: 10px 8px;
+    }
+
+    .statValue {
+        font-size: 1.25rem;
+    }
+
+    .tabs {
+        gap: 20px;
+    }
+
+    .pointsTag {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 860px) {
+    .matchLink {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 0.75fr);
+        grid-template-areas:
+            'meta meta'
+            'teams contrib';
+        column-gap: 32px;
+        align-items: center;
+    }
+
+    .matchMeta {
+        grid-area: meta;
+    }
+
+    .matchTeams {
+        grid-area: teams;
+    }
+
+    .matchContribution {
+        grid-area: contrib;
+        margin-top: 0;
+        padding: 0 0 0 24px;
+        border-top: none;
+        border-left: 1px solid var(--color-border-light);
+        align-self: stretch;
+        align-content: center;
+    }
+
+    .pointsTag {
+        margin-left: 0;
+    }
+}

@@ -1,0 +1,129 @@
+/*
+ * Piezas del esqueleto. Los tamanos copian los de `PlayerProfile.module.css`
+ * para que al llegar el contenido nada se corra.
+ */
+
+.bar,
+.block {
+    background: var(--color-bg-tertiary);
+    animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.bar {
+    border-radius: var(--radius-sm);
+}
+
+.block {
+    border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.45;
+    }
+}
+
+/* Sin animacion no queda una pantalla rota: queda una gris, que es lo
+   correcto para quien pidio que las cosas no se muevan. */
+@media (prefers-reduced-motion: reduce) {
+    .bar,
+    .block {
+        animation: none;
+    }
+}
+
+.breadcrumb {
+    width: 180px;
+    height: 13px;
+    margin-bottom: 20px;
+}
+
+.avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.identityBody {
+    flex: 1;
+    min-width: 0;
+}
+
+.name {
+    width: min(60%, 320px);
+    height: 30px;
+    margin-bottom: 10px;
+}
+
+.chipRow {
+    display: flex;
+    gap: 8px;
+}
+
+.chip {
+    width: 132px;
+    height: 26px;
+    border-radius: var(--radius-full);
+}
+
+.chipShort {
+    width: 78px;
+    height: 26px;
+    border-radius: var(--radius-full);
+}
+
+.ribbon {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 20px;
+}
+
+.stat {
+    flex: 1 1 0;
+    min-width: 84px;
+    height: 66px;
+}
+
+.tabs {
+    display: flex;
+    gap: 24px;
+    padding-bottom: 10px;
+}
+
+.tab {
+    width: 84px;
+    height: 20px;
+    margin-top: 12px;
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 24px;
+}
+
+.matchRow {
+    height: 108px;
+}
+
+@media (max-width: 640px) {
+    .avatar {
+        width: 56px;
+        height: 56px;
+    }
+
+    .name {
+        height: 24px;
+    }
+
+    .stat {
+        min-width: 76px;
+        height: 58px;
+    }
+}
