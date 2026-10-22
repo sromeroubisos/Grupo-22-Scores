@@ -86,6 +86,12 @@ export function addMatchToTotals(totals: PlayerProfileTotals, match: PlayerProfi
     totals.redCards += match.stats.redCards;
 }
 
+/** La competicion de un partido: torneo + año. Es la clave del filtro por torneo. */
+export function seasonKeyOf(match: PlayerProfileMatch): string {
+    const year = match.date ? match.date.slice(0, 4) : null;
+    return `${match.tournamentId || 'sin-torneo'}::${year || 's-f'}`;
+}
+
 export function totalsOf(matches: PlayerProfileMatch[]): PlayerProfileTotals {
     const totals = emptyTotals();
     for (const match of matches) addMatchToTotals(totals, match);
