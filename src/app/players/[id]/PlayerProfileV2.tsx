@@ -18,12 +18,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Share2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { ImageDown, Share2 } from 'lucide-react';
 import PlayerHeadIcon from '@/components/PlayerHeadIcon';
 import TeamLogo from '@/components/TeamLogo';
 import { formatDateInTimeZone } from '@/lib/timezone';
 import type { LocalPlayerProfile, PlayerProfileMatch } from '@/lib/services/localPlayerProfile';
-import { otherActionsOf, totalsOf } from '@/lib/services/playerProfileAggregate';
+import { otherActionsOf, seasonKeyOf, totalsOf } from '@/lib/services/playerProfileAggregate';
 import PlayerShareOverlay from './PlayerShareOverlay';
 import {
     EmptyMatches,
@@ -35,6 +36,10 @@ import {
     formatWeight,
 } from './PlayerProfile';
 import styles from './PlayerProfileV2.module.css';
+
+// El motor de export es pesado (comparte el de las placas de tablas y fixture):
+// solo se descarga cuando alguien abre el modal.
+const PlayerExportModal = dynamic(() => import('./PlayerExportModal'), { ssr: false });
 
 type TabId = 'resumen' | 'partidos' | 'estadisticas' | 'trayectoria';
 
@@ -53,11 +58,6 @@ function isTabId(value: string | null): value is TabId {
     return TABS.some((tab) => tab.id === value);
 }
 
-function seasonKeyOf(match: PlayerProfileMatch) {
-    const year = match.date ? match.date.slice(0, 4) : null;
-    return `${match.tournamentId || 'sin-torneo'}::${year || 's-f'}`;
-}
-
 /** Un valor en cero se muestra como guion: ver el comentario del archivo. */
 function tileValue(value: number): string {
     return value > 0 ? String(value) : '–';
@@ -68,6 +68,7 @@ type Tile = { key: string; label: string; value: string; tone?: 'caution' | 'dan
 export default function PlayerProfileV2({ profile }: { profile: LocalPlayerProfile }) {
     const [tab, setTab] = useState<TabId>('resumen');
     const [compartiendo, setCompartiendo] = useState(false);
+    const [exportando, setExportando] = useState(false);
     const [seasonKey, setSeasonKey] = useState<string>(ALL_SEASONS);
     const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -220,16 +221,28 @@ export default function PlayerProfileV2({ profile }: { profile: LocalPlayerProfi
                                 <path d="M15 18l-6-6 6-6" />
                             </svg>
                         </Link>
-                        <button
-                            type="button"
-                            className={styles.shareBtn}
-                            onClick={() => setCompartiendo(true)}
-                            aria-label="Compartir la ficha"
-                            aria-haspopup="dialog"
-                        >
-                            <Share2 size={16} aria-hidden="true" />
-                            <span className={styles.shareLabel}>Compartir</span>
-                        </button>
+                        <div className={styles.topActions}>
+                            <button
+                                type="button"
+                                className={styles.shareBtn}
+                                onClick={() => setExportando(true)}
+                                aria-label="Exportar la ficha como imágenes"
+                                aria-haspopup="dialog"
+                            >
+                                <ImageDown size={16} aria-hidden="true" />
+                                <span className={styles.shareLabel}>Exportar</span>
+                            </button>
+                            <button
+                                type="button"
+                                className={styles.shareBtn}
+                                onClick={() => setCompartiendo(true)}
+                                aria-label="Compartir la ficha"
+                                aria-haspopup="dialog"
+                            >
+                                <Share2 size={16} aria-hidden="true" />
+                                <span className={styles.shareLabel}>Compartir</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div className={styles.identity}>
@@ -529,6 +542,8 @@ export default function PlayerProfileV2({ profile }: { profile: LocalPlayerProfi
                     </div>
                 )}
             </main>
+
+            {exportando && <PlayerExportModal profile={profile} onClose={() => setExportando(false)} />}
 
             {compartiendo && (
                 <PlayerShareOverlay

@@ -139,12 +139,16 @@ export type PlayerProfileSeason = PlayerProfileTotals & {
     year: string | null;
     clubId: string | null;
     clubName: string | null;
+    /** `tournaments.primary_color`, si el torneo lo tiene cargado (hoy ninguno). */
+    tournamentColor: string | null;
 };
 
 export type PlayerProfileClub = {
     id: string;
     name: string;
     shortName: string | null;
+    /** `clubs.primary_color` (hoy en ~18% de los clubes). */
+    primaryColor: string | null;
     role: string | null;
     status: string | null;
     joinedAt: string | null;
@@ -282,6 +286,10 @@ function playedMinutes(
 function readNumber(value: unknown): number | null {
     const n = Number(value);
     return Number.isFinite(n) ? n : null;
+}
+
+function readHexColor(value: unknown): string | null {
+    return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value.trim()) ? value.trim().toLowerCase() : null;
 }
 
 function readText(value: unknown): string | null {
@@ -454,20 +462,26 @@ export async function getLocalPlayerProfile(
 
     const [clubsRes, tournamentsRes] = await Promise.all([
         clubIds.size
-            ? supabase.from('clubs').select('id, name, short_name').in('id', [...clubIds])
+            ? supabase.from('clubs').select('id, name, short_name, primary_color').in('id', [...clubIds])
             : Promise.resolve({ data: [] }),
         tournamentIds.size
-            ? supabase.from('tournaments').select('id, name, display_name').in('id', [...tournamentIds])
+            ? supabase.from('tournaments').select('id, name, display_name, primary_color').in('id', [...tournamentIds])
             : Promise.resolve({ data: [] }),
     ]);
 
-    const clubById = new Map<string, { name: string; shortName: string | null }>();
+    const clubById = new Map<string, { name: string; shortName: string | null; color: string | null }>();
     for (const club of clubsRes?.data || []) {
-        clubById.set(club.id, { name: club.name || club.id, shortName: club.short_name || null });
+        clubById.set(club.id, {
+            name: club.name || club.id,
+            shortName: club.short_name || null,
+            color: readHexColor(club.primary_color),
+        });
     }
     const tournamentById = new Map<string, string>();
+    const tournamentColorById = new Map<string, string | null>();
     for (const t of tournamentsRes?.data || []) {
         tournamentById.set(t.id, t.display_name || t.name || '');
+        tournamentColorById.set(t.id, readHexColor(t.primary_color));
     }
 
     const eventsByMatch = new Map<string, typeof eventRows>();
@@ -652,6 +666,7 @@ export async function getLocalPlayerProfile(
             year,
             clubId,
             clubName: clubId ? clubById.get(clubId)?.name || clubId : null,
+            tournamentColor: match.tournamentId ? tournamentColorById.get(match.tournamentId) ?? null : null,
         };
 
         addMatchToTotals(season, match);
@@ -700,6 +715,7 @@ export async function getLocalPlayerProfile(
                 id: clubId,
                 name: clubInfo?.name || clubId,
                 shortName: clubInfo?.shortName || null,
+                primaryColor: clubInfo?.color ?? null,
                 role: readText(activeRole?.role),
                 status: readText(activeRole?.status),
                 joinedAt: activeRole?.joined_at || null,
