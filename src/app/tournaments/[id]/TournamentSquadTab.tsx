@@ -31,6 +31,15 @@ export type SquadTableData = {
 
 const fmt = (value: number) => (Number.isInteger(value) ? String(value) : value.toFixed(1));
 
+// Las columnas son angostas: "Top 10" pasa a "Top10" (sin el espacio entra en cinco
+// letras) y lo que siga largo se corta con un punto. El nombre completo va en el title.
+const shortCategoryLabel = (label: string) => {
+    const text = label.trim();
+    if (text.length <= 5) return text;
+    const compact = text.replace(/\s+/g, '');
+    return compact.length <= 5 ? compact : `${compact.slice(0, 4)}.`;
+};
+
 /**
  * La placa de tabla normal (la misma de las posiciones): sus cuatro columnas
  * numéricas llevan lo que aporta cada categoría (hasta cuatro) y la última, el
@@ -46,7 +55,7 @@ function buildSquadExportData(
     // Una entrada por columna: la categoría, el total de PJ o una columna vacía.
     type Slot = { label: string; value: (row: NonNullable<SquadTableData['rows']>[number]) => string };
     const slots: Slot[] = categories.map((category) => ({
-        label: category.label,
+        label: shortCategoryLabel(category.label),
         value: (row) => (row.categories[category.id] === undefined ? '–' : fmt(row.categories[category.id])),
     }));
     if (slots.length < 4) slots.push({ label: 'PJ', value: (row) => String(row.played) });
@@ -123,8 +132,8 @@ export default function TournamentSquadTab({
                             <div className={styles.colPos}>#</div>
                             <div className={styles.colTeam}>Club</div>
                             {categories.map((category) => (
-                                <div key={category.id} className={optional} title={category.label}>
-                                    {category.label.length > 6 ? `${category.label.slice(0, 5)}…` : category.label}
+                                <div key={category.id} className={optional} title={category.label} style={{ whiteSpace: 'nowrap', letterSpacing: 0 }}>
+                                    {shortCategoryLabel(category.label)}
                                 </div>
                             ))}
                             <div className={`${styles.colPts} ${styles.historicalPts}`}>PTS</div>

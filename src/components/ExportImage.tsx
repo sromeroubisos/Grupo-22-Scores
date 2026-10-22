@@ -2271,6 +2271,9 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                     } else {
                         await drawStandings(ctx, canvas, standingsData, slide, config, accentColor, bgColor, brandLogo);
                     }
+                    if (!standingsPlatePaintsOwnBackground(standingsData, visualFamily)) {
+                        await applyStandingsBackgroundOverlay(ctx, canvas, standingsData.backgroundImage);
+                    }
                     await downloadCanvas(canvas, buildExportFilename(filename, template, resolvedFormat, index + 1, slides.length));
                     if (index < slides.length - 1) {
                         await wait(140);
@@ -3481,7 +3484,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                 </div>
                             )}
 
-                            {template === 'standings' && !isPalmares && !isLadder && !isRankingPoster && visualFamily === 'g22Base' && (
+                            {template === 'standings' && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Fondo propio</label>
                                     <div className={styles.uploadCard}>
@@ -5811,6 +5814,9 @@ export async function renderMatchExportPreviewCanvas(
         } else {
             await drawStandings(ctx, canvas, standingsData, slide, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
         }
+        if (!standingsPlatePaintsOwnBackground(standingsData, visualFamily)) {
+            await applyStandingsBackgroundOverlay(ctx, canvas, standingsData.backgroundImage);
+        }
     } else if (template === 'lineups') {
         if (visualFamily === 'posterV3') {
             await drawPosterV3Lineups(ctx, canvas, exportData as LineupsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupExportMode);
@@ -5891,10 +5897,42 @@ function getSafeStandingsGroupIndex(groups: StandingsGroupData[], selectedIndex:
     return selectedIndex;
 }
 
-// El fondo propio solo lo dibuja la placa normal: las variantes (ranking, ladder,
-// palmares) y las otras familias tienen su propio fondo.
 function withStandingsBackground(data: StandingsData, backgroundImage?: string): StandingsData {
     return backgroundImage ? { ...data, backgroundImage } : data;
+}
+
+// La placa normal de G22 Base pinta el fondo propio ella misma (drawBackdrop,
+// con un velo). Las demas (ranking, ladder, palmares y las otras familias) traen
+// su propia hoja o campo, asi que el fondo se mezcla despues, por encima.
+function standingsPlatePaintsOwnBackground(data: StandingsData, visualFamily: ExportVisualFamily): boolean {
+    if (data.variant) return false;
+    return visualFamily !== 'posterV3' && visualFamily !== 'impactoV4' && visualFamily !== 'fanV5' && visualFamily !== 'momentumV2';
+}
+
+// Mezcla el fondo propio sobre la placa ya dibujada: las zonas claras (la hoja)
+// dejan ver la imagen con "multiplicar" y las oscuras con "trama", y el texto, que
+// es lo opuesto al fondo, queda intacto. Poca opacidad para que se siga leyendo.
+async function applyStandingsBackgroundOverlay(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, src?: string) {
+    if (!src) return;
+    const image = await loadImage(src);
+    if (!image || image.naturalWidth <= 0 || image.naturalHeight <= 0) return;
+
+    let isLightPlate = true;
+    try {
+        const [r, g, b] = ctx.getImageData(6, 6, 1, 1).data;
+        isLightPlate = 0.2126 * r + 0.7152 * g + 0.0722 * b > 140;
+    } catch {
+        // Sin lectura de pixeles se asume una hoja clara.
+    }
+
+    const scale = Math.max(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
+    const drawWidth = image.naturalWidth * scale;
+    const drawHeight = image.naturalHeight * scale;
+    ctx.save();
+    ctx.globalCompositeOperation = isLightPlate ? 'multiply' : 'screen';
+    ctx.globalAlpha = isLightPlate ? 0.6 : 0.42;
+    ctx.drawImage(image, (canvas.width - drawWidth) / 2, (canvas.height - drawHeight) / 2, drawWidth, drawHeight);
+    ctx.restore();
 }
 
 function scopeStandingsDataForExport(data: StandingsData, mode: StandingsExportMode, selectedGroupIndex: number): StandingsData {
@@ -21481,7 +21519,7 @@ async function drawFanStandings(
     ctx.textAlign = 'center';
     ctx.fillText('P', posCenter, headerCenterY);
     ctx.textAlign = 'left';
-    ctx.fillText('EQUIPO', crestCenterX + u(56), headerCenterY);
+    ctx.fillText((data.entityLabel?.trim() || 'EQUIPO').toUpperCase(), crestCenterX + u(56), headerCenterY);
     ctx.textAlign = 'center';
     ctx.fillText((data.columnLabels?.played?.trim() || 'PJ').toUpperCase(), playedCenter, headerCenterY);
     ctx.fillText((data.columnLabels?.won?.trim() || 'G').toUpperCase(), wonCenter, headerCenterY);
