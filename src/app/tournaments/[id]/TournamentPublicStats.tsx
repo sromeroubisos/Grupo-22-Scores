@@ -117,6 +117,9 @@ const TEAM_COLUMNS: Record<TeamStatsView, StatColumn[]> = {
     ],
 };
 
+// La placa de tabla tiene cinco columnas de cifras: la principal y hasta cuatro mas.
+const MAX_EXTRA_STATS = 4;
+
 const PLAYER_COLUMNS: StatColumn[] = [
     { id: 'entity', label: 'Jugador' },
     { id: 'secondary', label: 'Equipo' },
@@ -336,6 +339,12 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
     // con 340 jugadores armaba 340 tarjetas de 500px en el celular.
     const [rowLimit, setRowLimit] = useState<number>(DEFAULT_ROW_LIMIT);
     const [sheetRow, setSheetRow] = useState<any | null>(null);
+    // Estadisticas que acompanan a la principal en la placa exportada. `null` es
+    // el valor de fabrica: las primeras cuatro de la tabla.
+    const [extraStatIds, setExtraStatIds] = useState<string[] | null>(null);
+    // La estadistica resaltada en la placa (`null`: la que ordena la tabla) y su color.
+    const [highlightStatId, setHighlightStatId] = useState<string | null>(null);
+    const [highlightColor, setHighlightColor] = useState('#22c55e');
     const [expandedTeamId, setExpandedTeamId] = useState<string | null>(null);
     const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -755,20 +764,43 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
     // La placa de tabla normal exporta LO QUE SE VE (mismo orden, filtro y tope).
     // La columna principal es la estadistica por la que esta ordenada la tabla y
     // las otras cuatro son las primeras que la acompanan en la web.
+    const exportColumns = activeSubTab === 'teams' ? teamColumns : playerColumns;
+    const exportMainKey = (() => {
+        const chosen = exportColumns.find((column) => column.id === highlightStatId && column.id !== 'entity' && column.id !== 'secondary');
+        if (chosen) return chosen.id;
+        const fallbackKey = activeSubTab === 'teams' ? TEAM_DEFAULT_SORT[teamStatsView].key : 'points';
+        return sortKey === 'entity' || sortKey === 'secondary' ? fallbackKey : sortKey;
+    })();
+    // Las que pueden acompanar a la principal: toda columna de cifras medida.
+    const extraStatOptions = useMemo(
+        () => exportColumns.filter((column) => column.id !== 'entity' && column.id !== 'secondary' && column.id !== exportMainKey && !unmeasuredMetrics.has(column.id)),
+        [exportColumns, exportMainKey, unmeasuredMetrics],
+    );
+    const selectedExtraIds = useMemo(() => {
+        const wanted = extraStatIds ?? extraStatOptions.slice(0, MAX_EXTRA_STATS).map((column) => column.id);
+        return wanted.filter((id) => extraStatOptions.some((option) => option.id === id)).slice(0, MAX_EXTRA_STATS);
+    }, [extraStatIds, extraStatOptions]);
+    const toggleExtraStat = (id: string) => {
+        setExtraStatIds(selectedExtraIds.includes(id)
+            ? selectedExtraIds.filter((current) => current !== id)
+            : [...selectedExtraIds, id].slice(0, MAX_EXTRA_STATS));
+    };
+
     const statsExportData = useMemo<StandingsData>(() => {
         const isTeams = activeSubTab === 'teams';
-        const columns = isTeams ? teamColumns : playerColumns;
+        const columns = exportColumns;
         const fallbackKey = isTeams ? TEAM_DEFAULT_SORT[teamStatsView].key : 'points';
-        const mainKey = sortKey === 'entity' ? fallbackKey : sortKey;
+        const mainKey = exportMainKey;
         const mainColumn = columns.find((column) => column.id === mainKey) ?? columns.find((column) => column.id === fallbackKey);
         // La placa normal de tabla tiene cinco columnas numericas: la ultima es
-        // la estadistica por la que esta ordenada la tabla y las otras cuatro son
-        // las primeras que la acompanan, en el orden en que se ven en la web.
-        const otherColumns = columns
-            .filter((column) => column.id !== 'entity' && column.id !== 'secondary' && column.id !== mainColumn?.id)
-            .slice(0, 4);
-        while (otherColumns.length < 4) otherColumns.push({ id: '', label: '–' });
+        // la estadistica por la que esta ordenada la tabla (subrayada) y las otras
+        // son las elegidas, en el orden en que se ven en la web. Si son menos de
+        // cuatro, las columnas que sobran van primero y el diseno clasico las oculta.
+        const otherColumns: StatColumn[] = columns.filter((column) => selectedExtraIds.includes(column.id));
+        const unusedCount = 4 - otherColumns.length;
+        while (otherColumns.length < 4) otherColumns.unshift({ id: '', label: '–' });
         const [first, second, third, fourth] = otherColumns;
+        const unusedColumns = (['played', 'won', 'lost', 'diff'] as const).slice(0, unusedCount);
         const valueOf = (row: any, column: StatColumn) => (column.id ? formatStatValue(row, column, unmeasuredMetrics) : '');
         const rows = displayRows.map((row, index) => {
             // El escudo va por el proxy por id, como en la tabla de la web: el
@@ -778,9 +810,9 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             const name = String(row.entityName ?? (isTeams ? 'Equipo' : 'Jugador'));
             return {
                 pos: index + 1,
-                // Del jugador se dice tambien el club: en la placa no hay otra columna.
-                team: !isTeams && clubName ? `${name} · ${clubName}` : name,
-                teamFull: !isTeams && clubName ? `${name} · ${clubName}` : name,
+                // Del jugador va solo el nombre: el club no hace falta en la placa.
+                team: name,
+                teamFull: name,
                 teamLogo: buildTeamLogoProxyUrl({ key: clubId, name: clubName, fallback: row.entityLogo || null }) || row.entityLogo || undefined,
                 played: valueOf(row, first),
                 won: valueOf(row, second),
@@ -807,8 +839,11 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                 points: mainColumn?.label || 'PTS',
             },
             showPositionDelta: false,
+            activeColumn: 'points',
+            activeColor: highlightColor,
+            unusedColumns,
         };
-    }, [activeSubTab, displayRows, playerColumns, sortKey, teamColumns, teamStatsView, tournamentLogo, tournamentName, unmeasuredMetrics]);
+    }, [activeSubTab, displayRows, exportColumns, exportMainKey, highlightColor, selectedExtraIds, teamStatsView, tournamentLogo, tournamentName, unmeasuredMetrics]);
     const hasEvents = finalMatches.some((m) => Array.isArray(m.events) && m.events.length > 0);
     const showTopScorersFallback = !hasEvents && (topScorers?.length || 0) > 0;
     const activeSortColumn = currentColumns.find((column) => column.id === sortKey);
@@ -1018,6 +1053,53 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                     </div>
                 )}
             </div>
+
+            {!showTopScorersFallback && hasStats && displayRows.length > 0 && extraStatOptions.length > 0 && (
+                <div className={styles.statsModeBar} role="group" aria-label="Estadísticas a incluir en la imagen exportada">
+                    <label className={styles.statsSubtitle}>
+                        Resaltar{' '}
+                        <select
+                            className={styles.statsSelect}
+                            value={exportMainKey}
+                            onChange={(event) => setHighlightStatId(event.target.value)}
+                            aria-label="Estadística resaltada en la imagen exportada"
+                        >
+                            {exportColumns
+                                .filter((column) => column.id !== 'entity' && column.id !== 'secondary' && !unmeasuredMetrics.has(column.id))
+                                .map((column) => (
+                                    <option key={column.id} value={column.id}>{column.label}</option>
+                                ))}
+                        </select>
+                    </label>
+                    <label className={styles.statsSubtitle}>
+                        Color{' '}
+                        <input
+                            type="color"
+                            value={highlightColor}
+                            onChange={(event) => setHighlightColor(event.target.value)}
+                            aria-label="Color de la estadística resaltada"
+                        />
+                    </label>
+                    <span className={styles.statsSubtitle}>Acompañan:</span>
+                    {extraStatOptions.map((column) => {
+                        const selected = selectedExtraIds.includes(column.id);
+                        const full = !selected && selectedExtraIds.length >= MAX_EXTRA_STATS;
+                        return (
+                            <button
+                                key={column.id}
+                                type="button"
+                                className={`${styles.statsModeButton} ${selected ? styles.statsModeButtonActive : ''}`}
+                                onClick={() => toggleExtraStat(column.id)}
+                                aria-pressed={selected}
+                                disabled={full}
+                                title={full ? `Hasta ${MAX_EXTRA_STATS} estadísticas junto a la principal` : column.title}
+                            >
+                                {column.label}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
 
             {!showTopScorersFallback && esRugby && activeSubTab === 'teams' && (
                 <div className={styles.statsModeBar} aria-label="Vista de estadísticas por equipo">

@@ -122,6 +122,15 @@ export interface StandingsData {
     // unidad de `columnLabels.points`), dato secundario (`diff` + opcionalmente
     // `columnLabels.diff`) y flecha de tendencia (`pointsDeltaTone`).
     variant?: 'rankingPoster' | 'palmares' | 'ladder';
+    // La estadistica que se exporta (siempre la de la columna `points`) va
+    // subrayada en la cabecera, para distinguirla de las que la acompanan.
+    activeColumn?: 'points';
+    // Color con el que se resalta esa estadistica (subrayado y cifras); sin el,
+    // el subrayado va en el acento del diseno.
+    activeColor?: string;
+    // Columnas sin estadistica (el jugador exporto menos de cinco). El diseno
+    // clasico las oculta; los demas las dibujan con el rotulo de relleno.
+    unusedColumns?: Array<'played' | 'won' | 'lost' | 'diff'>;
 }
 
 export interface DailyMatchesData {
@@ -9452,6 +9461,26 @@ async function drawMatchResult(
     await drawG22BasePlate(ctx, canvas, data, accentColor, bgColor, plateOptions);
 }
 
+// Subraya el rotulo de una cabecera de columna, anclado como el texto (segun
+// el `textAlign` vigente). Marca la estadistica que se exporta.
+function drawHeaderUnderline(
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    baselineY: number,
+    color: string,
+) {
+    const width = ctx.measureText(text).width;
+    const left = ctx.textAlign === 'right' ? x - width : ctx.textAlign === 'center' ? x - width / 2 : x;
+    const size = Number.parseFloat(ctx.font.match(/(\d+(?:\.\d+)?)px/)?.[1] ?? '16');
+    ctx.save();
+    ctx.fillStyle = color;
+    // Con base "middle" el texto llega a medio cuerpo; con la alfabetica, apenas debajo.
+    const drop = ctx.textBaseline === 'middle' ? size * 0.62 : size * 0.18;
+    ctx.fillRect(left, baselineY + drop, width, Math.max(2, Math.round(size * 0.14)));
+    ctx.restore();
+}
+
 async function drawStandings(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
@@ -9515,11 +9544,20 @@ async function drawStandings(
     const lostWidth = isStory ? 72 : 70;
     const wonWidth = isStory ? 80 : 78;
     const playedWidth = isStory ? 74 : 72;
+    // Las columnas sin estadistica no ocupan lugar: las que quedan se juntan
+    // contra el borde derecho y el nombre gana el ancho que sobra.
+    const unusedColumns = new Set(data.unusedColumns ?? []);
     const colPointsLeft = tableRight - pointsWidth;
-    const colDiffLeft = colPointsLeft - diffWidth;
-    const colLostLeft = colDiffLeft - lostWidth;
-    const colWonLeft = colLostLeft - wonWidth;
-    const colPlayedLeft = colWonLeft - playedWidth;
+    let colCursor = colPointsLeft;
+    const claimColumn = (key: 'played' | 'won' | 'lost' | 'diff', width: number) => {
+        if (unusedColumns.has(key)) return colCursor;
+        colCursor -= width;
+        return colCursor;
+    };
+    const colDiffLeft = claimColumn('diff', diffWidth);
+    const colLostLeft = claimColumn('lost', lostWidth);
+    const colWonLeft = claimColumn('won', wonWidth);
+    const colPlayedLeft = claimColumn('played', playedWidth);
     const colPlayedX = colPlayedLeft + playedWidth / 2;
     const colWonX = colWonLeft + wonWidth / 2;
     const colLostX = colLostLeft + lostWidth / 2;
@@ -9537,11 +9575,17 @@ async function drawStandings(
     ctx.textAlign = 'left';
     ctx.fillText((data.entityLabel?.trim() || 'EQUIPO').toUpperCase(), panelX + 118, headerY);
     ctx.textAlign = 'center';
-    ctx.fillText(playedLabel.toUpperCase(), colPlayedX, headerY);
-    ctx.fillText(wonLabel.toUpperCase(), colWonX, headerY);
-    ctx.fillText(lostLabel.toUpperCase(), colLostX, headerY);
-    ctx.fillText(diffLabel.toUpperCase(), colDiffX, headerY);
-    ctx.fillText(pointsLabel.toUpperCase(), colPointsX, headerY);
+    if (!unusedColumns.has('played')) ctx.fillText(playedLabel.toUpperCase(), colPlayedX, headerY);
+    if (!unusedColumns.has('won')) ctx.fillText(wonLabel.toUpperCase(), colWonX, headerY);
+    if (!unusedColumns.has('lost')) ctx.fillText(lostLabel.toUpperCase(), colLostX, headerY);
+    if (!unusedColumns.has('diff')) ctx.fillText(diffLabel.toUpperCase(), colDiffX, headerY);
+    if (data.activeColumn === 'points') {
+        ctx.fillStyle = data.activeColor || textColor;
+        ctx.fillText(pointsLabel.toUpperCase(), colPointsX, headerY);
+        drawHeaderUnderline(ctx, pointsLabel.toUpperCase(), colPointsX, headerY, data.activeColor || accentColor);
+    } else {
+        ctx.fillText(pointsLabel.toUpperCase(), colPointsX, headerY);
+    }
     ctx.restore();
 
     ctx.save();
@@ -9672,13 +9716,15 @@ async function drawStandings(
 
             ctx.textAlign = 'center';
             ctx.font = `700 ${statFontSize}px ${FONT_BODY}`;
-            ctx.fillText(String(row.played), colPlayedX, centerY + 1);
-            ctx.fillText(String(row.won), colWonX, centerY + 1);
-            ctx.fillText(String(row.lost), colLostX, centerY + 1);
+            if (!unusedColumns.has('played')) ctx.fillText(String(row.played), colPlayedX, centerY + 1);
+            if (!unusedColumns.has('won')) ctx.fillText(String(row.won), colWonX, centerY + 1);
+            if (!unusedColumns.has('lost')) ctx.fillText(String(row.lost), colLostX, centerY + 1);
 
             const diffText = data.plainDiff ? String(row.diff).trim() : formatDiff(row.diff);
             ctx.fillStyle = !data.plainDiff && diffText.startsWith('-') ? '#ef4444' : rowAccentColor;
-            if (data.plainDiff) {
+            if (unusedColumns.has('diff')) {
+                // Sin estadistica en esta columna: no se dibuja.
+            } else if (data.plainDiff) {
                 const diffMinFontSize = Math.max(11, statFontSize - 3);
                 setFittedFont(
                     ctx,
@@ -9719,7 +9765,7 @@ async function drawStandings(
             } else {
                 ctx.textBaseline = 'middle';
                 ctx.textAlign = 'center';
-                ctx.fillStyle = textColor;
+                ctx.fillStyle = data.activeColumn === 'points' && data.activeColor ? data.activeColor : textColor;
                 ctx.font = `800 ${pointsFontSize}px ${FONT_MONO}`;
                 ctx.fillText(pointsText, colPointsX, centerY + 1);
             }
@@ -15836,6 +15882,9 @@ async function drawMomentumStandings(
     ctx.fillText((data.columnLabels?.played?.trim() || 'P').toUpperCase(), playedX, cardY + sy(126));
     ctx.fillText((data.columnLabels?.diff?.trim() || 'GD').toUpperCase(), diffX, cardY + sy(126));
     ctx.fillText((data.columnLabels?.points?.trim() || 'POINTS').toUpperCase(), innerRight, cardY + sy(126));
+    if (data.activeColumn === 'points') {
+        drawHeaderUnderline(ctx, (data.columnLabels?.points?.trim() || 'POINTS').toUpperCase(), innerRight, cardY + sy(126), data.activeColor || accentColor);
+    }
     ctx.restore();
 
     let cursorY = rowsTop;
@@ -20706,6 +20755,9 @@ async function drawImpactoStandings(
     ctx.fillText((data.columnLabels?.points?.trim() || 'PTS').toUpperCase(), pointsCenter, headerTop + headerHeight / 2 + 1);
     ctx.fillText((data.columnLabels?.played?.trim() || 'PJ').toUpperCase(), playedCenter, headerTop + headerHeight / 2 + 1);
     ctx.fillText('COND', condCenter, headerTop + headerHeight / 2 + 1);
+    if (data.activeColumn === 'points') {
+        drawHeaderUnderline(ctx, (data.columnLabels?.points?.trim() || 'PTS').toUpperCase(), pointsCenter, headerTop + headerHeight / 2 + 1, data.activeColor || tone.ink);
+    }
     ctx.restore();
 
     let cursorY = rowsTop + rowsLeftover / 2;
@@ -21526,6 +21578,9 @@ async function drawFanStandings(
     ctx.fillText((data.columnLabels?.lost?.trim() || 'P').toUpperCase(), lostCenter, headerCenterY);
     ctx.fillText((data.columnLabels?.diff?.trim() || 'DIF').toUpperCase(), diffCenter, headerCenterY);
     ctx.fillText((data.columnLabels?.points?.trim() || 'PTS').toUpperCase(), pointsCenter, headerCenterY);
+    if (data.activeColumn === 'points') {
+        drawHeaderUnderline(ctx, (data.columnLabels?.points?.trim() || 'PTS').toUpperCase(), pointsCenter, headerCenterY, data.activeColor || tone.ink);
+    }
     setCanvasTracking(ctx, 0);
     ctx.restore();
 
