@@ -336,6 +336,8 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
     // con 340 jugadores armaba 340 tarjetas de 500px en el celular.
     const [rowLimit, setRowLimit] = useState<number>(DEFAULT_ROW_LIMIT);
     const [sheetRow, setSheetRow] = useState<any | null>(null);
+    // Estadisticas que se suman a la principal en la placa exportada.
+    const [extraStatIds, setExtraStatIds] = useState<string[]>([]);
     const [expandedTeamId, setExpandedTeamId] = useState<string | null>(null);
     const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -758,12 +760,32 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
     // columna; el secundario es la diferencia de puntos en equipos y los tries
     // en jugadores. Sin flecha de tendencia en jugadores: no hay fecha anterior
     // contra la cual compararlos.
+    const exportColumns = activeSubTab === 'teams' ? teamColumns : playerColumns;
+    const exportMainKey = (() => {
+        const fallbackKey = activeSubTab === 'teams' ? TEAM_DEFAULT_SORT[teamStatsView].key : 'points';
+        return sortKey === 'entity' || sortKey === 'secondary' ? fallbackKey : sortKey;
+    })();
+    // Candidatas a sumarse: toda columna de cifras medida, salvo la principal.
+    const extraStatOptions = useMemo(
+        () => exportColumns.filter((column) => column.id !== 'entity' && column.id !== 'secondary' && column.id !== exportMainKey && !unmeasuredMetrics.has(column.id)),
+        [exportColumns, exportMainKey, unmeasuredMetrics],
+    );
+    const toggleExtraStat = (id: string) => {
+        setExtraStatIds((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
+    };
+
     const ladderExportData = useMemo<StandingsData>(() => {
         const isTeams = activeSubTab === 'teams';
-        const columns = isTeams ? teamColumns : playerColumns;
+        const columns = exportColumns;
         const fallbackKey = isTeams ? TEAM_DEFAULT_SORT[teamStatsView].key : 'points';
-        const mainKey = sortKey === 'entity' ? fallbackKey : sortKey;
+        const mainKey = exportMainKey;
         const mainColumn = columns.find((column) => column.id === mainKey) ?? columns.find((column) => column.id === fallbackKey);
+        // Con estadisticas sumadas la placa pasa a columnas con cabecera, en el
+        // orden de la tabla, y la principal va subrayada.
+        const chosenColumns = columns.filter((column) => (
+            column.id === mainColumn?.id || (extraStatIds.includes(column.id) && extraStatOptions.some((option) => option.id === column.id))
+        ));
+        const multiColumns = chosenColumns.length > 1 ? chosenColumns : null;
         // Secundario: diferencia (equipos) o tries (jugadores). Si la tabla ya
         // esta ordenada por ese dato, el secundario pasa a ser los puntos: no
         // tiene sentido repetir la misma cifra dos veces en la fila.
@@ -779,7 +801,9 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                 pos: index + 1,
                 team: String(row.entityName ?? (isTeams ? 'Equipo' : 'Jugador')),
                 teamLogo: buildTeamLogoProxyUrl({ key: clubId, name: clubName, fallback: row.entityLogo || null }) || row.entityLogo || undefined,
-                caption: isTeams ? String(n(row.matches_played)) + ' PJ' : clubName,
+                // En jugadores no va el club: alcanza con el nombre.
+                caption: isTeams ? String(n(row.matches_played)) + ' PJ' : '',
+                stats: multiColumns ? multiColumns.map((column) => formatStatValue(row, column, unmeasuredMetrics)) : undefined,
                 played: 0,
                 won: 0,
                 lost: 0,
@@ -807,8 +831,9 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                 points: mainColumn?.label || 'PTS',
                 diff: '',
             },
+            statColumns: multiColumns?.map((column) => ({ label: column.label, active: column.id === mainColumn?.id })),
         };
-    }, [activeSubTab, displayRows, playerColumns, sortKey, teamColumns, teamStatsView, tournamentLogo, tournamentName]);
+    }, [activeSubTab, displayRows, exportColumns, exportMainKey, extraStatIds, extraStatOptions, sortKey, teamStatsView, tournamentLogo, tournamentName, unmeasuredMetrics]);
     const hasEvents = finalMatches.some((m) => Array.isArray(m.events) && m.events.length > 0);
     const showTopScorersFallback = !hasEvents && (topScorers?.length || 0) > 0;
     const activeSortColumn = currentColumns.find((column) => column.id === sortKey);
@@ -1018,6 +1043,26 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                     </div>
                 )}
             </div>
+
+            {!showTopScorersFallback && hasStats && displayRows.length > 0 && extraStatOptions.length > 0 && (
+                <div className={styles.statsModeBar} role="group" aria-label="Estadísticas a incluir en la imagen exportada">
+                    <span className={styles.statsSubtitle}>
+                        Exportar: {(exportColumns.find((column) => column.id === exportMainKey)?.label) || 'estadística'} (subrayada) +
+                    </span>
+                    {extraStatOptions.map((column) => (
+                        <button
+                            key={column.id}
+                            type="button"
+                            className={`${styles.statsModeButton} ${extraStatIds.includes(column.id) ? styles.statsModeButtonActive : ''}`}
+                            onClick={() => toggleExtraStat(column.id)}
+                            aria-pressed={extraStatIds.includes(column.id)}
+                            title={column.title}
+                        >
+                            {column.label}
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {!showTopScorersFallback && esRugby && activeSubTab === 'teams' && (
                 <div className={styles.statsModeBar} aria-label="Vista de estadísticas por equipo">

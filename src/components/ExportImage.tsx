@@ -63,6 +63,9 @@ interface StandingsRowData {
     // Solo la placa ladder: renglon chico bajo el nombre (el club del jugador,
     // los partidos jugados del equipo).
     caption?: string;
+    // Solo la placa ladder con varias estadisticas: una cifra por columna de
+    // `StandingsData.statColumns`, en el mismo orden.
+    stats?: string[];
 }
 
 interface StandingsGroupData {
@@ -116,6 +119,10 @@ export interface StandingsData {
     // unidad de `columnLabels.points`), dato secundario (`diff` + opcionalmente
     // `columnLabels.diff`) y flecha de tendencia (`pointsDeltaTone`).
     variant?: 'rankingPoster' | 'palmares' | 'ladder';
+    // Placa ladder con varias estadisticas: columnas con cabecera. La que tiene
+    // `active` (la estadistica por la que se ordena) va subrayada. Con menos de
+    // dos columnas la placa dibuja el valor unico de siempre.
+    statColumns?: Array<{ label: string; active?: boolean }>;
 }
 
 export interface DailyMatchesData {
@@ -9792,7 +9799,11 @@ async function drawLadderPoster(
     // ---- Geometria de las filas ----
     const left = margin;
     const right = width - margin;
-    const bodyTop = subtitleY + u(66);
+    // Con varias estadisticas hay una fila de cabecera (POS / JUGADOR / PJ ...).
+    const statColumns = data.statColumns ?? [];
+    const multi = statColumns.length > 1;
+    const headerRowHeight = multi ? u(52) : 0;
+    const bodyTop = subtitleY + u(66) + headerRowHeight;
     const footerCenterY = height - u(isStory ? 84 : 56);
     const bodyBottom = footerCenterY - u(30);
     // Con pocas filas la fila crece (hasta un tope) para no dejar media placa
@@ -9830,7 +9841,32 @@ async function drawLadderPoster(
     const unitWidth = unitLabel ? ctx.measureText(unitLabel).width + u(10) : 0;
     ctx.font = `800 ${mainSize}px ${FONT_BODY}`;
     const mainWidth = rows.reduce((max, row) => Math.max(max, ctx.measureText(String(row.points ?? '-')).width), 0);
-    const nameMaxWidth = Math.max(u(120), mainRight - unitWidth - mainWidth - u(28) - nameX);
+    // Varias estadisticas: columnas alineadas a la derecha, cada una del ancho de
+    // su cifra mas ancha (o de su cabecera). `colRights[i]` es el borde derecho.
+    const colSize = Math.min(u(32), Math.round(rowHeight * 0.4));
+    const colHeadSize = Math.min(u(20), Math.round(colSize * 0.7));
+    const colRights: number[] = [];
+    let colsLeft = right;
+    if (multi) {
+        const widths = statColumns.map((column, columnIndex) => {
+            ctx.font = `800 ${colHeadSize}px ${FONT_BODY}`;
+            let widest = ctx.measureText(column.label.toUpperCase()).width;
+            ctx.font = `800 ${colSize}px ${FONT_BODY}`;
+            rows.forEach((row) => {
+                widest = Math.max(widest, ctx.measureText(String(row.stats?.[columnIndex] ?? '-')).width);
+            });
+            return widest;
+        });
+        let cursor = right;
+        for (let i = widths.length - 1; i >= 0; i -= 1) {
+            colRights[i] = cursor;
+            cursor -= widths[i] + u(34);
+        }
+        colsLeft = cursor + u(34);
+    }
+    const nameMaxWidth = multi
+        ? Math.max(u(120), colsLeft - u(28) - nameX)
+        : Math.max(u(120), mainRight - unitWidth - mainWidth - u(28) - nameX);
     const nameSize = getSharedFittedFontSize(
         ctx,
         rows.map((row) => ({ text: row.team.trim().toUpperCase(), maxWidth: nameMaxWidth })),
@@ -9839,6 +9875,34 @@ async function drawLadderPoster(
         FONT_BODY,
         u(15),
     );
+
+    // Cabecera de columnas: la estadistica activa va en blanco y subrayada en acento.
+    if (multi) {
+        const headY = bodyTop - headerRowHeight / 2;
+        ctx.save();
+        ctx.textBaseline = 'middle';
+        const spaced = ctx as CanvasRenderingContext2D & { letterSpacing?: string };
+        spaced.letterSpacing = `${u(1)}px`;
+        ctx.font = `800 ${colHeadSize}px ${FONT_BODY}`;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = mutedColor;
+        ctx.fillText('POS', left, headY);
+        ctx.fillText('JUGADOR', nameX, headY);
+        ctx.textAlign = 'right';
+        statColumns.forEach((column, columnIndex) => {
+            const label = column.label.toUpperCase();
+            const rightEdge = colRights[columnIndex];
+            ctx.fillStyle = column.active ? textColor : mutedColor;
+            ctx.fillText(label, rightEdge, headY);
+            if (column.active) {
+                const labelWidth = ctx.measureText(label).width;
+                ctx.fillStyle = accentColor;
+                ctx.fillRect(rightEdge - labelWidth, headY + colHeadSize * 0.75, labelWidth, Math.max(2, u(4)));
+            }
+        });
+        spaced.letterSpacing = '0px';
+        ctx.restore();
+    }
 
     rows.forEach((row, index) => {
         const y = bodyTop + index * rowHeight;
@@ -9907,6 +9971,17 @@ async function drawLadderPoster(
             ctx.fillStyle = mutedColor;
             ctx.font = `600 ${captionSize}px ${FONT_BODY}`;
             ctx.fillText(caption.toUpperCase(), nameX, centerY + 1 + Math.round(rowHeight * 0.2));
+        }
+
+        if (multi) {
+            ctx.textAlign = 'right';
+            statColumns.forEach((column, columnIndex) => {
+                ctx.fillStyle = column.active ? textColor : softColor;
+                ctx.font = `${column.active ? 800 : 600} ${colSize}px ${FONT_BODY}`;
+                ctx.fillText(String(row.stats?.[columnIndex] ?? '-').trim(), colRights[columnIndex], centerY + 1);
+            });
+            ctx.restore();
+            return;
         }
 
         // Valor principal + unidad ("38 PTS").
