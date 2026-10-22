@@ -1,0 +1,685 @@
+/*
+ * Perfil de jugador V2. Todo el color sale de los tokens de `globals.css`.
+ * El acento que pinta TEXTO es `--color-accent-ink` (el otro esta calibrado
+ * para fondos), igual que en la ficha anterior.
+ *
+ * Movimiento: solo transform/opacity, con feedback al apretar (:active) y
+ * `prefers-reduced-motion` respetado al final del archivo.
+ */
+
+.page {
+    --tag-ink: var(--color-accent-ink);
+    --pill-win-ink: var(--color-success);
+    --pill-loss-ink: var(--color-error);
+    --card-ink: var(--color-warning);
+    --card-bg: var(--color-bg-secondary);
+    --glass: color-mix(in srgb, var(--color-bg-primary) 78%, transparent);
+
+    min-height: 100vh;
+    background: var(--color-bg-primary);
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+:global([data-theme='light']) .page {
+    --tag-ink: #05603a;
+    --pill-win-ink: #09592a;
+    --pill-loss-ink: #a3121d;
+    --card-ink: #8a5a00;
+}
+
+/* ── Cabecera ─────────────────────────────────────────────────────────── */
+
+.hero {
+    background:
+        radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--color-accent) 26%, transparent), transparent 60%),
+        linear-gradient(180deg, var(--color-bg-secondary), var(--color-bg-primary));
+    padding-top: 12px;
+}
+
+.heroInner {
+    padding-bottom: 0;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+}
+
+.back,
+.shareBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: var(--radius-full);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: transform 120ms ease-out, background-color 0.2s ease;
+}
+
+.back {
+    margin-left: -10px;
+}
+
+.shareBtn {
+    gap: 6px;
+    padding: 0 14px;
+    border: 1px solid var(--color-border);
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.back:hover,
+.shareBtn:hover {
+    background: var(--color-bg-hover);
+}
+
+.back:active,
+.shareBtn:active {
+    transform: scale(0.96);
+}
+
+.identity {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0 20px;
+}
+
+.avatar {
+    width: 84px;
+    height: 84px;
+    flex-shrink: 0;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    background: var(--color-bg-tertiary);
+    border: 2px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatarIcon {
+    color: var(--color-text-muted);
+}
+
+/* El escudo del club va pegado al avatar, abajo a la derecha. */
+.avatarWrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatarCrest {
+    position: absolute;
+    right: -6px;
+    bottom: -4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+}
+
+.identityBody {
+    min-width: 0;
+    flex: 1;
+}
+
+.name {
+    font-size: clamp(1.625rem, 5vw, 2.25rem);
+    line-height: 1.08;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--color-text-primary);
+    margin: 0 0 10px;
+    overflow-wrap: anywhere;
+}
+
+.clubChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 4px 12px 4px 5px;
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--color-bg-primary) 55%, transparent);
+    border: 1px solid var(--color-border);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: transform 120ms ease-out, border-color 0.2s ease;
+}
+
+.clubChip:hover {
+    border-color: var(--color-accent);
+}
+
+.clubChip:active {
+    transform: scale(0.97);
+}
+
+.clubCrest {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+/* ── Pestañas (material translucido, pegadas arriba al scrollear) ─────── */
+
+.tabs {
+    display: flex;
+    gap: 22px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    margin: 0 -16px;
+    padding: 0 16px;
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 48px;
+    padding: 0 2px;
+    border: none;
+    background: none;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+}
+
+.tab:hover {
+    color: var(--color-text-primary);
+}
+
+.tabActive {
+    color: var(--color-text-primary);
+}
+
+.tab::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 -1px 0;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tabActive::after {
+    transform: scaleX(1);
+}
+
+.tabCount {
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-tertiary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+}
+
+/* ── Contenido ────────────────────────────────────────────────────────── */
+
+.main {
+    padding-top: 16px;
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.notice {
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+}
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: 16px;
+    box-shadow: var(--shadow-card, none);
+}
+
+.cardHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.cardTitle {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+}
+
+.cardTitleMeta {
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.cardHeadMeta {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+}
+
+.inlineLink {
+    color: inherit;
+    text-decoration: none;
+}
+
+.inlineLink:hover {
+    color: var(--color-accent-ink);
+    text-decoration: underline;
+}
+
+.linkBtn,
+.cardLink {
+    border: none;
+    background: none;
+    padding: 6px 0;
+    min-height: 44px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-accent-ink);
+    cursor: pointer;
+}
+
+.cardLink {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+    border-top: 1px solid var(--color-border);
+    padding-top: 12px;
+    text-align: center;
+}
+
+/* Datos del jugador: 3 columnas, valor arriba y etiqueta abajo, centrado. */
+.facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    gap: 18px 8px;
+    margin: 0;
+}
+
+.fact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 0;
+}
+
+.factValue {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow-wrap: anywhere;
+}
+
+.factLabel {
+    margin-top: 2px;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+}
+
+.factNote {
+    margin-top: 2px;
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+}
+
+/* Numeros grandes de la competicion mas reciente. */
+.bigStats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+
+.bigStat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.bigValue {
+    margin: 0;
+    font-size: 2rem;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+}
+
+.bigValueAccent {
+    color: var(--color-accent-ink);
+}
+
+.bigLabel {
+    margin-top: 2px;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+}
+
+/* Forma reciente: resultado de cada partido con el escudo del rival. */
+.form {
+    display: flex;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.form > li {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.formItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    text-decoration: none;
+    transition: transform 120ms ease-out;
+}
+
+.formItem:active {
+    transform: scale(0.95);
+}
+
+.formScore {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 56px;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.form_win {
+    background: color-mix(in srgb, var(--color-success) 20%, transparent);
+    color: var(--pill-win-ink);
+}
+
+.form_loss {
+    background: color-mix(in srgb, var(--color-error) 18%, transparent);
+    color: var(--pill-loss-ink);
+}
+
+.form_draw,
+.form_none {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-secondary);
+}
+
+.formCrest {
+    display: inline-flex;
+}
+
+.matchList {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* ── Estadisticas ─────────────────────────────────────────────────────── */
+
+.scopeBar {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+}
+
+.scopeBar::-webkit-scrollbar {
+    display: none;
+}
+
+.scopeChip {
+    flex-shrink: 0;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform 120ms ease-out, background-color 0.2s ease, color 0.2s ease;
+}
+
+.scopeChip:active {
+    transform: scale(0.96);
+}
+
+.scopeChipActive {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-bg-primary);
+}
+
+.context {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+}
+
+.context strong {
+    color: var(--color-text-primary);
+}
+
+.groupNote {
+    margin: -4px 0 12px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--color-text-muted);
+}
+
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+
+.tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 6px;
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-tertiary);
+    text-align: center;
+}
+
+.tileValue {
+    margin: 0;
+    font-size: 1.5rem;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+}
+
+.tileEmpty {
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.tileLabel {
+    margin-top: 4px;
+    font-size: 0.75rem;
+    line-height: 1.25;
+    color: var(--color-text-secondary);
+}
+
+.tileHint {
+    color: var(--color-text-muted);
+}
+
+.toneAccent {
+    color: var(--color-accent-ink);
+}
+
+.toneCaution {
+    color: var(--card-ink);
+}
+
+.toneDanger {
+    color: var(--color-error);
+}
+
+.actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 44px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.actionLabel {
+    font-size: 0.9375rem;
+    color: var(--color-text-primary);
+}
+
+.actionCount {
+    font-size: 1rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+}
+
+/* ── Escritorio / tablet ──────────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+    .tabs {
+        margin: 0;
+        padding: 0;
+    }
+
+    .panel {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        align-items: start;
+    }
+
+    /* Lo que es una columna entera (partidos, trayectoria, estadisticas) ocupa las dos. */
+    .panel > :global(*):only-child,
+    .panel > .scopeBar,
+    .panel > .context {
+        grid-column: 1 / -1;
+    }
+
+    .avatar {
+        width: 104px;
+        height: 104px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .tiles {
+        grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+    }
+}
+
+/* ── Accesibilidad ────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    .tab::after,
+    .back,
+    .shareBtn,
+    .clubChip,
+    .formItem,
+    .scopeChip {
+        transition: none;
+    }
+
+    .back:active,
+    .shareBtn:active,
+    .clubChip:active,
+    .formItem:active,
+    .scopeChip:active {
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .tabs,
+    .shareBtn {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background: var(--color-bg-primary);
+    }
+}

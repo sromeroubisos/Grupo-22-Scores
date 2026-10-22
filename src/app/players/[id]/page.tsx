@@ -9,6 +9,7 @@ import { getWorldCupPlayerProfile, type WorldCupPlayerProfile as WorldCupProfile
 import { parseFihPlayerRef } from '@/lib/services/fihHockeyParser';
 import PlayerDetailClientPage from './PlayerDetailClientPage';
 import PlayerProfile from './PlayerProfile';
+import PlayerProfileV2 from './PlayerProfileV2';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -114,8 +115,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     };
 }
 
-export default async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PlayerDetailPage({
+    params,
+    searchParams,
+}: {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ diseno?: string }>;
+}) {
     const { id } = await params;
+    const { diseno } = await searchParams;
     const playerId = id.trim();
 
     if (parseFihPlayerRef(playerId)) {
@@ -129,7 +137,8 @@ export default async function PlayerDetailPage({ params }: { params: Promise<{ i
         // Un UUID que no es nadie es un 404 de verdad. Antes la API contestaba
         // 200 con `details: []` y la pagina publicaba el id crudo como titulo.
         if (!profile) notFound();
-        return <PlayerProfile profile={profile} />;
+        // `?diseno=anterior` deja a mano la ficha de antes para comparar la propuesta.
+        return diseno === 'anterior' ? <PlayerProfile profile={profile} /> : <PlayerProfileV2 profile={profile} />;
     }
 
     return <PlayerDetailClientPage id={playerId} />;

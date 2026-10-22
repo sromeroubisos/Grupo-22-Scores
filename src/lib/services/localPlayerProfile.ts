@@ -29,8 +29,15 @@ import {
     getDefaultMatchEventDefinitions,
     type MatchEventDefinition,
 } from '@/lib/matchEventCatalog';
+import { isGoalKickAttemptEvent, isGoalKickMade } from '@/lib/matchEventStats';
 import { getConfiguredEventPoints } from '@/lib/matchStatsFromEvents';
 import { positionLabelFromJerseyNumber } from '@/lib/types/squad';
+import {
+    addMatchToTotals,
+    emptyMatchStats,
+    emptyTotals,
+    otherActionsOf,
+} from './playerProfileAggregate';
 
 type SupabaseLike = {
     from: (table: string) => any;
@@ -46,6 +53,27 @@ export type PlayerEventTally = {
     count: number;
     /** 'score' | 'card' | 'discipline' | … — de aca sale el color del chip. */
     category: string;
+    /**
+     * De `count`, cuantos fueron tiros a los palos que NO entraron. `count`
+     * sigue siendo el total de intentos: lo bueno es `count - missed`.
+     */
+    missed?: number;
+};
+
+/**
+ * Lo que un partido le suma a los contadores, ya interpretado evento por
+ * evento. Un tiro a los palos errado NO es una conversion ni un penal: el
+ * total anterior los contaba igual porque solo miraba el tipo del evento.
+ */
+export type PlayerMatchStats = {
+    tries: number;
+    conversions: number;
+    penalties: number;
+    dropGoals: number;
+    /** Conversiones, penales y drops que no entraron. */
+    kicksMissed: number;
+    yellowCards: number;
+    redCards: number;
 };
 
 export type PlayerProfileTeam = {
@@ -71,37 +99,46 @@ export type PlayerProfileMatch = {
     result: PlayerMatchResult | null;
     points: number;
     events: PlayerEventTally[];
+    stats: PlayerMatchStats;
+    /** Minuto en que ENTRO desde el banco, si hay una sustitucion cargada. */
+    subbedOn: { minute: number | null } | null;
+    /** Minuto en que SALIO, si hay una sustitucion cargada. */
+    subbedOff: { minute: number | null } | null;
+    /**
+     * Minutos en cancha, CALCULADOS: entrada (0 si es titular, o el minuto del
+     * cambio) hasta la salida, la roja o el final reglamentario. `null` si no
+     * se puede saber: sin formacion ni cambio cargado, o deporte sin duracion
+     * declarada. No se estima nada que los eventos no sostengan.
+     */
+    minutes: number | null;
 };
 
-export type PlayerProfileTotals = {
+export type PlayerProfileTotals = PlayerMatchStats & {
     matches: number;
     starts: number;
     bench: number;
+    /** Partidos en que fue capitan. */
+    captain: number;
+    wins: number;
+    draws: number;
+    losses: number;
     points: number;
-    tries: number;
-    conversions: number;
-    penalties: number;
-    dropGoals: number;
-    yellowCards: number;
-    redCards: number;
+    /** Partidos en que entro desde el banco / salio reemplazado (con evento cargado). */
+    subbedOn: number;
+    subbedOff: number;
+    /** Suma de minutos de los partidos donde se pudieron calcular. */
+    minutes: number;
+    /** En cuantos partidos se pudieron calcular: el promedio se saca de estos. */
+    minutesKnown: number;
 };
 
-export type PlayerProfileSeason = {
+export type PlayerProfileSeason = PlayerProfileTotals & {
     key: string;
     tournamentId: string | null;
     tournamentName: string;
     year: string | null;
     clubId: string | null;
     clubName: string | null;
-    matches: number;
-    starts: number;
-    tries: number;
-    conversions: number;
-    penalties: number;
-    dropGoals: number;
-    points: number;
-    yellowCards: number;
-    redCards: number;
 };
 
 export type PlayerProfileClub = {
@@ -141,12 +178,50 @@ export type LocalPlayerProfile = {
     totals: PlayerProfileTotals;
     seasons: PlayerProfileSeason[];
     /**
+     * Acciones cargadas que no tienen contador propio (lines, scrums,
+     * knock-ons, patadas, lesiones…), sumadas por tipo.
+     */
+    actions: PlayerEventTally[];
+    /**
      * Cuantos partidos del club se miraron. Si el jugador no aparece en
      * ninguno la ficha lo dice, en vez de mostrar ceros como si hubiera
      * jugado y no hubiera hecho nada.
      */
     scanned: number;
+    /**
+     * Hubo mas filas que el tope de lectura: los totales pueden quedar cortos
+     * y la ficha tiene que decirlo en vez de presentarlos como completos.
+     */
+    truncated: boolean;
 };
+
+/**
+ * La ficha que puede salir a un anónimo: la EDAD en lugar de la fecha de
+ * nacimiento, y sin talla ni peso. Es el mismo criterio que `/api/teams` con
+ * el padrón: la lectura es con service_role (no pasa por los privilegios de
+ * columna que la migración le revocó a la clave anónima) y entre los jugadores
+ * hay juveniles menores de edad.
+ */
+export type PublicLocalPlayerProfile = Omit<LocalPlayerProfile, 'birthDate' | 'height' | 'weight'> & {
+    age: number | null;
+};
+
+export function ageFromBirthDate(birthDate: string | null | undefined, now: Date = new Date()): number | null {
+    if (!birthDate) return null;
+    const birth = new Date(birthDate);
+    if (Number.isNaN(birth.getTime())) return null;
+    let age = now.getFullYear() - birth.getFullYear();
+    const hasBirthdayPassed =
+        now.getMonth() > birth.getMonth()
+        || (now.getMonth() === birth.getMonth() && now.getDate() >= birth.getDate());
+    if (!hasBirthdayPassed) age -= 1;
+    return age >= 0 && age < 120 ? age : null;
+}
+
+export function toPublicLocalPlayerProfile(profile: LocalPlayerProfile): PublicLocalPlayerProfile {
+    const { birthDate, height: _height, weight: _weight, ...rest } = profile;
+    return { ...rest, age: ageFromBirthDate(birthDate) };
+}
 
 /** Cuantos partidos se traen por lado. Un plantel local no llega ni cerca. */
 const MATCH_LIMIT_PER_SIDE = 120;
@@ -163,6 +238,46 @@ const PENALTY_KICK_TYPES = new Set(['penalty_goal', 'penalty']);
 const DROP_TYPES = new Set(['drop_goal']);
 const YELLOW_TYPES = new Set(['yellow_card', 'card_yellow']);
 const RED_TYPES = new Set(['red_card', 'card_red']);
+const SUBSTITUTION_TYPE = 'substitution';
+
+/** Duracion reglamentaria por deporte. Sin entrada, los minutos no se calculan. */
+const REGULATION_MINUTES: Record<string, number> = { rugby: 80 };
+
+function playedMinutes(
+    duration: number | null,
+    role: PlayerMatchRole | null,
+    subbedOn: { minute: number | null } | null,
+    subbedOff: { minute: number | null } | null,
+    redMinute: number | null,
+    matchHasSubs: boolean,
+): number | null {
+    if (duration === null) return null;
+    // Un partido de rugby sin NINGUN cambio cargado casi siempre es un partido
+    // donde los cambios no se cargaron: dar 80' al titular seria inventar.
+    if (!matchHasSubs && !subbedOn && !subbedOff) return null;
+    let start: number;
+    if (subbedOn) {
+        if (subbedOn.minute === null) return null;
+        start = subbedOn.minute;
+    } else if (role === 'starter') {
+        start = 0;
+    } else if (role === 'bench') {
+        // Hay cambios cargados en el partido y el no entro: no jugo.
+        return 0;
+    } else {
+        // Sin formacion y sin cambio propio: no sabemos si jugo.
+        return null;
+    }
+    let end = duration;
+    if (subbedOff) {
+        if (subbedOff.minute === null) return null;
+        end = subbedOff.minute;
+    } else if (redMinute !== null) {
+        end = redMinute;
+    }
+    end = Math.min(end, duration);
+    return Math.max(0, end - Math.min(start, duration));
+}
 
 function readNumber(value: unknown): number | null {
     const n = Number(value);
@@ -234,7 +349,7 @@ export async function getLocalPlayerProfile(
     // lleva llaves y comas propias, que dentro de un `or=(…)` se comen el
     // parser. Dos `contains` en paralelo dicen lo mismo y no hay que escapar
     // nada.
-    const [homeRes, awayRes, eventsRes, rolesRes] = await Promise.all([
+    const [homeRes, awayRes, eventsRes, subsInRes, rolesRes] = await Promise.all([
         supabase
             .from('matches')
             .select(MATCH_COLUMNS)
@@ -249,8 +364,17 @@ export async function getLocalPlayerProfile(
             .limit(MATCH_LIMIT_PER_SIDE),
         supabase
             .from('match_events')
-            .select('match_id, event_type, minute, details')
+            .select('match_id, event_type, minute, details, player_id')
             .eq('player_id', personId)
+            .limit(EVENT_LIMIT),
+        // En una sustitucion `player_id` es el que SALE; el que ENTRA vive en
+        // `details.secondaryPlayerId`. Sin esta lectura, quien entro desde el
+        // banco no tenia el cambio en su ficha.
+        supabase
+            .from('match_events')
+            .select('match_id, event_type, minute, details, player_id')
+            .eq('event_type', 'substitution')
+            .eq('details->>secondaryPlayerId', personId)
             .limit(EVENT_LIMIT),
         supabase
             .from('club_person_roles')
@@ -264,18 +388,30 @@ export async function getLocalPlayerProfile(
         if (row?.id) matchRows.set(row.id, row);
     }
 
-    const eventRows = (eventsRes?.data || []) as Array<{
+    type EventRow = {
         match_id: string | null;
         event_type: string | null;
         minute: number | null;
         details: unknown;
-    }>;
+        player_id: string | null;
+    };
+    const eventRows = (eventsRes?.data || []) as EventRow[];
+    const subsInRows = (subsInRes?.data || []) as EventRow[];
+    const truncated =
+        (homeRes?.data?.length || 0) >= MATCH_LIMIT_PER_SIDE ||
+        (awayRes?.data?.length || 0) >= MATCH_LIMIT_PER_SIDE ||
+        eventRows.length >= EVENT_LIMIT ||
+        subsInRows.length >= EVENT_LIMIT;
 
     // Un partido puede tener eventos del jugador y no tenerlo en el lineup
     // (planillas viejas cargadas al reves). Se trae igual: el evento existe,
     // asi que jugo.
     const missingMatchIds = [
-        ...new Set(eventRows.map((e) => e.match_id).filter((id): id is string => Boolean(id) && !matchRows.has(id!))),
+        ...new Set(
+            [...eventRows, ...subsInRows]
+                .map((e) => e.match_id)
+                .filter((id): id is string => Boolean(id) && !matchRows.has(id!)),
+        ),
     ];
     if (missingMatchIds.length > 0) {
         const { data: extra } = await supabase
@@ -288,6 +424,20 @@ export async function getLocalPlayerProfile(
     }
 
     const matches = [...matchRows.values()].filter((row) => row?.is_visible !== false);
+
+    // En que partidos hay cambios cargados (de cualquier jugador). En tandas
+    // de 20: PostgREST corta en 1000 filas y un partido trae decenas de cambios.
+    const matchIdsWithSubs = new Set<string>();
+    const idChunks: string[][] = [];
+    for (let i = 0; i < matches.length; i += 20) idChunks.push(matches.slice(i, i + 20).map((m) => m.id));
+    const subChunks = await Promise.all(
+        idChunks.map((ids) =>
+            supabase.from('match_events').select('match_id').eq('event_type', SUBSTITUTION_TYPE).in('match_id', ids).limit(1000),
+        ),
+    );
+    for (const res of subChunks) {
+        for (const row of res?.data || []) if (row?.match_id) matchIdsWithSubs.add(row.match_id);
+    }
 
     // Clubes y torneos en dos consultas, no una por fila.
     const clubIds = new Set<string>();
@@ -328,18 +478,12 @@ export async function getLocalPlayerProfile(
         eventsByMatch.set(event.match_id, list);
     }
 
-    const totals: PlayerProfileTotals = {
-        matches: 0,
-        starts: 0,
-        bench: 0,
-        points: 0,
-        tries: 0,
-        conversions: 0,
-        penalties: 0,
-        dropGoals: 0,
-        yellowCards: 0,
-        redCards: 0,
-    };
+    const subsInByMatch = new Map<string, EventRow>();
+    for (const event of subsInRows) {
+        if (event.match_id) subsInByMatch.set(event.match_id, event);
+    }
+
+    const totals: PlayerProfileTotals = emptyTotals();
 
     const seasonsByKey = new Map<string, PlayerProfileSeason>();
     let latestNumber: number | null = null;
@@ -355,7 +499,18 @@ export async function getLocalPlayerProfile(
         const homeEntry = findInLineup(row.lineups, 'home', personId);
         const awayEntry = findInLineup(row.lineups, 'away', personId);
         const entry = homeEntry || awayEntry;
-        const side: PlayerMatchSide | null = homeEntry ? 'home' : awayEntry ? 'away' : null;
+        const matchEvents = eventsByMatch.get(row.id) || [];
+        // Sin formacion cargada el lado sale de sus propios eventos: un try
+        // cargado al equipo `home` dice de que lado jugo. Antes el partido
+        // quedaba sin resultado (G/E/P) aunque el jugador hubiera anotado.
+        const sideFromEvents = (): PlayerMatchSide | null => {
+            for (const event of [...matchEvents, ...(subsInByMatch.has(row.id) ? [subsInByMatch.get(row.id)!] : [])]) {
+                const team = event.details && typeof event.details === 'object' ? (event.details as Record<string, unknown>).team : null;
+                if (team === 'home' || team === 'away') return team;
+            }
+            return null;
+        };
+        const side: PlayerMatchSide | null = homeEntry ? 'home' : awayEntry ? 'away' : sideFromEvents();
 
         const score = row.score && typeof row.score === 'object' ? (row.score as Record<string, unknown>) : {};
         const homeScore = readNumber(score.home);
@@ -365,13 +520,23 @@ export async function getLocalPlayerProfile(
         const role: PlayerMatchRole | null = rawRole ? (rawRole === 'starter' ? 'starter' : 'bench') : null;
         const number = readNumber(entry?.number);
 
-        const matchEvents = eventsByMatch.get(row.id) || [];
         const tallyByType = new Map<string, PlayerEventTally>();
+        const stats = emptyMatchStats();
         let points = 0;
+        let subbedOff: PlayerProfileMatch['subbedOff'] = null;
+        let redMinute: number | null = null;
 
         for (const event of matchEvents) {
             const type = readText(event.event_type);
             if (!type) continue;
+
+            // Una sustitucion no es una accion del jugador: es que salio. El
+            // minuto sirve para el partido; no entra en el conteo de acciones.
+            if (type === SUBSTITUTION_TYPE) {
+                subbedOff = { minute: readNumber(event.minute) };
+                continue;
+            }
+
             const definition = definitionMap[type];
             // Los eventos de reloj no son del jugador aunque queden atados a el.
             if (definition?.category === 'clock') continue;
@@ -379,18 +544,43 @@ export async function getLocalPlayerProfile(
             const detail = readEventDetail(event.details);
             points += getConfiguredEventPoints({ type, detail }, definitionMap);
 
+            // Solo los tiros a los palos se pueden errar. El mismo criterio que
+            // usa el marcador (`isGoalKickMade`): un penal "al touch" no es un
+            // tiro, y una conversion `[palos:miss]` no es una conversion.
+            const isKick = Boolean(definition?.kickAtGoal) && isGoalKickAttemptEvent({ type, detail });
+            const kickMade = isKick && isGoalKickMade(type, detail);
+
+            if (TRY_TYPES.has(type)) stats.tries += 1;
+            else if (YELLOW_TYPES.has(type)) stats.yellowCards += 1;
+            else if (RED_TYPES.has(type)) {
+                stats.redCards += 1;
+                redMinute = readNumber(event.minute);
+            }
+            else if (isKick && kickMade) {
+                if (CONVERSION_TYPES.has(type)) stats.conversions += 1;
+                else if (PENALTY_KICK_TYPES.has(type)) stats.penalties += 1;
+                else if (DROP_TYPES.has(type)) stats.dropGoals += 1;
+            } else if (isKick && !kickMade) {
+                stats.kicksMissed += 1;
+            }
+
             const current = tallyByType.get(type);
             if (current) {
                 current.count += 1;
+                if (isKick && !kickMade) current.missed = (current.missed || 0) + 1;
             } else {
                 tallyByType.set(type, {
                     type,
                     label: definition?.label || type,
                     count: 1,
                     category: definition?.category || 'other',
+                    ...(isKick && !kickMade ? { missed: 1 } : {}),
                 });
             }
         }
+
+        const subIn = subsInByMatch.get(row.id);
+        const subbedOn: PlayerProfileMatch['subbedOn'] = subIn ? { minute: readNumber(subIn.minute) } : null;
 
         const homeClub = row.home_club_id ? clubById.get(row.home_club_id) : undefined;
         const awayClub = row.away_club_id ? clubById.get(row.away_club_id) : undefined;
@@ -421,6 +611,17 @@ export async function getLocalPlayerProfile(
             result: resolveResult(side, homeScore, awayScore),
             points,
             events: [...tallyByType.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)),
+            stats,
+            subbedOn,
+            subbedOff,
+            minutes: playedMinutes(
+                REGULATION_MINUTES[row.sport_id || 'rugby'] ?? null,
+                role,
+                subbedOn,
+                subbedOff,
+                redMinute,
+                matchIdsWithSubs.has(row.id),
+            ),
         };
 
         return match;
@@ -433,10 +634,7 @@ export async function getLocalPlayerProfile(
     });
 
     for (const match of built) {
-        totals.matches += 1;
-        if (match.role === 'starter') totals.starts += 1;
-        if (match.role === 'bench') totals.bench += 1;
-        totals.points += match.points;
+        addMatchToTotals(totals, match);
 
         if (latestNumber === null && match.number !== null) latestNumber = match.number;
         if (match.role === 'starter' && match.number !== null && match.number >= 1 && match.number <= 15) {
@@ -446,50 +644,17 @@ export async function getLocalPlayerProfile(
         const clubId = match.side === 'home' ? match.home.id : match.side === 'away' ? match.away.id : null;
         const year = match.date ? match.date.slice(0, 4) : null;
         const key = `${match.tournamentId || 'sin-torneo'}::${year || 's-f'}`;
-        const season = seasonsByKey.get(key) || {
+        const season: PlayerProfileSeason = seasonsByKey.get(key) || {
+            ...emptyTotals(),
             key,
             tournamentId: match.tournamentId,
             tournamentName: match.tournamentName || 'Partidos sueltos',
             year,
             clubId,
             clubName: clubId ? clubById.get(clubId)?.name || clubId : null,
-            matches: 0,
-            starts: 0,
-            tries: 0,
-            conversions: 0,
-            penalties: 0,
-            dropGoals: 0,
-            points: 0,
-            yellowCards: 0,
-            redCards: 0,
         };
 
-        season.matches += 1;
-        if (match.role === 'starter') season.starts += 1;
-        season.points += match.points;
-
-        for (const tally of match.events) {
-            if (TRY_TYPES.has(tally.type)) {
-                totals.tries += tally.count;
-                season.tries += tally.count;
-            } else if (CONVERSION_TYPES.has(tally.type)) {
-                totals.conversions += tally.count;
-                season.conversions += tally.count;
-            } else if (PENALTY_KICK_TYPES.has(tally.type)) {
-                totals.penalties += tally.count;
-                season.penalties += tally.count;
-            } else if (DROP_TYPES.has(tally.type)) {
-                totals.dropGoals += tally.count;
-                season.dropGoals += tally.count;
-            } else if (YELLOW_TYPES.has(tally.type)) {
-                totals.yellowCards += tally.count;
-                season.yellowCards += tally.count;
-            } else if (RED_TYPES.has(tally.type)) {
-                totals.redCards += tally.count;
-                season.redCards += tally.count;
-            }
-        }
-
+        addMatchToTotals(season, match);
         seasonsByKey.set(key, season);
     }
 
@@ -545,6 +710,8 @@ export async function getLocalPlayerProfile(
         matches: built,
         totals,
         seasons: [...seasonsByKey.values()].sort((a, b) => (b.year || '').localeCompare(a.year || '')),
+        actions: otherActionsOf(built),
         scanned: matches.length,
+        truncated,
     };
 }

@@ -27,14 +27,14 @@ function isTabId(value: string | null): value is TabId {
     return value === 'resumen' || value === 'partidos' || value === 'trayectoria';
 }
 
-function initialsOf(name: string) {
+export function initialsOf(name: string) {
     const parts = name.trim().split(/\s+/).filter(Boolean);
     if (parts.length === 0) return '?';
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-function formatMatchDate(value: string | null) {
+export function formatMatchDate(value: string | null) {
     if (!value) return 'Sin fecha';
     return (
         formatDateInTimeZone(value, 'es-AR', { day: 'numeric', month: 'short', year: 'numeric' }) ||
@@ -42,7 +42,7 @@ function formatMatchDate(value: string | null) {
     );
 }
 
-function ageFrom(birthDate: string | null) {
+export function ageFrom(birthDate: string | null) {
     if (!birthDate) return null;
     const born = new Date(birthDate);
     if (Number.isNaN(born.getTime())) return null;
@@ -61,7 +61,7 @@ function ageFrom(birthDate: string | null) {
  * campo vacio se lee como "no lo cargamos", el absurdo se lee como que el sitio
  * esta roto.
  */
-function formatHeight(value: number | string | null) {
+export function formatHeight(value: number | string | null) {
     const n = Number(value);
     if (!Number.isFinite(n) || n <= 0) return null;
     if (n >= 1.4 && n <= 2.3) return `${n.toFixed(2)} m`;
@@ -69,7 +69,7 @@ function formatHeight(value: number | string | null) {
     return null;
 }
 
-function formatWeight(value: number | string | null) {
+export function formatWeight(value: number | string | null) {
     const n = Number(value);
     if (!Number.isFinite(n) || n < 40 || n > 200) return null;
     return `${Math.round(n)} kg`;
@@ -400,7 +400,7 @@ export default function PlayerProfile({ profile }: { profile: LocalPlayerProfile
     );
 }
 
-function MatchRow({ match, expanded = false }: { match: PlayerProfileMatch; expanded?: boolean }) {
+export function MatchRow({ match, expanded = false }: { match: PlayerProfileMatch; expanded?: boolean }) {
     const scoring = match.events.filter((event) => event.category === 'score');
     const cards = match.events.filter((event) => event.category === 'card');
     const shown = expanded ? [...scoring, ...cards] : scoring;
@@ -481,7 +481,7 @@ function MatchRow({ match, expanded = false }: { match: PlayerProfileMatch; expa
     );
 }
 
-function SeasonTable({
+export function SeasonTable({
     seasons,
     totals,
 }: {
@@ -602,7 +602,7 @@ function SeasonTable({
  * informacion disponible" no es una respuesta: deja al jugador en una pagina
  * sin salida.
  */
-function EmptyMatches({ profile }: { profile: LocalPlayerProfile }) {
+export function EmptyMatches({ profile }: { profile: LocalPlayerProfile }) {
     const nombre = profile.name.split(/\s+/)[0] || 'este jugador';
     return (
         <div className={styles.empty}>
