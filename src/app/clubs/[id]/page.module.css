@@ -2343,6 +2343,27 @@
     border-radius: 50%;
     background: var(--color-bg-tertiary);
     border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+}
+
+/* La cabeza del jugador con el escudo de su club pegado a un costado. */
+.playerAvatarWrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.playerAvatarCrest {
+    position: absolute;
+    right: -5px;
+    bottom: -3px;
+    display: inline-flex;
+    padding: 1px;
+    border-radius: 50%;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
 }
 
 .playerName {

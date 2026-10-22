@@ -16,6 +16,8 @@ import { canUseRestrictedContentActions } from '@/lib/auth/roles';
 import { sortMatchesByDate } from '@/lib/utils/matchOrdering';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
 import { useAuth } from '@/context/AuthContext';
+import PlayerHeadIcon from '@/components/PlayerHeadIcon';
+import TeamLogo from '@/components/TeamLogo';
 import HistoryTab from './HistoryTab';
 import QuickSquadModal from './QuickSquadModal';
 import PanelMatchForm, { type PanelFamilyClub } from './PanelMatchForm';
@@ -1842,12 +1844,21 @@ function TeamDetailInner({ id }: { id: string }) {
 
                                                     return (
                                                         <div key={pId || idx} className={styles.playerRow}>
-                                                            <div>
+                                                            <div className={styles.playerAvatarWrap}>
                                                                 {playerPhoto ? (
                                                                     <img src={playerPhoto} alt={playerName} className={styles.playerPhoto} />
                                                                 ) : (
-                                                                    <div className={styles.playerPhotoPlaceholder} />
+                                                                    <div className={styles.playerPhotoPlaceholder}>
+                                                                        <PlayerHeadIcon size={22} />
+                                                                    </div>
                                                                 )}
+                                                                <span className={styles.playerAvatarCrest} aria-hidden="true">
+                                                                    <TeamLogo
+                                                                        name={String(teamName || '')}
+                                                                        teamId={resolvedClubId || rawId}
+                                                                        size={16}
+                                                                    />
+                                                                </span>
                                                             </div>
                                                             <div className={styles.playerIdentity}>
                                                                 <div className={styles.playerName}>
