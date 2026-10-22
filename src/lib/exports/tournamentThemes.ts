@@ -29,7 +29,7 @@ export type TournamentExportTheme = {
 const IMG = '/export-backgrounds/';
 
 export const TOURNAMENT_THEMES = {
-    regional: { id: 'regional', image: `${IMG}rojo.jpg`, bg: '#6d0b11', accent: '#ffffff', highlight: '#fca5a5' },
+    regional: { id: 'regional', image: `${IMG}rojo.jpg`, bg: '#6d0b11', accent: '#ffffff', highlight: '#ffffff' },
     ascenso: { id: 'ascenso', image: `${IMG}dorado.jpg`, bg: '#503308', accent: '#eab308', highlight: '#fde68a' },
     juvenil: { id: 'juvenil', image: `${IMG}negro.jpg`, bg: '#181818', accent: '#22c55e', highlight: '#ffffff' },
     uruguay: { id: 'uruguay', image: `${IMG}azul.jpg`, bg: '#0b416b', accent: '#ffffff', highlight: '#7dd3fc' },
