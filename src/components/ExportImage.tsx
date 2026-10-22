@@ -125,6 +125,8 @@ export interface StandingsData {
     // La estadistica que se exporta (siempre la de la columna `points`) va
     // subrayada en la cabecera, para distinguirla de las que la acompanan.
     activeColumn?: 'points';
+    // Filas por imagen; sin el, el tope del diseno (20 en la placa normal).
+    rowsPerSlide?: number;
     // Color con el que se resalta esa estadistica (subrayado y cifras); sin el,
     // el subrayado va en el acento del diseno.
     activeColor?: string;
@@ -134,6 +136,8 @@ export interface StandingsData {
 }
 
 export interface DailyMatchesData {
+    // Fondo propio subido en el modal; se mezcla sobre la placa ya dibujada.
+    backgroundImage?: string;
     date: string;
     tournament: string;
     /**
@@ -429,11 +433,25 @@ type RemoteExportPresetRow = {
     payload: Record<string, unknown>;
 };
 
+// Lo que el panel del export de estadisticas deja elegir. Lo maneja quien
+// exporta (el estado vive en la pantalla); el panel solo lo dibuja.
+export interface StandingsExportOptions {
+    /** "jugadores" / "equipos": para los rotulos. */
+    entityPlural: string;
+    highlight: { value: string; options: Array<{ id: string; label: string }>; onChange: (id: string) => void };
+    extras: { options: Array<{ id: string; label: string }>; selected: string[]; max: number; onToggle: (id: string) => void };
+    color: { value: string; onChange: (color: string) => void };
+    /** `value` 0 = todas las filas. */
+    limit: { value: number; total: number; choices: number[]; onChange: (value: number) => void };
+    perImage: { value: number; choices: number[]; onChange: (value: number) => void };
+}
+
 interface ExportImageProps {
     template: ExportTemplate;
     data: ExportData;
     filename?: string;
     className?: string;
+    statsOptions?: StandingsExportOptions;
 }
 
 type ExportPreviewColorOverrides = {
@@ -1053,7 +1071,7 @@ export default function ExportImage(props: ExportImageProps) {
     return <ExportImageInner key={props.template} {...props} />;
 }
 
-function ExportImageInner({ template, data: liveData, filename = 'g22-export', className = '' }: ExportImageProps) {
+function ExportImageInner({ template, data: liveData, filename = 'g22-export', className = '', statsOptions }: ExportImageProps) {
     const supabase = useMemo(() => createClient(), []);
     const { user } = useAuth();
     const guestInvite = useGuestExportInvite();
@@ -1085,7 +1103,9 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     // La foto solo vale con el modal abierto. Cerrado, el boton y sus deducciones
     // (que haya partidos programados, el nombre por defecto) siguen a la prop viva:
     // si se congelara siempre, una instancia reusada leeria datos de otra plantilla.
-    const data = showModal ? frozenData : liveData;
+    // Con `statsOptions` el panel cambia los datos desde adentro del modal, asi que
+    // la pieza tiene que seguir a la prop viva (la pantalla la memoiza: no titila).
+    const data = showModal && !statsOptions ? frozenData : liveData;
     const [isPortalReady, setIsPortalReady] = useState(false);
     const [format, setFormat] = useState<ExportFormat>('1080x1350');
     const [status, setStatus] = useState('');
@@ -2307,6 +2327,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                 } else {
                     await drawDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo, dailyMatchesTimeMode);
                 }
+                await applyStandingsBackgroundOverlay(ctx, canvas, standingsBackgroundUpload?.src);
             } else if (template === 'squad') {
                 const squadData = exportData as SquadData;
                 const pages = buildSquadPages(squadData, config);
@@ -2388,6 +2409,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             return {
                 ...matchesData,
                 matches: selectedMatches.length > 0 ? selectedMatches : matchesData.matches,
+                // Fondo propio de las placas de partidos (se mezcla por encima).
+                ...(standingsBackgroundUpload?.src ? { backgroundImage: standingsBackgroundUpload.src } : {}),
             };
         }
 
@@ -3493,7 +3516,107 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                 </div>
                             )}
 
-                            {template === 'standings' && (
+                            {template === 'standings' && statsOptions && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Estadísticas</label>
+                                    <div className={styles.optionGroup}>
+                                        <span className={styles.optionTitle}>Resaltar</span>
+                                        <div className={styles.optionRow} role="radiogroup" aria-label="Estadística resaltada">
+                                            {statsOptions.highlight.options.map((option) => (
+                                                <button
+                                                    key={option.id}
+                                                    type="button"
+                                                    role="radio"
+                                                    aria-checked={statsOptions.highlight.value === option.id}
+                                                    className={`${styles.optionBtn} ${statsOptions.highlight.value === option.id ? styles.optionBtnOn : ''}`}
+                                                    onClick={() => statsOptions.highlight.onChange(option.id)}
+                                                >
+                                                    {option.label}
+                                                </button>
+                                            ))}
+                                            <label className={styles.optionColor}>
+                                                Color
+                                                <input
+                                                    type="color"
+                                                    value={statsOptions.color.value}
+                                                    onChange={(event) => statsOptions.color.onChange(event.target.value)}
+                                                    aria-label="Color de la estadística resaltada"
+                                                />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div className={styles.optionGroup}>
+                                        <span className={styles.optionTitle}>
+                                            La acompañan (hasta {statsOptions.extras.max})
+                                        </span>
+                                        <div className={styles.optionRow}>
+                                            {statsOptions.extras.options.map((option) => {
+                                                const on = statsOptions.extras.selected.includes(option.id);
+                                                const full = !on && statsOptions.extras.selected.length >= statsOptions.extras.max;
+                                                return (
+                                                    <button
+                                                        key={option.id}
+                                                        type="button"
+                                                        aria-pressed={on}
+                                                        disabled={full}
+                                                        className={`${styles.optionBtn} ${on ? styles.optionBtnOn : ''}`}
+                                                        onClick={() => statsOptions.extras.onToggle(option.id)}
+                                                    >
+                                                        {option.label}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                    <div className={styles.optionGroup}>
+                                        <span className={styles.optionTitle}>
+                                            Cuántos {statsOptions.entityPlural} ({statsOptions.limit.total} en total)
+                                        </span>
+                                        <div className={styles.optionRow} role="radiogroup" aria-label={`Cantidad de ${statsOptions.entityPlural}`}>
+                                            {[...statsOptions.limit.choices, 0].map((choice) => (
+                                                <button
+                                                    key={choice}
+                                                    type="button"
+                                                    role="radio"
+                                                    aria-checked={statsOptions.limit.value === choice}
+                                                    className={`${styles.optionBtn} ${statsOptions.limit.value === choice ? styles.optionBtnOn : ''}`}
+                                                    onClick={() => statsOptions.limit.onChange(choice)}
+                                                >
+                                                    {choice === 0 ? 'Todos' : choice}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className={styles.optionGroup}>
+                                        <span className={styles.optionTitle}>Por imagen</span>
+                                        <div className={styles.optionRow} role="radiogroup" aria-label="Filas por imagen">
+                                            {statsOptions.perImage.choices.map((choice) => (
+                                                <button
+                                                    key={choice}
+                                                    type="button"
+                                                    role="radio"
+                                                    aria-checked={statsOptions.perImage.value === choice}
+                                                    className={`${styles.optionBtn} ${statsOptions.perImage.value === choice ? styles.optionBtnOn : ''}`}
+                                                    onClick={() => statsOptions.perImage.onChange(choice)}
+                                                >
+                                                    {choice}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <span className={styles.optionHint}>
+                                            {(() => {
+                                                const shown = statsOptions.limit.value > 0
+                                                    ? Math.min(statsOptions.limit.value, statsOptions.limit.total)
+                                                    : statsOptions.limit.total;
+                                                const images = Math.max(1, Math.ceil(shown / statsOptions.perImage.value));
+                                                return `${shown} ${statsOptions.entityPlural} en ${images} ${images === 1 ? 'imagen' : 'imágenes'}.`;
+                                            })()}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {(template === 'standings' || template === 'dailyMatches') && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Fondo propio</label>
                                     <div className={styles.uploadCard}>
@@ -5794,6 +5917,7 @@ export async function renderMatchExportPreviewCanvas(
         } else {
             await drawDailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, dailyMatchesTimeMode);
         }
+        await applyStandingsBackgroundOverlay(ctx, canvas, (exportData as DailyMatchesData).backgroundImage);
     } else if (template === 'standings') {
         const standingsData = exportData as StandingsData;
         const slide = buildStandingsSlides(standingsData, standingsExportMode)[0];
@@ -5963,7 +6087,9 @@ function scopeStandingsDataForExport(data: StandingsData, mode: StandingsExportM
 }
 
 function buildStandingsSlides(data: StandingsData, mode: StandingsExportMode): StandingsSlideData[] {
-    const rowsPerSlide = data.variant === 'ladder' ? LADDER_MAX_ROWS : MAX_STANDINGS_ROWS_PER_SLIDE;
+    const rowsPerSlide = data.rowsPerSlide && data.rowsPerSlide > 0
+        ? data.rowsPerSlide
+        : data.variant === 'ladder' ? LADDER_MAX_ROWS : MAX_STANDINGS_ROWS_PER_SLIDE;
     if (getStandingsSlideMode(mode) === 'groups') {
         const groups = getExportableStandingsGroups(data);
         if (groups.length > 0) {

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import type { StandingsData } from '@/components/ExportImage';
+import type { StandingsData, StandingsExportOptions } from '@/components/ExportImage';
 import styles from './page.module.css';
 import {
     isGoalKickAttemptEvent,
@@ -345,6 +345,9 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
     // La estadistica resaltada en la placa (`null`: la que ordena la tabla) y su color.
     const [highlightStatId, setHighlightStatId] = useState<string | null>(null);
     const [highlightColor, setHighlightColor] = useState('#22c55e');
+    // Cuantas filas se exportan en total (0: todas) y cuantas entran por imagen.
+    const [exportLimit, setExportLimit] = useState(10);
+    const [exportPerImage, setExportPerImage] = useState(10);
     const [expandedTeamId, setExpandedTeamId] = useState<string | null>(null);
     const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -802,7 +805,10 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
         const [first, second, third, fourth] = otherColumns;
         const unusedColumns = (['played', 'won', 'lost', 'diff'] as const).slice(0, unusedCount);
         const valueOf = (row: any, column: StatColumn) => (column.id ? formatStatValue(row, column, unmeasuredMetrics) : '');
-        const rows = displayRows.map((row, index) => {
+        // La placa exporta las mejores N del orden vigente, no lo que muestre la
+        // pagina: el tope se elige en el panel del export.
+        const exportRows = exportLimit > 0 ? sortedRows.slice(0, exportLimit) : sortedRows;
+        const rows = exportRows.map((row, index) => {
             // El escudo va por el proxy por id, como en la tabla de la web: el
             // logo_url del partido casi nunca viene (y si viene puede ser base64).
             const clubId = String(isTeams ? row.entityId : row.teamId ?? '');
@@ -842,8 +848,32 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             activeColumn: 'points',
             activeColor: highlightColor,
             unusedColumns,
+            rowsPerSlide: exportPerImage,
         };
-    }, [activeSubTab, displayRows, exportColumns, exportMainKey, highlightColor, selectedExtraIds, teamStatsView, tournamentLogo, tournamentName, unmeasuredMetrics]);
+    }, [activeSubTab, exportColumns, exportLimit, exportMainKey, exportPerImage, highlightColor, selectedExtraIds, sortedRows, teamStatsView, tournamentLogo, tournamentName, unmeasuredMetrics]);
+
+    // Lo que el panel del export ofrece: la estadistica resaltada, las que la
+    // acompanan, su color y cuantas filas / filas por imagen.
+    const statsExportOptions = useMemo<StandingsExportOptions>(() => ({
+        entityPlural: activeSubTab === 'teams' ? 'equipos' : 'jugadores',
+        highlight: {
+            value: exportMainKey,
+            options: exportColumns
+                .filter((column) => column.id !== 'entity' && column.id !== 'secondary' && !unmeasuredMetrics.has(column.id))
+                .map((column) => ({ id: column.id, label: column.label })),
+            onChange: setHighlightStatId,
+        },
+        extras: {
+            options: extraStatOptions.map((column) => ({ id: column.id, label: column.label })),
+            selected: selectedExtraIds,
+            max: MAX_EXTRA_STATS,
+            onToggle: toggleExtraStat,
+        },
+        color: { value: highlightColor, onChange: setHighlightColor },
+        limit: { value: exportLimit, total: sortedRows.length, choices: [5, 10, 15, 20], onChange: setExportLimit },
+        perImage: { value: exportPerImage, choices: [5, 10, 15, 20], onChange: setExportPerImage },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }), [activeSubTab, exportColumns, exportLimit, exportMainKey, exportPerImage, extraStatOptions, highlightColor, selectedExtraIds, sortedRows.length, unmeasuredMetrics]);
     const hasEvents = finalMatches.some((m) => Array.isArray(m.events) && m.events.length > 0);
     const showTopScorersFallback = !hasEvents && (topScorers?.length || 0) > 0;
     const activeSortColumn = currentColumns.find((column) => column.id === sortKey);
@@ -1048,58 +1078,12 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                                 template="standings"
                                 filename={`estadisticas-${activeSubTab === 'teams' ? 'equipos' : 'jugadores'}-${tournamentName || 'torneo'}`}
                                 data={statsExportData}
+                                statsOptions={statsExportOptions}
                             />
                         )}
                     </div>
                 )}
             </div>
-
-            {!showTopScorersFallback && hasStats && displayRows.length > 0 && extraStatOptions.length > 0 && (
-                <div className={styles.statsModeBar} role="group" aria-label="Estadísticas a incluir en la imagen exportada">
-                    <label className={styles.statsSubtitle}>
-                        Resaltar{' '}
-                        <select
-                            className={styles.statsSelect}
-                            value={exportMainKey}
-                            onChange={(event) => setHighlightStatId(event.target.value)}
-                            aria-label="Estadística resaltada en la imagen exportada"
-                        >
-                            {exportColumns
-                                .filter((column) => column.id !== 'entity' && column.id !== 'secondary' && !unmeasuredMetrics.has(column.id))
-                                .map((column) => (
-                                    <option key={column.id} value={column.id}>{column.label}</option>
-                                ))}
-                        </select>
-                    </label>
-                    <label className={styles.statsSubtitle}>
-                        Color{' '}
-                        <input
-                            type="color"
-                            value={highlightColor}
-                            onChange={(event) => setHighlightColor(event.target.value)}
-                            aria-label="Color de la estadística resaltada"
-                        />
-                    </label>
-                    <span className={styles.statsSubtitle}>Acompañan:</span>
-                    {extraStatOptions.map((column) => {
-                        const selected = selectedExtraIds.includes(column.id);
-                        const full = !selected && selectedExtraIds.length >= MAX_EXTRA_STATS;
-                        return (
-                            <button
-                                key={column.id}
-                                type="button"
-                                className={`${styles.statsModeButton} ${selected ? styles.statsModeButtonActive : ''}`}
-                                onClick={() => toggleExtraStat(column.id)}
-                                aria-pressed={selected}
-                                disabled={full}
-                                title={full ? `Hasta ${MAX_EXTRA_STATS} estadísticas junto a la principal` : column.title}
-                            >
-                                {column.label}
-                            </button>
-                        );
-                    })}
-                </div>
-            )}
 
             {!showTopScorersFallback && esRugby && activeSubTab === 'teams' && (
                 <div className={styles.statsModeBar} aria-label="Vista de estadísticas por equipo">
