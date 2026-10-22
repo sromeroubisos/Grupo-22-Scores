@@ -1098,6 +1098,12 @@ function TeamDetailInner({ id }: { id: string }) {
     })();
 
     const squadGroups = groupSquadByPosition(selectedSquadData);
+
+    // Los periodos solo mandan cuando de verdad hay PERIODOS: mas de uno, o uno
+    // con fechas. Un unico periodo sin fecha es lo que queda de las membresias
+    // sueltas (La Tablada tenia 3 de 82 jugadores) y mostrarlo esconde el resto
+    // del plantel del club, que sale de la lista completa.
+    const verPorPeriodos = squadPeriods.length > 1 || squadPeriods.some((p) => Boolean(p.from || p.to));
     const sortedPositionKeys = Object.keys(squadGroups)
         .map(Number)
         .sort((a, b) => a - b);
@@ -1757,7 +1763,7 @@ function TeamDetailInner({ id }: { id: string }) {
                                                 ))}
                                             </select>
                                         </div>
-                                    ) : squadPeriods.length === 1 ? (
+                                    ) : verPorPeriodos && squadPeriods.length === 1 ? (
                                         <span style={{ fontSize: 12, color: 'var(--meta, var(--color-text-secondary))' }}>
                                             {etiquetaDePeriodo(squadPeriods[0].from, squadPeriods[0].to)}
                                         </span>
@@ -1790,7 +1796,7 @@ function TeamDetailInner({ id }: { id: string }) {
                                         />
                                     ) : null}
                                 </div>
-                                {squadPeriods.length > 0 ? (
+                                {verPorPeriodos ? (
                                     // Con periodos cargados se muestra EL PERIODO ELEGIDO. La
                                     // plantilla de siempre junta todas las membresias del club en
                                     // una sola lista, y con dos temporadas cargadas esa lista
