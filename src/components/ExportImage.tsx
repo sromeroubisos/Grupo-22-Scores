@@ -5,6 +5,7 @@ import { JetBrains_Mono, Outfit } from 'next/font/google';
 import { Plus, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
+import { resolveTournamentExportTheme } from '@/lib/exports/tournamentThemes';
 import { resolveAdminPanel } from '@/lib/auth/roles';
 import { mapDesignSlugToVisualFamily, readActiveExportDesign, type ExportDesignSlug, type ExportVisualFamily } from '@/lib/exports/activeDesign';
 import { ratingScaleColor, TINTA as RATING_INK } from '@/lib/matches/ratingScale';
@@ -664,6 +665,8 @@ const EXPORT_PALETTES: ExportPalette[] = [
     { id: 'ranking-navy', name: 'Ranking Navy', description: 'Azul profundo con puntos dorados', bg: '#050b1f', accent: '#12297d' },
 ];
 const DEFAULT_PALETTE = EXPORT_PALETTES[0];
+// Nombre con el que el fondo predeterminado del torneo figura en "Fondo propio".
+const TOURNAMENT_THEME_BACKGROUND_NAME = 'Fondo del torneo';
 
 // El poster de ranking se pinta con CINCO colores, no con los dos usuales:
 // fondo (esquina negra), banda (columna del titulo), brillo (luz electrica de
@@ -1419,6 +1422,32 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         setEditorialGradientLeftColor(defaultExportColors.editorialGradientLeftColor);
         setEditorialGradientRightColor(defaultExportColors.editorialGradientRightColor);
     }, [defaultExportColors, hasSessionColorOverrides, isBracket, isLadder, isRankingPoster, showModal]);
+
+    // Fondo y colores predeterminados segun el torneo (ver tournamentThemes). Es
+    // del super administrador: el resto exporta con el diseno de siempre. Va
+    // despues de los efectos de colores de arriba para pisar su valor de fabrica,
+    // y se marca como retoque de la sesion para que no lo vuelvan a pisar.
+    const tournamentTheme = useMemo(
+        () => (user?.role === 'super_admin' ? resolveTournamentExportTheme(defaultTournamentName) : null),
+        [user?.role, defaultTournamentName],
+    );
+    useEffect(() => {
+        if (!showModal || !tournamentTheme || isRankingPoster || isLadder || isBracket) return;
+        setHasSessionColorOverrides(true);
+        setSelectedPaletteId('custom');
+        setBgColor(tournamentTheme.bg);
+        setAccentColor(tournamentTheme.accent);
+        if (template === 'standings' || template === 'dailyMatches') {
+            // Un fondo que subio la persona gana; el del torneo se cambia solo.
+            setStandingsBackgroundUpload((current) => (
+                current && current.name !== TOURNAMENT_THEME_BACKGROUND_NAME
+                    ? current
+                    : { name: TOURNAMENT_THEME_BACKGROUND_NAME, src: tournamentTheme.image }
+            ));
+        }
+        statsOptions?.color.onChange(tournamentTheme.highlight);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showModal, tournamentTheme?.id, template, isBracket, isLadder, isRankingPoster]);
 
     useEffect(() => {
         setIsPortalReady(true);
