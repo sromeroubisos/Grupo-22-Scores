@@ -2135,3 +2135,50 @@
     font-size: 0.78rem;
     color: rgba(255, 255, 255, 0.55);
 }
+
+/* Seleccion rapida de los fondos de G22 (super administrador). */
+.bgOptions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.bgOption {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(24, 24, 27, 0.92);
+    color: rgba(255, 255, 255, 0.8);
+    font-family: var(--font-primary);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.bgOption:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.bgOptionOn {
+    border-color: rgba(59, 130, 246, 0.9);
+    background: rgba(59, 130, 246, 0.16);
+    color: #fff;
+}
+
+.bgOptionThumb {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+}
+
+.bgOptionLabel {
+    text-align: center;
+}

@@ -47,6 +47,23 @@ export const TOURNAMENT_THEMES = {
     celeste: { id: 'celeste', image: `${IMG}cian.jpg`, bg: '#167c95', accent: '#ffffff', highlight: '#ffffff' },
 } as const satisfies Record<string, TournamentExportTheme>;
 
+/**
+ * Todos los fondos, para elegirlos a mano en el panel del export. Cada uno lleva
+ * el color de fondo de su foto (el de base del diseno se mezclaba con ella).
+ */
+export const EXPORT_BACKGROUND_OPTIONS: ReadonlyArray<{ id: string; label: string; image: string; bg: string }> = [
+    { id: 'rojo', label: 'Rojo', image: `${IMG}rojo.jpg`, bg: '#6d0b11' },
+    { id: 'dorado', label: 'Dorado', image: `${IMG}dorado.jpg`, bg: '#503308' },
+    { id: 'negro', label: 'Negro', image: `${IMG}negro.jpg`, bg: '#181818' },
+    { id: 'azul', label: 'Azul', image: `${IMG}azul.jpg`, bg: '#0b416b' },
+    { id: 'verde', label: 'Verde', image: `${IMG}verde.jpg`, bg: '#1c2b2a' },
+    { id: 'verde-azul', label: 'Verde y azul', image: `${IMG}verde-azul.jpg`, bg: '#115157' },
+    { id: 'cian', label: 'Celeste', image: `${IMG}cian.jpg`, bg: '#167c95' },
+    { id: 'naranja', label: 'Naranja', image: `${IMG}naranja.jpg`, bg: '#c05910' },
+    { id: 'rojo-naranja', label: 'Naranja oscuro', image: `${IMG}rojo-naranja.jpg`, bg: '#9c2506' },
+    { id: 'blanco', label: 'Blanco', image: `${IMG}blanco.jpg`, bg: '#f1f5f9' },
+];
+
 function normalize(name: string): string {
     return name
         .toLowerCase()

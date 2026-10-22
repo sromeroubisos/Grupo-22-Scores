@@ -5,7 +5,7 @@ import { JetBrains_Mono, Outfit } from 'next/font/google';
 import { Plus, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '@/context/AuthContext';
-import { resolveTournamentExportTheme } from '@/lib/exports/tournamentThemes';
+import { EXPORT_BACKGROUND_OPTIONS, resolveTournamentExportTheme } from '@/lib/exports/tournamentThemes';
 import { resolveAdminPanel } from '@/lib/auth/roles';
 import { mapDesignSlugToVisualFamily, readActiveExportDesign, type ExportDesignSlug, type ExportVisualFamily } from '@/lib/exports/activeDesign';
 import { ratingScaleColor, TINTA as RATING_INK } from '@/lib/matches/ratingScale';
@@ -1462,6 +1462,15 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         statsOptions?.color.onChange(tournamentTheme.highlight);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showModal, tournamentTheme?.id, template, isBracket, isLadder, isRankingPoster]);
+
+    // Seleccion rapida de los fondos de G22: pone la foto y el color de fondo que
+    // le corresponde (el acento se elige aparte, en la paleta).
+    const pickTournamentBackground = (option: { image: string; bg: string }) => {
+        setHasSessionColorOverrides(true);
+        setSelectedPaletteId('custom');
+        setBgColor(option.bg);
+        setStandingsBackgroundUpload({ name: TOURNAMENT_THEME_BACKGROUND_NAME, src: option.image });
+    };
 
     useEffect(() => {
         setIsPortalReady(true);
@@ -3700,6 +3709,30 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                             </button>
                                         </div>
                                     </div>
+                                    {user?.role === 'super_admin' && (
+                                        <div className={styles.bgOptions} role="radiogroup" aria-label="Fondos de G22">
+                                            {EXPORT_BACKGROUND_OPTIONS.map((option) => {
+                                                const active = standingsBackgroundUpload?.src === option.image;
+                                                return (
+                                                    <button
+                                                        key={option.id}
+                                                        type="button"
+                                                        role="radio"
+                                                        aria-checked={active}
+                                                        aria-label={`Fondo ${option.label}`}
+                                                        className={`${styles.bgOption} ${active ? styles.bgOptionOn : ''}`}
+                                                        onClick={() => pickTournamentBackground(option)}
+                                                    >
+                                                        <span
+                                                            className={styles.bgOptionThumb}
+                                                            style={{ backgroundImage: `url(${option.image})` }}
+                                                        />
+                                                        <span className={styles.bgOptionLabel}>{option.label}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
                                     {standingsBackgroundUpload && (
                                         <div className={styles.uploadPreview}>
                                             <div
