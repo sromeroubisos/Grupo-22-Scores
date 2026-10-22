@@ -2823,57 +2823,184 @@
     }
 }
 
-.collapseAllBtn {
+/* Las competiciones que no entran en la tanda de arriba del feed viven en un
+   solo bloque plegado ("N competiciones más"). Sólo en el teléfono: en
+   escritorio el bloque no se dibuja y todas las tarjetas se ven como siempre.
+   Plegado no es borrado: las tarjetas siguen en el DOM y sólo se ocultan. */
+.restPanel,
+.restPanelInner {
+    display: contents;
+}
+
+.restGroup {
     display: none;
 }
 
 @media (max-width: 1100px) {
-    .collapseAllBtn {
-        display: inline-flex;
+    /* El panel se pliega animando la altura de 0 a su alto real (grid 0fr → 1fr):
+       no hace falta medir nada en JS y, al ser una transición, se puede invertir a
+       mitad de camino sin saltos. La curva es la de las hojas de iOS: arranca
+       rápido y se asienta sin rebote. Cerrado queda `visibility: hidden` (con
+       retraso, para no cortar la animación): sale del foco del teclado y del
+       lector de pantalla. */
+    .restPanel {
+        display: grid;
+        grid-template-rows: 0fr;
+        margin-top: -12px;
+        opacity: 0;
+        visibility: hidden;
+        transition:
+            grid-template-rows 360ms cubic-bezier(0.32, 0.72, 0, 1),
+            margin-top 360ms cubic-bezier(0.32, 0.72, 0, 1),
+            opacity 220ms ease-out,
+            visibility 0s linear 360ms;
+    }
+
+    .restPanelOpen {
+        grid-template-rows: 1fr;
+        margin-top: 0;
+        opacity: 1;
+        visibility: visible;
+        transition:
+            grid-template-rows 360ms cubic-bezier(0.32, 0.72, 0, 1),
+            margin-top 360ms cubic-bezier(0.32, 0.72, 0, 1),
+            opacity 260ms ease-out 60ms,
+            visibility 0s;
+    }
+
+    .restPanelInner {
+        display: grid;
+        gap: 12px;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .restGroup {
+        display: flex;
         align-items: center;
-        justify-content: center;
-        gap: 8px;
-        justify-self: center;
-        align-self: center;
-        min-height: 44px;
-        margin: 8px 0;
-        padding: 0 28px;
+        gap: 12px;
+        width: 100%;
+        min-height: 60px;
+        padding: 10px 14px;
         border: 0;
-        border-radius: 999px;
-        background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
-        color: var(--color-text-primary);
+        border-radius: 16px;
+        background: var(--color-bg-secondary);
+        color: inherit;
         font: inherit;
-        font-size: 1rem;
-        font-weight: 700;
+        text-align: left;
         cursor: pointer;
         transition: transform 100ms ease-out;
     }
 
-    .collapseAllBtn:active {
-        transform: scale(0.97);
+    .restGroup:active {
+        transform: scale(0.985);
     }
 
-    .collapseAllBtn:focus-visible {
+    .restGroup:focus-visible {
         outline: 2px solid var(--color-primary, #22c55e);
         outline-offset: 2px;
     }
 
-    .collapseAllBtn svg {
+    .restGroupIcons {
+        display: flex;
+        flex-shrink: 0;
+    }
+
+    .restGroupIcon {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        margin-left: -8px;
+        border: 2px solid var(--color-bg-secondary);
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.92);
+        color: #52525b;
+        font-size: 0.95rem;
+        line-height: 1;
+        font-weight: 700;
+        overflow: hidden;
+    }
+
+    .restGroupIcon:first-child {
+        margin-left: 0;
+    }
+
+    .restGroupIcon img {
+        width: 100%;
+        height: 100%;
+        padding: 2px;
+        object-fit: contain;
+    }
+
+    .restGroupText {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .restGroupTitle {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--color-text-primary);
+    }
+
+    .restGroupMeta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+        color: var(--color-text-tertiary);
+    }
+
+    .restGroupLive {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+        color: var(--color-error);
+    }
+
+    .restGroupLiveDot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: #ff5c5c;
+        animation: livePulse 1.6s ease-in-out infinite;
+    }
+
+    .restGroupChevron,
+    .restGroupChevronOpen {
+        flex-shrink: 0;
+        color: var(--color-text-tertiary);
         transition: transform 200ms ease;
     }
 
-    .collapseAllChevronOpen {
+    .restGroupChevronOpen {
         transform: rotate(180deg);
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .collapseAllBtn,
-    .collapseAllBtn svg {
+    /* Sin movimiento: el panel aparece y desaparece con un fundido corto. */
+    .restPanel,
+    .restPanelOpen {
+        transition: opacity 150ms ease, visibility 0s;
+    }
+
+    .restGroup,
+    .restGroupChevron,
+    .restGroupChevronOpen {
         transition: none;
     }
 
-    .collapseAllBtn:active {
+    .restGroup:active {
         transform: none;
+    }
+
+    .restGroupLiveDot {
+        animation: none;
     }
 }

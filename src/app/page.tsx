@@ -178,6 +178,179 @@ function getTournamentCountryName(tournament: { country?: unknown } | null | und
     : 'Internacional';
 }
 
+/**
+ * Los torneos que en rugby se consideran "los importantes" para el feed, en
+ * orden de relevancia. La prioridad que trae cada torneo vale sólo dentro de su
+ * país (la Premiership de Escocia y la CRAA D1 de Estados Unidos también tienen
+ * 100), así que no sirve para decidir qué va arriba en una lista mundial: esto
+ * es una lista explícita. Se compara contra el nombre sin país y sin tildes.
+ */
+const RUGBY_FEATURED: Array<{ name: RegExp; country?: RegExp; not?: RegExp }> = [
+  { name: /world cup|copa del mundo|mundial/, not: /u-?20|sub-?20|league/ },
+  { name: /six nations|seis naciones/, not: /u-?20|sub-?20/ },
+  { name: /rugby championship|tres naciones/, not: /u-?20|sub-?20/ },
+  { name: /nations (cup|series|championship)|internationals?|test match|lions/, not: /u-?20|sub-?20/ },
+  { name: /champions cup|copa de campeones/ },
+  { name: /super rugby pacific|^super rugby$/ },
+  { name: /united rugby championship|^urc$/ },
+  { country: /inglaterra|england/, name: /^(gallagher )?premiership( rugby)?$/ },
+  { country: /francia|france/, name: /^top ?14$/ },
+  { name: /super rugby americ/ },
+  // Los mundiales de Rugby League cuentan, pero detrás de los de rugby union.
+  { name: /league.*world cup|world cup.*league/, not: /u-?20|sub-?20/ },
+];
+
+/** Tope de torneos "de tu país" en el grupo de arriba: un día de liga local no lo inunda. */
+const FEATURED_COUNTRY_MAX = 8;
+
+/**
+ * Tope de tarjetas de la tanda de arriba del feed (los favoritos nunca se
+ * recortan). Alcanza para las primeras divisiones del país del usuario y los
+ * grandes del rugby (mundial, internacionales, URC, Premiership, Top 14); si un
+ * día hay más, lo menos importante pasa al bloque plegado.
+ */
+const TOP_FEED_COUNT = 14;
+
+/**
+ * Qué cuenta como "primera división" en el país del usuario. La prioridad del
+ * catálogo no distingue un torneo de ascenso de uno de primera (la Primera A de
+ * la URBA es ascenso y tiene la misma prioridad que el Top 12), así que para los
+ * países con ligas escalonadas se nombra qué es lo principal. Sin entrada para
+ * un país, vale cualquier torneo suyo que no sea juvenil ni femenino.
+ */
+const COUNTRY_TOP_FLIGHT: Record<string, RegExp[]> = {
+  // Los torneos que el equipo definió como primera división regional: Top 12 de la
+  // URBA, Top 10 del Centro, Copa Oro del Oeste y los Torneos Regionales del
+  // Litoral, NEA, NOA, Patagónico y Pampeano (sólo la categoría principal: sin
+  // "B" ni "C" al final). La Primera A de la URBA es ascenso y no entra.
+  AR: [
+    /\btop ?1[02]\b/,
+    /nacional de clubes/,
+    /copa oro del oeste/,
+    /torneo regional (?:del |de la )?(?:litoral|nea|noa|patagonic\w*|pampean\w*)(?!.*[\s"'][bc]["']?$)/,
+  ],
+  FR: [/^top ?14$/],
+};
+
+/** Con menos competiciones que esto debajo de la tanda, no se arma el bloque plegado. */
+const MIN_GROUPED_LEAGUES = 3;
+
+/** Juveniles, reserva y femenino no entran como "lo principal de tu país". */
+const NOT_MAIN_COUNTRY_TOURNAMENT = /\b(m-?1\d|u-?\d{2}|sub-?\d{2}|juvenil\w*|reserva|femenin\w*|women|damas|infantil\w*|cadet\w*|seven\w*)\b/;
+
+/**
+ * País a partir de la zona horaria, para cuando el idioma no lo trae ("es-419"
+ * es el español de Latinoamérica y no dice cuál). Sólo los países con liga de
+ * rugby que se siguen acá; sin coincidencia no se asume ninguno.
+ */
+const REGION_BY_TIMEZONE_PREFIX: Array<[string, string]> = [
+  ['America/Argentina/', 'AR'], ['America/Buenos_Aires', 'AR'], ['America/Montevideo', 'UY'],
+  ['America/Santiago', 'CL'], ['America/Sao_Paulo', 'BR'], ['America/Bogota', 'CO'],
+  ['America/Lima', 'PE'], ['America/Mexico_City', 'MX'], ['America/Asuncion', 'PY'],
+  ['America/Toronto', 'CA'], ['America/Vancouver', 'CA'], ['America/New_York', 'US'],
+  ['America/Chicago', 'US'], ['America/Denver', 'US'], ['America/Los_Angeles', 'US'],
+  ['Europe/Madrid', 'ES'], ['Europe/Paris', 'FR'], ['Europe/Rome', 'IT'], ['Europe/Dublin', 'IE'],
+  ['Europe/Lisbon', 'PT'], ['Europe/Bucharest', 'RO'], ['Africa/Johannesburg', 'ZA'],
+  ['Pacific/Auckland', 'NZ'], ['Australia/', 'AU'], ['Asia/Tokyo', 'JP'],
+];
+
+function regionFromTimeZone(timeZone: string): string {
+  return REGION_BY_TIMEZONE_PREFIX.find(([prefix]) => timeZone.startsWith(prefix))?.[1] ?? '';
+}
+
+function normalizeForMatch(value: string): string {
+  return value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+}
+
+/** Posición del torneo en la lista de importantes, o null si no está. */
+function getFeaturedRank(leagueTitle: string, country: string): number | null {
+  const title = normalizeForMatch(leagueTitle);
+  const separator = title.indexOf(': ');
+  const name = separator >= 0 ? title.slice(separator + 2) : title;
+  const countryName = normalizeForMatch(country);
+  const index = RUGBY_FEATURED.findIndex((entry) => (
+    entry.name.test(name)
+    && (!entry.country || entry.country.test(countryName))
+    && (!entry.not || !entry.not.test(name))
+  ));
+  return index >= 0 ? index : null;
+}
+
+/**
+ * El bloque "N competiciones más": dice cuántas son, muestra cinco escudos o
+ * banderas de países distintos y avisa si hay partidos en vivo adentro. Un toque
+ * despliega las tarjetas en el lugar, animado (ver `.restPanel`).
+ *
+ * Vive en su propio componente a propósito: abrirlo o cerrarlo sólo vuelve a
+ * dibujar este bloque, no toda la home. Si el estado estuviera en `HomePage`, el
+ * toque tendría que esperar a que React re-dibuje cientos de filas y la
+ * animación arrancaría tarde, como un salto. Las tarjetas llegan como
+ * `children` ya armados, así que React no las toca al cambiar `open`.
+ */
+function RestSection({ leagues, children }: { leagues: LeagueMatches[]; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+
+  const { partidos, envivo, iconos } = useMemo(() => {
+    const vistos = new Set<string>();
+    return {
+      partidos: leagues.reduce((total, item) => total + item.matches.length, 0),
+      envivo: leagues.reduce(
+        (total, item) => total + item.matches.filter((match) => match.status === 'live').length,
+        0,
+      ),
+      // Cinco países distintos: lo que cuenta es mostrar cuánto cubrimos.
+      iconos: leagues.filter((item) => {
+        const clave = item.logoUrl || getCountryFlagEmoji(item.country) || item.country;
+        if (vistos.has(clave)) return false;
+        vistos.add(clave);
+        return true;
+      }).slice(0, 5),
+    };
+  }, [leagues]);
+
+  return (
+    <>
+      <button
+        type="button"
+        className={styles.restGroup}
+        aria-expanded={open}
+        onClick={() => setOpen((prev) => !prev)}
+      >
+        <span className={styles.restGroupIcons} aria-hidden="true">
+          {iconos.map((item) => (
+            <span key={item.leagueId} className={styles.restGroupIcon}>
+              {item.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- escudos de torneos de origen variado
+                <img src={item.logoUrl} alt="" loading="lazy" />
+              ) : (
+                <span>{getCountryFlagEmoji(item.country) || (item.league.split(': ')[1] || item.league).charAt(0)}</span>
+              )}
+            </span>
+          ))}
+        </span>
+        <span className={styles.restGroupText}>
+          <span className={styles.restGroupTitle}>
+            {leagues.length} {leagues.length === 1 ? 'competición más' : 'competiciones más'}
+          </span>
+          <span className={styles.restGroupMeta}>
+            {partidos} {partidos === 1 ? 'partido' : 'partidos'}
+            {envivo > 0 && (
+              <span className={styles.restGroupLive}>
+                <span className={styles.restGroupLiveDot} />
+                {envivo} en vivo
+              </span>
+            )}
+          </span>
+        </span>
+        <ChevronDown size={20} aria-hidden="true" className={open ? styles.restGroupChevronOpen : styles.restGroupChevron} />
+      </button>
+      <div className={`${styles.restPanel} ${open ? styles.restPanelOpen : ''}`}>
+        <div className={styles.restPanelInner}>{children}</div>
+      </div>
+    </>
+  );
+}
+
 // Type definitions
 interface Match {
   id: string | number;
@@ -821,6 +994,20 @@ export default function HomePage() {
   // Detect user timezone once (stable across re-renders)
   const userTimeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
 
+  // País del visitante: la región de su idioma ("es-AR" → "AR") y, si el idioma
+  // no la trae ("es-419"), su zona horaria. Se lee en el efecto y no en el render
+  // para que servidor y cliente dibujen lo mismo.
+  const [userRegion, setUserRegion] = useState('');
+  useEffect(() => {
+    try {
+      const language = navigator.languages?.[0] || navigator.language || '';
+      const region = language.match(/[-_]([A-Za-z]{2})\b/)?.[1];
+      setUserRegion(region ? region.toUpperCase() : regionFromTimeZone(userTimeZone));
+    } catch {
+      setUserRegion('');
+    }
+  }, [userTimeZone]);
+
   // Favorites hook
   // `favorites` sale de acá y no de otra llamada al hook adentro del ticker: son
   // los mismos seguidos y el hook no comparte estado entre instancias, así que
@@ -1313,6 +1500,93 @@ export default function HomePage() {
     new Set(favoriteClubMatches.map((match) => String(match.id)))
   ), [favoriteClubMatches]);
 
+  /**
+   * Qué lugar ocupa cada torneo en el feed:
+   *   0 = los que sigue el usuario, 1 = los de su país (sólo los de mayor
+   *   prioridad, con tope), 2 = los grandes del rugby (RUGBY_FEATURED), 3 = el resto.
+   * "Ocultar todo" va justo debajo de los tres primeros niveles.
+   */
+  const computeLeagueTiers = useCallback((list: LeagueMatches[]) => {
+    const tiers = new Map<string, { tier: number; rank: number }>();
+    const isMyCountry = (league: LeagueMatches) => (
+      Boolean(userRegion)
+      && findCountryRecord(undefined, league.country)?.code?.toUpperCase() === userRegion
+    );
+    const topFlight = COUNTRY_TOP_FLIGHT[userRegion];
+    const countryLeagues = list.filter((league) => {
+      if (!isMyCountry(league)) return false;
+      const title = normalizeForMatch(league.league);
+      if (NOT_MAIN_COUNTRY_TOURNAMENT.test(title)) return false;
+      if (!topFlight) return true;
+      const name = title.includes(': ') ? title.slice(title.indexOf(': ') + 2) : title;
+      return topFlight.some((pattern) => pattern.test(name));
+    });
+    // Con la primera división nombrada (COUNTRY_TOP_FLIGHT) entran TODAS las que se
+    // juegan ese día. Sin esa lista no se sabe cuál es la principal: se toma la de
+    // mayor prioridad y como mucho dos.
+    const topPriority = countryLeagues.reduce((max, league) => Math.max(max, league.priority), 0);
+    const countryAllowed = new Set(
+      (topFlight ? countryLeagues : countryLeagues.filter((league) => league.priority >= topPriority))
+        .slice(0, topFlight ? FEATURED_COUNTRY_MAX : 2)
+        .map((league) => league.leagueId),
+    );
+
+    for (const league of list) {
+      if (isLeagueGroupFavorite(league)) {
+        tiers.set(league.leagueId, { tier: 0, rank: 0 });
+      } else if (countryAllowed.has(league.leagueId)) {
+        tiers.set(league.leagueId, { tier: 1, rank: 0 });
+      } else {
+        const rank = selectedSport.id === 'rugby' ? getFeaturedRank(league.league, league.country) : null;
+        tiers.set(league.leagueId, rank === null ? { tier: 3, rank: 0 } : { tier: 2, rank });
+      }
+    }
+    return tiers;
+  }, [isLeagueGroupFavorite, selectedSport.id, userRegion]);
+
+  /**
+   * Arma el feed en dos tandas, como FotMob:
+   *   arriba  = lo que sigue el usuario (todo) + lo más importante hasta completar
+   *             TOP_FEED_COUNT tarjetas: primero el mejor torneo de su país y
+   *             después los grandes del rugby, en su orden;
+   *   abajo   = el resto, lo importante que no entró primero y después lo demás.
+   * `topCount` es cuántas tarjetas tiene la tanda de arriba: ahí va el botón
+   * que oculta el resto. Sin nada destacado, la tanda son las primeras tres.
+   */
+  const arrangeLeagues = useCallback((list: LeagueMatches[]) => {
+    // Cada evento de automovilismo es su propia tarjeta: no hay "resto" que agrupar.
+    if (selectedSport.id === 'motorsport') return { ordered: list, topCount: list.length };
+    const tiers = computeLeagueTiers(list);
+    const info = (league: LeagueMatches) => tiers.get(league.leagueId) ?? { tier: 3, rank: 0 };
+    const indexed = list.map((league, index) => ({ league, index }));
+    const byTier = (tier: number) => indexed.filter((entry) => info(entry.league).tier === tier);
+
+    const favorites = byTier(0);
+    const countryBest = byTier(1).sort((a, b) => (
+      (b.league.priority - a.league.priority)
+      || (b.league.matches.length - a.league.matches.length)
+      || (a.index - b.index)
+    ));
+    const featured = byTier(2).sort((a, b) => (info(a.league).rank - info(b.league).rank) || (a.index - b.index));
+
+    const fillCount = Math.max(0, TOP_FEED_COUNT - favorites.length);
+    const fill = [...countryBest, ...featured].slice(0, fillCount);
+    const taken = new Set([...favorites, ...fill].map((entry) => entry.index));
+    const rest = indexed
+      .filter((entry) => !taken.has(entry.index))
+      .sort((a, b) => (
+        (info(a.league).tier - info(b.league).tier)
+        || (info(a.league).rank - info(b.league).rank)
+        || (a.index - b.index)
+      ));
+
+    const ordered = [...favorites, ...fill, ...rest].map((entry) => entry.league);
+    const topCount = favorites.length + fill.length;
+    const top = topCount > 0 ? topCount : Math.min(3, ordered.length);
+    // Un día con pocas competiciones no se agrupa: plegar dos tarjetas es fricción pura.
+    return { ordered, topCount: ordered.length - top < MIN_GROUPED_LEAGUES ? ordered.length : top };
+  }, [computeLeagueTiers, selectedSport.id]);
+
   const displayedMatchesByLeague = useMemo<LeagueMatches[]>(() => {
     const withoutFavoriteClubMatches = matchesByLeague
       .map((league) => ({
@@ -1321,15 +1595,24 @@ export default function HomePage() {
       }))
       .filter((league) => league.matches.length > 0);
 
-    if (!showLiveOnly) return withoutFavoriteClubMatches;
+    const visible = showLiveOnly
+      ? withoutFavoriteClubMatches
+        .map((league) => ({
+          ...league,
+          matches: league.matches.filter((match) => match.status === 'live'),
+        }))
+        .filter((league) => league.matches.length > 0)
+      : withoutFavoriteClubMatches;
 
-    return withoutFavoriteClubMatches
-      .map((league) => ({
-        ...league,
-        matches: league.matches.filter((match) => match.status === 'live'),
-      }))
-      .filter((league) => league.matches.length > 0);
-  }, [favoriteClubMatchIds, matchesByLeague, showLiveOnly]);
+    return arrangeLeagues(visible).ordered;
+  }, [arrangeLeagues, favoriteClubMatchIds, matchesByLeague, showLiveOnly]);
+
+  /** Tarjetas de la tanda de arriba; debajo va el botón que oculta el resto. */
+  const topLeagueCount = useMemo(
+    () => arrangeLeagues(displayedMatchesByLeague).topCount,
+    [arrangeLeagues, displayedMatchesByLeague],
+  );
+
 
   const displayedFavoriteClubMatches = useMemo(() =>
     showLiveOnly ? favoriteClubMatches.filter(m => m.status === 'live') : favoriteClubMatches,
@@ -2216,7 +2499,8 @@ export default function HomePage() {
                 </div>
               )}
 
-              {!esTenis && !loading && displayedMatchesByLeague.map((league, leagueIndex) => {
+              {!esTenis && !loading && (() => {
+              const renderLeague = (league: LeagueMatches, leagueIndex: number): ReactNode => {
                 const isCollapsed = collapsedLeagues.has(league.leagueId);
                 const isFavoriteLeague = isLeagueGroupFavorite(league);
                 const leagueColorStyle = getLeagueColorStyle(
@@ -2275,34 +2559,6 @@ export default function HomePage() {
                   );
                 }
 
-                /**
-                 * "Ocultar todo" va después de las primeras tres tarjetas, como en
-                 * FotMob: separa lo de arriba de lo que sigue y sólo existe cuando
-                 * el día tiene suficientes ligas como para que plegar sirva.
-                 */
-                const hideAllAfter = (bloque: ReactNode) => {
-                  if (leagueIndex !== 2 || displayedMatchesByLeague.length < 4) return bloque;
-                  const allCollapsed = displayedMatchesByLeague.every((item) => collapsedLeagues.has(item.leagueId));
-                  return (
-                    <Fragment key={`${league.leagueId}-hide-all`}>
-                      {bloque}
-                      <button
-                        type="button"
-                        className={styles.collapseAllBtn}
-                        aria-pressed={allCollapsed}
-                        onClick={() => setCollapsedLeagues(
-                          allCollapsed
-                            ? new Set()
-                            : new Set(displayedMatchesByLeague.map((item) => item.leagueId)),
-                        )}
-                      >
-                        {allCollapsed ? 'Mostrar todo' : 'Ocultar todo'}
-                        <ChevronDown size={18} aria-hidden="true" className={allCollapsed ? undefined : styles.collapseAllChevronOpen} />
-                      </button>
-                    </Fragment>
-                  );
-                };
-
                 /** Sin favoritos, la placa entra después del primer partido. */
                 const bannerAfter = (bloque: ReactNode) => {
                   if (leagueIndex !== 0 || displayedFavoriteClubMatches.length > 0) return bloque;
@@ -2316,7 +2572,7 @@ export default function HomePage() {
                   );
                 };
 
-                return bannerAfter(hideAllAfter(conPromo(
+                const bloqueFinal = bannerAfter(conPromo(
                   <div key={league.leagueId} className={styles.leagueSection} style={leagueColorStyle}>
                     <div className={`${styles.leagueSectionHeader} ${isCollapsed ? styles.collapsed : ''}`}
                       onClick={() => toggleCompetitionCollapse(league.leagueId)}
@@ -2377,8 +2633,28 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                )));
-              })}
+                ));
+
+                return bloqueFinal;
+              };
+
+              const cards = displayedMatchesByLeague.map((league, index) => renderLeague(league, index));
+              const topCards = cards.slice(0, topLeagueCount);
+              const restCards = cards.slice(topLeagueCount);
+
+              // Lo que va debajo de la tanda de arriba se agrupa en un panel que, en el
+              // teléfono, se pliega y se despliega animado (ver `.restPanel`). En
+              // escritorio el panel no genera caja y las tarjetas se ven como siempre.
+              const resto = displayedMatchesByLeague.slice(topLeagueCount);
+              return (
+                <>
+                  {topCards}
+                  {restCards.length > 0 && (
+                    <RestSection leagues={resto}>{restCards}</RestSection>
+                  )}
+                </>
+              );
+              })()}
 
               {/* Menos de dos bloques: la tarjeta no encontró su lugar arriba. */}
               {!loading && displayedMatchesByLeague.length <= PROMO_DESPUES_DEL_BLOQUE && (
