@@ -1447,10 +1447,9 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         if (!showModal || !tournamentTheme || isRankingPoster || isLadder || isBracket) return;
         setHasSessionColorOverrides(true);
         setSelectedPaletteId('custom');
-        // El frente (panel, filas, texto) queda como en el diseno de siempre: del
-        // tema solo cambian la foto de atras y el acento. Unica excepcion, el fondo
-        // claro: ahi la placa pasa a su version clara para que el texto se lea.
-        if (tournamentTheme.light) setBgColor(tournamentTheme.bg);
+        // El color de fondo del tema va con su foto (el de base del diseno, que
+        // puede ser rojo, se mezclaba con el negro y quedaba marron).
+        setBgColor(tournamentTheme.bg);
         setAccentColor(tournamentTheme.accent);
         if (template === 'standings' || template === 'dailyMatches') {
             // Un fondo que subio la persona gana; el del torneo se cambia solo.
@@ -6964,12 +6963,12 @@ export function drawBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEl
     }
 }
 
-export function drawSurfacePanel(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, isDark: boolean) {
+export function drawSurfacePanel(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, isDark: boolean, opacity?: number) {
     ctx.save();
     ctx.shadowColor = isDark ? 'rgba(0,0,0,0.34)' : 'rgba(15,23,42,0.12)';
     ctx.shadowBlur = isDark ? 46 : 36;
     ctx.shadowOffsetY = isDark ? 22 : 18;
-    ctx.fillStyle = isDark ? 'rgba(18,18,20,0.84)' : 'rgba(255,255,255,0.92)';
+    ctx.fillStyle = opacity !== undefined ? (isDark ? `rgba(14,14,16,${opacity})` : `rgba(255,255,255,${opacity})`) : isDark ? 'rgba(18,18,20,0.84)' : 'rgba(255,255,255,0.92)';
     ctx.beginPath();
     ctx.roundRect(x, y, width, height, radius);
     ctx.fill();
@@ -9754,7 +9753,7 @@ async function drawStandings(
     const colLostX = colLostLeft + lostWidth / 2;
     const colDiffX = colDiffLeft + diffWidth / 2;
     const colPointsX = colPointsLeft + pointsWidth / 2;
-    drawSurfacePanel(ctx, panelX, panelY, panelWidth, panelHeight, 34, isDark);
+    drawSurfacePanel(ctx, panelX, panelY, panelWidth, panelHeight, 34, isDark, data.backgroundVeil !== undefined ? 0.97 : undefined);
 
     const headerFontSize = isStory ? 18 : (isDenseStandingsSlide ? 15 : 16);
     const headerY = panelY + (isDenseStandingsSlide ? 30 : 34);
@@ -11183,7 +11182,7 @@ async function drawDailyMatches(
     const panelY = offsetElementY('rowHeight', isStory ? 248 : 220);
     const panelWidth = canvas.width - panelX * 2;
     const panelHeight = safe.bottom - panelY - (isStory ? 18 : 10);
-    drawSurfacePanel(ctx, panelX, panelY, panelWidth, panelHeight, 34, isDark);
+    drawSurfacePanel(ctx, panelX, panelY, panelWidth, panelHeight, 34, isDark, data.backgroundVeil !== undefined ? 0.97 : undefined);
 
     const densityMode = resolveDensityMode(matches.length, 7, 9);
     const listTop = panelY + 28;

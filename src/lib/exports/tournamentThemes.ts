@@ -16,9 +16,9 @@ export type TournamentExportTheme = {
     id: string;
     /** Ruta publica del fondo propio. */
     image: string;
-    /** Color de fondo de la placa. Solo se aplica con `light`; si no, el diseno conserva el suyo. */
+    /** Color de fondo de la placa: el de la foto, para que el de base del diseno no se mezcle. */
     bg: string;
-    /** Fondo claro: la placa pasa a su version clara para que el texto se lea sobre la foto. */
+    /** Foto clara: la placa pasa a su version clara para que el texto se lea. */
     light?: boolean;
     /** Color de acento de la placa. */
     accent: string;
@@ -29,22 +29,22 @@ export type TournamentExportTheme = {
 const IMG = '/export-backgrounds/';
 
 export const TOURNAMENT_THEMES = {
-    regional: { id: 'regional', image: `${IMG}rojo.jpg`, bg: '#6d0b11', accent: '#ff5a5f', highlight: '#ffffff' },
+    regional: { id: 'regional', image: `${IMG}rojo.jpg`, bg: '#6d0b11', accent: '#ffffff', highlight: '#fca5a5' },
     ascenso: { id: 'ascenso', image: `${IMG}dorado.jpg`, bg: '#503308', accent: '#eab308', highlight: '#fde68a' },
     juvenil: { id: 'juvenil', image: `${IMG}negro.jpg`, bg: '#181818', accent: '#22c55e', highlight: '#ffffff' },
     uruguay: { id: 'uruguay', image: `${IMG}azul.jpg`, bg: '#0b416b', accent: '#ffffff', highlight: '#7dd3fc' },
-    brasil: { id: 'brasil', image: `${IMG}verde-azul.jpg`, bg: '#115157', accent: '#ffffff', highlight: '#86efac' },
-    espana: { id: 'espana', image: `${IMG}rojo.jpg`, bg: '#6d0b11', accent: '#facc15', highlight: '#ffffff' },
+    brasil: { id: 'brasil', image: `${IMG}verde.jpg`, bg: '#1c2b2a', accent: '#ffffff', highlight: '#86efac' },
+    espana: { id: 'espana', image: `${IMG}rojo.jpg`, bg: '#6d0b11', accent: '#ffffff', highlight: '#facc15' },
     top14Francia: { id: 'top14-francia', image: `${IMG}negro.jpg`, bg: '#181818', accent: '#eab308', highlight: '#fde68a' },
-    premiership: { id: 'premiership', image: `${IMG}naranja.jpg`, bg: '#9a4510', accent: '#ffffff', highlight: '#ffffff' },
+    premiership: { id: 'premiership', image: `${IMG}naranja.jpg`, bg: '#c05910', accent: '#ffffff', highlight: '#ffffff' },
     urc: { id: 'urc', image: `${IMG}azul.jpg`, bg: '#0b416b', accent: '#22d3ee', highlight: '#a5f3fc' },
     superRugbyAmericas: { id: 'super-rugby-americas', image: `${IMG}negro.jpg`, bg: '#181818', accent: '#22c55e', highlight: '#ffffff' },
     europa: { id: 'europa', image: `${IMG}negro.jpg`, bg: '#181818', accent: '#ffffff', highlight: '#eab308' },
-    seisNaciones: { id: 'seis-naciones', image: `${IMG}rojo-naranja.jpg`, bg: '#8f2308', accent: '#ffffff', highlight: '#fde68a' },
+    seisNaciones: { id: 'seis-naciones', image: `${IMG}rojo-naranja.jpg`, bg: '#9c2506', accent: '#ffffff', highlight: '#fde68a' },
     chileTop: { id: 'chile-top', light: true, image: `${IMG}blanco.jpg`, bg: '#f1f5f9', accent: '#dc2626', highlight: '#dc2626' },
     chileAscenso: { id: 'chile-ascenso', light: true, image: `${IMG}blanco.jpg`, bg: '#f1f5f9', accent: '#1d4ed8', highlight: '#1d4ed8' },
-    nationsChampionship: { id: 'nations-championship', image: `${IMG}verde-azul.jpg`, bg: '#115157', accent: '#facc15', highlight: '#ffffff' },
-    celeste: { id: 'celeste', image: `${IMG}cian.jpg`, bg: '#0f6f86', accent: '#ffffff', highlight: '#ffffff' },
+    nationsChampionship: { id: 'nations-championship', image: `${IMG}verde.jpg`, bg: '#1c2b2a', accent: '#facc15', highlight: '#ffffff' },
+    celeste: { id: 'celeste', image: `${IMG}cian.jpg`, bg: '#167c95', accent: '#ffffff', highlight: '#ffffff' },
 } as const satisfies Record<string, TournamentExportTheme>;
 
 function normalize(name: string): string {
