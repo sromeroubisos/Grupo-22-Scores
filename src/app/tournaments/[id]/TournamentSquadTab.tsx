@@ -31,13 +31,15 @@ export type SquadTableData = {
 
 const fmt = (value: number) => (Number.isInteger(value) ? String(value) : value.toFixed(1));
 
-// Las columnas son angostas: "Top 10" pasa a "Top10" (sin el espacio entra en cinco
-// letras) y lo que siga largo se corta con un punto. El nombre completo va en el title.
+// Las columnas son angostas: cuatro caracteres como mucho. Sin el espacio entran
+// "Pre A" (PreA); "Top 10" conserva el número y recorta las letras (T10). El
+// nombre completo va en el title de la cabecera.
 const shortCategoryLabel = (label: string) => {
-    const text = label.trim();
-    if (text.length <= 5) return text;
-    const compact = text.replace(/\s+/g, '');
-    return compact.length <= 5 ? compact : `${compact.slice(0, 4)}.`;
+    const compact = label.trim().replace(/\s+/g, '');
+    if (compact.length <= 4) return compact;
+    const withNumber = compact.match(/^([A-Za-zÀ-ÿ]+)(\d+)$/);
+    if (withNumber) return `${withNumber[1].slice(0, Math.max(1, 4 - withNumber[2].length))}${withNumber[2]}`.slice(0, 4);
+    return compact.slice(0, 4);
 };
 
 /**
