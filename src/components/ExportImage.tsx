@@ -106,6 +106,13 @@ export interface StandingsData {
     }>;
     plainDiff?: boolean;
     showPositionDelta?: boolean;
+    // Placa de tabla normal: rotulo de la pastilla de arriba (por defecto "TABLA
+    // DE POSICIONES") y de la columna del nombre (por defecto "EQUIPO"), para las
+    // tablas que no son de posiciones: planteles, goleadores.
+    kicker?: string;
+    entityLabel?: string;
+    // Fondo propio que el usuario subio en el modal; solo lo dibuja la placa normal.
+    backgroundImage?: string;
     // 'rankingPoster' cambia el dibujo a afiche full-bleed (banda vertical con el
     // titulo, columnas P/Equipo/PTS/VAR) en vez de la tabla de posiciones clasica.
     // 'palmares' dibuja la vitrina de un torneo: podio 2-1-3 con el escudo grande
@@ -1182,6 +1189,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         return gradientImage ? { name: 'Degradado preconfigurado', src: gradientImage } : null;
     });
     const [editorialCompetitionLogoUpload, setEditorialCompetitionLogoUpload] = useState<MatchBackgroundUpload | null>(null);
+    // Fondo propio de las tablas normales (no el de las placas de partido).
+    const [standingsBackgroundUpload, setStandingsBackgroundUpload] = useState<MatchBackgroundUpload | null>(null);
     const [matchBackgroundUpload, setMatchBackgroundUpload] = useState<MatchBackgroundUpload | null>(() => {
         if (template !== 'matchStats') return null;
         const backgroundImage = (data as MatchStatsData).backgroundImage?.trim();
@@ -2025,6 +2034,30 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         setStatus('');
     };
 
+    const handleStandingsBackgroundUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            setStatus('Subi un archivo de imagen valido');
+            return;
+        }
+
+        try {
+            const src = await readFileAsDataUrl(file);
+            setStandingsBackgroundUpload({ name: file.name, src });
+            setStatus('');
+        } catch {
+            setStatus('No se pudo leer la imagen');
+        }
+    };
+
+    const clearStandingsBackgroundUpload = () => {
+        setStandingsBackgroundUpload(null);
+        setStatus('');
+    };
+
     const handleEditorialGradientUpload = async (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         event.target.value = '';
@@ -2204,7 +2237,10 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                     }
                 }
             } else if (template === 'standings') {
-                const standingsData = scopeStandingsDataForExport(exportData as StandingsData, standingsExportMode, selectedStandingsGroupIndex);
+                const standingsData = withStandingsBackground(
+                    scopeStandingsDataForExport(exportData as StandingsData, standingsExportMode, selectedStandingsGroupIndex),
+                    standingsBackgroundUpload?.src,
+                );
                 const slides = buildStandingsSlides(standingsData, getStandingsSlideMode(standingsExportMode));
                 if (slides.length === 0) throw new Error('No hay filas para exportar');
 
@@ -2368,7 +2404,10 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         }
 
         if (template === 'standings') {
-            return scopeStandingsDataForExport(exportData as StandingsData, standingsExportMode, selectedStandingsGroupIndex);
+            return withStandingsBackground(
+                scopeStandingsDataForExport(exportData as StandingsData, standingsExportMode, selectedStandingsGroupIndex),
+                standingsBackgroundUpload?.src,
+            );
         }
 
         if (template === 'lineups' && lineupExportLayout === 'editorial') {
@@ -2399,6 +2438,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         selectedStandingsGroupIndex,
         selectedMatchIndices,
         selectedTimeZonePreset,
+        standingsBackgroundUpload?.src,
         standingsExportMode,
         template,
     ]);
@@ -3438,6 +3478,51 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                             );
                                         })}
                                     </div>
+                                </div>
+                            )}
+
+                            {template === 'standings' && !isPalmares && !isLadder && !isRankingPoster && visualFamily === 'g22Base' && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Fondo propio</label>
+                                    <div className={styles.uploadCard}>
+                                        <div className={styles.uploadMeta}>
+                                            <span className={styles.uploadTitle}>Importa tu propio fondo</span>
+                                            <span className={styles.uploadSubtitle}>
+                                                Cubre toda la pieza y la tabla queda encima, con un velo para que se lea. Sin fondo, se usa el color elegido.
+                                            </span>
+                                        </div>
+                                        <div className={styles.uploadActions}>
+                                            <label className={styles.uploadBtn}>
+                                                Subir fondo
+                                                <input
+                                                    className={styles.fileInput}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleStandingsBackgroundUpload}
+                                                />
+                                            </label>
+                                            <button
+                                                className={styles.ghostBtn}
+                                                onClick={clearStandingsBackgroundUpload}
+                                                disabled={!standingsBackgroundUpload}
+                                                type="button"
+                                            >
+                                                Quitar
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {standingsBackgroundUpload && (
+                                        <div className={styles.uploadPreview}>
+                                            <div
+                                                className={styles.uploadThumb}
+                                                style={{ backgroundImage: `url(${standingsBackgroundUpload.src})` }}
+                                            />
+                                            <div className={styles.uploadMeta}>
+                                                <span className={styles.uploadTitle}>{standingsBackgroundUpload.name}</span>
+                                                <span className={styles.uploadSubtitle}>Fondo de la tabla.</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -5806,6 +5891,12 @@ function getSafeStandingsGroupIndex(groups: StandingsGroupData[], selectedIndex:
     return selectedIndex;
 }
 
+// El fondo propio solo lo dibuja la placa normal: las variantes (ranking, ladder,
+// palmares) y las otras familias tienen su propio fondo.
+function withStandingsBackground(data: StandingsData, backgroundImage?: string): StandingsData {
+    return backgroundImage ? { ...data, backgroundImage } : data;
+}
+
 function scopeStandingsDataForExport(data: StandingsData, mode: StandingsExportMode, selectedGroupIndex: number): StandingsData {
     if (mode !== 'singleGroup') return data;
 
@@ -6600,9 +6691,19 @@ function drawStandingsTeamName(
     ctx.fillText(teamName, x, centerY + 1);
 }
 
-export function drawBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, bgColor: string, accentColor: string, isDark: boolean) {
+export function drawBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, bgColor: string, accentColor: string, isDark: boolean, backdropImage: HTMLImageElement | null = null) {
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (backdropImage && backdropImage.naturalWidth > 0 && backdropImage.naturalHeight > 0) {
+        // Fondo propio: cubre la pieza entera y un velo del color de fondo deja
+        // leer la tabla encima sin importar la foto.
+        const scale = Math.max(canvas.width / backdropImage.naturalWidth, canvas.height / backdropImage.naturalHeight);
+        const drawWidth = backdropImage.naturalWidth * scale;
+        const drawHeight = backdropImage.naturalHeight * scale;
+        ctx.drawImage(backdropImage, (canvas.width - drawWidth) / 2, (canvas.height - drawHeight) / 2, drawWidth, drawHeight);
+        ctx.fillStyle = hexToRGBA(bgColor, isDark ? 0.52 : 0.42);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
     const topGlow = ctx.createRadialGradient(canvas.width * 0.5, 0, 0, canvas.width * 0.5, 0, canvas.height * 0.85);
     topGlow.addColorStop(0, hexToRGBA(accentColor, isDark ? 0.28 : 0.18));
     topGlow.addColorStop(0.42, hexToRGBA(accentColor, isDark ? 0.08 : 0.05));
@@ -9332,8 +9433,9 @@ async function drawStandings(
     const isStory = format.height > format.width;
     const slideRows = slide.groups.flatMap((group) => group.rows);
     const legendItems = collectStandingsLegendEntries(slideRows, accentColor);
-    const [tournamentLogo, ...teamLogos] = await Promise.all([
+    const [tournamentLogo, backdropImage, ...teamLogos] = await Promise.all([
         loadImage(getTournamentLogoImageSource(data)),
+        loadImage(data.backgroundImage || ''),
         ...slideRows.map((row) => loadImage(row.teamLogo || '')),
     ]);
     const subtitleText = buildStandingsSlideSubtitle(data.subtitle, slide);
@@ -9344,12 +9446,12 @@ async function drawStandings(
     const pointsLabel = data.columnLabels?.points?.trim() || 'PTS';
     const showPositionDelta = data.showPositionDelta === true;
 
-    drawBackdrop(ctx, canvas, bgColor, accentColor, isDark);
+    drawBackdrop(ctx, canvas, bgColor, accentColor, isDark, backdropImage);
     drawCenteredPill(
         ctx,
         safe.centerX,
         isStory ? 74 : 56,
-        'TABLA DE POSICIONES',
+        (data.kicker?.trim() || 'TABLA DE POSICIONES').toUpperCase(),
         accentColor,
         getContrastColor(accentColor),
         `800 ${scaleElementSize('title', isStory ? 24 : 20, isStory ? 24 : 20)}px ${FONT_BODY}`,
@@ -9395,7 +9497,7 @@ async function drawStandings(
     ctx.textAlign = 'center';
     ctx.fillText('POS', panelX + 58, headerY);
     ctx.textAlign = 'left';
-    ctx.fillText('EQUIPO', panelX + 118, headerY);
+    ctx.fillText((data.entityLabel?.trim() || 'EQUIPO').toUpperCase(), panelX + 118, headerY);
     ctx.textAlign = 'center';
     ctx.fillText(playedLabel.toUpperCase(), colPlayedX, headerY);
     ctx.fillText(wonLabel.toUpperCase(), colWonX, headerY);

@@ -752,63 +752,63 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
 
     const hasStats = finalMatches.length > 0 && (activeSubTab === 'teams' ? teamRows.length > 0 : playerRows.length > 0);
 
-    // La placa "ladder" exporta LO QUE SE VE (mismo orden, filtro y tope) y el
-    // motor la pagina de a diez filas por placa. El titulo es la estadistica por
-    // la que esta ordenada la tabla, en mayusculas; el valor principal es esa
-    // columna; el secundario es la diferencia de puntos en equipos y los tries
-    // en jugadores. Sin flecha de tendencia en jugadores: no hay fecha anterior
-    // contra la cual compararlos.
-    const ladderExportData = useMemo<StandingsData>(() => {
+    // La placa de tabla normal exporta LO QUE SE VE (mismo orden, filtro y tope).
+    // La columna principal es la estadistica por la que esta ordenada la tabla y
+    // las otras cuatro son las primeras que la acompanan en la web.
+    const statsExportData = useMemo<StandingsData>(() => {
         const isTeams = activeSubTab === 'teams';
         const columns = isTeams ? teamColumns : playerColumns;
         const fallbackKey = isTeams ? TEAM_DEFAULT_SORT[teamStatsView].key : 'points';
         const mainKey = sortKey === 'entity' ? fallbackKey : sortKey;
         const mainColumn = columns.find((column) => column.id === mainKey) ?? columns.find((column) => column.id === fallbackKey);
-        // Secundario: diferencia (equipos) o tries (jugadores). Si la tabla ya
-        // esta ordenada por ese dato, el secundario pasa a ser los puntos: no
-        // tiene sentido repetir la misma cifra dos veces en la fila.
-        const secondaryKey = isTeams ? 'points_difference' : 'tries';
-        const secondaryIsMain = mainKey === secondaryKey;
+        // La placa normal de tabla tiene cinco columnas numericas: la ultima es
+        // la estadistica por la que esta ordenada la tabla y las otras cuatro son
+        // las primeras que la acompanan, en el orden en que se ven en la web.
+        const otherColumns = columns
+            .filter((column) => column.id !== 'entity' && column.id !== 'secondary' && column.id !== mainColumn?.id)
+            .slice(0, 4);
+        while (otherColumns.length < 4) otherColumns.push({ id: '', label: '–' });
+        const [first, second, third, fourth] = otherColumns;
+        const valueOf = (row: any, column: StatColumn) => (column.id ? formatStatValue(row, column, unmeasuredMetrics) : '');
         const rows = displayRows.map((row, index) => {
-            const secondary = n(row[secondaryKey]);
             // El escudo va por el proxy por id, como en la tabla de la web: el
             // logo_url del partido casi nunca viene (y si viene puede ser base64).
             const clubId = String(isTeams ? row.entityId : row.teamId ?? '');
             const clubName = String(isTeams ? row.entityName : row.secondary ?? '');
+            const name = String(row.entityName ?? (isTeams ? 'Equipo' : 'Jugador'));
             return {
                 pos: index + 1,
-                team: String(row.entityName ?? (isTeams ? 'Equipo' : 'Jugador')),
+                // Del jugador se dice tambien el club: en la placa no hay otra columna.
+                team: !isTeams && clubName ? `${name} · ${clubName}` : name,
+                teamFull: !isTeams && clubName ? `${name} · ${clubName}` : name,
                 teamLogo: buildTeamLogoProxyUrl({ key: clubId, name: clubName, fallback: row.entityLogo || null }) || row.entityLogo || undefined,
-                caption: isTeams ? String(n(row.matches_played)) + ' PJ' : clubName,
-                played: 0,
-                won: 0,
-                lost: 0,
-                diff: secondaryIsMain
-                    ? String(fmt(isTeams ? row.points_for : row.points)) + ' PTS'
-                    : isTeams
-                        ? formatDifference(secondary)
-                        : String(secondary) + (secondary === 1 ? ' try' : ' tries'),
-                points: mainColumn ? formatStatValue(row, mainColumn) : fmt(row[mainKey]),
-                pointsDeltaTone: isTeams && !secondaryIsMain
-                    ? (secondary > 0 ? 'positive' : secondary < 0 ? 'negative' : 'neutral')
-                    : 'neutral',
+                played: valueOf(row, first),
+                won: valueOf(row, second),
+                lost: valueOf(row, third),
+                diff: valueOf(row, fourth),
+                points: mainColumn ? formatStatValue(row, mainColumn, unmeasuredMetrics) : fmt(row[mainKey]),
             } as StandingsData['rows'][number];
         });
         // "TRIES", "PUNTOS A FAVOR": el rotulo largo de la columna si lo tiene,
         // porque "PTS" solo no dice de que puntos habla.
-        const statTitle = (mainColumn?.title || mainColumn?.label || 'Estadísticas').trim().toUpperCase();
+        const statTitle = (mainColumn?.title || mainColumn?.label || 'Estadísticas').trim();
         return {
-            variant: 'ladder',
-            title: statTitle,
-            subtitle: [tournamentName?.trim() || 'Estadísticas', isTeams ? 'Equipos' : 'Jugadores'].join(' · '),
+            title: tournamentName?.trim() || 'Estadísticas',
+            subtitle: `${isTeams ? 'Equipos' : 'Jugadores'} · ${statTitle}`,
+            kicker: isTeams ? 'Estadísticas de equipos' : 'Estadísticas de jugadores',
+            entityLabel: isTeams ? 'Equipo' : 'Jugador',
             tournamentLogo,
             rows,
             columnLabels: {
+                played: first.label,
+                won: second.label,
+                lost: third.label,
+                diff: fourth.label,
                 points: mainColumn?.label || 'PTS',
-                diff: '',
             },
+            showPositionDelta: false,
         };
-    }, [activeSubTab, displayRows, playerColumns, sortKey, teamColumns, teamStatsView, tournamentLogo, tournamentName]);
+    }, [activeSubTab, displayRows, playerColumns, sortKey, teamColumns, teamStatsView, tournamentLogo, tournamentName, unmeasuredMetrics]);
     const hasEvents = finalMatches.some((m) => Array.isArray(m.events) && m.events.length > 0);
     const showTopScorersFallback = !hasEvents && (topScorers?.length || 0) > 0;
     const activeSortColumn = currentColumns.find((column) => column.id === sortKey);
@@ -1012,7 +1012,7 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                             <ExportImage
                                 template="standings"
                                 filename={`estadisticas-${activeSubTab === 'teams' ? 'equipos' : 'jugadores'}-${tournamentName || 'torneo'}`}
-                                data={ladderExportData}
+                                data={statsExportData}
                             />
                         )}
                     </div>

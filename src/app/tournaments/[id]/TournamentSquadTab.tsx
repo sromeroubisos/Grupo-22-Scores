@@ -32,36 +32,44 @@ export type SquadTableData = {
 const fmt = (value: number) => (Number.isInteger(value) ? String(value) : value.toFixed(1));
 
 /**
- * La placa: una fila por club con su total y, debajo del nombre, lo que aporta
- * cada categoría en la que juega (la que no juega no figura).
+ * La placa de tabla normal (la misma de las posiciones): sus cuatro columnas
+ * numéricas llevan lo que aporta cada categoría (hasta cuatro) y la última, el
+ * total. Si sobra lugar, la primera columna libre es el total de partidos
+ * jugados. El guion es una categoría en la que el club no compite.
  */
 function buildSquadExportData(
     data: SquadTableData,
     { tournamentName, tournamentLogo }: { tournamentName?: string; tournamentLogo?: string },
 ): StandingsData {
-    const categories = data.categories ?? [];
+    const categories = (data.categories ?? []).slice(0, 4);
     const group = (data.groupName || '').split('·').map((part) => part.trim()).filter(Boolean).pop();
+    // Una entrada por columna: la categoría, el total de PJ o una columna vacía.
+    type Slot = { label: string; value: (row: NonNullable<SquadTableData['rows']>[number]) => string };
+    const slots: Slot[] = categories.map((category) => ({
+        label: category.label,
+        value: (row) => (row.categories[category.id] === undefined ? '–' : fmt(row.categories[category.id])),
+    }));
+    if (slots.length < 4) slots.push({ label: 'PJ', value: (row) => String(row.played) });
+    while (slots.length < 4) slots.push({ label: '–', value: () => '' });
+    const [first, second, third, fourth] = slots;
+
     return {
-        variant: 'ladder',
-        title: 'TABLA DE PLANTELES',
-        subtitle: [group, tournamentName?.trim()].filter(Boolean).filter((part, i, all) => all.indexOf(part) === i).join(' · ') || 'Planteles',
+        title: tournamentName?.trim() || group || 'Tabla de planteles',
+        subtitle: group && group !== tournamentName?.trim() ? group : 'Planteles',
+        kicker: 'Tabla de planteles',
+        entityLabel: 'Club',
         tournamentLogo,
-        columnLabels: { points: 'PTS', diff: '' },
+        columnLabels: { played: first.label, won: second.label, lost: third.label, diff: fourth.label, points: 'PTS' },
         rows: (data.rows ?? []).map((row) => ({
             pos: row.position,
             team: row.club.name,
             teamFull: row.club.name,
             teamLogo: row.club.logo || undefined,
-            caption: categories
-                .filter((category) => row.categories[category.id] !== undefined)
-                .map((category) => `${category.label} ${fmt(row.categories[category.id])}`)
-                .join(' · '),
-            played: 0,
-            won: 0,
-            lost: 0,
-            diff: '',
+            played: first.value(row),
+            won: second.value(row),
+            lost: third.value(row),
+            diff: fourth.value(row),
             points: fmt(row.points),
-            pointsDeltaTone: 'neutral' as const,
         })),
         showPositionDelta: false,
     };
