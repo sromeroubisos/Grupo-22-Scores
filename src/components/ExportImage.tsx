@@ -128,6 +128,9 @@ export interface StandingsData {
     activeColumn?: 'points';
     // Filas por imagen; sin el, el tope del diseno (20 en la placa normal).
     rowsPerSlide?: number;
+    // Opacidad del velo sobre el fondo propio (0 a 1). Se fija solo con el fondo
+    // predeterminado de un torneo: la foto va casi limpia y sin grilla.
+    backgroundVeil?: number;
     // Color con el que se resalta esa estadistica (subrayado y cifras); sin el,
     // el subrayado va en el acento del diseno.
     activeColor?: string;
@@ -137,8 +140,11 @@ export interface StandingsData {
 }
 
 export interface DailyMatchesData {
-    // Fondo propio subido en el modal; se mezcla sobre la placa ya dibujada.
+    // Fondo propio subido en el modal. G22 Base lo pinta detras de la placa; los
+    // demas disenos lo mezclan sobre la placa ya dibujada.
     backgroundImage?: string;
+    /** Velo sobre ese fondo; ver `StandingsData.backgroundVeil`. */
+    backgroundVeil?: number;
     date: string;
     tournament: string;
     /**
@@ -667,6 +673,12 @@ const EXPORT_PALETTES: ExportPalette[] = [
 const DEFAULT_PALETTE = EXPORT_PALETTES[0];
 // Nombre con el que el fondo predeterminado del torneo figura en "Fondo propio".
 const TOURNAMENT_THEME_BACKGROUND_NAME = 'Fondo del torneo';
+// Velo sobre la foto del torneo: casi limpia. Los fondos que sube la persona
+// conservan el velo de siempre (`undefined`).
+const TOURNAMENT_THEME_BACKGROUND_VEIL = 0.1;
+function getBackgroundVeil(upload: { name: string } | null | undefined): number | undefined {
+    return upload?.name === TOURNAMENT_THEME_BACKGROUND_NAME ? TOURNAMENT_THEME_BACKGROUND_VEIL : undefined;
+}
 
 // El poster de ranking se pinta con CINCO colores, no con los dos usuales:
 // fondo (esquina negra), banda (columna del titulo), brillo (luz electrica de
@@ -1435,7 +1447,10 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         if (!showModal || !tournamentTheme || isRankingPoster || isLadder || isBracket) return;
         setHasSessionColorOverrides(true);
         setSelectedPaletteId('custom');
-        setBgColor(tournamentTheme.bg);
+        // El frente (panel, filas, texto) queda como en el diseno de siempre: del
+        // tema solo cambian la foto de atras y el acento. Unica excepcion, el fondo
+        // claro: ahi la placa pasa a su version clara para que el texto se lea.
+        if (tournamentTheme.light) setBgColor(tournamentTheme.bg);
         setAccentColor(tournamentTheme.accent);
         if (template === 'standings' || template === 'dailyMatches') {
             // Un fondo que subio la persona gana; el del torneo se cambia solo.
@@ -2298,6 +2313,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                 const standingsData = withStandingsBackground(
                     scopeStandingsDataForExport(exportData as StandingsData, standingsExportMode, selectedStandingsGroupIndex),
                     standingsBackgroundUpload?.src,
+                    getBackgroundVeil(standingsBackgroundUpload),
                 );
                 const slides = buildStandingsSlides(standingsData, getStandingsSlideMode(standingsExportMode));
                 if (slides.length === 0) throw new Error('No hay filas para exportar');
@@ -2343,7 +2359,12 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                 markExportFinished();
                 return;
             } else if (template === 'dailyMatches') {
-                const matchesData = exportData as DailyMatchesData;
+                const matchesData: DailyMatchesData = {
+                    ...(exportData as DailyMatchesData),
+                    ...(standingsBackgroundUpload?.src
+                        ? { backgroundImage: standingsBackgroundUpload.src, backgroundVeil: getBackgroundVeil(standingsBackgroundUpload) }
+                        : {}),
+                };
                 const selectedMatches = matchesData.matches.filter((_, index) => selectedMatchIndices.has(index));
                 if (visualFamily === 'posterV3') {
                     await drawPosterV3DailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo, dailyMatchesTimeMode);
@@ -2356,7 +2377,9 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                 } else {
                     await drawDailyMatches(ctx, canvas, { ...matchesData, matches: selectedMatches }, config, accentColor, bgColor, brandLogo, dailyMatchesTimeMode);
                 }
-                await applyStandingsBackgroundOverlay(ctx, canvas, standingsBackgroundUpload?.src);
+                if (!dailyPlatePaintsOwnBackground(visualFamily)) {
+                    await applyStandingsBackgroundOverlay(ctx, canvas, matchesData.backgroundImage);
+                }
             } else if (template === 'squad') {
                 const squadData = exportData as SquadData;
                 const pages = buildSquadPages(squadData, config);
@@ -2439,7 +2462,9 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                 ...matchesData,
                 matches: selectedMatches.length > 0 ? selectedMatches : matchesData.matches,
                 // Fondo propio de las placas de partidos (se mezcla por encima).
-                ...(standingsBackgroundUpload?.src ? { backgroundImage: standingsBackgroundUpload.src } : {}),
+                ...(standingsBackgroundUpload?.src
+                    ? { backgroundImage: standingsBackgroundUpload.src, backgroundVeil: getBackgroundVeil(standingsBackgroundUpload) }
+                    : {}),
             };
         }
 
@@ -2471,6 +2496,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             return withStandingsBackground(
                 scopeStandingsDataForExport(exportData as StandingsData, standingsExportMode, selectedStandingsGroupIndex),
                 standingsBackgroundUpload?.src,
+                getBackgroundVeil(standingsBackgroundUpload),
             );
         }
 
@@ -5946,7 +5972,9 @@ export async function renderMatchExportPreviewCanvas(
         } else {
             await drawDailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, dailyMatchesTimeMode);
         }
-        await applyStandingsBackgroundOverlay(ctx, canvas, (exportData as DailyMatchesData).backgroundImage);
+        if (!dailyPlatePaintsOwnBackground(visualFamily)) {
+            await applyStandingsBackgroundOverlay(ctx, canvas, (exportData as DailyMatchesData).backgroundImage);
+        }
     } else if (template === 'standings') {
         const standingsData = exportData as StandingsData;
         const slide = buildStandingsSlides(standingsData, standingsExportMode)[0];
@@ -6059,8 +6087,14 @@ function getSafeStandingsGroupIndex(groups: StandingsGroupData[], selectedIndex:
     return selectedIndex;
 }
 
-function withStandingsBackground(data: StandingsData, backgroundImage?: string): StandingsData {
-    return backgroundImage ? { ...data, backgroundImage } : data;
+function withStandingsBackground(data: StandingsData, backgroundImage?: string, backgroundVeil?: number): StandingsData {
+    return backgroundImage ? { ...data, backgroundImage, backgroundVeil } : data;
+}
+
+// La placa de partidos de G22 Base pinta el fondo propio ella misma (detras del
+// panel). Las otras familias traen su propia hoja: ahi se mezcla despues.
+function dailyPlatePaintsOwnBackground(visualFamily: ExportVisualFamily): boolean {
+    return visualFamily !== 'posterV3' && visualFamily !== 'impactoV4' && visualFamily !== 'fanV5' && visualFamily !== 'momentumV2';
 }
 
 // La placa normal de G22 Base pinta el fondo propio ella misma (drawBackdrop,
@@ -6893,7 +6927,7 @@ function drawStandingsTeamName(
     ctx.fillText(teamName, x, centerY + 1);
 }
 
-export function drawBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, bgColor: string, accentColor: string, isDark: boolean, backdropImage: HTMLImageElement | null = null) {
+export function drawBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, bgColor: string, accentColor: string, isDark: boolean, backdropImage: HTMLImageElement | null = null, backdropVeil?: number) {
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     if (backdropImage && backdropImage.naturalWidth > 0 && backdropImage.naturalHeight > 0) {
@@ -6903,8 +6937,10 @@ export function drawBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEl
         const drawWidth = backdropImage.naturalWidth * scale;
         const drawHeight = backdropImage.naturalHeight * scale;
         ctx.drawImage(backdropImage, (canvas.width - drawWidth) / 2, (canvas.height - drawHeight) / 2, drawWidth, drawHeight);
-        ctx.fillStyle = hexToRGBA(bgColor, isDark ? 0.52 : 0.42);
+        ctx.fillStyle = hexToRGBA(bgColor, backdropVeil ?? (isDark ? 0.52 : 0.42));
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Fondo del torneo: la foto va limpia, sin la luz ni la grilla encima.
+        if (backdropVeil !== undefined) return;
     }
     const topGlow = ctx.createRadialGradient(canvas.width * 0.5, 0, 0, canvas.width * 0.5, 0, canvas.height * 0.85);
     topGlow.addColorStop(0, hexToRGBA(accentColor, isDark ? 0.28 : 0.18));
@@ -9668,7 +9704,7 @@ async function drawStandings(
     const pointsLabel = data.columnLabels?.points?.trim() || 'PTS';
     const showPositionDelta = data.showPositionDelta === true;
 
-    drawBackdrop(ctx, canvas, bgColor, accentColor, isDark, backdropImage);
+    drawBackdrop(ctx, canvas, bgColor, accentColor, isDark, backdropImage, data.backgroundVeil);
     drawCenteredPill(
         ctx,
         safe.centerX,
@@ -11119,8 +11155,10 @@ async function drawDailyMatches(
         ...matches.flatMap((match) => [loadImage(match.homeLogo || ''), loadImage(match.awayLogo || '')]),
     ]);
     const tournamentLogo = logoLoads[0];
+    // Fondo propio DETRAS de la placa: el panel y las filas quedan como siempre.
+    const backdropImage = data.backgroundImage ? await loadImage(data.backgroundImage) : null;
 
-    drawBackdrop(ctx, canvas, bgColor, accentColor, isDark);
+    drawBackdrop(ctx, canvas, bgColor, accentColor, isDark, backdropImage, data.backgroundVeil);
     drawCenteredPill(
         ctx,
         safe.centerX,

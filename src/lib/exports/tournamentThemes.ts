@@ -16,8 +16,10 @@ export type TournamentExportTheme = {
     id: string;
     /** Ruta publica del fondo propio. */
     image: string;
-    /** Color de fondo de la placa (el velo que se pone sobre la imagen). */
+    /** Color de fondo de la placa. Solo se aplica con `light`; si no, el diseno conserva el suyo. */
     bg: string;
+    /** Fondo claro: la placa pasa a su version clara para que el texto se lea sobre la foto. */
+    light?: boolean;
     /** Color de acento de la placa. */
     accent: string;
     /** Color con el que se resalta la estadistica elegida en las estadisticas. */
@@ -39,8 +41,8 @@ export const TOURNAMENT_THEMES = {
     superRugbyAmericas: { id: 'super-rugby-americas', image: `${IMG}negro.jpg`, bg: '#181818', accent: '#22c55e', highlight: '#ffffff' },
     europa: { id: 'europa', image: `${IMG}negro.jpg`, bg: '#181818', accent: '#ffffff', highlight: '#eab308' },
     seisNaciones: { id: 'seis-naciones', image: `${IMG}rojo-naranja.jpg`, bg: '#8f2308', accent: '#ffffff', highlight: '#fde68a' },
-    chileTop: { id: 'chile-top', image: `${IMG}blanco.jpg`, bg: '#f1f5f9', accent: '#dc2626', highlight: '#dc2626' },
-    chileAscenso: { id: 'chile-ascenso', image: `${IMG}blanco.jpg`, bg: '#f1f5f9', accent: '#1d4ed8', highlight: '#1d4ed8' },
+    chileTop: { id: 'chile-top', light: true, image: `${IMG}blanco.jpg`, bg: '#f1f5f9', accent: '#dc2626', highlight: '#dc2626' },
+    chileAscenso: { id: 'chile-ascenso', light: true, image: `${IMG}blanco.jpg`, bg: '#f1f5f9', accent: '#1d4ed8', highlight: '#1d4ed8' },
     nationsChampionship: { id: 'nations-championship', image: `${IMG}verde-azul.jpg`, bg: '#115157', accent: '#facc15', highlight: '#ffffff' },
     celeste: { id: 'celeste', image: `${IMG}cian.jpg`, bg: '#0f6f86', accent: '#ffffff', highlight: '#ffffff' },
 } as const satisfies Record<string, TournamentExportTheme>;
