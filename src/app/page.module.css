@@ -2445,3 +2445,435 @@
         min-height: 55.1px;
     }
 }
+
+/* En escritorio el wrapper no genera caja: las tres piezas siguen donde estaban. */
+.afterFeed {
+    display: contents;
+}
+
+.installSlot {
+    display: contents;
+}
+
+/* La placa de Ganá con tu club se dibuja dos veces y cada pantalla ve una:
+   arriba en escritorio, dentro del feed en el teléfono. */
+.bannerFeed {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .bannerDesktop {
+        display: none;
+    }
+
+    /* A ancho de tarjeta, con las mismas esquinas, y con aire propio: además del
+       `gap` de la lista suma 12px arriba y abajo para que no se lea como una
+       fila más. */
+    .bannerFeed {
+        display: block;
+        margin: 12px 0;
+    }
+
+    .bannerFeed > a {
+        border-radius: 16px;
+    }
+}
+
+/* Home en el teléfono: misma estructura que la referencia de FotMob.
+   Deporte → pestañas de día con subrayado → tarjetas por liga, cada fila en una
+   sola línea (estado · local · escudo · marcador · escudo · visitante).
+   Los colores son los de G22; sólo cambia cómo se arma la pantalla. */
+@media (max-width: 768px) {
+    .mainContent {
+        gap: 12px;
+    }
+
+    .mobileTopControls {
+        order: 1;
+        gap: 0;
+    }
+
+    .matchesSection {
+        order: 2;
+        gap: 12px;
+    }
+
+    .afterFeed {
+        order: 3;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* Deporte: una fila de íconos, sin nombre. */
+    .mobileSportSelector {
+        order: 1;
+        gap: 8px;
+        padding: 4px 4px 12px;
+    }
+
+    .sportChip {
+        width: 44px;
+        height: 44px;
+        border-radius: 999px;
+    }
+
+    .sportName {
+        display: none;
+    }
+
+    /* Día: pestañas de texto con subrayado, a todo el ancho. */
+    .dateSelector {
+        order: 2;
+        margin: 0 -12px;
+        padding: 0;
+        background: transparent;
+        border: 0;
+        border-bottom: 1px solid var(--color-border);
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .dateSelectorInner {
+        padding: 0;
+    }
+
+    .dateList {
+        display: flex;
+        gap: 0;
+        padding: 0 4px;
+        scroll-snap-type: x proximity;
+    }
+
+    .mobileDateNav {
+        display: none;
+    }
+
+    .dateItem {
+        position: relative;
+        flex-shrink: 0;
+        padding: 14px 16px;
+        border-radius: 0;
+        background: transparent;
+        color: var(--color-text-tertiary);
+        font-weight: 600;
+        scroll-snap-align: center;
+    }
+
+    .dateItem:hover {
+        background: transparent;
+    }
+
+    .dateItem.active {
+        background: transparent;
+        color: var(--color-text-primary);
+        font-weight: 700;
+    }
+
+    .dateItem.active::after {
+        display: block;
+        content: '';
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        bottom: 0;
+        height: 3px;
+        border-radius: 3px 3px 0 0;
+        background: var(--color-text-primary);
+    }
+
+    .dateLabel {
+        font-size: 1rem;
+    }
+
+    /* Segmento y "Instalar": después de las pestañas, discretos. */
+    .mobileAudienceSwitch {
+        order: 3;
+        padding: 12px 0 0;
+    }
+
+    .mobileAudienceSwitchBtn {
+        height: 32px;
+        font-size: 0.72rem;
+    }
+
+    .installSlot {
+        display: block;
+        order: 4;
+        padding-top: 12px;
+    }
+
+    .installSlot:empty {
+        display: none;
+    }
+
+    .matchesContainer {
+        gap: 12px;
+    }
+
+    /* Tarjeta de liga: encabezado con bandera, nombre y chevron; cuerpo con filas. */
+    .leagueSection {
+        margin-bottom: 0;
+        border: 0;
+        border-radius: 16px;
+        background: var(--color-bg-secondary);
+        box-shadow: none;
+    }
+
+    .leagueSectionHeader {
+        height: auto;
+        min-height: 50px;
+        padding: 10px 14px;
+        gap: 12px;
+        border-bottom: 0;
+        background: color-mix(in srgb, var(--color-text-primary) 5%, transparent);
+    }
+
+    .leagueInfo {
+        gap: 12px;
+    }
+
+    .leagueFlag {
+        font-size: 1.35rem;
+    }
+
+    .leagueMeta {
+        white-space: normal;
+    }
+
+    .leagueSectionName {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        white-space: normal;
+        font-size: 0.95rem;
+        font-weight: 700;
+        line-height: 1.25;
+    }
+
+    /* Chevron hacia arriba con la tarjeta abierta, hacia abajo cuando se pliega. */
+    .chevronHeader {
+        color: var(--color-text-tertiary);
+        transform: rotate(180deg);
+    }
+
+    .leagueSectionHeader.collapsed .chevronHeader {
+        transform: none;
+    }
+
+    /* Fila de partido: una sola línea, el marcador en el centro.
+       Las cajas intermedias se disuelven para que todo caiga en la misma grilla. */
+    .matchRow {
+        display: grid;
+        /* Columna de estado a la izquierda y una igual (vacía) a la derecha:
+           así el marcador y la hora quedan en el centro de la tarjeta. */
+        /* Las dos columnas de marcador miden lo mismo a propósito: con `auto`
+           el límite entre ambas se corría según los dígitos y el marcador
+           quedaba descentrado. */
+        grid-template-columns: 30px minmax(0, 1fr) 22px 34px 34px 22px minmax(0, 1fr) 30px;
+        column-gap: 4px;
+        align-items: center;
+        min-height: 72px;
+        padding: 14px 6px;
+    }
+
+    .matchRow > *,
+    .matchRow .matchTeam > *,
+    .matchRow .matchTeamIdentity > * {
+        grid-row: 1;
+    }
+
+    .matchTeams,
+    .matchTeam,
+    .matchTeamIdentity {
+        display: contents;
+    }
+
+    .matchTime {
+        grid-column: 1;
+        width: auto;
+    }
+
+    .matchTime > span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3px 6px;
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+        color: var(--color-text-tertiary);
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    /* En vivo: sólo el punto pulsante dentro de un círculo. La palabra no entra
+       en la columna del estado; se mantiene en el DOM para lectores de pantalla. */
+    .matchTime > .matchLive {
+        gap: 0;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border-radius: 999px;
+        font-size: 0;
+        color: var(--color-error);
+        background: color-mix(in srgb, var(--color-error) 14%, transparent);
+    }
+
+    .matchTeam:first-child .teamName {
+        grid-column: 2;
+        text-align: right;
+    }
+
+    .matchTeam:first-child .teamLogo {
+        grid-column: 3;
+    }
+
+    /* El guion se dibuja justo en el límite entre las dos columnas de marcador,
+       que es el centro de la tarjeta: cada número queda a un lado, a igual distancia. */
+    .matchTeam:first-child .teamScoreGroup {
+        grid-column: 4;
+        justify-content: flex-end;
+        padding-right: 7px;
+    }
+
+    .matchTeam:last-child .teamScoreGroup {
+        position: relative;
+        grid-column: 5;
+        justify-content: flex-start;
+        padding-left: 7px;
+    }
+
+    .matchTeam:last-child .teamScoreGroup::before {
+        content: '-';
+        position: absolute;
+        left: -2px; /* mitad del `column-gap`: el centro exacto entre ambas columnas */
+        top: 50%;
+        transform: translate(-50%, -50%);
+        color: var(--color-text-tertiary);
+    }
+
+    .matchTeam:last-child .teamLogo {
+        grid-column: 6;
+    }
+
+    .matchTeam:last-child .teamName {
+        grid-column: 7;
+        text-align: left;
+    }
+
+    .teamName {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        white-space: normal;
+        flex: none;
+        font-size: 0.92rem;
+        font-weight: 500;
+        line-height: 1.2;
+    }
+
+    .teamScore {
+        width: auto;
+        min-width: 12px;
+        font-size: 1.05rem;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .matchTeam:last-child .teamScore {
+        text-align: left;
+    }
+
+    .teamLogo,
+    .teamLogoRound {
+        width: 22px;
+        height: 22px;
+    }
+
+    .logoImgSquare,
+    .logoImgRound,
+    .logoFallback {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Seguir un club se hace desde su página: la fila no lleva estrellas. */
+    .matchRow .clubFavoriteBtn {
+        display: none;
+    }
+
+    /* Partido sin jugar: la hora ocupa el lugar del marcador. */
+    .matchRow:not([data-status="live"]):not([data-status="finished"]):not([data-status="suspended"]) .matchTime {
+        grid-column: 4 / 6;
+        grid-row: 1;
+        width: auto;
+    }
+
+    .matchRow:not([data-status="live"]):not([data-status="finished"]):not([data-status="suspended"]) .matchTime > span {
+        padding: 0;
+        background: transparent;
+        color: var(--color-text-primary);
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .matchRow:not([data-status="live"]):not([data-status="finished"]):not([data-status="suspended"]) .teamScoreGroup {
+        display: none;
+    }
+}
+
+.collapseAllBtn {
+    display: none;
+}
+
+@media (max-width: 1100px) {
+    .collapseAllBtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        justify-self: center;
+        align-self: center;
+        min-height: 44px;
+        margin: 8px 0;
+        padding: 0 28px;
+        border: 0;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+        color: var(--color-text-primary);
+        font: inherit;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 100ms ease-out;
+    }
+
+    .collapseAllBtn:active {
+        transform: scale(0.97);
+    }
+
+    .collapseAllBtn:focus-visible {
+        outline: 2px solid var(--color-primary, #22c55e);
+        outline-offset: 2px;
+    }
+
+    .collapseAllBtn svg {
+        transition: transform 200ms ease;
+    }
+
+    .collapseAllChevronOpen {
+        transform: rotate(180deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .collapseAllBtn,
+    .collapseAllBtn svg {
+        transition: none;
+    }
+
+    .collapseAllBtn:active {
+        transform: none;
+    }
+}

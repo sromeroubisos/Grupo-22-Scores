@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef, useCallback, memo, Fragment, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
-import { Trophy, ChevronRight, ChevronLeft, Star } from 'lucide-react';
+import { Trophy, ChevronRight, ChevronLeft, ChevronDown, Star } from 'lucide-react';
 import Link from 'next/link';
 import styles from './page.module.css';
 import LeagueDrilldown, { type DrillCountry } from '@/components/LeagueDrilldown';
@@ -581,6 +581,7 @@ const MatchRow = memo(({ match, selectedSport, styles, isIndividualSport, showCl
     <Link
       href={`/matches/${match.id}`}
       className={`${styles.matchRow} ${match.status === 'live' ? styles.matchRowLive : ''}`}
+      data-status={match.status}
     >
       <div className={styles.matchTime}>
         {match.status === 'live' ? (
@@ -1906,15 +1907,24 @@ export default function HomePage() {
 
         {/* Main Content - Matches */}
         <main className={styles.mainContent}>
-          {/* Titulares y los partidos de los clubes que sigue. Si no hay nada, no se dibuja. */}
-          <TickerTitulares favorites={favorites} />
+          {/* En escritorio estas piezas van arriba, como siempre (el wrapper no
+              genera caja). En el teléfono bajan al final del feed: arriba quedan
+              sólo deporte, día y partidos, igual que en FotMob. La placa de Ganá
+              con tu club no baja hasta el final: en el teléfono se dibuja dentro
+              del feed (ver `bannerFeed`), después de lo que sigue el usuario. */}
+          <div className={styles.afterFeed}>
+            {/* Titulares y los partidos de los clubes que sigue. Si no hay nada, no se dibuja. */}
+            <TickerTitulares favorites={favorites} />
 
-          {/* La placa de Ganá con tu club: entre los titulares y el selector de día. */}
-          <GanaConTuClubBanner />
+            {/* La placa de Ganá con tu club: entre los titulares y el selector de día. */}
+            <div className={styles.bannerDesktop}>
+              <GanaConTuClubBanner />
+            </div>
 
-          {/* Juegos Suramericanos Santa Fe 2026: solo en el teléfono, donde el nav
-              no tiene el link. Se apaga solo al día siguiente del cierre. */}
-          <SantaFe2026Acceso />
+            {/* Juegos Suramericanos Santa Fe 2026: solo en el teléfono, donde el nav
+                no tiene el link. Se apaga solo al día siguiente del cierre. */}
+            <SantaFe2026Acceso />
+          </div>
 
           {/* El interruptor de los PARTIDOS del día en escritorio. Antes vivía dentro
               del selector de ligas; ahora el selector no depende de él. En el teléfono
@@ -1964,7 +1974,9 @@ export default function HomePage() {
               ))}
             </div>
 
-            <InstallAppButton />
+            <div className={styles.installSlot}>
+              <InstallAppButton />
+            </div>
 
             {/* Date Selector */}
             <section className={styles.dateSelector}>
@@ -2197,6 +2209,13 @@ export default function HomePage() {
                 </div>
               )}
 
+              {/* Teléfono: la placa va después de los favoritos del usuario. */}
+              {!esTenis && !loading && displayedFavoriteClubMatches.length > 0 && (
+                <div className={styles.bannerFeed}>
+                  <GanaConTuClubBanner />
+                </div>
+              )}
+
               {!esTenis && !loading && displayedMatchesByLeague.map((league, leagueIndex) => {
                 const isCollapsed = collapsedLeagues.has(league.leagueId);
                 const isFavoriteLeague = isLeagueGroupFavorite(league);
@@ -2256,7 +2275,48 @@ export default function HomePage() {
                   );
                 }
 
-                return conPromo(
+                /**
+                 * "Ocultar todo" va después de las primeras tres tarjetas, como en
+                 * FotMob: separa lo de arriba de lo que sigue y sólo existe cuando
+                 * el día tiene suficientes ligas como para que plegar sirva.
+                 */
+                const hideAllAfter = (bloque: ReactNode) => {
+                  if (leagueIndex !== 2 || displayedMatchesByLeague.length < 4) return bloque;
+                  const allCollapsed = displayedMatchesByLeague.every((item) => collapsedLeagues.has(item.leagueId));
+                  return (
+                    <Fragment key={`${league.leagueId}-hide-all`}>
+                      {bloque}
+                      <button
+                        type="button"
+                        className={styles.collapseAllBtn}
+                        aria-pressed={allCollapsed}
+                        onClick={() => setCollapsedLeagues(
+                          allCollapsed
+                            ? new Set()
+                            : new Set(displayedMatchesByLeague.map((item) => item.leagueId)),
+                        )}
+                      >
+                        {allCollapsed ? 'Mostrar todo' : 'Ocultar todo'}
+                        <ChevronDown size={18} aria-hidden="true" className={allCollapsed ? undefined : styles.collapseAllChevronOpen} />
+                      </button>
+                    </Fragment>
+                  );
+                };
+
+                /** Sin favoritos, la placa entra después del primer partido. */
+                const bannerAfter = (bloque: ReactNode) => {
+                  if (leagueIndex !== 0 || displayedFavoriteClubMatches.length > 0) return bloque;
+                  return (
+                    <Fragment key={`${league.leagueId}-banner`}>
+                      {bloque}
+                      <div className={styles.bannerFeed}>
+                        <GanaConTuClubBanner />
+                      </div>
+                    </Fragment>
+                  );
+                };
+
+                return bannerAfter(hideAllAfter(conPromo(
                   <div key={league.leagueId} className={styles.leagueSection} style={leagueColorStyle}>
                     <div className={`${styles.leagueSectionHeader} ${isCollapsed ? styles.collapsed : ''}`}
                       onClick={() => toggleCompetitionCollapse(league.leagueId)}
@@ -2317,7 +2377,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   </div>
-                );
+                )));
               })}
 
               {/* Menos de dos bloques: la tarjeta no encontró su lugar arriba. */}
