@@ -2446,6 +2446,40 @@
     }
 }
 
+/* "Mis Equipos": el torneo de cada partido es un enlace a su página, con alto de
+   dedo y una flecha que dice que se puede entrar. */
+.favoriteMatchLeague {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 40px;
+    padding: 8px 12px;
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 150ms ease, color 150ms ease;
+}
+
+.favoriteMatchLeague:hover,
+.favoriteMatchLeague:active {
+    background: color-mix(in srgb, var(--color-text-primary) 5%, transparent);
+    color: var(--color-text-primary);
+}
+
+.favoriteMatchLeague:focus-visible {
+    outline: 2px solid var(--color-primary, #22c55e);
+    outline-offset: -2px;
+}
+
+.favoriteMatchLeagueName {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* En escritorio el wrapper no genera caja: las tres piezas siguen donde estaban. */
 .afterFeed {
     display: contents;

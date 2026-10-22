@@ -1352,7 +1352,10 @@ export default function HomePage() {
         const rawCountryName = overriddenTournament
           ? (getCountryById(overriddenTournament.countryId || '')?.name || overriddenTournament.countryId || getTournamentCountryName(tournament))
           : getTournamentCountryName(tournament);
-        const countryName = String(rawCountryName || 'Internacional').replace(/\b\w/g, (c: string) => c.toUpperCase());
+        // Mayúscula inicial de cada palabra. `\b\w` fallaba con las tildes: la "ñ" no es
+        // `\w`, así que "españa" quedaba "EspañA".
+        const countryName = String(rawCountryName || 'Internacional')
+          .replace(/(^|[\s-])(\p{L})/gu, (_match: string, lead: string, letter: string) => `${lead}${letter.toUpperCase()}`);
         const tournamentName = String(overriddenTournament?.displayName || overriddenTournament?.name || tournament.name || 'Competencia');
         const tournamentPriority = Math.max(
           getTournamentPriority(tournament),
@@ -1478,9 +1481,14 @@ export default function HomePage() {
   }, [isLeagueGroupFavorite, loadedRugbyTournamentMap, matches, selectedSport.id, shouldIncludeMatchForAudience, userTimeZone]);
 
   const favoriteClubMatches = useMemo(() => {
-    const result: (Match & { leagueName: string })[] = [];
+    const result: (Match & { leagueName: string; leagueHref: string })[] = [];
     const seenMatchIds = new Set<string>();
     for (const leagueGroup of matchesByLeague) {
+      // El mismo destino que el encabezado de la tarjeta del torneo: desde "Mis
+      // Equipos" se tiene que poder entrar al torneo del partido.
+      const leagueHref = `/tournaments/${leagueGroup.leagueId}?sport=${selectedSport.id}`
+        + `${leagueGroup.league ? `&name=${encodeURIComponent(leagueGroup.league)}` : ''}`
+        + `${leagueGroup.leagueUrl ? `&url=${encodeURIComponent(leagueGroup.leagueUrl)}` : ''}`;
       for (const m of leagueGroup.matches) {
         const hId = (m as any).homeClubId;
         const aId = (m as any).awayClubId;
@@ -1489,12 +1497,12 @@ export default function HomePage() {
 
         if (isFavoriteClubMatch && !seenMatchIds.has(matchKey)) {
           seenMatchIds.add(matchKey);
-          result.push({ ...m, leagueName: leagueGroup.league });
+          result.push({ ...m, leagueName: leagueGroup.league, leagueHref });
         }
       }
     }
     return result;
-  }, [matchesByLeague, isFavorite]);
+  }, [matchesByLeague, isFavorite, selectedSport.id]);
 
   const favoriteClubMatchIds = useMemo(() => (
     new Set(favoriteClubMatches.map((match) => String(match.id)))
@@ -2482,9 +2490,11 @@ export default function HomePage() {
                             isClubFavorite={isClubFavorite}
                             onToggleClubFavorite={toggleClubFavorite}
                           />
-                          <div style={{ fontSize: '11px', color: 'var(--text-secondary, #888)', padding: '0 12px 6px', marginTop: '-4px' }}>
-                            {match.leagueName}
-                          </div>
+                          {/* El torneo del partido, tocable: lleva a su página. */}
+                          <Link href={match.leagueHref} className={styles.favoriteMatchLeague}>
+                            <span className={styles.favoriteMatchLeagueName}>{match.leagueName}</span>
+                            <ChevronRight size={16} aria-hidden="true" />
+                          </Link>
                         </div>
                       ))}
                     </div>
