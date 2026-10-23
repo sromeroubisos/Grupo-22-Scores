@@ -13815,6 +13815,9 @@ type BracketPalette = {
     inkMuted: string;
     headerInk: string;
     isDark: boolean;
+    /** Tipografias propias de la familia; sin ellas, el cuerpo del sitio. */
+    nameFont?: string;
+    scoreFont?: string;
 };
 
 type BracketCardSpec = {
@@ -14081,11 +14084,11 @@ function drawBracketBlockCard(
     const meta = formatBracketMatchMeta(match);
 
     ctx.save();
-    ctx.fillStyle = palette.isDark ? 'rgba(0,0,0,0.26)' : hexToRGBA(palette.ink, 0.045);
+    ctx.fillStyle = palette.isDark ? 'rgba(255,255,255,0.04)' : hexToRGBA(palette.ink, 0.045);
     ctx.beginPath();
     ctx.roundRect(x, y, width, height, u(12));
     ctx.fill();
-    ctx.strokeStyle = hexToRGBA(palette.ink, palette.isDark ? 0.24 : 0.14);
+    ctx.strokeStyle = hexToRGBA(palette.ink, palette.isDark ? 0.1 : 0.14);
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -14121,7 +14124,7 @@ function drawBracketBlockCard(
     const crest = Math.min(u(34), rowHeight - u(10));
     const nameX = x + u(14) + crest + u(10);
     const nameMax = scoreX - nameX - u(6);
-    const nameSize = Math.min(...labels.map((label) => setFittedFont(ctx, label, nameMax, '800', u(16), FONT_BODY, u(9))));
+    const nameSize = Math.min(...labels.map((label) => setFittedFont(ctx, label, nameMax, '800', u(16), palette.nameFont ?? FONT_BODY, u(9))));
 
     rows.forEach((row, index) => {
         const centerY = y + headerHeight + rowHeight * index + rowHeight / 2;
@@ -14155,13 +14158,13 @@ function drawBracketBlockCard(
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = isTbd ? palette.inkMuted : dim ? palette.inkMuted : palette.ink;
-        ctx.font = `800 ${nameSize}px ${FONT_BODY}`;
+        ctx.font = `800 ${nameSize}px ${palette.nameFont ?? FONT_BODY}`;
         ctx.fillText(truncateTextToWidth(ctx, labels[index], nameMax), nameX, centerY + u(1));
 
         const hasScore = !(row.score == null || row.score === '');
         ctx.textAlign = 'center';
         ctx.fillStyle = hasScore ? (row.winner ? palette.accentSoft : dim ? palette.inkMuted : palette.ink) : palette.inkMuted;
-        ctx.font = `800 ${u(28)}px ${FONT_BODY}`;
+        ctx.font = `800 ${u(28)}px ${palette.scoreFont ?? FONT_BODY}`;
         ctx.fillText(hasScore ? String(row.score) : '-', scoreX + scoreWidth / 2, centerY + u(1));
         ctx.restore();
     });
@@ -14176,6 +14179,7 @@ function drawBracketBlocks(
     W: number,
     areaTop: number,
     areaHeight: number,
+    sideMargin?: number,
 ) {
     const thirdEntries = entries.filter((entry) => isBracketThirdPlaceName(getBracketRoundName(entry.round, entry.index)));
     let mainEntries = entries.filter((entry) => !thirdEntries.includes(entry));
@@ -14185,7 +14189,7 @@ function drawBracketBlocks(
     // Sin columna Final reconocible, el 3.er puesto vuelve a ser una columna mas.
     const columns = hasFinal ? mainEntries : entries;
 
-    const margin = u(40);
+    const margin = sideMargin ?? u(40);
     const gap = columns.length > 1 ? u(56) : 0;
     const columnWidth = Math.min(u(330), (W - margin * 2 - gap * (columns.length - 1)) / columns.length);
     const totalWidth = columnWidth * columns.length + gap * (columns.length - 1);
@@ -14332,18 +14336,19 @@ async function drawPlayoffBracket(
     const fanTone = getFanTone(accentColor, bgColor);
     // G22 Base (el diseno del super admin) lo arma como su placa: campo de color, titular en una linea.
     const isPlate = family === 'g22Base';
-    const plateTone = getG22PlateTone(accentColor, bgColor);
     const isDark = !isFan && getContrastColor(bgColor) === '#ffffff';
     const deep = mixHexColors(bgColor, '#000000', isDark ? 0.42 : 0.1);
     const palette: BracketPalette = isPlate ? {
-        bg: plateTone.field,
-        deep: plateTone.fieldEnd,
-        accent: plateTone.ink,
-        accentSoft: mixHexColors(plateTone.accent, '#ffffff', 0.55),
-        ink: plateTone.ink,
-        inkMuted: hexToRGBA(plateTone.ink, 0.7),
-        headerInk: getContrastColor(plateTone.ink) === '#ffffff' ? '#ffffff' : plateTone.fieldEnd,
-        isDark: plateTone.isDarkField,
+        bg: bgColor,
+        deep,
+        accent: accentColor,
+        accentSoft: accentColor,
+        ink: getTextColor(isDark),
+        inkMuted: getMutedColor(isDark, 0.7),
+        headerInk: getTextColor(isDark),
+        isDark,
+        nameFont: FONT_DISPLAY,
+        scoreFont: FONT_MONO,
     } : isFan ? {
         bg: fanTone.sheet,
         deep: fanTone.ink,
@@ -14364,7 +14369,7 @@ async function drawPlayoffBracket(
         isDark,
     };
 
-    if (isPlate) setActiveCrestBackdropDark(plateTone.isDarkField);
+    if (isPlate) setActiveCrestBackdropDark(isDark);
     const [tournamentLogo, wordmark, plateBackground, ...participantLogos] = await Promise.all([
         loadImage(getTournamentLogoImageSource(data)),
         loadImage('/header-logo.png'),
@@ -14387,6 +14392,7 @@ async function drawPlayoffBracket(
     };
 
     let fanHeaderBottom = 0;
+    let plateArea = { top: 0, height: 0, margin: 0 };
     let fanFooterRuleY = 0;
     if (isFan) {
         // Misma cabecera que la tabla Fan: torneo en gris, etapa en el Acento; en
@@ -14408,28 +14414,42 @@ async function drawPlayoffBracket(
         });
         fanFooterRuleY = drawFanFooter(ctx, canvas, brandLogo, fanTone, { padding, unit: fu, showBrand: !isStory, wordmark });
     } else if (isPlate) {
-        drawG22PlateField(ctx, canvas, plateTone);
+        // G22 Base: la misma cabecera que el fixture y las formaciones (pildora, cinta del torneo,
+        // panel de superficie), con la foto cargada por detras si hay.
+        const safe = getSafeArea(canvas);
         if (plateBackground) {
-            // La foto va a pantalla completa y un velo del campo la apaga: los cruces siguen siendo lo que se lee.
             drawCoverImage(ctx, canvas, plateBackground, { focusX: 0.5, focusY: 0.4 });
-            const veil = ctx.createLinearGradient(0, 0, 0, H);
-            veil.addColorStop(0, hexToRGBA(plateTone.field, 0.72));
-            veil.addColorStop(1, hexToRGBA(plateTone.fieldEnd, 0.86));
-            ctx.fillStyle = veil;
+            ctx.fillStyle = hexToRGBA(isDark ? '#050507' : '#f8fafc', 0.8);
             ctx.fillRect(0, 0, W, H);
+        } else {
+            drawBackdrop(ctx, canvas, bgColor, accentColor, isDark);
         }
-        let headerEdge = drawG22PlateHeadline(ctx, canvas, (data.subtitle || '').trim() || 'Cuadro playoff', bracketTournamentNameOf(data), plateTone, {
-            top: u(isStory ? 120 : 64),
-            maxWidth: W - u(96),
-            maxSize: u(84),
-            minSize: u(32),
-        });
-        if (tournamentLogo) {
-            const placement = getContainedImagePlacement(tournamentLogo, W / 2, headerEdge + u(78), u(190), u(120), 0);
-            ctx.drawImage(tournamentLogo, placement.x, placement.y, placement.width, placement.height);
-            headerEdge += u(150);
+        drawCenteredPill(
+            ctx,
+            safe.centerX,
+            isStory ? 74 : 56,
+            'CUADRO PLAYOFF',
+            accentColor,
+            getContrastColor(accentColor),
+            `800 ${isStory ? 24 : 20}px ${FONT_BODY}`,
+            26,
+            isStory ? 48 : 42,
+        );
+        drawTournamentRibbon(ctx, canvas, bracketTournamentNameOf(data), tournamentLogo, data.tournamentLogo, accentColor, isDark, isStory ? 166 : 138, isStory ? 26 : 22);
+        const stageLabel = (data.subtitle || '').trim();
+        if (stageLabel) {
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.fillStyle = palette.inkMuted;
+            ctx.font = `600 ${isStory ? 22 : 18}px ${FONT_BODY}`;
+            ctx.fillText(stageLabel.toUpperCase(), safe.centerX, isStory ? 208 : 178);
+            ctx.restore();
         }
-        fanHeaderBottom = headerEdge + u(10);
+        const panelX = isStory ? 46 : 54;
+        const panelY = isStory ? 248 : 220;
+        const panelHeight = safe.bottom - panelY - (isStory ? 18 : 10);
+        drawSurfacePanel(ctx, panelX, panelY, W - panelX * 2, panelHeight, 34, isDark);
+        plateArea = { top: panelY + 20, height: panelHeight - 40, margin: panelX + 28 };
     } else {
         drawBracketBackdrop(ctx, canvas, palette);
         // Esquinas: una palabra por linea, como el "RUGBY ARGENTINO CLUBES" de la referencia.
@@ -14535,8 +14555,8 @@ async function drawPlayoffBracket(
     const areaBottom = areaTop + areaHeight;
 
     const finishWithFooter = () => {
-        if (isFan) return;
-        const tone: G22PlateTone = isPlate ? plateTone : {
+        if (isFan || isPlate) return;
+        const tone: G22PlateTone = {
             field: palette.bg,
             fieldEnd: palette.deep,
             ink: palette.ink,
@@ -14567,7 +14587,12 @@ async function drawPlayoffBracket(
 
     if (isFan || isPlate) {
         const entries = rounds.map((round, index) => ({ round, index }));
-        drawBracketBlocks(ctx, entries, logosFor, palette, u, W, areaTop, areaHeight);
+        if (isPlate) {
+            drawBracketBlocks(ctx, entries, logosFor, palette, u, W, plateArea.top, plateArea.height, plateArea.margin);
+            drawBrandFooter(ctx, canvas, brandLogo, isDark);
+        } else {
+            drawBracketBlocks(ctx, entries, logosFor, palette, u, W, areaTop, areaHeight);
+        }
         finishWithFooter();
         return;
     }
