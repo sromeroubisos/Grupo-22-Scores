@@ -1788,3 +1788,14 @@ html[data-theme="dark"] img[src*="team-logo?key=el-tala-r-c"] {
 html[data-theme="dark"] img[src*="/clubs/sb-tala-rugby-club.png"] {
     content: url("/clubs/sb-tala-rugby-club-dark.png");
 }
+
+/*
+ * Escudo de Chubut (M16 y M17 comparten archivo): es negro sobre transparente y en
+ * modo noche desaparece. La version -dark lleva un contorno blanco.
+ */
+html[data-theme="dark"] img[src*="/clubs/chubut-m17.png"],
+html[data-theme="dark"] img[src*="/clubs/chubut-m16.png"],
+html[data-theme="dark"] img[src*="team-logo?key=chubut-m17"],
+html[data-theme="dark"] img[src*="team-logo?key=chubut-m16"] {
+    content: url("/clubs/chubut-m17-dark.png");
+}
