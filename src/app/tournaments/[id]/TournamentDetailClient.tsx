@@ -1367,12 +1367,16 @@ function buildCalculatedStandings(dbData: TournamentInitialData, preferredPhaseI
         participants,
         phaseParticipants,
         matches,
+        activePhase,
         activePhaseId,
         activeGroups,
         resolvedRules,
     } = getDbStandingsContext(dbData, preferredPhaseId);
 
     if (phaseParticipants.length === 0) return [];
+    // Zonas interzonales: los partidos cruzan zonas, así que la tabla de cada
+    // una sale de toda la fase recortada a sus equipos (ver recalculateStandings).
+    const zoneRanking = (activePhase as any)?.settings?.zoneRanking === true;
 
     // Una temporada importada no dice quién jugó cada fase: el plantel es el de
     // toda la temporada, y un club que solo jugó la permanencia aparecía en la
@@ -1420,6 +1424,13 @@ function buildCalculatedStandings(dbData: TournamentInitialData, preferredPhaseI
                 const groupClubIds = new Set(
                     groupParticipants.map((participant: any) => String(participant.club_id || participant.id)),
                 );
+                if (zoneRanking) {
+                    const zoneRows = StandingsEngine.generateTable(engineParticipants, finalMatches, resolvedRules)
+                        .filter((row: any) => groupClubIds.has(String(row.teamId)))
+                        .map((row: any, index: number) => ({ ...row, position: index + 1 }))
+                        .map((row: any) => mapCalculatedDbStanding(row, participants, activePhaseId, group.id));
+                    return { group_name: group.name, rows: zoneRows };
+                }
                 const groupMatches = finalMatches.filter((match: any) => {
                     if (match?.group_id) return String(match.group_id) === String(group.id);
 

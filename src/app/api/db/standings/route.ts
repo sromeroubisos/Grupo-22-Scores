@@ -314,13 +314,28 @@ export async function GET(req: NextRequest) {
         ? (persistedRes.data as PersistedStandingRow[]).map(mapPersistedStanding)
         : [];
     const participants = Array.isArray(participantsRes.data) ? (participantsRes.data as ParticipantRow[]) : [];
-    const finalMatches = filterMatchesForGroupScope(
-        Array.isArray(matchesRes.data)
+    // Zonas interzonales (`settings.zoneRanking`): ver recalculateStandings.
+    const zoneRanking = Boolean(requestedGroupId)
+        && (activePhase?.settings as { zoneRanking?: unknown } | null | undefined)?.zoneRanking === true;
+    let tableParticipants = participants;
+    if (zoneRanking && fallbackPhaseId) {
+        try {
+            tableParticipants = (await loadPhaseScopedParticipants(supabase, {
+                tournamentId,
+                phaseId: fallbackPhaseId,
+                groupId: null,
+            })).participants as ParticipantRow[];
+        } catch (error) {
+            console.error('[GET /api/db/standings] zone participants query failed:', error);
+            return NextResponse.json({ error: 'Failed to fetch standings participants' }, { status: 500 });
+        }
+    }
+    const allFinalMatches = Array.isArray(matchesRes.data)
         ? (matchesRes.data as FinalMatchRow[]).map((match) => ({ ...match, status: 'final' }))
-        : [],
-        participants,
-        requestedGroupId,
-    );
+        : [];
+    const finalMatches = zoneRanking
+        ? allFinalMatches
+        : filterMatchesForGroupScope(allFinalMatches, participants, requestedGroupId);
 
     const resolvedRules = StandingsEngine.resolveRules(
         activePhase?.settings ?? {},
@@ -335,13 +350,20 @@ export async function GET(req: NextRequest) {
             currentPhase: activePhase,
             tournamentRuleset: tournamentRes.data?.ruleset ?? {},
         });
-        const calculatedRows = StandingsEngine.generateTable(
-            participants,
+        const zoneTeamIds = new Set(participants.map((p) => String(p.club_id ?? p.id)));
+        let generated = StandingsEngine.generateTable(
+            tableParticipants,
             finalMatches,
             resolvedRules,
             'general',
             { carryOverRows: carryOver.rows },
-        ).map((row: GeneratedStandingRow) => mapCalculatedStanding(row, participants, fallbackPhaseId, requestedGroupId));
+        ) as GeneratedStandingRow[];
+        if (zoneRanking) {
+            generated = generated
+                .filter((row) => zoneTeamIds.has(String(row.teamId)))
+                .map((row, index) => ({ ...row, position: index + 1 }));
+        }
+        const calculatedRows = generated.map((row: GeneratedStandingRow) => mapCalculatedStanding(row, participants, fallbackPhaseId, requestedGroupId));
 
         if (calculatedRows.length > 0) {
             return NextResponse.json({

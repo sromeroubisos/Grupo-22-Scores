@@ -245,7 +245,30 @@ export async function recalculateAndPersistStandings(
         matches || [],
         await loadRelationalMatchEvents(supabase, matches || []),
     );
-    const scopedMatches = filterMatchesForGroupScope(matchesWithEvents, participants || [], groupId);
+    // Zonas interzonales (`settings.zoneRanking`): los partidos cruzan zonas
+    // —cada equipo juega solo contra la otra—, así que filtrar por grupo los
+    // dejaría afuera a todos. Se calcula UNA tabla con toda la fase y después se
+    // recorta a los equipos de la zona y se reenumera.
+    const zoneRanking = Boolean(groupId)
+        && phase.phase_type === 'group_stage'
+        && (phase.settings as { zoneRanking?: unknown } | null)?.zoneRanking === true;
+    let tableParticipants = participants || [];
+    if (zoneRanking) {
+        try {
+            tableParticipants = (await loadPhaseScopedParticipants(supabase, {
+                tournamentId,
+                phaseId,
+                groupId: null,
+                seasonId: scopedSeasonId,
+            })).participants;
+        } catch (error) {
+            console.error('[recalculateStandings] Error fetching phase participants (zoneRanking)', error);
+            return { ok: false, rows_calculated: 0 };
+        }
+    }
+    const scopedMatches = zoneRanking
+        ? matchesWithEvents
+        : filterMatchesForGroupScope(matchesWithEvents, participants || [], groupId);
     const carryOver = await resolveStandingsCarryOverRows({
         supabase,
         tournamentId,
@@ -256,13 +279,19 @@ export async function recalculateAndPersistStandings(
     });
 
     // 4. Run engine
-    const table = StandingsEngine.generateTable(
-        participants || [],
+    let table = StandingsEngine.generateTable(
+        tableParticipants,
         scopedMatches,
         resolvedRules,
         tableType,
         { carryOverRows: carryOver.rows },
     );
+    if (zoneRanking) {
+        const zoneTeamIds = new Set((participants || []).map((p) => String(p.club_id ?? p.id)));
+        table = table
+            .filter((row) => zoneTeamIds.has(String(row.teamId)))
+            .map((row, index) => ({ ...row, position: index + 1 }));
+    }
 
     // 5. Persist to tournament_standings. The new table was computed successfully
     // above, so only now clear the stale rows for this scope before inserting.
