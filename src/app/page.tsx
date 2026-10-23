@@ -240,6 +240,9 @@ const COUNTRY_TOP_FLIGHT: Record<string, RegExp[]> = {
     /torneo regional (?:del |de la )?(?:litoral|nea|noa|patagonic\w*|pampean\w*)(?!.*[\s"'][bc]["']?$)/,
   ],
   FR: [/^top ?14$/],
+  // La CRAA (rugby universitario) no es lo principal de EE.UU.: lista vacía = ningún
+  // torneo de ese país sube a la tanda de arriba por ser "de tu país".
+  US: [],
 };
 
 /** Con menos competiciones que esto debajo de la tanda, no se arma el bloque plegado. */
