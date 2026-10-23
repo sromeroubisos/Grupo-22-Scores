@@ -5120,3 +5120,195 @@
 @media (prefers-reduced-motion: reduce) {
     .statsCompactButton:active, .statsShowMore:active { transform: none; }
 }
+
+/* ================================================================
+   ESTILO FOTMOB — cabecera a color + pestañas sobre el banner
+   El color sale de --banner (lo elegido en el editor, o el del escudo).
+   Va al final del archivo a propósito: pisa las reglas de arriba sin
+   tocarlas, y borrar este bloque devuelve la cabecera anterior.
+   ================================================================ */
+
+.heroSection {
+    background: var(--banner, #14532d);
+    color: #fff;
+    padding: 12px 0 0;
+    transition: background 0.3s ease;
+}
+
+.heroSection .breadcrumb { color: rgba(255, 255, 255, 0.6); margin-bottom: 8px; }
+.heroSection .breadcrumb a:hover { color: #fff; }
+
+.heroSection .heroCard {
+    background: transparent;
+    border: 0;
+    border-top: 0;
+    box-shadow: none;
+    padding: 12px 0 10px;
+    margin-bottom: 4px;
+}
+.heroSection .heroCard::after { display: none; }
+
+.heroSection .heroLogoWrap {
+    background: rgba(255, 255, 255, 0.12);
+    border: 0;
+    box-shadow: none;
+}
+.heroSection .heroLogoWrap::before { display: none; }
+
+.heroSection .heroTitle { color: #fff; }
+.heroSection .heroMeta,
+.heroSection .heroMetaItem { color: rgba(255, 255, 255, 0.72); }
+.heroSection .heroMetaDot { background: rgba(255, 255, 255, 0.4); }
+
+.heroSection .ctaBtnSecondary {
+    background: transparent;
+    border: 1.5px solid rgba(255, 255, 255, 0.6);
+    color: #fff;
+}
+.heroSection .ctaBtnSecondary:hover { background: rgba(255, 255, 255, 0.12); }
+
+.heroSection .followBtn {
+    background: transparent;
+    border: 1.5px solid #fff;
+    color: #fff;
+    border-radius: 999px;
+}
+.heroSection .followBtnActive { background: #fff; color: #111; }
+
+.heroSection .statCard {
+    background: rgba(255, 255, 255, 0.1);
+    border: 0;
+    box-shadow: none;
+    color: #fff;
+}
+.heroSection .statCard::before { display: none; }
+.heroSection .statCardValue,
+.heroSection .statCardValueSm { color: #fff; }
+.heroSection .statCardLabel { color: rgba(255, 255, 255, 0.65); }
+
+.tabsBar {
+    background: var(--banner, #14532d);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: 0;
+    margin-bottom: 20px;
+}
+.tabsBar .tabButton { color: rgba(255, 255, 255, 0.6); font-weight: 700; }
+.tabsBar .tabButton:hover { color: #fff; }
+.tabsBar .activeTab { color: #fff; }
+.tabsBar .activeTab::after {
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #fff;
+    box-shadow: none;
+}
+
+/* La cabecera y la barra de pestañas son UN solo banner: sin franja entre ellas. */
+.tabsBar { margin-top: -8px; }
+
+/* Chips de la cabecera sobre el banner: legibles en tema claro Y oscuro
+   (antes heredaban el texto oscuro/verde del tema y se perdían sobre el color). */
+.heroSection .statusBadge {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.45);
+    color: #fff;
+}
+.heroSection .seasonSwitcherTrigger,
+.heroSection button[aria-haspopup="listbox"] {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: transparent;
+    color: #fff;
+}
+.heroSection .seasonSwitcherTrigger:hover,
+.heroSection button[aria-haspopup="listbox"]:hover {
+    background: rgba(255, 255, 255, 0.26);
+}
+.heroSection .seasonSwitcherCaret,
+.heroSection button[aria-haspopup="listbox"] svg { color: #fff; }
+
+/* ================================================================
+   ESTILO FOTMOB — tarjetas, tabla, resultados y estadísticas
+   Tarjetas de 20px sin borde ni brillo, tabla con filas de 52px y
+   encabezados en texto normal, selectores en píldora segmentada.
+   Va al final: borrar este bloque devuelve el estilo anterior.
+   ================================================================ */
+
+.sectionCard,
+.infoCard,
+.standingsPreviewCard,
+.topStatsCard {
+    border: 0;
+    border-radius: 20px;
+    box-shadow: none;
+}
+.sectionCard::before { display: none; }
+
+/* Tabla de posiciones */
+.tableHeader {
+    padding: 16px 20px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--fl-text);
+    text-transform: none;
+    letter-spacing: 0;
+}
+.tableRow {
+    min-height: 52px;
+    padding: 0 20px;
+}
+.tableRow:hover { background: transparent; }
+.tableRow .colVal:last-child,
+.tableRow .colVal[class*="colPts"] { font-weight: 800; color: var(--fl-text); }
+.colTeamName { font-weight: 600; }
+
+/* Filas de resultados y fixture */
+.matchRow { padding-top: 14px; padding-bottom: 14px; }
+.matchRow:hover { background: transparent; }
+
+/* Selectores: píldora segmentada */
+.pillsGroup {
+    background: var(--fl-surface-alt);
+    border: 0;
+    border-radius: 999px;
+    padding: 3px;
+}
+.pillBtn { border-radius: 999px; font-size: 0.8rem; }
+.pillBtnActive {
+    background: var(--fl-surface);
+    color: var(--fl-text);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+/* Estadísticas */
+.statsSubTabs {
+    background: var(--fl-surface-alt);
+    border: 0;
+    border-radius: 999px;
+    padding: 3px;
+}
+.statsSubTab { border-radius: 999px; font-weight: 700; }
+.statsSubTabActive {
+    background: var(--fl-surface);
+    color: var(--fl-text);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+.statsModeBar { border: 0; border-radius: 999px; background: var(--fl-surface-alt); }
+.statsModeButton { border-radius: 999px; }
+.statsModeButtonActive {
+    background: var(--fl-surface);
+    color: var(--fl-text);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+.topStatsCard { background: var(--fl-surface); }
+.topStatsCardTitle { text-transform: none; letter-spacing: 0; font-weight: 800; }
+.statsHeaderCell {
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: inherit;
+    font-weight: 700;
+    color: var(--fl-text);
+}
+.statsTableWrap { border: 0; border-radius: 20px; }
+.statsMobileCard { border: 0; border-radius: 20px; }

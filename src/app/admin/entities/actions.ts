@@ -42,6 +42,12 @@ const SCHEMAS: Record<EntityType, z.ZodObject<any>> = {
         is_popular: z.boolean().optional().nullable(),
         sync_locked: z.boolean().optional().nullable(),
         logo_url: z.string().optional().nullable(),
+        /** Color del banner de la pantalla pública (#RRGGBB). Vacío = el color sale del escudo. */
+        primary_color: z
+            .string()
+            .optional()
+            .nullable()
+            .refine((v) => v == null || v === '' || /^#[0-9a-fA-F]{6}$/.test(v), 'El color del banner debe ser #RRGGBB'),
         priority: z.number().int().optional().nullable(),
         format: z.string().optional().nullable(),
         ruleset: z.record(z.string(), z.any()).optional().nullable(),

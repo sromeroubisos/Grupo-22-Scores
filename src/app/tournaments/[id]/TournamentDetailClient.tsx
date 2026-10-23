@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
+import { useBannerColor } from './useBannerColor';
 import { getTournamentById } from '@/lib/data/tournaments';
 import { ArrowLeft, Calendar, Trophy, Users, ChevronRight, Share2, MapPin, Star } from 'lucide-react';
 import ExportImage from '@/components/ExportImage';
@@ -2053,6 +2054,7 @@ function buildDbTournamentSnapshot(dbData: TournamentInitialData, id: string) {
             sportId: tournament.sport_id || 'rugby',
             countryId: tournament.country_id || 'international',
             logoUrl: tournament.logo_url || tournament.banner_url || '',
+            primary_color: (tournament as { primary_color?: string | null }).primary_color ?? null,
             externalId: tournament.external_id || null,
             ruleset: tournamentRuleset,
             url: tournament.url || '',
@@ -2217,6 +2219,11 @@ export default function TournamentDetailPage({
     const [error, setError] = useState<string | null>(null);
 
     const [tournamentData, setTournamentData] = useState<any>(preloaded?.tournamentMeta ?? null);
+    // Color del banner estilo FotMob: el del editor, o el del escudo.
+    const bannerColor = useBannerColor(
+        tournamentData?.primary_color,
+        tournamentData?.logoUrl || tournamentData?.logo_url,
+    );
     const [standings, setStandings] = useState<any[]>(preloaded?.standings ?? []);
     // Los datos crudos de la base, para reconstruir la tabla de cada fecha. Solo
     // en torneos que se cargan acá: en los de proveedor externo la tabla es la
@@ -2454,6 +2461,7 @@ export default function TournamentDetailPage({
                                             sportId: (t as any).sport_id || tournamentMeta?.sportId || 'rugby',
                                             countryId: (t as any).country_id || tournamentMeta?.countryId || 'international',
                                             logoUrl: resolvedLogo,
+                                            primary_color: (t as any).primary_color ?? tournamentMeta?.primary_color ?? null,
                                             externalId: (t as any).external_id || tournamentMeta?.externalId || null,
                                             ruleset: (t as any).ruleset ?? tournamentMeta?.ruleset ?? null,
                                             url: dbStoredUrl,
@@ -4970,7 +4978,11 @@ export default function TournamentDetailPage({
     // overflow-x clip para que el sticky del header y de la barra de
     // pestañas funcione en esta página (con hidden, el sticky muere).
     return (
-        <div className={`${styles.page}${isFifaWorldCup ? ` ${styles.fwc26}` : ''}`} data-sticky-tabs="">
+        <div
+            className={`${styles.page}${isFifaWorldCup ? ` ${styles.fwc26}` : ''}`}
+            data-sticky-tabs=""
+            style={{ ['--banner' as string]: bannerColor }}
+        >
 
             {isFifaWorldCup && (
                 <div className={styles.fwc26TopBar} aria-hidden="true" />

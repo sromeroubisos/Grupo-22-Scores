@@ -233,6 +233,15 @@ const perMatch = (value: unknown, played: unknown) => {
     return matchesPlayed > 0 ? n(value) / matchesPlayed : 0;
 };
 
+// Estadísticas acumuladas (tries, puntos, tackles…): las únicas que tienen un
+// "por partido" con sentido para desempatar. Los promedios, porcentajes e
+// índices ya son una tasa y el propio PJ no se promedia contra sí mismo.
+const isCountStat = (key: string) =>
+    key !== 'entity'
+    && key !== 'secondary'
+    && key !== 'matches_played'
+    && !/(_per_match|_pct|_index|_idx|percentage)$/.test(key);
+
 const percentage = (value: unknown, total: unknown) => {
     const denominator = n(total);
     return denominator > 0 ? (n(value) / denominator) * 100 : 0;
@@ -338,9 +347,9 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
     const isMobile = useIsMobile();
     // Sin deporte declarado se asume rugby: es lo que la pestaña siempre fue.
     const esRugby = !sportId || isRugbySport(sportId);
-    const [activeSubTab, setActiveSubTab] = useState<StatsSubTab>('teams');
+    const [activeSubTab, setActiveSubTab] = useState<StatsSubTab>(esRugby ? 'players' : 'teams');
     const [teamStatsView, setTeamStatsView] = useState<TeamStatsView>('summary');
-    const [sortKey, setSortKey] = useState('points_for');
+    const [sortKey, setSortKey] = useState(esRugby ? 'points' : 'points_for');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTeamId, setSelectedTeamId] = useState('all');
@@ -714,7 +723,13 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             if (typeof left === 'string' || typeof right === 'string') {
                 return String(left ?? '').localeCompare(String(right ?? ''), 'es') * modifier;
             }
-            return (n(left) - n(right)) * modifier;
+            const diff = (n(left) - n(right)) * modifier;
+            if (diff !== 0 || !isCountStat(sortKey)) return diff;
+            // Empate en el total: gana el mejor promedio por partido de ESA
+            // estadística (4 tries en 3 PJ le gana a 4 tries en 5 PJ).
+            const perGame = (perMatch(b[sortKey], b.matches_played) - perMatch(a[sortKey], a.matches_played)) * modifier * -1;
+            if (perGame !== 0) return perGame;
+            return String(a.entityName ?? '').localeCompare(String(b.entityName ?? ''), 'es');
         });
     }, [filteredRows, sortKey, sortDirection]);
 

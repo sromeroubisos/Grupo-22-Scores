@@ -122,7 +122,7 @@ interface Props {
 }
 
 export default function TournamentSofascoreStats({ sofascoreLeague, seasonYear }: Props) {
-    const [subTab, setSubTab] = useState<SubTab>('teams');
+    const [subTab, setSubTab] = useState<SubTab>('players');
     const [teamRows, setTeamRows] = useState<TeamRow[]>([]);
     const [playerRows, setPlayerRows] = useState<PlayerRow[]>([]);
     const [meta, setMeta] = useState<Meta | null>(null);

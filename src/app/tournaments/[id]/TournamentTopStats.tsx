@@ -70,6 +70,13 @@ export default function TournamentTopStats({ rows, cards, unmeasured, kind, onPi
                     // Desempate estable por nombre: sin esto, dos equipos con los
                     // mismos puntos se turnan el podio entre renders.
                     if (delta !== 0) return card.lowerIsBetter ? delta : -delta;
+                    // Mismo total: el mejor promedio por partido de esa estadística
+                    // (las tarjetas que ya son una tasa no tienen PJ que promediar).
+                    if (!/_per_match$|_pct$|_index$/.test(card.metric)) {
+                        const perGame = (n(b[card.metric]) / Math.max(n(b.matches_played), 1))
+                            - (n(a[card.metric]) / Math.max(n(a.matches_played), 1));
+                        if (perGame !== 0) return card.lowerIsBetter ? -perGame : perGame;
+                    }
                     return String(a.entityName ?? '').localeCompare(String(b.entityName ?? ''), 'es');
                 })
                 .slice(0, 3);
