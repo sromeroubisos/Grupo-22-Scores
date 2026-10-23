@@ -362,7 +362,24 @@ const POSITION_ORDER: Record<string, number> = {
     // Rugby: los que no son forwards. Sin esto el seven de Ultimate Sevens
     // mandaba centros, medios y wings a "Otros".
     back: 6, backs: 6, 'tres cuartos': 6,
+    // Rugby union por puesto (claves sin tilde: ver `positionOrderOf`). Sin esto
+    // un plantel de 60 jugadores caía entero en "Otros".
+    pilar: 3, hooker: 3, talonador: 3, 'primera linea': 3, 'segunda linea': 3,
+    ala: 3, flanker: 3, 'tercera linea': 3, octavo: 3, 'numero 8': 3, 'n8': 3,
+    'medio scrum': 6, 'scrum half': 6, apertura: 6, 'medio apertura': 6, 'fly half': 6,
+    centro: 6, wing: 6, 'wing izquierdo': 6, 'wing derecho': 6, fullback: 6, 'full back': 6, zaguero: 6,
 };
+
+/** El grupo de un puesto escrito a mano: sin mayúsculas, sin tildes, sin espacios de más. */
+function positionOrderOf(raw: unknown): number {
+    const key = String(raw ?? '')
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+    return POSITION_ORDER[key] ?? POSITION_ORDER[key.replace(/s$/, '')] ?? 5;
+}
 
 const POSITION_LABELS: Record<number, string> = {
     0: 'Porteros',
@@ -438,8 +455,7 @@ function groupSquadByPosition(squad: any): Record<number, any[]> {
 
     // Group flat player list by position field
     players.forEach((p: any) => {
-        const pos = (p.position || p.position_name || p.role || '').toLowerCase().trim();
-        const orderIdx = POSITION_ORDER[pos] ?? 5;
+        const orderIdx = positionOrderOf(p.position || p.position_name || p.role);
         if (!groups[orderIdx]) groups[orderIdx] = [];
         groups[orderIdx].push(p);
     });
@@ -458,7 +474,21 @@ function formatPlayerStatus(value: unknown) {
     if (typeof value !== 'string' || !value.trim()) return null;
 
     const normalized = value.trim().replace(/[_-]+/g, ' ');
-    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+    const key = normalized.toLowerCase();
+
+    // "Activo" es el estado de todo el plantel: mostrarlo en cada fila es ruido
+    // que tapa el aviso que sí importa (lesión, suspensión). Solo se rotula lo
+    // que sale de lo normal, y en castellano.
+    if (key === 'active' || key === 'activo') return null;
+    const LABELS: Record<string, string> = {
+        injured: 'Lesionado',
+        suspended: 'Suspendido',
+        inactive: 'Inactivo',
+        retired: 'Retirado',
+        loaned: 'Cedido',
+        loan: 'Cedido',
+    };
+    return LABELS[key] ?? normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
 function TeamDetailInner({ id }: { id: string }) {
@@ -1242,9 +1272,11 @@ function TeamDetailInner({ id }: { id: string }) {
     // sueltas (La Tablada tenia 3 de 82 jugadores) y mostrarlo esconde el resto
     // del plantel del club, que sale de la lista completa.
     const verPorPeriodos = squadPeriods.length > 1 || squadPeriods.some((p) => Boolean(p.from || p.to));
+    // "Otros" (5) es lo que no tiene puesto: va al final, después de los grupos
+    // con nombre (en rugby, Delanteros y Tres cuartos).
     const sortedPositionKeys = Object.keys(squadGroups)
         .map(Number)
-        .sort((a, b) => a - b);
+        .sort((a, b) => (a === 5 ? 99 : a) - (b === 5 ? 99 : b));
     const exportPositionKeys = sortedPositionKeys.filter((posIdx) => Array.isArray(squadGroups[posIdx]) && squadGroups[posIdx].length > 0);
     const normalizedSquadTab = activeSquadTabValue.trim().toLowerCase();
     const squadExportSubtitle = activeSquadTabValue
@@ -1971,6 +2003,7 @@ function TeamDetailInner({ id }: { id: string }) {
                                     // una sola lista, y con dos temporadas cargadas esa lista
                                     // mezclada no es el plantel de nadie.
                                     <div className={styles.positionGroup}>
+                                      <div className={styles.tableCard}>
                                         {(squadPeriods[periodoElegido]?.players ?? []).map((jugador) => (
                                             // La fila entera es el enlace a la ficha del jugador: el
                                             // nombre de un plantel es una puerta, no una etiqueta.
@@ -1978,7 +2011,6 @@ function TeamDetailInner({ id }: { id: string }) {
                                                 key={jugador.id}
                                                 href={`/players/${jugador.id}`}
                                                 className={styles.playerRow}
-                                                style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '6px 0', color: 'inherit', textDecoration: 'none' }}
                                             >
                                                 <span className={styles.playerAvatarWrap}>
                                                     <span className={styles.playerPhotoPlaceholder}>
@@ -1992,15 +2024,18 @@ function TeamDetailInner({ id }: { id: string }) {
                                                         />
                                                     </span>
                                                 </span>
-                                                <span style={{ width: 26, fontVariantNumeric: 'tabular-nums', color: 'var(--meta, var(--color-text-secondary))' }}>
-                                                    {jugador.jerseyNumber ?? '–'}
+                                                <span className={styles.playerIdentity}>
+                                                    <span className={styles.playerName}>{jugador.name}</span>
+                                                    {jugador.position ? <span className={styles.playerSub}>{jugador.position}</span> : null}
                                                 </span>
-                                                <span style={{ fontWeight: 600 }}>{jugador.name}</span>
-                                                {jugador.position ? (
-                                                    <span style={{ fontSize: 12, color: 'var(--meta, var(--color-text-secondary))' }}>{jugador.position}</span>
-                                                ) : null}
+                                                <span className={styles.playerAside}>
+                                                    {jugador.jerseyNumber != null ? (
+                                                        <span className={styles.playerNumber} aria-label={`Dorsal ${jugador.jerseyNumber}`}>{jugador.jerseyNumber}</span>
+                                                    ) : null}
+                                                </span>
                                             </Link>
                                         ))}
+                                      </div>
                                     </div>
                                 ) : squadLoading ? (
                                     <div>
@@ -2029,8 +2064,18 @@ function TeamDetailInner({ id }: { id: string }) {
                                                         ? player.age
                                                         : null;
 
+                                                    // La fila entera es la puerta a la ficha (un solo objetivo
+                                                    // de toque grande, no solo el nombre). Sin id es un div.
+                                                    const RowTag: any = pId ? Link : 'div';
+                                                    const rowProps = pId ? { href: `/players/${pId}` } : {};
+                                                    const subline = [playerPosition, playerAge !== null ? `${playerAge} años` : '', playerCountry]
+                                                        .filter(Boolean)
+                                                        .join(' · ');
+                                                    // "Club" como división no dice nada: es el valor por defecto.
+                                                    const showDivision = Boolean(playerDivision) && String(playerDivision).trim().toLowerCase() !== 'club';
+
                                                     return (
-                                                        <div key={pId || idx} className={styles.playerRow}>
+                                                        <RowTag key={pId || idx} className={styles.playerRow} {...rowProps}>
                                                             <div className={styles.playerAvatarWrap}>
                                                                 {playerPhoto ? (
                                                                     <img src={playerPhoto} alt={playerName} className={styles.playerPhoto} />
@@ -2048,36 +2093,21 @@ function TeamDetailInner({ id }: { id: string }) {
                                                                 </span>
                                                             </div>
                                                             <div className={styles.playerIdentity}>
-                                                                <div className={styles.playerName}>
-                                                                    {pId ? <Link href={`/players/${pId}`} style={{ color: 'inherit', textDecoration: 'none' }}>{playerName}</Link> : playerName}
-                                                                </div>
-                                                                {playerCountry && <div className={styles.playerCountry}>{playerCountry}</div>}
-                                                                {(playerPosition || playerDivision) && (
+                                                                <div className={styles.playerName}>{playerName}</div>
+                                                                {subline ? <div className={styles.playerSub}>{subline}</div> : null}
+                                                                {showDivision ? (
                                                                     <div className={styles.playerMeta}>
-                                                                        {playerPosition ? <span className={styles.playerMetaChip}>{playerPosition}</span> : null}
-                                                                        {playerDivision ? <span className={styles.playerMetaChip}>{playerDivision}</span> : null}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                            <div className={styles.playerNumberBlock}>
-                                                                <span className={styles.playerStatLabel}>Dorsal</span>
-                                                                <span className={styles.playerNumber}>{jerseyNumber || '-'}</span>
-                                                            </div>
-                                                            <div className={styles.playerDetails}>
-                                                                {playerAge !== null ? (
-                                                                    <div className={styles.playerDetailItem}>
-                                                                        <span className={styles.playerDetailLabel}>Edad</span>
-                                                                        <span className={styles.playerDetailValue}>{playerAge}</span>
-                                                                    </div>
-                                                                ) : null}
-                                                                {playerStatus ? (
-                                                                    <div className={styles.playerDetailItem}>
-                                                                        <span className={styles.playerDetailLabel}>Estado</span>
-                                                                        <span className={styles.playerDetailValue}>{playerStatus}</span>
+                                                                        <span className={styles.playerMetaChip}>{playerDivision}</span>
                                                                     </div>
                                                                 ) : null}
                                                             </div>
-                                                        </div>
+                                                            <div className={styles.playerAside}>
+                                                                {playerStatus ? <span className={styles.playerStatus}>{playerStatus}</span> : null}
+                                                                {jerseyNumber ? (
+                                                                    <span className={styles.playerNumber} aria-label={`Dorsal ${jerseyNumber}`}>{jerseyNumber}</span>
+                                                                ) : null}
+                                                            </div>
+                                                        </RowTag>
                                                     );
                                                 })}
                                             </div>
