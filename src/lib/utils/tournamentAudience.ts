@@ -182,6 +182,10 @@ const BOTH_AUDIENCES_PATTERNS = [
     // portada de mayores lo escondía. Nombre exacto, que ningún torneo de clubes
     // se llama así.
     /\bu20\s+challenger\b/i,
+    // El Select 12 de la UAR: la Zona Desarrollo del Argentino Juvenil M17, con
+    // los seleccionados de las uniones. Medido contra los 1.199 nombres de
+    // `tournaments`: es el único que lo dice.
+    /\bselect\s*12\b/i,
 ];
 
 /** Si el torneo se muestra en los dos segmentos en vez de en el suyo. */
