@@ -2,6 +2,9 @@
 
 import { useMemo, useState, type CSSProperties } from 'react';
 import { resolveTeamLogo } from '@/lib/utils/teamLogoOverrides';
+// El tema (claro/oscuro) elige la variante de tinta; la regla vive aparte para
+// que los exports usen la misma lista.
+import { darkVariantOf } from '@/lib/exports/crestVariants';
 import styles from './TeamLogo.module.css';
 
 type LogoSource = Record<string, unknown> | null | undefined;
@@ -23,16 +26,6 @@ type TeamLogoProps = {
     disableLookup?: boolean;
 };
 
-/**
- * Escudos con dos versiones de tinta: la positiva (letras negras) para el tema
- * claro y la negativa (letras blancas) para el oscuro. Cada archivo local tiene
- * su hermano `-dark.png` en la misma carpeta; el tema lo decide el CSS.
- */
-const DARK_LOGO_VARIANTS = new Set(['/clubs/tala-rugby-club.png']);
-
-function darkVariantOf(src: string) {
-    return DARK_LOGO_VARIANTS.has(src) ? src.replace(/\.png$/, '-dark.png') : '';
-}
 
 function joinClasses(...values: Array<string | undefined | null | false>) {
     return values.filter(Boolean).join(' ');
