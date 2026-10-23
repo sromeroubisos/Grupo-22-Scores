@@ -8472,8 +8472,11 @@ async function drawG22BasePlate(
     const scoreMaxWidth = W - (crestCenterX + crestSize / 2) * 2 - u(52);
     const scoreCenterY = bandCenter - (hasPenalties ? u(14) : 0);
     const dateText = isScheduled ? (data.date || '').trim().toUpperCase() : '';
+    // Sin horario cargado un "--:--" gigante es ruido: el dia queda arriba y el
+    // versus ocupa el lugar de la hora.
+    const hasKickoffTime = /\d{1,2}\s*[:.hH]\s*\d{2}/.test(data.time || '');
     const scoreText = isScheduled
-        ? (data.time || '--:--').trim()
+        ? (hasKickoffTime ? (data.time || '').trim() : 'VS')
         : `${data.homeScore ?? '-'}-${data.awayScore ?? '-'}`;
 
     ctx.save();
