@@ -3595,3 +3595,97 @@
     background: #fff;
     box-shadow: none;
 }
+
+/* ================================================================
+   HISTORIAL — selector de equipo.
+   Un club con familia (Primera, Intermedia, Pre Intermedia, M16…) tiene un
+   historial por equipo. Una fila de chips con scroll horizontal: en el
+   teléfono no se parte en renglones, se desliza como las pestañas de arriba.
+   ================================================================ */
+.historyTeams {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    animation: mo-rise var(--mo-mid) var(--mo-ease-quart) 30ms backwards;
+}
+
+.historyTeamsLabel {
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.historyTeamChips {
+    display: flex;
+    gap: 8px;
+    padding-bottom: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+}
+
+.historyTeamChips::-webkit-scrollbar {
+    display: none;
+}
+
+.historyTeamChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+    min-height: 40px;
+    padding: 8px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 650;
+    white-space: nowrap;
+    cursor: pointer;
+    scroll-snap-align: start;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out, transform 120ms ease-out;
+}
+
+.historyTeamChip:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-text-muted);
+}
+
+.historyTeamChip:active {
+    transform: scale(0.97);
+}
+
+.historyTeamChip:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.historyTeamChipActive,
+.historyTeamChipActive:hover {
+    color: var(--color-text-primary);
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 14%, var(--color-bg-tertiary));
+}
+
+.historyTeamCount {
+    color: var(--color-text-muted);
+    font-size: 0.74rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.historyTeamChipActive .historyTeamCount {
+    color: var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .historyTeams { animation: none; }
+    .historyTeamChip { transition: none; }
+    .historyTeamChip:active { transform: none; }
+}

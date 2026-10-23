@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import useSWR from 'swr';
@@ -90,10 +90,18 @@ type Participation = {
     result: string | null;
 };
 
+// Un equipo de la familia del club (Primera, Intermedia, Pre Intermedia "B",
+// M16 "A"…). Cada uno tiene su historial: no se cuentan juntos salvo que se pida.
+type HistoryTeam = { id: string; label: string; name: string; matches: number; isCurrent: boolean };
+
 type HistoryPayload = {
     ok: boolean;
     error?: string;
     generatedAt: string;
+    /** `teamId` es el equipo mostrado, o 'all' para toda la familia. */
+    scope?: { teamId: string };
+    teams?: HistoryTeam[];
+    familyTotal?: number;
     matches: HistoryMatch[];
     participations: Participation[];
     filters: { seasons: string[]; tournaments: string[]; categories: string[]; sports: string[] };
@@ -197,8 +205,11 @@ function TeamMark({ name, logo }: { name: string; logo?: string | null }) {
 }
 
 export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId: string; teamName: string; selectedSport: string }) {
-    const { data: payload, error: historyError, isLoading: loading } = useSWR<HistoryPayload>(
-        `/api/clubs/${encodeURIComponent(clubId)}/history`,
+    // null = el equipo de esta ficha (lo que decide el servidor); un id = otro
+    // equipo de la familia; 'all' = la familia junta.
+    const [team, setTeam] = useState<string | null>(null);
+    const { data: payload, error: historyError, isLoading: loading, isValidating } = useSWR<HistoryPayload>(
+        `/api/clubs/${encodeURIComponent(clubId)}/history${team ? `?team=${encodeURIComponent(team)}` : ''}`,
         async (url: string) => {
             const response = await fetch(url, { cache: 'no-store' });
             const json = await response.json() as HistoryPayload;
@@ -222,6 +233,29 @@ export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId
     const guestInvite = useGuestExportInvite();
 
     useEffect(() => { setExportError(null); }, [selectedRivalId]);
+
+    // Con una familia larga (17 equipos en La Tablada) el seleccionado puede
+    // quedar fuera de la pantalla: se lo trae al centro de la fila. Solo mueve la
+    // fila, nunca la página (`block: 'nearest'`).
+    const teamChipsRef = useRef<HTMLDivElement>(null);
+    const shownTeamId = payload?.scope?.teamId;
+    useEffect(() => {
+        const active = teamChipsRef.current?.querySelector<HTMLElement>('[aria-checked="true"]');
+        active?.scrollIntoView({ inline: 'center', block: 'nearest' });
+    }, [shownTeamId]);
+
+    // Cambiar de equipo cambia los datos de abajo: los filtros de una temporada
+    // o un torneo del otro equipo no tienen por qué existir en este.
+    const selectTeam = (next: string) => {
+        if (next === (payload?.scope?.teamId ?? clubId)) return;
+        setTeam(next);
+        setSeason('all');
+        setTournament('all');
+        setCategory('all');
+        setVenue('all');
+        setSelectedRivalId(null);
+        setOpenSeason(null);
+    };
 
     // El selector de deporte del header (cuando existe) manda; el filtro interno
     // cubre a los clubes cuya página no lo muestra.
@@ -320,8 +354,8 @@ export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId
             biggestLoss,
             firstMatch: oldestFirst[0] ?? null,
             lastMatch: filteredMatches[0] ?? null,
-            titles: filteredParticipations.filter((item) => item.finished && item.position === 1).length,
-            runnerUps: filteredParticipations.filter((item) => item.finished && item.position === 2).length,
+            titles: filteredParticipations.filter((item) => item.result === 'Campeón').length,
+            runnerUps: filteredParticipations.filter((item) => item.result === 'Subcampeón').length,
             bestPosition: positioned.length ? Math.min(...positioned.map((item) => item.position!)) : null,
             worstPosition: positioned.length ? Math.max(...positioned.map((item) => item.position!)) : null,
         };
@@ -407,25 +441,73 @@ export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId
         );
     }
 
+    // El selector de equipo: un botón por equipo de la familia y uno para todos
+    // juntos. Solo existe si la familia tiene más de un equipo con partidos.
+    const familyTeams = payload?.teams ?? [];
+    const activeTeamId = payload?.scope?.teamId ?? clubId;
+    const teamSelector = familyTeams.length > 1 ? (
+        <div className={styles.historyTeams} aria-busy={isValidating}>
+            <span className={styles.historyTeamsLabel} id="history-teams-label">Equipo</span>
+            <div ref={teamChipsRef} className={styles.historyTeamChips} role="radiogroup" aria-labelledby="history-teams-label">
+                {familyTeams.map((item) => (
+                    <button
+                        key={item.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={activeTeamId === item.id}
+                        className={`${styles.historyTeamChip} ${activeTeamId === item.id ? styles.historyTeamChipActive : ''}`}
+                        onClick={() => selectTeam(item.id)}
+                    >
+                        {item.label}
+                        <span className={styles.historyTeamCount}>{item.matches}</span>
+                    </button>
+                ))}
+                <button
+                    type="button"
+                    role="radio"
+                    aria-checked={activeTeamId === 'all'}
+                    className={`${styles.historyTeamChip} ${activeTeamId === 'all' ? styles.historyTeamChipActive : ''}`}
+                    onClick={() => selectTeam('all')}
+                >
+                    Todos juntos
+                    <span className={styles.historyTeamCount}>{payload?.familyTotal ?? 0}</span>
+                </button>
+            </div>
+        </div>
+    ) : null;
+
     if (!payload || (payload.matches.length === 0 && payload.participations.length === 0)) {
         return (
-            <div className={styles.historyEmpty}>
-                <History size={30} aria-hidden="true" />
-                <h2>Todavía no hay información histórica disponible para este equipo.</h2>
-                <p>El archivo se completará automáticamente cuando existan partidos finalizados con marcador oficial.</p>
-            </div>
+            <>
+                {teamSelector}
+                <div className={styles.historyEmpty}>
+                    <History size={30} aria-hidden="true" />
+                    <h2>Todavía no hay información histórica disponible para este equipo.</h2>
+                    <p>El archivo se completará automáticamente cuando existan partidos finalizados con marcador oficial.</p>
+                </div>
+            </>
         );
     }
+
+    const activeTeam = familyTeams.find((item) => item.id === activeTeamId) ?? null;
+    // "Todos juntos" es del CLUB (la Primera lleva su nombre), no del equipo
+    // desde cuya ficha se abrió: la Intermedia no es dueña de la familia.
+    const clubName = familyTeams.find((item) => item.label === 'Primera')?.name ?? teamName;
+    const historyTitle = activeTeamId === 'all'
+        ? `${clubName} · todos los equipos`
+        : activeTeam && !activeTeam.isCurrent ? activeTeam.name : teamName;
 
     return (
         <section className={styles.historyRoot} aria-labelledby="history-title">
             <div className={styles.historyIntro}>
                 <div>
-                    <h2 id="history-title">Historial de {teamName}</h2>
+                    <h2 id="history-title">Historial de {historyTitle}</h2>
                     <p>Partidos finalizados y posiciones registradas en G22 Scores.</p>
                 </div>
                 <span className={styles.historyUpdated}>Actualizado {formatDate(payload.generatedAt, true)}</span>
             </div>
+
+            {teamSelector}
 
             <div className={styles.historySectionTabs} role="tablist" aria-label="Secciones del historial">
                 {([
@@ -592,7 +674,7 @@ export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId
                                 // no vale lo mismo que un 4.º de 8.
                                 const fieldSize = item.teamsCount && item.teamsCount >= position ? item.teamsCount : maxPosition;
                                 const height = Math.max(14, 100 - ((position - 1) / Math.max(1, fieldSize - 1)) * 76);
-                                return <div key={`${item.tournamentId}-${item.season}`} title={item.teamsCount ? `${position}.º de ${item.teamsCount} equipos` : `${position}.º`}><span className={styles.positionValue}>{item.finished && item.position === 1 ? <Trophy size={14} aria-label="Campeón" /> : `${item.position}.º`}</span><span className={styles.positionBarTrack}><span className={styles.positionBar} style={{ height: `${height}%` }} /></span><strong>{item.season}</strong><small title={item.tournamentName}>{item.tournamentName}</small></div>;
+                                return <div key={`${item.tournamentId}-${item.season}`} title={item.teamsCount ? `${position}.º de ${item.teamsCount} equipos` : `${position}.º`}><span className={styles.positionValue}>{item.result === 'Campeón' ? <Trophy size={14} aria-label="Campeón" /> : `${item.position}.º`}</span><span className={styles.positionBarTrack}><span className={styles.positionBar} style={{ height: `${height}%` }} /></span><strong>{item.season}</strong><small title={item.tournamentName}>{item.tournamentName}</small></div>;
                                 });
                             })()}
                         </div>
@@ -602,7 +684,7 @@ export default function HistoryTab({ clubId, teamName, selectedSport }: { clubId
                             <Link key={`${item.tournamentId}-${item.season}`} href={`/torneos/${item.tournamentId}`} className={styles.participationRow}>
                                 <TeamMark name={item.tournamentName} logo={item.tournamentLogo} />
                                 <div className={styles.participationIdentity}><strong>{item.tournamentName}</strong><span>{item.season}{item.category ? ` · ${item.category}` : ''}{item.phase ? ` · ${item.phase}` : ''}</span></div>
-                                <div className={styles.participationResult}>{item.finished && item.position === 1 && <Medal size={16} aria-hidden="true" />}<strong>{item.result || item.phase || 'Sin posición final'}</strong><span>{item.teamsCount ? `${item.teamsCount} equipos` : 'Participación registrada'}</span></div>
+                                <div className={styles.participationResult}>{item.result === 'Campeón' && <Medal size={16} aria-hidden="true" />}<strong>{item.result || item.phase || 'Sin posición final'}</strong><span>{item.teamsCount ? `${item.teamsCount} equipos` : 'Participación registrada'}</span></div>
                                 <div className={styles.participationRecord}><strong>{item.matchesPlayed} PJ</strong><span>{item.wins}G · {item.draws}E · {item.losses}P</span></div>
                                 <div className={styles.participationPoints}><strong>{item.tablePoints ?? '—'}</strong><span>Pts. tabla</span></div>
                                 <ChevronRight size={17} aria-hidden="true" />

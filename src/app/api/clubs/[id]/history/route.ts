@@ -3,6 +3,7 @@ import { getReadClient } from '@/lib/supabase/read';
 import { buildTeamLogoProxyUrl, isOversizedInlineLogoUrl, resolveSerializableLogoUrl } from '@/lib/utils/logoUrl';
 import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 import { APP_TIMEZONE } from '@/lib/timezone';
+import { compareCategoryLevel, resolveCategoryLevel } from '@/lib/clubs/categoryLevel';
 
 const FINISHED_STATUSES = new Set([
     'final', 'finished', 'completed', 'scored', 'ft', 'aet', 'pen', 'awarded',
@@ -136,8 +137,41 @@ function resultLabel(position: number | null, teamsCount: number | null, finishe
     return teamsCount ? `${position}.º de ${teamsCount} equipos` : `${position}.º puesto`;
 }
 
+// `clubId` es QUIEN lo ganó: con la familia entera en la consulta, el título de
+// la Intermedia no puede aparecer en el historial de la Primera.
+type DeclaredTitle = { tournamentId: string; season: string; clubId: string };
+
+// El campeón que el torneo DECLARA por temporada (`champion_club_id` más los
+// co-campeones de `settings.co_champions`) es el mismo dato que muestra la
+// pestaña "Campeones" del torneo. Es la fuente de verdad del título: la tabla
+// de posiciones no sabe de playoffs, y las ediciones viejas muchas veces ni
+// tienen tabla ni partidos cargados.
+async function fetchDeclaredTitles(db: Awaited<ReturnType<typeof getReadClient>>, familyIds: string[]) {
+    const select = 'tournament_id, season_code, champion_club_id, settings';
+    const [direct, ...shared] = await Promise.all([
+        db.from('tournament_seasons').select(select).in('champion_club_id', familyIds).limit(1000),
+        ...familyIds.map((clubId) => db.from('tournament_seasons').select(select)
+            .filter('settings->co_champions', 'cs', JSON.stringify([clubId])).limit(1000)),
+    ]);
+    if (direct.error) console.error('[club history] declared titles query failed', direct.error);
+    const titles = new Map<string, DeclaredTitle>();
+    const results = [direct, ...shared];
+    results.forEach((result, index) => {
+        for (const row of (result.data ?? []) as Array<{ tournament_id: string | null; season_code: string | null; champion_club_id?: string | null }>) {
+            const season = String(row.season_code ?? '').trim();
+            // El primer resultado es la consulta por `champion_club_id`; los
+            // demás, una por club de la familia (co-campeones), en su orden.
+            const clubId = index === 0 ? row.champion_club_id : familyIds[index - 1];
+            if (!row.tournament_id || !season || !clubId) continue;
+            titles.set(`${row.tournament_id}::${season}::${clubId}`, { tournamentId: row.tournament_id, season, clubId });
+        }
+    });
+    return Array.from(titles.values());
+}
+
 async function resolveClubFamilyIds(db: Awaited<ReturnType<typeof getReadClient>>, clubId: string) {
     const ids = new Set<string>([clubId]);
+    let baseId = clubId;
     try {
         // Las dos puntas del grafo en paralelo: lo común es que el club ya sea el
         // base y con estas dos alcance; si resulta ser filial, un viaje más.
@@ -145,7 +179,7 @@ async function resolveClubFamilyIds(db: Awaited<ReturnType<typeof getReadClient>
             db.from('club_derivatives').select('base_club_id').eq('derived_club_id', clubId).maybeSingle(),
             db.from('club_derivatives').select('derived_club_id').eq('base_club_id', clubId),
         ]);
-        const baseId = incoming?.base_club_id || clubId;
+        baseId = incoming?.base_club_id || clubId;
         ids.add(baseId);
         for (const row of outgoingFromSelf ?? []) if (row?.derived_club_id) ids.add(row.derived_club_id);
         if (baseId !== clubId) {
@@ -155,19 +189,69 @@ async function resolveClubFamilyIds(db: Awaited<ReturnType<typeof getReadClient>
     } catch {
         // Historical identity linking is optional on installations without this table.
     }
-    return Array.from(ids);
+    return { ids: Array.from(ids), baseId };
+}
+
+// ── Equipos de la familia ─────────────────────────────────────────────────────
+// Un club con familia (Primera, Intermedia, Pre Intermedia, M16…) tiene un
+// historial POR EQUIPO: sus partidos no se cuentan juntos. Cada derivado es una
+// ficha propia en `clubs`; acá se le pone el nombre que se lee en un selector.
+
+const FAMILY_NAME_NOISE = new Set(['club', 'de', 'del', 'la', 'el', 'los', 'las', 'rc', 'cr', 'ca', 'fc']);
+
+function nameWords(value: string) {
+    return value
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .split(/\s+/)
+        .map((word) => word.replace(/[^a-z0-9]/g, ''))
+        .filter(Boolean);
+}
+
+/**
+ * "La Tablada - Intermedia" → "Intermedia"; `La Tablada "B" - Pre Intermedia` →
+ * `Pre Intermedia "B"`; `Club La Tablada M16 "A"` → `M16 "A"`. El club base es
+ * la Primera. Se sacan del nombre las palabras del club base y queda lo que
+ * distingue al equipo.
+ */
+function familyTeamLabel(name: string, base: { name: string; shortName: string }, isBase: boolean) {
+    if (isBase) return 'Primera';
+    const baseWords = new Set([...nameWords(base.name), ...nameWords(base.shortName)]);
+    const kept = name
+        .split(/\s+/)
+        .filter((token) => {
+            const [word] = nameWords(token);
+            return word ? !(baseWords.has(word) || FAMILY_NAME_NOISE.has(word)) : true;
+        })
+        .join(' ')
+        .replace(/^[\s\-–/]+|[\s\-–/]+$/g, '')
+        .replace(/\s+[\-–]\s+/g, ' ');
+    // La letra entrecomillada va al final: `"B" Pre Intermedia` → `Pre Intermedia "B"`.
+    const leading = /^(["“'«][A-Za-z]["”'»])\s+(.+)$/.exec(kept);
+    const label = leading ? `${leading[2]} ${leading[1]}` : kept;
+    return label.trim() || name;
 }
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     if (!id) return NextResponse.json({ ok: false, error: 'Falta el equipo.' }, { status: 400 });
 
+    // `?team=<id del equipo>` o `?team=all`. Sin nada, el historial es el del
+    // equipo que se está mirando: los de su familia (Intermedia, Pre Intermedia,
+    // juveniles…) tienen el suyo y no se suman.
+    const requestedTeam = request.nextUrl.searchParams.get('team')?.trim() ?? '';
+
     try {
         const db = await getReadClient();
-        const [supportsTableType, familyIds] = await Promise.all([
+        const [supportsTableType, family] = await Promise.all([
             supportsStandingsTableTypeColumn(),
             resolveClubFamilyIds(db, id),
         ]);
+        const familyIds = family.ids;
+        const scopeAll = requestedTeam === 'all';
+        const scopeTeamId = scopeAll ? 'all' : (familyIds.includes(requestedTeam) ? requestedTeam : id);
+        const scopeIds = scopeAll ? familyIds : [scopeTeamId];
         // Los escudos NO viajan embebidos acá: un logo_url puede ser un base64 de
         // cientos de KB, y multiplicado por fila era el payload de 24 MB y los 40 s
         // de transferencia desde Supabase. Se resuelven una vez por entidad abajo.
@@ -179,16 +263,26 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             tournament:tournaments!matches_tournament_id_fkey(id, name, display_name, category, format, country, region, season_id, sport_id, status)
         `;
 
-        const [homeResult, awayResult, standingsResult] = await Promise.all([
-            db.from('matches').select(matchSelect).in('home_club_id', familyIds).order('date_time', { ascending: false }).limit(2500),
-            db.from('matches').select(matchSelect).in('away_club_id', familyIds).order('date_time', { ascending: false }).limit(2500),
+        // Para el selector de equipos: cuántos partidos terminados tiene cada
+        // ficha de la familia. Es liviano a propósito (sin joins ni marcador): se
+        // pide completa aunque el historial mostrado sea el de un solo equipo.
+        const hasFamily = familyIds.length > 1;
+        const emptyList = { data: [], error: null } as { data: unknown[]; error: null };
+
+        const [homeResult, awayResult, standingsResult, declaredTitles, teamHomeResult, teamAwayResult, familyClubsResult] = await Promise.all([
+            db.from('matches').select(matchSelect).in('home_club_id', scopeIds).order('date_time', { ascending: false }).limit(2500),
+            db.from('matches').select(matchSelect).in('away_club_id', scopeIds).order('date_time', { ascending: false }).limit(2500),
             // El historial del club es la tabla general. Sin filtrar, el
             // `limit(1000)` además se llenaría tres veces más rápido y podría
             // recortar temporadas viejas.
             applyStandingsTableType(
-                db.from('tournament_standings').select('club_id, tournament_id, phase_id, position, played, won, drawn, lost, scored, conceded, points').in('club_id', familyIds).limit(1000),
+                db.from('tournament_standings').select('club_id, tournament_id, phase_id, position, played, won, drawn, lost, scored, conceded, points').in('club_id', scopeIds).limit(1000),
                 supportsTableType,
             ),
+            fetchDeclaredTitles(db, scopeIds).catch(() => [] as DeclaredTitle[]),
+            hasFamily ? db.from('matches').select('id, home_club_id, away_club_id, status').in('home_club_id', familyIds).limit(5000) : Promise.resolve(emptyList),
+            hasFamily ? db.from('matches').select('id, home_club_id, away_club_id, status').in('away_club_id', familyIds).limit(5000) : Promise.resolve(emptyList),
+            hasFamily ? db.from('clubs').select('id, name, short_name').in('id', familyIds) : Promise.resolve(emptyList),
         ]);
 
         const queryError = homeResult.error || awayResult.error;
@@ -214,11 +308,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         const tournamentIds = Array.from(new Set([
             ...finishedRows.map((row) => row.tournament_id),
             ...((standingsResult.data ?? []) as StandingRow[]).map((row) => row.tournament_id),
+            ...declaredTitles.map((title) => title.tournamentId),
         ].filter((value): value is string => Boolean(value))));
         const clubIds = Array.from(new Set(
             finishedRows.flatMap((row) => [row.home_club_id, row.away_club_id]).filter((value): value is string => Boolean(value)),
         ));
-        const familySet = new Set(familyIds);
+        // "Los nuestros" son los del alcance elegido: en el historial de la
+        // Intermedia, un partido de la Pre Intermedia contra ella es un RIVAL.
+        const familySet = new Set(scopeIds);
         const opponentIds = Array.from(new Set(finishedRows.map((row) => {
             const isHome = Boolean(row.home_club_id && familySet.has(row.home_club_id));
             return isHome ? row.away_club_id : row.home_club_id;
@@ -238,7 +335,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         // Todo lo que no depende entre sí viaja junto: contra una base cross-region
         // cada ida y vuelta secuencial son segundos de espera.
         const emptyRows = { data: [], error: null } as { data: unknown[]; error: null };
-        const [seasonsResult, participantsResult, phasesResult, tournamentsResult, clubsResult, aliasesResult, tableRowsResult] = await Promise.all([
+        const [seasonsResult, participantsResult, phasesResult, tournamentsResult, clubsResult, aliasesResult, tableRowsResult, decidedResult] = await Promise.all([
             tournamentIds.length ? db.from('seasons').select('tournament_id, start_date, end_date, season_id').in('tournament_id', tournamentIds).limit(1000) : Promise.resolve(emptyRows),
             tournamentIds.length ? db.from('tournament_participants').select('tournament_id, club_id').in('tournament_id', tournamentIds).limit(10000) : Promise.resolve(emptyRows),
             tournamentIds.length ? db.from('tournament_phases').select('id, name, tournament_id').in('tournament_id', tournamentIds).limit(2000) : Promise.resolve(emptyRows),
@@ -253,6 +350,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
                     db.from('tournament_standings').select('tournament_id, phase_id, club_id').in('tournament_id', standingTournamentIds).limit(5000),
                     supportsTableType,
                 )
+                : Promise.resolve(emptyRows),
+            // Ediciones con campeón declarado: ahí manda el campeón, no el puesto.
+            tournamentIds.length
+                ? db.from('tournament_seasons').select('tournament_id, season_code').in('tournament_id', tournamentIds).not('champion_club_id', 'is', null).limit(5000)
                 : Promise.resolve(emptyRows),
         ]);
 
@@ -416,6 +517,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             const key = `${tournamentId}::${season}`;
             if (!participationGroups.has(key)) participationGroups.set(key, { tournamentId, season, matches: [] });
         }
+        // Un título declarado es una participación aunque no haya un solo partido
+        // de esa edición cargado: la mitad del palmarés histórico está así.
+        const titleKeys = new Set<string>();
+        for (const title of declaredTitles) {
+            const key = `${title.tournamentId}::${title.season}`;
+            titleKeys.add(key);
+            if (!participationGroups.has(key)) participationGroups.set(key, { tournamentId: title.tournamentId, season: title.season, matches: [] });
+        }
+        const decidedKeys = new Set<string>();
+        for (const row of (decidedResult.data ?? []) as Array<{ tournament_id: string | null; season_code: string | null }>) {
+            if (row.tournament_id && row.season_code) decidedKeys.add(`${row.tournament_id}::${String(row.season_code).trim()}`);
+        }
 
         const participations = Array.from(participationGroups.values()).map(({ tournamentId, season, matches }) => {
             const tournament = tournamentMap.get(tournamentId) ?? null;
@@ -456,6 +569,20 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             };
         }).sort((a, b) => b.season.localeCompare(a.season) || a.tournamentName.localeCompare(b.tournamentName));
 
+        // El campeón declarado manda sobre la tabla. Si la edición tiene campeón y
+        // es este club, es "Campeón" aunque la tabla diga otra cosa (o no exista);
+        // si es otro, el 1.º o 2.º de la fase regular no se lee como título: en un
+        // torneo con playoffs puntear la tabla no es salir campeón.
+        for (const participation of participations) {
+            const key = `${participation.tournamentId}::${participation.season}`;
+            if (titleKeys.has(key)) {
+                participation.result = 'Campeón';
+                participation.finished = true;
+            } else if (decidedKeys.has(key) && (participation.result === 'Campeón' || participation.result === 'Subcampeón')) {
+                participation.result = resultLabel(participation.position, participation.teamsCount, false);
+            }
+        }
+
         const filterSeasons = new Set(normalizedMatches.map((match) => match.season));
         const filterTournaments = new Set(normalizedMatches.map((match) => match.tournamentName).filter((value): value is string => Boolean(value)));
         const filterCategories = new Set(normalizedMatches.map((match) => match.category).filter((value): value is string => Boolean(value)));
@@ -467,11 +594,59 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             if (participation.sportId) filterSports.add(participation.sportId);
         }
 
+        // Equipos de la familia con partidos terminados (más el que se está
+        // mirando, aunque todavía no tenga): son los botones del selector. Un
+        // partido entre dos equipos de la familia cuenta para los dos.
+        type FamilyTeam = { id: string; label: string; name: string; matches: number; isCurrent: boolean };
+        let teams: FamilyTeam[] = [];
+        let familyTotal = 0;
+        if (hasFamily) {
+            const countedByClub = new Map<string, Set<string>>();
+            const allFamilyMatches = new Set<string>();
+            const familyIdSet = new Set(familyIds);
+            for (const row of [...(teamHomeResult.data ?? []), ...(teamAwayResult.data ?? [])] as Array<{ id: string; home_club_id: string | null; away_club_id: string | null; status: string | null }>) {
+                if (!FINISHED_STATUSES.has(String(row.status ?? '').trim().toLowerCase())) continue;
+                allFamilyMatches.add(row.id);
+                for (const clubId of [row.home_club_id, row.away_club_id]) {
+                    if (!clubId || !familyIdSet.has(clubId)) continue;
+                    const set = countedByClub.get(clubId) ?? new Set<string>();
+                    set.add(row.id);
+                    countedByClub.set(clubId, set);
+                }
+            }
+            familyTotal = allFamilyMatches.size;
+
+            const familyClubs = (familyClubsResult.data ?? []) as Array<{ id: string; name: string | null; short_name: string | null }>;
+            const baseClub = familyClubs.find((club) => club.id === family.baseId);
+            const base = { name: baseClub?.name ?? '', shortName: baseClub?.short_name ?? '' };
+            teams = familyClubs
+                .map((club) => {
+                    const name = club.name ?? club.id;
+                    const level = resolveCategoryLevel({ name });
+                    return {
+                        team: {
+                            id: club.id,
+                            name,
+                            label: familyTeamLabel(name, base, club.id === family.baseId),
+                            matches: countedByClub.get(club.id)?.size ?? 0,
+                            isCurrent: club.id === id,
+                        } satisfies FamilyTeam,
+                        level: { rank: club.id === family.baseId ? 0 : level.rank, variant: club.id === family.baseId ? '' : level.variant },
+                    };
+                })
+                .filter(({ team }) => team.matches > 0 || team.isCurrent)
+                .sort((a, b) => compareCategoryLevel(a.level, b.level) || a.team.label.localeCompare(b.team.label, 'es'))
+                .map(({ team }) => team);
+        }
+
         // Cada partido viaja UNA vez: temporadas, rivales e hitos se agrupan en el
         // cliente desde esta lista plana (y así responden a los filtros).
         return NextResponse.json({
             ok: true,
             generatedAt: new Date().toISOString(),
+            scope: { teamId: scopeTeamId },
+            teams,
+            familyTotal,
             matches: normalizedMatches,
             participations,
             filters: {
