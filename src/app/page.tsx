@@ -2313,6 +2313,12 @@ export default function HomePage() {
 
                   <span className={styles.mobileCurrentDate}>
                     {selectedDateInfo?.label || selectedDate}
+                    {/* En escritorio, al lado de Hoy/Ayer/Mañana va la fecha completa. */}
+                    {selectedDateInfo && ['Hoy', 'Ayer', 'Mañana'].includes(selectedDateInfo.label) && (
+                      <span className={styles.mobileCurrentDateSub}>
+                        · {selectedDateInfo.dayName} {selectedDateInfo.fullDate}
+                      </span>
+                    )}
                   </span>
 
                   <button
@@ -2548,7 +2554,9 @@ export default function HomePage() {
                     ? (
                       <Fragment key={league.leagueId}>
                         {bloque}
-                        <ClubsPromoCard variant="feed" />
+                        <div className={styles.feedPromo}>
+                          <ClubsPromoCard variant="feed" />
+                        </div>
                       </Fragment>
                     )
                     : bloque
@@ -2698,7 +2706,9 @@ export default function HomePage() {
 
               {/* Menos de dos bloques: la tarjeta no encontró su lugar arriba. */}
               {!loading && displayedMatchesByLeague.length <= PROMO_DESPUES_DEL_BLOQUE && (
-                <ClubsPromoCard variant="feed" />
+                <div className={styles.feedPromo}>
+                  <ClubsPromoCard variant="feed" />
+                </div>
               )}
 
               {/*

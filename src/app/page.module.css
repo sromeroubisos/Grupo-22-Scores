@@ -2509,34 +2509,29 @@
     display: contents;
 }
 
-/* La placa de Ganá con tu club se dibuja dos veces y cada pantalla ve una:
-   arriba en escritorio, dentro del feed en el teléfono. */
-.bannerFeed {
+/* La placa de Ganá con tu club va dentro del feed, después de los favoritos,
+   en todas las pantallas. La pieza es horizontal (1200 × 110): en la columna
+   derecha del escritorio (300px) quedaría de 27px de alto, ilegible. Si llega
+   una versión vertical, va ahí. La copia de arriba (`bannerDesktop`) ya no se ve. */
+.bannerDesktop {
     display: none;
 }
 
-@media (max-width: 768px) {
-    .bannerDesktop {
-        display: none;
-    }
+/* A ancho de tarjeta, con las mismas esquinas, y con aire propio: además del
+   `gap` de la lista suma 12px arriba y abajo para que no se lea como una fila más. */
+.bannerFeed {
+    display: block;
+    margin: 12px 0;
+}
 
-    /* A ancho de tarjeta, con las mismas esquinas, y con aire propio: además del
-       `gap` de la lista suma 12px arriba y abajo para que no se lea como una
-       fila más. */
-    .bannerFeed {
-        display: block;
-        margin: 12px 0;
-    }
-
-    .bannerFeed > a {
-        border-radius: 16px;
-    }
+.bannerFeed > a {
+    border-radius: 16px;
 }
 
 /* Home en el teléfono: misma estructura que la referencia de FotMob.
-   Deporte → pestañas de día con subrayado → tarjetas por liga, cada fila en una
-   sola línea (estado · local · escudo · marcador · escudo · visitante).
-   Los colores son los de G22; sólo cambia cómo se arma la pantalla. */
+   Deporte → pestañas de día con subrayado → tarjetas por liga. Acá queda lo que
+   es propio del teléfono; la tarjeta, la fila de una línea y las pestañas valen
+   en todas las pantallas (bloque siguiente). */
 @media (max-width: 768px) {
     .mainContent {
         gap: 12px;
@@ -2576,10 +2571,49 @@
         display: none;
     }
 
-    /* Día: pestañas de texto con subrayado, a todo el ancho. */
+    /* Las pestañas van a todo el ancho, debajo de los deportes. */
     .dateSelector {
         order: 2;
         margin: 0 -12px;
+    }
+
+    /* Segmento y "Instalar": después de las pestañas, discretos. */
+    .mobileAudienceSwitch {
+        order: 3;
+        padding: 12px 0 0;
+    }
+
+    .mobileAudienceSwitchBtn {
+        height: 32px;
+        font-size: 0.72rem;
+    }
+
+    .installSlot {
+        display: block;
+        order: 4;
+        padding-top: 12px;
+    }
+
+    .installSlot:empty {
+        display: none;
+    }
+
+    .matchesContainer {
+        gap: 12px;
+    }
+
+    /* En el teléfono seguir un club se hace desde su página: la fila no lleva estrellas. */
+    .matchRow .clubFavoriteBtn {
+        display: none;
+    }
+}
+
+/* Todas las pantallas: pestañas de día, tarjeta de liga y fila de partido en una
+   sola línea (estado · local · escudo · marcador · escudo · visitante). Los
+   colores son los de G22; sólo cambia cómo se arma la pantalla. */
+@media screen {
+    /* Día: pestañas de texto con subrayado. */
+    .dateSelector {
         padding: 0;
         background: transparent;
         border: 0;
@@ -2640,31 +2674,6 @@
 
     .dateLabel {
         font-size: 1rem;
-    }
-
-    /* Segmento y "Instalar": después de las pestañas, discretos. */
-    .mobileAudienceSwitch {
-        order: 3;
-        padding: 12px 0 0;
-    }
-
-    .mobileAudienceSwitchBtn {
-        height: 32px;
-        font-size: 0.72rem;
-    }
-
-    .installSlot {
-        display: block;
-        order: 4;
-        padding-top: 12px;
-    }
-
-    .installSlot:empty {
-        display: none;
-    }
-
-    .matchesContainer {
-        gap: 12px;
     }
 
     /* Tarjeta de liga: encabezado con bandera, nombre y chevron; cuerpo con filas. */
@@ -2852,11 +2861,6 @@
         height: 20px;
     }
 
-    /* Seguir un club se hace desde su página: la fila no lleva estrellas. */
-    .matchRow .clubFavoriteBtn {
-        display: none;
-    }
-
     /* Partido sin jugar: la hora ocupa el lugar del marcador. */
     .matchRow:not([data-status="live"]):not([data-status="finished"]):not([data-status="suspended"]) .matchTime {
         grid-column: 4 / 6;
@@ -2877,20 +2881,212 @@
     }
 }
 
-/* Las competiciones que no entran en la tanda de arriba del feed viven en un
-   solo bloque plegado ("N competiciones más"). Sólo en el teléfono: en
-   escritorio el bloque no se dibuja y todas las tarjetas se ven como siempre.
-   Plegado no es borrado: las tarjetas siguen en el DOM y sólo se ocultan. */
-.restPanel,
-.restPanelInner {
-    display: contents;
+/* Escritorio y tablet: la fila suma, a cada lado, la estrella para seguir al
+   club. Con mouse aparece al pasar por la fila (o si ya se lo sigue); en una
+   pantalla táctil grande se ve siempre. Columnas: estado · ★ · local · escudo ·
+   marcador · marcador · escudo · visitante · ★ · espejo del estado. */
+@media (min-width: 769px) {
+    .matchRow {
+        grid-template-columns: 44px 24px minmax(0, 1fr) 24px 40px 40px 24px minmax(0, 1fr) 24px 44px;
+        column-gap: 6px;
+        min-height: 56px;
+        padding: 8px 12px;
+    }
+
+    .matchTeam:first-child .clubFavoriteBtn { grid-column: 2; }
+    .matchTeam:first-child .teamName { grid-column: 3; }
+    .matchTeam:first-child .teamLogo { grid-column: 4; }
+    .matchTeam:first-child .teamScoreGroup { grid-column: 5; }
+    .matchTeam:last-child .teamScoreGroup { grid-column: 6; }
+    .matchTeam:last-child .teamLogo { grid-column: 7; }
+    .matchTeam:last-child .teamName { grid-column: 8; }
+    .matchTeam:last-child .clubFavoriteBtn { grid-column: 9; }
+
+    .matchTeam:last-child .teamScoreGroup::before {
+        left: -3px;
+    }
+
+    .matchRow:not([data-status="live"]):not([data-status="finished"]):not([data-status="suspended"]) .matchTime {
+        grid-column: 5 / 7;
+    }
+
+    .teamName {
+        -webkit-line-clamp: 1;
+        font-size: 0.95rem;
+    }
+
+    .teamLogo,
+    .teamLogoRound {
+        width: 24px;
+        height: 24px;
+    }
+
+    .logoImgSquare,
+    .logoImgRound,
+    .logoFallback {
+        width: 22px;
+        height: 22px;
+    }
 }
 
-.restGroup {
+@media (min-width: 769px) and (hover: hover) {
+    .matchRow .clubFavoriteBtn {
+        opacity: 0;
+        transition: opacity 120ms ease;
+    }
+
+    .matchRow:hover .clubFavoriteBtn,
+    .matchRow .clubFavoriteBtn:focus-visible,
+    .matchRow .clubFavoriteBtnActive {
+        opacity: 1;
+    }
+}
+
+.mobileCurrentDateSub {
     display: none;
 }
 
-@media (max-width: 1100px) {
+/* Escritorio: el feed en UNA columna (se lee de arriba abajo en el orden de
+   importancia, no en zigzag) y arriba UNA barra de herramientas: a la izquierda
+   el segmentado Mayores | Juveniles/Reserva, a la derecha el día con flechas
+   ("‹ Mañana · sábado 24 de octubre ›"). Con mouse, flechas: una tira de días
+   que se desliza de costado se corta y no hay cómo moverla.
+   No es `sticky`: el `overflow` del `main` lo anula. */
+@media (min-width: 1101px) {
+    .matchesContainer {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .desktopAudienceSwitch {
+        display: none;
+    }
+
+    .mobileTopControls {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        padding: 6px;
+        background: var(--color-bg-secondary);
+        border: 1px solid var(--color-border);
+        border-radius: 14px;
+    }
+
+    /* Segmentado: una sola pieza; la opción elegida se levanta como en iOS. */
+    .mobileAudienceSwitch {
+        display: inline-flex;
+        flex: 0 0 auto;
+        order: 1;
+        gap: 2px;
+        padding: 3px;
+        border-radius: 10px;
+        background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+    }
+
+    .mobileAudienceSwitchBtn {
+        flex: 0 0 auto;
+        height: 34px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--color-text-secondary);
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+
+    .mobileAudienceSwitchBtn:hover {
+        color: var(--color-text-primary);
+    }
+
+    .mobileAudienceSwitchBtnActive,
+    .mobileAudienceSwitchBtnActive:hover {
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    }
+
+    .dateSelector {
+        order: 2;
+        position: static;
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+
+    .dateList {
+        display: none;
+    }
+
+    .mobileDateNav {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        padding: 0;
+    }
+
+    .mobileNavArrow,
+    :global([data-theme="light"]) .mobileNavArrow {
+        width: 36px;
+        height: 36px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .mobileNavArrow:hover:not(:disabled),
+    :global([data-theme="light"]) .mobileNavArrow:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+    }
+
+    .mobileCurrentDate {
+        min-width: 0;
+        padding: 0 6px;
+        text-align: center;
+        font-size: 0.95rem;
+        white-space: nowrap;
+    }
+
+    .mobileCurrentDateSub {
+        display: inline;
+        margin-left: 6px;
+        color: var(--color-text-tertiary);
+        font-weight: 500;
+        text-transform: none;
+    }
+
+    .installSlot {
+        order: 3;
+        flex-basis: 100%;
+    }
+}
+
+/* Pantalla ancha: tres columnas. Ligas a la izquierda, el feed al centro y la
+   puerta comercial a la derecha (antes la derecha aparecía recién desde 1500px).
+   Desde 1280px el centro tiene ~620px; más angosto, la fila se aprieta. */
+@media (min-width: 1280px) {
+    .mainLayout {
+        grid-template-columns: 250px minmax(0, 1fr) 300px;
+        gap: 28px;
+        padding: 0 24px;
+    }
+
+    .sidebarRight {
+        display: flex;
+    }
+}
+
+/* Las competiciones que no entran en la tanda de arriba del feed viven en un
+   solo bloque plegado ("N competiciones más"), en todas las pantallas.
+   Plegado no es borrado: las tarjetas siguen en el DOM y sólo se ocultan. */
+@media screen {
     /* El panel se pliega animando la altura de 0 a su alto real (grid 0fr → 1fr):
        no hace falta medir nada en JS y, al ser una transición, se puede invertir a
        mitad de camino sin saltos. La curva es la de las hojas de iOS: arranca
@@ -3056,5 +3252,13 @@
 
     .restGroupLiveDot {
         animation: none;
+    }
+}
+
+/* La tarjeta "G22 para clubes" del feed: con tres columnas ya está a la
+   derecha (`sidebarRight`), así que la del feed se esconde para no repetirla. */
+@media (min-width: 1280px) {
+    .feedPromo {
+        display: none;
     }
 }
