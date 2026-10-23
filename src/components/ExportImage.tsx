@@ -252,6 +252,9 @@ export interface LineupsData {
     awayTeam: LineupExportTeamData;
     // Solo la formacion editorial de G22 Base: la foto que ocupa la mitad izquierda.
     backgroundImage?: string;
+    // Fondo de G22 de la pieza (detras de todo, con el velo que traiga); distinto de la foto del jugador.
+    backdropImage?: string;
+    backdropVeil?: number;
     // Deporte del partido: decide la marca del pie (Salida de 22 en rugby).
     sport?: string | null;
 }
@@ -1493,7 +1496,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         // puede ser rojo, se mezclaba con el negro y quedaba marron).
         setBgColor(tournamentTheme.bg);
         setAccentColor(tournamentTheme.accent);
-        if (template === 'standings' || template === 'dailyMatches' || template === 'matchStats' || template === 'playoffBracket') {
+        if (template === 'standings' || template === 'dailyMatches' || template === 'matchStats' || template === 'playoffBracket' || template === 'lineups') {
             // Un fondo que subio la persona gana; el del torneo se cambia solo.
             setStandingsBackgroundUpload((current) => (
                 current && current.name !== TOURNAMENT_THEME_BACKGROUND_NAME
@@ -2506,6 +2509,9 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                     const lineupsData: LineupsData = {
                         ...(exportData as LineupsData),
                         backgroundImage: matchBackgroundUpload?.src || (exportData as LineupsData).backgroundImage,
+                        ...(standingsBackgroundUpload?.src
+                            ? { backdropImage: standingsBackgroundUpload.src, backdropVeil: getBackgroundVeil(standingsBackgroundUpload) }
+                            : {}),
                     };
                     await drawG22BaseLineups(ctx, canvas, lineupsData, config, accentColor, bgColor, brandLogo, lineupExportMode, lineupExportLayout, lineupColors);
                 }
@@ -2588,10 +2594,15 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             );
         }
 
-        if (template === 'lineups' && lineupExportLayout === 'editorial') {
+        if (template === 'lineups') {
             return {
                 ...(exportData as LineupsData),
-                backgroundImage: matchBackgroundUpload?.src || (exportData as LineupsData).backgroundImage,
+                ...(lineupExportLayout === 'editorial'
+                    ? { backgroundImage: matchBackgroundUpload?.src || (exportData as LineupsData).backgroundImage }
+                    : {}),
+                ...(standingsBackgroundUpload?.src
+                    ? { backdropImage: standingsBackgroundUpload.src, backdropVeil: getBackgroundVeil(standingsBackgroundUpload) }
+                    : {}),
             };
         }
 
@@ -3824,7 +3835,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
 
                             {/* El palmares no tiene grupos ni modo de tabla: el unico boton
                                 que quedaria es "Tabla corrida", que no hace nada. */}
-                            {template === 'playoffBracket' && visualFamily === 'g22Base' && (
+                            {(template === 'playoffBracket' || template === 'lineups') && visualFamily === 'g22Base' && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Fondo de G22</label>
                                     {backgroundPicker}
@@ -12727,6 +12738,25 @@ function resolveLineupColors(colors: LineupColorOverrides, derived: Record<Lineu
     };
 }
 
+// El fondo de G22 de las formaciones: la imagen cubre la pieza y un velo del color
+// de la placa la deja leer. Sin imagen devuelve false y la pieza pinta su campo de siempre.
+function paintLineupBackdrop(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    image: HTMLImageElement | null,
+    veilColor: string,
+    veil: number | undefined,
+): boolean {
+    if (!image || !image.naturalWidth || !image.naturalHeight) return false;
+    const scale = Math.max(canvas.width / image.naturalWidth, canvas.height / image.naturalHeight);
+    const drawWidth = image.naturalWidth * scale;
+    const drawHeight = image.naturalHeight * scale;
+    ctx.drawImage(image, (canvas.width - drawWidth) / 2, (canvas.height - drawHeight) / 2, drawWidth, drawHeight);
+    ctx.fillStyle = hexToRGBA(veilColor, veil ?? 0.45);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    return true;
+}
+
 // ---------------------------------------------------------------------------
 // Formacion clasica: la escalera de Uruguay XV.
 // ---------------------------------------------------------------------------
@@ -12750,12 +12780,13 @@ async function drawG22BaseLineupsClassic(
     const isLightBg = getContrastColor(baseHex) !== '#ffffff';
     const teams = getSelectedLineupTeams(data, lineupExportMode).map((team) => ({ ...team, ...splitLineupTeamPlayers(team) }));
     const isSingleTeam = teams.length === 1;
-    const [tournamentLogo, wordmark, sportMark, homeCrest, awayCrest] = await Promise.all([
+    const [tournamentLogo, wordmark, sportMark, homeCrest, awayCrest, backdrop] = await Promise.all([
         loadImage(getTournamentLogoImageSource(data)),
         loadImage('/header-logo.png'),
         loadImage(resolvePlateBrandSource('auto', data.sport)),
         loadImage(data.homeTeam.logo || ''),
         loadImage(data.awayTeam.logo || ''),
+        loadImage(data.backdropImage || ''),
     ]);
     const crestBySide = { home: homeCrest, away: awayCrest } as const;
     const dayLabel = formatLineupDayLabel(data.date);
@@ -12787,12 +12818,14 @@ async function drawG22BaseLineupsClassic(
         const ink = colors.ink;
         const team = teams[0];
 
-        const field = ctx.createLinearGradient(0, 0, 0, H);
-        field.addColorStop(0, mixHexColors(base, '#000000', 0.1));
-        field.addColorStop(0.5, base);
-        field.addColorStop(1, mixHexColors(base, '#000000', 0.25));
-        ctx.fillStyle = field;
-        ctx.fillRect(0, 0, W, H);
+        if (!paintLineupBackdrop(ctx, canvas, backdrop, baseHex, data.backdropVeil)) {
+            const field = ctx.createLinearGradient(0, 0, 0, H);
+            field.addColorStop(0, mixHexColors(base, '#000000', 0.1));
+            field.addColorStop(0.5, base);
+            field.addColorStop(1, mixHexColors(base, '#000000', 0.25));
+            ctx.fillStyle = field;
+            ctx.fillRect(0, 0, W, H);
+        }
 
         // Marca de agua: una X arriba a la izquierda y una V abajo a la derecha,
         // en el color de la Luz y casi transparentes.
@@ -12985,8 +13018,10 @@ async function drawG22BaseLineupsClassic(
     });
     const base = colors.field;
     const ink = colors.ink;
-    ctx.fillStyle = base;
-    ctx.fillRect(0, 0, W, H);
+    if (!paintLineupBackdrop(ctx, canvas, backdrop, baseHex, data.backdropVeil)) {
+        ctx.fillStyle = base;
+        ctx.fillRect(0, 0, W, H);
+    }
 
     const headerHeight = u(360) + Math.round(extra * 0.08);
     const headerGlow = ctx.createRadialGradient(W * 0.98, -u(40), 0, W * 0.98, -u(40), u(760));
@@ -13310,12 +13345,13 @@ async function drawG22BaseLineupsEditorial(
 
     const teams = getSelectedLineupTeams(data, lineupExportMode).map((team) => ({ ...team, ...splitLineupTeamPlayers(team) }));
     const isSingleTeam = teams.length === 1;
-    const [photo, homeCrest, awayCrest, sportMark, tournamentLogo] = await Promise.all([
+    const [photo, homeCrest, awayCrest, sportMark, tournamentLogo, backdrop] = await Promise.all([
         loadImage(data.backgroundImage || ''),
         loadImage(data.homeTeam.logo || ''),
         loadImage(data.awayTeam.logo || ''),
         loadImage(resolvePlateBrandSource('auto', data.sport)),
         loadImage(getTournamentLogoImageSource(data)),
+        loadImage(data.backdropImage || ''),
     ]);
     const crestBySide = { home: homeCrest, away: awayCrest } as const;
     // Como en la clasica: el puntaje solo si la planilla lo trae, y estrella
@@ -13324,11 +13360,13 @@ async function drawG22BaseLineupsEditorial(
     const ratingChipWidth = u(76);
     const ratingColumn = highestRating != null ? ratingChipWidth + u(14) : 0;
 
-    const field = ctx.createLinearGradient(0, 0, 0, H);
-    field.addColorStop(0, mixHexColors(base, glow, 0.06));
-    field.addColorStop(1, mixHexColors(base, '#000000', 0.22));
-    ctx.fillStyle = field;
-    ctx.fillRect(0, 0, W, H);
+    if (!paintLineupBackdrop(ctx, canvas, backdrop, baseHex, data.backdropVeil)) {
+        const field = ctx.createLinearGradient(0, 0, 0, H);
+        field.addColorStop(0, mixHexColors(base, glow, 0.06));
+        field.addColorStop(1, mixHexColors(base, '#000000', 0.22));
+        ctx.fillStyle = field;
+        ctx.fillRect(0, 0, W, H);
+    }
 
     // La foto ocupa la mitad izquierda y se funde con el campo por la derecha y
     // por abajo. Sin foto, el escudo del equipo ocupa ese lugar.
