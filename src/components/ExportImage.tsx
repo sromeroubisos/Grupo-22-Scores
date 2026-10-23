@@ -4030,7 +4030,15 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                         </p>
                                     </div>
                                 )}
-                                {isClassicPlate && (
+                                {isClassicPlate && (() => {
+                                    // En Auto los selectores muestran lo que de verdad pinta la placa
+                                    // (derivado de Fondo + Acento), no un color fijo.
+                                    const plateTone = getG22PlateTone(accentColor, bgColor, {
+                                        field: plateFieldColor,
+                                        fieldEnd: plateFieldEndColor,
+                                        ink: plateInkColor,
+                                    });
+                                    return (
                                     <div style={{ marginTop: 16 }}>
                                         <label className={styles.modalLabel}>Degradado de la placa</label>
                                         <div className={styles.customColors}>
@@ -4038,7 +4046,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                                 <span>Desde</span>
                                                 <input
                                                     type="color"
-                                                    value={plateFieldColor || PLATE_FIELD_FALLBACK}
+                                                    value={plateTone.field}
                                                     onChange={(event) => setPlateFieldColor(event.target.value)}
                                                 />
                                                 <button
@@ -4055,7 +4063,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                                 <span>Hasta</span>
                                                 <input
                                                     type="color"
-                                                    value={plateFieldEndColor || PLATE_FIELD_END_FALLBACK}
+                                                    value={plateTone.fieldEnd}
                                                     onChange={(event) => setPlateFieldEndColor(event.target.value)}
                                                 />
                                                 <button
@@ -4072,7 +4080,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                                 <span>Tinta</span>
                                                 <input
                                                     type="color"
-                                                    value={plateInkColor || PLATE_INK_FALLBACK}
+                                                    value={plateTone.ink}
                                                     onChange={(event) => setPlateInkColor(event.target.value)}
                                                 />
                                                 <button
@@ -4189,7 +4197,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                             </div>
                                         </div>
                                     </div>
-                                )}
+                                    );
+                                })()}
                                 {/* La biblioteca de gradientes pinta Fondo + Acento, y en la placa
                                     clasica esos dos no pintan nada apenas tocas un color propio:
                                     ahi manda "Tus placas" y esta no tiene por que aparecer. */}
