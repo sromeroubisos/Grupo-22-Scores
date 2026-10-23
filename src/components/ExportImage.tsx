@@ -332,6 +332,10 @@ export interface PlayoffBracketData {
     kickerLeft?: string;
     kickerRight?: string;
     rounds: PlayoffBracketRoundData[];
+    /** Las llaves de la fase (semifinales, definicion de puestos...). Con mas de una, el modal deja elegir cual exportar; `rounds` es la principal. */
+    brackets?: Array<{ key: string; label: string | null; rounds: PlayoffBracketRoundData[] }>;
+    /** Foto de fondo de la placa G22 Base (se dibuja bajo un velo del color del campo). */
+    backgroundImage?: string;
 }
 
 export type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData | LineupsData | SquadData | TeamOfWeekData;
@@ -427,6 +431,10 @@ interface ExportImageProps {
     data: ExportData;
     filename?: string;
     className?: string;
+    // Placa ladder: estadisticas que se pueden sumar como columnas. Se eligen
+    // dentro del modal y `buildData` rearma la placa con los ids marcados.
+    statOptions?: Array<{ id: string; label: string; title?: string }>;
+    buildData?: (statIds: string[]) => ExportData;
 }
 
 type ExportPreviewColorOverrides = {
@@ -1029,7 +1037,7 @@ export default function ExportImage(props: ExportImageProps) {
     return <ExportImageInner key={props.template} {...props} />;
 }
 
-function ExportImageInner({ template, data: liveData, filename = 'g22-export', className = '' }: ExportImageProps) {
+function ExportImageInner({ template, data: liveData, filename = 'g22-export', className = '', statOptions, buildData }: ExportImageProps) {
     const supabase = useMemo(() => createClient(), []);
     const { user } = useAuth();
     const guestInvite = useGuestExportInvite();
@@ -1061,7 +1069,42 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     // La foto solo vale con el modal abierto. Cerrado, el boton y sus deducciones
     // (que haya partidos programados, el nombre por defecto) siguen a la prop viva:
     // si se congelara siempre, una instancia reusada leeria datos de otra plantilla.
-    const data = showModal ? frozenData : liveData;
+    const [statIds, setStatIds] = useState<string[]>([]);
+    // Con estadisticas elegibles la placa se rearma con las marcadas. Se calcula
+    // al abrir el modal o al marcar una (no en cada render: la foto no se mueve).
+    const statsData = useMemo(
+        () => (showModal && buildData ? buildData(statIds) : null),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [showModal, statIds],
+    );
+    const baseData = showModal ? (statsData ?? frozenData) : liveData;
+    const [selectedBracketIndex, setSelectedBracketIndex] = useState(0);
+    const [matchBackgroundUpload, setMatchBackgroundUpload] = useState<MatchBackgroundUpload | null>(() => {
+        if (template !== 'matchStats') return null;
+        const backgroundImage = (baseData as MatchStatsData).backgroundImage?.trim();
+        return backgroundImage ? { name: 'Fondo preconfigurado', src: backgroundImage } : null;
+    });
+    const bracketChoices = useMemo(
+        () => (template === 'playoffBracket' ? ((baseData as PlayoffBracketData).brackets ?? []) : []),
+        [baseData, template],
+    );
+    const safeBracketIndex = Math.min(selectedBracketIndex, Math.max(0, bracketChoices.length - 1));
+    // Cada llave es un export propio: sus rondas y su nombre en el subtitulo.
+    const data = useMemo<ExportData>(() => {
+        if (template !== 'playoffBracket') return baseData;
+        const bracketData = baseData as PlayoffBracketData;
+        // La foto subida en el modal pisa la que trae el torneo.
+        const withBackground = matchBackgroundUpload?.src
+            ? { ...bracketData, backgroundImage: matchBackgroundUpload.src }
+            : bracketData;
+        if (bracketChoices.length <= 1) return withBackground;
+        const choice = bracketChoices[safeBracketIndex];
+        return {
+            ...withBackground,
+            rounds: choice.rounds,
+            subtitle: [choice.label, bracketData.subtitle].filter(Boolean).join(' · '),
+        };
+    }, [baseData, bracketChoices, matchBackgroundUpload, safeBracketIndex, template]);
     const [isPortalReady, setIsPortalReady] = useState(false);
     const [format, setFormat] = useState<ExportFormat>('1080x1350');
     const [status, setStatus] = useState('');
@@ -1174,11 +1217,6 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         return gradientImage ? { name: 'Degradado preconfigurado', src: gradientImage } : null;
     });
     const [editorialCompetitionLogoUpload, setEditorialCompetitionLogoUpload] = useState<MatchBackgroundUpload | null>(null);
-    const [matchBackgroundUpload, setMatchBackgroundUpload] = useState<MatchBackgroundUpload | null>(() => {
-        if (template !== 'matchStats') return null;
-        const backgroundImage = (data as MatchStatsData).backgroundImage?.trim();
-        return backgroundImage ? { name: 'Fondo preconfigurado', src: backgroundImage } : null;
-    });
     const [manualHomeScore, setManualHomeScore] = useState(() => (
         template === 'matchStats'
             ? formatExportScoreInput((data as MatchStatsData).homeScore)
@@ -1657,6 +1695,10 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
 
         if (isLadder) {
             return 'En la placa ladder, Fondo es la placa entera (nace negra) y Acento pinta el remate del subtitulo, los numeros de zona y la flecha del que sube. La flecha del que baja es roja siempre.';
+        }
+
+        if (isBracket && visualFamily === 'fanV5') {
+            return 'En el cuadro de Fan V5 la hoja es clara y la tinta negra. Acento pinta el trazo superior de cada cruce, la etapa y el resultado del que avanza.';
         }
 
         if (isBracket) {
@@ -2296,8 +2338,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             } else if (template === 'teamOfWeek') {
                 await drawG22BaseTeamOfWeek(ctx, canvas, exportData as TeamOfWeekData, config, accentColor, bgColor, brandLogo);
             } else if (template === 'playoffBracket') {
-                // El cuadro tiene un solo afiche, sea cual sea la familia activa.
-                await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo);
+                // El cuadro tiene su afiche navy, salvo en Fan V5, que lo arma con su hoja clara.
+                await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo, visualFamily);
             } else {
                 if (visualFamily === 'posterV3') {
                     await drawPosterV3PlayerStats(ctx, canvas, exportData as PlayerStatsData, config, accentColor, bgColor, brandLogo);
@@ -2532,6 +2574,32 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                     <span className={styles.activeDesignBadge}>Activo</span>
                                 </div>
                             </div>
+
+                            {isLadder && statOptions && statOptions.length > 0 && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Estadisticas en la imagen</label>
+                                    <div className={styles.formatOptions} role="group" aria-label="Estadisticas a incluir en la imagen">
+                                        {statOptions.map((option) => {
+                                            const selected = statIds.includes(option.id);
+                                            return (
+                                                <button
+                                                    key={option.id}
+                                                    className={`${styles.formatBtn} ${selected ? styles.active : ''}`}
+                                                    onClick={() => setStatIds((current) => (selected ? current.filter((id) => id !== option.id) : [...current, option.id]))}
+                                                    aria-pressed={selected}
+                                                    title={option.title}
+                                                    type="button"
+                                                >
+                                                    {option.label}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <p className={styles.modalHint}>
+                                        Se suman como columnas a la estadistica por la que esta ordenada la tabla, que va subrayada.
+                                    </p>
+                                </div>
+                            )}
 
                             {false && (
                             <div className={styles.modalSection}>
@@ -3437,6 +3505,59 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
 
                             {/* El palmares no tiene grupos ni modo de tabla: el unico boton
                                 que quedaria es "Tabla corrida", que no hace nada. */}
+                            {template === 'playoffBracket' && visualFamily === 'g22Base' && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Foto de fondo</label>
+                                    <div className={styles.uploadCard}>
+                                        <div className={styles.uploadMeta}>
+                                            <span className={styles.uploadTitle}>Subi la foto que va detras del cuadro</span>
+                                            <span className={styles.uploadSubtitle}>
+                                                Cubre toda la placa y se tapa con un velo del color del campo para que los cruces se lean. Sin foto, queda el campo liso.
+                                            </span>
+                                        </div>
+                                        <div className={styles.uploadActions}>
+                                            <label className={styles.uploadBtn}>
+                                                Subir foto
+                                                <input
+                                                    className={styles.fileInput}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleMatchBackgroundUpload}
+                                                />
+                                            </label>
+                                            <button
+                                                className={styles.ghostBtn}
+                                                onClick={clearMatchBackgroundUpload}
+                                                disabled={!matchBackgroundUpload}
+                                                type="button"
+                                            >
+                                                Quitar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {template === 'playoffBracket' && bracketChoices.length > 1 && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Llave a exportar</label>
+                                    <div className={styles.formatOptions} role="radiogroup" aria-label="Llave a exportar">
+                                        {bracketChoices.map((choice, index) => (
+                                            <button
+                                                key={choice.key || 'principal'}
+                                                className={`${styles.formatBtn} ${index === safeBracketIndex ? styles.active : ''}`}
+                                                onClick={() => setSelectedBracketIndex(index)}
+                                                type="button"
+                                                role="radio"
+                                                aria-checked={index === safeBracketIndex}
+                                            >
+                                                {choice.label || (index === 0 ? 'Llave principal' : `Llave ${index + 1}`)}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {template === 'standings' && !isPalmares && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Modo de tabla</label>
@@ -5758,7 +5879,7 @@ export async function renderMatchExportPreviewCanvas(
             await drawG22BaseSquad(ctx, canvas, squadData, firstPage, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupColors);
         }
     } else if (template === 'playoffBracket') {
-        await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
+        await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, visualFamily);
     } else {
         if (visualFamily === 'posterV3') {
             await drawPosterV3PlayerStats(ctx, canvas, exportData as PlayerStatsData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo);
@@ -13920,6 +14041,96 @@ function drawBracketCard(ctx: CanvasRenderingContext2D, spec: BracketCardSpec, p
     });
 }
 
+// El cruce en la familia Fan: sin relleno de color ni sombra. Un trazo de Acento
+// arriba (el unico grueso, como en la tabla), la etapa en gris, dos filas
+// separadas por un filete y el resultado a la derecha. Gana el que va en tinta;
+// el que pierde se apaga.
+function drawFanBracketCard(ctx: CanvasRenderingContext2D, spec: BracketCardSpec, tone: FanTone, u: (value: number) => number) {
+    const { x, y, width, headerHeight, rowHeight, title, match, homeLogo, awayLogo, dense } = spec;
+    const height = headerHeight + rowHeight * 2;
+    const scoreWidth = u(dense ? 44 : 58);
+    const scoreX = x + width - scoreWidth;
+
+    ctx.save();
+    ctx.fillStyle = hexToRGBA(tone.ink, 0.035);
+    ctx.fillRect(x, y, width, height);
+    ctx.fillStyle = tone.accent;
+    ctx.fillRect(x, y, width, Math.max(2, u(3)));
+    ctx.strokeStyle = tone.line;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
+    ctx.beginPath();
+    ctx.moveTo(x, y + headerHeight + rowHeight);
+    ctx.lineTo(x + width, y + headerHeight + rowHeight);
+    ctx.stroke();
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = tone.muted;
+    ctx.font = `800 ${u(dense ? 12 : 14)}px ${FONT_BODY}`;
+    setCanvasTracking(ctx, u(dense ? 2 : 3));
+    ctx.fillText(truncateTextToWidth(ctx, title.toUpperCase(), width - u(24)), x + u(dense ? 10 : 14), y + headerHeight / 2 + u(2));
+    setCanvasTracking(ctx, 0);
+    ctx.restore();
+
+    const rows = [
+        {
+            name: getBracketParticipantName(match.home_team || null, match.home_participant || null),
+            rawLogo: getBracketParticipantLogo(match.home_team || null, match.home_participant || null),
+            logo: homeLogo,
+            score: match.score_home,
+            winner: getBracketMatchWinner(match, 'home'),
+        },
+        {
+            name: getBracketParticipantName(match.away_team || null, match.away_participant || null),
+            rawLogo: getBracketParticipantLogo(match.away_team || null, match.away_participant || null),
+            logo: awayLogo,
+            score: match.score_away,
+            winner: getBracketMatchWinner(match, 'away'),
+        },
+    ];
+    const anyWinner = rows.some((row) => row.winner);
+    const labels = rows.map((row) => (isBracketTbd(row.name) ? 'A DEFINIR' : row.name.toUpperCase()));
+    const crest = Math.min(u(dense ? 30 : 42), rowHeight - u(10));
+    const nameX = x + u(dense ? 10 : 14) + crest + u(dense ? 8 : 12);
+    const nameMax = scoreX - nameX - u(8);
+    const nameSize = Math.min(...labels.map((label) => setFittedFont(ctx, label, nameMax, '800', u(dense ? 13 : 17), FONT_BODY, u(dense ? 8 : 10))));
+
+    rows.forEach((row, index) => {
+        const centerY = y + headerHeight + rowHeight * index + rowHeight / 2;
+        const isTbd = isBracketTbd(row.name);
+        const crestX = x + u(dense ? 10 : 14) + crest / 2;
+        const dim = anyWinner && !row.winner;
+
+        ctx.save();
+        if (isTbd) {
+            ctx.strokeStyle = tone.line;
+            ctx.lineWidth = Math.max(1, u(1.5));
+            ctx.beginPath();
+            ctx.arc(crestX, centerY, crest / 2 - u(2), 0, Math.PI * 2);
+            ctx.stroke();
+        } else {
+            if (dim) ctx.globalAlpha = 0.55;
+            drawFanCrest(ctx, { centerX: crestX, centerY, size: crest, img: row.logo, label: row.name, rawLogo: row.rawLogo, tone });
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = isTbd ? tone.muted : dim ? tone.softInk : tone.ink;
+        ctx.font = `800 ${nameSize}px ${FONT_BODY}`;
+        ctx.fillText(truncateTextToWidth(ctx, labels[index], nameMax), nameX, centerY + u(1));
+
+        const hasScore = !(row.score == null || row.score === '');
+        ctx.textAlign = 'center';
+        ctx.fillStyle = hasScore ? (row.winner ? tone.accent : dim ? tone.softInk : tone.ink) : tone.muted;
+        ctx.font = `800 ${u(dense ? 26 : 34)}px ${FONT_BODY}`;
+        ctx.fillText(hasScore ? String(row.score) : '-', scoreX + scoreWidth / 2, centerY + u(1));
+        ctx.restore();
+    });
+}
+
 async function drawPlayoffBracket(
     ctx: CanvasRenderingContext2D,
     canvas: HTMLCanvasElement,
@@ -13927,7 +14138,8 @@ async function drawPlayoffBracket(
     _format: CanvasFormat,
     accentColor: string,
     bgColor: string,
-    brandLogo: HTMLImageElement | null
+    brandLogo: HTMLImageElement | null,
+    family: ExportVisualFamily = 'g22Base'
 ) {
     const rounds = Array.isArray(data.rounds) ? data.rounds.filter((round) => Array.isArray(round?.matches) && round.matches.length > 0) : [];
     const W = canvas.width;
@@ -13935,9 +14147,33 @@ async function drawPlayoffBracket(
     const isStory = H > 1500;
     // La referencia esta medida sobre 1024 de ancho; todo escala desde ahi.
     const u = (value: number) => Math.round(value * (W / 1024));
-    const isDark = getContrastColor(bgColor) === '#ffffff';
+    // Fan V5 no tiene afiche propio: el cuadro se arma con su hoja, su tinta y sus filetes.
+    const isFan = family === 'fanV5';
+    const fanTone = getFanTone(accentColor, bgColor);
+    // G22 Base (el diseno del super admin) lo arma como su placa: campo de color, titular en una linea.
+    const isPlate = family === 'g22Base';
+    const plateTone = getG22PlateTone(accentColor, bgColor);
+    const isDark = !isFan && getContrastColor(bgColor) === '#ffffff';
     const deep = mixHexColors(bgColor, '#000000', isDark ? 0.42 : 0.1);
-    const palette: BracketPalette = {
+    const palette: BracketPalette = isPlate ? {
+        bg: plateTone.field,
+        deep: plateTone.fieldEnd,
+        accent: plateTone.ink,
+        accentSoft: mixHexColors(plateTone.accent, '#ffffff', 0.55),
+        ink: plateTone.ink,
+        inkMuted: hexToRGBA(plateTone.ink, 0.7),
+        headerInk: getContrastColor(plateTone.ink) === '#ffffff' ? '#ffffff' : plateTone.fieldEnd,
+        isDark: plateTone.isDarkField,
+    } : isFan ? {
+        bg: fanTone.sheet,
+        deep: fanTone.ink,
+        accent: fanTone.accent,
+        accentSoft: fanTone.accent,
+        ink: fanTone.ink,
+        inkMuted: fanTone.muted,
+        headerInk: fanTone.ink,
+        isDark: false,
+    } : {
         bg: bgColor,
         deep,
         accent: accentColor,
@@ -13948,9 +14184,11 @@ async function drawPlayoffBracket(
         isDark,
     };
 
-    const [tournamentLogo, wordmark, ...participantLogos] = await Promise.all([
+    if (isPlate) setActiveCrestBackdropDark(plateTone.isDarkField);
+    const [tournamentLogo, wordmark, plateBackground, ...participantLogos] = await Promise.all([
         loadImage(getTournamentLogoImageSource(data)),
         loadImage('/header-logo.png'),
+        isPlate && data.backgroundImage ? loadImage(data.backgroundImage) : Promise.resolve(null),
         ...rounds.flatMap((round) =>
             round.matches.flatMap((match) => [
                 loadImage(getBracketParticipantLogo(match.home_team || null, match.home_participant || null)),
@@ -13968,103 +14206,148 @@ async function drawPlayoffBracket(
         return { homeLogo: participantLogos[base] || null, awayLogo: participantLogos[base + 1] || null };
     };
 
-    drawBracketBackdrop(ctx, canvas, palette);
+    let fanHeaderBottom = 0;
+    let fanFooterRuleY = 0;
+    if (isFan) {
+        // Misma cabecera que la tabla Fan: torneo en gris, etapa en el Acento; en
+        // story la firma se va arriba a la derecha y el titulo se alinea a la izquierda.
+        const fu = (value: number) => Math.round((value * W) / 1080);
+        const padding = fu(72);
+        const headerTop = fu(96) + Math.max(0, H - Math.round((W * 1350) / 1080)) * 0.1;
+        drawFanSheet(ctx, canvas, fanTone);
+        const brandWidth = isStory
+            ? drawFanBrand(ctx, wordmark, brandLogo, fanTone, { right: W - padding, centerY: headerTop + fu(20), unit: fu, height: fu(58) })
+            : 0;
+        fanHeaderBottom = drawFanKicker(ctx, canvas, bracketTournamentNameOf(data) || 'Cuadro playoff', (data.subtitle || '').trim() || 'CUADRO PLAYOFF', fanTone, {
+            top: headerTop,
+            maxWidth: W - padding * 2,
+            primaryMaxWidth: isStory ? W - padding * 2 - brandWidth - fu(28) : W - padding * 2,
+            align: isStory ? 'left' : 'center',
+            left: padding,
+            unit: fu,
+        });
+        fanFooterRuleY = drawFanFooter(ctx, canvas, brandLogo, fanTone, { padding, unit: fu, showBrand: !isStory, wordmark });
+    } else if (isPlate) {
+        drawG22PlateField(ctx, canvas, plateTone);
+        if (plateBackground) {
+            // La foto va a pantalla completa y un velo del campo la apaga: los cruces siguen siendo lo que se lee.
+            drawCoverImage(ctx, canvas, plateBackground, { focusX: 0.5, focusY: 0.4 });
+            const veil = ctx.createLinearGradient(0, 0, 0, H);
+            veil.addColorStop(0, hexToRGBA(plateTone.field, 0.72));
+            veil.addColorStop(1, hexToRGBA(plateTone.fieldEnd, 0.86));
+            ctx.fillStyle = veil;
+            ctx.fillRect(0, 0, W, H);
+        }
+        let headerEdge = drawG22PlateHeadline(ctx, canvas, (data.subtitle || '').trim() || 'Cuadro playoff', bracketTournamentNameOf(data), plateTone, {
+            top: u(isStory ? 120 : 64),
+            maxWidth: W - u(96),
+            maxSize: u(84),
+            minSize: u(32),
+        });
+        if (tournamentLogo) {
+            const placement = getContainedImagePlacement(tournamentLogo, W / 2, headerEdge + u(78), u(190), u(120), 0);
+            ctx.drawImage(tournamentLogo, placement.x, placement.y, placement.width, placement.height);
+            headerEdge += u(150);
+        }
+        fanHeaderBottom = headerEdge + u(10);
+    } else {
+        drawBracketBackdrop(ctx, canvas, palette);
+        // Esquinas: una palabra por linea, como el "RUGBY ARGENTINO CLUBES" de la referencia.
+        const kickerTop = u(60);
+        const drawKicker = (text: string | undefined, align: 'left' | 'right') => {
+            const lines = (text || '').trim().toUpperCase().split(/\s+/).filter(Boolean).slice(0, 3);
+            if (!lines.length) return;
+            const tracking = u(4);
+            const x = align === 'left' ? u(40) : W - u(40) + tracking;
+            ctx.save();
+            ctx.textAlign = align;
+            ctx.textBaseline = 'top';
+            ctx.fillStyle = palette.accentSoft;
+            ctx.font = `800 ${u(13)}px ${FONT_BODY}`;
+            setCanvasTracking(ctx, tracking);
+            lines.forEach((line, index) => ctx.fillText(line, x, kickerTop + index * u(21)));
+            setCanvasTracking(ctx, 0);
+            const ruleY = kickerTop + lines.length * u(21) + u(6);
+            ctx.fillStyle = palette.accent;
+            ctx.fillRect(align === 'left' ? u(40) : W - u(40) - u(56), ruleY, u(56), u(2));
+            ctx.restore();
+        };
+        drawKicker(data.kickerLeft, 'left');
+        drawKicker(data.kickerRight, 'right');
 
-    // Esquinas: una palabra por linea, como el "RUGBY ARGENTINO CLUBES" de la referencia.
-    const kickerTop = u(60);
-    const drawKicker = (text: string | undefined, align: 'left' | 'right') => {
-        const lines = (text || '').trim().toUpperCase().split(/\s+/).filter(Boolean).slice(0, 3);
-        if (!lines.length) return;
-        const tracking = u(4);
-        const x = align === 'left' ? u(40) : W - u(40) + tracking;
-        ctx.save();
-        ctx.textAlign = align;
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = palette.accentSoft;
-        ctx.font = `800 ${u(13)}px ${FONT_BODY}`;
-        setCanvasTracking(ctx, tracking);
-        lines.forEach((line, index) => ctx.fillText(line, x, kickerTop + index * u(21)));
-        setCanvasTracking(ctx, 0);
-        const ruleY = kickerTop + lines.length * u(21) + u(6);
-        ctx.fillStyle = palette.accent;
-        ctx.fillRect(align === 'left' ? u(40) : W - u(40) - u(56), ruleY, u(56), u(2));
-        ctx.restore();
-    };
-    drawKicker(data.kickerLeft, 'left');
-    drawKicker(data.kickerRight, 'right');
+        const logoCenterY = u(92);
+        if (tournamentLogo) {
+            ctx.save();
+            const glow = ctx.createRadialGradient(W / 2, logoCenterY, 0, W / 2, logoCenterY, u(120));
+            glow.addColorStop(0, 'rgba(255,255,255,0.14)');
+            glow.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = glow;
+            ctx.fillRect(W / 2 - u(140), logoCenterY - u(120), u(280), u(240));
+            const placement = getContainedImagePlacement(tournamentLogo, W / 2, logoCenterY, u(180), u(132), 0);
+            ctx.drawImage(tournamentLogo, placement.x, placement.y, placement.width, placement.height);
+            ctx.restore();
+        }
 
-    const logoCenterY = u(92);
-    if (tournamentLogo) {
-        ctx.save();
-        const glow = ctx.createRadialGradient(W / 2, logoCenterY, 0, W / 2, logoCenterY, u(120));
-        glow.addColorStop(0, 'rgba(255,255,255,0.14)');
-        glow.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = glow;
-        ctx.fillRect(W / 2 - u(140), logoCenterY - u(120), u(280), u(240));
-        const placement = getContainedImagePlacement(tournamentLogo, W / 2, logoCenterY, u(180), u(132), 0);
-        ctx.drawImage(tournamentLogo, placement.x, placement.y, placement.width, placement.height);
-        ctx.restore();
-    }
+        const tournamentName = bracketTournamentNameOf(data);
+        if (tournamentName) {
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = palette.ink;
+            ctx.font = `700 ${u(21)}px ${FONT_BODY}`;
+            setCanvasTracking(ctx, u(5));
+            ctx.fillText(truncateTextToWidth(ctx, tournamentName.toUpperCase(), W - u(260)), W / 2 + u(2), u(184));
+            setCanvasTracking(ctx, 0);
+            ctx.restore();
+        }
 
-    const tournamentName = bracketTournamentNameOf(data);
-    if (tournamentName) {
+        // CUADRO / PLAYOFF: la palabra mas ancha fija el cuerpo de las dos.
         ctx.save();
         ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+        ctx.textBaseline = 'alphabetic';
+        setFittedFont(ctx, 'PLAYOFF', W - u(160), '900', u(118), BASE_FONT_DHARMA, u(64));
+        const titleFont = ctx.font;
+        ctx.shadowColor = hexToRGBA(palette.accent, 0.45);
+        ctx.shadowBlur = u(28);
         ctx.fillStyle = palette.ink;
-        ctx.font = `700 ${u(21)}px ${FONT_BODY}`;
-        setCanvasTracking(ctx, u(5));
-        ctx.fillText(truncateTextToWidth(ctx, tournamentName.toUpperCase(), W - u(260)), W / 2 + u(2), u(184));
-        setCanvasTracking(ctx, 0);
+        ctx.fillText('CUADRO', W / 2, u(318));
+        const playoffGrad = ctx.createLinearGradient(0, u(326), 0, u(410));
+        playoffGrad.addColorStop(0, palette.accentSoft);
+        playoffGrad.addColorStop(1, palette.accent);
+        ctx.fillStyle = playoffGrad;
+        ctx.font = titleFont;
+        ctx.fillText('PLAYOFF', W / 2, u(408));
         ctx.restore();
-    }
 
-    // CUADRO / PLAYOFF: la palabra mas ancha fija el cuerpo de las dos.
-    ctx.save();
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    setFittedFont(ctx, 'PLAYOFF', W - u(160), '900', u(118), BASE_FONT_DHARMA, u(64));
-    const titleFont = ctx.font;
-    ctx.shadowColor = hexToRGBA(palette.accent, 0.45);
-    ctx.shadowBlur = u(28);
-    ctx.fillStyle = palette.ink;
-    ctx.fillText('CUADRO', W / 2, u(318));
-    const playoffGrad = ctx.createLinearGradient(0, u(326), 0, u(410));
-    playoffGrad.addColorStop(0, palette.accentSoft);
-    playoffGrad.addColorStop(1, palette.accent);
-    ctx.fillStyle = playoffGrad;
-    ctx.font = titleFont;
-    ctx.fillText('PLAYOFF', W / 2, u(408));
-    ctx.restore();
-
-    const pillLabel = (data.subtitle || 'Cuadro eliminatorio').trim().toUpperCase();
-    if (pillLabel) {
-        const pillCenterY = u(456);
-        const pillHeight = u(44);
-        ctx.save();
-        ctx.font = `900 ${u(30)}px ${BASE_FONT_DHARMA}`;
-        setCanvasTracking(ctx, u(2));
-        const pillText = truncateTextToWidth(ctx, pillLabel, W - u(240));
-        const pillWidth = ctx.measureText(pillText).width + u(48);
-        ctx.shadowColor = hexToRGBA(palette.accent, 0.35);
-        ctx.shadowBlur = u(18);
-        ctx.fillStyle = isDark ? '#ffffff' : deep;
-        ctx.beginPath();
-        ctx.roundRect(W / 2 - pillWidth / 2, pillCenterY - pillHeight / 2, pillWidth, pillHeight, u(8));
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = isDark ? deep : '#ffffff';
-        ctx.fillText(pillText, W / 2 + u(1), pillCenterY + u(2));
-        setCanvasTracking(ctx, 0);
-        ctx.restore();
+        const pillLabel = (data.subtitle || 'Cuadro eliminatorio').trim().toUpperCase();
+        if (pillLabel) {
+            const pillCenterY = u(456);
+            const pillHeight = u(44);
+            ctx.save();
+            ctx.font = `900 ${u(30)}px ${BASE_FONT_DHARMA}`;
+            setCanvasTracking(ctx, u(2));
+            const pillText = truncateTextToWidth(ctx, pillLabel, W - u(240));
+            const pillWidth = ctx.measureText(pillText).width + u(48);
+            ctx.shadowColor = hexToRGBA(palette.accent, 0.35);
+            ctx.shadowBlur = u(18);
+            ctx.fillStyle = isDark ? '#ffffff' : deep;
+            ctx.beginPath();
+            ctx.roundRect(W / 2 - pillWidth / 2, pillCenterY - pillHeight / 2, pillWidth, pillHeight, u(8));
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = isDark ? deep : '#ffffff';
+            ctx.fillText(pillText, W / 2 + u(1), pillCenterY + u(2));
+            setCanvasTracking(ctx, 0);
+            ctx.restore();
+        }
     }
 
     // La firma cierra abajo; el arbol ocupa lo que queda entre la capsula y ella.
     const footerBottom = H - (isStory ? u(84) : u(62));
-    const footerTop = footerBottom - u(46);
-    const areaTopMin = u(500);
+    const footerTop = isFan ? fanFooterRuleY - u(10) : footerBottom - u(46);
+    const areaTopMin = isFan || isPlate ? fanHeaderBottom + u(24) : u(500);
     const available = footerTop - u(36) - areaTopMin;
     const areaHeight = Math.min(available, isStory ? u(820) : available);
     // En story el arbol sube un poco del centro: pegado a la capsula lee mejor que flotando.
@@ -14072,7 +14355,8 @@ async function drawPlayoffBracket(
     const areaBottom = areaTop + areaHeight;
 
     const finishWithFooter = () => {
-        const tone: G22PlateTone = {
+        if (isFan) return;
+        const tone: G22PlateTone = isPlate ? plateTone : {
             field: palette.bg,
             fieldEnd: palette.deep,
             ink: palette.ink,
@@ -14110,17 +14394,25 @@ async function drawPlayoffBracket(
         && rounds.every((round, index) => index === 0 || round.matches.length === rounds[index - 1].matches.length / 2);
 
     ctx.save();
-    ctx.strokeStyle = palette.accent;
-    ctx.lineWidth = Math.max(2, u(3));
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.shadowColor = hexToRGBA(palette.accent, 0.5);
-    ctx.shadowBlur = u(10);
+    if (isFan) {
+        // Sin brillo: un trazo de tinta que une las llaves.
+        ctx.strokeStyle = hexToRGBA(fanTone.ink, 0.38);
+        ctx.lineWidth = Math.max(2, u(2));
+        ctx.lineCap = 'butt';
+        ctx.lineJoin = 'miter';
+    } else {
+        ctx.strokeStyle = palette.accent;
+        ctx.lineWidth = Math.max(2, u(3));
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.shadowColor = hexToRGBA(palette.accent, 0.5);
+        ctx.shadowBlur = u(10);
+    }
     ctx.beginPath();
 
     if (isMirrored) {
         const laneGap = u(30);
-        const sideWidth = u(278);
+        const sideWidth = u(isFan ? 252 : 278);
         const sideHeader = u(30);
         const sideRow = u(66);
         const sideHeight = sideHeader + sideRow * 2;
@@ -14318,7 +14610,7 @@ async function drawPlayoffBracket(
     ctx.stroke();
     ctx.restore();
 
-    cards.forEach((card) => drawBracketCard(ctx, card, palette, u));
+    cards.forEach((card) => (isFan ? drawFanBracketCard(ctx, card, fanTone, u) : drawBracketCard(ctx, card, palette, u)));
     finishWithFooter();
 }
 
