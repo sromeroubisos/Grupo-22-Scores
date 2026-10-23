@@ -14,8 +14,8 @@
  * isn't applied yet) it is a no-op, so normal match editing never breaks.
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { isMissingTableError } from '@/lib/utils/supabaseSchema';
-import { resolveMatchOutcome, type MatchOutcome } from '@/lib/server/matchOutcome';
+import { isMissingTableError } from '../utils/supabaseSchema.ts';
+import { resolveMatchOutcome, type MatchOutcome } from './matchOutcome.ts';
 
 type Supa = SupabaseClient<any, any, any>;
 
