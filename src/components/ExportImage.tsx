@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { resolveAdminPanel } from '@/lib/auth/roles';
 import { mapDesignSlugToVisualFamily, readActiveExportDesign, type ExportDesignSlug, type ExportVisualFamily } from '@/lib/exports/activeDesign';
 import { EXPORT_PALETTES, type ExportPalette } from '@/lib/exports/exportPalettes';
+import { darkCrestSource } from '@/lib/exports/crestVariants';
 import { ratingScaleColor, TINTA as RATING_INK } from '@/lib/matches/ratingScale';
 import {
     EXPORT_DESIGN_CUSTOMIZATION_EVENT,
@@ -2100,6 +2101,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             canvas.height = config.height;
             const ctx = canvas.getContext('2d');
             if (!ctx) throw new Error('No se pudo inicializar el canvas');
+            setActiveCrestBackdropDark(getContrastColor(bgColor) === '#ffffff');
             const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset, teamNameMode);
 
             if (template === 'matchStats') {
@@ -5594,6 +5596,7 @@ export async function renderMatchExportPreviewCanvas(
         }
         : { ...DEFAULT_EXPORT_COLOR_DEFAULTS };
 
+    setActiveCrestBackdropDark(getContrastColor(previewDefaults.bgColor) === '#ffffff');
     const { canvas, ctx } = acquireExportRenderCanvas(scratchCanvas, config.width, config.height);
 
     const impactoColors: ImpactoColorOverrides = {
@@ -6402,9 +6405,20 @@ function withExportCrestWidth(url: string): string {
     }
 }
 
+// Si el fondo de la pieza es oscuro, los escudos con variante de tinta (Tala)
+// salen en su version de letras blancas; sobre claro, en la de letras negras.
+// Estado de modulo como la tipografia activa: cada entrada de dibujo lo fija
+// antes de cargar escudos. null = nadie lo fijo, el escudo va como llego.
+let ACTIVE_CREST_BACKDROP_DARK: boolean | null = null;
+
+function setActiveCrestBackdropDark(isDark: boolean | null) {
+    ACTIVE_CREST_BACKDROP_DARK = isDark;
+}
+
 export async function loadImage(url: string): Promise<HTMLImageElement | null> {
     if (!isImageSource(url)) return null;
-    const normalized = normalizeImageSource(url);
+    const normalizedBase = normalizeImageSource(url);
+    const normalized = ACTIVE_CREST_BACKDROP_DARK === true ? darkCrestSource(normalizedBase) : normalizedBase;
     const sameOrigin = typeof window !== 'undefined' && normalized.startsWith(window.location.origin);
     const sources = (normalized.startsWith('http') && !sameOrigin ? [buildProxyUrl(normalized), normalized] : [normalized])
         .map(withExportCrestWidth);
@@ -7958,6 +7972,9 @@ async function drawG22BasePlate(
     bgColor: string,
     plateOptions?: ExportPlateOptions
 ) {
+    // La placa pinta su propio campo: ahi se decide la variante del escudo, no
+    // con el Fondo del modal.
+    setActiveCrestBackdropDark(getG22PlateTone(accentColor, bgColor, plateOptions).isDarkField);
     const [homeLogo, awayLogo, tournamentLogo, sportMark, wordmark] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
