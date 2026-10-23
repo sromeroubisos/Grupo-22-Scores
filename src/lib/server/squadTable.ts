@@ -111,8 +111,22 @@ export async function buildTournamentSquadTable(supabase: ReadClient, routeId: s
         rows: b.rows.map((r) => ({ ...r, clubId: toBase(r.clubId) })),
     })));
 
+    // La raíz de la familia sirve para AGRUPAR, no siempre para MOSTRAR: la raíz de
+    // Gimnasia de Rosario es "GER B" y la de Universitario de Rosario es la de
+    // hockey. Se muestra la raíz solo si figura ella misma en alguna tabla; si no,
+    // el club de la primera categoría (en orden de agrupación) donde aparece.
+    const displayOf = new Map<string, string>();
+    for (const b of built) {
+        for (const r of b.rows) {
+            const base = toBase(r.clubId);
+            if (r.clubId === base) displayOf.set(base, base);
+            else if (!displayOf.has(base)) displayOf.set(base, r.clubId);
+        }
+    }
+    const displayId = (baseId: string) => displayOf.get(baseId) ?? baseId;
+
     const clubInfo = new Map<string, { id: string; name: string; logo: string | null }>();
-    const baseIds = [...new Set(table.map((row) => row.clubId))];
+    const baseIds = [...new Set(table.map((row) => displayId(row.clubId)))];
     for (let i = 0; i < baseIds.length; i += 60) {
         const { data, error: clubError } = await supabase.from('clubs').select('id, name, short_name, logo_url').in('id', baseIds.slice(i, i + 60));
         if (clubError) throw new Error(clubError.message);
@@ -131,7 +145,7 @@ export async function buildTournamentSquadTable(supabase: ReadClient, routeId: s
             points: row.points,
             played: row.played,
             categories: row.categories,
-            club: clubInfo.get(row.clubId) ?? { id: row.clubId, name: 'Club', logo: resolveSerializableLogoUrl(null, { key: row.clubId, name: 'Club' }) },
+            club: clubInfo.get(displayId(row.clubId)) ?? { id: displayId(row.clubId), name: 'Club', logo: resolveSerializableLogoUrl(null, { key: displayId(row.clubId), name: 'Club' }) },
         })),
     };
 }
