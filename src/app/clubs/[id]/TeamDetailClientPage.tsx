@@ -19,6 +19,7 @@ import { useAuth } from '@/context/AuthContext';
 import PlayerHeadIcon from '@/components/PlayerHeadIcon';
 import TeamLogo from '@/components/TeamLogo';
 import HistoryTab from './HistoryTab';
+import ClubNews, { useClubNews } from './ClubNews';
 import QuickSquadModal from './QuickSquadModal';
 import PanelMatchForm, { type PanelFamilyClub } from './PanelMatchForm';
 import PanelCategories from './PanelCategories';
@@ -34,6 +35,129 @@ const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: fal
 const SPORT_LABEL: Record<string, string> = Object.fromEntries(
     Object.entries(SPORTS_BY_ID).map(([id, s]) => [id, s.name])
 );
+
+/**
+ * El color de la cabecera, o null si el club no tiene uno usable.
+ *
+ * El texto de la cabecera es blanco, así que el color tiene que sostenerlo: uno
+ * claro (amarillo, celeste, blanco) se oscurece hasta que el blanco se lea
+ * (contraste ≥ 4.5 con la luminancia relativa de WCAG). Un valor que no es un
+ * hex de 6 dígitos se descarta en vez de llegar a un `style`.
+ */
+function clubHeaderColor(raw: unknown): string | null {
+    let channels: number[];
+    if (Array.isArray(raw) && raw.length === 3 && raw.every((value) => Number.isFinite(value))) {
+        channels = raw as number[];
+    } else {
+        const match = typeof raw === 'string' ? /^#?([0-9a-f]{6})$/i.exec(raw.trim()) : null;
+        if (!match) return null;
+        channels = [0, 2, 4].map((offset) => parseInt(match[1].slice(offset, offset + 2), 16));
+    }
+    const luminance = (rgb: number[]) => {
+        const [r, g, b] = rgb.map((value) => {
+            const unit = value / 255;
+            return unit <= 0.03928 ? unit / 12.92 : ((unit + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    // Blanco sobre el color: (1.05) / (L + 0.05) ≥ 4.5  →  L ≤ 0.183
+    for (let step = 0; step < 12 && luminance(channels) > 0.183; step += 1) {
+        channels = channels.map((value) => Math.round(value * 0.88));
+    }
+    return `rgb(${channels.join(' ')})`;
+}
+
+/**
+ * El color más presente del escudo, como [r, g, b], o null si no se pudo leer.
+ *
+ * Se muestrea el escudo en chico y se agrupan los píxeles por color. No cuentan
+ * los transparentes, los casi blancos ni los casi negros (el fondo y el
+ * contorno de casi todo escudo), y los saturados pesan más que los grises: el
+ * "color del club" es el que se ve, no el que más superficie ocupa por ser neutro.
+ * Si el escudo es todo neutro, se usa el color más frecuente sin filtrar.
+ * Un origen sin CORS ensucia el canvas y `getImageData` tira: devuelve null y la
+ * ficha cae en `primary_color`.
+ */
+function dominantLogoColor(image: HTMLImageElement): number[] | null {
+    try {
+        const size = 48;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        if (!context) return null;
+        context.drawImage(image, 0, 0, size, size);
+        const { data } = context.getImageData(0, 0, size, size);
+
+        const buckets = new Map<number, { weight: number; r: number; g: number; b: number; count: number }>();
+        const neutral = new Map<number, { weight: number; r: number; g: number; b: number; count: number }>();
+        for (let index = 0; index < data.length; index += 4) {
+            const r = data[index], g = data[index + 1], b = data[index + 2], a = data[index + 3];
+            if (a < 200) continue;
+            const high = Math.max(r, g, b), low = Math.min(r, g, b);
+            if (low > 225 || high < 40) continue;
+            const saturation = (high - low) / high;
+            const key = ((r >> 5) << 6) | ((g >> 5) << 3) | (b >> 5);
+            const target = saturation < 0.25 ? neutral : buckets;
+            const entry = target.get(key) ?? { weight: 0, r: 0, g: 0, b: 0, count: 0 };
+            entry.weight += 1 + saturation * 2;
+            entry.r += r; entry.g += g; entry.b += b; entry.count += 1;
+            target.set(key, entry);
+        }
+        const pool = buckets.size > 0 ? buckets : neutral;
+        let best: { weight: number; r: number; g: number; b: number; count: number } | null = null;
+        // Orden fijo: dos grupos empatados dan siempre el mismo color.
+        for (const key of Array.from(pool.keys()).sort((a, b) => a - b)) {
+            const entry = pool.get(key)!;
+            if (!best || entry.weight > best.weight) best = entry;
+        }
+        return best ? [Math.round(best.r / best.count), Math.round(best.g / best.count), Math.round(best.b / best.count)] : null;
+    } catch {
+        return null;
+    }
+}
+
+/** El color del escudo, calculado una vez por URL y recordado en la sesión. */
+function useLogoColor(logoUrl: string): number[] | null {
+    const [color, setColor] = useState<number[] | null>(null);
+
+    useEffect(() => {
+        setColor(null);
+        if (!logoUrl) return;
+        const storageKey = `g22:logo-color:${logoUrl}`;
+        try {
+            const cached = sessionStorage.getItem(storageKey);
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) || parsed === null) {
+                    setColor(parsed);
+                    return;
+                }
+            }
+        } catch {
+            // Sin sessionStorage: se calcula cada vez.
+        }
+        let cancelled = false;
+        const image = new Image();
+        image.crossOrigin = 'anonymous';
+        image.onload = () => {
+            if (cancelled) return;
+            const result = dominantLogoColor(image);
+            setColor(result);
+            try {
+                sessionStorage.setItem(storageKey, JSON.stringify(result));
+            } catch {
+                // Cuota llena: no pasa nada.
+            }
+        };
+        image.src = logoUrl;
+        return () => {
+            cancelled = true;
+        };
+    }, [logoUrl]);
+
+    return color;
+}
 
 // ── Panel del Día ───────────────────────────────────────────────────────────
 // El día de un partido sale de la timezone del sitio, NUNCA de aritmética sobre
@@ -156,6 +280,7 @@ const DAY_SECTIONS: Array<{ id: DayState; label: string; tone: string }> = [
 
 const TABS = [
     { id: 'summary', label: 'Resumen' },
+    { id: 'news', label: 'Noticias' },
     { id: 'results', label: 'Resultados' },
     { id: 'fixtures', label: 'Fixture' },
     { id: 'history', label: 'Historial' },
@@ -165,7 +290,10 @@ const TABS = [
     { id: 'today', label: 'Hoy' },
 ];
 
-const DEFAULT_PUBLIC_TABS = new Set(['summary', 'results', 'fixtures']);
+// Hasta cuándo una nota cuenta como "reciente" para el Resumen.
+const RECENT_NEWS_DAYS = 45;
+
+const DEFAULT_PUBLIC_TABS =new Set(['summary', 'results', 'fixtures']);
 
 function isRugbyApiSportsTeamId(value: string) {
     return /^ras-team-\d+$/i.test(value);
@@ -809,6 +937,11 @@ function TeamDetailInner({ id }: { id: string }) {
         ) return rawId;
         return null;
     }, [externalTeamId, rawId, resolvedClubId]);
+    const logoColor = useLogoColor(resolveTeamLogo(details, details?.team) || '');
+    const clubNews = useClubNews(
+        resolvedClubId || (!externalTeamId ? rawId : null),
+        details?.name || details?.team?.name || null,
+    );
     const visibleTabs = useMemo(() => {
         const supportedTabs = new Set<string>(
             Array.isArray(details?.supported_tabs)
@@ -828,13 +961,18 @@ function TeamDetailInner({ id }: { id: string }) {
 
         supportedTabs.add('history');
 
+        // Igual que el palmarés: sin una nota que lo nombre, la pestaña no existe.
+        if (clubNews && clubNews.length > 0) {
+            supportedTabs.add('news');
+        }
+
         // La tab de títulos solo existe si hay palmarés: sin filas, ni aparece.
         if (honoursByCompetition.length > 0) {
             supportedTabs.add('titles');
         }
 
         return TABS.filter((tab) => supportedTabs.has(tab.id));
-    }, [details?.is_internal, details?.supported_tabs, resolvedClubId, honoursByCompetition.length, dayIndex.size]);
+    }, [details?.is_internal, details?.supported_tabs, resolvedClubId, honoursByCompetition.length, dayIndex.size, clubNews]);
     const relatedFamilyClubs = useMemo(() => {
         const familyClubs: PublicRelatedClub[] = Array.isArray(details?.related_clubs)
             ? details.related_clubs.filter((club: unknown): club is PublicRelatedClub => {
@@ -1160,10 +1298,20 @@ function TeamDetailInner({ id }: { id: string }) {
         }
         : null;
 
+    const recentClubNews = (clubNews ?? []).filter((item) => {
+        const published = item.published_at ? Date.parse(item.published_at) : NaN;
+        return Number.isFinite(published) && Date.now() - published <= RECENT_NEWS_DAYS * 86_400_000;
+    });
+    // El escudo manda; `primary_color` es el respaldo cuando el escudo no se puede leer.
+    const headerColor = clubHeaderColor(logoColor) ?? clubHeaderColor(details?.primary_color);
+
     return (
         <div className={styles.page}>
             {/* Header */}
-            <header className={styles.header}>
+            <header
+                className={`${styles.header} ${headerColor ? styles.headerTinted : ''}`}
+                style={headerColor ? ({ '--club-color': headerColor } as React.CSSProperties) : undefined}
+            >
                 <div className="container">
                     <div className={styles.breadcrumb}>
                         <Link href="/">Inicio</Link>
@@ -1514,6 +1662,13 @@ function TeamDetailInner({ id }: { id: string }) {
                             </div>
                         )}
 
+                        {activeTab === 'news' && clubNews && (
+                            <div className={styles.section}>
+                                <h2 className={styles.pageTitle}>Noticias</h2>
+                                <ClubNews items={clubNews} />
+                            </div>
+                        )}
+
                         {activeTab === 'summary' && (
                             <>
                                 {filteredResults.length > 0 && (
@@ -1537,6 +1692,20 @@ function TeamDetailInner({ id }: { id: string }) {
                                         <div className={styles.matchList}>
                                             {filteredFixtures.slice(0, 5).map(m => renderMatchItem(m))}
                                         </div>
+                                    </div>
+                                )}
+
+                                {/* Después de los partidos y solo si hay algo reciente: no
+                                    todos los clubes tienen notas, y una de hace un año en el
+                                    Resumen se lee como contenido muerto. Las viejas siguen en
+                                    la pestaña Noticias. */}
+                                {recentClubNews.length > 0 && (
+                                    <div className={styles.section} style={{ marginTop: '32px' }}>
+                                        <div className={styles.sectionHeader}>
+                                            <h2>Noticias</h2>
+                                            <button className={styles.linkButton} onClick={() => setActiveTab('news')}>Ver todas</button>
+                                        </div>
+                                        <ClubNews items={recentClubNews} limit={2} />
                                     </div>
                                 )}
 

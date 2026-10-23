@@ -3417,3 +3417,133 @@
         padding: 8px 13px;
     }
 }
+
+/* ================================================================
+   MÓVIL — la ficha a sangre.
+   El <main> del layout deja 0.475rem de aire a cada lado y `.page` pintaba
+   su propio fondo adentro: en el teléfono eso se leía como un bloque oscuro
+   flotando con el fondo del sitio asomando a los costados. Acá la ficha se
+   come ese aire (mismo valor que ConditionalLayout.module.css) y llega de
+   borde a borde. Si cambia el padding del layout, cambia acá también.
+   ================================================================ */
+@media (max-width: 900px) {
+    .page {
+        margin: -0.475rem -0.475rem 0;
+    }
+
+    .header {
+        padding-top: 14px;
+        background:
+            radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 60%),
+            var(--color-bg-primary);
+    }
+
+    /* El camino de migas ocupa un renglón entero para decir lo que ya dice
+       el título; en el teléfono la flecha del sitio alcanza. */
+    .breadcrumb {
+        display: none;
+    }
+
+    .headerContent {
+        gap: 14px 16px;
+        margin-bottom: 8px;
+        align-items: center;
+    }
+
+    /* Escudo al lado del nombre, como la cabecera de un club en FotMob: el
+       escudo arriba y el título abajo gastaba media pantalla antes del primer dato. */
+    .logoContainer {
+        width: 64px;
+        height: 64px;
+        flex: none;
+    }
+
+    .headerInfo {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .headerInfo .title {
+        font-size: 1.5rem;
+        line-height: 1.1;
+        margin-bottom: 4px;
+        overflow-wrap: anywhere;
+    }
+
+    .navTabs {
+        gap: 22px;
+        scroll-snap-type: x proximity;
+    }
+
+    .tabButton {
+        min-height: 44px;
+        padding: 0;
+        scroll-snap-align: start;
+    }
+}
+
+/* ================================================================
+   CABECERA CON EL COLOR DEL CLUB (como FotMob).
+   `--club-color` lo pone la ficha ya corregido para sostener texto blanco
+   (ver `clubHeaderColor`). Sin color usable no se aplica la clase y queda la
+   cabecera de siempre. Va al final: gana por orden a las reglas de arriba.
+   ================================================================ */
+.headerTinted {
+    background:
+        linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.28)),
+        var(--club-color);
+    border-bottom-color: rgba(255, 255, 255, 0.16);
+    color: #fff;
+}
+
+.headerTinted .breadcrumb,
+.headerTinted .breadcrumb a,
+.headerTinted .meta,
+.headerTinted .country {
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.headerTinted .breadcrumbActive,
+.headerTinted .title {
+    color: #fff;
+}
+
+/* Sin recuadro: el escudo va directo sobre el color, como en FotMob. */
+.headerTinted .logoContainer {
+    background: transparent;
+    border: 0;
+    overflow: visible;
+}
+
+.headerTinted .teamLogo {
+    /* El halo claro separa un escudo del mismo tono que el fondo (azul sobre azul). */
+    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.85)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+}
+
+.headerTinted .followBtn,
+.headerTinted .adminActionBtn,
+.headerTinted .headerSelect {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.55);
+    color: #fff;
+}
+
+.headerTinted .followBtnActive {
+    background: #fff;
+    border-color: #fff;
+    color: #111;
+}
+
+.headerTinted .tabButton {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.headerTinted .tabButton:hover,
+.headerTinted .activeTab {
+    color: #fff;
+}
+
+.headerTinted .activeTab::after {
+    background: #fff;
+    box-shadow: none;
+}

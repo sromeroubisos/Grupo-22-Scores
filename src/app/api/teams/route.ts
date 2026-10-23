@@ -1565,7 +1565,7 @@ export async function GET(request: Request) {
         // id. Si el esquema no tiene alguna de estas columnas, se reintenta con *.
         let internalClubQuery = await readClient
             .from('clubs')
-            .select('id, name, short_name, sport, sport_id, external_id, country, city, region, categories, updated_at')
+            .select('id, name, short_name, sport, sport_id, external_id, country, city, region, categories, updated_at, primary_color')
             .eq('id', rawTeamId)
             .single();
         if (internalClubQuery.error && (internalClubQuery.error.code === '42703' || internalClubQuery.error.code === 'PGRST204')) {
@@ -1589,7 +1589,7 @@ export async function GET(request: Request) {
                 try {
                     const { data: porExternalId } = await readClient
                         .from('clubs')
-                        .select('id, name, short_name, sport, sport_id, external_id, country, city, region, categories, updated_at')
+                        .select('id, name, short_name, sport, sport_id, external_id, country, city, region, categories, updated_at, primary_color')
                         .in('external_id', claves)
                         .limit(1)
                         .maybeSingle();
@@ -1692,6 +1692,7 @@ export async function GET(request: Request) {
             details = {
                 id: effectiveClub.id,
                 name: effectiveClub.name,
+                primary_color: (effectiveClub as { primary_color?: string | null }).primary_color ?? null,
                 image_path: clubLogoUrl,
                 logo: clubLogoUrl,
                 logo_url: clubLogoUrl,
