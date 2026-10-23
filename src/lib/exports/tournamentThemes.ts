@@ -32,6 +32,7 @@ export const TOURNAMENT_THEMES = {
     regional: { id: 'regional', image: `${IMG}rojo.jpg`, bg: '#6d0b11', accent: '#ffffff', highlight: '#ffffff' },
     ascenso: { id: 'ascenso', image: `${IMG}dorado.jpg`, bg: '#503308', accent: '#eab308', highlight: '#fde68a' },
     juvenil: { id: 'juvenil', image: `${IMG}negro.jpg`, bg: '#181818', accent: '#22c55e', highlight: '#ffffff' },
+    argentinoJuvenil: { id: 'argentino-juvenil', image: `${IMG}azul.jpg`, bg: '#0b416b', accent: '#ffffff', highlight: '#7dd3fc' },
     uruguay: { id: 'uruguay', image: `${IMG}azul.jpg`, bg: '#0b416b', accent: '#ffffff', highlight: '#7dd3fc' },
     brasil: { id: 'brasil', image: `${IMG}verde.jpg`, bg: '#1c2b2a', accent: '#ffffff', highlight: '#86efac' },
     espana: { id: 'espana', image: `${IMG}rojo.jpg`, bg: '#6d0b11', accent: '#ffffff', highlight: '#facc15' },
@@ -116,6 +117,8 @@ export function resolveTournamentExportTheme(tournamentName: string | null | und
     if (has(name, EUROPE)) return T.europa;
 
     // ── Argentina ──────────────────────────────────────────────────────
+    // El Argentino Juvenil (M17, M18) y el Select 12 son de la UAR: azul, no el negro de los juveniles.
+    if (has(name, /argentino juvenil|select 12/)) return T.argentinoJuvenil;
     if (has(name, JUVENIL)) return T.juvenil;
     if (has(name, /ascenso/)) return T.ascenso;
     if (has(name, /top 14 de la urba|urba top 14|urba: top 14/)) return T.regional;

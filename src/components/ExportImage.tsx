@@ -173,6 +173,12 @@ export interface DailyMatchesData {
 }
 
 export interface MatchStatsData {
+    // Fondo del torneo (foto de G22) para las placas de partido. G22 Base lo pinta
+    // como campo de la placa; las demas familias lo mezclan despues. No es el
+    // `backgroundImage` del layout editorial, que es una foto del partido.
+    themeBackground?: string;
+    /** Velo sobre ese fondo; ver `StandingsData.backgroundVeil`. */
+    themeBackgroundVeil?: number;
     mainTitle?: string;
     status?: 'scheduled' | 'live' | 'final';
     homeTeam: string;
@@ -678,6 +684,14 @@ const TOURNAMENT_THEME_BACKGROUND_NAME = 'Fondo del torneo';
 const TOURNAMENT_THEME_BACKGROUND_VEIL = 0.1;
 function getBackgroundVeil(upload: { name: string } | null | undefined): number | undefined {
     return upload?.name === TOURNAMENT_THEME_BACKGROUND_NAME ? TOURNAMENT_THEME_BACKGROUND_VEIL : undefined;
+}
+// El fondo (del torneo o propio) tambien llega a la placa de un partido suelto.
+function withMatchThemeBackground<T extends MatchStatsData>(
+    data: T,
+    upload: { name: string; src: string } | null | undefined,
+): T {
+    if (!upload?.src) return data;
+    return { ...data, themeBackground: upload.src, themeBackgroundVeil: getBackgroundVeil(upload) };
 }
 
 // El poster de ranking se pinta con CINCO colores, no con los dos usuales:
@@ -1451,7 +1465,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         // puede ser rojo, se mezclaba con el negro y quedaba marron).
         setBgColor(tournamentTheme.bg);
         setAccentColor(tournamentTheme.accent);
-        if (template === 'standings' || template === 'dailyMatches') {
+        if (template === 'standings' || template === 'dailyMatches' || template === 'matchStats') {
             // Un fondo que subio la persona gana; el del torneo se cambia solo.
             setStandingsBackgroundUpload((current) => (
                 current && current.name !== TOURNAMENT_THEME_BACKGROUND_NAME
@@ -1471,6 +1485,31 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         setBgColor(option.bg);
         setStandingsBackgroundUpload({ name: TOURNAMENT_THEME_BACKGROUND_NAME, src: option.image });
     };
+
+    const backgroundPicker = user?.role === 'super_admin' ? (
+        <div className={styles.bgOptions} role="radiogroup" aria-label="Fondos de G22">
+            {EXPORT_BACKGROUND_OPTIONS.map((option) => {
+                const active = standingsBackgroundUpload?.src === option.image;
+                return (
+                    <button
+                        key={option.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        aria-label={`Fondo ${option.label}`}
+                        className={`${styles.bgOption} ${active ? styles.bgOptionOn : ''}`}
+                        onClick={() => pickTournamentBackground(option)}
+                    >
+                        <span
+                            className={styles.bgOptionThumb}
+                            style={{ backgroundImage: `url(${option.image})` }}
+                        />
+                        <span className={styles.bgOptionLabel}>{option.label}</span>
+                    </button>
+                );
+            })}
+        </div>
+    ) : null;
 
     useEffect(() => {
         setIsPortalReady(true);
@@ -2226,10 +2265,13 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             const exportData = buildExportData(template, data, customTournamentName, selectedTimeZonePreset, teamNameMode);
 
             if (template === 'matchStats') {
-                const matchData = applyManualMatchScore(
-                    applyMatchExportMode(exportData as MatchStatsData, matchExportMode),
-                    manualHomeScore,
-                    manualAwayScore
+                const matchData = withMatchThemeBackground(
+                    applyManualMatchScore(
+                        applyMatchExportMode(exportData as MatchStatsData, matchExportMode),
+                        manualHomeScore,
+                        manualAwayScore
+                    ),
+                    standingsBackgroundUpload,
                 );
                 if (matchExportLayout === 'editorial4x5') {
                     const backgroundImage = matchBackgroundUpload?.src || matchData.backgroundImage || '';
@@ -2315,6 +2357,11 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                         }
                     } else {
                         await drawMatchResult(ctx, canvas, matchData, config, accentColor, bgColor, brandLogo, modalPlateOptions);
+                    }
+                    // G22 Base pinta el fondo como campo de la placa; las demas
+                    // familias traen su propia hoja y lo reciben mezclado.
+                    if (!dailyPlatePaintsOwnBackground(visualFamily)) {
+                        await applyStandingsBackgroundOverlay(ctx, canvas, matchData.themeBackground);
                     }
                 }
             } else if (template === 'standings') {
@@ -2484,7 +2531,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             );
 
             if (matchExportLayout !== 'editorial4x5') {
-                return matchData;
+                return withMatchThemeBackground(matchData, standingsBackgroundUpload);
             }
 
             return {
@@ -3679,6 +3726,22 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                 </div>
                             )}
 
+                            {template === 'matchStats' && matchExportLayout !== 'editorial4x5' && backgroundPicker && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Fondo de G22</label>
+                                    {backgroundPicker}
+                                    {standingsBackgroundUpload && (
+                                        <button
+                                            className={styles.ghostBtn}
+                                            onClick={clearStandingsBackgroundUpload}
+                                            type="button"
+                                        >
+                                            Quitar fondo
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
                             {(template === 'standings' || template === 'dailyMatches') && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Fondo propio</label>
@@ -3709,30 +3772,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                             </button>
                                         </div>
                                     </div>
-                                    {user?.role === 'super_admin' && (
-                                        <div className={styles.bgOptions} role="radiogroup" aria-label="Fondos de G22">
-                                            {EXPORT_BACKGROUND_OPTIONS.map((option) => {
-                                                const active = standingsBackgroundUpload?.src === option.image;
-                                                return (
-                                                    <button
-                                                        key={option.id}
-                                                        type="button"
-                                                        role="radio"
-                                                        aria-checked={active}
-                                                        aria-label={`Fondo ${option.label}`}
-                                                        className={`${styles.bgOption} ${active ? styles.bgOptionOn : ''}`}
-                                                        onClick={() => pickTournamentBackground(option)}
-                                                    >
-                                                        <span
-                                                            className={styles.bgOptionThumb}
-                                                            style={{ backgroundImage: `url(${option.image})` }}
-                                                        />
-                                                        <span className={styles.bgOptionLabel}>{option.label}</span>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
+                                    {backgroundPicker}
                                     {standingsBackgroundUpload && (
                                         <div className={styles.uploadPreview}>
                                             <div
@@ -5992,6 +6032,9 @@ export async function renderMatchExportPreviewCanvas(
         } else {
             await drawMatchResult(ctx, canvas, matchData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, plateOptions);
         }
+        if (matchExportLayout !== 'editorial4x5' && !dailyPlatePaintsOwnBackground(visualFamily)) {
+            await applyStandingsBackgroundOverlay(ctx, canvas, matchData.themeBackground);
+        }
     } else if (template === 'dailyMatches') {
         if (visualFamily === 'posterV3') {
             await drawPosterV3DailyMatches(ctx, canvas, exportData as DailyMatchesData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, dailyMatchesTimeMode);
@@ -8099,7 +8142,13 @@ function getG22PlateTone(accentColor: string, bgColor: string, overrides?: Expor
 // El fondo ES el diseño: un degradado de ESQUINA A ESQUINA (arriba izquierda
 // hacia abajo derecha) con trama de tela y grano encima. Sin la textura el
 // degradado se ve como fondo de aplicación, no como una placa impresa.
-function drawG22PlateField(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, tone: G22PlateTone) {
+function drawG22PlateField(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    tone: G22PlateTone,
+    photo: HTMLImageElement | null = null,
+    photoVeil = 0.1,
+) {
     const W = canvas.width;
     const H = canvas.height;
 
@@ -8108,6 +8157,18 @@ function drawG22PlateField(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElem
     corner.addColorStop(1, tone.fieldEnd);
     ctx.fillStyle = corner;
     ctx.fillRect(0, 0, W, H);
+
+    // Fondo del torneo: la foto reemplaza al campo (ya trae su propio grano), con
+    // un velo leve del color de la placa. El resto queda como siempre.
+    if (photo && photo.naturalWidth > 0 && photo.naturalHeight > 0) {
+        const scale = Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
+        const drawWidth = photo.naturalWidth * scale;
+        const drawHeight = photo.naturalHeight * scale;
+        ctx.drawImage(photo, (W - drawWidth) / 2, (H - drawHeight) / 2, drawWidth, drawHeight);
+        ctx.fillStyle = hexToRGBA(tone.field, photoVeil);
+        ctx.fillRect(0, 0, W, H);
+        return;
+    }
 
     // El Acento no pinta ningún texto — la placa se lee en blanco sobre color —,
     // así que entra como luz en la esquina de arriba: se nota que cambia sin
@@ -8292,12 +8353,13 @@ async function drawG22BasePlate(
     bgColor: string,
     plateOptions?: ExportPlateOptions
 ) {
-    const [homeLogo, awayLogo, tournamentLogo, sportMark, wordmark] = await Promise.all([
+    const [homeLogo, awayLogo, tournamentLogo, sportMark, wordmark, themePhoto] = await Promise.all([
         loadImage(data.homeLogo || ''),
         loadImage(data.awayLogo || ''),
         loadImage(getTournamentLogoImageSource(data)),
         loadImage(resolvePlateBrandSource(plateOptions?.brand, data.sport)),
         loadImage('/header-logo.png'),
+        data.themeBackground ? loadImage(data.themeBackground) : Promise.resolve(null),
     ]);
 
     // Escudo real o no hay placa. Sin este corte el escudo que falta se rellena
@@ -8323,7 +8385,7 @@ async function drawG22BasePlate(
     const tone = getG22PlateTone(accentColor, bgColor, plateOptions);
     const showFooterMeta = plateOptions?.footerMeta !== false;
 
-    drawG22PlateField(ctx, canvas, tone);
+    drawG22PlateField(ctx, canvas, tone, themePhoto, data.themeBackgroundVeil);
 
     const padding = u(62);
     const contentWidth = W - padding * 2;

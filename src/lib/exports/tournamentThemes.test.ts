@@ -38,9 +38,16 @@ test('ascenso y desarrollo: dorado', () => {
     );
 });
 
+test('Argentino Juvenil y Select 12: azul', () => {
+    assert.deepEqual(
+        ids(['Campeonato Argentino Juvenil M17 - Zona Campeonato', 'Campeonato Argentino Juvenil M17 - Zona Ascenso', 'Campeonato Argentino Juvenil M18', 'Select 12']),
+        Array(4).fill(T.argentinoJuvenil.id),
+    );
+});
+
 test('juveniles: negro con verde', () => {
     assert.deepEqual(
-        ids(['Campeonato Argentino Juvenil M18', 'Torneo Cordobés M19 "A"', 'URBA: Juveniles - Primera rueda - M 15 - Grupo I - Zona A']),
+        ids(['Torneo Juvenil de Tucumán M16', 'Torneo Cordobés M19 "A"', 'URBA: Juveniles - Primera rueda - M 15 - Grupo I - Zona A']),
         Array(3).fill(T.juvenil.id),
     );
 });
