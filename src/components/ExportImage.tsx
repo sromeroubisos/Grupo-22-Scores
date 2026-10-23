@@ -14812,18 +14812,32 @@ async function drawPlayoffBracket(
             26,
             isStory ? 48 : 42,
         );
-        drawTournamentRibbon(ctx, canvas, bracketTournamentNameOf(data), tournamentLogo, data.tournamentLogo, accentColor, isDark, isStory ? 166 : 138, isStory ? 26 : 22);
+        // El logo va contenido en una caja fija: la cinta del torneo lo escala con la
+        // configuracion del diseno y un logo ancho (Select 12) terminaba tapando la pildora.
+        const logoCenterY = isStory ? 184 : 150;
+        if (tournamentLogo) {
+            const placement = getContainedImagePlacement(tournamentLogo, safe.centerX, logoCenterY, isStory ? 340 : 300, isStory ? 88 : 76, 0);
+            ctx.drawImage(tournamentLogo, placement.x, placement.y, placement.width, placement.height);
+        } else {
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = accentColor;
+            ctx.font = `800 ${isStory ? 34 : 30}px ${FONT_DISPLAY}`;
+            ctx.fillText(truncateTextToWidth(ctx, bracketTournamentNameOf(data).toUpperCase(), W - 160), safe.centerX, logoCenterY);
+            ctx.restore();
+        }
         const stageLabel = (data.subtitle || '').trim();
         if (stageLabel) {
             ctx.save();
             ctx.textAlign = 'center';
             ctx.fillStyle = palette.inkMuted;
             ctx.font = `600 ${isStory ? 22 : 18}px ${FONT_BODY}`;
-            ctx.fillText(stageLabel.toUpperCase(), safe.centerX, isStory ? 208 : 178);
+            ctx.fillText(stageLabel.toUpperCase(), safe.centerX, isStory ? 262 : 224);
             ctx.restore();
         }
         const panelX = isStory ? 46 : 54;
-        const panelY = isStory ? 248 : 220;
+        const panelY = isStory ? 292 : 246;
         const panelHeight = safe.bottom - panelY - (isStory ? 18 : 10);
         drawSurfacePanel(ctx, panelX, panelY, W - panelX * 2, panelHeight, 34, isDark);
         plateArea = { top: panelY + 20, height: panelHeight - 40, margin: panelX + 28 };
