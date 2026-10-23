@@ -9,11 +9,13 @@
 // administra ve además los borradores y las acciones de cada nota.
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import {
+    Activity,
     ArrowRight,
     Eye,
     EyeOff,
+    Hash,
     MoreVertical,
     Newspaper,
     Pencil,
@@ -23,10 +25,11 @@ import {
     X,
 } from 'lucide-react';
 
-import MobileSectionTabs from '@/components/MobileSectionTabs';
 import ProtectedLink from '@/components/ProtectedLink';
 import { plainTextOf } from '@/lib/news/richText';
+import { useFollowedTags } from '@/lib/news/followedTags';
 import { newsPath } from '@/lib/news/newsUrl';
+import { timeAgo } from '@/lib/news/timeAgo';
 import { sessionFetch } from '@/lib/supabase/freshSession';
 import { useSport } from '@/context/SportContext';
 import type { VideoHubSummary } from '@/lib/videoHub/types';
@@ -54,6 +57,8 @@ interface NoticiasClientProps {
     canManageNews: boolean;
     /** Los torneos con videos, del de carga más reciente al más viejo. */
     videoHubs?: VideoHubSummary[];
+    /** La etiqueta por la que se filtró (`?etiqueta=`): las notas ya vienen filtradas del servidor. */
+    activeTag?: string | null;
 }
 
 /** Una fila de dos en la portada; "Ver más" despliega el resto acá mismo. */
@@ -64,7 +69,7 @@ const ALL_HUBS_HREF = '/noticias/videos';
 
 type SportFolder = 'rugby' | 'hockey' | 'football';
 type ScopeFolder = 'global' | 'tournament' | 'club' | 'union';
-type Folder = 'all' | SportFolder | ScopeFolder;
+type Folder = 'all' | 'foryou' | SportFolder | ScopeFolder;
 
 const SPORT_FOLDERS: Record<string, SportFolder> = {
     rugby: 'rugby',
@@ -144,6 +149,7 @@ interface NewsCardProps {
 
 function NewsCard({ item, canManage, menuOpen, onToggleMenu, onToggleStatus, onDelete }: NewsCardProps) {
     const date = formatDate(item.published_at);
+    const ago = timeAgo(item.published_at);
     const image = renderableImageUrl(item.image_url);
     const scope = SCOPE_LABELS[scopeFolderOf(item.scope)];
     const published = item.status === 'published';
@@ -173,6 +179,10 @@ function NewsCard({ item, canManage, menuOpen, onToggleMenu, onToggleStatus, onD
                     <h3 className={styles.newsTitle}>{item.title}</h3>
                     <p className={styles.newsExcerpt}>{buildNewsPreview(item)}</p>
                     <span className={styles.newsCta}>Leer la nota <ArrowRight size={14} aria-hidden="true" /></span>
+                    <span className={styles.newsSource}>
+                        <span className={styles.sourceDot} aria-hidden="true">G</span>
+                        <span suppressHydrationWarning>G22 Scores - {ago ?? date}</span>
+                    </span>
                 </span>
             </Link>
 
@@ -219,8 +229,9 @@ function NewsCard({ item, canManage, menuOpen, onToggleMenu, onToggleStatus, onD
 
 // ── La portada ────────────────────────────────────────────────────────────
 
-export default function NoticiasClient({ initialNews, canManageNews, videoHubs = [] }: NoticiasClientProps) {
+export default function NoticiasClient({ initialNews, canManageNews, videoHubs = [], activeTag = null }: NoticiasClientProps) {
     const { selectedSport } = useSport();
+    const { followed } = useFollowedTags();
     const [news, setNews] = useState<NewsItem[]>(() => initialNews.map((item) => ({
         ...item,
         scope: item.scope || 'global',
@@ -302,7 +313,10 @@ export default function NoticiasClient({ initialNews, canManageNews, videoHubs =
             if (sport) bump(sport);
             bump(scopeFolderOf(item.scope));
         }
-        const list: { id: Folder; label: string; count: number }[] = [{ id: 'all', label: 'Todas', count: news.length }];
+        const list: { id: Folder; label: string; count: number }[] = [{ id: 'all', label: 'Últimas', count: news.length }];
+        // "Para vos": las notas con alguna etiqueta que el lector sigue. Solo aparece si sigue alguna.
+        const forYou = news.filter((item) => (item.tags ?? []).some((tag) => followed.includes(tag))).length;
+        if (followed.length > 0) list.unshift({ id: 'foryou', label: 'Para vos', count: forYou });
         const push = (id: Folder, label: string) => {
             const count = counts.get(id) ?? 0;
             if (count > 0 && count < news.length) list.push({ id, label, count });
@@ -310,15 +324,16 @@ export default function NoticiasClient({ initialNews, canManageNews, videoHubs =
         for (const sport of SPORT_ORDER) push(sport, SPORT_LABELS[sport]);
         for (const scope of SCOPE_ORDER) push(scope, SCOPE_LABELS[scope]);
         return list;
-    }, [news]);
+    }, [news, followed]);
 
     const query = searchQuery.trim().toLowerCase();
     const filteredNews = useMemo(() => news.filter((item) => {
         if (query && !`${item.title} ${item.summary ?? ''} ${(item.tags ?? []).join(' ')}`.toLowerCase().includes(query)) return false;
         if (activeFolder === 'all') return true;
+        if (activeFolder === 'foryou') return (item.tags ?? []).some((tag) => followed.includes(tag));
         if ((SPORT_ORDER as string[]).includes(activeFolder)) return sportFolderOf(item.sport) === activeFolder;
         return scopeFolderOf(item.scope) === activeFolder;
-    }), [news, query, activeFolder]);
+    }), [news, query, activeFolder, followed]);
 
     const filtering = activeFolder !== 'all' || query !== '';
     const totalVideos = videoHubs.reduce((sum, hub) => sum + hub.videoCount, 0);
@@ -326,11 +341,6 @@ export default function NoticiasClient({ initialNews, canManageNews, videoHubs =
     return (
         <div className={styles.page}>
             <div className={styles.shell}>
-                <MobileSectionTabs
-                    activeTab="news"
-                    rankingsHref={`/rankings?sport=${encodeURIComponent(selectedSport.id)}`}
-                />
-
                 <header className={styles.masthead}>
                     <div className={styles.mastheadText}>
                         <p className={styles.eyebrow}>G22 Scores · Editorial</p>
@@ -378,9 +388,10 @@ export default function NoticiasClient({ initialNews, canManageNews, videoHubs =
                     </section>
                 )}
 
-                <section className={styles.section} aria-labelledby="news-title">
+                <section className={`${styles.section} ${styles.newsSection}`} aria-labelledby="news-title">
                     <div className={styles.sectionHead}>
-                        <div>
+                        <div className={styles.newsHeading}>
+                            <span className={styles.trendIcon} aria-hidden="true"><Activity size={20} /></span>
                             <h2 id="news-title" className={styles.sectionTitle}>Últimas noticias</h2>
                         </div>
                         <span className={styles.sectionMeta} aria-live="polite">
@@ -388,15 +399,27 @@ export default function NoticiasClient({ initialNews, canManageNews, videoHubs =
                         </span>
                     </div>
 
+                    {activeTag && (
+                        <div className={styles.tagFilter}>
+                            <span className={styles.tagFilterIcon} aria-hidden="true"><Hash size={18} /></span>
+                            <span className={styles.tagFilterText}>
+                                <span className={styles.tagFilterLabel}>Etiqueta</span>
+                                <span className={styles.tagFilterName}>{activeTag}</span>
+                            </span>
+                            <Link href="/noticias" className={styles.tagFilterClear} aria-label={`Quitar la etiqueta ${activeTag}`}>
+                                <X size={18} aria-hidden="true" />
+                            </Link>
+                        </div>
+                    )}
+
                     <div className={styles.toolbar}>
-                        {/* Con "Todas" sola no hay nada que filtrar: el grupo no se muestra. */}
-                        {folders.length > 1 && (
-                            <div className={styles.chips} role="group" aria-label="Filtrar las noticias">
-                                {folders.map((folder) => {
-                                    const active = activeFolder === folder.id;
-                                    return (
+                        {/* Las pestañas: las carpetas de notas y, a continuación de "Últimas", la salida al ranking de clubes. */}
+                        <div className={styles.chips} role="group" aria-label="Filtrar las noticias">
+                            {folders.map((folder) => {
+                                const active = activeFolder === folder.id;
+                                return (
+                                    <Fragment key={folder.id}>
                                         <button
-                                            key={folder.id}
                                             type="button"
                                             className={`${styles.chip} ${active ? styles.chipActive : ''}`}
                                             aria-pressed={active}
@@ -405,10 +428,18 @@ export default function NoticiasClient({ initialNews, canManageNews, videoHubs =
                                             {folder.label}
                                             <span className={styles.chipCount}>{folder.count}</span>
                                         </button>
-                                    );
-                                })}
-                            </div>
-                        )}
+                                        {folder.id === 'all' && (
+                                            <Link
+                                                href={`/rankings?sport=${encodeURIComponent(selectedSport.id)}`}
+                                                className={`${styles.chip} ${styles.chipLink}`}
+                                            >
+                                                Ranking de clubes
+                                            </Link>
+                                        )}
+                                    </Fragment>
+                                );
+                            })}
+                        </div>
 
                         <div className={styles.search}>
                             <label htmlFor="news-search" className={styles.srOnly}>Buscar noticias</label>
@@ -438,7 +469,9 @@ export default function NoticiasClient({ initialNews, canManageNews, videoHubs =
                     {filteredNews.length === 0 ? (
                         <div className={styles.empty}>
                             <p className={styles.emptyTitle}>
-                                {news.length === 0 ? 'Todavía no hay noticias publicadas.' : 'Ninguna noticia coincide con ese filtro.'}
+                                {news.length === 0
+                                    ? (activeTag ? `Todavía no hay noticias con la etiqueta ${activeTag}.` : 'Todavía no hay noticias publicadas.')
+                                    : 'Ninguna noticia coincide con ese filtro.'}
                             </p>
                             {filtering && (
                                 <button

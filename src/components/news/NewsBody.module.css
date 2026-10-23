@@ -180,123 +180,154 @@
 }
 
 /* ── Menciones: un club, un jugador, un torneo, un partido o un video en medio del texto ── */
+/* En medio de una frase, una mención es texto: el nombre en negrita con un
+   subrayado fino. Nada de píldora ni de escudo diminuto metido en el renglón. */
 .mention {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    vertical-align: baseline;
-    padding: 0 6px 0 4px;
-    margin: 0 1px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--news-accent) 12%, transparent);
     color: var(--news-ink);
-    font-weight: 600;
-    text-decoration: none;
-    line-height: 1.45;
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--news-accent) 30%, transparent);
-    transition: background-color 0.18s ease, box-shadow 0.18s ease;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--news-accent) 55%, transparent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.18s ease;
 }
 
 .mention:hover,
 .mention:focus-visible {
-    background: color-mix(in srgb, var(--news-accent) 22%, transparent);
-    box-shadow: inset 0 0 0 1px var(--news-accent);
+    text-decoration-color: var(--news-accent);
 }
 
 .mention:focus-visible {
     outline: 2px solid var(--news-accent);
     outline-offset: 2px;
+    border-radius: 4px;
 }
 
-.mentionCrest {
-    width: 1.15em;
-    height: 1.15em;
-    object-fit: contain;
-    border-radius: 50%;
-    background: #fff;
-    flex: none;
-}
-
-/* ── La tarjeta de un partido de la web ─────────────────────────────────── */
-.matchCard {
+/* ── Las fichas: un partido, un torneo, un club ─────────────────────────── */
+/* Una sola forma para las tres, la de la tarjeta de un partido de una app:
+   arriba, a la izquierda, la fecha (o qué es) y a la derecha una píldora con
+   la competición; abajo, los escudos grandes y el nombre. */
+.matchCard,
+.entityCard {
     max-width: none;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 16px 18px;
-    margin: 6px 0;
+    gap: 14px;
+    padding: 14px 16px 16px;
+    margin: 10px 0;
     border: 1px solid var(--news-edge);
-    border-radius: 16px;
+    border-radius: 18px;
     background: var(--news-raised);
     color: var(--news-ink);
     text-decoration: none;
-    transition: border-color 0.18s ease, transform 0.18s ease;
+    transition: border-color 0.18s ease, transform 0.12s ease;
 }
 
 .matchCard:hover,
-.matchCard:focus-visible {
-    border-color: var(--news-accent);
+.matchCard:focus-visible,
+.entityCard:hover,
+.entityCard:focus-visible {
+    border-color: color-mix(in srgb, var(--news-accent) 60%, var(--news-edge));
 }
 
-.matchCard:focus-visible {
+/* Responde al apoyar el dedo, no al soltarlo. */
+.matchCard:active,
+.entityCard:active {
+    transform: scale(0.985);
+}
+
+.matchCard:focus-visible,
+.entityCard:focus-visible {
     outline: 2px solid var(--news-accent);
     outline-offset: 2px;
 }
 
-.matchContext {
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+.cardHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+}
+
+.cardWhen {
     color: var(--news-ink-muted);
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.cardPill {
+    min-width: 0;
+    max-width: 62%;
+    overflow: hidden;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--news-ink) 8%, transparent);
+    color: var(--news-ink-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .matchRow {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    gap: 14px;
-}
-
-.matchTeam {
-    display: flex;
+    grid-template-columns: minmax(0, 1fr) auto auto auto minmax(0, 1fr);
     align-items: center;
     gap: 10px;
-    min-width: 0;
-    font-size: 1.05rem;
-    font-weight: 700;
-    line-height: 1.2;
 }
 
-.matchTeamAway {
-    flex-direction: row-reverse;
+.matchName {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.matchNameHome {
     text-align: right;
 }
 
-.matchCrest {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-    border-radius: 50%;
-    background: #fff;
-    flex: none;
+.matchNameAway {
+    text-align: left;
 }
 
-.matchTeamName {
-    min-width: 0;
-    overflow-wrap: anywhere;
+.matchCrest {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #fff;
+    overflow: hidden;
+}
+
+.matchCrest img {
+    width: 100%;
+    height: 100%;
+    padding: 3px;
+    object-fit: contain;
+}
+
+.crestInitial {
+    color: #0a0a0b;
+    font-size: 0.9375rem;
+    font-weight: 800;
 }
 
 .matchScore {
     display: inline-flex;
     align-items: baseline;
     gap: 6px;
-    padding: 4px 12px;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--news-ink) 8%, transparent);
-    font-size: 1.6rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    font-size: 1.375rem;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
     line-height: 1;
     white-space: nowrap;
@@ -312,17 +343,45 @@
 }
 
 .matchVs {
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--news-ink-muted);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
 
-.matchCta {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--news-accent-ink);
+.entityBody {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.entityCrest {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fff;
+    overflow: hidden;
+}
+
+.entityCrest img {
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+    object-fit: contain;
+}
+
+.entityName {
+    min-width: 0;
+    font-size: 1.1875rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
 }
 
 /* ── Un video adentro del cuerpo ────────────────────────────────────────── */
@@ -338,24 +397,4 @@
     color: var(--news-ink-muted);
     font-size: 0.875rem;
     line-height: 1.5;
-}
-
-@media (max-width: 768px) {
-    .matchRow {
-        gap: 10px;
-    }
-
-    .matchTeam {
-        font-size: 0.95rem;
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .matchTeamAway {
-        flex-direction: column;
-    }
-
-    .matchScore {
-        font-size: 1.35rem;
-    }
 }

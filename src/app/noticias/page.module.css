@@ -872,6 +872,69 @@
     outline: 2px solid var(--accent-ink);
 }
 
+/* ── Filtro por etiqueta (?etiqueta=) ───────────────────────────────────── */
+.tagFilter {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 8px 10px 12px;
+    border: 1px solid var(--edge);
+    border-radius: 16px;
+    background: var(--slab);
+}
+
+.tagFilterIcon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+}
+
+.tagFilterText {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.tagFilterLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-muted);
+}
+
+.tagFilterName {
+    overflow-wrap: anywhere;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+}
+
+.tagFilterClear {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: var(--ink-muted);
+    transition: background-color 120ms var(--ease);
+}
+
+.tagFilterClear:hover,
+.tagFilterClear:active {
+    background: var(--raised-2);
+    color: var(--ink);
+}
+
+.tagFilterClear:focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 2px;
+}
+
 /* ── Las notas ──────────────────────────────────────────────────────────── */
 .newsGrid {
     display: grid;
@@ -1132,6 +1195,32 @@
     color: var(--ink);
 }
 
+/* Solo en el teléfono: la fuente bajo el titular y el ícono del bloque. */
+.newsSource,
+.trendIcon {
+    display: none;
+}
+
+.sourceDot {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 800;
+    line-height: 1;
+}
+
+.newsHeading {
+    display: contents;
+}
+
+/* "Ranking de clubes" es un link, pero se lee como una pestaña más. */
+.chipLink {
+    text-decoration: none;
+}
+
 /* ── Pantallas chicas ───────────────────────────────────────────────────── */
 @media (max-width: 760px) {
     /* La tarjeta se apila: portada arriba, texto abajo. Siguen siendo dos por fila. */
@@ -1236,12 +1325,212 @@
         max-width: none;
     }
 
+    /* La portada como el feed de una app: "Noticias" grande, pestañas con
+       subrayado, un bloque destacado con la primera nota como héroe y debajo
+       filas con la portada a la izquierda. Sin tarjetas, bordes ni CTA: la
+       fila entera ya es el link. Las notas van antes que los videos. */
+    .shell {
+        gap: 24px;
+    }
+
+    .masthead {
+        order: -2;
+        padding-bottom: 0;
+        border-bottom: 0;
+    }
+
+    .eyebrow,
+    .lede {
+        display: none;
+    }
+
+    .title {
+        font-size: 40px;
+        letter-spacing: -0.03em;
+    }
+
+    .newsSection {
+        order: -1;
+        gap: 16px;
+    }
+
+    /* Pestañas: texto grande, la activa subrayada. */
+    .toolbar {
+        gap: 14px;
+    }
+
+    .chips {
+        gap: 24px;
+        margin: 0 -14px;
+        padding: 0 14px;
+        border-bottom: 1px solid var(--edge);
+    }
+
+    .chip {
+        min-height: 48px;
+        padding: 0;
+        border: 0;
+        border-bottom: 3px solid transparent;
+        border-radius: 0;
+        background: transparent;
+        color: var(--ink-muted);
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+    .chip:hover {
+        background: transparent;
+        color: var(--ink);
+    }
+
+    .chipActive,
+    .chipActive:hover {
+        background: transparent;
+        border-bottom-color: var(--ink);
+        color: var(--ink);
+    }
+
+    .chipCount {
+        display: none;
+    }
+
+    /* "Últimas noticias" con el ícono verde, como un bloque de tendencias. */
+    .sectionHead {
+        align-items: center;
+    }
+
+    .newsHeading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .trendIcon {
+        display: grid;
+        place-items: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: var(--on-accent);
+    }
+
+    .newsSection .sectionTitle {
+        font-size: 26px;
+        letter-spacing: -0.025em;
+    }
+
+    .newsSection .sectionMeta {
+        display: none;
+    }
+
+    .newsGrid {
+        gap: 4px;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .newsCard {
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .newsCard:hover {
+        transform: none;
+    }
+
+    .newsLink {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 10px 0;
+        transition: opacity 100ms var(--ease);
+    }
+
+    /* Responde al apoyar el dedo, no al soltarlo. */
+    .newsLink:active {
+        opacity: 0.6;
+    }
+
+    .newsMedia {
+        flex: none;
+        width: 152px;
+        aspect-ratio: 16 / 9;
+        border-radius: 12px;
+    }
+
     .newsBody {
-        padding: 14px;
+        flex: 1;
+        padding: 0;
+        gap: 8px;
+        justify-content: space-between;
+        align-self: stretch;
+    }
+
+    .newsMeta,
+    .newsExcerpt,
+    .newsCta {
+        display: none;
     }
 
     .newsTitle {
         font-size: 17px;
+        font-weight: 600;
+        line-height: 1.25;
+        letter-spacing: -0.01em;
+        -webkit-line-clamp: 3;
+    }
+
+    .newsSource {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: auto;
+        color: var(--ink-muted);
+        font-size: 13px;
+    }
+
+    .sourceDot {
+        width: 16px;
+        height: 16px;
+        font-size: 9px;
+    }
+
+    /* La primera nota: portada grande y el titular debajo. */
+    .newsCard:first-child .newsLink {
+        flex-direction: column;
+        gap: 14px;
+        padding: 4px 0 14px;
+    }
+
+    .newsCard:first-child .newsMedia {
+        width: 100%;
+        aspect-ratio: 17 / 10;
+        border-radius: 18px;
+    }
+
+    .newsCard:first-child .newsTitle {
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        -webkit-line-clamp: 4;
+    }
+
+    .newsCard:first-child .newsSource {
+        font-size: 14px;
+    }
+
+    .newsCard:first-child .sourceDot {
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+    }
+
+    .newsAdmin {
+        padding: 0 0 12px;
+        border-top: 0;
     }
 }
 

@@ -12,11 +12,12 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { cache } from 'react';
+import { ChevronLeft, Hash } from 'lucide-react';
 
 import NewsBody from '@/components/news/NewsBody';
-import NewsMentionsStrip from '@/components/news/NewsMentionsStrip';
 import NewsViewBeacon from '@/components/news/NewsViewBeacon';
 import ShareButton from '@/components/news/ShareButton';
+import TagFollowButton from '@/components/news/TagFollowButton';
 import ProtectedLink from '@/components/ProtectedLink';
 import { getServerAuthRole } from '@/lib/auth/newsAccess';
 import { hasNewsManagementAccess } from '@/lib/auth/roles';
@@ -24,6 +25,7 @@ import { bylineOf } from '@/lib/news/byline';
 import type { MentionRef, ResolvedMention } from '@/lib/news/mentions';
 import { newsIdFromSegment, newsPath, newsSegment } from '@/lib/news/newsUrl';
 import { collectMentions, plainTextOf, wordCountOf } from '@/lib/news/richText';
+import { timeAgo } from '@/lib/news/timeAgo';
 import { resolveNewsMentions } from '@/lib/server/newsMentions';
 import { absoluteUrl } from '@/lib/seo/siteUrl';
 import TodayMatchesRail from './TodayMatchesRail';
@@ -259,6 +261,7 @@ function RelatedNews({ items }: { items: RelatedNewsRow[] }) {
                     const image = publicImageOf(item);
                     const sport = sportLabel(item.sport) ?? 'Rugby';
                     const date = shortDate(item.published_at);
+                    const ago = timeAgo(item.published_at);
                     return (
                         <li key={item.id}>
                             <Link href={newsPath(item)} className={styles.relatedItem}>
@@ -268,8 +271,9 @@ function RelatedNews({ items }: { items: RelatedNewsRow[] }) {
                                 </span>
                                 <span className={styles.relatedBody}>
                                     <span className={styles.relatedMeta}>
+                                        <span className={styles.sourceDot} aria-hidden="true">G</span>
                                         <span>{sport}</span>
-                                        {date && <><span className={styles.dateDivider} aria-hidden="true" /><span>{date}</span></>}
+                                        {(ago || date) && <><span className={styles.dateDivider} aria-hidden="true" /><span>{ago ?? date}</span></>}
                                     </span>
                                     <span className={styles.relatedTitle}>{item.title}</span>
                                 </span>
@@ -381,8 +385,9 @@ export default async function NewsPage({ params }: NewsPageProps) {
             <div className={styles.readerLayout}>
                 <div className={styles.readerShell}>
                     <div className={styles.readerTopBar}>
-                        <Link href="/noticias" className={styles.backLink}>
-                            Volver a noticias
+                        <Link href="/noticias" className={styles.backLink} aria-label="Volver a noticias">
+                            <span className={styles.backText}>Volver a noticias</span>
+                            <ChevronLeft className={styles.backIcon} size={22} strokeWidth={2.25} aria-hidden="true" />
                         </Link>
                         <div className={styles.topBarActions}>
                             <span className={styles.topBarMeta}>{readingMinutes} min de lectura</span>
@@ -422,6 +427,11 @@ export default async function NewsPage({ params }: NewsPageProps) {
 
                         <header className={styles.headline}>
                             <h1>{news.title}</h1>
+                            {/* Solo en el teléfono: la fuente y la fecha bajo el titular. */}
+                            <p className={styles.sourceRow}>
+                                <span className={styles.sourceDot} aria-hidden="true">G</span>
+                                <span>{byline.name}{news.published_at ? ` - ${publishedLabel}` : ''}</span>
+                            </p>
                             {news.summary && <p className={styles.summary}>{news.summary}</p>}
                             <p className={styles.byline}>
                                 Redactado por <span className={styles.bylineName}>{byline.name}</span>
@@ -452,18 +462,25 @@ export default async function NewsPage({ params }: NewsPageProps) {
                             )}
                         />
 
-                        <NewsMentionsStrip mentions={mentionRefs} resolved={mentions} newsId={news.id} />
-
                         {tags.length > 0 && (
                             <div className={styles.tagSection}>
-                                <span className={styles.tagSectionLabel} id={`tags-${news.id}`}>
-                                    Etiquetas
-                                </span>
-                                <div className={styles.badgeRow} role="list" aria-labelledby={`tags-${news.id}`}>
+                                <h2 className={styles.tagSectionLabel} id={`tags-${news.id}`}>
+                                    Categorías
+                                </h2>
+                                <ul className={styles.tagList} aria-labelledby={`tags-${news.id}`}>
                                     {tags.map((tag) => (
-                                        <span key={tag} role="listitem" className={styles.badge}>{tag}</span>
+                                        <li key={tag} className={styles.tagItem}>
+                                            <Link
+                                                href={`/noticias?etiqueta=${encodeURIComponent(tag)}`}
+                                                className={styles.tagRow}
+                                            >
+                                                <span className={styles.tagRowIcon} aria-hidden="true"><Hash size={20} /></span>
+                                                <span className={styles.tagRowName}>{tag}</span>
+                                            </Link>
+                                            <TagFollowButton tag={tag} />
+                                        </li>
                                     ))}
-                                </div>
+                                </ul>
                             </div>
                         )}
 

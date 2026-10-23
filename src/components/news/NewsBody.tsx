@@ -13,14 +13,14 @@
 // (todavía, o porque la entidad ya no existe) se dibujan como link pelado
 // con la etiqueta escrita: la nota nunca se rompe por un dato ajeno.
 
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 
 import { parseRichText, type BlockNode, type InlineNode } from '@/lib/news/richText';
 import {
     MENTION_KIND_LABELS,
     hrefForMention,
     isSiteVideoRef,
-    matchContextOf,
+    matchDateLabel,
     matchLabelOf,
     mentionKey,
     type MentionMatch,
@@ -44,11 +44,11 @@ type NewsBodyProps = {
 
 type Resolved = Record<string, ResolvedMention>;
 
+/** Una mención en medio de una frase: texto con el nombre, sin escudo ni píldora. */
 function Mention({ kind, refId, label, resolved }: { kind: ResolvedMention['kind']; refId: string; label: string; resolved: Resolved }) {
     const hit = resolved[mentionKey({ kind, ref: refId })];
     const href = hit?.href ?? hrefForMention(kind, refId);
     const external = /^https?:\/\//i.test(href);
-    const crest = hit && hit.kind !== 'video' && hit.kind !== 'player' ? hit.logoUrl : null;
     return (
         <a
             href={href}
@@ -57,11 +57,121 @@ function Mention({ kind, refId, label, resolved }: { kind: ResolvedMention['kind
             title={hit?.detail ?? MENTION_KIND_LABELS[kind]}
             {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         >
-            {crest && (
-                // eslint-disable-next-line @next/next/no-img-element -- escudo chico por el proxy, en medio del texto.
-                <img src={crest} alt="" loading="lazy" decoding="async" className={styles.mentionCrest} />
-            )}
             {label || hit?.label || MENTION_KIND_LABELS[kind]}
+        </a>
+    );
+}
+
+type MentionNode = Extract<InlineNode, { type: 'mention' }>;
+
+/**
+ * Las menciones que cierran un párrafo o un subtítulo no van en medio de una
+ * frase: son un bloque (la tarjeta del partido, la ficha del torneo o del
+ * club). Cuenta como cierre la que va sola en su renglón (después de un salto
+ * de línea) o la que sigue a una frase terminada ("... Urú Curé. @[...]").
+ * Se separan del texto para dibujarlas aparte.
+ */
+function splitTrailingMentions(nodes: InlineNode[]): { lead: InlineNode[]; cards: MentionNode[] } {
+    const isBlankText = (node: InlineNode | undefined) => node?.type === 'text' && node.text.trim() === '';
+    // La frase puede estar entera dentro de una cursiva o una negrita: se mira el final del texto de adentro.
+    const endsSentence = (node: InlineNode | undefined): boolean => {
+        if (!node) return false;
+        if (node.type === 'text') return /[.!?:]\s*$/.test(node.text);
+        if (node.type === 'em' || node.type === 'strong') {
+            let k = node.children.length - 1;
+            while (k >= 0 && isBlankText(node.children[k])) k -= 1;
+            return k >= 0 && endsSentence(node.children[k]);
+        }
+        return false;
+    };
+
+    let last = nodes.length - 1;
+    while (last >= 0 && isBlankText(nodes[last])) last -= 1;
+
+    // La mención va dentro de una cursiva o una negrita que cierra el párrafo: se saca de ahí.
+    const wrapper = nodes[last];
+    if (wrapper && (wrapper.type === 'em' || wrapper.type === 'strong')) {
+        const inner = splitTrailingMentions(wrapper.children);
+        if (inner.cards.length > 0) {
+            const rebuilt = inner.lead.length > 0
+                ? [...nodes.slice(0, last), { ...wrapper, children: inner.lead }]
+                : nodes.slice(0, last);
+            const more = splitTrailingMentions(rebuilt);
+            return { lead: more.lead, cards: [...more.cards, ...inner.cards] };
+        }
+    }
+
+    const cards: MentionNode[] = [];
+    let end = nodes.length;
+
+    while (end > 0) {
+        let i = end - 1;
+        while (i >= 0 && isBlankText(nodes[i])) i -= 1;
+        const node = nodes[i];
+        if (!node || node.type !== 'mention') break;
+
+        let j = i - 1;
+        while (j >= 0 && isBlankText(nodes[j])) j -= 1;
+        const closes = j < 0 || nodes[j].type === 'break' || endsSentence(nodes[j]);
+        if (!closes) break;
+
+        cards.unshift(node);
+        // El salto de línea se descarta; el texto de la frase se queda tal cual.
+        end = j < 0 ? 0 : nodes[j].type === 'break' ? j : j + 1;
+    }
+
+    return { lead: nodes.slice(0, end), cards };
+}
+
+/** El escudo de un equipo en la tarjeta: la imagen, o la inicial si no hay. */
+function Crest({ name, logoUrl, className }: { name: string; logoUrl: string | null; className: string }) {
+    return (
+        <span className={className} aria-hidden="true">
+            {logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- escudo por el proxy, debajo del pliegue.
+                <img src={logoUrl} alt="" loading="lazy" decoding="async" />
+            ) : (
+                <span className={styles.crestInitial}>{name.trim().charAt(0).toUpperCase()}</span>
+            )}
+        </span>
+    );
+}
+
+/**
+ * Un club, un torneo o un jugador como bloque, con la misma forma que la
+ * tarjeta de un partido: arriba qué es y, a la derecha, un rótulo; abajo el
+ * escudo y el nombre. No es un link con flecha: es una ficha que se toca.
+ */
+function EntityCard({ node, resolved }: { node: MentionNode; resolved: Resolved }) {
+    const hit = resolved[mentionKey({ kind: node.kind, ref: node.ref })];
+
+    // Un partido resuelto es la tarjeta del partido, con los dos escudos y el marcador.
+    if (node.kind === 'match' && hit?.match) return <MatchCard match={hit.match} href={hit.href} />;
+
+    const href = hit?.href ?? hrefForMention(node.kind, node.ref);
+    const name = node.label || hit?.label || MENTION_KIND_LABELS[node.kind];
+    const crest = hit && hit.kind !== 'video' ? hit.logoUrl : null;
+    const role = node.kind === 'player' ? hit?.detail?.split(' · ')[0] : null;
+    const kindLabel = role && /^Jugador/i.test(role) ? role : MENTION_KIND_LABELS[node.kind];
+    // El detalle ("Rugby Argentina 2026") va en el rótulo de la derecha, sin repetir el nombre ni el tipo.
+    const detail = node.kind !== 'player' && hit?.detail && hit.detail !== name && hit.detail !== kindLabel ? hit.detail : null;
+    const external = /^https?:\/\//i.test(href);
+
+    return (
+        <a
+            href={href}
+            className={styles.entityCard}
+            data-kind={node.kind}
+            {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        >
+            <span className={styles.cardHead}>
+                <span className={styles.cardWhen}>{kindLabel}</span>
+                {detail && <span className={styles.cardPill}>{detail}</span>}
+            </span>
+            <span className={styles.entityBody}>
+                <Crest name={name} logoUrl={crest} className={styles.entityCrest} />
+                <strong className={styles.entityName}>{name}</strong>
+            </span>
         </a>
     );
 }
@@ -99,39 +209,35 @@ function renderInline(nodes: InlineNode[], keyPrefix: string, resolved: Resolved
     });
 }
 
-function Team({ team, align }: { team: MentionMatch['home']; align: 'home' | 'away' }) {
-    return (
-        <span className={`${styles.matchTeam} ${align === 'away' ? styles.matchTeamAway : ''}`}>
-            {team.logoUrl && (
-                // eslint-disable-next-line @next/next/no-img-element -- escudo por el proxy, debajo del pliegue.
-                <img src={team.logoUrl} alt="" loading="lazy" decoding="async" className={styles.matchCrest} />
-            )}
-            <span className={styles.matchTeamName}>{team.name}</span>
-        </span>
-    );
-}
-
-/** La tarjeta de un partido de la web: escudos, marcador (o "vs"), torneo, fecha y el link a la ficha. */
+/**
+ * La tarjeta de un partido de la web: arriba la fecha (y la fecha del torneo)
+ * y a la derecha la competición en una píldora; abajo, el equipo local, su
+ * escudo, el marcador (o "vs"), el escudo del visitante y su nombre.
+ */
 function MatchCard({ match, href }: { match: MentionMatch; href: string }) {
-    const context = matchContextOf(match);
     const live = match.status === 'live' || match.status === 'in_progress';
+    const when = [matchDateLabel(match.dateTime), match.roundLabel].filter(Boolean).join(' · ');
     return (
         <a href={href} className={styles.matchCard} aria-label={`${matchLabelOf(match)}: ver la ficha del partido`}>
-            {context && <span className={styles.matchContext}>{context}</span>}
+            <span className={styles.cardHead}>
+                <span className={styles.cardWhen}>{live ? 'En vivo' : when || 'Partido'}</span>
+                {match.tournament?.name && <span className={styles.cardPill}>{match.tournament.name}</span>}
+            </span>
             <span className={styles.matchRow}>
-                <Team team={match.home} align="home" />
+                <span className={`${styles.matchName} ${styles.matchNameHome}`}>{match.home.name}</span>
+                <Crest name={match.home.name} logoUrl={match.home.logoUrl} className={styles.matchCrest} />
                 {match.score ? (
                     <span className={`${styles.matchScore} ${live ? styles.matchScoreLive : ''}`}>
                         <span>{match.score.home}</span>
-                        <span className={styles.matchScoreDash} aria-hidden="true">–</span>
+                        <span className={styles.matchScoreDash} aria-hidden="true">-</span>
                         <span>{match.score.away}</span>
                     </span>
                 ) : (
                     <span className={styles.matchVs}>vs</span>
                 )}
-                <Team team={match.away} align="away" />
+                <Crest name={match.away.name} logoUrl={match.away.logoUrl} className={styles.matchCrest} />
+                <span className={`${styles.matchName} ${styles.matchNameAway}`}>{match.away.name}</span>
             </span>
-            <span className={styles.matchCta}>Ver la ficha del partido →</span>
         </a>
     );
 }
@@ -193,16 +299,29 @@ function renderEmbed(block: Extract<BlockNode, { type: 'embed' }>, key: string, 
 function renderBlock(block: BlockNode, index: number, isLead: boolean, resolved: Resolved, title: string | undefined): ReactNode {
     const key = `b${index}`;
     switch (block.type) {
-        case 'paragraph':
+        case 'paragraph': {
+            const { lead, cards } = splitTrailingMentions(block.children);
             return (
-                <p key={key} className={isLead ? styles.lead : undefined}>
-                    {renderInline(block.children, key, resolved)}
-                </p>
+                <Fragment key={key}>
+                    {lead.length > 0 && (
+                        <p className={isLead ? styles.lead : undefined}>{renderInline(lead, key, resolved)}</p>
+                    )}
+                    {cards.map((card, cIndex) => <EntityCard key={`${key}-c${cIndex}`} node={card} resolved={resolved} />)}
+                </Fragment>
             );
-        case 'heading':
-            return block.level === 2
-                ? <h2 key={key} className={styles.h2}>{renderInline(block.children, key, resolved)}</h2>
-                : <h3 key={key} className={styles.h3}>{renderInline(block.children, key, resolved)}</h3>;
+        }
+        case 'heading': {
+            const { lead, cards } = splitTrailingMentions(block.children);
+            const content = renderInline(lead, key, resolved);
+            return (
+                <Fragment key={key}>
+                    {lead.length > 0 && (block.level === 2
+                        ? <h2 className={styles.h2}>{content}</h2>
+                        : <h3 className={styles.h3}>{content}</h3>)}
+                    {cards.map((card, cIndex) => <EntityCard key={`${key}-c${cIndex}`} node={card} resolved={resolved} />)}
+                </Fragment>
+            );
+        }
         case 'quote':
             return (
                 <blockquote key={key} className={styles.quote}>

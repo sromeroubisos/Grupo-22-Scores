@@ -73,6 +73,10 @@
     transition: color 0.18s var(--ease);
 }
 
+.backIcon {
+    display: none;
+}
+
 .backLink::before {
     content: '';
     width: 7px;
@@ -253,11 +257,97 @@
 }
 
 .tagSectionLabel {
+    margin: 0;
+    color: var(--ink);
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+}
+
+/* Etiquetas como filas, no como píldoras: una por renglón, con un blanco
+   táctil de 60px, el nombre legible y la salida a la derecha. */
+.tagList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Cada fila: ícono + nombre (llevan a las notas de esa etiqueta) y a la
+   derecha el botón Seguir / Siguiendo. */
+.tagItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+}
+
+.tagRow {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    align-self: stretch;
+    color: var(--ink);
+    text-decoration: none;
+    transition: opacity 0.1s var(--ease);
+}
+
+/* La respuesta es al apoyar el dedo, no al soltarlo. */
+.tagRow:active {
+    opacity: 0.6;
+}
+
+.tagRowIcon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--raised);
     color: var(--ink-muted);
-    font-family: var(--font-mono);
+}
+
+.tagRowName {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+/* La fuente de la nota: círculo con la inicial + nombre, en una línea tenue. */
+.sourceRow {
+    display: none;
+    margin: 0;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink-muted);
+    font-size: 0.9375rem;
+}
+
+.sourceDot {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
     font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.relatedMeta .sourceDot {
+    width: 16px;
+    height: 16px;
+    font-size: 9px;
 }
 
 .actionRow {
@@ -704,97 +794,238 @@
 }
 
 /* ── Mobile ─────────────────────────────────────────────────────────────── */
+/* La nota como una pantalla de app: la foto sube hasta el borde de arriba con
+   los botones de volver y compartir flotando encima, el titular grande, la
+   fuente en una línea y el cuerpo. Después, "Categorías" y "Noticias
+   relacionadas" como listas de filas. Las tipografías son las del sitio. */
 @media (max-width: 768px) {
     .readerPage {
         padding:
-            calc(env(safe-area-inset-top, 0px) + 12px)
+            0
             16px
             calc(env(safe-area-inset-bottom, 0px) + 72px);
     }
 
     .readerShell {
-        gap: 22px;
+        position: relative;
+        gap: 20px;
     }
 
-    /* La vuelta queda al alcance del pulgar durante toda la lectura. */
+    /* Volver y compartir: dos botones redondos de vidrio, arriba a los lados de
+       la foto y pegados bajo el header mientras se lee. La barra no ocupa alto
+       (el margen negativo se come el hueco): la foto arranca donde siempre. */
     .readerTopBar {
         position: sticky;
-        top: calc(env(safe-area-inset-top, 0px) + var(--h-header, 52px) + 8px);
-        z-index: 20;
-        margin-inline: -6px;
-        padding: 6px 14px;
-        border: 1px solid var(--edge);
-        border-radius: 999px;
-        background: var(--color-glass, var(--color-bg-secondary));
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        top: calc(env(safe-area-inset-top, 0px) + var(--h-header, 52px) - 4px);
+        z-index: 40;
+        height: 0;
+        margin: 0 -16px -20px;
+        padding: 0 16px;
+        overflow: visible;
+        pointer-events: none;
+        align-items: flex-start;
+    }
+
+    .readerTopBar > *,
+    .topBarActions > * {
+        pointer-events: auto;
+    }
+
+    .backLink,
+    .topBarActions button[aria-haspopup='menu'] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        min-height: 0;
+        margin-top: 12px;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.5);
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+        color: #fff;
+        font-size: 0;
+        gap: 0;
+    }
+
+    /* Los dos botones usan iconos del mismo set, del mismo tamaño y trazo. */
+    .backLink::before {
+        display: none;
+    }
+
+    .backText {
+        display: none;
+    }
+
+    .backIcon {
+        display: block;
+        width: 22px;
+        height: 22px;
+        margin-left: -1px;
+    }
+
+    .backLink:active,
+    .topBarActions button[aria-haspopup='menu']:active {
+        background: rgba(0, 0, 0, 0.7);
+    }
+
+    .topBarActions button[aria-haspopup='menu'] svg {
+        width: 22px;
+        height: 22px;
+        stroke-width: 2.25;
+    }
+
+    .topBarMeta {
+        display: none;
     }
 
     .heroCard {
-        gap: 16px;
+        gap: 18px;
     }
 
-    .metaRow {
-        gap: 10px;
-        padding-bottom: 14px;
-    }
-
-    .dateCluster {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .headline h1 {
-        font-size: clamp(1.75rem, 7.2vw, 2.3rem);
-        line-height: 1.12;
-    }
-
-    .summary {
-        font-size: 1rem;
-        line-height: 1.6;
-    }
-
-    /* La foto va de borde a borde: es la portada de la nota, no una tarjeta. */
+    /* La foto va de borde a borde y arranca arriba de todo. */
     .imageWrap {
+        order: 1;
         width: calc(100% + 32px);
         margin-inline: -16px;
-        border-inline: none;
+        border: 0;
         border-radius: 0;
     }
 
     .heroImage {
-        aspect-ratio: 16 / 10;
+        aspect-ratio: 4 / 3;
+    }
+
+    .headline {
+        order: 2;
+        gap: 14px;
+    }
+
+    .headline h1 {
+        font-size: clamp(1.75rem, 8vw, 2.1rem);
+        font-weight: 800;
+        line-height: 1.14;
+        letter-spacing: -0.03em;
+        text-wrap: pretty;
+    }
+
+    .sourceRow {
+        display: flex;
+    }
+
+    .summary {
+        font-size: 1.1875rem;
+        line-height: 1.5;
+        color: var(--ink);
+    }
+
+    /* La fuente y la fecha ya van bajo el titular. */
+    .metaRow,
+    .byline {
+        display: none;
     }
 
     .bodyCard {
-        gap: 26px;
+        gap: 28px;
     }
 
+    .tagSection {
+        gap: 8px;
+        padding-top: 8px;
+        border-top: 0;
+    }
+
+    .tagSectionLabel {
+        font-size: 1.625rem;
+        letter-spacing: -0.025em;
+    }
 
     .actionRow {
         display: grid;
         grid-template-columns: 1fr;
+        border-top: 0;
+        padding-top: 0;
     }
 
     .actionLink {
         width: 100%;
     }
+
+    /* Noticias relacionadas: filas con la portada a la izquierda. */
+    .readerAside {
+        gap: 28px;
+    }
+
+    .railCard {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        gap: 6px;
+    }
+
+    .railHead {
+        padding-bottom: 6px;
+        border-bottom: 0;
+    }
+
+    .railTitle {
+        font-size: 1.625rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+    }
+
+    .relatedList li + li {
+        border-top: 0;
+    }
+
+    .relatedItem {
+        grid-template-columns: 152px minmax(0, 1fr);
+        gap: 16px;
+        align-items: start;
+        padding: 10px 0;
+        min-height: 0;
+        transition: opacity 0.1s var(--ease);
+    }
+
+    .relatedItem:active {
+        opacity: 0.6;
+    }
+
+    .relatedThumb {
+        width: 152px;
+        height: 86px;
+        border: 0;
+        border-radius: 12px;
+    }
+
+    .relatedBody {
+        align-self: stretch;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .relatedTitle {
+        order: 1;
+        -webkit-line-clamp: 3;
+        font-size: 1.0625rem;
+        font-weight: 600;
+        line-height: 1.25;
+    }
+
+    .relatedMeta {
+        order: 2;
+        gap: 6px;
+        font-family: var(--font-sans);
+        font-size: 0.8125rem;
+        letter-spacing: 0;
+        text-transform: none;
+    }
 }
 
-@media (max-width: 430px) {
-    .readerPage {
-        padding-inline: 14px;
-    }
-
-    .headline h1 {
-        font-size: clamp(1.62rem, 7.4vw, 2rem);
-    }
-
-    .imageWrap {
-        width: calc(100% + 28px);
-        margin-inline: -14px;
-    }
-}
 
 @media (prefers-reduced-motion: reduce) {
 
