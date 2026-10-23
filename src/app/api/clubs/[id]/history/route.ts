@@ -4,6 +4,7 @@ import { buildTeamLogoProxyUrl, isOversizedInlineLogoUrl, resolveSerializableLog
 import { applyStandingsTableType, supportsStandingsTableTypeColumn } from '@/lib/standings/tableTypeSupport';
 import { APP_TIMEZONE } from '@/lib/timezone';
 import { compareCategoryLevel, resolveCategoryLevel } from '@/lib/clubs/categoryLevel';
+import { canonicalizeSportId } from '@/lib/clubDerivatives';
 
 const FINISHED_STATUSES = new Set([
     'final', 'finished', 'completed', 'scored', 'ft', 'aet', 'pen', 'awarded',
@@ -248,7 +249,24 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             supportsStandingsTableTypeColumn(),
             resolveClubFamilyIds(db, id),
         ]);
-        const familyIds = family.ids;
+        // El historial es de UN deporte: el del equipo que se está mirando. La
+        // familia de un club de rugby puede traer equipos de hockey colgados
+        // (La Tablada "Damas A" y "Roja"): no son del historial de rugby ni
+        // entran en "Todos juntos", y lo mismo vale al revés. Sin deporte
+        // conocido (club o dato), no se filtra nada.
+        const familyClubsRead = await db.from('clubs').select('id, name, short_name, sport_id, sport').in('id', family.ids);
+        const familyClubRows = (familyClubsRead.data ?? []) as Array<{ id: string; name: string | null; short_name: string | null; sport_id: string | null; sport: string | null }>;
+        const clubSport = (club: { sport_id: string | null; sport: string | null }) => canonicalizeSportId(club.sport_id || club.sport);
+        const viewedSport = clubSport(familyClubRows.find((club) => club.id === id) ?? { sport_id: null, sport: null });
+        const isViewedSport = (raw: string | null | undefined) => {
+            const sport = canonicalizeSportId(raw);
+            return !viewedSport || !sport || sport === viewedSport;
+        };
+        const familyIds = family.ids.filter((clubId) => {
+            if (clubId === id) return true;
+            const club = familyClubRows.find((row) => row.id === clubId);
+            return !club || isViewedSport(club.sport_id || club.sport);
+        });
         const scopeAll = requestedTeam === 'all';
         const scopeTeamId = scopeAll ? 'all' : (familyIds.includes(requestedTeam) ? requestedTeam : id);
         const scopeIds = scopeAll ? familyIds : [scopeTeamId];
@@ -269,7 +287,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         const hasFamily = familyIds.length > 1;
         const emptyList = { data: [], error: null } as { data: unknown[]; error: null };
 
-        const [homeResult, awayResult, standingsResult, declaredTitles, teamHomeResult, teamAwayResult, familyClubsResult] = await Promise.all([
+        const [homeResult, awayResult, standingsResult, declaredTitles, teamHomeResult, teamAwayResult] = await Promise.all([
             db.from('matches').select(matchSelect).in('home_club_id', scopeIds).order('date_time', { ascending: false }).limit(2500),
             db.from('matches').select(matchSelect).in('away_club_id', scopeIds).order('date_time', { ascending: false }).limit(2500),
             // El historial del club es la tabla general. Sin filtrar, el
@@ -282,7 +300,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             fetchDeclaredTitles(db, scopeIds).catch(() => [] as DeclaredTitle[]),
             hasFamily ? db.from('matches').select('id, home_club_id, away_club_id, status').in('home_club_id', familyIds).limit(5000) : Promise.resolve(emptyList),
             hasFamily ? db.from('matches').select('id, home_club_id, away_club_id, status').in('away_club_id', familyIds).limit(5000) : Promise.resolve(emptyList),
-            hasFamily ? db.from('clubs').select('id, name, short_name').in('id', familyIds) : Promise.resolve(emptyList),
         ]);
 
         const queryError = homeResult.error || awayResult.error;
@@ -303,7 +320,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
         const finishedRows = Array.from(rowsById.values()).filter((row) => {
             const status = String(row.status ?? '').trim().toLowerCase();
-            return FINISHED_STATUSES.has(status) && Boolean(row.date_time) && Boolean(getScore(row.score));
+            if (!(FINISHED_STATUSES.has(status) && Boolean(row.date_time) && Boolean(getScore(row.score)))) return false;
+            // Un partido de otro deporte (el del partido o, si no lo trae, el de su
+            // torneo) no es del historial de este equipo.
+            return isViewedSport(row.sport_id || one(row.tournament)?.sport_id);
         });
         const tournamentIds = Array.from(new Set([
             ...finishedRows.map((row) => row.tournament_id),
@@ -583,11 +603,16 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             }
         }
 
+        // Torneos y tablas de otro deporte (un título de hockey en un equipo de
+        // rugby) tampoco figuran: las participaciones salen de las tablas y de
+        // los campeones declarados, no solo de los partidos.
+        const visibleParticipations = participations.filter((item) => isViewedSport(item.sportId));
+
         const filterSeasons = new Set(normalizedMatches.map((match) => match.season));
         const filterTournaments = new Set(normalizedMatches.map((match) => match.tournamentName).filter((value): value is string => Boolean(value)));
         const filterCategories = new Set(normalizedMatches.map((match) => match.category).filter((value): value is string => Boolean(value)));
         const filterSports = new Set(normalizedMatches.map((match) => match.sportId).filter((value): value is string => Boolean(value)));
-        for (const participation of participations) {
+        for (const participation of visibleParticipations) {
             filterSeasons.add(participation.season);
             filterTournaments.add(participation.tournamentName);
             if (participation.category) filterCategories.add(participation.category);
@@ -616,8 +641,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             }
             familyTotal = allFamilyMatches.size;
 
-            const familyClubs = (familyClubsResult.data ?? []) as Array<{ id: string; name: string | null; short_name: string | null }>;
-            const baseClub = familyClubs.find((club) => club.id === family.baseId);
+            const familyClubs = familyClubRows.filter((club) => familyIds.includes(club.id));
+            // El nombre del club base se lee de TODA la familia, aunque el base sea de
+            // otro deporte: los equipos de hockey de La Tablada se llaman "Roja" y
+            // "Damas A" respecto de "Club La Tablada", que es de rugby.
+            const baseClub = familyClubRows.find((club) => club.id === family.baseId);
             const base = { name: baseClub?.name ?? '', shortName: baseClub?.short_name ?? '' };
             teams = familyClubs
                 .map((club) => {
@@ -648,7 +676,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             teams,
             familyTotal,
             matches: normalizedMatches,
-            participations,
+            participations: visibleParticipations,
             filters: {
                 seasons: Array.from(filterSeasons).sort().reverse(),
                 tournaments: Array.from(filterTournaments).sort(),

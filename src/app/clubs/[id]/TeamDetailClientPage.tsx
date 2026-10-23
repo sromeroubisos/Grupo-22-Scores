@@ -1875,7 +1875,12 @@ function TeamDetailInner({ id }: { id: string }) {
                         )}
 
                         {activeTab === 'history' && (
+                            // `key` por equipo: al pasar de un equipo de la familia a otro
+                            // (por "Clubes relacionados") la pestaña es la MISMA instancia y
+                            // conservaba el equipo elegido en el selector, así que el historial
+                            // dejaba de ser el del equipo que se está viendo.
                             <HistoryTab
+                                key={resolvedClubId || rawId}
                                 clubId={resolvedClubId || rawId}
                                 teamName={teamName}
                                 selectedSport={selectedSport}
