@@ -14041,35 +14041,62 @@ function drawBracketCard(ctx: CanvasRenderingContext2D, spec: BracketCardSpec, p
     });
 }
 
-// El cruce en la familia Fan: sin relleno de color ni sombra. Un trazo de Acento
-// arriba (el unico grueso, como en la tabla), la etapa en gris, dos filas
-// separadas por un filete y el resultado a la derecha. Gana el que va en tinta;
-// el que pierde se apaga.
-function drawFanBracketCard(ctx: CanvasRenderingContext2D, spec: BracketCardSpec, tone: FanTone, u: (value: number) => number) {
-    const { x, y, width, headerHeight, rowHeight, title, match, homeLogo, awayLogo, dense } = spec;
+// El cuadro como bloques, igual que en la pagina: una columna por ronda, el
+// 3.er puesto colgado debajo de la Final y las llaves que unen cada par de
+// cruces con el que lo sigue. Lo usan las familias Fan V5 y G22 Base; el color
+// sale todo de la paleta, asi las dos comparten el dibujo.
+function isBracketThirdPlaceName(name: string): boolean {
+    const n = name.toLowerCase();
+    if (/third\s*place|3rd\s*place|bronze\s*final/.test(n)) return true;
+    return /puesto/.test(n) && (/tercer/.test(n) || /(^|\D)3(\D|$)/.test(n));
+}
+
+function formatBracketMatchMeta(match: PlayoffBracketMatchData): { date: string; status: string } {
+    let date = '';
+    if (match.match_start_iso) {
+        const parsed = new Date(match.match_start_iso);
+        if (!Number.isNaN(parsed.getTime())) {
+            date = parsed.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', timeZone: 'America/Argentina/Buenos_Aires' });
+        }
+    }
+    const raw = String(match.result || match.status || '').toLowerCase();
+    let status = '';
+    if (match.winner_id != null || /finished|final|ft/.test(raw)) status = 'Final';
+    else if (/live|progress|en vivo/.test(raw)) status = 'En vivo';
+    else if (/scheduled|ns|not started|programado/.test(raw)) status = 'Programado';
+    else if (!date) status = 'Por definir';
+    return { date, status };
+}
+
+function drawBracketBlockCard(
+    ctx: CanvasRenderingContext2D,
+    spec: BracketCardSpec,
+    palette: BracketPalette,
+    u: (value: number) => number,
+) {
+    const { x, y, width, headerHeight, rowHeight, match, homeLogo, awayLogo } = spec;
     const height = headerHeight + rowHeight * 2;
-    const scoreWidth = u(dense ? 44 : 58);
+    const scoreWidth = u(46);
     const scoreX = x + width - scoreWidth;
+    const meta = formatBracketMatchMeta(match);
 
     ctx.save();
-    ctx.fillStyle = hexToRGBA(tone.ink, 0.035);
-    ctx.fillRect(x, y, width, height);
-    ctx.fillStyle = tone.accent;
-    ctx.fillRect(x, y, width, Math.max(2, u(3)));
-    ctx.strokeStyle = tone.line;
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x + 0.5, y + 0.5, width - 1, height - 1);
+    ctx.fillStyle = palette.isDark ? 'rgba(0,0,0,0.26)' : hexToRGBA(palette.ink, 0.045);
     ctx.beginPath();
-    ctx.moveTo(x, y + headerHeight + rowHeight);
-    ctx.lineTo(x + width, y + headerHeight + rowHeight);
+    ctx.roundRect(x, y, width, height, u(12));
+    ctx.fill();
+    ctx.strokeStyle = hexToRGBA(palette.ink, palette.isDark ? 0.24 : 0.14);
+    ctx.lineWidth = 1;
     ctx.stroke();
 
-    ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = tone.muted;
-    ctx.font = `800 ${u(dense ? 12 : 14)}px ${FONT_BODY}`;
-    setCanvasTracking(ctx, u(dense ? 2 : 3));
-    ctx.fillText(truncateTextToWidth(ctx, title.toUpperCase(), width - u(24)), x + u(dense ? 10 : 14), y + headerHeight / 2 + u(2));
+    ctx.fillStyle = palette.inkMuted;
+    ctx.font = `700 ${u(13)}px ${FONT_BODY}`;
+    ctx.textAlign = 'left';
+    ctx.fillText(meta.date, x + u(14), y + headerHeight / 2 + u(1));
+    ctx.textAlign = 'right';
+    setCanvasTracking(ctx, u(1));
+    ctx.fillText(meta.status.toUpperCase(), x + width - u(14), y + headerHeight / 2 + u(1));
     setCanvasTracking(ctx, 0);
     ctx.restore();
 
@@ -14091,44 +14118,197 @@ function drawFanBracketCard(ctx: CanvasRenderingContext2D, spec: BracketCardSpec
     ];
     const anyWinner = rows.some((row) => row.winner);
     const labels = rows.map((row) => (isBracketTbd(row.name) ? 'A DEFINIR' : row.name.toUpperCase()));
-    const crest = Math.min(u(dense ? 30 : 42), rowHeight - u(10));
-    const nameX = x + u(dense ? 10 : 14) + crest + u(dense ? 8 : 12);
-    const nameMax = scoreX - nameX - u(8);
-    const nameSize = Math.min(...labels.map((label) => setFittedFont(ctx, label, nameMax, '800', u(dense ? 13 : 17), FONT_BODY, u(dense ? 8 : 10))));
+    const crest = Math.min(u(34), rowHeight - u(10));
+    const nameX = x + u(14) + crest + u(10);
+    const nameMax = scoreX - nameX - u(6);
+    const nameSize = Math.min(...labels.map((label) => setFittedFont(ctx, label, nameMax, '800', u(16), FONT_BODY, u(9))));
 
     rows.forEach((row, index) => {
         const centerY = y + headerHeight + rowHeight * index + rowHeight / 2;
         const isTbd = isBracketTbd(row.name);
-        const crestX = x + u(dense ? 10 : 14) + crest / 2;
+        const crestX = x + u(14) + crest / 2;
         const dim = anyWinner && !row.winner;
 
         ctx.save();
         if (isTbd) {
-            ctx.strokeStyle = tone.line;
+            ctx.strokeStyle = hexToRGBA(palette.ink, 0.25);
             ctx.lineWidth = Math.max(1, u(1.5));
             ctx.beginPath();
             ctx.arc(crestX, centerY, crest / 2 - u(2), 0, Math.PI * 2);
             ctx.stroke();
         } else {
             if (dim) ctx.globalAlpha = 0.55;
-            drawFanCrest(ctx, { centerX: crestX, centerY, size: crest, img: row.logo, label: row.name, rawLogo: row.rawLogo, tone });
+            if (row.logo) {
+                const placement = getContainedImagePlacement(row.logo, crestX, centerY, crest, crest, 0);
+                ctx.drawImage(row.logo, placement.x, placement.y, placement.width, placement.height);
+            } else {
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = palette.inkMuted;
+                ctx.font = `800 ${Math.round(crest * 0.32)}px ${FONT_BODY}`;
+                ctx.fillText(getFallbackLogoText(row.rawLogo, row.name), crestX, centerY + 1);
+            }
         }
         ctx.restore();
 
         ctx.save();
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = isTbd ? tone.muted : dim ? tone.softInk : tone.ink;
+        ctx.fillStyle = isTbd ? palette.inkMuted : dim ? palette.inkMuted : palette.ink;
         ctx.font = `800 ${nameSize}px ${FONT_BODY}`;
         ctx.fillText(truncateTextToWidth(ctx, labels[index], nameMax), nameX, centerY + u(1));
 
         const hasScore = !(row.score == null || row.score === '');
         ctx.textAlign = 'center';
-        ctx.fillStyle = hasScore ? (row.winner ? tone.accent : dim ? tone.softInk : tone.ink) : tone.muted;
-        ctx.font = `800 ${u(dense ? 26 : 34)}px ${FONT_BODY}`;
+        ctx.fillStyle = hasScore ? (row.winner ? palette.accentSoft : dim ? palette.inkMuted : palette.ink) : palette.inkMuted;
+        ctx.font = `800 ${u(28)}px ${FONT_BODY}`;
         ctx.fillText(hasScore ? String(row.score) : '-', scoreX + scoreWidth / 2, centerY + u(1));
         ctx.restore();
     });
+}
+
+function drawBracketBlocks(
+    ctx: CanvasRenderingContext2D,
+    entries: Array<{ round: PlayoffBracketRoundData; index: number }>,
+    logosFor: (roundIndex: number, matchIndex: number) => { homeLogo: HTMLImageElement | null; awayLogo: HTMLImageElement | null },
+    palette: BracketPalette,
+    u: (value: number) => number,
+    W: number,
+    areaTop: number,
+    areaHeight: number,
+) {
+    const thirdEntries = entries.filter((entry) => isBracketThirdPlaceName(getBracketRoundName(entry.round, entry.index)));
+    let mainEntries = entries.filter((entry) => !thirdEntries.includes(entry));
+    const hasFinal = mainEntries.length > 0 && thirdEntries.length > 0;
+    if (mainEntries.length === 0) mainEntries = entries;
+    const thirdBlocks = hasFinal ? thirdEntries : [];
+    // Sin columna Final reconocible, el 3.er puesto vuelve a ser una columna mas.
+    const columns = hasFinal ? mainEntries : entries;
+
+    const margin = u(40);
+    const gap = columns.length > 1 ? u(56) : 0;
+    const columnWidth = Math.min(u(330), (W - margin * 2 - gap * (columns.length - 1)) / columns.length);
+    const totalWidth = columnWidth * columns.length + gap * (columns.length - 1);
+    const left = (W - totalWidth) / 2;
+    const labelBand = u(46);
+    const cardsTop = areaTop + labelBand;
+    const cardsHeight = areaHeight - labelBand;
+    const cardGap = u(26);
+    const maxMatches = Math.max(...columns.map((entry) => entry.round.matches.length));
+    const thirdExtra = thirdBlocks.length > 0 ? u(40) : 0;
+    const cardHeight = Math.min(u(136), Math.max(u(104), (cardsHeight - thirdExtra - cardGap * (maxMatches - 1)) / (maxMatches + (thirdBlocks.length ? 1 : 0))));
+    const headerHeight = u(30);
+    const rowHeight = (cardHeight - headerHeight) / 2;
+
+    // Centros: la primera columna se reparte (con un paso acotado, para que los
+    // pares no queden a media hoja); las siguientes se centran entre sus dos origenes.
+    const centersByColumn: number[][] = [];
+    columns.forEach((entry, columnIndex) => {
+        const count = entry.round.matches.length;
+        const prev = centersByColumn[columnIndex - 1];
+        const isTree = columnIndex > 0 && prev && count === Math.ceil(prev.length / 2);
+        if (isTree) {
+            centersByColumn.push(entry.round.matches.map((_match, matchIndex) => {
+                const a = prev[2 * matchIndex];
+                const b = prev[2 * matchIndex + 1];
+                return b != null ? (a + b) / 2 : a;
+            }));
+            return;
+        }
+        const step = count > 1 ? Math.min((cardsHeight - cardHeight) / (count - 1), cardHeight + u(70)) : 0;
+        const groupHeight = (count - 1) * step + cardHeight;
+        const first = cardsTop + (cardsHeight - groupHeight) / 2 + cardHeight / 2;
+        centersByColumn.push(Array.from({ length: count }, (_, index) => first + index * step));
+    });
+
+    ctx.save();
+    ctx.strokeStyle = hexToRGBA(palette.ink, palette.isDark ? 0.6 : 0.38);
+    ctx.lineWidth = Math.max(2, u(2));
+    ctx.lineCap = 'butt';
+    ctx.lineJoin = 'miter';
+    ctx.beginPath();
+    columns.forEach((_entry, columnIndex) => {
+        if (columnIndex === 0) return;
+        const prev = centersByColumn[columnIndex - 1];
+        const current = centersByColumn[columnIndex];
+        if (current.length !== Math.ceil(prev.length / 2)) return;
+        const xPrevRight = left + (columnIndex - 1) * (columnWidth + gap) + columnWidth;
+        const xCurrentLeft = left + columnIndex * (columnWidth + gap);
+        const midX = (xPrevRight + xCurrentLeft) / 2;
+        current.forEach((centerY, matchIndex) => {
+            const a = prev[2 * matchIndex];
+            const b = prev[2 * matchIndex + 1];
+            ctx.moveTo(xPrevRight, a);
+            ctx.lineTo(midX, a);
+            if (b != null) {
+                ctx.moveTo(xPrevRight, b);
+                ctx.lineTo(midX, b);
+                ctx.moveTo(midX, a);
+                ctx.lineTo(midX, b);
+            }
+            ctx.moveTo(midX, centerY);
+            ctx.lineTo(xCurrentLeft, centerY);
+        });
+    });
+    ctx.stroke();
+    ctx.restore();
+
+    const drawLabel = (text: string, x: number, y: number, align: CanvasTextAlign, width: number) => {
+        ctx.save();
+        ctx.textAlign = align;
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = palette.inkMuted;
+        ctx.font = `800 ${u(15)}px ${FONT_BODY}`;
+        setCanvasTracking(ctx, u(3));
+        ctx.fillText(truncateTextToWidth(ctx, text.toUpperCase(), width), x, y);
+        setCanvasTracking(ctx, 0);
+        ctx.restore();
+    };
+
+    columns.forEach((entry, columnIndex) => {
+        const x = left + columnIndex * (columnWidth + gap);
+        // El rotulo se pega a SU primera tarjeta: con pocos cruces la columna queda centrada y el titulo no puede quedarse arriba de todo.
+        const columnTop = Math.min(...centersByColumn[columnIndex]) - cardHeight / 2;
+        drawLabel(getBracketRoundName(entry.round, entry.index), x + columnWidth / 2 + u(1), columnTop - u(26), 'center', columnWidth);
+        entry.round.matches.forEach((match, matchIndex) => {
+            drawBracketBlockCard(ctx, {
+                x,
+                y: centersByColumn[columnIndex][matchIndex] - cardHeight / 2,
+                width: columnWidth,
+                headerHeight,
+                rowHeight,
+                title: '',
+                match,
+                ...logosFor(entry.index, matchIndex),
+                dense: false,
+            }, palette, u);
+        });
+    });
+
+    if (thirdBlocks.length > 0) {
+        const finalColumn = columns.length - 1;
+        const x = left + finalColumn * (columnWidth + gap);
+        const finalBottom = Math.max(...centersByColumn[finalColumn]) + cardHeight / 2;
+        let cursor = finalBottom + u(30);
+        thirdBlocks.forEach((entry) => {
+            drawLabel(getBracketRoundName(entry.round, entry.index), x + u(2), cursor + u(10), 'left', columnWidth);
+            cursor += u(34);
+            entry.round.matches.forEach((match, matchIndex) => {
+                drawBracketBlockCard(ctx, {
+                    x,
+                    y: cursor,
+                    width: columnWidth,
+                    headerHeight,
+                    rowHeight,
+                    title: '',
+                    match,
+                    ...logosFor(entry.index, matchIndex),
+                    dense: false,
+                }, palette, u);
+                cursor += cardHeight + u(16);
+            });
+        });
+    }
 }
 
 async function drawPlayoffBracket(
@@ -14385,6 +14565,13 @@ async function drawPlayoffBracket(
         return;
     }
 
+    if (isFan || isPlate) {
+        const entries = rounds.map((round, index) => ({ round, index }));
+        drawBracketBlocks(ctx, entries, logosFor, palette, u, W, areaTop, areaHeight);
+        finishWithFooter();
+        return;
+    }
+
     const margin = u(28);
     const cards: BracketCardSpec[] = [];
     const isMirrored = rounds.length >= 2
@@ -14610,7 +14797,7 @@ async function drawPlayoffBracket(
     ctx.stroke();
     ctx.restore();
 
-    cards.forEach((card) => (isFan ? drawFanBracketCard(ctx, card, fanTone, u) : drawBracketCard(ctx, card, palette, u)));
+    cards.forEach((card) => drawBracketCard(ctx, card, palette, u));
     finishWithFooter();
 }
 
