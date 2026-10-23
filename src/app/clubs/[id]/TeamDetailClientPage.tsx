@@ -1978,8 +1978,20 @@ function TeamDetailInner({ id }: { id: string }) {
                                                 key={jugador.id}
                                                 href={`/players/${jugador.id}`}
                                                 className={styles.playerRow}
-                                                style={{ display: 'flex', gap: 10, alignItems: 'baseline', padding: '6px 0', color: 'inherit', textDecoration: 'none' }}
+                                                style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '6px 0', color: 'inherit', textDecoration: 'none' }}
                                             >
+                                                <span className={styles.playerAvatarWrap}>
+                                                    <span className={styles.playerPhotoPlaceholder}>
+                                                        <PlayerHeadIcon size={22} />
+                                                    </span>
+                                                    <span className={styles.playerAvatarCrest} aria-hidden="true">
+                                                        <TeamLogo
+                                                            name={String(teamName || '')}
+                                                            teamId={resolvedClubId || rawId}
+                                                            size={16}
+                                                        />
+                                                    </span>
+                                                </span>
                                                 <span style={{ width: 26, fontVariantNumeric: 'tabular-nums', color: 'var(--meta, var(--color-text-secondary))' }}>
                                                     {jugador.jerseyNumber ?? '–'}
                                                 </span>
