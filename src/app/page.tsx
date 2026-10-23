@@ -211,6 +211,16 @@ const FEATURED_COUNTRY_MAX = 8;
  */
 const TOP_FEED_COUNT = 14;
 
+/** Partidos que muestra un torneo antes del botón "Ver más partidos". */
+const MATCHES_PER_LEAGUE_PREVIEW = 8;
+
+/**
+ * Torneos de varias provincias (seleccionados y campeonatos nacionales): entran
+ * siempre en la tanda de arriba del feed, antes del botón que oculta el resto,
+ * pero después de los favoritos, el país del usuario y los grandes del rugby.
+ */
+const MULTIPROVINCIAL_TOURNAMENT = /select\s*12|multiprovincial|argentino\s+juvenil|nacional\s+de\s+clubes|nacional\s+de\s+desarrollo|argentino\s+de\s+seven/;
+
 /**
  * Qué cuenta como "primera división" en el país del usuario. La prioridad del
  * catálogo no distingue un torneo de ascenso de uno de primera (la Primera A de
@@ -986,6 +996,7 @@ export default function HomePage() {
   const [expandedCountries, setExpandedCountries] = useState<Set<string>>(new Set(['international']));
   const [expandedLeagueIds, setExpandedLeagueIds] = useState<Set<string>>(new Set()); // Level 2 Accordion
   const [collapsedLeagues, setCollapsedLeagues] = useState<Set<string>>(new Set()); // Main Content Collapse
+  const [expandedLeagues, setExpandedLeagues] = useState<Set<string>>(new Set()); // "Ver más partidos"
   const [searchQuery, setSearchQuery] = useState('');
   const [isSportMenuOpen, setIsSportMenuOpen] = useState(false);
   const dateListRef = useRef<HTMLDivElement>(null);
@@ -1540,7 +1551,9 @@ export default function HomePage() {
     );
 
     for (const league of list) {
-      if (isLeagueGroupFavorite(league)) {
+      if (MULTIPROVINCIAL_TOURNAMENT.test(normalizeForMatch(league.league))) {
+        tiers.set(league.leagueId, { tier: -1, rank: 0 });
+      } else if (isLeagueGroupFavorite(league)) {
         tiers.set(league.leagueId, { tier: 0, rank: 0 });
       } else if (countryAllowed.has(league.leagueId)) {
         tiers.set(league.leagueId, { tier: 1, rank: 0 });
@@ -1570,6 +1583,7 @@ export default function HomePage() {
     const byTier = (tier: number) => indexed.filter((entry) => info(entry.league).tier === tier);
 
     const favorites = byTier(0);
+    const multiprovincial = byTier(-1);
     const countryBest = byTier(1).sort((a, b) => (
       (b.league.priority - a.league.priority)
       || (b.league.matches.length - a.league.matches.length)
@@ -1577,9 +1591,9 @@ export default function HomePage() {
     ));
     const featured = byTier(2).sort((a, b) => (info(a.league).rank - info(b.league).rank) || (a.index - b.index));
 
-    const fillCount = Math.max(0, TOP_FEED_COUNT - favorites.length);
+    const fillCount = Math.max(0, TOP_FEED_COUNT - favorites.length - multiprovincial.length);
     const fill = [...countryBest, ...featured].slice(0, fillCount);
-    const taken = new Set([...favorites, ...fill].map((entry) => entry.index));
+    const taken = new Set([...favorites, ...fill, ...multiprovincial].map((entry) => entry.index));
     const rest = indexed
       .filter((entry) => !taken.has(entry.index))
       .sort((a, b) => (
@@ -1588,8 +1602,8 @@ export default function HomePage() {
         || (a.index - b.index)
       ));
 
-    const ordered = [...favorites, ...fill, ...rest].map((entry) => entry.league);
-    const topCount = favorites.length + fill.length;
+    const ordered = [...favorites, ...fill, ...multiprovincial, ...rest].map((entry) => entry.league);
+    const topCount = favorites.length + fill.length + multiprovincial.length;
     const top = topCount > 0 ? topCount : Math.min(3, ordered.length);
     // Un día con pocas competiciones no se agrupa: plegar dos tarjetas es fricción pura.
     return { ordered, topCount: ordered.length - top < MIN_GROUPED_LEAGUES ? ordered.length : top };
@@ -2628,8 +2642,8 @@ export default function HomePage() {
 
                     <div className={`${styles.matchesListWrapper} ${isCollapsed ? styles.collapsed : ''}`}>
                       <div className={styles.matchesList}>
-                        {league.matches.map((match) => (
-                          <MatchRow 
+                        {(expandedLeagues.has(league.leagueId) ? league.matches : league.matches.slice(0, MATCHES_PER_LEAGUE_PREVIEW)).map((match) => (
+                          <MatchRow
                             key={match.id} 
                             match={match as any} 
                             selectedSport={selectedSport} 
@@ -2641,6 +2655,22 @@ export default function HomePage() {
                           />
                         ))}
                       </div>
+                      {league.matches.length > MATCHES_PER_LEAGUE_PREVIEW && (
+                        <button
+                          type="button"
+                          className={styles.leagueMoreBtn}
+                          aria-expanded={expandedLeagues.has(league.leagueId)}
+                          onClick={() => setExpandedLeagues((prev) => {
+                            const next = new Set(prev);
+                            if (!next.delete(league.leagueId)) next.add(league.leagueId);
+                            return next;
+                          })}
+                        >
+                          {expandedLeagues.has(league.leagueId)
+                            ? 'Ver menos partidos'
+                            : `Ver más partidos (${league.matches.length - MATCHES_PER_LEAGUE_PREVIEW})`}
+                        </button>
+                      )}
                     </div>
                   </div>
                 ));
