@@ -725,13 +725,71 @@ function mapClubRosterPersonToSquad(person: PersonWithRole, clubId: string) {
     };
 }
 
+/**
+ * Los jugadores que el club tiene cargados en `people` (club_id + rol jugador):
+ * el plantel ACTUAL, el que edita el gestor de club.
+ *
+ * `fetchPeopleByClub` NO lo lee: mira `team_memberships` y las tablas viejas
+ * (`club_person_roles`). Un club cuyo padrón vive solo en `people` —La Tablada
+ * tiene 53 jugadores ahí y 3 membresías sueltas, la Intermedia 66 y ninguna—
+ * mostraba esas 3 o directamente el plantel de su club base.
+ */
+async function fetchClubPeopleRows(readClient: ReadClient, clubId: string): Promise<PersonWithRole[]> {
+    try {
+        const { data, error } = await (readClient as any)
+            .from('people')
+            .select('id, first_name, last_name, full_name, photo_url, avatar_url, birth_date, position, role, status')
+            .eq('club_id', clubId)
+            .in('role', ['player', 'jugador'])
+            .order('full_name')
+            .range(0, 999);
+
+        if (error) {
+            console.error('Teams API club people read failed:', error);
+            return [];
+        }
+
+        return (Array.isArray(data) ? data : []) as unknown as PersonWithRole[];
+    } catch (error) {
+        console.error('Teams API club people read failed:', error);
+        return [];
+    }
+}
+
+/** ¿El club tiene jugadores con plazo (joined_at / left_at)? Es lo que distingue una convocatoria de altas sueltas. */
+async function clubHasDatedSquad(readClient: ReadClient, clubId: string): Promise<boolean> {
+    try {
+        const { data, error } = await (readClient as any)
+            .from('team_memberships')
+            .select('id')
+            .eq('club_id', clubId)
+            .eq('role', 'player')
+            .or('joined_at.not.is.null,left_at.not.is.null')
+            .limit(1);
+        if (error) return true; // ante la duda, no tocar un plantel curado
+        return Array.isArray(data) && data.length > 0;
+    } catch {
+        return true;
+    }
+}
+
 async function fetchClubRosterFallback(
     readClient: ReadClient,
     clubId: string,
     includePlayers: boolean,
 ): Promise<InternalSquadState | null> {
     const rosterPeople = await fetchPeopleByClub(clubId, readClient as never);
-    const players = rosterPeople.filter((person) => isPlayerRosterRole(person.role));
+    const curatedPlayers = rosterPeople.filter((person) => isPlayerRosterRole(person.role));
+    // Una convocatoria con fechas (Argentina XV, 28 jugadores) manda SOLA: el
+    // padrón crudo del club mezcla temporadas viejas y la llevaba a 78. Sin
+    // fechas, lo curado son altas sueltas —a La Tablada Intermedia le llegaban
+    // 2 jugadores de su club base— y el plantel es el padrón del club en
+    // `people`, siempre que no sea MÁS CHICO que lo curado (ahí se queda lo curado).
+    let players = curatedPlayers;
+    if (!(await clubHasDatedSquad(readClient, clubId))) {
+        const ownPlayers = (await fetchClubPeopleRows(readClient, clubId)).filter((person) => isPlayerRosterRole(person.role));
+        if (ownPlayers.length > 0 && ownPlayers.length >= curatedPlayers.length) players = ownPlayers;
+    }
 
     if (players.length === 0) {
         return null;
@@ -941,7 +999,7 @@ async function fetchInternalClubSquad(
                     ])
                 );
 
-                const squad = playerMemberships
+                let squad: any[] = playerMemberships
                     .map((membership: any) => {
                         const team = teamById.get(String(membership.team_id));
                         const person = peopleById.get(String(membership.person_id));
@@ -987,6 +1045,22 @@ async function fetchInternalClubSquad(
                         if (leftNumber !== rightNumber) return leftNumber - rightNumber;
                         return String(left.name || '').localeCompare(String(right.name || ''));
                     });
+
+                // Membresías SIN fecha son altas sueltas, no una convocatoria: no
+                // son el plantel del club, solo los que alguien cargó a mano. Con
+                // ellas solas, el plantel de La Tablada eran 3 de 53. Con fechas sí
+                // son una convocatoria cerrada (una selección) y mandan solas.
+                const hasDatedPeriods = playerMemberships.some((membership: any) => membership.joined_at || membership.left_at);
+                if (!hasDatedPeriods) {
+                    const clubPeople = await fetchClubPeopleRows(readClient, clubId);
+                    const listed = new Set(squad.map((player: any) => String(player.id)));
+                    squad = [
+                        ...squad,
+                        ...clubPeople
+                            .filter((person) => isPlayerRosterRole(person.role) && !listed.has(String(person.id)))
+                            .map((person) => mapClubRosterPersonToSquad(person, clubId)),
+                    ];
+                }
 
                 return {
                     squad,
