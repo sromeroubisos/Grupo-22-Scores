@@ -14812,19 +14812,28 @@ async function drawPlayoffBracket(
             26,
             isStory ? 48 : 42,
         );
-        // El logo va contenido en una caja fija: la cinta del torneo lo escala con la
-        // configuracion del diseno y un logo ancho (Select 12) terminaba tapando la pildora.
-        const logoCenterY = isStory ? 184 : 150;
-        if (tournamentLogo) {
-            const placement = getContainedImagePlacement(tournamentLogo, safe.centerX, logoCenterY, isStory ? 340 : 300, isStory ? 88 : 76, 0);
-            ctx.drawImage(tournamentLogo, placement.x, placement.y, placement.width, placement.height);
-        } else {
+        // La cinta del torneo (logo chico + nombre) con tamanos FIJOS: la del fixture los escala con
+        // la configuracion del diseno y el nombre terminaba gigante, encima de la pildora.
+        const ribbonY = isStory ? 166 : 138;
+        const ribbonName = bracketTournamentNameOf(data).toUpperCase();
+        if (ribbonName || tournamentLogo) {
+            const logoSize = tournamentLogo ? (isStory ? 44 : 38) : 0;
+            const logoGap = tournamentLogo ? 14 : 0;
             ctx.save();
-            ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
+            ctx.textAlign = 'left';
             ctx.fillStyle = accentColor;
-            ctx.font = `800 ${isStory ? 34 : 30}px ${FONT_DISPLAY}`;
-            ctx.fillText(truncateTextToWidth(ctx, bracketTournamentNameOf(data).toUpperCase(), W - 160), safe.centerX, logoCenterY);
+            const nameMax = W - 160 - logoSize - logoGap;
+            const nameSize = setFittedFont(ctx, ribbonName, nameMax, '800', isStory ? 30 : 26, FONT_DISPLAY, 16);
+            const shownName = truncateTextToWidth(ctx, ribbonName, nameMax);
+            const nameWidth = ctx.measureText(shownName).width;
+            const startX = safe.centerX - (logoSize + logoGap + nameWidth) / 2;
+            if (tournamentLogo) {
+                const placement = getContainedImagePlacement(tournamentLogo, startX + logoSize / 2, ribbonY, logoSize, logoSize, 0);
+                ctx.drawImage(tournamentLogo, placement.x, placement.y, placement.width, placement.height);
+            }
+            ctx.font = `800 ${nameSize}px ${FONT_DISPLAY}`;
+            ctx.fillText(shownName, startX + logoSize + logoGap, ribbonY + 2);
             ctx.restore();
         }
         const stageLabel = (data.subtitle || '').trim();
@@ -14833,11 +14842,11 @@ async function drawPlayoffBracket(
             ctx.textAlign = 'center';
             ctx.fillStyle = palette.inkMuted;
             ctx.font = `600 ${isStory ? 22 : 18}px ${FONT_BODY}`;
-            ctx.fillText(stageLabel.toUpperCase(), safe.centerX, isStory ? 262 : 224);
+            ctx.fillText(stageLabel.toUpperCase(), safe.centerX, isStory ? 232 : 198);
             ctx.restore();
         }
         const panelX = isStory ? 46 : 54;
-        const panelY = isStory ? 292 : 246;
+        const panelY = isStory ? 262 : 222;
         const panelHeight = safe.bottom - panelY - (isStory ? 18 : 10);
         drawSurfacePanel(ctx, panelX, panelY, W - panelX * 2, panelHeight, 34, isDark);
         plateArea = { top: panelY + 20, height: panelHeight - 40, margin: panelX + 28 };
