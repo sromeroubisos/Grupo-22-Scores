@@ -1,0 +1,42 @@
+/* Dos estados, como una píldora de app: Seguir (contorno) y Siguiendo
+   (relleno con la tinta). Sin paleta propia: los tokens del sitio. */
+.button {
+    flex: none;
+    min-width: 92px;
+    min-height: 36px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border-light);
+    background: transparent;
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.12s ease, color 0.12s ease, transform 0.12s ease;
+}
+
+.button:active {
+    transform: scale(0.96);
+}
+
+.button:focus-visible {
+    outline: 2px solid var(--color-accent-ink, #22c55e);
+    outline-offset: 2px;
+}
+
+.following {
+    border-color: transparent;
+    background: var(--color-text-primary);
+    color: var(--color-bg-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button {
+        transition: none;
+    }
+
+    .button:active {
+        transform: none;
+    }
+}

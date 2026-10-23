@@ -20,7 +20,6 @@ import styles from './page.module.css';
 import { useSport } from '@/context/SportContext';
 import { useAuth } from '@/context/AuthContext';
 import type { Sport } from '@/lib/types';
-import MobileSectionTabs from '@/components/MobileSectionTabs';
 import TeamLogo from '@/components/TeamLogo';
 import {
     buildRankingExportRows,
@@ -97,7 +96,7 @@ const RANKING_NOUNS: Record<RankingEntity, RankingNouns> = {
         puntaje: 'Puntos',
         tituloExport: 'Ranking de Clubes',
         buscar: 'Buscar un club',
-        comoSeCalcula: 'Cada partido mueve puntos del que pierde al que gana, mas cuanto mas parejo era el cruce o mas amplio el margen. Se actualiza los martes con los resultados del fin de semana.',
+        comoSeCalcula: 'Cada partido mueve puntos del que pierde al que gana, mas cuanto mas parejo era el cruce o mas amplio el margen. Ganar un playoff suma aparte: 0,5 en cuartos, 1,5 en semifinal y 2 en la final, solo para el ganador. Se actualiza los martes con los resultados del fin de semana.',
     },
     // "Union" y no "Seleccion": es el rotulo que usa el propio World Rugby, y es
     // el correcto para los que no son paises (Chinese Taipei, Hong Kong China).
@@ -384,6 +383,8 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
     );
     const [publicError, setPublicError] = useState<string | null>(null);
     const [tablePageState, setTablePageState] = useState({ rankingId: '', page: 1 });
+    // En el telefono los movimientos se leen de a uno: subieron o bajaron.
+    const [moverTab, setMoverTab] = useState<'suben' | 'bajan'>('suben');
     const [busqueda, setBusqueda] = useState('');
     // La pastilla responde al toque en el acto; el resto (URL, contexto, tabla)
     // va en una transicion. Sin esto la pastilla se marcaba recien cuando toda
@@ -691,7 +692,7 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
             page: Number.isFinite(page) ? page : 1,
         });
 
-        // Son 8 paginas: sin esto, cambiar de pagina te deja al pie mirando la
+        // Son varias paginas: sin esto, cambiar de pagina te deja al pie mirando la
         // leyenda en vez del puesto #21.
         document.getElementById('tabla-ranking')?.scrollIntoView({
             behavior: 'smooth',
@@ -712,30 +713,14 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
     return (
         <div className={styles.page}>
             <div className="container">
-                <MobileSectionTabs
-                    activeTab="rankings"
-                    rankingsHref={buildRankingsHref(selectedSport.id, selectedRankingId || undefined)}
-                />
-
-                {/* 1. Que estoy viendo */}
+                {/* 1. Que estoy viendo: el titulo y una linea de datos. Como se calcula
+                    va al pie, en un desplegable: no es lo primero que busca el que entra. */}
                 <header className={styles.header}>
                     <div className={styles.headerText}>
-                        <h1 className={styles.title}>{titulo}</h1>
-                        {/* La descripcion del ranking de clubes la escribe el panel y
-                            dice de que ranking se trata; la de World Rugby la genera
-                            el servidor y ya cuenta lo mismo que la frase fija, asi
-                            que ahi va solo la frase. */}
-                        <p className={styles.lead}>
-                            {!esSeleccion && selectedRanking?.description?.trim()
-                                ? `${selectedRanking.description.trim().replace(/[.!?]$/, '')}. `
-                                : ''}
-                            {nouns.comoSeCalcula}
-                        </p>
+                        <h1 key={titulo} className={styles.title}>{titulo}</h1>
                         <ul className={styles.meta} aria-label="Datos del ranking">
                             {totalLabel ? <li>{totalLabel}</li> : null}
                             {actualizadoEl ? <li>Actualizado el {actualizadoEl}</li> : null}
-                            {semanaDeReferencia ? <li>Flechas respecto del {semanaDeReferencia}</li> : null}
-                            {esSeleccion ? <li>Flechas respecto de la publicacion anterior</li> : null}
                             {/* El medallero es la puerta al apartado de los Juegos,
                                 que en el telefono no tiene lugar en la barra. */}
                             {esMedallero ? (
@@ -773,7 +758,28 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                     ) : null}
                 </header>
 
-                {/* Los controles, juntos y arriba de lo que controlan */}
+                {/* Las mismas pestañas que la portada de Noticias: texto grande, la
+                    activa subrayada. "Noticias" vuelve a la portada; cada ranking del
+                    deporte es una pestaña. */}
+                <div className={styles.tabBar} role="group" aria-label="Noticias y rankings">
+                    <Link href="/noticias" className={styles.tabBarItem}>Noticias</Link>
+                    {rankingList.map((ranking) => {
+                        const isActive = ranking.id === activeRankingId;
+                        return (
+                            <button
+                                key={ranking.id}
+                                type="button"
+                                className={`${styles.tabBarItem} ${isActive ? styles.tabBarItemActive : ''}`}
+                                onClick={() => handleRankingChange(ranking.id)}
+                                aria-pressed={isActive}
+                            >
+                                {ranking.name}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Deporte, busqueda y semana, juntos y arriba de lo que controlan */}
                 <div className={styles.toolbar}>
                     <div className={styles.tabs} role="group" aria-label="Deporte">
                         {activeSports.map((sport) => {
@@ -791,28 +797,6 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                             );
                         })}
                     </div>
-
-                    {/* Con un solo ranking en el deporte no hay nada que elegir. La
-                        fila no se esconde mientras se recarga la lista: desaparecer
-                        y volver era uno de los saltos. */}
-                    {rankingList.length > 1 ? (
-                        <div className={styles.tabs} role="group" aria-label="Ranking">
-                            {rankingList.map((ranking) => {
-                                const isActive = ranking.id === activeRankingId;
-                                return (
-                                    <button
-                                        key={ranking.id}
-                                        type="button"
-                                        className={`${styles.tab} ${styles.tabSecondary} ${isActive ? styles.tabActive : ''}`}
-                                        onClick={() => handleRankingChange(ranking.id)}
-                                        aria-pressed={isActive}
-                                    >
-                                        {ranking.name}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    ) : null}
 
                     {hasEntries || tieneHistorico ? (
                         <div className={styles.toolbarRow}>
@@ -920,65 +904,13 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                     className={`${styles.content} ${refrescando ? styles.contentStale : ''}`}
                     aria-busy={refrescando}
                 >
-                {/* 2. Que paso esta semana */}
-                {hasEntries && movimientos.hayReferencia ? (
-                    <section className={styles.movers} aria-labelledby="movimientos-titulo">
-                        <h2 id="movimientos-titulo" className={styles.sectionTitle}>Movimientos de la semana</h2>
-                        {movimientos.suben.length || movimientos.bajan.length ? (
-                            <div key={shownDetail?.ranking.id} className={`${styles.moversGrid} ${styles.fadeIn}`}>
-                                {[
-                                    { titulo: 'Subieron', vacio: 'Nadie subio de puesto.', items: movimientos.suben, tono: styles.moverUp },
-                                    { titulo: 'Bajaron', vacio: 'Nadie bajo de puesto.', items: movimientos.bajan, tono: styles.moverDown },
-                                ].map((grupo) => (
-                                    <div key={grupo.titulo} className={`${styles.moverCard} ${grupo.tono}`}>
-                                        <h3 className={styles.moverTitle}>{grupo.titulo}</h3>
-                                        {grupo.items.length ? (
-                                            <ol className={styles.moverList}>
-                                                {grupo.items.map(({ entry, puntos }) => (
-                                                    <li key={entry.id} className={styles.moverRow}>
-                                                        <TeamLogo
-                                                            name={getRankingClubName(entry)}
-                                                            shortName={getRankingClubShortName(entry)}
-                                                            teamId={entry.club_id}
-                                                            logoUrl={entry.clubs?.logo_url}
-                                                            className={styles.moverLogo}
-                                                            size={28}
-                                                        />
-                                                        <span className={styles.moverName}>
-                                                            <strong>{getRankingClubName(entry)}</strong>
-                                                            <span>
-                                                                Puesto {entry.current_position}
-                                                                {puntos !== 0 ? ` · ${puntos > 0 ? '+' : ''}${puntos.toFixed(2)} pts` : ''}
-                                                            </span>
-                                                        </span>
-                                                        <MovementChip
-                                                            current={entry.current_position}
-                                                            previous={entry.source_previous_position}
-                                                        />
-                                                    </li>
-                                                ))}
-                                            </ol>
-                                        ) : (
-                                            <p className={styles.moverEmpty}>{grupo.vacio}</p>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className={styles.moverEmpty}>
-                                Sin cambios de puesto respecto de la semana anterior.
-                            </p>
-                        )}
-                    </section>
-                ) : null}
-
-                {/* 3. Donde esta mi club */}
+                {/* 2. Donde esta mi club: lo primero que se ve */}
                 <section className={styles.tableSection} id="tabla-ranking" aria-labelledby="tabla-titulo">
                     <div className={styles.tableHead}>
                         <h2 id="tabla-titulo" className={styles.sectionTitle}>
                             {busquedaPlegada
                                 ? `${entradasFiltradas.length} ${entradasFiltradas.length === 1 ? 'resultado' : 'resultados'} para "${busqueda.trim()}"`
-                                : 'Tabla completa'}
+                                : `Posiciones`}
                         </h2>
                         {hasEntries && !busquedaPlegada ? (
                             <span className={styles.tableMeta}>
@@ -1050,7 +982,7 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                                                             logoUrl={entry.clubs?.logo_url}
                                                             className={styles.clubLogo}
                                                             fallbackClassName={styles.clubLogoFallbackText}
-                                                            size={32}
+                                                            size={28}
                                                             title={`Bandera de ${name}`}
                                                         />
                                                         <span className={styles.clubCopy}>
@@ -1111,7 +1043,7 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                                                             logoUrl={entry.clubs?.logo_url}
                                                             className={styles.clubLogo}
                                                             fallbackClassName={styles.clubLogoFallbackText}
-                                                            size={32}
+                                                            size={28}
                                                             title={`Escudo de ${clubName}`}
                                                         />
                                                         <span className={styles.clubCopy}>
@@ -1207,6 +1139,80 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                     ) : null}
                 </section>
 
+                {/* 3. Que paso esta semana: despues de la tabla, que es lo que vino a ver */}
+                {hasEntries && movimientos.hayReferencia ? (
+                    <section className={styles.movers} aria-labelledby="movimientos-titulo">
+                        <div className={styles.sectionHeading}>
+                            <span className={styles.sectionIcon} aria-hidden="true"><TrendingUp size={20} /></span>
+                            <h2 id="movimientos-titulo" className={styles.sectionTitle}>Movimientos de la semana</h2>
+                        </div>
+                        {movimientos.suben.length && movimientos.bajan.length ? (
+                            <div className={styles.moverTabs} role="group" aria-label="Subieron o bajaron">
+                                {([['suben', 'Subieron'], ['bajan', 'Bajaron']] as const).map(([id, label]) => (
+                                    <button
+                                        key={id}
+                                        type="button"
+                                        className={`${styles.tabBarItem} ${moverTab === id ? styles.tabBarItemActive : ''}`}
+                                        aria-pressed={moverTab === id}
+                                        onClick={() => setMoverTab(id)}
+                                    >
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                        ) : null}
+                        {movimientos.suben.length || movimientos.bajan.length ? (
+                            <div key={shownDetail?.ranking.id} className={`${styles.moversGrid} ${styles.fadeIn}`}>
+                                {[
+                                    { titulo: 'Subieron', vacio: 'Nadie subio de puesto.', items: movimientos.suben, tono: styles.moverUp },
+                                    { titulo: 'Bajaron', vacio: 'Nadie bajo de puesto.', items: movimientos.bajan, tono: styles.moverDown },
+                                ].map((grupo) => (
+                                    <div
+                                        key={grupo.titulo}
+                                        className={`${styles.moverCard} ${grupo.tono}`}
+                                        data-inactive={movimientos.suben.length > 0 && movimientos.bajan.length > 0 && (grupo.titulo === 'Subieron' ? 'suben' : 'bajan') !== moverTab ? 'true' : undefined}
+                                    >
+                                        <h3 className={styles.moverTitle}>{grupo.titulo}</h3>
+                                        {grupo.items.length ? (
+                                            <ol className={styles.moverList}>
+                                                {grupo.items.map(({ entry, puntos }) => (
+                                                    <li key={entry.id} className={styles.moverRow}>
+                                                        <TeamLogo
+                                                            name={getRankingClubName(entry)}
+                                                            shortName={getRankingClubShortName(entry)}
+                                                            teamId={entry.club_id}
+                                                            logoUrl={entry.clubs?.logo_url}
+                                                            className={styles.moverLogo}
+                                                            size={28}
+                                                        />
+                                                        <span className={styles.moverName}>
+                                                            <strong>{getRankingClubName(entry)}</strong>
+                                                            <span>
+                                                                Puesto {entry.current_position}
+                                                                {puntos !== 0 ? ` · ${puntos > 0 ? '+' : ''}${puntos.toFixed(2)} pts` : ''}
+                                                            </span>
+                                                        </span>
+                                                        <MovementChip
+                                                            current={entry.current_position}
+                                                            previous={entry.source_previous_position}
+                                                        />
+                                                    </li>
+                                                ))}
+                                            </ol>
+                                        ) : (
+                                            <p className={styles.moverEmpty}>{grupo.vacio}</p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className={styles.moverEmpty}>
+                                Sin cambios de puesto respecto de la semana anterior.
+                            </p>
+                        )}
+                    </section>
+                ) : null}
+
                 {/* 4. El medallero de cada deporte (solo el general de los Juegos) */}
                 {tablaMedallero && desgloseMedallero.length ? (
                     <section className={styles.breakdownSection} aria-labelledby="desglose-titulo">
@@ -1245,6 +1251,20 @@ function RankingsPageContent({ initialSportId, initialRankings, initialDetail }:
                             ))}
                         </div>
                     </section>
+                ) : null}
+                {/* Como se calcula: al pie, y cerrado. Antes eran seis lineas arriba de la tabla. */}
+                {hasEntries ? (
+                    <details className={styles.howTo}>
+                        <summary>Cómo se calcula</summary>
+                        <p>
+                            {!esSeleccion && selectedRanking?.description?.trim()
+                                ? `${selectedRanking.description.trim().replace(/[.!?]$/, '')}. `
+                                : ''}
+                            {nouns.comoSeCalcula}
+                        </p>
+                        {semanaDeReferencia ? <p>Las flechas comparan con el {semanaDeReferencia}.</p> : null}
+                        {esSeleccion ? <p>Las flechas comparan con la publicación anterior.</p> : null}
+                    </details>
                 ) : null}
                 </div>
             </div>

@@ -1044,3 +1044,564 @@
     text-decoration: underline;
     text-underline-offset: 2px;
 }
+
+/* ── Como la portada de Noticias ─────────────────────────────────────────── */
+/* Las mismas pestañas con subrayado, el mismo titulo grande y el mismo icono
+   verde en los bloques. Primero la tabla (que es a lo que se viene); los
+   movimientos, el desglose y "como se calcula" van debajo. */
+
+.tabBar {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.tabBar::-webkit-scrollbar {
+    display: none;
+}
+
+.tabBarItem {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tabBarItem:hover {
+    color: var(--color-text-primary);
+}
+
+.tabBarItem:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.tabBarItemActive,
+.tabBarItemActive:hover {
+    color: var(--color-text-primary);
+    border-bottom-color: var(--color-text-primary);
+}
+
+.sectionHeading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sectionIcon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    color: #04130c;
+}
+
+/* En escritorio los dos grupos van lado a lado: no hace falta elegir. */
+.moverTabs {
+    display: none;
+}
+
+.moreBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 52px;
+    margin-top: var(--spacing-md);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+.moreBtn:hover {
+    background: var(--color-bg-secondary);
+}
+
+.moreBtn:active {
+    transform: scale(0.98);
+}
+
+.moreBtn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.moreBtnCount {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text-tertiary);
+    font-variant-numeric: tabular-nums;
+}
+
+.howTo {
+    margin-top: var(--spacing-xl);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+}
+
+.howTo summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 56px;
+    color: var(--color-text-primary);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+}
+
+.howTo summary::-webkit-details-marker {
+    display: none;
+}
+
+.howTo summary::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 0.15s ease;
+}
+
+.howTo[open] summary::after {
+    transform: rotate(-135deg);
+}
+
+.howTo p {
+    margin: 0 0 var(--spacing-sm);
+    text-wrap: pretty;
+}
+
+@media (max-width: 768px) {
+    /* Titulo grande y una sola linea de datos. */
+    .header {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm) 0 var(--spacing-sm);
+    }
+
+    .title {
+        margin: 0 0 6px;
+        /* Los nombres de ranking son largos: 32px los deja en dos renglones junto al boton de exportar. */
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+    }
+
+    .meta {
+        font-size: 0.875rem;
+    }
+
+    /* Pestañas a sangre, como las de Noticias. */
+    .tabBar {
+        gap: 24px;
+        margin-inline: calc(-1 * var(--spacing-md));
+        padding-inline: var(--spacing-md);
+    }
+
+    /* Deporte, buscador y semana: compactos, sin raya ni aire de sobra. */
+    .toolbar {
+        gap: 10px;
+        padding-bottom: 0;
+        margin-bottom: var(--spacing-sm);
+        border-bottom: 0;
+    }
+
+    .tab {
+        min-height: 36px;
+        padding: 0 14px;
+    }
+
+    .toolbarRow {
+        padding-top: 0;
+    }
+
+    .searchInput {
+        border-radius: 14px;
+    }
+
+    /* La tabla: una lista de filas, sin caja alrededor. */
+    .tableWrap {
+        overflow: visible;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .tableHead {
+        align-items: center;
+        margin-bottom: 4px;
+    }
+
+    .tableHead .sectionTitle {
+        font-size: 1.625rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+    }
+
+    .tableMeta {
+        font-size: 0.875rem;
+    }
+
+    .table tbody tr {
+        grid-template-columns: 44px minmax(0, 1fr) auto;
+        column-gap: 12px;
+        min-height: 68px;
+        padding: 10px 0;
+        border-bottom: 0;
+    }
+
+    .table tbody tr:hover {
+        background: transparent;
+    }
+
+    .table tbody tr:active {
+        background: var(--color-bg-secondary);
+    }
+
+    .posNumber {
+        font-size: 1.0625rem;
+        font-weight: 600;
+        color: var(--color-text-secondary);
+    }
+
+    .clubCell {
+        gap: 14px;
+    }
+
+    .clubCopy strong {
+        font-size: 1.0625rem;
+        font-weight: 600;
+    }
+
+    .clubRegionMobile {
+        font-size: 0.8125rem;
+    }
+
+    .pointsCell {
+        font-size: 1.125rem;
+        font-weight: 700;
+    }
+
+    /* Una zona (ascenso, descenso) se marca con la barra de color, sin caja. */
+    .positionLabeledRow,
+    .movementRow {
+        border-radius: 12px;
+        padding-inline: 8px !important;
+        margin-inline: -8px;
+    }
+
+    .legend {
+        padding-top: var(--spacing-md);
+    }
+
+    /* Movimientos: un bloque con icono y dos pestañas, una lista a la vez. */
+    .movers {
+        gap: var(--spacing-sm);
+        margin: var(--spacing-xl) 0 0;
+    }
+
+    .movers .sectionTitle {
+        font-size: 1.625rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+    }
+
+    .moverTabs {
+        display: flex;
+        gap: 24px;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .moverCard {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .moverCard[data-inactive='true'] {
+        display: none;
+    }
+
+    .moverTabs ~ .moversGrid .moverTitle {
+        display: none;
+    }
+
+    .moverRow {
+        min-height: 68px;
+        gap: 14px;
+    }
+
+    .moverRow + .moverRow {
+        border-top: 0;
+    }
+
+    .moverName strong {
+        font-size: 1.0625rem;
+    }
+
+    .breakdownCard {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tabBarItem,
+    .moreBtn,
+    .howTo summary::after {
+        transition: none;
+    }
+
+    .moreBtn:active {
+        transform: none;
+    }
+}
+
+/* ── Densidad de la tabla del torneo ─────────────────────────────────────── */
+/* La tabla de posiciones de un torneo es la referencia: fila de ~44px, escudo
+   de 24, nombre a 14px y una cabecera chica. El ranking repetia la misma tabla
+   con filas de 68px y se hacia larguisimo. Las etiquetas (podio, ascenso,
+   descenso) son lo mismo que alli: una barra de 3px y un tinte que se apaga. */
+@media (max-width: 768px) {
+    .table thead {
+        display: block;
+    }
+
+    .table thead tr,
+    .table tbody tr {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr) 64px 56px;
+        grid-template-areas: 'pos club pts var';
+        align-items: center;
+        column-gap: 8px;
+    }
+
+    .table thead th {
+        padding: 8px 0;
+        border: 0;
+        font-size: 0.6875rem;
+        letter-spacing: 0.06em;
+        color: var(--color-text-tertiary);
+    }
+
+    .table thead th:first-child { padding-left: 10px; }
+    .table thead th:last-child { padding-right: 10px; }
+    .table thead .thPos { width: auto; }
+
+    .table .thRegion {
+        display: none;
+    }
+
+    .table tbody tr {
+        min-height: 44px;
+        padding: 0;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .table tbody tr:last-child {
+        border-bottom: 0;
+    }
+
+    .table tbody .medalRow {
+        grid-template-columns: 52px minmax(0, 1fr) 56px;
+        grid-template-areas: 'pos club pts';
+    }
+
+    .posCell {
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+        padding-left: 10px !important;
+    }
+
+    .posNumber {
+        min-width: 1.5ch;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    /* El cambio de puesto es una marquita al lado del numero, no una pastilla. */
+    .posCell .move {
+        min-width: 0;
+        height: auto;
+        padding: 0;
+        background: transparent;
+        font-size: 0.6875rem;
+    }
+
+    .posCell .move svg {
+        width: 10px;
+        height: 10px;
+    }
+
+    .clubCell {
+        gap: 10px;
+    }
+
+    .clubLogo {
+        width: 24px;
+        height: 24px;
+    }
+
+    .clubCopy strong {
+        font-size: 0.875rem;
+        font-weight: 700;
+    }
+
+    /* La region ya no ocupa un renglon: en la tabla del torneo tampoco hay. */
+    .table tbody .clubRegionMobile {
+        display: none;
+    }
+
+    .table tbody .medalRow .clubRegionMobile {
+        display: block;
+    }
+
+    .pointsCell {
+        grid-area: pts;
+        align-self: center;
+        padding-right: 0;
+        font-size: 0.9375rem;
+        font-weight: 700;
+    }
+
+    .varCell {
+        grid-area: var;
+        align-self: center;
+        padding-right: 10px !important;
+        font-size: 0.75rem;
+    }
+
+    /* Etiquetas: barra de 3px y un tinte que se apaga hacia la derecha. */
+    .positionLabeledRow,
+    .movementRow {
+        margin-inline: 0;
+        padding-inline: 0 !important;
+        border-radius: 0;
+        box-shadow: inset 3px 0 0 var(--position-label-color, var(--movement-color));
+    }
+
+    .positionLabeledRow {
+        background: linear-gradient(90deg, color-mix(in srgb, var(--position-label-color) 16%, transparent), transparent 75%);
+    }
+
+    .legend {
+        gap: 4px 12px;
+        padding: 10px 0 0;
+        font-size: 0.75rem;
+    }
+
+    .legendSwatch {
+        width: 3px;
+        height: 12px;
+        border-radius: 2px;
+    }
+
+    .tableHead .sectionTitle {
+        font-size: 1.375rem;
+    }
+
+
+    .moverRow {
+        min-height: 52px;
+        gap: 10px;
+    }
+
+    .moverName strong {
+        font-size: 0.9375rem;
+    }
+
+    .moreBtn {
+        min-height: 46px;
+    }
+}
+
+/* ── Entrada desde Noticias ──────────────────────────────────────────────── */
+/* Al pasar de Noticias a Ranking, el titulo sube desde donde estaba la
+   pestania, las pestanias aparecen debajo (con "Noticias" para volver) y el
+   resto entra un instante despues. Cambiar de ranking repite la subida. Todo
+   es transform y opacity, y se apaga con movimiento reducido. */
+@keyframes rankTitleRise {
+    from { opacity: 0; transform: translateY(72px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes rankFadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes rankSlideIn {
+    from { opacity: 0; transform: translateX(-16px); }
+    to { opacity: 1; transform: none; }
+}
+
+.title {
+    animation: rankTitleRise 460ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+.meta {
+    animation: rankFadeUp 320ms ease-out 120ms both;
+}
+
+.tabBar {
+    animation: rankFadeUp 360ms ease-out 140ms both;
+}
+
+.tabBar > :first-child {
+    animation: rankSlideIn 380ms cubic-bezier(0.2, 0.9, 0.25, 1) 220ms both;
+}
+
+.toolbar {
+    animation: rankFadeUp 360ms ease-out 200ms both;
+}
+
+.tableSection {
+    animation: rankFadeUp 380ms ease-out 260ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .title,
+    .meta,
+    .tabBar,
+    .tabBar > :first-child,
+    .toolbar,
+    .tableSection {
+        animation: none;
+    }
+}

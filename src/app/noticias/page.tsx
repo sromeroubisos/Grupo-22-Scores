@@ -33,12 +33,21 @@ export const metadata: Metadata = {
 const INITIAL_NEWS_LIMIT = 50;
 const PUBLIC_INITIAL_NEWS_LIMIT = 10;
 
-export default async function NoticiasPage() {
+export default async function NoticiasPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ etiqueta?: string | string[] }>;
+}) {
     const { supabase, role } = await getServerAuthRole();
     const canManageNews = hasNewsManagementAccess(role);
 
+    // Una etiqueta de la nota lleva acá: `?etiqueta=Top 14` trae solo las notas que la llevan.
+    const rawTag = (await searchParams).etiqueta;
+    const activeTag = (Array.isArray(rawTag) ? rawTag[0] : rawTag)?.trim().slice(0, 80) || null;
+
     // Quien edita ve todo (borradores incluidos); el público, solo lo publicado.
     let query = supabase.from('news').select('*').order('published_at', { ascending: false });
+    if (activeTag) query = query.contains('tags', [activeTag]);
 
     if (!canManageNews) {
         query = query.eq('status', 'published').limit(PUBLIC_INITIAL_NEWS_LIMIT);
@@ -66,7 +75,8 @@ export default async function NoticiasPage() {
         <NoticiasClient
             initialNews={initialNews || []}
             canManageNews={canManageNews}
-            videoHubs={videoHubs}
+            videoHubs={activeTag ? [] : videoHubs}
+            activeTag={activeTag}
         />
     );
 }
