@@ -3853,6 +3853,34 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                             </button>
                                         </div>
                                     </div>
+                                    {savedGradientPresets.some((preset) => preset.gradientImage) && (
+                                        <div className={styles.presetLibrarySection}>
+                                            <div className={styles.presetLibraryHeader}>
+                                                <span className={styles.presetLibraryTitle}>Tus fondos</span>
+                                                <span className={styles.presetLibraryMeta}>Los PNG que guardaste en Tus gradientes</span>
+                                            </div>
+                                            <div className={styles.gradientPresetGrid}>
+                                                {savedGradientPresets.filter((preset) => preset.gradientImage).map((preset) => {
+                                                    const isActive = matchBackgroundUpload?.src === preset.gradientImage?.src;
+                                                    return (
+                                                        <button
+                                                            key={preset.id}
+                                                            className={`${styles.gradientPresetBtn} ${isActive ? styles.gradientPresetBtnActive : ''}`}
+                                                            onClick={() => setMatchBackgroundUpload(preset.gradientImage ? { ...preset.gradientImage } : null)}
+                                                            title={`Usar ${preset.name} de fondo`}
+                                                            type="button"
+                                                        >
+                                                            <span
+                                                                className={styles.gradientPresetSwatch}
+                                                                style={{ backgroundImage: `url(${preset.gradientImage?.src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                                                            />
+                                                            <span className={styles.gradientPresetName}>{preset.name}</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
