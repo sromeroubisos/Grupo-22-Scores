@@ -5312,3 +5312,17 @@
 }
 .statsTableWrap { border: 0; border-radius: 20px; }
 .statsMobileCard { border: 0; border-radius: 20px; }
+
+/* El banner no es una caja dentro de la página: llega de borde a borde y se pega
+   al header del sitio. .page ya declara --page-bleed (el margen del layout, en
+   sus mismos cortes). Margen negativo + padding igual: el fondo se extiende hasta
+   el borde y el contenido queda exactamente donde estaba, alineado con lo de abajo. */
+.page { padding-top: 0; }
+.heroSection,
+.tabsBar {
+    width: auto;
+    margin-left: calc(-1 * var(--page-bleed));
+    margin-right: calc(-1 * var(--page-bleed));
+    padding-left: var(--page-bleed);
+    padding-right: var(--page-bleed);
+}
