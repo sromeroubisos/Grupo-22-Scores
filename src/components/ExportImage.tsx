@@ -2632,7 +2632,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         ink: plateInkColor,
         brand: plateBrand,
         footerMeta: plateFooterMeta,
-    }), [plateBrand, plateFieldColor, plateFieldEndColor, plateFooterMeta, plateInkColor]);
+        followColors: hasSessionColorOverrides,
+    }), [hasSessionColorOverrides, plateBrand, plateFieldColor, plateFieldEndColor, plateFooterMeta, plateInkColor]);
     const modalPreviewColors = useMemo<ExportPreviewColorOverrides>(() => ({
         accentColor,
         bgColor,
@@ -4037,6 +4038,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                         field: plateFieldColor,
                                         fieldEnd: plateFieldEndColor,
                                         ink: plateInkColor,
+                                        followColors: hasSessionColorOverrides,
                                     });
                                     return (
                                     <div style={{ marginTop: 16 }}>
@@ -8110,6 +8112,8 @@ type ExportPlateOptions = {
     ink?: string;
     brand?: PlateBrandId;
     footerMeta?: boolean;
+    /** Fondo y Acento tocados en esta exportacion: la placa los respeta tal cual (Fondo = campo, Acento = tinta). */
+    followColors?: boolean;
 };
 
 type G22PlateTone = {
@@ -8134,11 +8138,17 @@ function getG22PlateTone(accentColor: string, bgColor: string, overrides?: Expor
     const inkOverride = normalizeHexColor(overrides?.ink);
     const normalizedAccent = normalizeHexColor(accentColor);
     const accent = isHexColor(normalizedAccent) ? normalizedAccent : BRAND_ACCENT;
-    const field = isHexColor(fieldOverride) ? fieldOverride : mixHexColors(bgColor, accent, 0.58);
+    const normalizedBg = normalizeHexColor(bgColor);
+    const follow = overrides?.followColors === true && isHexColor(normalizedBg);
+    const field = isHexColor(fieldOverride)
+        ? fieldOverride
+        : follow ? normalizedBg : mixHexColors(bgColor, accent, 0.58);
     // El campo decide si la pieza es clara u oscura aunque la tinta se fuerce a
     // mano: de eso dependen la trama, las sombras y la viñeta.
     const isDarkField = getContrastColor(field) === '#ffffff';
-    const ink = isHexColor(inkOverride) ? inkOverride : getContrastColor(field);
+    const ink = isHexColor(inkOverride)
+        ? inkOverride
+        : follow && isHexColor(normalizedAccent) ? normalizedAccent : getContrastColor(field);
     // La otra punta del degradado: por defecto el mismo color hundido, que es lo
     // que hace pesar la esquina de abajo sin ensuciar el color de la placa.
     const fieldEnd = isHexColor(fieldEndOverride)
