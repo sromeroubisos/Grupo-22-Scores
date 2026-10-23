@@ -72,17 +72,55 @@ function stripGroupName(roundName: string, groupName: string): string {
     return stripped || raw;
 }
 
+// Sufijo de la clave del cuadro que define puestos (5.º, 7.º…) en vez del título.
+const PLACEMENT_KEY_SUFFIX = '#puestos';
+const PLACEMENT_LABEL = 'Definición de puestos';
+
+const ORDINAL_WORDS: Record<string, number> = {
+    quinto: 5, sexto: 6, septimo: 7, octavo: 8, noveno: 9, decimo: 10,
+};
+
+/**
+ * Primer puesto que define una ronda de ubicación ("5.º puesto", "Final por el
+ * 7.º puesto", "quinto puesto", "5th place"), o null si no lo es. El 3.er puesto
+ * (y "3.º y 4.º") queda afuera a propósito: cuelga de la Final, no es otro cuadro.
+ */
+function placementPosition(stageName: string): number | null {
+    const n = normalizeKey(stageName);
+    if (!/puesto|place/.test(n)) return null;
+    const numeric = n.match(/(\d+)\s*\.?\s*(?:º|°|o)?\s*(?:er|do|to|mo|vo|no)?\s*puesto|(\d+)(?:st|nd|rd|th)[-\s]*place/);
+    const value = numeric ? Number(numeric[1] ?? numeric[2]) : null;
+    if (value != null) return value >= 5 ? value : null;
+    const word = n.match(/\b(quinto|sexto|septimo|octavo|noveno|decimo)\b/);
+    return word ? ORDINAL_WORDS[word[1]] : null;
+}
+
+function isPlacementKey(key: string): boolean {
+    return key.endsWith(PLACEMENT_KEY_SUFFIX);
+}
+
 export function tagBracketRound(roundName: string, groupName?: string | null): BracketRoundTag {
     const name = String(roundName || '').trim();
     const group = String(groupName || '').trim();
+    let tag: BracketRoundTag;
     if (group) {
-        return { bracketKey: normalizeKey(group), bracketLabel: group, stageName: stripGroupName(name, group) };
+        tag = { bracketKey: normalizeKey(group), bracketLabel: group, stageName: stripGroupName(name, group) };
+    } else {
+        const split = splitRoundNamePrefix(name);
+        tag = split
+            ? { bracketKey: normalizeKey(split.prefix), bracketLabel: split.prefix, stageName: split.stage }
+            : { bracketKey: '', bracketLabel: null, stageName: name };
     }
-    const split = splitRoundNamePrefix(name);
-    if (split) {
-        return { bracketKey: normalizeKey(split.prefix), bracketLabel: split.prefix, stageName: split.stage };
+    // Los puestos del 5.º para abajo no son parte del cuadro del título: se
+    // dibujan aparte, dentro de la misma copa si la hay ("Oro" -> "Oro · puestos").
+    if (placementPosition(tag.stageName) != null) {
+        return {
+            bracketKey: `${tag.bracketKey}${PLACEMENT_KEY_SUFFIX}`,
+            bracketLabel: tag.bracketLabel ? `${tag.bracketLabel} · puestos` : PLACEMENT_LABEL,
+            stageName: tag.stageName,
+        };
     }
-    return { bracketKey: '', bracketLabel: null, stageName: name };
+    return tag;
 }
 
 // Orden de las copas cuando la fase tiene varias: la del título primero. Lo que
@@ -148,13 +186,22 @@ export function splitPlayoffDraw<R extends SplittableRound>(draw: R[]): Array<Sp
 
     let brackets = [...byKey.values()];
     if (brackets.length > 1) {
-        const withTeams = brackets.filter((bracket) => bracket.rounds.some(hasRealMatch));
-        if (withTeams.length > 0) brackets = withTeams;
+        // El cuadro de puestos se queda aunque todavía no tenga equipos: es parte
+        // del torneo y se completa solo con el avance de la llave principal.
+        const withTeams = brackets.filter(
+            (bracket) => isPlacementKey(bracket.key) || bracket.rounds.some(hasRealMatch),
+        );
+        if (withTeams.some((bracket) => !isPlacementKey(bracket.key))) brackets = withTeams;
     }
+
+    const rankOf = (key: string) =>
+        isPlacementKey(key)
+            ? bracketRank(key.slice(0, -PLACEMENT_KEY_SUFFIX.length)) + 0.5
+            : bracketRank(key);
 
     return brackets
         .sort((left, right) => {
-            const rankDiff = bracketRank(left.key) - bracketRank(right.key);
+            const rankDiff = rankOf(left.key) - rankOf(right.key);
             if (rankDiff !== 0) return rankDiff;
             return left.firstIndex - right.firstIndex;
         })

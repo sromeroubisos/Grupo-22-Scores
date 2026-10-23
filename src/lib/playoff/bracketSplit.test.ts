@@ -18,7 +18,7 @@ test('el prefijo del nombre define la copa cuando lo que sigue es una instancia'
 });
 
 test('un nombre sin copa no se parte', () => {
-    for (const name of ['Final', 'Semifinales', 'Final - Ida', 'Zona A - Fecha 1', 'Cuartos de final', 'Por el 5.º puesto']) {
+    for (const name of ['Final', 'Semifinales', 'Final - Ida', 'Zona A - Fecha 1', 'Cuartos de final', 'Por el 3.er puesto', '3.º y 4.º puesto']) {
         assert.equal(tagBracketRound(name).bracketKey, '', name);
         assert.equal(tagBracketRound(name).stageName, name, name);
     }
@@ -83,4 +83,29 @@ test('un draw sin etiquetas (proveedor externo) queda como un solo cuadro en su 
     assert.equal(brackets.length, 1);
     assert.equal(brackets[0].label, null);
     assert.deepEqual(brackets[0].rounds.map((r) => r.round_id), ['q', 's', 'f']);
+});
+
+test('los puestos del 5.º para abajo van en su propio cuadro; el 3.º queda con la Final', () => {
+    for (const name of ['5.º puesto', 'Final por el 5.º puesto', 'Quinto puesto', '7.º puesto', '5th place']) {
+        const tag = tagBracketRound(name);
+        assert.equal(tag.bracketKey, '#puestos', name);
+        assert.equal(tag.bracketLabel, 'Definición de puestos', name);
+        assert.equal(tag.stageName, name, name);
+    }
+    assert.equal(tagBracketRound('3.º y 4.º puesto').bracketKey, '');
+    assert.equal(tagBracketRound('Final por el 1.er puesto').bracketKey, '');
+    assert.equal(tagBracketRound('Oro · 5.º puesto').bracketKey, 'oro#puestos');
+    assert.equal(tagBracketRound('Oro · 5.º puesto').bracketLabel, 'Oro · puestos');
+});
+
+test('el cuadro de puestos sale aparte, después del principal, aunque no tenga equipos', () => {
+    const draw = [
+        { ...round('s', 'Semifinal', ''), bracket_label: null },
+        { ...round('f', 'Final', ''), bracket_label: null },
+        { ...round('p', '5.º puesto', '#puestos', false), bracket_label: 'Definición de puestos' },
+    ];
+    const brackets = splitPlayoffDraw(draw);
+    assert.deepEqual(brackets.map((b) => b.key), ['', '#puestos']);
+    assert.deepEqual(brackets[0].rounds.map((r) => r.round_id), ['s', 'f']);
+    assert.equal(brackets[1].label, 'Definición de puestos');
 });

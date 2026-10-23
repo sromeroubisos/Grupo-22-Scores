@@ -13,6 +13,7 @@ import {
     ensurePlayoffBracketMatches,
     getPlayoffTeamsCount,
     isPlayoffPhaseType,
+    readPlayoffBracketMode,
     resolvePlayoffStagesForTeams,
     syncPlayoffStagesToRounds,
 } from '@/lib/server/playoffStages';
@@ -589,7 +590,14 @@ async function createPhases(writer: any, params: {
         const phase = phaseResult.data;
         phases.push(phase);
 
-        if (isPlayoffPhaseType(plan.phase_type) && playoffStages.length > 0) {
+        // Llaves automáticas: rondas y partidos los crea el constructor (con
+        // reglas de avance); los slots vacíos del modo manual dejarían dos
+        // cuadros conviviendo en la misma fase.
+        if (
+            isPlayoffPhaseType(plan.phase_type) &&
+            playoffStages.length > 0 &&
+            readPlayoffBracketMode(planSettings) !== 'auto'
+        ) {
             const syncResult = await syncPlayoffStagesToRounds(writer, phase.id, params.seasonId, playoffStages);
             if (!syncResult.ok) {
                 warnings.push(`La fase ${plan.name} se creo, pero no se pudieron crear sus etapas playoff.`);
