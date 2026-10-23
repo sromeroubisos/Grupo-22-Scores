@@ -359,8 +359,9 @@ export interface PlayoffBracketData {
     rounds: PlayoffBracketRoundData[];
     /** Las llaves de la fase (semifinales, definicion de puestos...). Con mas de una, el modal deja elegir cual exportar; `rounds` es la principal. */
     brackets?: Array<{ key: string; label: string | null; rounds: PlayoffBracketRoundData[] }>;
-    /** Foto de fondo de la placa G22 Base (se dibuja bajo un velo del color del campo). */
+    /** Fondo de la placa G22 Base: va detras de todo, con el velo que traiga. */
     backgroundImage?: string;
+    backgroundVeil?: number;
 }
 
 export type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData | LineupsData | SquadData | TeamOfWeekData;
@@ -1141,6 +1142,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     // la pieza tiene que seguir a la prop viva (la pantalla la memoiza: no titila).
     const baseData = showModal && !statsOptions ? frozenData : liveData;
     const [selectedBracketIndex, setSelectedBracketIndex] = useState(0);
+    // Fondo propio de las tablas normales y del cuadro (no el de las placas de partido).
+    const [standingsBackgroundUpload, setStandingsBackgroundUpload] = useState<MatchBackgroundUpload | null>(null);
     const [matchBackgroundUpload, setMatchBackgroundUpload] = useState<MatchBackgroundUpload | null>(() => {
         if (template !== 'matchStats') return null;
         const backgroundImage = (baseData as MatchStatsData).backgroundImage?.trim();
@@ -1155,9 +1158,9 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const data = useMemo<ExportData>(() => {
         if (template !== 'playoffBracket') return baseData;
         const bracketData = baseData as PlayoffBracketData;
-        // La foto subida en el modal pisa la que trae el torneo.
-        const withBackground = matchBackgroundUpload?.src
-            ? { ...bracketData, backgroundImage: matchBackgroundUpload.src }
+        // El fondo elegido en el modal (o el del torneo) va detras del cuadro.
+        const withBackground = standingsBackgroundUpload?.src
+            ? { ...bracketData, backgroundImage: standingsBackgroundUpload.src, backgroundVeil: getBackgroundVeil(standingsBackgroundUpload) }
             : bracketData;
         if (bracketChoices.length <= 1) return withBackground;
         const choice = bracketChoices[safeBracketIndex];
@@ -1166,7 +1169,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             rounds: choice.rounds,
             subtitle: [choice.label, bracketData.subtitle].filter(Boolean).join(' · '),
         };
-    }, [baseData, bracketChoices, matchBackgroundUpload, safeBracketIndex, template]);
+    }, [baseData, bracketChoices, standingsBackgroundUpload, safeBracketIndex, template]);
     const [isPortalReady, setIsPortalReady] = useState(false);
     const [format, setFormat] = useState<ExportFormat>('1080x1350');
     const [status, setStatus] = useState('');
@@ -1279,8 +1282,6 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         return gradientImage ? { name: 'Degradado preconfigurado', src: gradientImage } : null;
     });
     const [editorialCompetitionLogoUpload, setEditorialCompetitionLogoUpload] = useState<MatchBackgroundUpload | null>(null);
-    // Fondo propio de las tablas normales (no el de las placas de partido).
-    const [standingsBackgroundUpload, setStandingsBackgroundUpload] = useState<MatchBackgroundUpload | null>(null);
     const [manualHomeScore, setManualHomeScore] = useState(() => (
         template === 'matchStats'
             ? formatExportScoreInput((data as MatchStatsData).homeScore)
@@ -1485,14 +1486,14 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         [user?.role, defaultTournamentName],
     );
     useEffect(() => {
-        if (!showModal || !tournamentTheme || isRankingPoster || isLadder || isBracket) return;
+        if (!showModal || !tournamentTheme || isRankingPoster || isLadder || (isBracket && visualFamily !== 'g22Base')) return;
         setHasSessionColorOverrides(true);
         setSelectedPaletteId('custom');
         // El color de fondo del tema va con su foto (el de base del diseno, que
         // puede ser rojo, se mezclaba con el negro y quedaba marron).
         setBgColor(tournamentTheme.bg);
         setAccentColor(tournamentTheme.accent);
-        if (template === 'standings' || template === 'dailyMatches' || template === 'matchStats') {
+        if (template === 'standings' || template === 'dailyMatches' || template === 'matchStats' || template === 'playoffBracket') {
             // Un fondo que subio la persona gana; el del torneo se cambia solo.
             setStandingsBackgroundUpload((current) => (
                 current && current.name !== TOURNAMENT_THEME_BACKGROUND_NAME
@@ -1502,7 +1503,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         }
         statsOptions?.color.onChange(tournamentTheme.highlight);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showModal, tournamentTheme?.id, template, isBracket, isLadder, isRankingPoster]);
+    }, [showModal, tournamentTheme?.id, template, isBracket, isLadder, isRankingPoster, visualFamily]);
 
     // Seleccion rapida de los fondos de G22: pone la foto y el color de fondo que
     // le corresponde (el acento se elige aparte, en la paleta).
@@ -1722,17 +1723,6 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const isEditorialGradientMode = template === 'matchStats' && matchExportLayout === 'editorial4x5';
     // La placa clasica del partido: la unica pieza con degradado propio.
     const isClassicPlate = template === 'matchStats' && matchExportLayout === 'classic' && visualFamily === 'g22Base';
-    // Los PNG de fondo viven en los presets guardados (los editoriales casi todos): una
-    // misma imagen aparece en muchos, asi que se ofrece una sola vez por archivo.
-    const savedBackgroundChoices = useMemo(() => {
-        const seen = new Set<string>();
-        return [...savedEditorialPresets, ...savedGradientPresets].flatMap((preset) => {
-            const image = preset.gradientImage;
-            if (!image?.src || seen.has(image.src)) return [];
-            seen.add(image.src);
-            return [{ id: preset.id, name: preset.name, image }];
-        });
-    }, [savedEditorialPresets, savedGradientPresets]);
     const savedColorGradientPresets = useMemo(
         () => savedGradientPresets.filter((preset) => !preset.gradientImage),
         [savedGradientPresets]
@@ -3836,62 +3826,35 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                 que quedaria es "Tabla corrida", que no hace nada. */}
                             {template === 'playoffBracket' && visualFamily === 'g22Base' && (
                                 <div className={styles.modalSection}>
-                                    <label className={styles.modalLabel}>Foto de fondo</label>
+                                    <label className={styles.modalLabel}>Fondo de G22</label>
+                                    {backgroundPicker}
                                     <div className={styles.uploadCard}>
                                         <div className={styles.uploadMeta}>
-                                            <span className={styles.uploadTitle}>Subi la foto que va detras del cuadro</span>
+                                            <span className={styles.uploadTitle}>Importa tu propio fondo</span>
                                             <span className={styles.uploadSubtitle}>
-                                                Cubre toda la placa y se tapa con un velo del color del campo para que los cruces se lean. Sin foto, queda el campo liso.
+                                                Va detras de todo y el cuadro queda encima. Sin fondo, se usa el color elegido.
                                             </span>
                                         </div>
                                         <div className={styles.uploadActions}>
                                             <label className={styles.uploadBtn}>
-                                                Subir foto
+                                                Subir fondo
                                                 <input
                                                     className={styles.fileInput}
                                                     type="file"
                                                     accept="image/*"
-                                                    onChange={handleMatchBackgroundUpload}
+                                                    onChange={handleStandingsBackgroundUpload}
                                                 />
                                             </label>
                                             <button
                                                 className={styles.ghostBtn}
-                                                onClick={clearMatchBackgroundUpload}
-                                                disabled={!matchBackgroundUpload}
+                                                onClick={clearStandingsBackgroundUpload}
+                                                disabled={!standingsBackgroundUpload}
                                                 type="button"
                                             >
-                                                Quitar
+                                                Quitar fondo
                                             </button>
                                         </div>
                                     </div>
-                                    {savedBackgroundChoices.length > 0 && (
-                                        <div className={styles.presetLibrarySection}>
-                                            <div className={styles.presetLibraryHeader}>
-                                                <span className={styles.presetLibraryTitle}>Tus fondos</span>
-                                                <span className={styles.presetLibraryMeta}>Los PNG que guardaste en tus ediciones</span>
-                                            </div>
-                                            <div className={styles.gradientPresetGrid}>
-                                                {savedBackgroundChoices.map((preset) => {
-                                                    const isActive = matchBackgroundUpload?.src === preset.image.src;
-                                                    return (
-                                                        <button
-                                                            key={preset.id}
-                                                            className={`${styles.gradientPresetBtn} ${isActive ? styles.gradientPresetBtnActive : ''}`}
-                                                            onClick={() => setMatchBackgroundUpload({ ...preset.image })}
-                                                            title={`Usar ${preset.name} de fondo`}
-                                                            type="button"
-                                                        >
-                                                            <span
-                                                                className={styles.gradientPresetSwatch}
-                                                                style={{ backgroundImage: `url(${preset.image.src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-                                                            />
-                                                            <span className={styles.gradientPresetName}>{preset.name}</span>
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             )}
 
@@ -14805,13 +14768,8 @@ async function drawPlayoffBracket(
         // G22 Base: la misma cabecera que el fixture y las formaciones (pildora, cinta del torneo,
         // panel de superficie), con la foto cargada por detras si hay.
         const safe = getSafeArea(canvas);
-        if (plateBackground) {
-            drawCoverImage(ctx, canvas, plateBackground, { focusX: 0.5, focusY: 0.4 });
-            ctx.fillStyle = hexToRGBA(isDark ? '#050507' : '#f8fafc', 0.8);
-            ctx.fillRect(0, 0, W, H);
-        } else {
-            drawBackdrop(ctx, canvas, bgColor, accentColor, isDark);
-        }
+        // El fondo va ATRAS de todo, con la misma regla que el fixture y la tabla.
+        drawBackdrop(ctx, canvas, bgColor, accentColor, isDark, plateBackground, data.backgroundVeil);
         drawCenteredPill(
             ctx,
             safe.centerX,
@@ -14859,7 +14817,7 @@ async function drawPlayoffBracket(
         const panelX = isStory ? 46 : 54;
         const panelY = isStory ? 262 : 222;
         const panelHeight = safe.bottom - panelY - (isStory ? 18 : 10);
-        drawSurfacePanel(ctx, panelX, panelY, W - panelX * 2, panelHeight, 34, isDark);
+        drawSurfacePanel(ctx, panelX, panelY, W - panelX * 2, panelHeight, 34, isDark, data.backgroundVeil !== undefined ? 0.97 : undefined);
         plateArea = { top: panelY + 20, height: panelHeight - 40, margin: panelX + 28 };
     } else {
         drawBracketBackdrop(ctx, canvas, palette);
