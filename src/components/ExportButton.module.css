@@ -1553,7 +1553,7 @@
     flex: 1;
     font-size: 0.8125rem;
     font-weight: 600;
-    color: var(--color-text-primary, #fff);
+    color: #f4f4f5;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1563,7 +1563,7 @@
     flex-shrink: 0;
     font-size: 0.7rem;
     font-weight: 500;
-    color: var(--color-text-secondary, rgba(255,255,255,0.45));
+    color: rgba(255, 255, 255, 0.55);
     white-space: nowrap;
 }
 

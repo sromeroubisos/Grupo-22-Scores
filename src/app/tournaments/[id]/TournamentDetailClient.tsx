@@ -3743,6 +3743,12 @@ export default function TournamentDetailPage({
         kickerLeft: [sportLabel, countryName].filter(Boolean).join(' '),
         kickerRight: yearDisplay ? `Temporada ${yearDisplay}` : '',
         rounds: primaryBracketRounds,
+        // Semifinales y definicion de puestos son llaves distintas: el export deja elegir cual.
+        brackets: playoffBrackets.map((bracket) => ({
+            key: bracket.key,
+            label: bracket.label ?? (bracket.rounds.length === 1 ? bracket.rounds[0].name : null),
+            rounds: bracket.rounds,
+        })),
     };
 
     // Quick stats
