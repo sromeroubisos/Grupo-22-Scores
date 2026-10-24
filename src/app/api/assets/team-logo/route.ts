@@ -1,6 +1,6 @@
-import { lookup } from 'node:dns/promises';
-import { access } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { unstable_cache } from 'next/cache';
 import { NextResponse } from 'next/server';
 import sharp from 'sharp';
 import { getReadClient } from '@/lib/supabase/read';
@@ -13,6 +13,8 @@ import { getPlayerDetails, getTeamDetails } from '@/lib/services/flashscore';
 import { getRugbyPassTournamentBranding } from '@/lib/services/rugbyPass';
 import { parseRugbyPassTournamentId } from '@/lib/services/rugbyPassTournamentBundle';
 import { isUuid } from '@/lib/utils/postgrest';
+import { safeFetchBuffer, SafeFetchError } from '@/lib/server/safeFetch';
+import { TEAM_LOGO_SOURCE_REVALIDATE_SECONDS, TEAM_LOGO_SOURCE_TAG } from '@/lib/server/teamLogoSourceCache';
 
 const LOGO_DIR = path.join(process.cwd(), 'public', 'logos', 'clubs');
 const EXTENSIONS = ['.png', '.svg', '.webp', '.jpg', '.jpeg', '.avif'];
@@ -40,75 +42,44 @@ function resolveProxyCacheControl(url: URL, trustVersion = true): string {
 
 // El `fallback` de la query lo escribe cualquiera en la barra de direcciones, y esta ruta
 // hace el fetch desde el servidor: sin control, `?fallback=http://169.254.169.254/...`
-// convierte al proxy en un telescopio hacia la red interna de Vercel. No usamos lista
-// blanca de hosts a proposito — los logos cargados a mano (overrides, clubs.logo_url)
-// pueden vivir en cualquier dominio publico y tienen que seguir andando. Lo que se
-// bloquea es el DESTINO: loopback, link-local, rangos privados y puertos raros.
-function isPrivateIpv4(address: string): boolean {
-    const parts = address.split('.').map((part) => Number(part));
-    if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) {
-        return true;
-    }
+// convierte al proxy en un telescopio hacia la red interna de Vercel. El control vive
+// en `safeFetch` (destino validado al conectar y en cada redirect, tiempo y bytes con
+// tope). Lo que queda aca es lo que vuelve: esta ruta es del MISMO origen que el sitio,
+// asi que cualquier cosa que no sea una imagen verificada —un `text/html`, un SVG con
+// <script>— seria XSS en g22. Por eso nunca se reenvia el tipo que declara el origen.
+const MAX_SOURCE_BYTES = 5 * 1024 * 1024;
+const FETCH_TIMEOUT_MS = 5000;
+// ~5000x5000. El default de sharp (268 Mpx) deja que un PNG chiquito que declara
+// 50000x50000 se coma la memoria de la funcion al decodificarse.
+const LIMIT_INPUT_PIXELS = 25_000_000;
+// Lado con el que se rasteriza un SVG cuando nadie pidio ancho (el export): alcanza
+// para la placa mas grande sin volver el PNG un ladrillo.
+const SVG_RASTER_WIDTH = 512;
 
-    const [first, second] = parts;
-    if (first === 0 || first === 10 || first === 127) return true;
-    if (first === 169 && second === 254) return true;          // metadata de la nube
-    if (first === 172 && second >= 16 && second <= 31) return true;
-    if (first === 192 && (second === 0 || second === 168)) return true;
-    if (first === 100 && second >= 64 && second <= 127) return true;  // CGNAT
-    if (first === 198 && (second === 18 || second === 19)) return true;
-    if (first >= 224) return true;                              // multicast / reservados
-    return false;
+const PUBLIC_DIR = path.join(process.cwd(), 'public');
+// Lo unico local que se sirve o se redirige: un archivo de imagen bajo public/.
+const LOCAL_IMAGE_PATH = /^\/(?!\/)[A-Za-z0-9._\-/]+\.(?:png|jpe?g|webp|gif|avif|svg)$/i;
+
+// `team_url` termina en el proveedor (getTeamDetails pide a RapidAPI con nuestra
+// key): solo pasa si tiene la forma de un path de FlashScore, `/team/<slug>/<id>/`.
+const FLASHSCORE_ENTITY_PATH = /^(?:https:\/\/(?:www\.)?flashscore\.[a-z.]{2,12})?\/(?:team|player)\/[a-z0-9_-]{1,80}\/[A-Za-z0-9]{4,16}\/?$/i;
+
+function sanitizeTeamUrl(raw: string): string {
+    return FLASHSCORE_ENTITY_PATH.test(raw) ? raw : '';
 }
 
-function isPrivateIpv6(address: string): boolean {
-    const normalized = address.toLowerCase().split('%')[0];
-    if (normalized === '::' || normalized === '::1') return true;
-    if (normalized.startsWith('fc') || normalized.startsWith('fd')) return true;   // unique local
-    if (normalized.startsWith('fe80')) return true;                                 // link local
+const BASE_HEADERS = {
+    'Access-Control-Allow-Origin': '*',
+    // El navegador no adivina: si el tipo dice image/png, se trata como imagen.
+    'X-Content-Type-Options': 'nosniff',
+} as const;
 
-    const mapped = normalized.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/);
-    if (mapped) return isPrivateIpv4(mapped[1]);
-    return false;
-}
-
-async function isPublicHttpUrl(rawUrl: string): Promise<boolean> {
-    let parsed: URL;
-    try {
-        parsed = new URL(rawUrl);
-    } catch {
-        return false;
-    }
-
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
-    if (parsed.port && parsed.port !== '80' && parsed.port !== '443') return false;
-
-    const hostname = parsed.hostname.replace(/^\[/, '').replace(/\]$/, '').toLowerCase();
-    if (!hostname) return false;
-    if (hostname === 'localhost' || hostname.endsWith('.localhost')) return false;
-    if (hostname.endsWith('.internal') || hostname.endsWith('.local')) return false;
-
-    try {
-        // Resolver el nombre es lo que atrapa el caso feo: un dominio publico que apunta
-        // a una IP privada. Chequear el texto del host no alcanza.
-        const addresses = await lookup(hostname, { all: true });
-        if (addresses.length === 0) return false;
-
-        return addresses.every(({ address, family }) => (
-            family === 6 ? !isPrivateIpv6(address) : !isPrivateIpv4(address)
-        ));
-    } catch {
-        return false;
-    }
-}
-
-function buildBlockedSourceResponse() {
+// Una respuesta que no es imagen no lleva cuerpo: nada que un navegador pueda
+// interpretar como documento.
+function buildEmptyResponse(status: number) {
     return new NextResponse(null, {
-        status: 400,
-        headers: {
-            'Cache-Control': 'no-store',
-            'Access-Control-Allow-Origin': '*',
-        },
+        status,
+        headers: { ...BASE_HEADERS, 'Cache-Control': 'no-store' },
     });
 }
 
@@ -289,9 +260,20 @@ function getFallbackInitials(teamName: string, key: string): string {
     return `${parts[0][0] || ''}${parts[1][0] || ''}`.toUpperCase() || 'CL';
 }
 
+// `name` y `key` vienen de la query: sin escapar, `name="><script>...` cerraba el
+// atributo y metia codigo en un SVG servido desde nuestro origen.
+function escapeXml(value: string): string {
+    return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
 function buildFallbackLogoResponse(teamName: string, key: string, url: URL) {
-    const initials = getFallbackInitials(teamName, key);
-    const title = teamName || key || 'Club';
+    const initials = escapeXml(getFallbackInitials(teamName, key));
+    const title = escapeXml((teamName || key || 'Club').slice(0, 120));
     const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" role="img" aria-label="${title}">
             <defs>
@@ -312,26 +294,33 @@ function buildFallbackLogoResponse(teamName: string, key: string, url: URL) {
             // Nunca inmutable: las iniciales son la respuesta de "todavia no hay
             // escudo", y cachearlas una semana sobrevive a que el escudo aparezca.
             'Cache-Control': resolveProxyCacheControl(url, false),
-            'Access-Control-Allow-Origin': '*',
+            ...BASE_HEADERS,
         },
     });
+}
+
+// La carpeta se lista una vez por instancia: antes cada pedido probaba ~16
+// candidatos x 6 extensiones con un `access()` cada uno, casi todos fallidos.
+// Los archivos de public/ no cambian dentro de un deploy.
+let logoDirListing: Promise<Set<string>> | null = null;
+
+function listLogoDir(): Promise<Set<string>> {
+    logoDirListing ??= readdir(LOGO_DIR)
+        .then((names) => new Set(names))
+        .catch(() => new Set<string>());
+    return logoDirListing;
 }
 
 async function findLogoFile(key: string): Promise<string | null> {
     const candidates = new Set<string>();
     addCandidate(candidates, key);
+    const files = await listLogoDir();
+    if (files.size === 0) return null;
 
     for (const candidate of candidates) {
         for (const extension of EXTENSIONS) {
             const filename = `${candidate}${extension}`;
-            const filePath = path.join(LOGO_DIR, filename);
-
-            try {
-                await access(filePath);
-                return `/logos/clubs/${filename}`;
-            } catch {
-                // Try next candidate.
-            }
+            if (files.has(filename)) return `/logos/clubs/${filename}`;
         }
     }
 
@@ -732,6 +721,42 @@ async function findCachedLogo(key: string, teamUrl: string, teamName: string, en
     return null;
 }
 
+type ResolvedLogoSource = { source: string; inherited: boolean };
+
+// "No hay escudo" no se guarda: puede ser un corte de la base (la cascada se
+// traga los errores) y congelar las iniciales seis horas seria peor que pagar
+// la busqueda otra vez. Tirar dentro de unstable_cache es lo que evita guardarlo.
+class LogoSourceNotFound extends Error {}
+
+const findCachedLogoAcrossDeploys = unstable_cache(
+    async (key: string, teamUrl: string, teamName: string, entity: string, sport: string | null): Promise<ResolvedLogoSource> => {
+        const origin: LogoOrigin = { inherited: false };
+        const source = await findCachedLogo(key, teamUrl, teamName, entity, sport, origin);
+        if (!source) throw new LogoSourceNotFound();
+        return { source, inherited: origin.inherited };
+    },
+    ['team-logo-source-v1'],
+    { revalidate: TEAM_LOGO_SOURCE_REVALIDATE_SECONDS, tags: [TEAM_LOGO_SOURCE_TAG] },
+);
+
+async function resolveLogoSource(
+    key: string,
+    teamUrl: string,
+    teamName: string,
+    entity: string,
+    sport: string | null,
+): Promise<ResolvedLogoSource | null> {
+    try {
+        return await findCachedLogoAcrossDeploys(key, teamUrl, teamName, entity, sport);
+    } catch (error) {
+        if (error instanceof LogoSourceNotFound) return null;
+        // El cache mismo fallo (una entrada demasiado grande, el store caido): sin cache.
+        const origin: LogoOrigin = { inherited: false };
+        const source = await findCachedLogo(key, teamUrl, teamName, entity, sport, origin);
+        return source ? { source, inherited: origin.inherited } : null;
+    }
+}
+
 // Muchos escudos estan guardados a 600-1080 px y se pintan en chips de 18-42 px:
 // un ranking de 20 filas bajaba 2,6 MB para dibujar miniaturas. El ancho entra en
 // la URL, o sea que tambien diferencia la entrada de cache del navegador y el CDN.
@@ -766,157 +791,237 @@ function parseRequestedWidth(url: URL): number {
 
 type ProxyImagePayload = { payload: Uint8Array<ArrayBuffer>; contentType: string };
 
-async function downscaleImage(
-    payload: Buffer<ArrayBuffer>,
-    contentType: string,
-    width: number,
-): Promise<ProxyImagePayload> {
-    if (!width) return { payload, contentType };
-    // Un SVG ya escala solo: rasterizarlo lo empeoraria.
-    if (contentType.includes('svg')) return { payload, contentType };
+const RASTER_CONTENT_TYPES: Record<string, string> = {
+    png: 'image/png',
+    jpeg: 'image/jpeg',
+    webp: 'image/webp',
+    gif: 'image/gif',
+};
+
+// Un data: URL solo entra si DICE ser una de estas. Igual se verifica el contenido:
+// la etiqueta la escribe quien arma la URL.
+const ALLOWED_DATA_MIME = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif']);
+
+/**
+ * Bytes de origen desconocido → una imagen que se puede servir, o null.
+ *
+ * El tipo sale de lo que sharp LEE en el contenido, nunca de lo que declara el
+ * origen ni el data: URL. Un SVG ajeno se rasteriza a PNG: como SVG viaja con
+ * su <script> y sus handlers, y servido desde g22 correria con nuestras cookies.
+ * Lo que sharp no sabe leer se rechaza: antes "mejor el original que ninguna
+ * imagen" era justo la puerta por la que pasaba un HTML.
+ */
+async function toSafeImage(input: Buffer, width: number): Promise<ProxyImagePayload | null> {
+    if (input.length === 0 || input.length > MAX_SOURCE_BYTES) return null;
 
     try {
-        const image = sharp(payload);
-        const meta = await image.metadata();
-        if (!meta.width || meta.width <= width) return { payload, contentType };
+        const meta = await sharp(input, { limitInputPixels: LIMIT_INPUT_PIXELS }).metadata();
 
-        const resized = await image
-            // `inside` conserva la proporcion: hay escudos que no son cuadrados.
-            .resize(width, width, { fit: 'inside', withoutEnlargement: true })
-            .png()
-            .toBuffer();
+        if (meta.format === 'svg') {
+            const target = Math.min(width || SVG_RASTER_WIDTH, MAX_PROXY_WIDTH);
+            // A 72 dpi un SVG de 24 px se rasteriza a 24 px y despues se estira:
+            // la densidad se sube para que el render ya salga del tamano final.
+            const intrinsic = meta.width && meta.width > 0 ? meta.width : target;
+            const density = Math.max(72, Math.min(1200, Math.ceil((72 * target) / intrinsic)));
+            const png = await sharp(input, { density, limitInputPixels: LIMIT_INPUT_PIXELS })
+                .resize(target, target, { fit: 'inside' })
+                .png()
+                .toBuffer();
+            return { payload: new Uint8Array(png), contentType: 'image/png' };
+        }
 
-        return { payload: new Uint8Array(resized), contentType: 'image/png' };
+        let contentType = RASTER_CONTENT_TYPES[meta.format ?? ''];
+        // AVIF llega como `heif` con compresion av1; un HEIC (hevc) no lo dibuja ningun navegador.
+        if (!contentType && meta.format === 'heif' && meta.compression === 'av1') contentType = 'image/avif';
+        if (!contentType) return null;
+
+        if (width && meta.width && meta.width > width) {
+            const resized = await sharp(input, { limitInputPixels: LIMIT_INPUT_PIXELS })
+                // `inside` conserva la proporcion: hay escudos que no son cuadrados.
+                .resize(width, width, { fit: 'inside', withoutEnlargement: true })
+                .png()
+                .toBuffer();
+            return { payload: new Uint8Array(resized), contentType: 'image/png' };
+        }
+
+        return { payload: new Uint8Array(input), contentType };
     } catch {
-        // Formato que sharp no puede leer: mejor el original que ninguna imagen.
-        return { payload, contentType };
+        return null;
     }
 }
 
-async function buildImageResponse(source: string, url: URL, trustVersion = true) {
+function decodeDataUrl(source: string): Buffer | null {
+    const commaIndex = source.indexOf(',');
+    if (commaIndex === -1) return null;
+
+    const header = source.slice(5, commaIndex).toLowerCase();
+    const mimeType = header.split(';')[0].trim();
+    if (!ALLOWED_DATA_MIME.has(mimeType)) return null;
+
+    const body = source.slice(commaIndex + 1);
+    // Tope antes de decodificar: base64 infla 4/3, el doble deja aire de sobra.
+    if (body.length > MAX_SOURCE_BYTES * 2) return null;
+
+    try {
+        return header.includes(';base64')
+            ? Buffer.from(body, 'base64')
+            : Buffer.from(decodeURIComponent(body), 'utf-8');
+    } catch {
+        return null;
+    }
+}
+
+function toLocalImagePath(source: string): string | null {
+    const pathname = source.split(/[?#]/)[0];
+    let decoded: string;
+    try {
+        decoded = decodeURIComponent(pathname);
+    } catch {
+        return null;
+    }
+    if (!LOCAL_IMAGE_PATH.test(decoded)) return null;
+    if (decoded.split('/').some((segment) => segment === '..' || segment === '.')) return null;
+    return decoded;
+}
+
+async function readLocalImage(localPath: string): Promise<Buffer | null> {
+    const filePath = path.resolve(PUBLIC_DIR, `.${localPath}`);
+    // Defensa extra contra traversal: el archivo tiene que quedar adentro de public/.
+    if (!filePath.startsWith(PUBLIC_DIR + path.sep)) return null;
+
+    try {
+        const buffer = await readFile(filePath);
+        return buffer.length <= MAX_SOURCE_BYTES ? buffer : null;
+    } catch {
+        // En Vercel public/ puede no estar en el bundle de la funcion: lo sirve el CDN.
+        return null;
+    }
+}
+
+async function fetchRemoteImage(source: string): Promise<Buffer | null> {
+    try {
+        // Sin el data cache de Next (`next.revalidate`) a proposito: la respuesta de esta
+        // ruta ya sale con s-maxage de una semana, el CDN es el que guarda la copia.
+        const { status, body } = await safeFetchBuffer(source, {
+            timeoutMs: FETCH_TIMEOUT_MS,
+            maxBytes: MAX_SOURCE_BYTES,
+            maxRedirects: 3,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Referer': 'https://www.flashscore.com/',
+                'Accept': 'image/avif,image/webp,image/png,image/svg+xml,image/*;q=0.8,*/*;q=0.5',
+            },
+        });
+        return status >= 200 && status < 300 ? body : null;
+    } catch (error) {
+        // Un destino vedado es alguien probando la puerta, no una falla para el log.
+        if (!(error instanceof SafeFetchError) || error.code !== 'blocked_destination') {
+            console.error(`[LogoProxy] Failed to fetch ${source}:`, error instanceof Error ? error.message : error);
+        }
+        return null;
+    }
+}
+
+/**
+ * La imagen de `source` lista para servir, o null si no se pudo conseguir una
+ * imagen verificada. Nunca redirige afuera: el 307 al `fallback` convertia a
+ * g22 en un open redirect (`?key=x&fallback=https://phishing`). El unico
+ * redirect que queda es al MISMO origen, a un archivo de imagen de public/,
+ * para cuando la funcion no lo tiene en disco.
+ */
+async function buildImageResponse(source: string, url: URL, trustVersion = true): Promise<NextResponse | null> {
     const normalizedSource = normalizeSourceUrl(source);
     const cacheControl = resolveProxyCacheControl(url, trustVersion);
     const requestedWidth = parseRequestedWidth(url);
 
+    let bytes: Buffer | null = null;
+    let localPath: string | null = null;
+
     if (normalizedSource.startsWith('data:')) {
-        const commaIndex = normalizedSource.indexOf(',');
-        if (commaIndex === -1) {
-            return NextResponse.json({ ok: false, error: 'invalid data url' }, { status: 400 });
-        }
+        bytes = decodeDataUrl(normalizedSource);
+    } else if (/^https?:\/\//i.test(normalizedSource)) {
+        bytes = await fetchRemoteImage(normalizedSource);
+    } else if (normalizedSource.startsWith('/')) {
+        localPath = toLocalImagePath(normalizedSource);
+        if (localPath) bytes = await readLocalImage(localPath);
+    }
 
-        const header = normalizedSource.slice(5, commaIndex);
-        const body = normalizedSource.slice(commaIndex + 1);
-        const mimeType = header.split(';')[0] || 'application/octet-stream';
-        const isBase64 = header.includes(';base64');
-        const rawPayload = isBase64 ? Buffer.from(body, 'base64') : Buffer.from(decodeURIComponent(body), 'utf-8');
-        const { payload, contentType } = await downscaleImage(rawPayload, mimeType, requestedWidth);
+    if (bytes) {
+        const image = await toSafeImage(bytes, requestedWidth);
+        if (!image) return null;
 
-        return new NextResponse(payload, {
+        return new NextResponse(image.payload, {
             headers: {
-                'Content-Type': contentType,
+                'Content-Type': image.contentType,
                 'Cache-Control': cacheControl,
-                'Access-Control-Allow-Origin': '*',
+                ...BASE_HEADERS,
             },
         });
     }
 
-    if (normalizedSource.startsWith('http://') || normalizedSource.startsWith('https://')) {
-        if (!(await isPublicHttpUrl(normalizedSource))) {
-            return buildBlockedSourceResponse();
-        }
+    if (localPath) {
+        const target = new URL(localPath, url.origin);
+        if (target.origin !== url.origin) return null;
 
-        try {
-            // Fetch the image server-side to bypass potential CORS/hotlinking issues
-            const imgResponse = await fetch(normalizedSource, {
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Referer': 'https://www.flashscore.com/',
-                },
-                next: { revalidate: 86400 }, // Cache on Vercel/Next for a day
-            });
-
-            if (imgResponse.ok) {
-                const upstreamType = imgResponse.headers.get('Content-Type') || 'image/png';
-                const buffer = await imgResponse.arrayBuffer();
-                const { payload, contentType } = await downscaleImage(
-                    Buffer.from(buffer),
-                    upstreamType,
-                    requestedWidth,
-                );
-
-                return new NextResponse(payload, {
-                    headers: {
-                        'Content-Type': contentType,
-                        'Cache-Control': cacheControl,
-                        'Access-Control-Allow-Origin': '*',
-                    },
-                });
-            }
-        } catch (error) {
-            console.error(`[LogoProxy] Failed to fetch ${normalizedSource}:`, error);
-        }
+        return new NextResponse(null, {
+            status: 307,
+            headers: {
+                Location: target.pathname,
+                'Cache-Control': cacheControl,
+                ...BASE_HEADERS,
+            },
+        });
     }
 
-    const target = normalizedSource.startsWith('http://') || normalizedSource.startsWith('https://')
-        ? new URL(normalizedSource)
-        : new URL(normalizedSource, url.origin);
-
-    return new NextResponse(null, {
-        status: 307,
-        headers: {
-            Location: target.toString(),
-            'Cache-Control': cacheControl,
-            'Access-Control-Allow-Origin': '*',
-        },
-    });
+    return null;
 }
 
 export async function GET(request: Request) {
     const url = new URL(request.url);
     const key = url.searchParams.get('key')?.trim() || '';
     const fallback = url.searchParams.get('fallback')?.trim() || '';
-    const teamUrl = url.searchParams.get('team_url')?.trim() || '';
+    const teamUrl = sanitizeTeamUrl(url.searchParams.get('team_url')?.trim() || '');
     const teamName = url.searchParams.get('name')?.trim() || '';
     const entity = url.searchParams.get('entity')?.trim().toLowerCase() || '';
     const sport = normalizeSportHint(url.searchParams.get('sport'));
     const noFallback = url.searchParams.get('noFallback') === '1';
 
     if (!key) {
-        return NextResponse.json({ ok: false, error: 'key is required' }, { status: 400 });
+        return buildEmptyResponse(400);
     }
 
     // Buscar `export-image` como si fuera un club costaba seis `access()` a disco y una
     // cascada de consultas a clubs/external_teams —cada una un viaje cross-region— antes
     // de llegar al fallback, por cada escudo y por cada pasada del preview.
+    // Si falla, 404 y no iniciales: el export pide por aca fotos de fondo, y un "EX"
+    // dibujado en su lugar seria peor que el hueco (ExportImage prueba la directa).
     if (key === EXPORT_IMAGE_PROXY_KEY && fallback) {
-        return buildImageResponse(fallback, url);
+        return (await buildImageResponse(fallback, url)) ?? buildEmptyResponse(404);
     }
 
+    // Cada fuente que no da una imagen verificada cae a la siguiente, en vez de
+    // cortar la cascada: un logo_url roto no deberia tapar al `fallback`.
     const localLogo = await findLogoFile(key);
     if (localLogo) {
-        return buildImageResponse(localLogo, url);
+        const response = await buildImageResponse(localLogo, url);
+        if (response) return response;
     }
 
-    const origin: LogoOrigin = { inherited: false };
-    const cachedLogo = await findCachedLogo(key, teamUrl, teamName, entity, sport, origin);
-    if (cachedLogo) {
-        return buildImageResponse(cachedLogo, url, !origin.inherited);
+    const resolved = await resolveLogoSource(key, teamUrl, teamName, entity, sport);
+    if (resolved) {
+        const response = await buildImageResponse(resolved.source, url, !resolved.inherited);
+        if (response) return response;
     }
 
     if (fallback) {
-        return buildImageResponse(fallback, url);
+        const response = await buildImageResponse(fallback, url);
+        if (response) return response;
     }
 
     // `noFallback`: quien pregunta prefiere NO recibir imagen antes que recibir una con
     // iniciales. Lo pide el export, donde la imagen se publica (ver getTournamentLogoImageSource).
     if (noFallback) {
-        return new NextResponse(null, {
-            status: 404,
-            headers: {
-                'Cache-Control': 'no-store',
-                'Access-Control-Allow-Origin': '*',
-            },
-        });
+        return buildEmptyResponse(404);
     }
 
     return buildFallbackLogoResponse(teamName, key, url);

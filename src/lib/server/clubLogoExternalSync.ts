@@ -1,5 +1,6 @@
 import { upsertExternalTeamLogoOverride } from '@/lib/server/externalTeamLogoOverrides';
 import { isMissingTableError } from '@/lib/utils/supabaseSchema';
+import { invalidateTeamLogoSources } from '@/lib/server/teamLogoSourceCache';
 
 type ClubLogoSource = {
     id?: string | null;
@@ -32,6 +33,10 @@ export async function syncClubLogoToExternalSources(
     club: ClubLogoSource,
     options: { supabaseClient?: any } = {},
 ): Promise<void> {
+    // El proxy de escudos recuerda la fuente de cada escudo entre deploys: un
+    // escudo guardado tiene que verse ya, no cuando venza esa memoria.
+    invalidateTeamLogoSources();
+
     const id = clean(club.id) || clean(club.slug);
     const name = clean(club.name);
     const logoUrl = clean(club.logo_url);

@@ -341,7 +341,9 @@ export interface PlayoffBracketData {
 export type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData | LineupsData | SquadData | TeamOfWeekData;
 type CanvasFormat = { width: number; height: number };
 type SafeArea = { top: number; bottom: number; centerX: number; width: number; height: number };
-type MatchBackgroundUpload = { name: string; src: string };
+// `thumb`: miniatura en Storage para las grillas de presets. Solo la tienen los
+// fondos que ya viven en Storage; un data URI recien subido no.
+type MatchBackgroundUpload = { name: string; src: string; thumb?: string };
 type MatchSponsorData = {
     id?: string;
     name?: string;
@@ -2795,7 +2797,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                         <div className={styles.uploadPreview}>
                                             <div
                                                 className={styles.uploadThumb}
-                                                style={{ backgroundImage: `url(${matchBackgroundUpload.src})` }}
+                                                style={{ backgroundImage: `url(${matchBackgroundUpload.thumb || matchBackgroundUpload.src})` }}
                                             />
                                             <div className={styles.uploadMeta}>
                                                 <span className={styles.uploadTitle}>{matchBackgroundUpload.name}</span>
@@ -3070,7 +3072,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                         <div className={styles.uploadPreview}>
                                             <div
                                                 className={styles.uploadThumb}
-                                                style={{ backgroundImage: `url(${matchBackgroundUpload.src})` }}
+                                                style={{ backgroundImage: `url(${matchBackgroundUpload.thumb || matchBackgroundUpload.src})` }}
                                             />
                                             <div className={styles.uploadMeta}>
                                                 <span className={styles.uploadTitle}>{matchBackgroundUpload.name}</span>
@@ -3276,7 +3278,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                                                         <span
                                                                             className={styles.gradientPresetSwatch}
                                                                             style={{ background: preset.gradientImage?.src
-                                                                                ? `center / cover no-repeat url(${preset.gradientImage.src})`
+                                                                                ? `center / cover no-repeat url(${preset.gradientImage.thumb || preset.gradientImage.src})`
                                                                                 : `linear-gradient(135deg, ${preset.gradientLeftColor}, ${preset.gradientRightColor})` }}
                                                                         />
                                                                         <span className={styles.gradientPresetName}>{preset.name}</span>
@@ -3328,7 +3330,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                                     <div className={styles.gradientUploadPreview}>
                                                         <div
                                                             className={styles.gradientUploadSwatch}
-                                                            style={{ backgroundImage: `url(${editorialGradientUpload.src})` }}
+                                                            style={{ backgroundImage: `url(${editorialGradientUpload.thumb || editorialGradientUpload.src})` }}
                                                         />
                                                         <div className={styles.uploadMeta}>
                                                             <span className={styles.uploadTitle}>{editorialGradientUpload.name}</span>
@@ -3565,7 +3567,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                                         >
                                                             <span
                                                                 className={styles.gradientPresetSwatch}
-                                                                style={{ backgroundImage: `url(${preset.image.src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                                                                style={{ backgroundImage: `url(${preset.image.thumb || preset.image.src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                                                             />
                                                             <span className={styles.gradientPresetName}>{preset.name}</span>
                                                         </button>
@@ -4840,6 +4842,9 @@ function normalizeSavedEditorialPresets(raw: unknown): SavedMatchEditorialPreset
                         ? item.gradientImage.name.trim()
                         : 'Degradado guardado',
                     src: item.gradientImage.src,
+                    ...(typeof item?.gradientImage?.thumb === 'string' && item.gradientImage.thumb
+                        ? { thumb: item.gradientImage.thumb }
+                        : {}),
                 }
                 : null,
             sponsors: getActiveEditorialSponsors(buildEditorialSponsorSlots(item?.sponsors)),
@@ -4862,6 +4867,9 @@ function normalizeSavedGradientPresets(raw: unknown): SavedMatchGradientPreset[]
                         ? item.gradientImage.name.trim()
                         : 'Degradado guardado',
                     src: item.gradientImage.src,
+                    ...(typeof item?.gradientImage?.thumb === 'string' && item.gradientImage.thumb
+                        ? { thumb: item.gradientImage.thumb }
+                        : {}),
                 }
                 : null,
         }))
@@ -5382,6 +5390,60 @@ async function deleteRemotePresetByName(
     }
 }
 
+// La foto de fondo de un preset vivia embebida en el payload como data URI
+// (~1 MB cada una, 23 MB para 11 presets): abrir Exportar bajaba todo, lo
+// parseaba y lo clonaba a IndexedDB. Ahora va a Storage y el preset guarda la
+// URL y una miniatura. La misma foto suele repetirse en varios presets: una
+// sola subida por foto y por pagina.
+const presetBackgroundUploads = new Map<string, Promise<MatchBackgroundUpload | null>>();
+
+function uploadPresetBackground(image: MatchBackgroundUpload): Promise<MatchBackgroundUpload | null> {
+    const pending = presetBackgroundUploads.get(image.src);
+    if (pending) return pending;
+    const promise = (async () => {
+        try {
+            const response = await fetch('/api/export-presets/background', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({ dataUrl: image.src }),
+            });
+            if (!response.ok) return null;
+            const body = await response.json() as { src?: unknown; thumb?: unknown };
+            if (typeof body.src !== 'string' || !body.src) return null;
+            return {
+                name: image.name,
+                src: body.src,
+                ...(typeof body.thumb === 'string' && body.thumb ? { thumb: body.thumb } : {}),
+            };
+        } catch {
+            return null;
+        }
+    })();
+    presetBackgroundUploads.set(image.src, promise);
+    // Un fallo no se recuerda: la proxima hidratacion vuelve a intentar.
+    void promise.then((result) => {
+        if (!result) presetBackgroundUploads.delete(image.src);
+    });
+    return promise;
+}
+
+/**
+ * Los presets con la foto ya en Storage. Si una subida falla, ese preset queda
+ * con su data URI: nunca se pierde un fondo por no poder subirlo.
+ */
+async function movePresetBackgroundsToStorage<T extends { gradientImage: MatchBackgroundUpload | null }>(
+    presets: T[],
+): Promise<T[]> {
+    if (!presets.some((preset) => preset.gradientImage?.src.startsWith('data:'))) return presets;
+    return Promise.all(presets.map(async (preset) => {
+        const image = preset.gradientImage;
+        if (!image || !image.src.startsWith('data:')) return preset;
+        const uploaded = await uploadPresetBackground(image);
+        return uploaded ? { ...preset, gradientImage: uploaded } : preset;
+    }));
+}
+
 type HydratedPresetCollections = {
     editorialPresets: SavedMatchEditorialPreset[];
     gradientPresets: SavedMatchGradientPreset[];
@@ -5453,8 +5515,13 @@ async function hydrateSavedPresetCollections(supabase: SupabaseBrowserClient): P
         const remoteEditorialPresets = mapRemoteEditorialPresetRows(remoteEditorialRows);
         const remoteGradientPresets = mapRemoteGradientPresetRows(remoteGradientRows);
         const remotePlatePresets = mapRemotePlatePresetRows(remotePlateRows);
-        const mergedEditorialPresets = mergeSavedEditorialPresetCollections(remoteEditorialPresets, localEditorialPresets);
-        const mergedGradientPresets = mergeSavedGradientPresetCollections(remoteGradientPresets, localGradientPresets);
+        // Los fondos que siguen embebidos se suben aca, una vez: la firma de la
+        // foto cambia y el bloque de abajo reescribe el storage local y la nube
+        // con la URL corta.
+        const [mergedEditorialPresets, mergedGradientPresets] = await Promise.all([
+            movePresetBackgroundsToStorage(mergeSavedEditorialPresetCollections(remoteEditorialPresets, localEditorialPresets)),
+            movePresetBackgroundsToStorage(mergeSavedGradientPresetCollections(remoteGradientPresets, localGradientPresets)),
+        ]);
         const mergedPlatePresets = mergeSavedPlatePresetCollections(remotePlatePresets, localPlatePresets);
 
         const mergedEditorialSignature = getPresetComparableSignature(mergedEditorialPresets);
@@ -5523,12 +5590,14 @@ async function persistSavedEditorialPreset(
     supabase: SupabaseBrowserClient,
 ): Promise<ExportPresetStorageMode> {
     invalidateSharedPresetHydration();
-    await persistLocalSavedEditorialPresets(presets);
-
     const userId = await getAuthenticatedPresetUserId(supabase);
+    // Con sesion, la foto va a Storage antes de guardar: el preset nunca nace embebido.
+    const storedPresets = userId ? await movePresetBackgroundsToStorage(presets) : presets;
+    await persistLocalSavedEditorialPresets(storedPresets);
     if (!userId) return 'local';
 
-    await upsertRemotePresetRows(supabase, [buildRemoteEditorialPresetRow(userId, preset)]);
+    const storedPreset = storedPresets.find((current) => current.id === preset.id) ?? preset;
+    await upsertRemotePresetRows(supabase, [buildRemoteEditorialPresetRow(userId, storedPreset)]);
     return 'cloud';
 }
 
@@ -5538,12 +5607,13 @@ async function persistSavedGradientPreset(
     supabase: SupabaseBrowserClient,
 ): Promise<ExportPresetStorageMode> {
     invalidateSharedPresetHydration();
-    await persistLocalSavedGradientPresets(presets);
-
     const userId = await getAuthenticatedPresetUserId(supabase);
+    const storedPresets = userId ? await movePresetBackgroundsToStorage(presets) : presets;
+    await persistLocalSavedGradientPresets(storedPresets);
     if (!userId) return 'local';
 
-    await upsertRemotePresetRows(supabase, [buildRemoteGradientPresetRow(userId, preset)]);
+    const storedPreset = storedPresets.find((current) => current.id === preset.id) ?? preset;
+    await upsertRemotePresetRows(supabase, [buildRemoteGradientPresetRow(userId, storedPreset)]);
     return 'cloud';
 }
 
@@ -6575,12 +6645,26 @@ function setActiveCrestBackdropDark(isDark: boolean | null) {
     ACTIVE_CREST_BACKDROP_DARK = isDark;
 }
 
+const OWN_PUBLIC_STORAGE_PREFIX = process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.replace(/\/+$/, '')}/storage/v1/object/public/`
+    : '';
+
+function isOwnPublicStorageUrl(url: string): boolean {
+    return Boolean(OWN_PUBLIC_STORAGE_PREFIX) && url.startsWith(OWN_PUBLIC_STORAGE_PREFIX);
+}
+
 export async function loadImage(url: string): Promise<HTMLImageElement | null> {
     if (!isImageSource(url)) return null;
     const normalizedBase = normalizeImageSource(url);
     const normalized = ACTIVE_CREST_BACKDROP_DARK === true ? darkCrestSource(normalizedBase) : normalizedBase;
     const sameOrigin = typeof window !== 'undefined' && normalized.startsWith(window.location.origin);
-    const sources = (normalized.startsWith('http') && !sameOrigin ? [buildProxyUrl(normalized), normalized] : [normalized])
+    // Storage publico de Supabase manda CORS y cache de un año (los fondos de
+    // presets, los escudos subidos): directo primero. Por el proxy cada foto de
+    // fondo era un viaje a la funcion y, despues de cada deploy, un MISS.
+    const fromOwnStorage = isOwnPublicStorageUrl(normalized);
+    const sources = (normalized.startsWith('http') && !sameOrigin
+        ? (fromOwnStorage ? [normalized, buildProxyUrl(normalized)] : [buildProxyUrl(normalized), normalized])
+        : [normalized])
         .map(withExportCrestWidth);
     const cacheKey = sources[0];
     const cached = exportImageCache.get(cacheKey);
