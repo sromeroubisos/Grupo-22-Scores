@@ -14287,6 +14287,44 @@ function drawBracketBackdrop(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasEl
     ctx.fillRect(0, 0, W, H);
 }
 
+// Un escudo de 512 px dibujado a ~30 px en un solo paso sale con dientes: el
+// filtro del canvas promedia pocos pixeles al achicar tanto. Se baja a la mitad
+// por vez hasta quedar a menos de 2x del destino y recien ahi se dibuja.
+function drawImageDownscaled(
+    ctx: CanvasRenderingContext2D,
+    img: HTMLImageElement,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+) {
+    const targetW = Math.max(1, Math.round(width));
+    const targetH = Math.max(1, Math.round(height));
+    let source: CanvasImageSource = img;
+    let srcW = img.naturalWidth || img.width;
+    let srcH = img.naturalHeight || img.height;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    if (typeof document !== 'undefined' && srcW > 0 && srcH > 0) {
+        while (srcW >= targetW * 2 && srcH >= targetH * 2) {
+            const stepW = Math.max(targetW, Math.floor(srcW / 2));
+            const stepH = Math.max(targetH, Math.floor(srcH / 2));
+            const step = document.createElement('canvas');
+            step.width = stepW;
+            step.height = stepH;
+            const stepCtx = step.getContext('2d');
+            if (!stepCtx) break;
+            stepCtx.imageSmoothingEnabled = true;
+            stepCtx.imageSmoothingQuality = 'high';
+            stepCtx.drawImage(source, 0, 0, stepW, stepH);
+            source = step;
+            srcW = stepW;
+            srcH = stepH;
+        }
+    }
+    ctx.drawImage(source, x, y, width, height);
+}
+
 function drawBracketCrest(
     ctx: CanvasRenderingContext2D,
     centerX: number,
@@ -14314,7 +14352,7 @@ function drawBracketCrest(
     // El escudo va solo, sin recuadro circular: se apoya en el fondo de la tarjeta.
     if (img) {
         const placement = getContainedImagePlacement(img, centerX, centerY, size, size, 0);
-        ctx.drawImage(img, placement.x, placement.y, placement.width, placement.height);
+        drawImageDownscaled(ctx, img, placement.x, placement.y, placement.width, placement.height);
     } else {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
