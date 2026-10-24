@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './page.module.css';
 import { getTournamentById } from '@/lib/data/tournaments';
 import { AlertTriangle, ArrowLeft, Calendar, Trophy, Users, ChevronRight, Share2, MapPin } from 'lucide-react';
+import ShareLinkButton from '@/components/ShareLinkButton';
 import dynamic from 'next/dynamic';
 import { useFavorites } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
@@ -4675,9 +4676,12 @@ export default function TournamentDetailPage({
 
                         {/* Right: status + CTAs */}
                         <div className={styles.heroRight}>
-                            <span className={`${styles.statusBadge} ${tournamentStatus === 'active' ? styles.statusActive : tournamentStatus === 'upcoming' ? styles.statusUpcoming : styles.statusFinished}`}>
-                                {tournamentStatus === 'active' ? 'En Curso' : tournamentStatus === 'upcoming' ? 'Próximamente' : 'Finalizado'}
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span className={`${styles.statusBadge} ${tournamentStatus === 'active' ? styles.statusActive : tournamentStatus === 'upcoming' ? styles.statusUpcoming : styles.statusFinished}`}>
+                                    {tournamentStatus === 'active' ? 'En Curso' : tournamentStatus === 'upcoming' ? 'Próximamente' : 'Finalizado'}
+                                </span>
+                                <ShareLinkButton title={tournamentName} />
+                            </div>
                             <div className={styles.heroCTAs}>
                                 <button
                                     className={styles.ctaBtnSecondary}
