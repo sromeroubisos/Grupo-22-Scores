@@ -27,3 +27,12 @@ export function darkCrestSource(src: string): string {
     const variant = darkVariantOf(match[2]);
     return variant ? `${match[1]}${variant}${match[3] ?? ''}` : src;
 }
+
+/**
+ * Escudos a los que el export NO les dibuja contorno: el trazo blanco que sigue
+ * la silueta del escudo (drawEditorialCrestStroke) no va con el del Tala, que ya
+ * trae su propio borde en la imagen.
+ */
+export function crestHasNoOutline(src: string): boolean {
+    return /\/clubs\/(sb-)?tala-rugby-club(-dark)?\.png/.test(src);
+}

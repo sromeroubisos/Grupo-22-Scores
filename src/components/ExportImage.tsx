@@ -8,7 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { EXPORT_BACKGROUND_OPTIONS, resolveTournamentExportTheme } from '@/lib/exports/tournamentThemes';
 import { resolveAdminPanel } from '@/lib/auth/roles';
 import { mapDesignSlugToVisualFamily, readActiveExportDesign, type ExportDesignSlug, type ExportVisualFamily } from '@/lib/exports/activeDesign';
-import { darkCrestSource } from '@/lib/exports/crestVariants';
+import { crestHasNoOutline, darkCrestSource } from '@/lib/exports/crestVariants';
 import { ratingScaleColor, TINTA as RATING_INK } from '@/lib/matches/ratingScale';
 import {
     EXPORT_DESIGN_CUSTOMIZATION_EVENT,
@@ -7406,6 +7406,8 @@ function drawEditorialCrestStroke(
     color = '#ffffff'
 ) {
     if (!img || typeof document === 'undefined') return;
+    // El Tala no lleva contorno en los exports.
+    if (crestHasNoOutline(img.currentSrc || img.src)) return;
 
     const inset = Math.max(strokeWidth + 4, Math.min(width, height) * 0.08);
     const placement = getContainedImagePlacement(img, x, y, width, height, inset);
