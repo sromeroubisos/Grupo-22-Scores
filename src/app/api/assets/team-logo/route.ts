@@ -1,6 +1,7 @@
 import { lookup } from 'node:dns/promises';
-import { access } from 'node:fs/promises';
+import { readdir } from 'node:fs/promises';
 import path from 'node:path';
+import { unstable_cache } from 'next/cache';
 import { NextResponse } from 'next/server';
 import { getReadClient } from '@/lib/supabase/read';
 import {
@@ -12,6 +13,7 @@ import { getPlayerDetails, getTeamDetails } from '@/lib/services/flashscore';
 import { getRugbyPassTournamentBranding } from '@/lib/services/rugbyPass';
 import { parseRugbyPassTournamentId } from '@/lib/services/rugbyPassTournamentBundle';
 import { isUuid } from '@/lib/utils/postgrest';
+import { TEAM_LOGO_SOURCE_REVALIDATE_SECONDS, TEAM_LOGO_SOURCE_TAG } from '@/lib/server/teamLogoSourceCache';
 
 const LOGO_DIR = path.join(process.cwd(), 'public', 'logos', 'clubs');
 const EXTENSIONS = ['.png', '.svg', '.webp', '.jpg', '.jpeg', '.avif'];
@@ -316,21 +318,28 @@ function buildFallbackLogoResponse(teamName: string, key: string, url: URL) {
     });
 }
 
+// La carpeta se lista una vez por instancia: antes cada pedido probaba ~16
+// candidatos x 6 extensiones con un `access()` cada uno, casi todos fallidos.
+// Los archivos de public/ no cambian dentro de un deploy.
+let logoDirListing: Promise<Set<string>> | null = null;
+
+function listLogoDir(): Promise<Set<string>> {
+    logoDirListing ??= readdir(LOGO_DIR)
+        .then((names) => new Set(names))
+        .catch(() => new Set<string>());
+    return logoDirListing;
+}
+
 async function findLogoFile(key: string): Promise<string | null> {
     const candidates = new Set<string>();
     addCandidate(candidates, key);
+    const files = await listLogoDir();
+    if (files.size === 0) return null;
 
     for (const candidate of candidates) {
         for (const extension of EXTENSIONS) {
             const filename = `${candidate}${extension}`;
-            const filePath = path.join(LOGO_DIR, filename);
-
-            try {
-                await access(filePath);
-                return `/logos/clubs/${filename}`;
-            } catch {
-                // Try next candidate.
-            }
+            if (files.has(filename)) return `/logos/clubs/${filename}`;
         }
     }
 
@@ -802,6 +811,42 @@ async function buildImageResponse(source: string, url: URL, trustVersion = true)
     });
 }
 
+type ResolvedLogoSource = { source: string; inherited: boolean };
+
+// "No hay escudo" no se guarda: puede ser un corte de la base (la cascada se
+// traga los errores) y congelar las iniciales seis horas seria peor que pagar
+// la busqueda otra vez. Tirar dentro de unstable_cache es lo que evita guardarlo.
+class LogoSourceNotFound extends Error {}
+
+const findCachedLogoAcrossDeploys = unstable_cache(
+    async (key: string, teamUrl: string, teamName: string, entity: string, sport: string | null): Promise<ResolvedLogoSource> => {
+        const origin: LogoOrigin = { inherited: false };
+        const source = await findCachedLogo(key, teamUrl, teamName, entity, sport, origin);
+        if (!source) throw new LogoSourceNotFound();
+        return { source, inherited: origin.inherited };
+    },
+    ['team-logo-source-v1'],
+    { revalidate: TEAM_LOGO_SOURCE_REVALIDATE_SECONDS, tags: [TEAM_LOGO_SOURCE_TAG] },
+);
+
+async function resolveLogoSource(
+    key: string,
+    teamUrl: string,
+    teamName: string,
+    entity: string,
+    sport: string | null,
+): Promise<ResolvedLogoSource | null> {
+    try {
+        return await findCachedLogoAcrossDeploys(key, teamUrl, teamName, entity, sport);
+    } catch (error) {
+        if (error instanceof LogoSourceNotFound) return null;
+        // El cache mismo fallo (una entrada demasiado grande, el store caido): sin cache.
+        const origin: LogoOrigin = { inherited: false };
+        const source = await findCachedLogo(key, teamUrl, teamName, entity, sport, origin);
+        return source ? { source, inherited: origin.inherited } : null;
+    }
+}
+
 export async function GET(request: Request) {
     const url = new URL(request.url);
     const key = url.searchParams.get('key')?.trim() || '';
@@ -828,10 +873,9 @@ export async function GET(request: Request) {
         return buildImageResponse(localLogo, url);
     }
 
-    const origin: LogoOrigin = { inherited: false };
-    const cachedLogo = await findCachedLogo(key, teamUrl, teamName, entity, sport, origin);
-    if (cachedLogo) {
-        return buildImageResponse(cachedLogo, url, !origin.inherited);
+    const resolved = await resolveLogoSource(key, teamUrl, teamName, entity, sport);
+    if (resolved) {
+        return buildImageResponse(resolved.source, url, !resolved.inherited);
     }
 
     if (fallback) {
