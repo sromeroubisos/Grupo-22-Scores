@@ -1,0 +1,67 @@
+.root {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--fl-border, var(--color-border, rgba(127, 127, 127, 0.4)));
+    border-radius: 999px;
+    background: var(--fl-btn-ghost-bg, transparent);
+    color: var(--fl-text, var(--color-text-primary, inherit));
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.trigger:hover,
+.trigger:focus-visible {
+    border-color: var(--color-text-secondary, currentColor);
+}
+
+.trigger:focus-visible {
+    outline: 2px solid var(--accent-ink, #22c55e);
+    outline-offset: 2px;
+}
+
+.triggerOk {
+    border-color: var(--accent-ink, #22c55e);
+    color: var(--accent-ink, #22c55e);
+}
+
+.label {
+    white-space: nowrap;
+}
+
+.manualLink {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 30;
+    width: min(320px, 80vw);
+    padding: 10px 12px;
+    border: 1px solid var(--color-border, rgba(127, 127, 127, 0.4));
+    border-radius: 10px;
+    background: var(--color-bg-elevated, Canvas);
+    color: inherit;
+    font: inherit;
+    font-size: 0.85rem;
+}
+
+.srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}

@@ -8,6 +8,7 @@ import { useBannerColor } from './useBannerColor';
 import { getTournamentById } from '@/lib/data/tournaments';
 import { ArrowLeft, Calendar, Trophy, Users, ChevronRight, Share2, MapPin, Star } from 'lucide-react';
 import ExportImage from '@/components/ExportImage';
+import ShareLinkButton from '@/components/ShareLinkButton';
 import { useFavorites } from '@/hooks/useFavorites';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import { setCachedLogo } from '@/lib/utils/logoCache';
@@ -5125,9 +5126,12 @@ export default function TournamentDetailPage({
 
                         {/* Right: status + CTAs */}
                         <div className={styles.heroRight}>
-                            <span className={`${styles.statusBadge} ${tournamentStatus === 'active' ? styles.statusActive : tournamentStatus === 'upcoming' ? styles.statusUpcoming : styles.statusFinished}`}>
-                                {tournamentStatus === 'active' ? 'En Curso' : tournamentStatus === 'upcoming' ? 'Próximamente' : 'Finalizado'}
-                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <span className={`${styles.statusBadge} ${tournamentStatus === 'active' ? styles.statusActive : tournamentStatus === 'upcoming' ? styles.statusUpcoming : styles.statusFinished}`}>
+                                    {tournamentStatus === 'active' ? 'En Curso' : tournamentStatus === 'upcoming' ? 'Próximamente' : 'Finalizado'}
+                                </span>
+                                <ShareLinkButton title={tournamentName} />
+                            </div>
                             <div className={styles.heroCTAs}>
                                 {/* Atajos a pestañas: en el celular las pestañas están justo
                                     debajo, así que se esconden (heroNavShortcut). */}
