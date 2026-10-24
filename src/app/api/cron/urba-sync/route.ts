@@ -100,6 +100,7 @@ import {
     parseUrbaId,
     subcategoriaDeTorneoUrba,
 } from '@/lib/integrations/urba/externalId';
+import { instanciaDePlayoff } from '@/lib/integrations/urba/instanciaDePlayoff';
 import { planTournamentMatches, type ExistenteEnBase } from '@/lib/integrations/urba/planMatches';
 import { construirPatch, parteDelBarrido, PARTES_DEL_BARRIDO, rotarPorReloj } from '@/lib/integrations/urba/syncPlan';
 import { parsearAnioPedido, PRIMER_ANIO_URBA, temporadaEnCurso } from '@/lib/integrations/urba/temporada';
@@ -567,6 +568,19 @@ export async function GET(request: NextRequest) {
                 participantesYaEnBase: new Set(((partsRaw ?? []) as Array<{ club_id: string }>).map((p) => p.club_id)),
             });
 
+            // Un torneo con playoff cargado tiene dos fases, y "la de los hermanos"
+            // ya no alcanza para elegir: la regular es la que no es de playoff. Sólo
+            // se consulta si hay algo que dar de alta.
+            let fasesPlayoff = new Set<string>();
+            if (plan.crear.length > 0 || plan.participantesCrear.length > 0) {
+                const { data: fp } = await supabase
+                    .from('tournament_phases').select('id').eq('tournament_id', t.id).eq('phase_type', 'playoff');
+                fasesPlayoff = new Set(((fp ?? []) as Array<{ id: string }>).map((f) => f.id));
+            }
+            const faseRegular = ya.find((m) => m.phase_id && !fasesPlayoff.has(m.phase_id))?.phase_id ?? faseDelTorneo;
+            // Una sola fase de playoff es una respuesta; con varias no se adivina.
+            const fasePlayoff = fasesPlayoff.size === 1 ? [...fasesPlayoff][0] : null;
+
             // Las fases que este torneo va a tener que recalcular. Se junta acá,
             // sobre los partidos que REALMENTE se escriben, y no al final sobre
             // el torneo entero: recalcular una fase que no se tocó es leer toda
@@ -587,18 +601,36 @@ export async function GET(request: NextRequest) {
                 const { error } = await supabase.from('tournament_participants').insert([p]);
                 if (error) { errors.push(`${t.external_id}: no se pudo inscribir a ${p.club_id} (${error.message})`); continue; }
                 participantesCreados++;
-                if (faseDelTorneo) fasesTocadas.add(faseDelTorneo);
+                if (faseRegular) fasesTocadas.add(faseRegular);
             }
 
             // altas
             for (const fila of plan.crear) {
                 if (enSeco) { written++; detalle.push({ torneo: t.external_id, accion: 'crear', external_id: fila.external_id }); continue; }
+                // Una instancia de playoff va a la fase de playoff del torneo, no a la
+                // tabla del regular. Y la final ya tiene su lugar en el cuadro (M-F,
+                // sin rival ni external_id): se completa, no se duplica.
+                const instancia = fasePlayoff ? instanciaDePlayoff(fila.round_label) : null;
+                if (instancia === 'final' && fasePlayoff) {
+                    const { data: previstas } = await supabase.from('matches').select('id')
+                        .eq('tournament_id', t.id).eq('phase_id', fasePlayoff)
+                        .eq('bracket_match_code', 'M-F').is('external_id', null).limit(1);
+                    const prevista = (previstas ?? [])[0] as { id: string } | undefined;
+                    if (prevista) {
+                        const { error } = await supabase.from('matches')
+                            .update({ ...fila, sport_id: 'rugby', is_visible: visibleEnEsteTorneo }).eq('id', prevista.id);
+                        if (error) { errors.push(`${fila.external_id}: no se pudo completar la final (${error.message})`); continue; }
+                        written++;
+                        continue;
+                    }
+                }
+                const fasePartido = instancia ? fasePlayoff : faseRegular;
                 const { error } = await supabase.from('matches').insert([{
-                    ...fila, sport_id: 'rugby', is_visible: visibleEnEsteTorneo, phase_id: faseDelTorneo,
+                    ...fila, sport_id: 'rugby', is_visible: visibleEnEsteTorneo, phase_id: fasePartido,
                 }]);
                 if (error) { errors.push(`${fila.external_id}: alta falló (${error.message})`); continue; }
                 written++;
-                if (faseDelTorneo) fasesTocadas.add(faseDelTorneo);
+                if (fasePartido && fasePartido === faseRegular) fasesTocadas.add(fasePartido);
             }
 
             // actualizaciones
