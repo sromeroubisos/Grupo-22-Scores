@@ -14572,7 +14572,7 @@ function drawBracketBlockCard(
             if (dim) ctx.globalAlpha = 0.55;
             if (row.logo) {
                 const placement = getContainedImagePlacement(row.logo, crestX, centerY, crest, crest, 0);
-                ctx.drawImage(row.logo, placement.x, placement.y, placement.width, placement.height);
+                drawImageDownscaled(ctx, row.logo, placement.x, placement.y, placement.width, placement.height);
             } else {
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
@@ -14877,7 +14877,7 @@ async function drawPlayoffBracket(
             const startX = safe.centerX - (logoSize + logoGap + nameWidth) / 2;
             if (tournamentLogo) {
                 const placement = getContainedImagePlacement(tournamentLogo, startX + logoSize / 2, ribbonY, logoSize, logoSize, 0);
-                ctx.drawImage(tournamentLogo, placement.x, placement.y, placement.width, placement.height);
+                drawImageDownscaled(ctx, tournamentLogo, placement.x, placement.y, placement.width, placement.height);
             }
             ctx.font = `800 ${nameSize}px ${FONT_DISPLAY}`;
             ctx.fillText(shownName, startX + logoSize + logoGap, ribbonY + 2);
@@ -14931,7 +14931,7 @@ async function drawPlayoffBracket(
             ctx.fillStyle = glow;
             ctx.fillRect(W / 2 - u(140), logoCenterY - u(120), u(280), u(240));
             const placement = getContainedImagePlacement(tournamentLogo, W / 2, logoCenterY, u(180), u(132), 0);
-            ctx.drawImage(tournamentLogo, placement.x, placement.y, placement.width, placement.height);
+            drawImageDownscaled(ctx, tournamentLogo, placement.x, placement.y, placement.width, placement.height);
             ctx.restore();
         }
 
