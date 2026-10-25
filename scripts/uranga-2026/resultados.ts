@@ -42,10 +42,14 @@ const SEMIS: R[] = [
   { codigo: 'BRONCE-S1', home: 7, away: 7, winner: 'home' }, { codigo: 'BRONCE-S2', home: 7, away: 19 },
   { codigo: 'CRISTAL-S1', home: 7, away: 0 },
 ];
+/** Finales jugadas. Oro: Jockey Salta Rojo 19 – Taraguy 3 (el campeón es el de la final de Oro). */
+const FINALES: R[] = [{ codigo: 'ORO-F', home: 19, away: 3 }];
 /** Ganadores sin marcador legible: [partido que se completa a mano, lado, equipo (ficha)]. */
 const A_MANO: Array<[string, 'home' | 'away', string]> = [
   ['PLATA-S2', 'away', 'universitario-de-salta-m15'],   // ganó los cuartos 4 de Plata, marcador ilegible
   ['CRISTAL-F', 'away', 'parana-rowing-m15'],            // ganó la semi 2 de Cristal, marcador ilegible
+  // Se ve a Teque contra "SLT" en la transmisión de la final de Plata: ganó la semi 2 (marcador desconocido).
+  ['PLATA-F', 'away', 'santiago-lawn-tennis-m15-rojo'],
 ];
 /** Horarios que el cuadro impreso cambió respecto de la placa (hora local de Paraná). */
 const HORARIOS: Record<string, string> = { 'ORO-F': '17:30', 'PLATA-S2': '15:30', 'PLATA-F': '17:00', 'BRONCE-F': '16:00' };
@@ -90,6 +94,17 @@ async function main() {
   await cargar(SEMIS); await avanzar(SEMIS);
   console.log('✓ semis cargadas y avance a finales');
   for (const [codigo, lado, ficha] of A_MANO.filter(([c]) => c.endsWith('-F'))) await ponerAMano(sb, porCodigo.get(codigo).id, lado, ficha);
+  await cargar(FINALES);
+  // El campeón del torneo es el de la final de Copa Oro.
+  const final = FINALES.find((f) => f.codigo === 'ORO-F');
+  if (final) {
+    const m = porCodigo.get('ORO-F');
+    const { data: fila } = await sb.from('matches').select('home_club_id, away_club_id').eq('id', m.id).single();
+    const campeon = final.home > final.away ? fila.home_club_id : fila.away_club_id;
+    const { error } = await sb.from('tournament_seasons').update({ champion_club_id: campeon, status: 'active' }).eq('tournament_id', t.id);
+    if (error) throw new Error(`campeón: ${error.message}`);
+    console.log(`✓ campeón del torneo: ${campeon}`);
+  }
   for (const [codigo, hora] of Object.entries(HORARIOS)) {
     const { error } = await sb.from('matches').update({ date_time: instante(hora) }).eq('id', porCodigo.get(codigo).id);
     if (error) throw new Error(`${codigo}: ${error.message}`);
