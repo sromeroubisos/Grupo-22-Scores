@@ -24,7 +24,7 @@ const SLUG = 'torneo-juvenil-m15-eduardo-uranga';
 const modo = process.argv.includes('--execute') ? 'execute' : process.argv.includes('--plan') ? 'plan' : null;
 if (!modo) { console.error('usá --plan o --execute'); process.exit(2); }
 
-type R = { codigo: string; home: number; away: number; winner?: 'home' | 'away' };
+type R = { codigo: string; home?: number; away?: number; winner?: 'home' | 'away' };
 
 /** Marcadores por etapa. `home`/`away` siguen el orden del cruce cargado (ver datos.mjs). */
 const CUARTOS: R[] = [
@@ -50,6 +50,8 @@ const FINALES: R[] = [
   { codigo: 'ORO-F', home: 19, away: 3 },
   { codigo: 'PLATA-F', home: 17, away: 7 },
   { codigo: 'BRONCE-F', home: 5, away: 19 },
+  // Cristal: Rowing campeón, sin marcador conocido (se carga sólo el ganador, sin inventar goles).
+  { codigo: 'CRISTAL-F', winner: 'away' },
 ];
 /** Ganadores sin marcador legible: [partido que se completa a mano, lado, equipo (ficha)]. */
 const A_MANO: Array<[string, 'home' | 'away', string]> = [
@@ -82,8 +84,9 @@ async function main() {
   const cargar = async (etapa: R[]) => {
     for (const r of etapa) {
       const m = porCodigo.get(r.codigo);
-      const score: Record<string, unknown> = { home: r.home, away: r.away };
-      if (r.winner) { score.winner = r.winner; score.tiebreak = 'drops'; }
+      // Sin goles conocidos: sólo el ganador. Con goles y `winner` (los 7-7), el desempate fue por drops.
+      const score: Record<string, unknown> = r.home == null ? { winner: r.winner } : { home: r.home, away: r.away };
+      if (r.winner && r.home != null) { score.winner = r.winner; score.tiebreak = 'drops'; }
       const { error } = await sb.from('matches').update({ status: 'final', score, updated_at: new Date().toISOString() }).eq('id', m.id);
       if (error) throw new Error(`${r.codigo}: ${error.message}`);
     }
@@ -107,7 +110,7 @@ async function main() {
   if (final) {
     const m = porCodigo.get('ORO-F');
     const { data: fila } = await sb.from('matches').select('home_club_id, away_club_id').eq('id', m.id).single();
-    const campeon = final.home > final.away ? fila.home_club_id : fila.away_club_id;
+    const campeon = (final.home ?? 0) > (final.away ?? 0) ? fila.home_club_id : fila.away_club_id;
     const { error } = await sb.from('tournament_seasons').update({ champion_club_id: campeon, status: 'active' }).eq('tournament_id', t.id);
     if (error) throw new Error(`campeón: ${error.message}`);
     console.log(`✓ campeón del torneo: ${campeon}`);
