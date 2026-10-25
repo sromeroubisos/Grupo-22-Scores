@@ -4211,6 +4211,29 @@
         transform: scale(0.9);
     }
 
+    /* Modo claro: la barra no puede quedar negra con rotulos casi invisibles. */
+    :root[data-theme='light'] .basalt-tabs-bottom {
+        background: #ffffff;
+        border-top: 1px solid rgba(15, 23, 42, 0.12);
+        box-shadow: 0 -6px 20px rgba(15, 23, 42, 0.1);
+    }
+
+    :root[data-theme='light'] .basalt-tabs-bottom-item {
+        color: #475569;
+    }
+
+    :root[data-theme='light'] .basalt-tabs-bottom-item.active {
+        color: #0f7a3f;
+    }
+
+    :root[data-theme='light'] .basalt-tabs-bottom-item.active .basalt-tabs-bottom-glyph svg {
+        filter: none;
+    }
+
+    :root[data-theme='light'] .basalt-tabs-bottom-dot {
+        box-shadow: 0 0 0 2px #ffffff;
+    }
+
     /* Active item: primary green, bolder, scale up to 1.1 (matches mockup) */
     .basalt-tabs-bottom-item.active {
         color: var(--primary, #4be277);
