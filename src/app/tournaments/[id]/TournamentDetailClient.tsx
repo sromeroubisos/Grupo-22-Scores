@@ -5026,6 +5026,9 @@ export default function TournamentDetailPage({
 
                     {/* Hero Card */}
                     <div className={styles.heroCard}>
+                        {/* En el celular el botón vive en la fila del nombre (arriba a la derecha)
+                            y no en .heroRight, para no sumarle una fila al banner. */}
+                        <ShareLinkButton title={tournamentName} className={styles.heroShareMobile} />
                         <div className={styles.heroLeft}>
                             {/* Logo */}
                             <div className={styles.heroLogoWrap}>
@@ -5126,11 +5129,11 @@ export default function TournamentDetailPage({
 
                         {/* Right: status + CTAs */}
                         <div className={styles.heroRight}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div className={styles.heroStatusRow}>
                                 <span className={`${styles.statusBadge} ${tournamentStatus === 'active' ? styles.statusActive : tournamentStatus === 'upcoming' ? styles.statusUpcoming : styles.statusFinished}`}>
                                     {tournamentStatus === 'active' ? 'En Curso' : tournamentStatus === 'upcoming' ? 'Próximamente' : 'Finalizado'}
                                 </span>
-                                <ShareLinkButton title={tournamentName} />
+                                <ShareLinkButton title={tournamentName} className={styles.heroShareDesktop} />
                             </div>
                             <div className={styles.heroCTAs}>
                                 {/* Atajos a pestañas: en el celular las pestañas están justo

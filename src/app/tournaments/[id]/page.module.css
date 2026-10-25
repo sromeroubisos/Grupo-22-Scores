@@ -623,6 +623,15 @@
     z-index: 1;
 }
 
+/* Compartir: en escritorio va junto al estado; en el celular el badge se oculta
+   y el botón pasa a la fila del nombre (heroShareMobile) para no agrandar el banner. */
+.heroStatusRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.heroCard .heroShareMobile { display: none; }
+
 /* Status badges */
 .statusBadge {
     padding: 5px 13px;
@@ -3323,6 +3332,15 @@
     .heroMeta > *:not(.heroMetaItem):not(.seasonSwitcher):not(.heroMetaNav) { display: none; }
     /* Hide secondary chrome that cluttered the old hero */
     .statusBadge { display: none; }
+    .heroStatusRow { display: none; }
+    .heroCard .heroShareMobile {
+        display: inline-flex;
+        position: absolute;
+        top: 18px; /* centrado con el logo de 64px */
+        right: 0;
+        z-index: 2;
+    }
+    .heroInfo { padding-right: 52px; }
     /* CTA row sits below the title in a tighter line */
     .heroRight {
         flex-direction: row;
