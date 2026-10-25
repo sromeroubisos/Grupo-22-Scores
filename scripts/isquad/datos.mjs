@@ -46,7 +46,7 @@ export const TORNEOS = [
   {
     campeonato: '419', slug: 'es-liga-iberdrola', nombre: 'Liga Iberdrola de Rugby',
     categoria: 'Femenino', genero: 'femenino', edad: 'mayores',
-    fases: [{ nombre: '1ª Fase', grupos: [{ id: '1298', nombre: null }] }],
+    fases: [{ nombre: '1ª Fase', grupos: [{ id: '1329', nombre: null }] }],
   },
   {
     campeonato: '417', slug: 'es-division-de-honor-elite', nombre: 'División de Honor Élite',
@@ -56,7 +56,7 @@ export const TORNEOS = [
   {
     campeonato: '420', slug: 'es-division-de-honor-b-femenina', nombre: 'División de Honor B Femenina',
     categoria: 'Femenino', genero: 'femenino', edad: 'mayores',
-    fases: [{ nombre: '1ª Fase', grupos: [{ id: '1299', nombre: null }] }],
+    fases: [{ nombre: '1ª Fase', grupos: [{ id: '1330', nombre: null }] }],
   },
   {
     campeonato: '418', slug: 'es-division-de-honor-b', nombre: 'División de Honor B',
@@ -200,10 +200,10 @@ export const EQUIPOS = {
   2064: 'getxo-rugby', 2057: 'barca-rugbi', 1736: 'fenix-rugby', 1717: 'ingenieros-industriales-las-rozas',
   1724: 'bizkaia-gernika', 1709: 'valencia-rc', 2048: 'real-ciencias-sevilla', 1722: 'cp-les-abelles',
   1721: 'cr-sant-cugat', 1719: 'hernani-cre',
-  // Liga Iberdrola (1298)
+  // Liga Iberdrola (1298 hasta el 2026-10-24; hoy 1329)
   226: 'crat-coruna-femenino', 254: 'el-salvador-femenino', 278: 'rugby-majadahonda-femenino',
   285: 'cr-sant-cugat-femenino', 336: 'universitario-sevilla-femenino', 1417: 'getxo-rugby-femenino', 2065: 'turia-rugby-femenino',
-  // DH B femenina (1299)
+  // DH B femenina (1299 hasta el 2026-10-24; hoy 1330)
   257: 'buc-barcelona-femenino', 341: 'atletico-portuense-femenino', 1100: 'ue-santboiana-femenino',
   1414: 'eibar-rt-femenino', 1723: 'universitario-bilbao-femenino', 2049: 'complutense-cisneros-femenino',
   2056: 'gaztedi-rt-femenino', 2058: 'olimpico-de-pozuelo-femenino',
