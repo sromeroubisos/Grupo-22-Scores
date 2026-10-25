@@ -42,8 +42,15 @@ const SEMIS: R[] = [
   { codigo: 'BRONCE-S1', home: 7, away: 7, winner: 'home' }, { codigo: 'BRONCE-S2', home: 7, away: 19 },
   { codigo: 'CRISTAL-S1', home: 7, away: 0 },
 ];
-/** Finales jugadas. Oro: Jockey Salta Rojo 19 – Taraguy 3 (el campeón es el de la final de Oro). */
-const FINALES: R[] = [{ codigo: 'ORO-F', home: 19, away: 3 }];
+/**
+ * Finales jugadas. Oro: Jockey Salta Rojo 19 – Taraguy 3 (el campeón del torneo es el de la final de Oro).
+ * Plata: Teque 17 – Santiago LT Rojo 7. Bronce: Suri 5 – San Juan 19.
+ */
+const FINALES: R[] = [
+  { codigo: 'ORO-F', home: 19, away: 3 },
+  { codigo: 'PLATA-F', home: 17, away: 7 },
+  { codigo: 'BRONCE-F', home: 5, away: 19 },
+];
 /** Ganadores sin marcador legible: [partido que se completa a mano, lado, equipo (ficha)]. */
 const A_MANO: Array<[string, 'home' | 'away', string]> = [
   ['PLATA-S2', 'away', 'universitario-de-salta-m15'],   // ganó los cuartos 4 de Plata, marcador ilegible
