@@ -59,9 +59,10 @@ async function main() {
 
   const { data: t } = await sb.from('tournaments').select('id').eq('slug', SLUG).maybeSingle();
   if (!t) throw new Error('el torneo no existe');
-  const { data: fase } = await sb.from('tournament_phases').select('id').eq('tournament_id', t.id).eq('phase_type', 'playoff').maybeSingle();
-  if (!fase) throw new Error('falta la fase de copas');
-  const { data: ms } = await sb.from('matches').select('id, bracket_match_code, home_club_id, away_club_id').eq('phase_id', fase.id);
+  // Una fase de playoff por copa (Oro, Plata, Bronce, Cristal).
+  const { data: fases } = await sb.from('tournament_phases').select('id').eq('tournament_id', t.id).eq('phase_type', 'playoff');
+  if (!fases?.length) throw new Error('faltan las fases de copas');
+  const { data: ms } = await sb.from('matches').select('id, bracket_match_code, home_club_id, away_club_id').in('phase_id', fases.map((f: any) => f.id));
   const porCodigo = new Map((ms ?? []).map((m: any) => [m.bracket_match_code as string, m]));
   for (const r of [...CUARTOS, ...SEMIS]) if (!porCodigo.has(r.codigo)) throw new Error(`no existe el partido ${r.codigo}`);
   console.log(`modo: ${modo} · ${CUARTOS.length} cuartos + ${SEMIS.length} semis con resultado · ${A_MANO.length} ganadores a mano · ${Object.keys(HORARIOS).length} horarios`);

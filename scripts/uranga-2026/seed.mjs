@@ -210,30 +210,30 @@ async function crearTorneo() {
 
     // ── Fases ──
     const faseZonas = crypto.randomUUID();
-    const faseCopas = crypto.randomUUID();
+    // Una FASE de playoff por copa: el selector de la pestaña Playoff separa fases, no copas de una misma fase.
+    const copas = COPAS.map((c, i) => ({ ...c, faseId: crypto.randomUUID(), orden: i }));
     const zonas = ZONAS.map((z, i) => ({ ...z, nombre: nombreZona(z.clave), groupId: crypto.randomUUID(), color: COLORES_ZONA[i] }));
     const zonaDe = new Map(zonas.map((z) => [z.clave, z]));
     await insertar('tournament_phases', [
       {
         id: faseZonas, tournament_id: tournamentId, season_id: seasonId, name: 'Fase de zonas', phase_type: 'group_stage',
-        order_index: 1, is_active: true,
+        // Una sola fase activa por temporada (restricción de la base): la activa es Copa Oro, que es lo que se está jugando.
+        order_index: 1, is_active: false,
         settings: {
           ...settingsBase(), teamsCount: 32, advanceCount: 4, group_names: zonas.map((z) => z.nombre), groupTags: zonas.map((z) => z.nombre),
           groupLabels: zonas.map((z, i) => ({ id: z.groupId, name: z.nombre, color: z.color, colorMode: 'manual', autoColorIndex: i })),
         },
         created_at: ahora, updated_at: ahora,
       },
-      {
-        id: faseCopas, tournament_id: tournamentId, season_id: seasonId, name: 'Copas', phase_type: 'playoff',
-        order_index: 2, is_active: false,
+      ...copas.map((c) => ({
+        id: c.faseId, tournament_id: tournamentId, season_id: seasonId, name: c.nombre, phase_type: 'playoff',
+        // La pestaña Playoff abre en la copa eliminatoria activa: Oro, y las demás a un clic.
+        order_index: c.orden + 2, is_active: c.orden === 0,
         settings: { ...settingsBase(), advanceCount: 1, phaseMode: 'playoff', bracketMode: 'auto' },
         created_at: ahora, updated_at: ahora,
-      },
+      })),
     ]);
     await insertar('tournament_groups', zonas.map((z, i) => ({ id: z.groupId, phase_id: faseZonas, season_id: seasonId, name: z.nombre, order_index: i })));
-    // Las copas son grupos de la fase de playoff y, como las del constructor, van SIN season_id.
-    const copas = COPAS.map((c, i) => ({ ...c, groupId: crypto.randomUUID(), orden: i }));
-    await insertar('tournament_groups', copas.map((c) => ({ id: c.groupId, phase_id: faseCopas, name: c.nombre, order_index: c.orden })));
 
     // ── Rondas ──
     const rondaZonas = crypto.randomUUID();
@@ -247,9 +247,8 @@ async function crearTorneo() {
       for (const [etapa, orden] of ETAPAS) {
         const id = crypto.randomUUID();
         rondaDe.set(`${c.clave}|${etapa}`, id);
-        // (phase_id, order_index) es único: una copa tras otra, cuartos → semis → final.
         filasRondas.push({
-          id, phase_id: faseCopas, season_id: seasonId, group_id: c.groupId, name: `${etapa} · ${c.nombre}`, order_index: c.orden * ETAPAS.length + orden,
+          id, phase_id: c.faseId, season_id: seasonId, group_id: null, name: etapa, order_index: orden,
           start_date: DIAS.dom, end_date: DIAS.dom, is_completed: false, notes: null, created_at: ahora, updated_at: ahora,
         });
       }
@@ -316,8 +315,8 @@ async function crearTorneo() {
         const id = crypto.randomUUID();
         idPorCodigo.set(codigo, id);
         partidos.push({
-          ...comun, id, phase_id: faseCopas, group_id: c.groupId, round_uuid: rondaDe.get(`${c.clave}|${etapa}`),
-          round_label: `${etapa} · ${c.nombre}`, home_club_id: local, away_club_id: visitante,
+          ...comun, id, phase_id: c.faseId, group_id: null, round_uuid: rondaDe.get(`${c.clave}|${etapa}`),
+          round_label: etapa, home_club_id: local, away_club_id: visitante,
           date_time: instanteDe('dom', hora), venue: SEDE_CANCHA(cancha), status: 'scheduled', score: null,
           bracket_match_code: codigo, ...extras,
         });
@@ -341,7 +340,7 @@ async function crearTorneo() {
           home_source_label: `Ganador cuartos ${i * 2 + 1}`, away_source_label: `Ganador cuartos ${i * 2 + 2}`,
           participant_source: { home: { type: 'winner', ref: o1 }, away: { type: 'winner', ref: o2 } },
         });
-        reglasPendientes.push([o1, 'winner', codigo, 'home', c.groupId], [o2, 'winner', codigo, 'away', c.groupId]);
+        reglasPendientes.push([o1, 'winner', codigo, 'home', c.faseId], [o2, 'winner', codigo, 'away', c.faseId]);
       });
       const codigoFinal = `${c.clave}-F`;
       fila(codigoFinal, 'Final', c.final[0], c.final[1], null, null, {
@@ -349,13 +348,13 @@ async function crearTorneo() {
         home_source_label: 'Ganador semi 1', away_source_label: 'Ganador semi 2',
         participant_source: { home: { type: 'winner', ref: `${c.clave}-S1` }, away: { type: 'winner', ref: `${c.clave}-S2` } },
       });
-      reglasPendientes.push([`${c.clave}-S1`, 'winner', codigoFinal, 'home', c.groupId], [`${c.clave}-S2`, 'winner', codigoFinal, 'away', c.groupId]);
+      reglasPendientes.push([`${c.clave}-S1`, 'winner', codigoFinal, 'home', c.faseId], [`${c.clave}-S2`, 'winner', codigoFinal, 'away', c.faseId]);
     }
     await insertar('matches', partidos);
 
-    const reglas = reglasPendientes.map(([origen, resultado, destino, slot, groupId]) => ({
-      id: crypto.randomUUID(), phase_id: faseCopas, source_match_id: idPorCodigo.get(origen), outcome: resultado,
-      target_match_id: idPorCodigo.get(destino), target_slot: slot, target_group_id: groupId, created_at: ahora, updated_at: ahora,
+    const reglas = reglasPendientes.map(([origen, resultado, destino, slot, faseId]) => ({
+      id: crypto.randomUUID(), phase_id: faseId, source_match_id: idPorCodigo.get(origen), outcome: resultado,
+      target_match_id: idPorCodigo.get(destino), target_slot: slot, target_group_id: null, created_at: ahora, updated_at: ahora,
     }));
     await insertar('tournament_match_advancement_rules', reglas);
 
