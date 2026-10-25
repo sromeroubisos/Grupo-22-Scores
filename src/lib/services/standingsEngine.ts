@@ -290,6 +290,10 @@ export class StandingsEngine {
       offensive_bonus_rule: resolvedOffensiveBonusRule,
       defensive_bonus_rule: resolvedDefensiveBonusRule,
       tiebreakers,
+      // 'overall': tras un empate que el enfrentamiento directo no resuelve, los
+      // criterios siguientes se miden con la temporada entera y no con la
+      // mini-tabla de los empatados (Regional del NOA "A": Lince-Jockey de Salta).
+      tiebreakers_scope: phaseSettings?.tiebreakersScope === 'overall' ? 'overall' : 'head_to_head',
       qualification_rules:
         phaseSettings?.qualification ?? tournamentRuleset?.qualification ?? null,
       editable_mode: phaseSettings?.standings?.editable ?? false,
@@ -767,7 +771,7 @@ export class StandingsEngine {
                 matches,
                 rules,
                 tableType,
-                headToHeadSource.statsByTeamId,
+                rules?.tiebreakers_scope === 'overall' ? metricSource : headToHeadSource.statsByTeamId,
                 index + 1,
               )
             : group,
