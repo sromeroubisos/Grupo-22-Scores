@@ -2595,10 +2595,32 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                             </button>
                         )}
                         <ShareLinkButton title={`${matchData.home.name} vs ${matchData.away.name}`} />
-                        <button className={styles.btn}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
-                            Exportar
-                        </button>
+                        <ExportImage
+                            template="matchStats"
+                            filename={`reporte-${matchData.home.name}-${matchData.away.name}`}
+                            data={{
+                                status: matchData.status as 'scheduled' | 'live' | 'final',
+                                homeTeam: matchData.home.name,
+                                awayTeam: matchData.away.name,
+                                homeScore: matchData.home.score,
+                                awayScore: matchData.away.score,
+                                homePenalties: publicPenaltyScore?.home ?? null,
+                                awayPenalties: publicPenaltyScore?.away ?? null,
+                                homeLogo: matchData.home.logo,
+                                awayLogo: matchData.away.logo,
+                                tournament: matchData.tournament,
+                                tournamentId: matchData.tournamentId,
+                                tournamentUrl: matchData.tournamentUrl,
+                                tournamentLogo: matchData.tournamentLogo,
+                                date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
+                                time: matchTimerText,
+                                kickoffAt: matchData.date,
+                                venue: matchData.venue,
+                                // De aca sale la marca de la placa: Salida de 22, Corner Corto o Grupo 22 TV.
+                                sport: exportSportId,
+                                stats: statsData || []
+                            }}
+                        />
                     </div>
                 </header>
 
@@ -2648,37 +2670,6 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 {matchData.status === 'live' && <div className={styles.pulse}></div>}
                                 {matchData.status === 'live' ? 'En Vivo' : matchData.status === 'final' ? 'Finalizado' : 'Programado'}
                             </div>
-                            {matchData.status !== 'scheduled' && (
-                                <div style={{ marginBottom: '12px' }}>
-                                    <ExportImage
-                                        template="matchStats"
-                                        filename={`reporte-${matchData.home.name}-${matchData.away.name}`}
-                                        data={{
-                                            status: matchData.status as 'scheduled' | 'live' | 'final',
-                                            homeTeam: matchData.home.name,
-                                            awayTeam: matchData.away.name,
-                                            homeScore: matchData.home.score,
-                                            awayScore: matchData.away.score,
-                                            homePenalties: publicPenaltyScore?.home ?? null,
-                                            awayPenalties: publicPenaltyScore?.away ?? null,
-                                            homeLogo: matchData.home.logo,
-                                            awayLogo: matchData.away.logo,
-                                            tournament: matchData.tournament,
-                                            tournamentId: matchData.tournamentId,
-                                            tournamentUrl: matchData.tournamentUrl,
-                                            tournamentLogo: matchData.tournamentLogo,
-                                            date: new Date(matchData.date).toLocaleDateString('es-AR', { timeZone: USER_TZ }),
-                                            time: matchTimerText,
-                                            kickoffAt: matchData.date,
-                                            venue: matchData.venue,
-                                            // De aca sale la marca de la placa: Salida de 22, Corner Corto o Grupo 22 TV.
-                                            sport: exportSportId,
-                                            stats: statsData || []
-                                        }}
-                                        className={styles.compactExport}
-                                    />
-                                </div>
-                            )}
                               <div className={styles.scoreDisplay}>
                                  <div className={styles.scoreValue}>
                                      <div
