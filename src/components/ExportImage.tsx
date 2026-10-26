@@ -296,6 +296,9 @@ export interface ChampionData {
     season?: string;
     tag?: string;
     tournamentLogo?: string;
+    // Fondo propio o del torneo (ver `StandingsData.backgroundVeil` para el velo).
+    backgroundImage?: string;
+    backgroundVeil?: number;
 }
 
 export interface SquadExportPlayerData {
@@ -1104,16 +1107,6 @@ const BRACKET_COLOR_DEFAULTS: ExportColorDefaults = {
     editorialGradientRightColor: '#3db5ff',
 };
 
-// La placa de campeón nace negra con el verde de la referencia; Fondo y Acento
-// la recolorean (azul y amarillo, marrón y blanco) como a cualquier otra pieza.
-const CHAMPION_COLOR_DEFAULTS: ExportColorDefaults = {
-    selectedPaletteId: DEFAULT_PALETTE.id,
-    bgColor: '#0d0d0d',
-    accentColor: '#00d26a',
-    editorialGradientLeftColor: '#df255c',
-    editorialGradientRightColor: '#00d26a',
-};
-
 function isPalmaresData(template: ExportTemplate, data: ExportData): boolean {
     return template === 'standings' && (data as StandingsData).variant === 'palmares';
 }
@@ -1187,6 +1180,13 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const safeBracketIndex = Math.min(selectedBracketIndex, Math.max(0, bracketChoices.length - 1));
     // Cada llave es un export propio: sus rondas y su nombre en el subtitulo.
     const data = useMemo<ExportData>(() => {
+        // La placa de campeón toma el fondo igual que las tablas: el que subió la
+        // persona o el del torneo, con su velo.
+        if (template === 'champion') {
+            return standingsBackgroundUpload?.src
+                ? { ...(baseData as ChampionData), backgroundImage: standingsBackgroundUpload.src, backgroundVeil: getBackgroundVeil(standingsBackgroundUpload) }
+                : baseData;
+        }
         if (template !== 'playoffBracket') return baseData;
         const bracketData = baseData as PlayoffBracketData;
         // El fondo elegido en el modal (o el del torneo) va detras del cuadro.
@@ -1481,9 +1481,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                 ? LADDER_COLOR_DEFAULTS
                 : isBracket
                     ? BRACKET_COLOR_DEFAULTS
-                    : isChampion
-                        ? CHAMPION_COLOR_DEFAULTS
-                        : defaultExportColorsRef.current;
+                    : defaultExportColorsRef.current;
         setHasSessionColorOverrides(false);
         setImpactoFieldColor('');
         setImpactoInkColor('');
@@ -1501,17 +1499,17 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             setRankingPanelColor(combo.panel);
             setRankingGoldColor(combo.gold);
         }
-    }, [isBracket, isChampion, isLadder, isRankingPoster, showModal]);
+    }, [isBracket, isLadder, isRankingPoster, showModal]);
 
     useEffect(() => {
-        if (!showModal || hasSessionColorOverrides || isRankingPoster || isLadder || isBracket || isChampion) return;
+        if (!showModal || hasSessionColorOverrides || isRankingPoster || isLadder || isBracket) return;
 
         setSelectedPaletteId(defaultExportColors.selectedPaletteId);
         setBgColor(defaultExportColors.bgColor);
         setAccentColor(defaultExportColors.accentColor);
         setEditorialGradientLeftColor(defaultExportColors.editorialGradientLeftColor);
         setEditorialGradientRightColor(defaultExportColors.editorialGradientRightColor);
-    }, [defaultExportColors, hasSessionColorOverrides, isBracket, isChampion, isLadder, isRankingPoster, showModal]);
+    }, [defaultExportColors, hasSessionColorOverrides, isBracket, isLadder, isRankingPoster, showModal]);
 
     // Fondo y colores predeterminados segun el torneo (ver tournamentThemes). Es
     // del super administrador: el resto exporta con el diseno de siempre. Va
@@ -1529,7 +1527,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         // puede ser rojo, se mezclaba con el negro y quedaba marron).
         setBgColor(tournamentTheme.bg);
         setAccentColor(tournamentTheme.accent);
-        if (template === 'standings' || template === 'dailyMatches' || template === 'matchStats' || template === 'playoffBracket' || template === 'lineups') {
+        if (template === 'standings' || template === 'dailyMatches' || template === 'matchStats' || template === 'playoffBracket' || template === 'lineups' || template === 'champion') {
             // Un fondo que subio la persona gana; el del torneo se cambia solo.
             setStandingsBackgroundUpload((current) => (
                 current && current.name !== TOURNAMENT_THEME_BACKGROUND_NAME
@@ -1863,7 +1861,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         }
 
         if (isChampion) {
-            return 'En la placa de campeon, Fondo es la placa entera (nace negra) y Acento pinta CAMPEON y el renglon del torneo. El nombre del club va en blanco o en negro segun el fondo.';
+            return 'En la placa de campeon, Fondo es el color de la placa (y el velo que tapa la foto, si subis una) y Acento pinta CAMPEON y el renglon del torneo. Los colores salen del diseno activo. El nombre del club va en blanco o en negro segun el fondo.';
         }
 
         if (isBracket && visualFamily === 'fanV5') {
@@ -3846,14 +3844,16 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                 </div>
                             )}
 
-                            {(template === 'standings' || template === 'dailyMatches') && (
+                            {(template === 'standings' || template === 'dailyMatches' || template === 'champion') && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Fondo propio</label>
                                     <div className={styles.uploadCard}>
                                         <div className={styles.uploadMeta}>
                                             <span className={styles.uploadTitle}>Importa tu propio fondo</span>
                                             <span className={styles.uploadSubtitle}>
-                                                Cubre toda la pieza y la tabla queda encima, con un velo para que se lea. Sin fondo, se usa el color elegido.
+                                                {template === 'champion'
+                                                    ? 'Cubre toda la placa y el titular queda encima, con un velo para que se lea. Sin fondo, se usa el color elegido.'
+                                                    : 'Cubre toda la pieza y la tabla queda encima, con un velo para que se lea. Sin fondo, se usa el color elegido.'}
                                             </span>
                                         </div>
                                         <div className={styles.uploadActions}>
@@ -10450,25 +10450,16 @@ async function drawChampionPlate(
     const spacedCtx = ctx as CanvasRenderingContext2D & { letterSpacing?: string };
 
     const clubs = [data.club, ...(data.coChampions ?? [])].filter((club) => club && club.name).slice(0, 2);
-    const [brandMark, ...images] = await Promise.all([
+    const [brandMark, photo, ...images] = await Promise.all([
         loadImage('/marcas/salida-de-22.png'),
+        data.backgroundImage ? loadImage(data.backgroundImage) : Promise.resolve(null),
         ...clubs.map((club) => loadImage(club.logo || '')),
     ]);
 
-    // ---- Fondo: placa plena, luz suave, un arco grande y grano fino ----
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, width, height);
-    const glow = ctx.createRadialGradient(width * 0.3, height * 0.12, 0, width * 0.3, height * 0.12, height * 0.8);
-    glow.addColorStop(0, isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.45)');
-    glow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, width, height);
-    ctx.save();
-    ctx.fillStyle = isDark ? mixHexColors(bgColor, '#ffffff', 0.05) : mixHexColors(bgColor, '#000000', 0.05);
-    ctx.beginPath();
-    ctx.arc(-width * 0.12, height * 0.34, width * 0.62, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    // ---- Fondo: el mismo que las tablas (drawBackdrop). Con foto —la que subió la
+    // persona o la del torneo— va cubriendo la placa con su velo; sin foto, el color
+    // elegido con la luz del acento. Encima, grano fino como en las placas de referencia.
+    drawBackdrop(ctx, canvas, bgColor, accentColor, isDark, photo, data.backgroundVeil);
     const noiseTile = getRankingNoiseTile();
     if (noiseTile) {
         const noisePattern = ctx.createPattern(noiseTile, 'repeat');
