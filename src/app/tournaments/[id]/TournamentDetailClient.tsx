@@ -4847,8 +4847,13 @@ export default function TournamentDetailPage({
                                             ))}
                                         </span>
                                     </div>
+                                    <button
+                                        className={`${styles.linkButton} ${styles.championBannerAction}`}
+                                        onClick={() => setActiveTab('champions')}
+                                    >
+                                        Ver campeones
+                                    </button>
                                     <ExportImage
-                                        className={styles.championBannerAction}
                                         template="champion"
                                         filename={`campeon-${tournamentData?.name || 'torneo'}`}
                                         data={{
@@ -4859,12 +4864,6 @@ export default function TournamentDetailPage({
                                             tournamentLogo,
                                         }}
                                     />
-                                    <button
-                                        className={`${styles.linkButton} ${styles.championBannerAction}`}
-                                        onClick={() => setActiveTab('champions')}
-                                    >
-                                        Ver campeones
-                                    </button>
                                 </div>
                             )}
 
