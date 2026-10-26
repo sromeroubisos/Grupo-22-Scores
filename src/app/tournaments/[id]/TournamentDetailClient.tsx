@@ -5304,8 +5304,6 @@ export default function TournamentDetailPage({
                                             coChampions: (currentSeasonOption.coChampions || []).map((club) => ({ name: club.name, logo: club.logo })),
                                             tournament: tournamentData?.name || 'Torneo',
                                             season: currentSeasonOption.label,
-                                            // "Torneo M15 A": la categoría se suma al titular, como en la referencia.
-                                            tag: (tournamentData?.name || '').match(/\bM-?(\d{2})\b/i)?.[0].replace('-', ''),
                                             tournamentLogo,
                                         }}
                                     />

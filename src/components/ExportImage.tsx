@@ -1208,6 +1208,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const defaultTournamentName = getDefaultTournamentName(template, data);
     const defaultMatchExportMode = getDefaultMatchExportMode(template, data);
     const [customTournamentName, setCustomTournamentName] = useState(defaultTournamentName);
+    // Placa de campeón: lo que se suma al titular ("M15" -> CAMPEÓN M15). Vacío por defecto.
+    const [championExtra, setChampionExtra] = useState('');
     const [selectedTimeZoneId, setSelectedTimeZoneId] = useState(DEFAULT_TIMEZONE_PRESET_ID);
     const [isTimeZoneDropdownOpen, setIsTimeZoneDropdownOpen] = useState(false);
     const [matchExportMode, setMatchExportMode] = useState<MatchExportMode>(defaultMatchExportMode);
@@ -2555,7 +2557,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             } else if (template === 'teamOfWeek') {
                 await drawG22BaseTeamOfWeek(ctx, canvas, exportData as TeamOfWeekData, config, accentColor, bgColor, brandLogo);
             } else if (template === 'champion') {
-                await drawChampionPlate(ctx, canvas, exportData as ChampionData, accentColor, bgColor);
+                await drawChampionPlate(ctx, canvas, { ...(exportData as ChampionData), tag: championExtra.trim() }, accentColor, bgColor);
             } else if (template === 'playoffBracket') {
                 // El cuadro tiene su afiche navy, salvo en Fan V5, que lo arma con su hoja clara.
                 await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo, visualFamily);
@@ -2645,9 +2647,14 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             };
         }
 
+        if (template === 'champion') {
+            return { ...(exportData as ChampionData), tag: championExtra.trim() };
+        }
+
         return exportData;
     }, [
         activeEditorialSponsors,
+        championExtra,
         customTournamentName,
         data,
         editorialCompetitionLogoUpload?.src,
@@ -3059,6 +3066,19 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                                         value={customTournamentName}
                                         onChange={(event) => setCustomTournamentName(event.target.value)}
                                         placeholder="Ej: Torneo Apertura 2026"
+                                    />
+                                </div>
+                            )}
+
+                            {template === 'champion' && (
+                                <div className={styles.modalSection}>
+                                    <label className={styles.modalLabel}>Texto junto al titular</label>
+                                    <input
+                                        className={styles.modalInput}
+                                        value={championExtra}
+                                        onChange={(event) => setChampionExtra(event.target.value)}
+                                        placeholder="Opcional. Ej: M15 (queda CAMPEÓN M15)"
+                                        maxLength={24}
                                     />
                                 </div>
                             )}
@@ -10430,7 +10450,10 @@ async function drawChampionPlate(
     const spacedCtx = ctx as CanvasRenderingContext2D & { letterSpacing?: string };
 
     const clubs = [data.club, ...(data.coChampions ?? [])].filter((club) => club && club.name).slice(0, 2);
-    const images = await Promise.all(clubs.map((club) => loadImage(club.logo || '')));
+    const [brandMark, ...images] = await Promise.all([
+        loadImage('/marcas/salida-de-22.png'),
+        ...clubs.map((club) => loadImage(club.logo || '')),
+    ]);
 
     // ---- Fondo: placa plena, luz suave, un arco grande y grano fino ----
     ctx.fillStyle = bgColor;
@@ -10465,8 +10488,17 @@ async function drawChampionPlate(
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = textColor;
-    ctx.font = `900 ${u(46)}px ${FONT_DHARMA_C}`;
-    ctx.fillText('SALIDA DE 22', marginX, barY);
+    if (brandMark) {
+        // El logo de la marca (public/marcas/salida-de-22.png), no el texto: va tal cual.
+        const markHeight = u(74);
+        const markWidth = Math.round((markHeight * (brandMark.naturalWidth || brandMark.width)) / Math.max(brandMark.naturalHeight || brandMark.height, 1));
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(brandMark, marginX - u(6), barY - markHeight / 2, markWidth, markHeight);
+    } else {
+        ctx.font = `900 ${u(46)}px ${FONT_DHARMA_C}`;
+        ctx.fillText('SALIDA DE 22', marginX, barY);
+    }
     ctx.strokeStyle = textColor;
     ctx.lineWidth = u(7);
     ctx.lineCap = 'round';
