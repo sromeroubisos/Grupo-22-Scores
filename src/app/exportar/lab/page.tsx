@@ -5,7 +5,7 @@
 // Si molesta en produccion, esta carpeta se borra sola sin dejar imports sueltos.
 
 import { useEffect, useState } from 'react';
-import { ExportImagePreview, type DailyMatchesData, type LineupsData, type MatchStatsData, type SquadData, type StandingsData } from '@/components/ExportImage';
+import { ExportImagePreview, type ChampionData, type DailyMatchesData, type LineupsData, type MatchStatsData, type SquadData, type StandingsData } from '@/components/ExportImage';
 import type { ExportVisualFamily } from '@/lib/exports/activeDesign';
 
 const FAMILIES: Array<{ value: ExportVisualFamily; label: string }> = [
@@ -67,6 +67,14 @@ const FIXTURE: DailyMatchesData = {
         { homeTeam: 'Huirapuca', awayTeam: 'Los Tarcos', homeLogo: '/clubs/sb-huirapuca.png', awayLogo: '/clubs/sb-los-tarcos.png', time: '20:40', status: 'scheduled' },
         { homeTeam: 'Lince Rugby Club', awayTeam: 'Tucuman Lawn Tennis', homeLogo: '/clubs/sb-lince-rugby-club.png', awayLogo: '/clubs/sb-tucuman-lawn-tennis.png', time: '21:00', status: 'scheduled' },
     ],
+};
+
+// La placa de campeón: club, categoría en el titular y renglón del torneo.
+const CHAMPION: ChampionData = {
+    club: { name: 'Canterbury', logo: '/clubs/canterbury.png' },
+    tournament: 'Torneo M15 "A" · Unión Cordobesa de Rugby',
+    season: '2026',
+    tag: 'M15',
 };
 
 // La placa ladder: valor principal + unidad, secundario y flecha por fila.
@@ -383,6 +391,17 @@ export default function ExportLabPage() {
                         format={format}
                         dailyMatchesTimeMode="time"
                         previewColors={previewColors}
+                        className="lab-preview"
+                    />
+                </figure>
+                <figure style={{ margin: 0 }}>
+                    <figcaption style={{ marginBottom: 8, fontWeight: 700 }}>Placa campeón</figcaption>
+                    <ExportImagePreview
+                        template="champion"
+                        data={CHAMPION}
+                        visualFamily={family}
+                        format={format}
+                        previewColors={{ ...previewColors, bgColor: '#0d0d0d', accentColor: '#00d26a' }}
                         className="lab-preview"
                     />
                 </figure>
