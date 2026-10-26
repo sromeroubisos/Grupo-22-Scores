@@ -5,7 +5,8 @@ export type ExportTemplateId =
     | 'playerStats'
     | 'playoffBracket'
     | 'lineups'
-    | 'teamOfWeek';
+    | 'teamOfWeek'
+    | 'champion';
 
 export type ExportPresetType = 'editorial' | 'gradient';
 
@@ -101,6 +102,12 @@ export const EXPORT_TEMPLATE_CATALOG: ExportCatalogFormat[] = [
         name: 'Equipo de la semana',
         description: 'Afiche tipo Starting XV con 15 seleccionados, reemplazos y escudo del equipo por jugador.',
         outputLabel: 'Team of the week',
+    },
+    {
+        id: 'champion',
+        name: 'Placa de campeon',
+        description: 'Placa con el escudo del campeon, CAMPEON gigante y el torneo, en post 4:5 o story 9:16.',
+        outputLabel: 'Champion',
     },
 ];
 

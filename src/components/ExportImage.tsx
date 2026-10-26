@@ -27,7 +27,7 @@ import { createClient } from '@/lib/supabase/client';
 import styles from './ExportButton.module.css';
 
 export type ExportFormat = '1080x1350' | '1080x1920';
-export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats' | 'playoffBracket' | 'lineups' | 'squad' | 'teamOfWeek';
+export type ExportTemplate = 'standings' | 'dailyMatches' | 'matchStats' | 'playerStats' | 'playoffBracket' | 'lineups' | 'squad' | 'teamOfWeek' | 'champion';
 type ExportDateValue = string | number | Date;
 export type MatchExportMode = 'schedule' | 'result';
 export type MatchExportLayout = 'classic' | 'editorial4x5';
@@ -282,6 +282,22 @@ export interface TeamOfWeekData {
     replacements?: TeamOfWeekPlayerData[];
 }
 
+// Placa de campeón: club (o clubes, si compartieron el título), torneo y
+// temporada. `tag` es la categoría que se suma al titular ("CAMPEÓN M15").
+export interface ChampionClubData {
+    name: string;
+    logo?: string | null;
+}
+
+export interface ChampionData {
+    club: ChampionClubData;
+    coChampions?: ChampionClubData[];
+    tournament: string;
+    season?: string;
+    tag?: string;
+    tournamentLogo?: string;
+}
+
 export interface SquadExportPlayerData {
     id?: string | null;
     number?: number | string | null;
@@ -367,7 +383,7 @@ export interface PlayoffBracketData {
     backgroundVeil?: number;
 }
 
-export type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData | LineupsData | SquadData | TeamOfWeekData;
+export type ExportData = StandingsData | DailyMatchesData | MatchStatsData | PlayerStatsData | PlayoffBracketData | LineupsData | SquadData | TeamOfWeekData | ChampionData;
 type CanvasFormat = { width: number; height: number };
 type SafeArea = { top: number; bottom: number; centerX: number; width: number; height: number };
 // `thumb`: miniatura en Storage para las grillas de presets. Solo la tienen los
@@ -1088,6 +1104,16 @@ const BRACKET_COLOR_DEFAULTS: ExportColorDefaults = {
     editorialGradientRightColor: '#3db5ff',
 };
 
+// La placa de campeón nace negra con el verde de la referencia; Fondo y Acento
+// la recolorean (azul y amarillo, marrón y blanco) como a cualquier otra pieza.
+const CHAMPION_COLOR_DEFAULTS: ExportColorDefaults = {
+    selectedPaletteId: DEFAULT_PALETTE.id,
+    bgColor: '#0d0d0d',
+    accentColor: '#00d26a',
+    editorialGradientLeftColor: '#df255c',
+    editorialGradientRightColor: '#00d26a',
+};
+
 function isPalmaresData(template: ExportTemplate, data: ExportData): boolean {
     return template === 'standings' && (data as StandingsData).variant === 'palmares';
 }
@@ -1210,6 +1236,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const isPalmares = isPalmaresData(template, data);
     const isLadder = isLadderData(template, data);
     const isBracket = template === 'playoffBracket';
+    const isChampion = template === 'champion';
     const groupedStandings = useMemo(
         () => (template === 'standings' ? getExportableStandingsGroups(data as StandingsData) : []),
         [data, template]
@@ -1452,7 +1479,9 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                 ? LADDER_COLOR_DEFAULTS
                 : isBracket
                     ? BRACKET_COLOR_DEFAULTS
-                    : defaultExportColorsRef.current;
+                    : isChampion
+                        ? CHAMPION_COLOR_DEFAULTS
+                        : defaultExportColorsRef.current;
         setHasSessionColorOverrides(false);
         setImpactoFieldColor('');
         setImpactoInkColor('');
@@ -1470,17 +1499,17 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             setRankingPanelColor(combo.panel);
             setRankingGoldColor(combo.gold);
         }
-    }, [isBracket, isLadder, isRankingPoster, showModal]);
+    }, [isBracket, isChampion, isLadder, isRankingPoster, showModal]);
 
     useEffect(() => {
-        if (!showModal || hasSessionColorOverrides || isRankingPoster || isLadder || isBracket) return;
+        if (!showModal || hasSessionColorOverrides || isRankingPoster || isLadder || isBracket || isChampion) return;
 
         setSelectedPaletteId(defaultExportColors.selectedPaletteId);
         setBgColor(defaultExportColors.bgColor);
         setAccentColor(defaultExportColors.accentColor);
         setEditorialGradientLeftColor(defaultExportColors.editorialGradientLeftColor);
         setEditorialGradientRightColor(defaultExportColors.editorialGradientRightColor);
-    }, [defaultExportColors, hasSessionColorOverrides, isBracket, isLadder, isRankingPoster, showModal]);
+    }, [defaultExportColors, hasSessionColorOverrides, isBracket, isChampion, isLadder, isRankingPoster, showModal]);
 
     // Fondo y colores predeterminados segun el torneo (ver tournamentThemes). Es
     // del super administrador: el resto exporta con el diseno de siempre. Va
@@ -1771,11 +1800,12 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         if (template === 'lineups') return `Alineaciones · ${getLineupExportModeLabel(lineupExportMode)}`;
         if (template === 'squad') return 'Plantel completo';
         if (template === 'teamOfWeek') return 'Equipo de la semana';
+        if (template === 'champion') return 'Placa de campeon';
         return 'Configuracion de exportacion';
     }, [dailyMatchesTimeMode, isPalmares, lineupExportMode, matchExportLayout, matchExportMode, selectedStandingsGroupLabel, standingsExportMode, template]);
     const exportSummaryChips = useMemo(() => {
         const chips = [selectedFormatConfig.label];
-        chips.push(isRankingPoster ? 'Poster Ranking' : isLadder ? 'Placa Ladder' : isBracket ? 'Cuadro Playoff' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily));
+        chips.push(isRankingPoster ? 'Poster Ranking' : isLadder ? 'Placa Ladder' : isBracket ? 'Cuadro Playoff' : isChampion ? 'Placa Campeon' : (isPalmares && visualFamily !== 'fanV5') ? 'Poster Palmares' : getExportVisualFamilyLabel(visualFamily));
         if (template === 'matchStats') {
             chips.push(getMatchExportLayoutLabel(matchExportLayout));
         } else if (template === 'standings') {
@@ -1807,6 +1837,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         customTournamentName,
         data,
         isBracket,
+        isChampion,
         isLadder,
         isPalmares,
         isRankingPoster,
@@ -1827,6 +1858,10 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
 
         if (isLadder) {
             return 'En la placa ladder, Fondo es la placa entera (nace negra) y Acento pinta el remate del subtitulo, los numeros de zona y la flecha del que sube. La flecha del que baja es roja siempre.';
+        }
+
+        if (isChampion) {
+            return 'En la placa de campeon, Fondo es la placa entera (nace negra) y Acento pinta CAMPEON y el renglon del torneo. El nombre del club va en blanco o en negro segun el fondo.';
         }
 
         if (isBracket && visualFamily === 'fanV5') {
@@ -1866,7 +1901,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         }
 
         return 'La marca de agua G22 se mantiene en todas las exportaciones.';
-    }, [isBracket, isLadder, isPalmares, isRankingPoster, template, visualFamily]);
+    }, [isBracket, isChampion, isLadder, isPalmares, isRankingPoster, template, visualFamily]);
 
     const toggleMatch = (index: number) => {
         setSelectedMatchIndices((previous) => {
@@ -2519,6 +2554,8 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                 }
             } else if (template === 'teamOfWeek') {
                 await drawG22BaseTeamOfWeek(ctx, canvas, exportData as TeamOfWeekData, config, accentColor, bgColor, brandLogo);
+            } else if (template === 'champion') {
+                await drawChampionPlate(ctx, canvas, exportData as ChampionData, accentColor, bgColor);
             } else if (template === 'playoffBracket') {
                 // El cuadro tiene su afiche navy, salvo en Fan V5, que lo arma con su hoja clara.
                 await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, accentColor, bgColor, brandLogo, visualFamily);
@@ -4676,6 +4713,7 @@ function paintPreviewCanvas(target: HTMLCanvasElement | null, rendered: HTMLCanv
 function getDefaultTournamentName(template: ExportTemplate, data: ExportData): string {
     if (template === 'standings') return (data as StandingsData).title || '';
     if (template === 'playoffBracket') return bracketTournamentNameOf(data as PlayoffBracketData);
+    if (template === 'champion') return (data as ChampionData).tournament || '';
     if (template === 'dailyMatches' || template === 'matchStats' || template === 'lineups' || template === 'squad' || template === 'teamOfWeek') {
         return (data as DailyMatchesData | MatchStatsData | LineupsData | SquadData | TeamOfWeekData).tournament || '';
     }
@@ -6288,6 +6326,8 @@ export async function renderMatchExportPreviewCanvas(
         } else {
             await drawG22BaseSquad(ctx, canvas, squadData, firstPage, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, lineupColors);
         }
+    } else if (template === 'champion') {
+        await drawChampionPlate(ctx, canvas, exportData as ChampionData, previewDefaults.accentColor, previewDefaults.bgColor);
     } else if (template === 'playoffBracket') {
         await drawPlayoffBracket(ctx, canvas, exportData as PlayoffBracketData, config, previewDefaults.accentColor, previewDefaults.bgColor, brandLogo, visualFamily);
     } else {
@@ -6627,6 +6667,14 @@ function buildExportData(
             ...bracketData,
             title: tournamentName || bracketData.title,
             tournamentName: tournamentName || bracketData.tournamentName,
+        };
+    }
+
+    if (template === 'champion') {
+        const championData = data as ChampionData;
+        return {
+            ...championData,
+            tournament: tournamentName || championData.tournament,
         };
     }
 
@@ -10316,6 +10364,7 @@ async function drawStandings(
 // (oro/plata/bronce) en el numero de posicion.
 // ============================================================================
 const FONT_DHARMA_M = '"dharma-gothic-m", "G22 Dharma Gothic", "Dharma Gothic E Heavy", "Bebas Neue", "Outfit", sans-serif';
+const FONT_DHARMA_C = '"dharma-gothic-c", "Bebas Neue", "Outfit", sans-serif';
 
 let rankingNoiseTile: HTMLCanvasElement | null = null;
 
@@ -10348,6 +10397,172 @@ function getRankingNoiseTile(): HTMLCanvasElement | null {
     tileCtx.putImageData(image, 0, 0);
     rankingNoiseTile = tile;
     return tile;
+}
+
+// ---------------------------------------------------------------------------
+// Placa de campeón (2026-10-25). Referencia: la placa de "Campeón M15" de
+// Salida de 22 — barra de marca arriba, nombre del club en blanco, escudo al
+// centro y CAMPEÓN gigante en acento, que pisa un poco el escudo, con el
+// renglón del torneo debajo. Sin sponsors. Ignora la familia visual: es una
+// pieza dedicada, y Fondo / Acento recolorean toda la placa.
+//
+// Sirve para post (4:5) y story (9:16): todo se escala por ANCHO (`u`) y el
+// story reparte el alto de más corriendo los bloques, fuera de la zona que
+// tapa la interfaz de Instagram.
+// ---------------------------------------------------------------------------
+async function drawChampionPlate(
+    ctx: CanvasRenderingContext2D,
+    canvas: HTMLCanvasElement,
+    data: ChampionData,
+    accentColor: string,
+    bgColor: string,
+) {
+    const width = canvas.width;
+    const height = canvas.height;
+    // Un 4:5 también es más alto que ancho: story es solo el 9:16 (misma regla que getSafeArea).
+    const isStory = canvas.height > 1500;
+    const u = (value: number) => Math.round((value * width) / 1080);
+    const pick = (post: number, story: number) => u(isStory ? story : post);
+    const isDark = getContrastColor(bgColor) === '#ffffff';
+    const textColor = isDark ? '#ffffff' : '#0b0f19';
+    const marginX = u(70);
+    const innerWidth = width - marginX * 2;
+    const spacedCtx = ctx as CanvasRenderingContext2D & { letterSpacing?: string };
+
+    const clubs = [data.club, ...(data.coChampions ?? [])].filter((club) => club && club.name).slice(0, 2);
+    const images = await Promise.all(clubs.map((club) => loadImage(club.logo || '')));
+
+    // ---- Fondo: placa plena, luz suave, un arco grande y grano fino ----
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, width, height);
+    const glow = ctx.createRadialGradient(width * 0.3, height * 0.12, 0, width * 0.3, height * 0.12, height * 0.8);
+    glow.addColorStop(0, isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.45)');
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, width, height);
+    ctx.save();
+    ctx.fillStyle = isDark ? mixHexColors(bgColor, '#ffffff', 0.05) : mixHexColors(bgColor, '#000000', 0.05);
+    ctx.beginPath();
+    ctx.arc(-width * 0.12, height * 0.34, width * 0.62, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    const noiseTile = getRankingNoiseTile();
+    if (noiseTile) {
+        const noisePattern = ctx.createPattern(noiseTile, 'repeat');
+        if (noisePattern) {
+            ctx.save();
+            ctx.globalAlpha = 0.07;
+            ctx.globalCompositeOperation = 'overlay';
+            ctx.fillStyle = noisePattern;
+            ctx.fillRect(0, 0, width, height);
+            ctx.restore();
+        }
+    }
+
+    // ---- Barra de marca: SALIDA DE 22 a la izquierda, flechas a la derecha ----
+    const barY = pick(96, 250);
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = textColor;
+    ctx.font = `900 ${u(46)}px ${FONT_DHARMA_C}`;
+    ctx.fillText('SALIDA DE 22', marginX, barY);
+    ctx.strokeStyle = textColor;
+    ctx.lineWidth = u(7);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    const chevronH = u(24);
+    const chevronW = u(14);
+    for (let index = 0; index < 3; index += 1) {
+        const x = width - marginX - u(8) - (2 - index) * u(22) - chevronW;
+        ctx.beginPath();
+        ctx.moveTo(x, barY - chevronH / 2);
+        ctx.lineTo(x + chevronW, barY);
+        ctx.lineTo(x, barY + chevronH / 2);
+        ctx.stroke();
+    }
+    ctx.restore();
+
+    // ---- Nombre del club: blanco, condensado, ajustado al ancho ----
+    const clubName = clubs.map((club) => club.name.trim()).join(' Y ').toUpperCase();
+    const nameBaseline = pick(352, 560);
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = textColor;
+    setFittedFont(ctx, clubName, innerWidth, '900', u(210), FONT_DHARMA_C, u(60));
+    ctx.fillText(clubName, width / 2, nameBaseline);
+    ctx.restore();
+
+    // ---- Escudo(s) al centro; el titular los pisa un poco ----
+    // En el post, como en las referencias, el escudo llena el hueco entre el
+    // nombre y el titular y los dos lo pisan (el texto se dibuja después, encima).
+    // El story ya tenía aire de sobra y quedó como estaba.
+    const crestCenterY = pick(650, 985);
+    const crestHeight = pick(760, 680);
+    if (clubs.length === 1) {
+        drawOverflowCrest(ctx, {
+            x: width / 2,
+            y: crestCenterY,
+            width: pick(900, 760),
+            height: crestHeight,
+            img: images[0],
+            label: clubs[0].name,
+            rawLogo: clubs[0].logo || '',
+            isDark,
+            showFrame: false,
+        });
+    } else {
+        const boxWidth = u(440);
+        const gap = u(40);
+        clubs.forEach((club, index) => {
+            drawOverflowCrest(ctx, {
+                x: width / 2 + (index === 0 ? -1 : 1) * (boxWidth / 2 + gap / 2),
+                y: crestCenterY,
+                width: boxWidth,
+                height: Math.round(crestHeight * 0.8),
+                img: images[index],
+                label: club.name,
+                rawLogo: club.logo || '',
+                isDark,
+                showFrame: false,
+            });
+        });
+    }
+
+    // ---- CAMPEÓN gigante en acento ----
+    const headline = `${clubs.length > 1 ? 'CAMPEONES' : 'CAMPEÓN'}${data.tag ? ` ${data.tag.trim().toUpperCase()}` : ''}`;
+    const headlineBaseline = pick(1108, 1540);
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = accentColor;
+    ctx.shadowColor = 'rgba(0,0,0,0.38)';
+    ctx.shadowBlur = u(26);
+    ctx.shadowOffsetY = u(8);
+    setFittedFont(ctx, headline, width - u(140), '900', u(640), FONT_DHARMA_C, u(140));
+    ctx.fillText(headline, width / 2, headlineBaseline);
+    ctx.restore();
+
+    // ---- Renglón del torneo: "— SELECT 12 NORTE · 2026 —" ----
+    const captionParts = [data.tournament, data.season].map((part) => (part || '').trim()).filter(Boolean);
+    if (captionParts.length > 0) {
+        const caption = `— ${captionParts.join(' · ').toUpperCase()} —`;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = textColor;
+        spacedCtx.letterSpacing = `${u(1)}px`;
+        let captionSize = u(34);
+        while (captionSize > u(16)) {
+            ctx.font = `italic 800 ${captionSize}px ${FONT_BODY}`;
+            if (ctx.measureText(caption).width <= innerWidth) break;
+            captionSize -= 1;
+        }
+        ctx.fillText(caption, width / 2, headlineBaseline + pick(64, 76));
+        spacedCtx.letterSpacing = '0px';
+        ctx.restore();
+    }
 }
 
 // ---------------------------------------------------------------------------

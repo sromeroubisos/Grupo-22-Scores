@@ -5295,6 +5295,20 @@ export default function TournamentDetailPage({
                                             ))}
                                         </span>
                                     </div>
+                                    <ExportImage
+                                        className={styles.championBannerAction}
+                                        template="champion"
+                                        filename={`campeon-${tournamentData?.name || 'torneo'}`}
+                                        data={{
+                                            club: { name: currentSeasonOption.champion.name, logo: currentSeasonOption.champion.logo },
+                                            coChampions: (currentSeasonOption.coChampions || []).map((club) => ({ name: club.name, logo: club.logo })),
+                                            tournament: tournamentData?.name || 'Torneo',
+                                            season: currentSeasonOption.label,
+                                            // "Torneo M15 A": la categoría se suma al titular, como en la referencia.
+                                            tag: (tournamentData?.name || '').match(/\bM-?(\d{2})\b/i)?.[0].replace('-', ''),
+                                            tournamentLogo,
+                                        }}
+                                    />
                                     <button
                                         className={`${styles.linkButton} ${styles.championBannerAction}`}
                                         onClick={() => setActiveTab('champions')}
