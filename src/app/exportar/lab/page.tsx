@@ -400,7 +400,7 @@ export default function ExportLabPage() {
                         data={CHAMPION}
                         visualFamily={family}
                         format={format}
-                        previewColors={{ ...previewColors, bgColor: '#0d0d0d', accentColor: '#00d26a' }}
+                        previewColors={previewColors}
                         className="lab-preview"
                     />
                 </figure>

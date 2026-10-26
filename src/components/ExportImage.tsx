@@ -268,6 +268,8 @@ export interface ChampionData {
     season?: string;
     tag?: string;
     tournamentLogo?: string;
+    // Foto de fondo (la que se sube en el modal o viene de "Tus fondos").
+    backgroundImage?: string;
 }
 
 export interface SquadExportPlayerData {
@@ -1032,16 +1034,6 @@ const BRACKET_COLOR_DEFAULTS: ExportColorDefaults = {
     editorialGradientRightColor: '#3db5ff',
 };
 
-// La placa de campeón nace negra con el verde de la referencia; Fondo y Acento
-// la recolorean (azul y amarillo, marrón y blanco) como a cualquier otra pieza.
-const CHAMPION_COLOR_DEFAULTS: ExportColorDefaults = {
-    selectedPaletteId: DEFAULT_PALETTE.id,
-    bgColor: '#0d0d0d',
-    accentColor: '#00d26a',
-    editorialGradientLeftColor: '#df255c',
-    editorialGradientRightColor: '#00d26a',
-};
-
 function isPalmaresData(template: ExportTemplate, data: ExportData): boolean {
     return template === 'standings' && (data as StandingsData).variant === 'palmares';
 }
@@ -1119,6 +1111,12 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
     const safeBracketIndex = Math.min(selectedBracketIndex, Math.max(0, bracketChoices.length - 1));
     // Cada llave es un export propio: sus rondas y su nombre en el subtitulo.
     const data = useMemo<ExportData>(() => {
+        // La placa de campeón toma la foto de fondo igual que el cuadro.
+        if (template === 'champion') {
+            return matchBackgroundUpload?.src
+                ? { ...(baseData as ChampionData), backgroundImage: matchBackgroundUpload.src }
+                : baseData;
+        }
         if (template !== 'playoffBracket') return baseData;
         const bracketData = baseData as PlayoffBracketData;
         // La foto subida en el modal pisa la que trae el torneo.
@@ -1413,9 +1411,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
                 ? LADDER_COLOR_DEFAULTS
                 : isBracket
                     ? BRACKET_COLOR_DEFAULTS
-                    : isChampion
-                        ? CHAMPION_COLOR_DEFAULTS
-                        : defaultExportColorsRef.current;
+                    : defaultExportColorsRef.current;
         setHasSessionColorOverrides(false);
         setImpactoFieldColor('');
         setImpactoInkColor('');
@@ -1433,17 +1429,17 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
             setRankingPanelColor(combo.panel);
             setRankingGoldColor(combo.gold);
         }
-    }, [isBracket, isChampion, isLadder, isRankingPoster, showModal]);
+    }, [isBracket, isLadder, isRankingPoster, showModal]);
 
     useEffect(() => {
-        if (!showModal || hasSessionColorOverrides || isRankingPoster || isLadder || isBracket || isChampion) return;
+        if (!showModal || hasSessionColorOverrides || isRankingPoster || isLadder || isBracket) return;
 
         setSelectedPaletteId(defaultExportColors.selectedPaletteId);
         setBgColor(defaultExportColors.bgColor);
         setAccentColor(defaultExportColors.accentColor);
         setEditorialGradientLeftColor(defaultExportColors.editorialGradientLeftColor);
         setEditorialGradientRightColor(defaultExportColors.editorialGradientRightColor);
-    }, [defaultExportColors, hasSessionColorOverrides, isBracket, isChampion, isLadder, isRankingPoster, showModal]);
+    }, [defaultExportColors, hasSessionColorOverrides, isBracket, isLadder, isRankingPoster, showModal]);
 
     useEffect(() => {
         setIsPortalReady(true);
@@ -1744,7 +1740,7 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
         }
 
         if (isChampion) {
-            return 'En la placa de campeon, Fondo es la placa entera (nace negra) y Acento pinta CAMPEON y el renglon del torneo. El nombre del club va en blanco o en negro segun el fondo.';
+            return 'En la placa de campeon, Fondo es el color de la placa (y el velo que tapa la foto, si subis una) y Acento pinta CAMPEON y el renglon del torneo. Los colores salen del diseno activo. El nombre del club va en blanco o en negro segun el fondo.';
         }
 
         if (isBracket && visualFamily === 'fanV5') {
@@ -3575,14 +3571,18 @@ function ExportImageInner({ template, data: liveData, filename = 'g22-export', c
 
                             {/* El palmares no tiene grupos ni modo de tabla: el unico boton
                                 que quedaria es "Tabla corrida", que no hace nada. */}
-                            {template === 'playoffBracket' && visualFamily === 'g22Base' && (
+                            {((template === 'playoffBracket' && visualFamily === 'g22Base') || template === 'champion') && (
                                 <div className={styles.modalSection}>
                                     <label className={styles.modalLabel}>Foto de fondo</label>
                                     <div className={styles.uploadCard}>
                                         <div className={styles.uploadMeta}>
-                                            <span className={styles.uploadTitle}>Subi la foto que va detras del cuadro</span>
+                                            <span className={styles.uploadTitle}>
+                                                {template === 'champion' ? 'Subi la foto que va detras del campeon' : 'Subi la foto que va detras del cuadro'}
+                                            </span>
                                             <span className={styles.uploadSubtitle}>
-                                                Cubre toda la placa y se tapa con un velo del color del campo para que los cruces se lean. Sin foto, queda el campo liso.
+                                                {template === 'champion'
+                                                    ? 'Cubre toda la placa y se tapa con un velo del color de Fondo para que el titular se lea. Sin foto, queda el campo liso.'
+                                                    : 'Cubre toda la placa y se tapa con un velo del color del campo para que los cruces se lean. Sin foto, queda el campo liso.'}
                                             </span>
                                         </div>
                                         <div className={styles.uploadActions}>
@@ -10059,25 +10059,34 @@ async function drawChampionPlate(
     const spacedCtx = ctx as CanvasRenderingContext2D & { letterSpacing?: string };
 
     const clubs = [data.club, ...(data.coChampions ?? [])].filter((club) => club && club.name).slice(0, 2);
-    const [brandMark, ...images] = await Promise.all([
+    const [brandMark, photo, ...images] = await Promise.all([
         loadImage('/marcas/salida-de-22.png'),
+        data.backgroundImage ? loadImage(data.backgroundImage) : Promise.resolve(null),
         ...clubs.map((club) => loadImage(club.logo || '')),
     ]);
 
     // ---- Fondo: placa plena, luz suave, un arco grande y grano fino ----
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, width, height);
-    const glow = ctx.createRadialGradient(width * 0.3, height * 0.12, 0, width * 0.3, height * 0.12, height * 0.8);
-    glow.addColorStop(0, isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.45)');
-    glow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, width, height);
-    ctx.save();
-    ctx.fillStyle = isDark ? mixHexColors(bgColor, '#ffffff', 0.05) : mixHexColors(bgColor, '#000000', 0.05);
-    ctx.beginPath();
-    ctx.arc(-width * 0.12, height * 0.34, width * 0.62, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    if (photo) {
+        // Igual que el cuadro: la foto cubre la placa y un velo del color de Fondo
+        // la apaga lo justo para que el nombre y CAMPEÓN se lean.
+        drawCoverImage(ctx, canvas, photo, { focusX: 0.5, focusY: 0.4 });
+        ctx.fillStyle = hexToRGBA(bgColor, 0.74);
+        ctx.fillRect(0, 0, width, height);
+    } else {
+        const glow = ctx.createRadialGradient(width * 0.3, height * 0.12, 0, width * 0.3, height * 0.12, height * 0.8);
+        glow.addColorStop(0, isDark ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.45)');
+        glow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, width, height);
+        ctx.save();
+        ctx.fillStyle = isDark ? mixHexColors(bgColor, '#ffffff', 0.05) : mixHexColors(bgColor, '#000000', 0.05);
+        ctx.beginPath();
+        ctx.arc(-width * 0.12, height * 0.34, width * 0.62, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
     const noiseTile = getRankingNoiseTile();
     if (noiseTile) {
         const noisePattern = ctx.createPattern(noiseTile, 'repeat');
