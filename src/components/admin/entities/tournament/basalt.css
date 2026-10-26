@@ -4218,6 +4218,231 @@ select.basalt-input {
     color: var(--text-dim);
 }
 
+/* ── Panel: "Por hacer" ────────────────────────────────────────────────────
+   El título de la tarjeta principal es un h2 de verdad, no un rótulo mono:
+   es la pregunta que contesta la pantalla. */
+.summary-todo-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-main);
+}
+
+.summary-todo-body {
+    display: grid;
+    gap: 18px;
+}
+
+.summary-todo-group {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.summary-todo-group h3 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+}
+
+.summary-todo-group h3 svg {
+    color: #f59e0b;
+}
+
+.summary-matches {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--border-basalt);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.summary-match {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px;
+    background: var(--bg-basalt);
+}
+
+.summary-match + .summary-match {
+    border-top: 1px solid var(--border-basalt);
+}
+
+.summary-match-when {
+    display: grid;
+    gap: 2px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+.summary-match-teams {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+}
+
+.summary-match-teams strong {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.summary-match-teams small {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.summary-match-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    min-height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--border-basalt);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-primary);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.summary-match-cta:hover {
+    border-color: var(--accent-primary);
+}
+
+.summary-match-cta:focus-visible,
+.summary-cta:focus-visible,
+.summary-more:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 2px;
+}
+
+.summary-more {
+    justify-self: start;
+    font-size: 12px;
+    color: var(--accent-primary);
+    text-decoration: none;
+}
+
+.summary-done {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+.summary-done svg {
+    color: #10b981;
+}
+
+.summary-error {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-main);
+}
+
+.summary-skeleton {
+    display: grid;
+    gap: 8px;
+}
+
+.summary-skeleton span {
+    height: 44px;
+    border-radius: 4px;
+    background: var(--bg-basalt);
+    animation: summary-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes summary-pulse {
+    from { opacity: 0.55; }
+    to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .summary-skeleton span { animation: none; }
+}
+
+.summary-progress {
+    display: grid;
+    gap: 6px;
+}
+
+.summary-progress-text {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-dim);
+}
+
+.summary-progress-text strong {
+    color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+}
+
+.summary-progress-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--bg-basalt);
+    overflow: hidden;
+}
+
+.summary-progress-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent-primary);
+}
+
+.summary-live {
+    font-style: normal;
+    color: var(--accent-primary);
+}
+
+.summary-count {
+    flex: 0 0 auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 520px) {
+    .summary-match {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .summary-match-when {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 8px;
+    }
+}
+
 .summary-actions {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -5654,4 +5879,17 @@ select.basalt-input {
     /* El degradado de titulares del shell viejo pintaba texto con
        `background-clip: text`. Acá el titular es tinta plena. */
     --headline-gradient: none;
+}
+
+/* ── Menús anclados en escritorio: sin velo ──
+   Un menú no es una tarea modal: oscurecer y desenfocar toda la página por
+   abrir "…" o el selector de temporada apagaba la pantalla para elegir una
+   opción. El fondo sigue ahí (transparente) para cerrar con un clic afuera.
+   En el teléfono el menú es una hoja y conserva su velo. */
+@media (min-width: 768px) {
+    .basalt-floating-backdrop.is-open,
+    :root[data-theme="light"] .basalt-body .basalt-floating-backdrop.is-open {
+        background: transparent;
+        backdrop-filter: none;
+    }
 }

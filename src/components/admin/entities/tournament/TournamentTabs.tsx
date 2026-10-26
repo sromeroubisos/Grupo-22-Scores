@@ -21,12 +21,15 @@ import { useTournamentDirty } from './TournamentContext';
 
 type TournamentRow = Database['public']['Tables']['tournaments']['Row'];
 
+// Los ids siguen siendo los de la URL (`?tab=estructura`): los enlaces viejos
+// y los atajos del Panel no se rompen. Cambian el nombre y el orden: el
+// recorrido es armar las fases, sumar los equipos, cargar los partidos.
 export const TOURNAMENT_TABS = [
-    { id: 'resumen', label: 'Resumen', icon: LayoutDashboard, description: 'Estado general y salud del torneo' },
-    { id: 'detalles', label: 'Detalles', icon: FileText, description: 'Identidad, temporada y datos base' },
-    { id: 'estructura', label: 'Estructura', icon: Layers, description: 'Fases, reglas y formato competitivo' },
-    { id: 'participantes', label: 'Participantes', icon: Users, description: 'Altas, filtros y control de equipos' },
-    { id: 'operacion', label: 'Operación', icon: Zap, description: 'Fixture, resultados y tabla operativa' },
+    { id: 'resumen', label: 'Panel', icon: LayoutDashboard, description: 'Estado del torneo y qué falta' },
+    { id: 'estructura', label: 'Fases', icon: Layers, description: 'Fases, grupos, llaves y reglas' },
+    { id: 'participantes', label: 'Equipos', icon: Users, description: 'Equipos inscriptos y planteles' },
+    { id: 'operacion', label: 'Partidos', icon: Zap, description: 'Fixture, resultados y tabla' },
+    { id: 'detalles', label: 'Ajustes', icon: FileText, description: 'Nombre, categoría, escudo y visibilidad' },
     { id: 'sponsors', label: 'Sponsors', icon: Handshake, description: 'Marcas que se muestran en la página pública' },
 ];
 
@@ -170,7 +173,7 @@ export function TournamentTabs({ id, currentTab, onPendingTabChange }: Tournamen
     const ActiveIcon = activeTab.icon;
 
     return (
-        <nav className="basalt-tabs" aria-busy={isTabNavigationPending}>
+        <nav className="basalt-tabs tmt" aria-busy={isTabNavigationPending}>
             <div className="basalt-tabs-mobile">
                 <div className="basalt-tabs-mobile-head">
                     <span className="basalt-tabs-mobile-label">Modulo activo</span>
@@ -262,30 +265,15 @@ export function TournamentTabs({ id, currentTab, onPendingTabChange }: Tournamen
                                     <span>{tab.label}</span>
                                     {hasDraft ? (
                                         <span
+                                            className="basalt-tab-dot"
                                             aria-label={`Cambios pendientes en ${tab.label}`}
                                             title={`Cambios pendientes en ${tab.label}`}
-                                            style={{
-                                                width: 8,
-                                                height: 8,
-                                                borderRadius: '999px',
-                                                background: 'var(--accent)',
-                                                boxShadow: '0 0 8px rgba(0, 163, 101, 0.65)',
-                                                flexShrink: 0,
-                                            }}
                                         />
                                     ) : wasSaved ? (
                                         <span
+                                            className="basalt-tab-dot is-saved"
                                             aria-label={`Cambios guardados recientemente en ${tab.label}`}
                                             title={`Cambios guardados recientemente en ${tab.label}`}
-                                            style={{
-                                                width: 10,
-                                                height: 10,
-                                                borderRadius: '999px',
-                                                background: '#34d399',
-                                                boxShadow: '0 0 0 4px rgba(52, 211, 153, 0.2), 0 0 12px rgba(52, 211, 153, 0.75)',
-                                                flexShrink: 0,
-                                                transition: 'all 180ms ease',
-                                            }}
                                         />
                                     ) : null}
                                 </span>

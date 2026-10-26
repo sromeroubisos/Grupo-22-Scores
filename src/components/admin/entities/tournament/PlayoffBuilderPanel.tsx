@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ChevronDown,
   RefreshCw,
@@ -10,6 +10,7 @@ import {
   Check,
   Link2,
   Rocket,
+  Settings2,
 } from 'lucide-react';
 import PlayoffBracketBoard, { type PlayoffBracketBoardData } from './PlayoffBracketBoard';
 import { buildBracketTemplate, resolveCupName } from '@/lib/playoff/templates';
@@ -243,8 +244,14 @@ export default function PlayoffBuilderPanel({
     | undefined;
 
   const [open, setOpenState] = useState(defaultOpen || OPEN_PANELS.has(phaseId));
+  /* Abierto "por las dudas" y no porque el gestor lo pidió. `defaultOpen` se
+     decide con `bracketBuilder.generatedAt`, que NO existe en un cuadro cargado
+     por script: el Uranga abría las cuatro copas a la vez (~1.800px cada una).
+     Si al llegar el estado resulta que el cuadro ya está, se pliega solo. */
+  const openedByDefault = useRef(defaultOpen && !OPEN_PANELS.has(phaseId));
   const setOpen = (next: boolean | ((prev: boolean) => boolean)) =>
     setOpenState((prev) => {
+      openedByDefault.current = false;
       const value = typeof next === 'function' ? next(prev) : next;
       if (value) OPEN_PANELS.add(phaseId);
       else OPEN_PANELS.delete(phaseId);
@@ -262,6 +269,10 @@ export default function PlayoffBuilderPanel({
   const [confirmForce, setConfirmForce] = useState<null | 'generate' | 'clear'>(null);
   const [templates, setTemplates] = useState<TemplateMeta[]>([]);
   const [board, setBoard] = useState<PlayoffBracketBoardData>({ hasBracket: false, cups: [] });
+  /* `null` = lo decide el cuadro: abierto si todavía no hay cuadro (no hay
+     otra cosa que hacer), plegado si ya existe. */
+  const [configOpen, setConfigOpen] = useState<boolean | null>(null);
+  const showConfig = configOpen ?? !board.hasBracket;
 
   const [templateId, setTemplateId] = useState<TemplateId>(saved?.templateId ?? 'single_elimination');
   const [teamCount, setTeamCount] = useState<number>(saved?.teamCount ?? 8);
@@ -473,9 +484,19 @@ export default function PlayoffBuilderPanel({
     }
   }, [tournamentId, phaseId, applySeeding]);
 
+  /* El estado se pide aunque el panel esté plegado: el sello de la cabecera
+     ("Cuadro generado" / "Sin generar") sale de acá, y antes un panel plegado
+     nunca lo pedía y decía "Sin generar" sobre un cuadro ya jugado. */
   useEffect(() => {
-    if (open && !loaded) fetchState();
-  }, [open, loaded, fetchState]);
+    if (!loaded) fetchState();
+  }, [loaded, fetchState]);
+
+  useEffect(() => {
+    if (loaded && board.hasBracket && openedByDefault.current) {
+      openedByDefault.current = false;
+      setOpenState(false);
+    }
+  }, [loaded, board.hasBracket]);
 
   const cupFields = templateId === 'custom' ? [] : CUP_KEYS[templateId];
   const teamCountOptions =
@@ -604,11 +625,13 @@ export default function PlayoffBuilderPanel({
           </span>
         </span>
         <span className={styles.headerRight}>
-          <span
-            className={`${styles.badge} ${board.hasBracket ? styles.badgeGenerated : ''}`}
-          >
-            {board.hasBracket ? 'Cuadro generado' : 'Sin generar'}
-          </span>
+          {loaded ? (
+            <span
+              className={`${styles.badge} ${board.hasBracket ? styles.badgeGenerated : ''}`}
+            >
+              {board.hasBracket ? 'Cuadro generado' : 'Sin generar'}
+            </span>
+          ) : null}
           <ChevronDown
             size={18}
             className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`}
@@ -618,6 +641,47 @@ export default function PlayoffBuilderPanel({
 
       {open && (
         <div className={styles.body}>
+          {/* Con el cuadro armado, lo primero es el cuadro: es lo que se viene
+              a mirar. Formato, quiénes entran y horarios quedan detrás de
+              "Editar cuadro". Antes la configuración iba arriba y los
+              resultados de una copa ya jugada quedaban 1.000px más abajo. */}
+          {board.hasBracket && (
+            <>
+              <div className={styles.boardWrap} style={{ borderTop: 'none', paddingTop: 0 }}>
+                <PlayoffBracketBoard data={board} />
+              </div>
+              <div className={styles.editBar}>
+                <button
+                  type="button"
+                  onClick={() => setConfigOpen((v) => !(v ?? false))}
+                  className={styles.secondaryBtn}
+                  aria-expanded={showConfig}
+                >
+                  <Settings2 size={14} />
+                  {showConfig ? 'Ocultar configuración' : 'Editar cuadro'}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => runAction('syncAdvancement')}
+                  className={`${styles.secondaryBtn} ${busy ? styles.btnDisabled : ''}`}
+                  title="Vuelve a empujar ganadores y perdedores de todos los partidos terminados. Para resultados que entraron por fuera del gestor."
+                >
+                  <Link2 size={14} />
+                  Sincronizar llaves
+                </button>
+              </div>
+              {notice && !showConfig && (
+                <div className={styles.noticeBanner} role="status">
+                  <Check size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+                  <span>{notice}</span>
+                </div>
+              )}
+            </>
+          )}
+
+          {showConfig && (
+          <>
           <div className={styles.builderCard}>
             <p className={styles.introText}>
               Tres decisiones: el formato del cuadro, quiénes entran y cuándo se juega. Al
@@ -1122,18 +1186,6 @@ export default function PlayoffBuilderPanel({
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() => runAction('syncAdvancement')}
-                      className={`${styles.secondaryBtn} ${busy ? styles.btnDisabled : ''}`}
-                      title="Vuelve a empujar ganadores y perdedores de todos los partidos terminados. Para resultados que entraron por fuera del gestor."
-                    >
-                      <Link2 size={14} />
-                      Sincronizar llaves
-                    </button>
-                  )}
-                  {board.hasBracket && (
-                    <button
-                      type="button"
-                      disabled={busy}
                       onClick={() => setConfirmForce('clear')}
                       className={`${styles.secondaryBtn} ${styles.dangerBtn} ${busy ? styles.btnDisabled : ''}`}
                     >
@@ -1145,7 +1197,10 @@ export default function PlayoffBuilderPanel({
                     type="button"
                     disabled={busy}
                     onClick={() => runAction(board.hasBracket ? 'regenerate' : 'generate')}
-                    className={`${styles.generateBtn} ${busy ? styles.btnDisabled : ''}`}
+                    // Generar es LA acción de un cuadro vacío. Regenerar rehace
+                    // uno que ya existe: va como secundaria, no como el botón
+                    // azul que invita a tocarlo.
+                    className={`${board.hasBracket ? styles.secondaryBtn : styles.generateBtn} ${busy ? styles.btnDisabled : ''}`}
                   >
                     {board.hasBracket ? (
                       <RefreshCw size={15} />
@@ -1165,10 +1220,15 @@ export default function PlayoffBuilderPanel({
             )}
           </div>
 
-          {/* Bracket visual */}
-          <div className={styles.boardWrap}>
-            <PlayoffBracketBoard data={board} />
-          </div>
+          </>
+          )}
+
+          {/* Sin cuadro todavía: el tablero vacío queda debajo del armador. */}
+          {!board.hasBracket && (
+            <div className={styles.boardWrap}>
+              <PlayoffBracketBoard data={board} />
+            </div>
+          )}
         </div>
       )}
     </div>

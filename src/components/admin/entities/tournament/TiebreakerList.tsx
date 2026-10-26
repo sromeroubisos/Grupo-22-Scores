@@ -409,7 +409,11 @@ export function TiebreakerList({ items, onChange, phaseType }: TiebreakerListPro
                  texto que el resto de la consola, con su foco y su borde. El
                  `pl-10` deja lugar a la lupa que va encima. El estilo anterior
                  pedía `--accent-cyan`, una variable que ya no define nadie. */
-              className="basalt-input pl-10"
+              // `tiebreaker-search-input`: debajo de 1280px la consola le pone
+              // `padding: 9px 12px !important` a todo input del editor y la lupa
+              // quedaba encima de "Buscar criterio". El lugar para la lupa se
+              // reserva en tournament-structure.css.
+              className="basalt-input pl-10 tiebreaker-search-input"
             />
             <svg
               xmlns="http://www.w3.org/2000/svg"

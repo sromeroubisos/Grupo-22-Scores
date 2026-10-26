@@ -157,7 +157,9 @@ export default function PlayoffBracketBoard({ data }: { data: PlayoffBracketBoar
           cup.groupId == null ? '#8e9aa7' : CUP_ACCENTS[cup.orderIndex] ?? '#8e9aa7';
         return (
           <div key={cup.groupId ?? 'qualifier'} className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
+            {/* Con una sola copa el título sobra: la fase ya se llama "Copa
+                Oro", y la llave principal llegaba rotulada "Clasificación". */}
+            <div className={data.cups.length === 1 ? 'hidden' : 'flex items-center gap-2'}>
               <span
                 className="w-2.5 h-2.5 rounded-full"
                 style={{ background: accent }}

@@ -8,7 +8,6 @@ import { TournamentHeader } from './TournamentHeader';
 import { HistoricalSeasonImportDrawer } from './HistoricalSeasonImportDrawer';
 import { TournamentSeasonCreationModal } from './TournamentSeasonCreationModal';
 import { TournamentTabs } from './TournamentTabs';
-import { TournamentRightSidebar } from './TournamentRightSidebar';
 import {
     TournamentDraftProvider,
     type TournamentDetailsDraft,
@@ -135,13 +134,38 @@ export function TournamentManageShell(props: ShellProps) {
 function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null, children, seasonMenuItems = [] }: ShellProps) {
     const router = useRouter();
     const tournament = data as TournamentManageRow;
-    const hasSidebar = currentTab === 'resumen';
+    // El Panel tenía una barra derecha (Chequeos, Atajos, Borrar torneo) que
+    // repetía las pestañas con otros nombres y dejaba "Borrar torneo" como el
+    // botón más llamativo de la pantalla. El Panel nuevo ya dice qué falta, y
+    // borrar vive en el menú "…" con su confirmación.
+    const hasSidebar = false;
     const useWideWorkspace = !hasSidebar;
     const shellRef = useRef<HTMLDivElement | null>(null);
     usePerfComponentLifecycle('TournamentManageShell', {
         tournamentId: id,
         tab: currentTab,
     });
+
+    /**
+     * En un telefono, el gestor es OTRA pantalla.
+     *
+     * Esta consola son nueve pestanas sobre cinco hojas de CSS de escritorio;
+     * en 390px se adapta, pero no se gestiona. `manage/movil` es el recorrido
+     * corto —Panel, Fases, Competidores, y la fase en una pantalla— y esta
+     * redireccion es lo que lo vuelve el gestor de mobile en vez de una ruta
+     * escondida que nadie encuentra.
+     *
+     * Se decide UNA vez, al montar, y no en un listener de resize: al gestor
+     * que agranda la ventana no se le arranca la pantalla de abajo. Y siempre
+     * hay salida: `?desktop=1` desactiva la redireccion, que es exactamente el
+     * enlace que la pantalla mobile ofrece como "Abrir el gestor completo".
+     */
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        if (new URLSearchParams(window.location.search).get('desktop') === '1') return;
+        if (!window.matchMedia('(max-width: 767px)').matches) return;
+        router.replace(`/admin/entities/${encodeURIComponent(id)}/manage/movil`);
+    }, [id, router]);
     const {
         isDirty,
         drafts,
@@ -523,7 +547,7 @@ function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null
     }, [clearAllDrafts, isDirty, router]);
 
     return (
-        <div ref={shellRef} className="basalt-body flex flex-col min-h-screen">
+        <div ref={shellRef} className="basalt-body tmv2 flex flex-col min-h-screen">
             <TournamentHeader
                 data={data}
                 isDirty={isDirty}
@@ -579,14 +603,6 @@ function TournamentManageShellInner({ id, data, currentTab, currentSubtab = null
                             <TournamentTabPendingState label={pendingTab.label} />
                         ) : children}
                     </main>
-
-                    {hasSidebar && (
-                        <TournamentRightSidebar
-                            id={id}
-                            data={data}
-                            onDelete={handleDelete}
-                        />
-                    )}
                 </div>
 
                 {actionMessage && (

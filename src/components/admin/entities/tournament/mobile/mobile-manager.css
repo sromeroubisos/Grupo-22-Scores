@@ -1,0 +1,1480 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+/*
+ * Gestor de torneo en mobile.
+ *
+ * Hoja propia y ENTERAMENTE scopeada a `.gtm`: no toca `:root` ni `body`. La
+ * consola de escritorio (basalt + tournament-mobile + operation-console y dos
+ * mas, ~700 KB entre todas) no se carga en esta ruta, asi que aca no hay
+ * cascada ajena que pisar y no hace falta un solo `!important`.
+ *
+ * El prefijo es `gtm-` y no `tm-` a proposito: `src/app/admin/styles/
+ * tournament-theme.css` ya define `.tm-card`, `.tm-input` y `.tm-btn-primary`,
+ * y entra por `globals.css`, o sea es global en todo el sitio.
+ *
+ * Los tokens son los mismos valores de basalt.css, redeclarados en `.gtm` para
+ * que la pantalla se pinte sola aunque basalt no este cargado.
+ */
+
+.gtm {
+    --gtm-bg: #0F141A;
+    --gtm-surface: #151B22;
+    --gtm-raised: #1B232C;
+    --gtm-border: #26313B;
+    --gtm-border-soft: #1F2833;
+    --gtm-accent: #22C55E;         /* verde accion */
+    --gtm-info: #38BDF8;           /* azul informativo */
+    --gtm-warn: #F59E0B;
+    --gtm-danger: #EF4444;
+    --gtm-text: #F4F7FA;
+    --gtm-dim: #98A6B3;            /* 7,0:1 sobre --gtm-bg */
+    --gtm-faint: #7C8B99;          /* 5,0:1 sobre --gtm-bg */
+    --gtm-font: 'Space Grotesk', 'Inter', system-ui, -apple-system, sans-serif;
+    --gtm-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+    /* Escala modular, no valores sueltos: 12 / 13 / 15 / 17 / 20 / 26 */
+    --gtm-fs-xs: 12px;
+    --gtm-fs-sm: 13px;
+    --gtm-fs-md: 15px;
+    --gtm-fs-lg: 17px;
+    --gtm-fs-xl: 20px;
+    --gtm-fs-2xl: 26px;
+
+    --gtm-gap: 10px;
+    --gtm-pad: 14px;
+    --gtm-radius: 12px;
+    --gtm-tap: 44px;               /* area tactil minima */
+
+    --gtm-head-h: 56px;
+    --gtm-tabs-h: 46px;
+
+    min-height: 100dvh;
+    background: var(--gtm-bg);
+    color: var(--gtm-text);
+    font-family: var(--gtm-font);
+    font-size: var(--gtm-fs-md);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: contain;
+}
+
+.gtm *,
+.gtm *::before,
+.gtm *::after { box-sizing: border-box; }
+
+/*
+ * `:where()` no suma especificidad, asi que este reset queda en (0,1,0) y
+ * cualquier clase posterior lo pisa. Escrito como `.gtm button` valia (0,1,1) y
+ * le ganaba a `.gtm-btn-primary`, `.gtm-tab` y `.gtm-chip`: TODO boton heredaba
+ * `--gtm-text`. Medido en el banco: el texto del boton primario salia blanco
+ * sobre el verde, 2,12:1 — la mitad del minimo.
+ */
+.gtm :where(button) {
+    font: inherit;
+    color: var(--gtm-text);
+}
+
+.gtm :focus-visible {
+    outline: 2px solid var(--gtm-info);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+/* ── CABECERA ─────────────────────────────────────────────────────────── */
+
+.gtm-head {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: var(--gtm-head-h);
+    padding: 8px 8px 8px 6px;
+    padding-top: max(8px, env(safe-area-inset-top));
+    background: rgba(15, 20, 26, 0.92);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--gtm-border);
+}
+
+.gtm-head-id {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.gtm-head-crest {
+    width: 34px;
+    height: 34px;
+    flex: none;
+    border-radius: 8px;
+    object-fit: contain;
+    background: var(--gtm-raised);
+    padding: 3px;
+}
+
+.gtm-head-text { min-width: 0; }
+
+.gtm-head-title {
+    font-size: var(--gtm-fs-md);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gtm-head-sub {
+    font-size: var(--gtm-fs-xs);
+    color: var(--gtm-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── BOTON ICONO ──────────────────────────────────────────────────────── */
+
+.gtm-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--gtm-tap);
+    height: var(--gtm-tap);
+    flex: none;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--gtm-text);
+    cursor: pointer;
+    transition: background 160ms ease;
+}
+
+.gtm-icon-btn:active { background: var(--gtm-raised); }
+.gtm-icon-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+/* ── NAVEGACION INFERIOR ──────────────────────────────────────────────── */
+
+/*
+ * Las secciones van ABAJO, en la zona del pulgar. Arriba quedaba la cabecera
+ * del torneo empujando las pestanas fuera del alcance comodo en un telefono
+ * grande; y es ademas donde las pone el gestor completo.
+ *
+ * Cuatro destinos: el limite practico de una barra inferior son cinco.
+ */
+.gtm-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: flex;
+    gap: 2px;
+    padding: 4px 6px;
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
+    background: rgba(15, 20, 26, 0.96);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid var(--gtm-border);
+}
+
+@media (min-width: 640px) {
+    .gtm-nav {
+        left: 50%;
+        right: auto;
+        width: 560px;
+        transform: translateX(-50%);
+        border-inline: 1px solid var(--gtm-border);
+    }
+}
+
+.gtm-nav-btn {
+    flex: 1;
+    min-height: 52px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--gtm-dim);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: color 160ms ease, background 160ms ease;
+}
+
+.gtm-nav-btn[aria-selected='true'] { color: var(--gtm-accent); }
+.gtm-nav-btn:active { background: var(--gtm-raised); }
+
+.gtm-nav-label { line-height: 1; }
+
+/* ── CUERPO ───────────────────────────────────────────────────────────── */
+
+.gtm-main {
+    padding: var(--gtm-pad);
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: var(--gtm-gap);
+}
+
+.gtm-section-title {
+    font-size: var(--gtm-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--gtm-faint);
+    margin: 6px 2px 0;
+}
+
+.gtm-row { display: flex; align-items: center; gap: 8px; }
+.gtm-grow { flex: 1; min-width: 0; }
+
+/* ── TARJETAS ─────────────────────────────────────────────────────────── */
+
+.gtm-card {
+    background: var(--gtm-surface);
+    border: 1px solid var(--gtm-border);
+    border-radius: var(--gtm-radius);
+    padding: var(--gtm-pad);
+}
+
+.gtm-row-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 64px;
+    padding: 12px var(--gtm-pad);
+    background: var(--gtm-surface);
+    border: 1px solid var(--gtm-border);
+    border-radius: var(--gtm-radius);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease;
+}
+
+.gtm-row-card:active { background: var(--gtm-raised); border-color: #33414F; }
+
+.gtm-row-body { flex: 1; min-width: 0; }
+
+.gtm-row-title {
+    font-size: var(--gtm-fs-md);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gtm-row-sub {
+    font-size: var(--gtm-fs-sm);
+    color: var(--gtm-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gtm-row-meta {
+    font-size: var(--gtm-fs-xs);
+    color: var(--gtm-faint);
+    font-family: var(--gtm-mono);
+}
+
+.gtm-chevron { color: var(--gtm-faint); flex: none; }
+
+/* ── PILDORAS Y ESTADOS ───────────────────────────────────────────────── */
+
+.gtm-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: var(--gtm-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.gtm-pill-live  { color: #86EFAC; background: rgba(34, 197, 94, 0.14);  border-color: rgba(34, 197, 94, 0.36); }
+.gtm-pill-info  { color: #A5DFFA; background: rgba(56, 189, 248, 0.13); border-color: rgba(56, 189, 248, 0.34); }
+.gtm-pill-warn  { color: #FCD34D; background: rgba(245, 158, 11, 0.13); border-color: rgba(245, 158, 11, 0.34); }
+.gtm-pill-muted { color: var(--gtm-dim); background: var(--gtm-raised);  border-color: var(--gtm-border); }
+
+/* ── BOTONES ──────────────────────────────────────────────────────────── */
+
+.gtm-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: var(--gtm-tap);
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1px solid var(--gtm-border);
+    background: var(--gtm-raised);
+    color: var(--gtm-text);
+    font-size: var(--gtm-fs-md);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 160ms ease, opacity 160ms ease;
+}
+
+.gtm-btn:active { background: #222C36; }
+
+.gtm-btn-primary {
+    background: var(--gtm-accent);
+    border-color: var(--gtm-accent);
+    color: #06210F;
+}
+
+.gtm-btn-primary:active { background: #1BAE52; }
+
+.gtm-btn-danger { color: #FCA5A5; border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1); }
+
+.gtm-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+.gtm-btn-hint {
+    margin-top: 6px;
+    font-size: var(--gtm-fs-xs);
+    color: var(--gtm-faint);
+    text-align: center;
+}
+
+/* ── PANEL: rejilla de cifras ─────────────────────────────────────────── */
+
+.gtm-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gtm-gap);
+}
+
+.gtm-stat {
+    background: var(--gtm-surface);
+    border: 1px solid var(--gtm-border);
+    border-radius: var(--gtm-radius);
+    padding: 12px var(--gtm-pad);
+}
+
+.gtm-stat-n {
+    font-family: var(--gtm-mono);
+    font-size: var(--gtm-fs-2xl);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.gtm-stat-l {
+    font-size: var(--gtm-fs-xs);
+    color: var(--gtm-dim);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+/* ── SEGMENTADO (Tabla / Calendario / Llaves) ─────────────────────────── */
+
+.gtm-seg {
+    display: flex;
+    gap: 3px;
+    padding: 3px;
+    background: var(--gtm-raised);
+    border: 1px solid var(--gtm-border);
+    border-radius: 10px;
+}
+
+.gtm-seg-btn {
+    flex: 1;
+    min-height: var(--gtm-tap);
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--gtm-dim);
+    font-size: var(--gtm-fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease;
+}
+
+.gtm-seg-btn[aria-selected='true'] {
+    background: var(--gtm-surface);
+    color: var(--gtm-text);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* ── TABLA DE POSICIONES ──────────────────────────────────────────────── */
+
+/*
+ * La tabla scrollea DENTRO de su caja: el cuerpo de la pagina nunca se corre.
+ * Posicion, escudo, nombre y PTS quedan siempre a la vista; el resto entra por
+ * el scroll horizontal.
+ */
+.gtm-table-wrap {
+    background: var(--gtm-surface);
+    border: 1px solid var(--gtm-border);
+    border-radius: var(--gtm-radius);
+    overflow: hidden;
+}
+
+.gtm-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.gtm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--gtm-fs-sm);
+}
+
+.gtm-table th {
+    font-size: var(--gtm-fs-xs);
+    font-weight: 700;
+    color: var(--gtm-faint);
+    text-align: right;
+    padding: 9px 8px;
+    border-bottom: 1px solid var(--gtm-border);
+    white-space: nowrap;
+    background: var(--gtm-surface);
+}
+
+.gtm-table td {
+    padding: 9px 8px;
+    text-align: right;
+    border-bottom: 1px solid var(--gtm-border-soft);
+    font-family: var(--gtm-mono);
+    color: var(--gtm-dim);
+    white-space: nowrap;
+}
+
+.gtm-table tr:last-child td { border-bottom: 0; }
+
+.gtm-table th.gtm-col-team,
+.gtm-table td.gtm-col-team {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    background: var(--gtm-surface);
+    font-family: var(--gtm-font);
+    color: var(--gtm-text);
+    min-width: 152px;
+}
+
+.gtm-table th.gtm-col-pts,
+.gtm-table td.gtm-col-pts {
+    position: sticky;
+    right: 0;
+    background: var(--gtm-surface);
+    color: var(--gtm-text);
+    font-weight: 700;
+    box-shadow: -8px 0 8px -8px rgba(0, 0, 0, 0.6);
+}
+
+.gtm-team-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.gtm-pos {
+    font-family: var(--gtm-mono);
+    font-size: var(--gtm-fs-xs);
+    color: var(--gtm-faint);
+    width: 16px;
+    flex: none;
+    text-align: right;
+}
+
+.gtm-team-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/*
+ * La zona de clasificacion no se comunica SOLO por color: la franja lleva al
+ * lado su sigla, que es lo que se lee sin distinguir el verde del ambar.
+ */
+.gtm-zone {
+    font-family: var(--gtm-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 4px;
+    flex: none;
+}
+
+/*
+ * El panel del segmento (Tabla / Calendario / Plantel).
+ *
+ * Repite el flex de `.gtm-main` A PROPOSITO: antes el contenido del segmento
+ * eran hijos directos de `.gtm-main` y heredaban su `gap`. Al envolverlos para
+ * poder darles `role="tabpanel"` —una pestana sin panel no es una pestana— ese
+ * gap se perdia y todo quedaba pegado. Esto lo devuelve sin cambiar una medida.
+ */
+.gtm-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gtm-gap);
+    min-width: 0;
+}
+
+/* ── CALENDARIO ───────────────────────────────────────────────────────── */
+
+.gtm-round-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: var(--gtm-surface);
+    border: 1px solid var(--gtm-border);
+    border-radius: var(--gtm-radius);
+    padding: 0 4px;
+}
+
+.gtm-round-name {
+    flex: 1;
+    text-align: center;
+    font-size: var(--gtm-fs-md);
+    font-weight: 700;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gtm-round-count {
+    display: block;
+    font-size: var(--gtm-fs-xs);
+    font-weight: 400;
+    color: var(--gtm-faint);
+    font-family: var(--gtm-mono);
+}
+
+/*
+ * LA TIRA DE FECHAS.
+ *
+ * Las flechas mueven de a una, y una fase de dieciocho fechas son diecisiete
+ * toques para llegar al final. La tira las pone todas a un toque de distancia,
+ * y de paso muestra la posicion: el contador "5 de 18" que habia antes decia el
+ * numero pero no en que parte del torneo cae.
+ *
+ * Scroll horizontal DENTRO de la tira: el cuerpo de la pagina no se corre.
+ */
+.gtm-round-strip {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    /* El respiro lateral es del `.gtm-main`, asi el primer y ultimo chip no
+       quedan pegados al borde de la pantalla al llegar al tope del scroll. */
+    margin-inline: calc(var(--gtm-pad) * -1);
+    padding-inline: var(--gtm-pad);
+    padding-block: 2px;
+}
+
+.gtm-round-strip::-webkit-scrollbar { display: none; }
+
+.gtm-round-chip {
+    flex: none;
+    min-width: var(--gtm-tap);
+    min-height: 38px;
+    padding: 0 10px;
+    scroll-snap-align: center;
+    border: 1px solid var(--gtm-border);
+    border-radius: 9px;
+    background: var(--gtm-surface);
+    color: var(--gtm-dim);
+    font-family: var(--gtm-mono);
+    font-size: var(--gtm-fs-sm);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+/* La fecha cerrada se apaga: de un vistazo se ve hasta donde llego el torneo. */
+.gtm-round-chip-done { color: var(--gtm-faint); background: transparent; }
+
+.gtm-round-chip[aria-checked='true'] {
+    background: var(--gtm-accent);
+    border-color: var(--gtm-accent);
+    /* Texto oscuro sobre el verde: el blanco daba 2,1:1. */
+    color: #06240F;
+    font-weight: 700;
+}
+
+.gtm-round-chip:active { background: var(--gtm-raised); }
+.gtm-round-chip[aria-checked='true']:active { background: var(--gtm-accent); }
+
+/*
+ * LA LISTA DE PARTIDOS, en una sola caja.
+ *
+ * Cada `.gtm-match` era hijo directo de `.gtm-main`, que es un flex con
+ * `gap: 10px`: la fila se pintaba de `--gtm-surface` con las esquinas cuadradas
+ * y separada de la siguiente, o sea la "pila de cajas" que el comentario de
+ * `.gtm-match` decia estar evitando, con la linea divisoria flotando en el
+ * medio del hueco. Envueltas, el borde y el redondeo son de la caja y las filas
+ * quedan al ras, separadas por la linea y nada mas.
+ */
+.gtm-matches {
+    border: 1px solid var(--gtm-border);
+    border-radius: var(--gtm-radius);
+    background: var(--gtm-surface);
+}
+
+/* Se redondean las filas de las puntas en vez de poner `overflow: hidden` en la
+   caja: el overflow recorta el `outline` del foco —que sale 2px hacia afuera—
+   y el primer y ultimo partido se navegaban a ciegas con el teclado. */
+.gtm-matches > :first-child {
+    border-start-start-radius: 11px;
+    border-start-end-radius: 11px;
+}
+
+.gtm-matches > :last-child {
+    border-end-start-radius: 11px;
+    border-end-end-radius: 11px;
+}
+
+/* == PARTIDO =============================================================
+   La misma fila que en la web (`.matchRow` de page.module.css): la hora en una
+   columna fija a la izquierda y los dos equipos apilados a la derecha, cada uno
+   con su marcador al final. Se copian las medidas de alla —64px de alto, 24px
+   por equipo, 4px entre ellos, el ganador en 600— para que un partido se lea
+   igual en el sitio y en el gestor.
+
+   Filas separadas por una linea, no tarjetas sueltas: es lo que hace que un
+   calendario se lea de un vistazo como una lista y no como una pila de cajas. */
+.gtm-match {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 8px var(--gtm-pad);
+    background: var(--gtm-surface);
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+    transition: background 160ms ease;
+}
+
+/* La linea va ENTRE partidos, con el selector de hermano adyacente y no con
+   `:last-of-type`: despues de la lista hay otros <button> ("Nuevo partido",
+   "Nueva fecha"), asi que `of-type` apuntaba a esos y le dejaba el borde al
+   ultimo partido. Asi la separacion depende solo de que haya otro partido. */
+.gtm-match + .gtm-match {
+    border-top: 1px solid var(--gtm-border);
+}
+
+.gtm-match:active { background: var(--gtm-raised); }
+
+/* La fila del partido en vivo se tiñe, igual que en la web. Sin
+   `border-bottom-color`: la fila tiene `border: 0` y la linea la pone el
+   hermano de arriba, asi que esa declaracion no pintaba nada. */
+.gtm-match-vivo {
+    background: linear-gradient(90deg, rgba(148, 24, 24, 0.24) 0%, rgba(88, 12, 12, 0.12) 38%, transparent 100%);
+}
+
+.gtm-match-when {
+    width: 46px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    font-family: var(--gtm-mono);
+    font-size: var(--gtm-fs-xs);
+    color: var(--gtm-dim);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.25;
+}
+
+.gtm-match-ft { font-weight: 600; color: var(--gtm-faint); }
+
+.gtm-match-vivo-label {
+    color: #ff5c5c;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.gtm-match-vivo-dot {
+    width: 7px;
+    height: 7px;
+    flex: none;
+    border-radius: 999px;
+    background: #ff5c5c;
+    box-shadow: 0 0 0 4px rgba(255, 92, 92, 0.14);
+    animation: gtmLivePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes gtmLivePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.82); opacity: 0.72; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gtm-match-vivo-dot { animation: none; }
+}
+
+.gtm-match-teams {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    justify-content: center;
+}
+
+.gtm-side {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 24px;
+    min-width: 0;
+}
+
+.gtm-side-name {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--gtm-fs-md);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gtm-side-score {
+    font-family: var(--gtm-mono);
+    font-size: var(--gtm-fs-md);
+    font-weight: 600;
+    min-width: 22px;
+    text-align: right;
+    flex: none;
+}
+
+/* En la web al ganador solo se le engorda el nombre: sin color ni fondo. */
+.gtm-side-win .gtm-side-name { font-weight: 600; }
+.gtm-side-lose .gtm-side-name,
+.gtm-side-lose .gtm-side-score { color: var(--gtm-dim); }
+
+.gtm-side-empty { color: var(--gtm-faint); font-style: italic; }
+
+.gtm-slot-disc {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--gtm-raised);
+    border: 1px solid var(--gtm-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--gtm-faint);
+    font-weight: 700;
+}
+
+/* ── CUADRO DE LLAVES ─────────────────────────────────────────────────── */
+
+.gtm-bracket {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+}
+
+.gtm-bracket-cols {
+    display: flex;
+    gap: 12px;
+    min-width: min-content;
+}
+
+.gtm-bracket-col {
+    flex: none;
+    width: 236px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.gtm-bracket-head {
+    font-size: var(--gtm-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--gtm-info);
+    padding-left: 2px;
+}
+
+.gtm-serie {
+    background: var(--gtm-surface);
+    border: 1px solid var(--gtm-border);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+    text-align: left;
+    padding: 0 0 4px;
+    cursor: pointer;
+}
+
+.gtm-serie:active { border-color: #33414F; }
+
+.gtm-serie-label {
+    font-size: var(--gtm-fs-xs);
+    color: var(--gtm-faint);
+    padding: 6px 10px 2px;
+    font-family: var(--gtm-mono);
+}
+
+.gtm-serie-side {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    min-height: 40px;
+}
+
+.gtm-serie-side + .gtm-serie-side { border-top: 1px solid var(--gtm-border-soft); }
+
+/* ── FORMULARIO ───────────────────────────────────────────────────────── */
+
+.gtm-field { display: flex; flex-direction: column; gap: 6px; }
+
+.gtm-label {
+    font-size: var(--gtm-fs-sm);
+    font-weight: 600;
+    color: var(--gtm-text);
+}
+
+.gtm-help { font-size: var(--gtm-fs-xs); color: var(--gtm-faint); }
+
+.gtm-input {
+    width: 100%;
+    min-height: var(--gtm-tap);
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--gtm-border);
+    background: var(--gtm-bg);
+    color: var(--gtm-text);
+    font-family: var(--gtm-font);
+    font-size: var(--gtm-fs-md);
+}
+
+.gtm-input:focus { border-color: var(--gtm-info); outline: none; }
+.gtm-input-invalid { border-color: var(--gtm-danger); }
+.gtm-input-num { text-align: center; font-family: var(--gtm-mono); font-weight: 700; }
+
+.gtm-error { font-size: var(--gtm-fs-xs); color: #FCA5A5; }
+
+/* Grupo de eleccion: dos tarjetas grandes, no un select */
+.gtm-choice {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gtm-gap);
+}
+
+.gtm-choice-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-height: 92px;
+    padding: 12px;
+    border-radius: var(--gtm-radius);
+    border: 1px solid var(--gtm-border);
+    background: var(--gtm-surface);
+    color: var(--gtm-text);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 160ms ease, background 160ms ease;
+}
+
+.gtm-choice-btn[aria-checked='true'] {
+    border-color: var(--gtm-accent);
+    background: rgba(34, 197, 94, 0.09);
+}
+
+.gtm-choice-title { font-size: var(--gtm-fs-md); font-weight: 700; }
+.gtm-choice-desc { font-size: var(--gtm-fs-xs); color: var(--gtm-dim); line-height: 1.35; }
+
+/* Contador +/- */
+.gtm-stepper {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--gtm-bg);
+    border: 1px solid var(--gtm-border);
+    border-radius: 10px;
+    padding: 3px;
+    width: max-content;
+}
+
+.gtm-stepper-v {
+    min-width: 54px;
+    text-align: center;
+    font-family: var(--gtm-mono);
+    font-size: var(--gtm-fs-lg);
+    font-weight: 700;
+}
+
+/* Acordeon de opciones avanzadas */
+.gtm-acc {
+    border: 1px solid var(--gtm-border);
+    border-radius: var(--gtm-radius);
+    background: var(--gtm-surface);
+}
+
+.gtm-acc-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    min-height: var(--gtm-tap);
+    padding: 0 var(--gtm-pad);
+    border: 0;
+    background: transparent;
+    font-size: var(--gtm-fs-md);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.gtm-acc-body {
+    padding: var(--gtm-pad);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gtm-gap);
+    border-top: 1px solid var(--gtm-border-soft);
+}
+
+.gtm-triple { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+
+.gtm-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--gtm-tap);
+    cursor: pointer;
+    font-size: var(--gtm-fs-sm);
+}
+
+.gtm-check input { width: 20px; height: 20px; accent-color: var(--gtm-accent); flex: none; }
+
+.gtm-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.gtm-chip {
+    position: relative;
+    min-height: 36px;
+    min-width: 44px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--gtm-border);
+    background: var(--gtm-bg);
+    color: var(--gtm-dim);
+    font-size: var(--gtm-fs-sm);
+    cursor: pointer;
+}
+
+/*
+ * La ficha se ve de 36 y se toca de 44. Estirarla a 44 de alto rompe la linea
+ * de fichas —quedan botones, no etiquetas—, asi que el area crece por afuera.
+ * Los 4px que sobresalen de cada lado entran en el `gap: 8px` de la grilla, con
+ * lo que dos fichas vecinas nunca se solapan.
+ */
+.gtm-chip::after {
+    content: '';
+    position: absolute;
+    inset: -4px 0;
+    min-height: var(--gtm-tap);
+}
+
+.gtm-chip[aria-pressed='true'],
+.gtm-chip[aria-checked='true'] {
+    border-color: var(--gtm-accent);
+    color: #BBF7D0;
+    background: rgba(34, 197, 94, 0.12);
+}
+
+.gtm-order-list { display: flex; flex-direction: column; gap: 6px; }
+
+.gtm-order-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--gtm-tap);
+    padding: 0 10px;
+    border: 1px solid var(--gtm-border);
+    border-radius: 10px;
+    background: var(--gtm-bg);
+    font-size: var(--gtm-fs-sm);
+}
+
+.gtm-order-n {
+    font-family: var(--gtm-mono);
+    font-size: var(--gtm-fs-xs);
+    color: var(--gtm-faint);
+    width: 18px;
+    flex: none;
+}
+
+/* ── HOJA INFERIOR ────────────────────────────────────────────────────── */
+
+.gtm-sheet-back {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(6, 9, 12, 0.72);
+    display: flex;
+    align-items: flex-end;
+    animation: gtm-fade 180ms ease;
+}
+
+.gtm-sheet {
+    width: 100%;
+    max-height: 86dvh;
+    overflow-y: auto;
+    background: var(--gtm-surface);
+    border-top: 1px solid var(--gtm-border);
+    border-radius: 18px 18px 0 0;
+    padding: 8px var(--gtm-pad) calc(var(--gtm-pad) + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: var(--gtm-gap);
+    animation: gtm-up 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gtm-sheet-grip {
+    width: 38px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--gtm-border);
+    margin: 4px auto 6px;
+    flex: none;
+}
+
+.gtm-sheet-title { font-size: var(--gtm-fs-lg); font-weight: 700; }
+.gtm-sheet-text { font-size: var(--gtm-fs-sm); color: var(--gtm-dim); }
+
+.gtm-sheet-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: var(--gtm-tap);
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
+    font-size: var(--gtm-fs-md);
+    text-align: left;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.gtm-sheet-item:active { background: var(--gtm-raised); }
+.gtm-sheet-item-danger { color: #FCA5A5; }
+
+@keyframes gtm-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gtm-up { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Marcador dentro de la hoja: nombre + casillero grande */
+.gtm-score-grid {
+    display: grid;
+    grid-template-columns: 1fr 66px;
+    gap: 10px;
+    align-items: center;
+}
+
+/* ── VACIOS, CARGA, AVISOS ────────────────────────────────────────────── */
+
+.gtm-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 34px 20px;
+    text-align: center;
+    color: var(--gtm-dim);
+    background: var(--gtm-surface);
+    border: 1px dashed var(--gtm-border);
+    border-radius: var(--gtm-radius);
+}
+
+.gtm-empty-title { font-size: var(--gtm-fs-md); font-weight: 700; color: var(--gtm-text); }
+.gtm-empty-text { font-size: var(--gtm-fs-sm); max-width: 34ch; }
+
+/* Los esqueletos reservan el alto real: la lista no salta al llegar el dato. */
+.gtm-skel {
+    border-radius: var(--gtm-radius);
+    background: linear-gradient(90deg, var(--gtm-surface) 25%, var(--gtm-raised) 37%, var(--gtm-surface) 63%);
+    background-size: 400% 100%;
+    animation: gtm-shimmer 1.4s ease infinite;
+}
+
+@keyframes gtm-shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
+
+.gtm-toast {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    z-index: 70;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: var(--gtm-fs-sm);
+    font-weight: 600;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    animation: gtm-up 200ms ease;
+}
+
+.gtm-toast-ok  { background: #10331F; border: 1px solid rgba(34, 197, 94, 0.5); color: #BBF7D0; }
+.gtm-toast-err { background: #331416; border: 1px solid rgba(239, 68, 68, 0.5); color: #FECACA; }
+
+@media (prefers-reduced-motion: reduce) {
+    .gtm *,
+    .gtm *::before,
+    .gtm *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* En una tablet o en escritorio la pantalla se centra a ancho de telefono en
+   vez de estirar las filas a 1400px. */
+@media (min-width: 640px) {
+    .gtm-frame {
+        max-width: 560px;
+        margin: 0 auto;
+        border-inline: 1px solid var(--gtm-border);
+        min-height: 100dvh;
+    }
+}
+
+
+/* ── FILA DE FORMULARIO EN LINEA (hoja de partido, periodo) ───────────── */
+
+.gtm-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+/* Selector de club: escudo + nombre + chevron, tocable entero */
+.gtm-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: var(--gtm-tap);
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid var(--gtm-border);
+    background: var(--gtm-bg);
+    color: var(--gtm-text);
+    font-size: var(--gtm-fs-md);
+    text-align: left;
+    cursor: pointer;
+}
+
+.gtm-picker:active { border-color: #33414F; }
+.gtm-picker-empty { color: var(--gtm-faint); font-style: italic; }
+
+/* Lista larga dentro de una hoja: scrollea sola */
+.gtm-scroll-list {
+    max-height: 46dvh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Fila con casilla: alta del torneo -> plantel de la fase */
+.gtm-pick-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 52px;
+    padding: 8px 12px;
+    border: 1px solid var(--gtm-border);
+    border-radius: 10px;
+    background: var(--gtm-surface);
+    color: var(--gtm-text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.gtm-pick-row[aria-pressed='true'] {
+    border-color: var(--gtm-accent);
+    background: rgba(34, 197, 94, 0.09);
+}
+
+.gtm-pick-mark {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    border-radius: 6px;
+    border: 1px solid var(--gtm-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+}
+
+.gtm-pick-row[aria-pressed='true'] .gtm-pick-mark {
+    border-color: var(--gtm-accent);
+    background: var(--gtm-accent);
+    color: #06210F;
+}
+
+/* Aviso dentro de una pantalla (fecha partida, fixture recortado) */
+.gtm-notice {
+    display: flex;
+    gap: 10px;
+    padding: 12px var(--gtm-pad);
+    border-radius: var(--gtm-radius);
+    border: 1px solid rgba(245, 158, 11, 0.45);
+    background: rgba(245, 158, 11, 0.08);
+    font-size: var(--gtm-fs-sm);
+    color: #FCD34D;
+}
+
+.gtm-notice-body { flex: 1; min-width: 0; }
+
+/* El aviso que ADEMAS es un boton (la fecha partida en dos, que se toca para
+   unirla). Era el mismo `.gtm-notice` con tres estilos en linea encima; con
+   clase propia se comporta como los demas botones de la pantalla. */
+.gtm-notice-btn {
+    width: 100%;
+    text-align: left;
+    color: #FCD34D;
+    cursor: pointer;
+    transition: background 160ms ease;
+}
+
+.gtm-notice-btn:active { background: rgba(245, 158, 11, 0.16); }
+
+/* Dos acciones lado a lado, sin anclar al pie. Es `.gtm-actionbar` sin el
+   `sticky`: adentro de un estado vacio no hay lista debajo a la que pegarse. */
+.gtm-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.gtm-actions .gtm-btn { margin: 0; }
+
+/* Muestra de color de una etiqueta */
+.gtm-swatch {
+    width: 26px;
+    height: 26px;
+    flex: none;
+    border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    cursor: pointer;
+}
+
+.gtm-swatch[aria-pressed='true'] { box-shadow: 0 0 0 2px var(--gtm-text); }
+
+/* Cabecera de la fecha en el calendario: nombre + periodo */
+.gtm-period {
+    font-size: var(--gtm-fs-xs);
+    color: var(--gtm-info);
+    font-family: var(--gtm-mono);
+}
+
+/* Barra de acciones anclada al pie de la pantalla.
+   `sticky` y no `fixed`: asi ocupa su lugar al final de la lista y no tapa la
+   ultima fila, pero mientras haya lista por debajo queda pegada arriba de la
+   barra de secciones. El degradado evita que el contenido se lea "por atras"
+   del boton al hacer scroll. */
+.gtm-actionbar {
+    position: sticky;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    z-index: 30;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px 0 6px;
+    background: linear-gradient(to top, var(--gtm-bg) 72%, transparent);
+}
+
+.gtm-actionbar .gtm-btn { margin: 0; }
+
+/* El lugar del partido. La web no lo muestra —agrupa por dia y el dato no le
+   sirve al hincha— pero en el gestor es lo que se chequea antes de publicar la
+   fecha, asi que queda como tercera linea, chica y apagada. */
+.gtm-match-venue {
+    font-size: var(--gtm-fs-xs);
+    color: var(--gtm-faint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── EDITOR DE FASE ───────────────────────────────────────────────────────
+   Mientras se edita, la barra de secciones se esconde (`hidden`) y la barra
+   Cancelar / Guardar ocupa su lugar. `.gtm-nav` es display: flex, que le
+   gana al [hidden] del navegador: por eso la regla explícita. */
+.gtm-nav[hidden] { display: none; }
+
+.gtm-editbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: grid;
+    gap: 8px;
+    padding: 10px var(--gtm-pad);
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    background: rgba(15, 20, 26, 0.96);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid var(--gtm-border);
+}
+
+@media (min-width: 640px) {
+    .gtm-editbar {
+        left: 50%;
+        right: auto;
+        width: 560px;
+        transform: translateX(-50%);
+        border-inline: 1px solid var(--gtm-border);
+    }
+}
+
+.gtm-editbar-row {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 8px;
+}
+
+.gtm-editbar-note {
+    font-size: var(--gtm-fs-sm);
+    color: var(--gtm-warn);
+    text-align: center;
+}
+
+/* Reglas de la tabla: filas que se leen cerradas. */
+.gtm-rules {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--gtm-border);
+    border-radius: var(--gtm-radius);
+    background: var(--gtm-surface);
+    overflow: hidden;
+}
+
+.gtm-rule + .gtm-rule { border-top: 1px solid var(--gtm-border-soft); }
+
+.gtm-rule-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 52px;
+    padding: 0 var(--gtm-pad);
+    border: 0;
+    background: transparent;
+    color: var(--gtm-text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.gtm-rule-head:active { background: var(--gtm-raised); }
+
+.gtm-rule-head:focus-visible {
+    outline: 2px solid var(--gtm-accent);
+    outline-offset: -2px;
+}
+
+.gtm-rule-title {
+    flex: none;
+    font-size: var(--gtm-fs-md);
+    font-weight: 600;
+}
+
+.gtm-rule-summary {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
+    font-size: var(--gtm-fs-sm);
+    color: var(--gtm-dim);
+}
+
+.gtm-rule-chevron {
+    flex: none;
+    color: var(--gtm-faint);
+    transition: transform 180ms ease;
+}
+
+.gtm-rule-head[aria-expanded='true'] .gtm-rule-chevron { transform: rotate(180deg); }
+
+.gtm-rule-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gtm-gap);
+    padding: 4px var(--gtm-pad) var(--gtm-pad);
+}
+
+/* Desempate: subir, bajar y quitar, cada uno de 44px. */
+.gtm-order-item { padding-right: 4px; }
+
+.gtm-order-btn {
+    flex: none;
+    width: 40px;
+    height: var(--gtm-tap);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--gtm-dim);
+    cursor: pointer;
+}
+
+.gtm-order-btn:active { background: var(--gtm-raised); }
+.gtm-order-btn[disabled] { opacity: 0.3; cursor: default; }
+
+.gtm-chip-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-style: dashed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gtm-rule-chevron { transition: none; }
+}
+
+/* "Seguir editando" se partía en dos renglones en la columna angosta. */
+.gtm-editbar-row .gtm-btn {
+    padding: 0 10px;
+    white-space: nowrap;
+}
+
+/* En la confirmación de descarte las dos opciones pesan lo mismo: columnas
+   iguales, así "Seguir editando" entra también en un teléfono de 360px. */
+.gtm-editbar-row:has(.gtm-btn-danger) {
+    grid-template-columns: 1fr 1fr;
+}

@@ -156,16 +156,18 @@ const METHOD_OPTIONS: Array<{
 }> = [
   { id: 'manual_match', icon: PlusCircle, title: 'Crear partido manual', description: 'Agregar un partido individual con fecha, hora, jornada, sede y equipos.', tone: 'accent-primary' },
   { id: 'import_fixture', icon: Upload, title: 'Importar fixture', description: 'Cargar partidos desde Excel, CSV, PDF o texto pegado.', tone: 'accent-accent' },
-  { id: 'structure_only', icon: LayoutGrid, title: 'Generar estructura', description: 'Crear jornadas vacias para completar despues.', tone: 'accent-neutral' },
-  { id: 'berger_algorithm', icon: Zap, title: 'Generacion Berger', description: 'Crear automaticamente cruces Round Robin.', tone: 'accent-neutral' },
+  { id: 'structure_only', icon: LayoutGrid, title: 'Fechas vacías', description: 'Crear las fechas y completar los partidos después.', tone: 'accent-neutral' },
+  { id: 'berger_algorithm', icon: Zap, title: 'Todos contra todos', description: 'Generar automáticamente los cruces de la fase.', tone: 'accent-neutral' },
 ];
 
 // El `label` es el botón del segmento y la `description` la línea que lo
 // acompaña en el riel. No hay `title`: era el mismo texto que el label, escrito
 // dos veces para un hero que ya no existe.
+// Lo cargado va primero: el gestor entra a Partidos a cargar un resultado
+// mucho más seguido que a crear partidos.
 const WORKSPACE_SUBTABS = [
-  { id: 'add_matches' as const, label: 'Agregar', description: 'Alta manual, importacion y generacion en un solo lugar.' },
-  { id: 'manage_fixture' as const, label: 'Gestionar fixture', description: 'Cards, filtros y acciones rapidas sobre lo ya cargado.' },
+  { id: 'manage_fixture' as const, label: 'Partidos cargados', description: 'Buscá, filtrá y cargá resultados.' },
+  { id: 'add_matches' as const, label: 'Agregar', description: 'A mano, importados o generados.' },
 ];
 
 /**
@@ -566,7 +568,7 @@ export function TournamentOperationFixtureWorkspace({
     deleteMatch,
     deleteMatches,
   } = useFixture();
-  const [activeSubtab, setActiveSubtab] = useState<WorkspaceSubtabId>('add_matches');
+  const [activeSubtab, setActiveSubtab] = useState<WorkspaceSubtabId>('manage_fixture');
   const [selectedMethod, setSelectedMethod] = useState<MethodId>('manual_match');
   const [manualForm, setManualForm] = useState<ManualFormState>(() => defaultManualForm());
   const [manualErrors, setManualErrors] = useState<Record<string, string>>({});
@@ -623,15 +625,23 @@ export function TournamentOperationFixtureWorkspace({
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const stored = window.localStorage.getItem(getStorageKey(tournament.id));
-    if (stored === 'add_matches' || stored === 'manage_fixture') {
-      setActiveSubtab(stored);
+    try {
+      const stored = window.localStorage.getItem(getStorageKey(tournament.id));
+      if (stored === 'add_matches' || stored === 'manage_fixture') {
+        setActiveSubtab(stored);
+      }
+    } catch {
+      // Sin acceso a localStorage (modo privado): queda la pestaña por defecto.
     }
   }, [tournament.id]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    window.localStorage.setItem(getStorageKey(tournament.id), activeSubtab);
+    try {
+      window.localStorage.setItem(getStorageKey(tournament.id), activeSubtab);
+    } catch {
+      // Sin acceso a localStorage (modo privado, cuota): no se recuerda la pestaña.
+    }
   }, [activeSubtab, tournament.id]);
 
   useEffect(() => {
@@ -1650,7 +1660,7 @@ export function TournamentOperationFixtureWorkspace({
           <div className="operation-mobile-side-trigger-copy">
             <span className="operation-fixture-kicker">Panel de fase</span>
             <strong>{mobileInsightsSummary}</strong>
-            <small>Resumen, chequeos y alertas sin sacar foco del flujo principal.</small>
+            <small>Resumen y avisos de la fase.</small>
           </div>
           <button type="button" className="basalt-btn basalt-btn-primary" onClick={() => setMobileInsightsOpen(true)}>
             <ClipboardList size={15} />
@@ -1670,9 +1680,8 @@ export function TournamentOperationFixtureWorkspace({
             <section className="operation-fixture-panel basalt-card">
               <div className="operation-fixture-panel-head">
                 <div>
-                  <span className="operation-fixture-kicker">Metodos</span>
-                  <h4>Como quieres agregar partidos</h4>
-                  <p>Selecciona una card y el panel activo se abre debajo sin salir de la sub-tab.</p>
+                  <h4>Cómo querés agregar partidos</h4>
+                  <p>Elegí una opción y se abre abajo.</p>
                 </div>
               </div>
               <div className="operation-method-grid">
@@ -1849,7 +1858,7 @@ export function TournamentOperationFixtureWorkspace({
 
                 <div className="operation-inline-note">
                   <ShieldCheck size={16} />
-                  <span>El partido quedara vinculado a la fase actual y se refrescara dentro de Gestionar fixture.</span>
+                  <span>El partido queda en la fase actual y aparece en Partidos cargados.</span>
                 </div>
 
                 <div className="operation-inline-actions">
@@ -1883,13 +1892,13 @@ export function TournamentOperationFixtureWorkspace({
                   <div>
                     <span className="operation-fixture-kicker">Estructura base</span>
                     <h4>{isSelectedPhasePlayoff ? 'Armar cuadro playoff' : 'Generar jornadas vacias'}</h4>
-                    <p>{isAutoBracket ? 'Esta fase tiene llaves automaticas: el cuadro se genera desde Estructura, en el panel Cuadro de llaves.' : isSelectedPhasePlayoff ? 'Crea los partidos vacios del bracket segun los equipos y etapas definidos en la fase.' : 'Crea bloques de jornadas para completar despues desde la sub-tab de gestion.'}</p>
+                    <p>{isAutoBracket ? 'Esta fase tiene llaves automaticas: el cuadro se genera desde Estructura, en el panel Cuadro de llaves.' : isSelectedPhasePlayoff ? 'Crea los partidos vacíos del cuadro según los equipos y etapas definidos en la fase.' : 'Crea las fechas vacías para completarlas después desde Partidos cargados.'}</p>
                   </div>
                 </div>
                 {isSelectedPhasePlayoff ? (
                   <div className="operation-inline-note">
                     <LayoutGrid size={16} />
-                    <span>{isAutoBracket ? `${realRounds.length} rondas generadas · los cruces avanzan solos al cerrar cada resultado.` : `${playoffTeamsCount || 0} equipos configurados · ${realRounds.length} etapas disponibles · se completaran los slots faltantes sin equipos asignados.`}</span>
+                    <span>{isAutoBracket ? `${realRounds.length} rondas generadas · los cruces avanzan solos al cerrar cada resultado.` : `${playoffTeamsCount || 0} equipos configurados · ${realRounds.length} etapas disponibles · los lugares sin equipo quedan a definir.`}</span>
                   </div>
                 ) : (
                   <div className="operation-form-grid">
@@ -2022,21 +2031,17 @@ export function TournamentOperationFixtureWorkspace({
           </>
         ) : (
           <section className="operation-fixture-panel basalt-card operation-manage-panel">
-            <div className="operation-fixture-panel-head">
-              <div>
-                <span className="operation-fixture-kicker">Herramientas de gestion</span>
-                <h4>Vista operativa del fixture</h4>
-                <p>Recupera el sistema visual por cards y evita bajar por toda la pantalla para administrar partidos.</p>
-              </div>
-            </div>
+            {/* Sin cabecera propia: la nombra la pestaña de arriba. La que había
+                ("Vista operativa del fixture… recupera el sistema visual por
+                cards") era una nota de desarrollo que se filtró a la pantalla. */}
 
             {isSelectedPhasePlayoff ? (
               <div className="operation-playoff-bracket">
                 <div className="operation-playoff-bracket-head">
                   <div>
-                    <span className="operation-fixture-kicker">Bracket playoff</span>
+                    <span className="operation-fixture-kicker">Cuadro</span>
                     <h4>Cuadro completo</h4>
-                    <p>{isAutoBracket ? `Llaves automaticas · ${playoffBracketColumns.length} rondas` : `${playoffTeamsCount || 0} equipos configurados · ${playoffBracketColumns.length} etapas`}</p>
+                    <p>{isAutoBracket ? `Llaves automáticas ·${playoffBracketColumns.length} rondas` : `${playoffTeamsCount || 0} equipos configurados · ${playoffBracketColumns.length} etapas`}</p>
                   </div>
                   {!isAutoBracket && (
                     <button type="button" className="basalt-btn basalt-btn-primary" disabled={busyAction === 'structure'} onClick={() => void handleGenerateStructure()}>
@@ -2053,21 +2058,33 @@ export function TournamentOperationFixtureWorkspace({
                         <span>{matches.length} partido{matches.length !== 1 ? 's' : ''}</span>
                       </div>
                       <div className="operation-playoff-slots">
-                        {matches.length > 0 ? matches.map((match, index) => (
-                          <button
-                            key={match.id}
-                            type="button"
-                            className="operation-playoff-slot"
-                            onClick={() => openEditMatch(match, 'edit')}
-                          >
-                            <span className="operation-playoff-slot-index">#{index + 1}</span>
-                            <span>{match.homeClub?.name || 'Equipo por definir'}</span>
-                            <span>{match.awayClub?.name || 'Equipo por definir'}</span>
-                          </button>
-                        )) : (
+                        {matches.length > 0 ? matches.map((match, index) => {
+                          // El cuadro mostraba solo los nombres: una final ya
+                          // jugada se veía igual que una por jugar.
+                          const showScore = match.status === 'live' || match.status === 'final';
+                          const sideStyle = { display: 'flex', justifyContent: 'space-between', gap: 8 } as const;
+                          return (
+                            <button
+                              key={match.id}
+                              type="button"
+                              className="operation-playoff-slot"
+                              onClick={() => openEditMatch(match, 'edit')}
+                            >
+                              <span className="operation-playoff-slot-index">#{index + 1}</span>
+                              <span style={sideStyle}>
+                                <span>{match.homeClub?.name || 'Equipo por definir'}</span>
+                                {showScore ? <b>{match.score?.home ?? 0}</b> : null}
+                              </span>
+                              <span style={sideStyle}>
+                                <span>{match.awayClub?.name || 'Equipo por definir'}</span>
+                                {showScore ? <b>{match.score?.away ?? 0}</b> : null}
+                              </span>
+                            </button>
+                          );
+                        }) : (
                           <div className="operation-playoff-empty-slot">
                             <Calendar size={18} />
-                            <span>Sin slots todavia</span>
+                            <span>Sin cruces todavía</span>
                           </div>
                         )}
                       </div>
@@ -2286,7 +2303,7 @@ export function TournamentOperationFixtureWorkspace({
                               <div className="fixture-round-empty-card">
                                 <Calendar size={28} />
                                 <h4>Sin partidos visibles</h4>
-                                <p>Prueba con otros filtros o agrega un partido a este bloque.</p>
+                                <p>Probá con otros filtros o agregá un partido a esta fecha.</p>
                               </div>
                             )}
 

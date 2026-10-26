@@ -1679,12 +1679,12 @@
 
 /* ---- Buttons ---- */
 .tournament-structure-shell .basalt-btn {
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     font-weight: 600 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    font-size: 0.85rem !important;
-    padding: 12px 24px !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 13.5px !important;
+    padding: 9px 16px !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     display: inline-flex;
     align-items: center;
@@ -2420,11 +2420,11 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
 /* Wizard footer buttons (Cancelar + Siguiente / Crear / Guardar). */
 .basalt-body .tournament-structure-shell .phase-wizard-footer .basalt-btn,
 .basalt-body .tournament-structure-shell .structure-wizard-footer .basalt-btn {
-    font-size: 13.5px !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.03em !important;
-    min-height: 48px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    min-height: 44px !important;
     line-height: 1 !important;
     padding: 12px 18px !important;
 }
@@ -4117,3 +4117,259 @@ html body .tournament-structure-shell .structure-split-grid > .structure-field-p
  * ningún motor lee es exactamente eso, así que lo dice en la cara en vez de
  * prometer un cálculo que no ocurre. Ámbar y no rojo: no está roto, está
  * pendiente. */
+
+/* ════════════════════════════════════════════════════════════════════════
+   EDITOR DE FASE — una página con secciones, no un asistente
+   ────────────────────────────────────────────────────────────────────────
+   Antes: barra lateral con "Progreso 2/4", pasos numerados, un paso por vez
+   y Atrás / Siguiente; Guardar recién en el último. Ahora: cabecera arriba,
+   todas las secciones a la vista y una barra fija al pie con las secciones
+   y Guardar.
+
+   La barra es position: fixed y no sticky: en esta app <body> y <main>
+   llevan overflow-x hidden, se vuelven scrollports que nunca scrollean y
+   cualquier sticky de adentro se comporta como static.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* La grilla vieja del asistente (barra lateral de 320px + contenido) llega
+   con !important desde varias capas. Dentro del editor nuevo la cabecera va
+   ARRIBA y las secciones debajo: una sola columna. */
+.basalt-body .tournament-structure-shell .phase-editor .structure-wizard-layout,
+.basalt-body .tournament-structure-shell .phase-editor .phase-wizard-layout,
+.tournament-structure-shell .phase-editor .structure-wizard-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    min-height: 0 !important;
+}
+
+.phase-editor-head {
+    align-content: start;
+    display: grid;
+    gap: 4px;
+    padding: 28px 32px 22px;
+    border-bottom: 1px solid var(--border-basalt);
+}
+
+.phase-editor-kicker {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-primary);
+}
+
+.phase-editor-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+.phase-editor-summary {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--text-dim);
+}
+
+/* Lugar para que la barra fija no tape la última sección. */
+.basalt-body .tournament-structure-shell .phase-editor .structure-wizard-content,
+.tournament-structure-shell .phase-editor .structure-wizard-content {
+    padding-bottom: 104px !important;
+}
+
+/* Cada sección se separa de la anterior con aire y una línea, y al saltar
+   desde la barra no queda tapada por la cabecera del sitio. */
+.phase-editor .phase-editor-section {
+    scroll-margin-top: 110px;
+}
+
+.phase-editor .phase-editor-section + .phase-editor-section {
+    margin-top: 40px;
+    padding-top: 36px;
+    border-top: 1px solid var(--border-basalt);
+}
+
+.phase-editor-savebar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px max(24px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px));
+    border-top: 1px solid var(--border-basalt);
+    background: rgba(12, 16, 20, 0.86);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+.phase-editor-nav {
+    display: flex;
+    gap: 4px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.phase-editor-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.phase-editor-nav-item {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-dim);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 120ms ease, color 120ms ease;
+}
+
+.phase-editor-nav-item:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.phase-editor-nav-item.is-active {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.phase-editor-nav-item:focus-visible {
+    outline: 2px solid var(--accent-primary);
+    outline-offset: 1px;
+}
+
+.phase-editor-nav-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #f59e0b;
+}
+
+.phase-editor-savebar-end {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    min-width: 0;
+}
+
+/* El motivo de un Guardar apagado va antes de los dos botones. */
+.phase-editor-save-hint {
+    order: -1;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    max-width: 520px;
+    font-size: 13px;
+    color: #f59e0b;
+}
+
+/* Los botones de la barra a tamaño de toque y en caja normal: la consola
+   los achica a 11px en versalitas mono, y al lado de las secciones (14px)
+   Guardar parecía el control menos importante de la barra. */
+.basalt-body .phase-editor-savebar .basalt-btn,
+.phase-editor-savebar .basalt-btn {
+    min-height: 40px !important;
+    padding: 0 18px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+:root[data-theme="light"] .phase-editor-savebar {
+    background: rgba(255, 255, 255, 0.88);
+}
+
+:root[data-theme="light"] .phase-editor-nav-item:hover {
+    background: rgba(15, 23, 42, 0.05);
+}
+
+:root[data-theme="light"] .phase-editor-nav-item.is-active {
+    background: rgba(15, 23, 42, 0.08);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .phase-editor-savebar {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: var(--surface-basalt);
+    }
+}
+
+/* Angosto: dos filas. Arriba las secciones (se desplazan de costado),
+   abajo el motivo y los botones. */
+@media (max-width: 900px) {
+    .phase-editor-head {
+        padding: 18px 16px 14px;
+    }
+
+    .phase-editor-title {
+        font-size: 20px;
+    }
+
+    .phase-editor-savebar {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-left: max(12px, env(safe-area-inset-left, 0px));
+        padding-right: max(12px, env(safe-area-inset-right, 0px));
+    }
+
+    .phase-editor-nav {
+        flex-basis: 100%;
+    }
+
+    .phase-editor-savebar-end {
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .phase-editor-save-hint {
+        flex-basis: 100%;
+        max-width: none;
+        justify-content: flex-end;
+        text-align: right;
+    }
+
+    .basalt-body .tournament-structure-shell .phase-editor .structure-wizard-content,
+    .tournament-structure-shell .phase-editor .structure-wizard-content {
+        padding-bottom: 150px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .phase-editor-nav-item { transition: none; }
+}
+
+/* Columna de lectura: cabecera y secciones centradas a un ancho cómodo, en
+   vez de pegadas a la izquierda con medio panel vacío a la derecha. */
+.phase-editor .phase-editor-head > *,
+.phase-editor .phase-editor-section {
+    width: 100%;
+    max-width: 920px;
+    margin-inline: auto;
+}
+
+/* Buscador de criterios de desempate: lugar para la lupa. Le gana a la capa
+   de "padding: 9px 12px !important" que la consola aplica bajo 1280px. */
+.basalt-body .tournament-structure-shell .structure-step-panel .basalt-input.tiebreaker-search-input,
+.tournament-structure-shell .basalt-input.tiebreaker-search-input {
+    padding-left: 40px !important;
+}

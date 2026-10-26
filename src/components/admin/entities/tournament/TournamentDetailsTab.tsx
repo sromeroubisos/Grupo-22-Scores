@@ -379,13 +379,17 @@ export function TournamentDetailsTab({ data, id, unions, countries }: Tournament
                                     <label className="basalt-field-label" htmlFor="details-logo-url">Dirección de la imagen</label>
                                     <input
                                         id="details-logo-url"
-                                        type="url"
+                                        type="text"
+                                        inputMode="url"
                                         className="basalt-input"
                                         placeholder="https://.../escudo.png"
                                         value={form.logo_url || ''}
                                         onChange={e => update('logo_url', e.target.value)}
                                     />
-                                    <p className="basalt-field-hint">Tiene que ser HTTPS. Acepta png, jpg, webp y svg.</p>
+                                    {/* `type="url"` marcaba inválida una ruta del sitio
+                                        (/competiciones/…), que es como se guardan los escudos
+                                        locales, y la ayuda decía que solo valía HTTPS. */}
+                                    <p className="basalt-field-hint">Una dirección https:// o una ruta del sitio (/competiciones/…). Acepta png, jpg, webp y svg.</p>
                                     {form.logo_url ? (
                                         <div>
                                             <button

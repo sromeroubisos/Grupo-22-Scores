@@ -1266,3 +1266,17 @@
     padding-top: 16px;
   }
 }
+
+/* ── Barra bajo el cuadro ya armado ──
+   "Editar cuadro" abre el armador; "Sincronizar llaves" es mantenimiento.
+   Los dos secundarios: con el cuadro jugado no hay acción principal. */
+.editBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+  margin-bottom: 4px;
+}
+.editBar + .noticeBanner {
+  margin-top: 12px;
+}

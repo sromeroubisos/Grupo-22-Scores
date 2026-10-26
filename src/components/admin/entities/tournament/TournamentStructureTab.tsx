@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { AlertCircle, ArrowDownUp, Award, CheckCircle, ChevronRight, Edit3, Eye, GitBranch, Globe, Grid3x3, Hand, Info, Layers, MoreVertical, Plus, Trash2, TrendingUp, Trophy, Users, Wand2, X } from 'lucide-react';
 import './basalt.css';
 import './phase-wizard.css';
@@ -10,6 +10,8 @@ import { TiebreakerList, TiebreakerItem } from './TiebreakerList';
 import { TableColumnSelector, ColumnCategory } from './TableColumnSelector';
 import { LabelChip } from './standings/LabelChip';
 import { PhaseSettings, GroupLabel } from '@/types/phase-settings';
+import { getPhaseDefaults, hasDraws, type PhaseDefaults } from '@/lib/data/phaseDefaults';
+import { buildPhaseRequestBody } from '@/lib/data/phasePayload';
 import { updateEntity } from '@/app/admin/entities/actions';
 import { buildTournamentCompetitionConfig } from '@/lib/utils/tournamentFormat';
 import { normalizeOffensiveBonusMode, type OffensiveBonusMode } from '@/lib/bonusRuleMetrics';
@@ -45,12 +47,40 @@ const PHASE_TYPE_LABELS: Record<string, string> = {
     playoff: 'Eliminación directa · Llaves',
 };
 
-const PHASE_TYPE_BADGE: Record<string, string> = {
-    league: 'badge-ok',
-    group_stage: 'badge-published',
-    knockout: 'badge-warning',
-    playoff: 'badge-draft',
+/**
+ * Los desempates que el gestor sabe mostrar, con su rotulo y su condicion.
+ * `phaseDefaults` decide CUALES y en que ORDEN segun el deporte; aca esta el
+ * como se llaman, que es presentacion y no regla.
+ */
+const TIEBREAKER_PRESETS: Record<string, Omit<TiebreakerItem, 'priority'>> = {
+    points:     { metric: 'points',     label: 'Puntos',                 enabled: true, order: 'desc' },
+    headToHead: { metric: 'headToHead', label: 'Enfrentamiento Directo', enabled: true, order: 'desc', requiresRoundRobin: true },
+    pointsDiff: { metric: 'pointsDiff', label: 'Diferencia de Puntos',   enabled: true, order: 'desc' },
+    pointsFor:  { metric: 'pointsFor',  label: 'Puntos a Favor',         enabled: true, order: 'desc' },
+    won:        { metric: 'won',        label: 'Victorias',              enabled: true, order: 'desc' },
 };
+
+/** Los desempates del deporte, en la forma que ya usa el formulario. */
+function buildTiebreakerItems(defaults: PhaseDefaults): TiebreakerItem[] {
+    return defaults.tiebreakers.map((item, index) => {
+        const preset = TIEBREAKER_PRESETS[item.metric];
+        return preset
+            ? { ...preset, order: item.order, priority: index + 1 }
+            : { metric: item.metric, label: item.metric, enabled: true, order: item.order, priority: index + 1 };
+    });
+}
+
+/** Las columnas de la tabla: las base del deporte mas sus estadisticas. */
+function buildTableCols(defaults: PhaseDefaults): Record<string, boolean> {
+    const cols: Record<string, boolean> = { ...defaults.columns };
+    for (const stat of defaults.statColumns) cols[stat.key] = true;
+    return cols;
+}
+
+/** "Avanza 1 equipo" / "Avanzan 4 equipos": la lista decía "Avanzan 1 equipos". */
+function advanceLabel(count: number): string {
+    return count === 1 ? 'Avanza 1 equipo' : `Avanzan ${count} equipos`;
+}
 
 const PRESET_COLORS = [
     '#00a365', '#22c55e', '#eab308', '#ef4444', '#3b82f6', '#a855f7', '#f97316', '#14b8a6',
@@ -163,7 +193,25 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     // sport_id stores the sport slug (e.g. 'rugby', 'football'); the legacy
     // `sport` column does not exist in the schema, so the previous lookup
     // always returned undefined and rugby defaults never applied.
-    const isRugby = (data?.sport_id ?? '').toString().toLowerCase() === 'rugby';
+    const sportId = (data?.sport_id ?? '').toString().toLowerCase();
+
+    /**
+     * Los defaults de la fase salen del deporte, no de un ternario.
+     *
+     * Aca vivia `const isRugby = sport_id === 'rugby'`, y todo lo demas era
+     * `isRugby ? algoDeRugby : algoDeFutbol`. Con eso, un torneo de handball
+     * arrancaba con el puntaje del futbol (3/1/0 en vez de 2/1/0), uno de
+     * basquet pedia puntos por un empate que no puede pasar, y —porque la
+     * comparacion era contra el string exacto 'rugby'— un torneo cargado como
+     * `rugby-union` se quedaba sin bonus y sin las columnas de try.
+     */
+    const sportDefaults = useMemo(
+        () => getPhaseDefaults({ sportId, tournamentRuleset: (data as any)?.ruleset ?? null }),
+        [sportId, data],
+    );
+    const sportStatColumns = sportDefaults.statColumns;
+    const sportHasDraws = hasDraws(sportId);
+    const allowsBonusPoints = sportDefaults.points.allowBonusPoints;
 
     // Tournament model (circuit vs normal)
     const initialTournamentFormat = useMemo<'circuit' | 'league'>(() => {
@@ -237,10 +285,10 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const [placementPoints, setPlacementPoints] = useState<{ position: number; points: number }[]>(DEFAULT_PLACEMENT_POINTS);
 
     // Points system
-    const [pointsWin, setPointsWin] = useState(isRugby ? 4 : 3);
-    const [pointsDraw, setPointsDraw] = useState(isRugby ? 2 : 1);
-    const [pointsLoss, setPointsLoss] = useState(0);
-    const [allowBonusPoints, setAllowBonusPoints] = useState(isRugby);
+    const [pointsWin, setPointsWin] = useState(sportDefaults.points.win);
+    const [pointsDraw, setPointsDraw] = useState(sportDefaults.points.draw);
+    const [pointsLoss, setPointsLoss] = useState(sportDefaults.points.loss);
+    const [allowBonusPoints, setAllowBonusPoints] = useState(allowsBonusPoints);
     // Contra qué se mide el bonus ofensivo: 4+ tries anotados o 3+ de diferencia.
     const [bonusTryMode, setBonusTryMode] = useState<OffensiveBonusMode>('count');
     const [useExtraTimePoints, setUseExtraTimePoints] = useState(false);
@@ -249,22 +297,10 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const [pointsLossExtra, setPointsLossExtra] = useState(0);
 
     // Table columns
-    const [tableCols, setTableCols] = useState<Record<string, boolean>>({
-        posVariation: true, points: true, won: true, drawn: true, lost: true,
-        played: true, percentage: false, classification: false,
-        pointsFor: true, pointsAgainst: true, pointsDiff: true,
-        extraPlayed: false, extraWon: false, extraDrawn: false, extraLost: false,
-        tries: isRugby, conversions: isRugby, penalties: isRugby,
-        dropGoals: isRugby, tackles: isRugby, runs: isRugby,
-    });
+    const [tableCols, setTableCols] = useState<Record<string, boolean>>(() => buildTableCols(sportDefaults));
 
     // Tiebreakers — only active ones (priority > 0) stored in state
-    const [tiebreakers, setTiebreakers] = useState<TiebreakerItem[]>([
-        { metric: 'points',     label: 'Puntos',                 enabled: true, order: 'desc', priority: 1 },
-        { metric: 'headToHead', label: 'Enfrentamiento Directo', enabled: true, order: 'desc', priority: 2, requiresRoundRobin: true },
-        { metric: 'pointsDiff', label: 'Diferencia de Puntos',   enabled: true, order: 'desc', priority: 3 },
-        { metric: 'pointsFor',  label: 'Puntos a Favor',         enabled: true, order: 'desc', priority: 4 },
-    ]);
+    const [tiebreakers, setTiebreakers] = useState<TiebreakerItem[]>(() => buildTiebreakerItems(sportDefaults));
     const [statsAssignment, setStatsAssignment] = useState<'played' | 'starters'>('played');
     const [carryOverPreviousPhase, setCarryOverPreviousPhase] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
@@ -569,18 +605,14 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 { id: 'pointsDiff', label: 'Diferencia' },
             ],
         },
-        ...(isRugby ? [{
-            id: 'rugby', label: 'Rugby',
-            columns: [
-                { id: 'tries', label: 'Try' },
-                { id: 'conversions', label: 'Conversión' },
-                { id: 'penalties', label: 'Penal' },
-                { id: 'dropGoals', label: 'Drop Goal' },
-                { id: 'tackles', label: 'Tackle' },
-                { id: 'runs', label: 'Carrera' },
-            ],
+        // La categoria del deporte sale de `phaseDefaults`, que solo ofrece
+        // columnas que la tabla sabe pintar y que este torneo registra.
+        ...(sportStatColumns.length > 0 ? [{
+            id: 'sportStats',
+            label: 'Estadísticas',
+            columns: sportStatColumns.map(col => ({ id: col.key, label: col.label })),
         }] : []),
-    ], [isRugby]);
+    ], [sportStatColumns]);
 
     // Validation
     const validationErrors = useMemo(() => {
@@ -607,7 +639,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         const activeGroupNames = groupNames.filter(name => name.trim());
         const activePlayoffStages = normalizePlayoffStageNames(playoffStageNames);
 
-        if (!normalizedName) errors.push('Debes ingresar un nombre de fase.');
+        if (!normalizedName) errors.push('Poné un nombre a la fase.');
         if (normalizedTeams !== null && normalizedTeams < 2) errors.push('La fase debe tener al menos 2 equipos.');
         if (normalizedAdvance !== null && normalizedAdvance < 1) errors.push('Debe avanzar al menos 1 equipo.');
         if (normalizedTeams !== null && normalizedAdvance !== null && normalizedAdvance > normalizedTeams) {
@@ -617,11 +649,11 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             errors.push('La fase de grupos necesita al menos un grupo.');
         }
         if ((phaseType === 'playoff' || phaseType === 'knockout') && normalizedTeams === null) {
-            errors.push('La fase playoff necesita definir cuantos equipos juegan.');
+            errors.push('La fase playoff necesita definir cuántos equipos juegan.');
         }
         const manualBracket = (phaseType === 'playoff' || phaseType === 'knockout') && bracketMode === 'manual';
         if (manualBracket && activePlayoffStages.length === 0) {
-            errors.push('La fase playoff necesita al menos una etapa de eliminacion.');
+            errors.push('La fase playoff necesita al menos una etapa de eliminación.');
         }
         if (manualBracket && activePlayoffStages.some((_, index) => toPositiveStageMatchCount(playoffStageMatchCounts[index], 0) < 1)) {
             errors.push('Cada etapa playoff necesita al menos 1 partido configurado.');
@@ -741,7 +773,44 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
     const fixedRosterDirty = fixedRosterEnabled !== savedFixedRoster.enabled
         || fixedRosterSize !== savedFixedRoster.rosterSize
         || fixedRosterLockPhaseId !== savedFixedRoster.lockPhaseId;
-    const isStructureDirty = showPhaseForm || formatModelDirty || fixedRosterDirty;
+    // El formulario abierto NO es un cambio: antes `showPhaseForm` solo ya
+    // prendía "Sin guardar en Fases" con apenas tocar la flecha de una fase,
+    // y el aviso le comía la mitad del ancho al nombre del torneo. Ahora se
+    // compara contra cómo estaba el formulario al abrirse.
+    const phaseFormSignature = JSON.stringify([
+        phaseName, phaseType, teamsCount, advanceCount, legs,
+        pointsWin, pointsDraw, pointsLoss, allowBonusPoints,
+        useExtraTimePoints, pointsWinExtra, pointsDrawExtra, pointsLossExtra,
+        statsAssignment, carryOverPreviousPhase, tiebreakers, tableCols,
+        groupLabels, groupNames, playoffStageNames, playoffStageMatchCounts,
+        bracketMode, placementPoints,
+    ]);
+    const [phaseFormBaseline, setPhaseFormBaseline] = useState<{ key: string | null; sig: string } | null>(null);
+    const phaseFormSignatureRef = useRef(phaseFormSignature);
+    useEffect(() => {
+        phaseFormSignatureRef.current = phaseFormSignature;
+    }, [phaseFormSignature]);
+    useEffect(() => {
+        if (!showPhaseForm) {
+            setPhaseFormBaseline(null);
+            return;
+        }
+        // La línea de base se toma cuando el formulario ya se asentó, no en
+        // el primer render: al abrir una fase NUEVA hay efectos que completan
+        // valores por defecto (equipos que avanzan, desempates del deporte)
+        // un render después, y "Sin guardar" se prendía sin que nadie tocara
+        // nada. Se vuelve a tomar si se abre OTRA fase sin cerrar el formulario.
+        const timer = window.setTimeout(() => {
+            setPhaseFormBaseline((prev) => (prev && prev.key === editingPhaseId
+                ? prev
+                : { key: editingPhaseId, sig: phaseFormSignatureRef.current }));
+        }, 250);
+        return () => window.clearTimeout(timer);
+    }, [showPhaseForm, editingPhaseId]);
+    const phaseFormDirty = showPhaseForm
+        && phaseFormBaseline !== null
+        && phaseFormBaseline.sig !== phaseFormSignature;
+    const isStructureDirty = phaseFormDirty || formatModelDirty || fixedRosterDirty;
     useEffect(() => {
         if (isStructureDirty) {
             markStructureDirty();
@@ -758,30 +827,18 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         setAdvanceCount('');
         setAdvanceTouched(false);
         setLegs(1);
-        setPointsWin(isRugby ? 4 : 3);
-        setPointsDraw(isRugby ? 2 : 1);
-        setPointsLoss(0);
-        setAllowBonusPoints(isRugby);
+        setPointsWin(sportDefaults.points.win);
+        setPointsDraw(sportDefaults.points.draw);
+        setPointsLoss(sportDefaults.points.loss);
+        setAllowBonusPoints(allowsBonusPoints);
         setUseExtraTimePoints(false);
         setPointsWinExtra(2);
         setPointsDrawExtra(1);
         setPointsLossExtra(0);
         setStatsAssignment('played');
         setCarryOverPreviousPhase(false);
-        setTiebreakers([
-            { metric: 'points',     label: 'Puntos',                 enabled: true, order: 'desc', priority: 1 },
-            { metric: 'headToHead', label: 'Enfrentamiento Directo', enabled: true, order: 'desc', priority: 2, requiresRoundRobin: true },
-            { metric: 'pointsDiff', label: 'Diferencia de Puntos',   enabled: true, order: 'desc', priority: 3 },
-            { metric: 'pointsFor',  label: 'Puntos a Favor',         enabled: true, order: 'desc', priority: 4 },
-        ]);
-        setTableCols({
-            posVariation: true, points: true, won: true, drawn: true, lost: true,
-            played: true, percentage: false, classification: false,
-            pointsFor: true, pointsAgainst: true, pointsDiff: true,
-            extraPlayed: false, extraWon: false, extraDrawn: false, extraLost: false,
-            tries: isRugby, conversions: isRugby, penalties: isRugby,
-            dropGoals: isRugby, tackles: isRugby, runs: isRugby,
-        });
+        setTiebreakers(buildTiebreakerItems(sportDefaults));
+        setTableCols(buildTableCols(sportDefaults));
         setGroupLabels([]);
         setGroupNames([]);
         setPlayoffStageNames(DEFAULT_PLAYOFF_STAGE_NAMES);
@@ -836,10 +893,10 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     setPointsLossExtra(s.pointsSystem.behavior.extraTimeLogic.loss || 0);
                 }
             } else {
-                setPointsWin(isRugby ? 4 : 3);
-                setPointsDraw(isRugby ? 2 : 1);
-                setPointsLoss(0);
-                setAllowBonusPoints(isRugby);
+                setPointsWin(sportDefaults.points.win);
+                setPointsDraw(sportDefaults.points.draw);
+                setPointsLoss(sportDefaults.points.loss);
+                setAllowBonusPoints(allowsBonusPoints);
             }
 
             if (s.tableColumns) setTableCols(prev => ({ ...prev, ...s.tableColumns }));
@@ -923,7 +980,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             return;
         }
         if (validationErrors.some(err => err.includes('Debe haber'))) {
-            setFeedback({ tone: 'error', message: 'Corrige los errores de validación antes de guardar.' });
+            setFeedback({ tone: 'error', message: 'Corregí los errores marcados antes de guardar.' });
             return;
         }
 
@@ -935,139 +992,53 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         const editingPhase = editingPhaseId
             ? phases.find(phase => phase.id === editingPhaseId) ?? null
             : null;
-        const sanitizedGroupNames = phaseType === 'group_stage'
-            ? groupNames.map(name => name.trim()).filter(Boolean)
-            : [];
-        const sanitizedPlayoffStages = (phaseType === 'playoff' || phaseType === 'knockout')
-            ? resolvePlayoffStagesForTeams(
-                {
-                    teamsCount: formPlayoffTeamsCount,
-                    playoffStages: playoffStageNames.map((name, index) => ({
-                        name,
-                        matchCount: playoffStageMatchCounts[index],
-                    })),
-                },
-                formPlayoffTeamsCount,
-            )
-            : [];
-        const sanitizedPlayoffStageNames = sanitizedPlayoffStages.map(stage => stage.name);
-        const sanitizedPlayoffStageMatchCounts = sanitizedPlayoffStages.map(stage => stage.matchCount);
-        const previousPhaseForCarryOver = getPreviousPhaseForForm();
-        const canCarryOverPreviousPhase = Boolean(previousPhaseForCarryOver);
-        const carryOverEnabled = carryOverPreviousPhase && canCarryOverPreviousPhase;
+        /* El payload vive en `lib/data/phasePayload` y está congelado por un
+           test golden. Acá sólo se junta el estado del formulario: si las dos
+           cosas se vuelven a fundir, cambiar la forma del formulario vuelve a
+           poder dejar de escribir una clave que sólo lee una fase vieja — sin
+           romper ninguna pantalla y sin que nadie se entere. */
+        const requestBody = buildPhaseRequestBody(
+            {
+                phaseType,
+                isCircuit,
+                placementPoints,
+                teamsCount,
+                advanceCount,
+                legs,
+                tableColumns: tableCols,
+                groupLabels,
+                groupNames,
+                playoffStageNames,
+                playoffStageMatchCounts,
+                playoffTeamsCount: formPlayoffTeamsCount,
+                bracketMode,
+                statsAssignment,
+                carryOverPreviousPhase,
+                canCarryOverPreviousPhase: Boolean(getPreviousPhaseForForm()),
+                pointsWin,
+                pointsDraw,
+                pointsLoss,
+                allowBonusPoints,
+                bonusTryMode,
+                useExtraTimePoints,
+                pointsWinExtra,
+                pointsDrawExtra,
+                pointsLossExtra,
+                tiebreakers,
+            },
+            {
+                phaseName,
+                editingPhaseId,
+                editingPhase,
+                phaseCount: phases.length,
+            },
+        );
 
         try {
             const response = await fetch(url, {
                 method,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: phaseName,
-                    phase_type: phaseType,
-                    order_index: editingPhaseId ? undefined : phases.length + 1,
-                    is_active: editingPhase ? editingPhase.is_active : phases.length === 0,
-                    settings: {
-                        ...(isCircuit ? { circuit: { pointsByPlacement: placementPoints } } : {}),
-                        teamsCount: teamsCount === '' ? 0 : Number(teamsCount),
-                        advanceCount: advanceCount === '' ? 0 : Number(advanceCount),
-                        legs,
-                        tableColumns: tableCols,
-                        groupLabels,
-                        statsAssignment,
-                        carryOverPreviousPhase: carryOverEnabled,
-                        carryOver: {
-                            enabled: carryOverEnabled,
-                            source: 'previous_phase',
-                            sourcePhaseId: null,
-                            mode: 'table_totals',
-                            include: {
-                                standings: true,
-                                points: true,
-                                scores: true,
-                                form: true,
-                            },
-                        },
-                        group_names: sanitizedGroupNames,
-                        ...((phaseType === 'playoff' || phaseType === 'knockout') ? { bracketMode } : {}),
-                        playoffStages: sanitizedPlayoffStages.map((stage, index) => ({
-                            id: `playoff_stage_${index + 1}`,
-                            name: stage.name,
-                            orderIndex: index + 1,
-                            matchCount: stage.matchCount,
-                        })),
-                        playoff_stage_names: sanitizedPlayoffStageNames,
-                        playoffStageMatchCounts: sanitizedPlayoffStageMatchCounts,
-                        playoff_match_counts: sanitizedPlayoffStageMatchCounts,
-                        groupTags: groupLabels.map(l => l.name),
-                        playerStats: {
-                            assignTeamStatsToPlayersWhoPlayed: statsAssignment === 'played',
-                            assignOnlyToStarters: statsAssignment === 'starters',
-                            behavior: {
-                                whenToAttribute: 'on_match_finalized',
-                                eligibility: {
-                                    mode: 'played_or_starter',
-                                    playedFlagField: 'lineup.played',
-                                    starterFlagField: 'lineup.is_starter',
-                                    rules: [
-                                        { if: { assignOnlyToStarters: true }, then: { eligiblePlayers: 'starters_only' } },
-                                        { if: { assignOnlyToStarters: false }, then: { eligiblePlayers: 'played_true' } },
-                                    ],
-                                },
-                                attribution: {
-                                    teamStatsToPlayers: ['points_for', 'points_against', 'wins', 'draws', 'losses', 'bonus_points'],
-                                    howToApply: 'for_each_eligible_player_add_same_team_stat_delta_as_in_team_totals',
-                                },
-                            },
-                        },
-                        matchFormat: {
-                            type: legs === 2 ? 'series' : 'single_match',
-                            label: legs === 2 ? 'Ida y Vuelta' : 'Partido Único',
-                            behavior: {
-                                single_match: { seriesLength: 1, winnerDetermination: 'most_points_in_match' },
-                                series: { seriesLength: 2, aggregateMethod: 'points_sum', tieResolution: 'extra_time_then_penalty_shootout' },
-                            },
-                        },
-                        pointsSystem: {
-                            win: pointsWin,
-                            draw: pointsDraw,
-                            loss: pointsLoss,
-                            extraTimeAlternativeSystem: useExtraTimePoints,
-                            allowBonusPoints,
-                            bonusTryMode,
-                            behavior: {
-                                whenToCalculate: 'on_match_finalized',
-                                input: { requires: ['score'], statusRequired: 'finalized' },
-                                output: { writesTo: ['standings'] },
-                                basePointsLogic: [
-                                    { if: { win: true }, then: { add: pointsWin } },
-                                    { if: { draw: true }, then: { add: pointsDraw } },
-                                    { if: { loss: true }, then: { add: pointsLoss } },
-                                ],
-                                extraTimeLogic: useExtraTimePoints ? {
-                                    enabledWhen: { extraTimeAlternativeSystem: true },
-                                    requires: ['extra_time_score'],
-                                    howToApply: 'override_base_points_with_extra_time_logic',
-                                    win: pointsWinExtra,
-                                    draw: pointsDrawExtra,
-                                    loss: pointsLossExtra,
-                                } : undefined,
-                                idempotency: { key: 'match_id', rule: 'ignore_if_already_processed' },
-                            },
-                        },
-                        tiebreakers: tiebreakers.map(({ metric, enabled, order, priority }) => ({ metric, enabled, order, priority })),
-                        tiebreakerBehavior: {
-                            appliesTo: 'standings_sorting_only',
-                            evaluationTime: 'after_all_matches_in_scope_processed',
-                            scope: {
-                                tableScope: 'phase_group_or_pool',
-                                headToHeadScope: 'only_between_tied_teams_in_that_tableScope',
-                            },
-                            algorithm: {
-                                stepByStep: tiebreakers.filter(t => t.enabled).map(t => t.metric),
-                                finalFallback: { mode: 'stable', rule: 'keep_previous_order_or_use_team_id_ascending' },
-                            },
-                        },
-                    },
-                }),
+                body: JSON.stringify(requestBody),
             });
 
             if (response.ok) {
@@ -1179,66 +1150,43 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
         return [];
     }, [phaseFormErrors, validationErrors]);
 
-    // Step navigation accounting for skipped steps + field-level gating.
-    const goNext = () => {
-        const stepErrors = getStepErrors(currentStep);
-        if (stepErrors.length > 0) {
-            setFeedback({ tone: 'error', message: stepErrors[0] });
-            return;
-        }
-        setFeedback(null);
-        if (currentStep === 1 && (phaseType === 'knockout' || phaseType === 'playoff')) {
-            setCurrentStep(4);
-        } else {
-            setCurrentStep(c => c + 1);
-        }
-    };
-
-    const goPrev = () => {
-        if (currentStep === 4 && (phaseType === 'knockout' || phaseType === 'playoff')) {
-            setCurrentStep(1);
-        } else {
-            setCurrentStep(c => c - 1);
-        }
-    };
-
     const STEPS = [
-        { step: 1, title: 'Básico', desc: 'Formato general', show: true },
-        { step: 2, title: 'Puntos', desc: 'Sistema de puntuación', show: phaseType === 'league' || phaseType === 'group_stage' },
-        { step: 3, title: 'Desempate', desc: 'Criterios y tabla', show: phaseType === 'league' || phaseType === 'group_stage' },
-        { step: 4, title: 'Etiquetas', desc: 'Zonas de clasificación', show: true },
+        { step: 1, title: 'Formato', desc: 'Nombre, tipo y equipos', show: true },
+        { step: 2, title: 'Puntos', desc: 'Lo que suma cada resultado', show: phaseType === 'league' || phaseType === 'group_stage' },
+        { step: 3, title: 'Desempate', desc: 'Cómo se ordenan los empates', show: phaseType === 'league' || phaseType === 'group_stage' },
+        { step: 4, title: 'Etiquetas', desc: 'Zonas de color en la tabla', show: true },
         // El paso 5 tenía dos casillas: una sin motor —se guardaba y nadie la
         // leía— y el arrastre de la fase previa, que sí mueve la tabla. Sacada
         // la primera, en la fase 1 el paso quedaba con un solo control apagado
         // y un cartel diciendo que no se puede usar todavía: una parada del
         // recorrido para no decidir nada. Aparece cuando hay fase previa.
-        { step: 5, title: 'Estadísticas', desc: 'Arrastre de la fase previa', show: Boolean(getPreviousPhaseForForm()) },
+        { step: 5, title: 'Arrastre', desc: 'Lo que trae de la fase previa', show: Boolean(getPreviousPhaseForForm()) },
         { step: 6, title: 'Circuito', desc: 'Puntos por posición', show: isCircuit },
     ];
 
     // ─── RENDER ───────────────────────────────────────────────────────────────
 
     const visibleSteps = STEPS.filter(step => step.show);
-    const currentStepIndex = Math.max(visibleSteps.findIndex(step => step.step === currentStep), 0);
-    const lastVisibleStep = visibleSteps[visibleSteps.length - 1]?.step ?? 5;
+    // El editor ya no es un asistente: todas las secciones están a la vista en
+    // una sola página y `currentStep` pasó a ser la sección que se está
+    // leyendo (la marca el índice lateral). Antes había que recorrer Básico →
+    // Puntos → Desempate → Etiquetas con Siguiente/Atrás para ver o cambiar
+    // algo, y Guardar aparecía recién en el último paso.
+    const showStep = (step: number) => visibleSteps.some(item => item.step === step);
+    const scrollToStep = (step: number) => {
+        setCurrentStep(step);
+        document.getElementById(`phase-editor-section-${step}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
     const currentPhaseOrdinal = editingPhaseId ? phases.findIndex(phase => phase.id === editingPhaseId) + 1 : phases.length + 1;
     const previousPhaseForForm = getPreviousPhaseForForm();
     const canSubmitPhase = phaseFormErrors.length === 0 && !validationErrors.some(error => error.includes('Debe haber'));
 
-    // El aviso del sidebar y el del paso 3 mostraban el MISMO texto al mismo
-    // tiempo: parado en Desempate se leía dos veces "Debe haber al menos un
-    // criterio". Y parado en cualquier otro paso el aviso no decía adónde ir,
-    // que es lo único que hacía falta desde ahí. Ahora la barra sólo habla
-    // cuando el problema está en otra parte, y dice en cuál.
-    const tiebreakerStep = visibleSteps.find(step => step.title === 'Desempate')?.step ?? null;
+    // Los errores se marcan en el índice, junto a la sección que los tiene
+    // (`getStepErrors`), y el pie dice el primero. Con todas las secciones a la
+    // vista ya no hace falta un aviso aparte que diga "andá al paso 3".
     const tiebreakerError = validationErrors.find(error => error.includes('Debe haber')) ?? null;
-    const sidebarAlert = phaseFormErrors[0]
-        ?? (tiebreakerError && currentStep !== tiebreakerStep
-            ? `Falta resolver el paso Desempate: ${tiebreakerError.charAt(0).toLowerCase()}${tiebreakerError.slice(1)}`
-            : null);
-    const progressPercent = visibleSteps.length > 0
-        ? ((currentStepIndex + 1) / visibleSteps.length) * 100
-        : 0;
+    // Mismo texto que el pie: un botón apagado dice qué le falta.
+    const saveBlocker = phaseFormErrors[0] ?? tiebreakerError ?? 'Faltan datos de la fase.';
 
     // Aca vivia `structureMetrics`: fase activa, cantidad de fases, grupos
     // configurados y llaves, que alimentaban una grilla de cuatro placas arriba
@@ -1253,6 +1201,25 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
             setCurrentStep(visibleSteps[0].step);
         }
     }, [currentStep, visibleSteps]);
+
+    // El índice marca la sección que se está leyendo: la que cruza la franja
+    // superior de la pantalla. Se vuelve a observar cuando cambian las
+    // secciones visibles (al pasar de Liga a Llaves desaparecen Puntos y
+    // Desempate).
+    const visibleStepKey = visibleSteps.map(step => step.step).join(',');
+    useEffect(() => {
+        if (!showPhaseForm || typeof IntersectionObserver === 'undefined') return;
+        const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-pe-step]'));
+        if (sections.length === 0) return;
+        const observer = new IntersectionObserver((entries) => {
+            const hit = entries
+                .filter(entry => entry.isIntersecting)
+                .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+            if (hit) setCurrentStep(Number((hit.target as HTMLElement).dataset.peStep));
+        }, { rootMargin: '-20% 0px -65% 0px' });
+        sections.forEach(section => observer.observe(section));
+        return () => observer.disconnect();
+    }, [showPhaseForm, visibleStepKey]);
 
     useEffect(() => {
         if (!openMenuPhaseId) return;
@@ -1328,6 +1295,321 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 </div>
             )}
 
+
+            {/* La placa "Consola competitiva" que iba aca era titulo, bajada y
+                cuatro metricas — ningun control. Sus dos chips ("Sistema
+                estructural activo", "N fases configuradas") repetian el badge de
+                la placa de abajo, y los pies de las cuatro tarjetas estaban
+                apagados por CSS: markup que calculaba texto para no mostrarlo.
+                Ya venia oculta en mobile. Ahora la seccion arranca por el
+                listado, que es donde estan los datos y las acciones. */}
+
+            {/* ── Phase list ── */}
+            {phases.length > 0 && !showPhaseForm && (
+                <section className="tms-section" aria-labelledby="tms-phases-title">
+                    {/* Franja de sección + una sola acción principal arriba de la
+                        lista (la maqueta aprobada). El botón de alta estaba al pie,
+                        debajo de todas las fases: con cinco fases quedaba fuera de
+                        la pantalla. */}
+                    {/* El alta va en la franja del título, como el "+" de una
+                        barra de navegación: a mano arriba, pero sin ser el botón
+                        verde centrado que le ganaba a la lista entera. Crear una
+                        fase es lo que MENOS se hace en esta pantalla. */}
+                    <div className="tms-band">
+                        <h2 id="tms-phases-title">Fases</h2>
+                        <button
+                            type="button"
+                            className="tms-band-action"
+                            onClick={() => { resetForm(); setShowPhaseForm(true); }}
+                            disabled={isApiManaged}
+                        >
+                            <Plus size={14} aria-hidden="true" />
+                            Agregar fase
+                        </button>
+                    </div>
+
+                    <div className="tms-phase-list">
+                        {phases.map((phase, index) => (
+                            <div key={phase.id} className="tms-phase-entry">
+                            <div
+                                role="button"
+                                tabIndex={isApiManaged ? -1 : 0}
+                                aria-disabled={isApiManaged || undefined}
+                                aria-current={phase.is_active ? 'true' : undefined}
+                                onClick={() => { if (!isApiManaged) loadPhaseIntoForm(phase); }}
+                                onKeyDown={(e) => {
+                                    if (isApiManaged) return;
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        loadPhaseIntoForm(phase);
+                                    }
+                                }}
+                                className={`tms-phase-row group ${phase.is_active ? 'is-active' : ''} ${pendingDeletePhaseId === phase.id ? 'is-pending-delete' : ''} ${isApiManaged ? 'is-locked' : ''}`}
+                            >
+                                <div className="tms-phase-main">
+                                    <div className="tms-phase-icon" aria-hidden="true">
+                                        {phase.phase_type === 'playoff' || phase.phase_type === 'knockout'
+                                            ? <GitBranch size={20} />
+                                            : <Grid3x3 size={20} />}
+                                    </div>
+                                    <div className="tms-phase-copy">
+                                        <h3 className="tms-phase-title">
+                                            {phase.name}
+                                            {phase.is_active && <span className="tms-phase-live">En juego</span>}
+                                        </h3>
+                                        <div className="tms-phase-kicker">
+                                            Fase {index + 1} · {PHASE_TYPE_LABELS[phase.phase_type] || phase.phase_type}
+                                        </div>
+                                        <div className="tms-phase-meta">
+                                            {(phase.settings?.teamsCount ?? 0) > 0 && (
+                                                <span>{phase.settings!.teamsCount} equipos</span>
+                                            )}
+                                            {phase.settings?.legs ? (
+                                                <span>{phase.settings.legs === 2 ? 'Ida y vuelta' : 'Partido único'}</span>
+                                            ) : null}
+                                            {(phase.settings?.advanceCount ?? 0) > 0 && (
+                                                <span className="structure-phase-meta-accent text-[var(--status-active)] font-semibold">
+                                                    <span className="ts-meta-mobile">{advanceLabel(phase.settings!.advanceCount!)}</span>
+                                                    <span className="ts-meta-desktop">{phase.settings!.advanceCount} {phase.settings!.advanceCount === 1 ? 'avanza' : 'avanzan'}</span>
+                                                </span>
+                                            )}
+                                            {/* Una llave no tiene tabla: "Tabla única" en una copa decía algo falso. */}
+                                            {phase.phase_type !== 'group_stage' && phase.phase_type !== 'playoff' && phase.phase_type !== 'knockout' && !((phase.settings as any)?.group_names?.length > 0) && (
+                                                <span className="structure-phase-meta-single text-[var(--text-main)]/70 font-semibold">
+                                                    <span className="ts-meta-mobile">Una sola tabla</span>
+                                                    <span className="ts-meta-desktop">Tabla única</span>
+                                                </span>
+                                            )}
+                                            {(phase.settings as any)?.group_names?.length > 0 && (
+                                                <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
+                                                    {(phase.settings as any).group_names.length} grupos
+                                                </span>
+                                            )}
+                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && (
+                                                <span className={`structure-phase-meta-info font-semibold ${readPlayoffBracketMode(phase.settings) === 'auto' ? 'text-[var(--accent-primary)]' : 'text-[var(--text-main)]/70'}`}>
+                                                    {readPlayoffBracketMode(phase.settings) === 'auto' ? 'Llaves automáticas' : 'Llaves manuales'}
+                                                </span>
+                                            )}
+                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && readPlayoffBracketMode(phase.settings) === 'manual' && normalizePlayoffStageNames(phase.settings).length > 0 && (
+                                                <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
+                                                    {normalizePlayoffStageNames(phase.settings).length} etapas
+                                                </span>
+                                            )}
+                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && readPlayoffBracketMode(phase.settings) === 'manual' && resolvePlayoffStagesForTeams(phase.settings, getPlayoffTeamsCount(phase.settings)).length > 0 && (
+                                                <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
+                                                    {(() => {
+                                                        const count = resolvePlayoffStagesForTeams(phase.settings, getPlayoffTeamsCount(phase.settings)).reduce((total, stage) => total + stage.matchCount, 0);
+                                                        return (
+                                                            <>
+                                                                <span className="ts-meta-mobile">{count} partidos en el cuadro</span>
+                                                                <span className="ts-meta-desktop">{count} partidos de cuadro</span>
+                                                            </>
+                                                        );
+                                                    })()}
+                                                </span>
+                                            )}
+                                            {(phase.settings?.carryOver?.enabled || phase.settings?.carryOverPreviousPhase) && (
+                                                <span className="structure-phase-meta-info text-[var(--accent-primary)] font-semibold">
+                                                    Arrastra fase previa
+                                                </span>
+                                            )}
+                                            {isCircuit && (() => {
+                                                const pts: { position: number; points: number }[] = (phase.settings as any)?.circuit?.pointsByPlacement || DEFAULT_PLACEMENT_POINTS;
+                                                const shown = pts.slice(0, 4);
+                                                return (
+                                                    <span className="structure-phase-meta-info text-[var(--accent-primary)] font-semibold">
+                                                        {shown.map(p => `${p.position}°→${p.points}`).join(' · ')}{pts.length > 4 ? ' …' : ''}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </div>
+                                        <div className="structure-phase-mobile-meta" aria-hidden="true">
+                                            {((phase.settings?.teamsCount ?? 0) > 0 || phase.settings?.legs) && (
+                                                <div className="structure-phase-mobile-meta-row">
+                                                    <Users size={18} />
+                                                    <span>
+                                                        {(phase.settings?.teamsCount ?? 0) > 0 && (
+                                                            <strong>{phase.settings!.teamsCount} equipos</strong>
+                                                        )}
+                                                        {(phase.settings?.teamsCount ?? 0) > 0 && phase.settings?.legs ? ' · ' : ''}
+                                                        {phase.settings?.legs
+                                                            ? (phase.settings.legs === 2 ? 'Ida y vuelta' : 'Partido único')
+                                                            : null}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {((phase.settings?.advanceCount ?? 0) > 0 || (phase.settings as any)?.group_names?.length > 0 || phase.phase_type !== 'group_stage') && (
+                                                <div className="structure-phase-mobile-meta-row">
+                                                    <TrendingUp size={18} />
+                                                    <span>
+                                                        {(phase.settings?.advanceCount ?? 0) > 0 && (
+                                                            <strong>{advanceLabel(phase.settings!.advanceCount!)}</strong>
+                                                        )}
+                                                        {(phase.settings?.advanceCount ?? 0) > 0 && ((phase.settings as any)?.group_names?.length > 0 || phase.phase_type !== 'group_stage') ? ' · ' : ''}
+                                                        {(phase.settings as any)?.group_names?.length > 0
+                                                            ? `${(phase.settings as any).group_names.length} grupos`
+                                                            : phase.phase_type !== 'group_stage'
+                                                                ? 'Una sola tabla'
+                                                                : null}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="structure-phase-actions flex items-center gap-2 flex-shrink-0">
+                                    {!isApiManaged && (
+                                        <button
+                                            type="button"
+                                            onClick={e => { e.stopPropagation(); loadPhaseIntoForm(phase); }}
+                                            className="structure-phase-mobile-edit"
+                                        >
+                                            <Edit3 size={16} aria-hidden="true" />
+                                            <span>Editar</span>
+                                        </button>
+                                    )}
+                                    {!phase.is_active && !isApiManaged && (
+                                        <button
+                                            type="button"
+                                            onClick={e => {
+                                                e.stopPropagation();
+                                                handleSetActivePhase(phase.id);
+                                            }}
+                                            disabled={activatingPhaseId === phase.id}
+                                            className="px-3 py-1.5 rounded-full border border-[var(--status-active)]/40 bg-[var(--status-active)]/8 text-[11px] font-bold uppercase tracking-widest text-[var(--status-active)] hover:bg-[var(--status-active)]/14 transition-colors disabled:opacity-60 disabled:cursor-wait"
+                                            title="La fase en juego es la que se abre primero en Partidos"
+                                        >
+                                            {activatingPhaseId === phase.id ? 'Marcando…' : 'Marcar en juego'}
+                                        </button>
+                                    )}
+                                    <ChevronRight size={16} className="structure-phase-chevron text-dim group-hover:text-[var(--text-main)] transition-colors" />
+                                    {!isApiManaged && pendingDeletePhaseId === phase.id ? (
+                                        <div
+                                            className="structure-phase-delete-confirm"
+                                            role="group"
+                                            aria-label={`Confirmar eliminación de ${phase.name}`}
+                                            onClick={e => e.stopPropagation()}
+                                        >
+                                            <span className="structure-phase-delete-confirm-text">
+                                                ¿Eliminar fase? Se quitan sus grupos, tablas y cuadro; los partidos quedan sin fase.
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={e => { e.stopPropagation(); setPendingDeletePhaseId(null); }}
+                                                className="structure-phase-delete-confirm-cancel"
+                                            >
+                                                Cancelar
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={e => { e.stopPropagation(); handleDeletePhase(phase.id); }}
+                                                disabled={deletingPhaseId === phase.id}
+                                                className="structure-phase-delete-confirm-go"
+                                                autoFocus
+                                            >
+                                                {deletingPhaseId === phase.id ? 'Eliminando…' : 'Eliminar'}
+                                            </button>
+                                        </div>
+                                    ) : !isApiManaged ? (
+                                        <button
+                                            type="button"
+                                            onClick={e => { e.stopPropagation(); handleDeletePhase(phase.id); }}
+                                            className="structure-phase-delete p-2 rounded-lg hover:bg-red-500/10 text-dim hover:text-red-400 transition-all duration-200"
+                                            title="Eliminar fase"
+                                            aria-label={`Eliminar fase ${phase.name}`}
+                                        >
+                                            <Trash2 size={15} />
+                                        </button>
+                                    ) : null}
+                                    {!isApiManaged && (
+                                        <div className="structure-phase-menu relative">
+                                            <button
+                                                type="button"
+                                                onClick={e => {
+                                                    e.stopPropagation();
+                                                    setOpenMenuPhaseId(openMenuPhaseId === phase.id ? null : phase.id);
+                                                }}
+                                                className="structure-phase-menu-trigger p-2 rounded-lg text-dim hover:text-[var(--text-main)] hover:bg-[var(--surface-elevated)] transition-colors"
+                                                aria-haspopup="menu"
+                                                aria-expanded={openMenuPhaseId === phase.id}
+                                                title="Más acciones"
+                                            >
+                                                <MoreVertical size={16} />
+                                            </button>
+                                            {openMenuPhaseId === phase.id && (
+                                                <div className="structure-phase-menu-panel" role="menu">
+                                                    {!phase.is_active && (
+                                                        <button
+                                                            type="button"
+                                                            role="menuitem"
+                                                            onClick={e => {
+                                                                e.stopPropagation();
+                                                                setOpenMenuPhaseId(null);
+                                                                handleSetActivePhase(phase.id);
+                                                            }}
+                                                            disabled={activatingPhaseId === phase.id}
+                                                            className="structure-phase-menu-item"
+                                                        >
+                                                            <CheckCircle size={14} />
+                                                            {activatingPhaseId === phase.id ? 'Marcando…' : 'Marcar en juego'}
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        role="menuitem"
+                                                        onClick={e => {
+                                                            e.stopPropagation();
+                                                            setOpenMenuPhaseId(null);
+                                                            handleDeletePhase(phase.id);
+                                                        }}
+                                                        className="structure-phase-menu-item structure-phase-menu-item--danger"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                        Eliminar fase
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            {!!id && (phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && (
+                                readPlayoffBracketMode(phase.settings) === 'auto' || builderRevealedFor[phase.id] ? (
+                                    <PlayoffBuilderPanel
+                                        tournamentId={id}
+                                        phaseId={phase.id}
+                                        phaseName={phase.name}
+                                        settings={phase.settings}
+                                        defaultOpen={!(phase.settings as any)?.bracketBuilder?.generatedAt}
+                                        onChanged={() => { loadPhases(); }}
+                                    />
+                                ) : (
+                                    <div className="structure-bracket-manual-row flex flex-wrap items-center justify-between gap-3 px-5 py-3 rounded-xl border border-dashed border-[var(--border-basalt)] text-xs text-dim">
+                                        <span className="flex items-center gap-2">
+                                            <GitBranch size={14} aria-hidden="true" />
+                                            Llaves manuales: los cruces y los resultados se cargan desde Fixture. Los ganadores no avanzan solos.
+                                        </span>
+                                        {!isApiManaged && (
+                                            <button
+                                                type="button"
+                                                className="basalt-btn"
+                                                onClick={() => setBuilderRevealedFor(prev => ({ ...prev, [phase.id]: true }))}
+                                            >
+                                                <Wand2 size={14} />
+                                                Pasar a automáticas
+                                            </button>
+                                        )}
+                                    </div>
+                                )
+                            )}
+                            </div>
+                        ))}
+                    </div>
+                    <p className="tms-hint">El orden de la lista es el orden en que se juega. Tocá una fase para editar su formato, sus grupos y el desempate.</p>
+                </section>
+            )}
+
             {/* ── Configuración del torneo (2 columnas en escritorio) ──
                  Cada uno de estos dos paneles ocupaba una banda propia de ancho
                  completo para un puñado de controles: el modelo son dos tarjetas
@@ -1335,12 +1617,17 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                  en los dos. Debajo de 768px el wrapper es `display: contents`,
                  así que las secciones siguen siendo hijas directas del shell y
                  el drilldown a bottom sheet funciona igual que antes. */}
-            <div className="structure-config-row">
+            {!showPhaseForm && (
+            <section className="tms-section tms-options" aria-labelledby="tms-options-title">
+                <div className="tms-band">
+                    <h2 id="tms-options-title">Opciones del torneo</h2>
+                </div>
+            <div className="tms-options-grid">
 
             {/* ── Tournament model selector ── */}
             {!showPhaseForm && (
                 <section
-                    className={`basalt-card structure-module structure-module-modelo p-6 ${mobileConfigSheet === 'model' ? 'is-mobile-sheet-open' : ''}`}
+                    className={`tms-option structure-module-modelo ${mobileConfigSheet === 'model' ? 'is-mobile-sheet-open' : ''}`}
                     data-disabled={isApiManaged || undefined}
                 >
                     <button
@@ -1354,8 +1641,8 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     {/* El kicker decía "Modelo competitivo" y el título "Rol del
                         torneo": dos nombres para la misma cosa, uno encima del
                         otro. Queda el que nombra el dato que se edita. */}
-                    <div className="structure-module-header mb-5">
-                        <h2 className="structure-module-title">Modelo competitivo</h2>
+                    <div className="tms-option-head">
+                        <h3 className="tms-option-title">Modelo competitivo</h3>
                         <p className="structure-module-copy text-dim text-sm mt-1">
                             Define si este torneo es una competencia estándar o un circuito por eventos acumulados.
                         </p>
@@ -1446,7 +1733,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
             {!showPhaseForm && (
                 <section
-                    className={`basalt-card structure-module structure-module-plantel p-6 ${mobileConfigSheet === 'roster' ? 'is-mobile-sheet-open' : ''}`}
+                    className={`tms-option structure-module-plantel ${mobileConfigSheet === 'roster' ? 'is-mobile-sheet-open' : ''}`}
                     data-disabled={isApiManaged || undefined}
                 >
                     <button
@@ -1460,8 +1747,8 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                     {/* Este panel era el único que titulaba con `structure-hero-*`
                         —la escala de la placa grande— mientras los otros dos usan
                         `structure-module-*`. Mismo rol, misma tipografía. */}
-                    <div className="structure-module-header mb-5">
-                        <h2 className="structure-module-title">Plantel fijo por equipo</h2>
+                    <div className="tms-option-head">
+                        <h3 className="tms-option-title">Plantel fijo por equipo</h3>
                         <p className="structure-module-copy text-dim text-sm mt-1">
                             Cada equipo inscribe una sola vez su plantel/delegación en el torneo y esos jugadores
                             se cargan automáticamente en todos sus partidos. Otros torneos siguen con la carga
@@ -1545,324 +1832,8 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                 </section>
             )}
 
-            </div>{/* /.structure-config-row */}
-
-            {/* La placa "Consola competitiva" que iba aca era titulo, bajada y
-                cuatro metricas — ningun control. Sus dos chips ("Sistema
-                estructural activo", "N fases configuradas") repetian el badge de
-                la placa de abajo, y los pies de las cuatro tarjetas estaban
-                apagados por CSS: markup que calculaba texto para no mostrarlo.
-                Ya venia oculta en mobile. Ahora la seccion arranca por el
-                listado, que es donde estan los datos y las acciones. */}
-
-            {/* ── Phase list ── */}
-            {phases.length > 0 && !showPhaseForm && (
-                <div className="basalt-card structure-module structure-phase-list-module p-6">
-                    {/* El badge "N FASES" y su gemelo de mobile contaban en la
-                        cabecera las fases que estan listadas justo abajo, con
-                        numero y todo. Con dos o tres filas a la vista, contarlas
-                        aparte no informa: ocupa. El kicker "Mapa competitivo"
-                        tampoco nombraba nada que exista en el producto. */}
-                    <div className="structure-module-header mb-6">
-                        <h2 className="structure-module-title">Fases del torneo</h2>
-                        <p className="structure-module-copy">
-                            El orden de esta lista es el orden en que se juega. Toca una fase para editar su
-                            formato, sus grupos y sus criterios de desempate.
-                        </p>
-                    </div>
-
-                    <div className="structure-phase-list flex flex-col gap-4">
-                        {phases.map((phase, index) => (
-                            <div key={phase.id} className="structure-phase-entry flex flex-col gap-3">
-                            <div
-                                role="button"
-                                tabIndex={isApiManaged ? -1 : 0}
-                                aria-disabled={isApiManaged || undefined}
-                                aria-current={phase.is_active ? 'true' : undefined}
-                                onClick={() => { if (!isApiManaged) loadPhaseIntoForm(phase); }}
-                                onKeyDown={(e) => {
-                                    if (isApiManaged) return;
-                                    if (e.key === 'Enter' || e.key === ' ') {
-                                        e.preventDefault();
-                                        loadPhaseIntoForm(phase);
-                                    }
-                                }}
-                                className={`structure-phase-card group relative flex items-start sm:items-center justify-between gap-4 p-5 rounded-xl border border-[var(--border-basalt)] bg-[var(--surface-basalt)] transition-all duration-200 ${phase.is_active ? 'structure-phase-card--active' : ''} ${pendingDeletePhaseId === phase.id ? 'structure-phase-card--pending-delete' : ''} ${isApiManaged ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:border-[var(--accent-primary)] hover:bg-[var(--surface-elevated)]'}`}
-                            >
-                                <div className="structure-phase-main flex items-start sm:items-center gap-4 min-w-0">
-                                    <div className="structure-phase-icon flex-shrink-0 w-10 h-10 rounded-lg bg-[var(--surface-elevated)] border border-[var(--border-basalt)] flex items-center justify-center">
-                                        <Layers size={18} className="text-dim" />
-                                    </div>
-                                    <div className="structure-phase-copy min-w-0">
-                                        <div className="structure-phase-badges flex items-center gap-2 flex-wrap mb-1">
-                                            <span className="structure-phase-step text-[11px] font-bold text-dim uppercase tracking-widest">
-                                                Fase {index + 1}
-                                            </span>
-                                            <span className={`basalt-badge ${PHASE_TYPE_BADGE[phase.phase_type] || 'badge-draft'}`}>
-                                                {PHASE_TYPE_LABELS[phase.phase_type] || phase.phase_type}
-                                            </span>
-                                            {phase.is_active && (
-                                                <span className="basalt-badge badge-ok">Activa</span>
-                                            )}
-                                        </div>
-                                        <h3 className="structure-phase-title text-[var(--text-main)]">{phase.name}</h3>
-                                        <div className="structure-phase-meta flex flex-wrap gap-3 mt-2 text-xs text-dim">
-                                            {(phase.settings?.teamsCount ?? 0) > 0 && (
-                                                <span>{phase.settings!.teamsCount} equipos</span>
-                                            )}
-                                            {phase.settings?.legs ? (
-                                                <span>{phase.settings.legs === 2 ? 'Ida y vuelta' : 'Partido único'}</span>
-                                            ) : null}
-                                            {(phase.settings?.advanceCount ?? 0) > 0 && (
-                                                <span className="structure-phase-meta-accent text-[var(--status-active)] font-semibold">
-                                                    <span className="ts-meta-mobile">Avanzan {phase.settings!.advanceCount} equipos</span>
-                                                    <span className="ts-meta-desktop">{phase.settings!.advanceCount} avanzan</span>
-                                                </span>
-                                            )}
-                                            {phase.phase_type !== 'group_stage' && !((phase.settings as any)?.group_names?.length > 0) && (
-                                                <span className="structure-phase-meta-single text-[var(--text-main)]/70 font-semibold">
-                                                    <span className="ts-meta-mobile">Una sola tabla</span>
-                                                    <span className="ts-meta-desktop">Tabla única</span>
-                                                </span>
-                                            )}
-                                            {(phase.settings as any)?.group_names?.length > 0 && (
-                                                <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
-                                                    {(phase.settings as any).group_names.length} grupos
-                                                </span>
-                                            )}
-                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && (
-                                                <span className={`structure-phase-meta-info font-semibold ${readPlayoffBracketMode(phase.settings) === 'auto' ? 'text-[var(--accent-primary)]' : 'text-[var(--text-main)]/70'}`}>
-                                                    {readPlayoffBracketMode(phase.settings) === 'auto' ? 'Llaves automáticas' : 'Llaves manuales'}
-                                                </span>
-                                            )}
-                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && readPlayoffBracketMode(phase.settings) === 'manual' && normalizePlayoffStageNames(phase.settings).length > 0 && (
-                                                <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
-                                                    {normalizePlayoffStageNames(phase.settings).length} etapas
-                                                </span>
-                                            )}
-                                            {(phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && readPlayoffBracketMode(phase.settings) === 'manual' && resolvePlayoffStagesForTeams(phase.settings, getPlayoffTeamsCount(phase.settings)).length > 0 && (
-                                                <span className="structure-phase-meta-info text-[var(--status-published)] font-semibold">
-                                                    {(() => {
-                                                        const count = resolvePlayoffStagesForTeams(phase.settings, getPlayoffTeamsCount(phase.settings)).reduce((total, stage) => total + stage.matchCount, 0);
-                                                        return (
-                                                            <>
-                                                                <span className="ts-meta-mobile">{count} partidos en el cuadro</span>
-                                                                <span className="ts-meta-desktop">{count} partidos de cuadro</span>
-                                                            </>
-                                                        );
-                                                    })()}
-                                                </span>
-                                            )}
-                                            {(phase.settings?.carryOver?.enabled || phase.settings?.carryOverPreviousPhase) && (
-                                                <span className="structure-phase-meta-info text-[var(--accent-primary)] font-semibold">
-                                                    Arrastra fase previa
-                                                </span>
-                                            )}
-                                            {isCircuit && (() => {
-                                                const pts: { position: number; points: number }[] = (phase.settings as any)?.circuit?.pointsByPlacement || DEFAULT_PLACEMENT_POINTS;
-                                                const shown = pts.slice(0, 4);
-                                                return (
-                                                    <span className="structure-phase-meta-info text-[var(--accent-primary)] font-semibold">
-                                                        {shown.map(p => `${p.position}°→${p.points}`).join(' · ')}{pts.length > 4 ? ' …' : ''}
-                                                    </span>
-                                                );
-                                            })()}
-                                        </div>
-                                        <div className="structure-phase-mobile-meta" aria-hidden="true">
-                                            {((phase.settings?.teamsCount ?? 0) > 0 || phase.settings?.legs) && (
-                                                <div className="structure-phase-mobile-meta-row">
-                                                    <Users size={18} />
-                                                    <span>
-                                                        {(phase.settings?.teamsCount ?? 0) > 0 && (
-                                                            <strong>{phase.settings!.teamsCount} equipos</strong>
-                                                        )}
-                                                        {(phase.settings?.teamsCount ?? 0) > 0 && phase.settings?.legs ? ' · ' : ''}
-                                                        {phase.settings?.legs
-                                                            ? (phase.settings.legs === 2 ? 'Ida y vuelta' : 'Partido único')
-                                                            : null}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {((phase.settings?.advanceCount ?? 0) > 0 || (phase.settings as any)?.group_names?.length > 0 || phase.phase_type !== 'group_stage') && (
-                                                <div className="structure-phase-mobile-meta-row">
-                                                    <TrendingUp size={18} />
-                                                    <span>
-                                                        {(phase.settings?.advanceCount ?? 0) > 0 && (
-                                                            <strong>Avanzan {phase.settings!.advanceCount} equipos</strong>
-                                                        )}
-                                                        {(phase.settings?.advanceCount ?? 0) > 0 && ((phase.settings as any)?.group_names?.length > 0 || phase.phase_type !== 'group_stage') ? ' · ' : ''}
-                                                        {(phase.settings as any)?.group_names?.length > 0
-                                                            ? `${(phase.settings as any).group_names.length} grupos`
-                                                            : phase.phase_type !== 'group_stage'
-                                                                ? 'Una sola tabla'
-                                                                : null}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="structure-phase-actions flex items-center gap-2 flex-shrink-0">
-                                    {!isApiManaged && (
-                                        <button
-                                            type="button"
-                                            onClick={e => { e.stopPropagation(); loadPhaseIntoForm(phase); }}
-                                            className="structure-phase-mobile-edit"
-                                        >
-                                            <Edit3 size={16} aria-hidden="true" />
-                                            <span>Editar</span>
-                                        </button>
-                                    )}
-                                    {!phase.is_active && !isApiManaged && (
-                                        <button
-                                            type="button"
-                                            onClick={e => {
-                                                e.stopPropagation();
-                                                handleSetActivePhase(phase.id);
-                                            }}
-                                            disabled={activatingPhaseId === phase.id}
-                                            className="px-3 py-1.5 rounded-full border border-[var(--status-active)]/40 bg-[var(--status-active)]/8 text-[11px] font-bold uppercase tracking-widest text-[var(--status-active)] hover:bg-[var(--status-active)]/14 transition-colors disabled:opacity-60 disabled:cursor-wait"
-                                            title="Marcar como fase activa"
-                                        >
-                                            {activatingPhaseId === phase.id ? 'Activando...' : 'Activar'}
-                                        </button>
-                                    )}
-                                    <ChevronRight size={16} className="structure-phase-chevron text-dim group-hover:text-[var(--text-main)] transition-colors" />
-                                    {!isApiManaged && pendingDeletePhaseId === phase.id ? (
-                                        <div
-                                            className="structure-phase-delete-confirm"
-                                            role="group"
-                                            aria-label={`Confirmar eliminación de ${phase.name}`}
-                                            onClick={e => e.stopPropagation()}
-                                        >
-                                            <span className="structure-phase-delete-confirm-text">
-                                                ¿Eliminar fase? Se quitan sus grupos, tablas y cuadro; los partidos quedan sin fase.
-                                            </span>
-                                            <button
-                                                type="button"
-                                                onClick={e => { e.stopPropagation(); setPendingDeletePhaseId(null); }}
-                                                className="structure-phase-delete-confirm-cancel"
-                                            >
-                                                Cancelar
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={e => { e.stopPropagation(); handleDeletePhase(phase.id); }}
-                                                disabled={deletingPhaseId === phase.id}
-                                                className="structure-phase-delete-confirm-go"
-                                                autoFocus
-                                            >
-                                                {deletingPhaseId === phase.id ? 'Eliminando…' : 'Eliminar'}
-                                            </button>
-                                        </div>
-                                    ) : !isApiManaged ? (
-                                        <button
-                                            type="button"
-                                            onClick={e => { e.stopPropagation(); handleDeletePhase(phase.id); }}
-                                            className="structure-phase-delete p-2 rounded-lg hover:bg-red-500/10 text-dim hover:text-red-400 transition-all duration-200"
-                                            title="Eliminar fase"
-                                            aria-label={`Eliminar fase ${phase.name}`}
-                                        >
-                                            <Trash2 size={15} />
-                                        </button>
-                                    ) : null}
-                                    {!isApiManaged && (
-                                        <div className="structure-phase-menu relative">
-                                            <button
-                                                type="button"
-                                                onClick={e => {
-                                                    e.stopPropagation();
-                                                    setOpenMenuPhaseId(openMenuPhaseId === phase.id ? null : phase.id);
-                                                }}
-                                                className="structure-phase-menu-trigger p-2 rounded-lg text-dim hover:text-[var(--text-main)] hover:bg-[var(--surface-elevated)] transition-colors"
-                                                aria-haspopup="menu"
-                                                aria-expanded={openMenuPhaseId === phase.id}
-                                                title="Más acciones"
-                                            >
-                                                <MoreVertical size={16} />
-                                            </button>
-                                            {openMenuPhaseId === phase.id && (
-                                                <div className="structure-phase-menu-panel" role="menu">
-                                                    {!phase.is_active && (
-                                                        <button
-                                                            type="button"
-                                                            role="menuitem"
-                                                            onClick={e => {
-                                                                e.stopPropagation();
-                                                                setOpenMenuPhaseId(null);
-                                                                handleSetActivePhase(phase.id);
-                                                            }}
-                                                            disabled={activatingPhaseId === phase.id}
-                                                            className="structure-phase-menu-item"
-                                                        >
-                                                            <CheckCircle size={14} />
-                                                            {activatingPhaseId === phase.id ? 'Activando…' : 'Activar fase'}
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        type="button"
-                                                        role="menuitem"
-                                                        onClick={e => {
-                                                            e.stopPropagation();
-                                                            setOpenMenuPhaseId(null);
-                                                            handleDeletePhase(phase.id);
-                                                        }}
-                                                        className="structure-phase-menu-item structure-phase-menu-item--danger"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                        Eliminar fase
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            {!!id && (phase.phase_type === 'playoff' || phase.phase_type === 'knockout') && (
-                                readPlayoffBracketMode(phase.settings) === 'auto' || builderRevealedFor[phase.id] ? (
-                                    <PlayoffBuilderPanel
-                                        tournamentId={id}
-                                        phaseId={phase.id}
-                                        phaseName={phase.name}
-                                        settings={phase.settings}
-                                        defaultOpen={!(phase.settings as any)?.bracketBuilder?.generatedAt}
-                                        onChanged={() => { loadPhases(); }}
-                                    />
-                                ) : (
-                                    <div className="structure-bracket-manual-row flex flex-wrap items-center justify-between gap-3 px-5 py-3 rounded-xl border border-dashed border-[var(--border-basalt)] text-xs text-dim">
-                                        <span className="flex items-center gap-2">
-                                            <GitBranch size={14} aria-hidden="true" />
-                                            Llaves manuales: los cruces y los resultados se cargan desde Fixture. Los ganadores no avanzan solos.
-                                        </span>
-                                        {!isApiManaged && (
-                                            <button
-                                                type="button"
-                                                className="basalt-btn"
-                                                onClick={() => setBuilderRevealedFor(prev => ({ ...prev, [phase.id]: true }))}
-                                            >
-                                                <Wand2 size={14} />
-                                                Pasar a automáticas
-                                            </button>
-                                        )}
-                                    </div>
-                                )
-                            )}
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="structure-module-footer mt-6 pt-6 border-t border-[var(--border-basalt)] flex justify-center">
-                        <button
-                            className="basalt-btn basalt-btn-primary"
-                            onClick={() => { resetForm(); setShowPhaseForm(true); }}
-                            disabled={isApiManaged}
-                        >
-                            <Plus size={16} />
-                            Agregar nueva fase
-                        </button>
-                    </div>
-                </div>
+            </div>
+            </section>
             )}
 
             {/* ── Mobile-only: 'Configuración del torneo' drilldown ──
@@ -1937,107 +1908,44 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
 
             {/* ── Phase wizard ── */}
             {showPhaseForm && (
-                <div className="basalt-card phase-wizard-card structure-wizard-card p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="basalt-card phase-wizard-card structure-wizard-card phase-editor p-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <form onSubmit={handleCreatePhase}>
-                        <div className="phase-wizard-layout structure-wizard-layout flex flex-col lg:flex-row min-h-[600px]">
+                        <div className="phase-wizard-layout structure-wizard-layout flex flex-col">
 
-                            {/* Sidebar */}
-                            <aside className="phase-wizard-sidebar structure-wizard-sidebar w-full lg:w-64 xl:w-72 flex-shrink-0 bg-[var(--surface-basalt)] border-b lg:border-b-0 lg:border-r border-[var(--border-basalt)] p-6 flex flex-col gap-4">
-                                <div className="phase-wizard-sidebar-head structure-wizard-sidebar-head mb-2">
-                                    <p className="phase-wizard-kicker text-[11px] font-bold text-dim uppercase tracking-widest mb-1">
-                                        {editingPhaseId ? 'Editando' : 'Nueva'}
-                                    </p>
-                                    <h2 className="phase-wizard-sidebar-title">
-                                        {phaseName || `Fase ${currentPhaseOrdinal}`}
-                                    </h2>
-                                    {/* Acá iba "Consola modular para definir formato, reglas y
-                                        criterios de esta etapa". Es la lista de los cinco pasos
-                                        que están doce píxeles más abajo, dicha en prosa. */}
-                                </div>
-
-                                <div className="structure-wizard-progress-card">
-                                    <div className="structure-wizard-progress-head">
-                                        <span>Progreso</span>
-                                        <strong>{currentStepIndex + 1}/{visibleSteps.length}</strong>
-                                    </div>
-                                    <div className="structure-wizard-progress-bar">
-                                        <span style={{ width: `${progressPercent}%` }} />
-                                    </div>
-                                </div>
-
-                                {sidebarAlert && (
-                                    <button
-                                        type="button"
-                                        className="structure-wizard-sidebar-alert"
-                                        onClick={() => { if (tiebreakerStep) setCurrentStep(tiebreakerStep); }}
-                                    >
-                                        <AlertCircle size={14} aria-hidden="true" />
-                                        <span>{sidebarAlert}</span>
-                                    </button>
-                                )}
-
-                                <nav className="phase-wizard-stepper structure-wizard-stepper flex flex-col gap-1">
-                                    {visibleSteps.map(s => (
-                                        <button
-                                            key={s.step}
-                                            type="button"
-                                            onClick={() => setCurrentStep(s.step)}
-                                            className={`phase-wizard-step structure-wizard-step ${currentStep === s.step ? 'is-active' : ''} ${currentStep > s.step ? 'is-complete' : ''} flex items-start gap-3 px-3 py-2.5 rounded-lg text-left transition-all duration-150 ${currentStep === s.step
-                                                ? 'bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/30'
-                                                : 'hover:bg-[var(--surface-elevated)]'
-                                                }`}
-                                        >
-                                            <span className={`phase-wizard-step-index structure-wizard-step-index ${currentStep === s.step ? 'is-active' : ''} ${currentStep > s.step ? 'is-complete' : ''} w-5 h-5 flex-shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold mt-0.5 ${currentStep > s.step
-                                                ? 'bg-[var(--status-active)] text-[var(--text-main)]'
-                                                : currentStep === s.step
-                                                    ? 'bg-[var(--accent-primary)] text-[var(--text-main)]'
-                                                    : 'bg-[var(--surface-elevated)] border border-[var(--border-basalt)] text-dim'
-                                                }`}>
-                                                {currentStep > s.step ? <CheckCircle size={12} /> : s.step}
-                                            </span>
-                                            <span className="phase-wizard-step-copy flex flex-col min-w-0">
-                                                <span className={`phase-wizard-step-title text-sm font-semibold ${currentStep === s.step ? 'text-[var(--text-main)]' : 'text-dim'}`}>
-                                                    {s.title}
-                                                </span>
-                                                <span className="phase-wizard-step-desc text-[11px] text-dim">{s.desc}</span>
-                                            </span>
-                                        </button>
-                                    ))}
-                                </nav>
-
-                                {/* Inline meta strip — single-line summary in
-                                    place of the 3-card stack. Reads like a
-                                    breadcrumb: "Liga · 16 equipos · Avanzan 8".
-                                    The legacy 3-card grid wasted ~140px of
-                                    vertical space for data that doesn't change
-                                    in this paso. */}
-                                <div className="structure-sidebar-facts structure-sidebar-facts-inline">
-                                    <span className="structure-sidebar-fact-inline">
-                                        {PHASE_TYPE_LABELS[phaseType] || phaseType}
-                                    </span>
-                                    <span className="structure-sidebar-fact-inline">
-                                        {teamsCount === '' ? '— equipos' : `${teamsCount} equipos`}
-                                    </span>
-                                    <span className="structure-sidebar-fact-inline">
-                                        Avanzan {advanceCount === '' ? '—' : advanceCount}
-                                    </span>
-                                </div>
-                            </aside>
+                            {/* Cabecera del editor. Antes era una barra lateral de
+                                asistente ("Progreso 2/4", pasos numerados, un paso por
+                                vez). Las secciones ahora están todas a la vista y la
+                                navegación entre ellas vive en la barra fija de abajo. */}
+                            <header className="phase-editor-head">
+                                <p className="phase-editor-kicker">
+                                    {editingPhaseId ? 'Editar fase' : 'Nueva fase'}
+                                </p>
+                                <h2 className="phase-editor-title">
+                                    {phaseName.trim() || `Fase ${currentPhaseOrdinal}`}
+                                </h2>
+                                <p className="phase-editor-summary">
+                                    {[
+                                        PHASE_TYPE_LABELS[phaseType] || phaseType,
+                                        teamsCount === '' ? null : `${teamsCount} equipos`,
+                                        advanceCount === '' ? null : (advanceCount === 1 ? 'avanza 1' : `avanzan ${advanceCount}`),
+                                    ].filter(Boolean).join(' · ')}
+                                </p>
+                            </header>
 
                             {/* Content */}
                             <div className="phase-wizard-content structure-wizard-content flex-1 flex flex-col p-6 lg:p-8 gap-0 min-w-0">
 
                                 {/* STEP 1: Básico */}
-                                {currentStep === 1 && (
-                                    <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-basic flex flex-col gap-6">
+                                {showStep(1) && (
+                                    <div id="phase-editor-section-1" data-pe-step={1} className="phase-editor-section phase-wizard-step-panel structure-step-panel structure-step-panel-basic flex flex-col gap-6">
                                         <div className="phase-wizard-step-head structure-step-head">
                                             {/* El "Paso N" estaba en tres de los cinco pasos y en
                                                 ninguno de los otros dos. Además la barra lateral ya
                                                 dice el número (1/5), marca cuál está activo y lo
                                                 nombra. Tres veces el mismo dato, y encima
                                                 inconsistente. Se numera en un solo lugar. */}
-                                            <h3 className="phase-wizard-step-heading structure-step-heading-main mb-1">Configuración Básica</h3>
-                                            <p className="phase-wizard-step-subtitle text-dim text-sm">Define la estructura general de la fase</p>
+                                            <h3 className="phase-wizard-step-heading structure-step-heading-main mb-1">Formato</h3>
+                                            <p className="phase-wizard-step-subtitle text-dim text-sm">Cómo se llama la fase, cómo se juega y cuántos equipos pasan.</p>
                                         </div>
 
                                         <div className="phase-wizard-fields flex flex-col gap-5">
@@ -2059,7 +1967,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                 {phaseFormErrors.some(err => /nombre/i.test(err)) && (
                                                     <p className="structure-field-error" role="alert">
                                                         <AlertCircle size={12} />
-                                                        Necesitas un nombre para esta fase.
+                                                        Poné un nombre a la fase.
                                                     </p>
                                                 )}
                                             </div>
@@ -2350,11 +2258,11 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 )}
 
                                 {/* STEP 2: Puntos */}
-                                {currentStep === 2 && (
-                                    <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-points flex flex-col gap-6">
+                                {showStep(2) && (
+                                    <div id="phase-editor-section-2" data-pe-step={2} className="phase-editor-section phase-wizard-step-panel structure-step-panel structure-step-panel-points flex flex-col gap-6">
                                         <div className="structure-step-head">
-                                            <h3 className=" mb-1">Sistema de Puntos</h3>
-                                            <p className="text-dim text-sm">Configura los puntos otorgados por cada resultado</p>
+                                            <h3 className=" mb-1">Puntos</h3>
+                                            <p className="text-dim text-sm">Cuánto suma cada resultado en la tabla.</p>
                                         </div>
 
                                         {/* Live example */}
@@ -2373,7 +2281,11 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                         <div className="structure-score-grid grid grid-cols-3 gap-4">
                                             {[
                                                 { label: 'Victoria', value: pointsWin, set: setPointsWin, color: 'text-[var(--status-active)]' },
-                                                { label: 'Empate', value: pointsDraw, set: setPointsDraw, color: 'text-dim' },
+                                                // En basquet o voley un partido no puede empatar: pedir
+                                                // puntos por empate era un campo que siempre valia 0.
+                                                ...(sportHasDraws
+                                                    ? [{ label: 'Empate', value: pointsDraw, set: setPointsDraw, color: 'text-dim' }]
+                                                    : []),
                                                 { label: 'Derrota', value: pointsLoss, set: setPointsLoss, color: 'text-[var(--status-error)]' },
                                             ].map(({ label, value, set, color }) => (
                                                 <div key={label} className="structure-field-panel structure-score-panel">
@@ -2417,7 +2329,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                             )}
                                         </div>
 
-                                        {isRugby && (
+                                        {allowsBonusPoints && (
                                             <div className={`structure-toggle-card ${allowBonusPoints ? 'is-on' : ''}`}>
                                                 <label className="structure-toggle-card-label">
                                                     <input
@@ -2456,13 +2368,13 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 )}
 
                                 {/* STEP 3: Desempate */}
-                                {currentStep === 3 && (() => {
+                                {showStep(3) && (() => {
                                     const blockingErrors = validationErrors.filter(err => err.includes('Debe haber'));
                                     const advisoryErrors = validationErrors.filter(err => !err.includes('Debe haber'));
                                     const visibleColumnsCount = Object.values(tableCols).filter(Boolean).length;
                                     const totalColumnsCount = Object.keys(tableCols).length;
                                     return (
-                                    <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-rules flex flex-col gap-5">
+                                    <div id="phase-editor-section-3" data-pe-step={3} className="phase-editor-section phase-wizard-step-panel structure-step-panel structure-step-panel-rules flex flex-col gap-5">
                                         {/* Acá iba una barra de progreso "sólo para mobile", con la
                                             premisa de que en mobile la del sidebar no se ve. Sí se
                                             ve: el sidebar no se oculta, se aplana en una tira
@@ -2475,7 +2387,7 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                                     <ArrowDownUp size={18} />
                                                 </div>
                                                 <div className="structure-step-head-text">
-                                                    <h3 className="structure-step-head-title">Criterios de Desempate</h3>
+                                                    <h3 className="structure-step-head-title">Desempate</h3>
                                                     <p className="structure-step-head-subtitle">
                                                         Si dos equipos terminan con los mismos puntos, estos criterios se aplican en orden hasta resolver el empate.
                                                     </p>
@@ -2544,21 +2456,11 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 })()}
 
                                 {/* STEP 4: Etiquetas */}
-                                {currentStep === 4 && (
-                                    <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-labels flex flex-col gap-5">
-                                        {/* Mobile-only progress indicator (desktop already shows it in the sidebar) */}
-                                        <div className="structure-mobile-progress" aria-hidden="true">
-                                            <div className="structure-mobile-progress-bar">
-                                                <span style={{ width: `${progressPercent}%` }} />
-                                            </div>
-                                            <p className="structure-mobile-progress-label">
-                                                Paso {currentStepIndex + 1} de {visibleSteps.length}
-                                            </p>
-                                        </div>
-
+                                {showStep(4) && (
+                                    <div id="phase-editor-section-4" data-pe-step={4} className="phase-editor-section phase-wizard-step-panel structure-step-panel structure-step-panel-labels flex flex-col gap-5">
                                         <div className="structure-step-head">
-                                            <h3 className=" mb-1">Etiquetas de Clasificación</h3>
-                                            <p className="text-dim text-sm">Zonas coloreadas para resaltar posiciones en la tabla (ej: &quot;Clasifica&quot;, &quot;Descenso&quot;).</p>
+                                            <h3 className=" mb-1">Etiquetas de la tabla</h3>
+                                            <p className="text-dim text-sm">Zonas de color que marcan posiciones, como &quot;Clasifica&quot; o &quot;Descenso&quot;.</p>
                                         </div>
 
                                         {/* Single global color-mode toggle */}
@@ -2762,10 +2664,10 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 )}
 
                                 {/* STEP 5: Stats */}
-                                {currentStep === 5 && (
-                                    <div className="phase-wizard-step-panel structure-step-panel structure-step-panel-stats flex flex-col gap-6">
+                                {showStep(5) && (
+                                    <div id="phase-editor-section-5" data-pe-step={5} className="phase-editor-section phase-wizard-step-panel structure-step-panel structure-step-panel-stats flex flex-col gap-6">
                                         <div className="structure-step-head">
-                                            <h3 className=" mb-1">Estadísticas</h3>
+                                            <h3 className=" mb-1">Arrastre de la fase previa</h3>
                                             <p className="text-dim text-sm">
                                                 Qué trae esta fase de la anterior cuando se arma su tabla
                                             </p>
@@ -2802,11 +2704,11 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                 )}
 
                                 {/* STEP 6: Circuito */}
-                                {currentStep === 6 && (
-                                    <div className="phase-wizard-step-panel structure-step-panel flex flex-col gap-6">
+                                {showStep(6) && (
+                                    <div id="phase-editor-section-6" data-pe-step={6} className="phase-editor-section phase-wizard-step-panel structure-step-panel flex flex-col gap-6">
                                         <div className="structure-step-head">
                                             <h3 className=" mb-1">Puntos de circuito</h3>
-                                            <p className="text-dim text-sm">Asigna cuántos puntos acumula cada posición al terminar esta etapa</p>
+                                            <p className="text-dim text-sm">Cuántos puntos suma cada posición al terminar esta etapa.</p>
                                         </div>
 
                                         <div className="structure-circuit-presets" role="group" aria-label="Presets de puntuación">
@@ -2878,39 +2780,49 @@ export function TournamentStructureTab({ data, id }: { data?: any; id?: string }
                                     </div>
                                 )}
 
-                                {/* Footer actions */}
-                                <div className="phase-wizard-footer structure-wizard-footer mt-auto pt-8 border-t border-[var(--border-basalt)] flex items-center gap-3 flex-wrap">
-                                    <button type="button" className="basalt-btn" onClick={resetForm}>
-                                        Cancelar
-                                    </button>
-                                    <div className="structure-wizard-footer-actions flex items-center gap-3 ml-auto">
-                                        {currentStep > 1 && (
-                                            <button type="button" className="basalt-btn" onClick={goPrev}>
-                                                ← Atrás
-                                            </button>
-                                        )}
-                                        {currentStep < lastVisibleStep && (
-                                            <button type="button" className="basalt-btn basalt-btn-primary" onClick={goNext}>
-                                                Siguiente →
-                                            </button>
-                                        )}
-                                        {/* El submit se apaga cuando hay un error que bloquea, pero
-                                            el motivo vivía sólo en la barra lateral, al otro lado
-                                            de la pantalla. Un botón apagado dice qué le falta. */}
-                                        {currentStep === lastVisibleStep && !canSubmitPhase && !creating && (
-                                            <span className="structure-save-hint">
-                                                {phaseFormErrors[0] ?? tiebreakerError ?? 'Faltan datos de la fase.'}
+                                {/* Barra del editor, fija al pie de la ventana (position:
+                                    fixed: en esta app un sticky no se pega porque <body> y
+                                    <main> llevan overflow-x hidden). A la izquierda las
+                                    secciones: marcan la que se está leyendo, saltan a cada
+                                    una y avisan con un punto la que tiene algo por resolver.
+                                    A la derecha, Guardar siempre a mano y, si no se puede,
+                                    el porqué. */}
+                                <div className="phase-editor-savebar">
+                                    <nav className="phase-editor-nav" aria-label="Secciones de la fase">
+                                        {visibleSteps.map(s => {
+                                            const hasError = getStepErrors(s.step).length > 0;
+                                            return (
+                                                <button
+                                                    key={s.step}
+                                                    type="button"
+                                                    onClick={() => scrollToStep(s.step)}
+                                                    className={`phase-editor-nav-item${currentStep === s.step ? ' is-active' : ''}`}
+                                                    aria-current={currentStep === s.step ? 'true' : undefined}
+                                                    title={s.desc}
+                                                >
+                                                    {s.title}
+                                                    {hasError ? <span className="phase-editor-nav-dot" aria-label="tiene algo por resolver" /> : null}
+                                                </button>
+                                            );
+                                        })}
+                                    </nav>
+                                    <div className="phase-editor-savebar-end">
+                                        <button type="button" className="basalt-btn" onClick={resetForm}>
+                                            Cancelar
+                                        </button>
+                                        {!canSubmitPhase && !creating && (
+                                            <span className="phase-editor-save-hint" role="status">
+                                                <AlertCircle size={14} aria-hidden="true" />
+                                                {saveBlocker}
                                             </span>
                                         )}
-                                        {currentStep === lastVisibleStep && (
-                                            <button
-                                                type="submit"
-                                                className="basalt-btn basalt-btn-primary"
-                                                disabled={creating || !canSubmitPhase}
-                                            >
-                                                {creating ? 'Guardando...' : editingPhaseId ? 'Guardar cambios' : 'Crear fase'}
-                                            </button>
-                                        )}
+                                        <button
+                                            type="submit"
+                                            className="basalt-btn basalt-btn-primary"
+                                            disabled={creating || !canSubmitPhase}
+                                        >
+                                            {creating ? 'Guardando…' : editingPhaseId ? 'Guardar cambios' : 'Crear fase'}
+                                        </button>
                                     </div>
                                 </div>
                             </div>

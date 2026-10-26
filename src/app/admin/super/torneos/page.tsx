@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Trash2, Eye, EyeOff, Link2, MoreVertical, Plus, RefreshCw, Star, StarOff, Users, Hash, Upload } from 'lucide-react';
 import styles from '../page.module.css';
@@ -46,14 +46,6 @@ const countryFlags: Record<string, string> = {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-type TopClubRow = {
-    id: string;
-    name: string;
-    logo_url: string | null;
-    primary_color: string | null;
-    followers_count: number;
-};
-
 export default function SuperadminTorneosPage() {
     const { filters, setFilters, tournaments: rawTournaments, unions, loading, errors, refresh } = useSuperConsole();
     const isLoading = loading.tournaments;
@@ -72,35 +64,6 @@ export default function SuperadminTorneosPage() {
     // Performance: local state for instant toggles
     const [localMetadata, setLocalMetadata] = useState<Record<string, { status?: string, is_visible?: boolean, is_popular?: boolean, priority?: number }>>({});
     const [priorityDrafts, setPriorityDrafts] = useState<Record<string, string>>({});
-    const [topClubsByFollowers, setTopClubsByFollowers] = useState<TopClubRow[]>([]);
-
-    const loadTopClubsByFollowers = useCallback(async () => {
-        try {
-            const response = await fetch('/api/admin/super/top-clubs', {
-                cache: 'no-store',
-                credentials: 'include',
-            });
-            const payload = await response.json() as {
-                data?: TopClubRow[];
-                error?: string;
-                details?: unknown;
-            };
-
-            if (!response.ok) {
-                const detail = typeof payload?.details === 'string' ? payload.details : null;
-                throw new Error(detail ? `${payload?.error || 'Failed to load top clubs'}: ${detail}` : (payload?.error || 'Failed to load top clubs'));
-            }
-
-            setTopClubsByFollowers(Array.isArray(payload.data) ? payload.data : []);
-        } catch (loadError) {
-            console.error('[SuperadminTorneosPage] Failed to load top clubs:', loadError);
-            setTopClubsByFollowers([]);
-        }
-    }, []);
-
-    useEffect(() => {
-        void loadTopClubsByFollowers();
-    }, [loadTopClubsByFollowers]);
 
     // ── Enriched Data ─────────────────────────────────────────────────────────
 
@@ -557,13 +520,27 @@ export default function SuperadminTorneosPage() {
                 </div>
             </div>
 
-            {!isLoading && !error && filtered.length > 0 && (
+            {/* Sin nada elegido, la selección masiva es una sola acción discreta.
+                Antes era un bloque fijo con seis botones apagados arriba de la
+                lista: ocupaba la pantalla para decir que no había nada que hacer.
+                Las acciones aparecen recién cuando hay torneos elegidos. */}
+            {!isLoading && !error && filtered.length > 0 && selectedCount === 0 && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+                    <button className={styles.cardAction} onClick={toggleSelectAllVisible} disabled={isBulkBusy}>
+                        Seleccionar los {filtered.length} visibles
+                    </button>
+                </div>
+            )}
+
+            {!isLoading && !error && filtered.length > 0 && selectedCount > 0 && (
                 <div className={styles.slab} style={{ marginBottom: 20, padding: '16px 20px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', flexWrap: 'wrap', marginBottom: 12 }}>
                         <div>
-                            <div style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>Seleccion masiva</div>
+                            <div style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>
+                                {selectedCount} torneo{selectedCount !== 1 ? 's' : ''} seleccionado{selectedCount !== 1 ? 's' : ''}
+                            </div>
                             <div style={{ fontSize: 12, color: '#a1a1aa' }}>
-                                {selectedCount} seleccionado{selectedCount !== 1 ? 's' : ''} de {filtered.length} torneo{filtered.length !== 1 ? 's' : ''} filtrado{filtered.length !== 1 ? 's' : ''}
+                                de {filtered.length} en la lista
                                 {bulkActionLabel ? ` · ${bulkActionLabel}...` : ''}
                             </div>
                         </div>
@@ -573,7 +550,7 @@ export default function SuperadminTorneosPage() {
                                 {allVisibleSelected ? 'Quitar visibles' : 'Seleccionar visibles'}
                             </button>
                             <button className={styles.cardAction} onClick={clearSelection} disabled={isBulkBusy || selectedCount === 0}>
-                                Limpiar seleccion
+                                Limpiar selección
                             </button>
                         </div>
                     </div>
@@ -647,7 +624,10 @@ export default function SuperadminTorneosPage() {
                         <span className={styles.groupTitle} style={{ fontSize: '1.2em', fontWeight: 800 }}>{country}</span>
                         <span className={styles.groupMeta} style={{ opacity: 0.6 }}>({items.length} torneo{items.length !== 1 ? 's' : ''})</span>
                     </div>
-                    <div className={styles.cardGrid}>
+                    {/* Columnas de 320px como mínimo: a 240 la casilla, el escudo, la
+                        estrella y el menú le dejaban ~66px al nombre, que se cortaba en
+                        "Sudar de…" y apilaba temporada y deporte uno por línea. */}
+                    <div className={styles.cardGrid} style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
                         {items.map(t => (
                             <div key={t.id} className={styles.cardItem} style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
                                 <div className={styles.cardHeader}>
@@ -666,7 +646,15 @@ export default function SuperadminTorneosPage() {
                                     </label>
                                     <div className={styles.cardLogo} style={{ position: 'relative' }}>
                                         {t.logo_url ? (
-                                            <img src={t.logo_url} alt={t.name} style={{ width: 40, height: 40, objectFit: 'contain' }} />
+                                            /* alt vacío: el nombre ya está al lado. Con el nombre como
+                                               alt, un escudo roto escribía "Suda…" encima del título. */
+                                            <img
+                                                src={t.logo_url}
+                                                alt=""
+                                                loading="lazy"
+                                                style={{ width: 40, height: 40, objectFit: 'contain' }}
+                                                onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+                                            />
                                         ) : '🏆'}
                                         <label className={styles.logoEditOverlay}>
                                             <input type="file" hidden accept="image/*" onChange={(e) => handleLogoUpload(t.id, e)} />
@@ -795,7 +783,7 @@ export default function SuperadminTorneosPage() {
                                 {/* Actions */}
                                 <div className={styles.cardActions}>
                                     <Link href={`/admin/entities/${t.id}/manage?type=tournament`} prefetch={false} className={styles.actionBtn}>
-                                        Configurar Detalles
+                                        Gestionar torneo
                                     </Link>
                                 </div>
                             </div>
@@ -854,47 +842,6 @@ export default function SuperadminTorneosPage() {
                 </div>
             )}
 
-            {/* Top clubs by followers */}
-            <div className={styles.slab} style={{ marginTop: 32, padding: '20px 24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                    <Users size={15} style={{ color: '#a1a1aa' }} />
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-                        Clubes por seguidores
-                    </span>
-                </div>
-                {topClubsByFollowers.length === 0 ? (
-                    <div style={{ color: 'var(--basalt-400)', fontSize: 13 }}>Sin datos de seguidores aún.</div>
-                ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {topClubsByFollowers.map((club, idx) => (
-                            <div key={club.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 0', borderBottom: '1px solid var(--surface-edge)' }}>
-                                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--basalt-500)', minWidth: 20, textAlign: 'right' }}>
-                                    {idx + 1}
-                                </span>
-                                {club.logo_url ? (
-                                    <img
-                                        src={club.logo_url.trimStart().startsWith('<svg')
-                                            ? `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(club.logo_url)))}`
-                                            : club.logo_url}
-                                        alt={club.name}
-                                        style={{ width: 24, height: 24, objectFit: 'contain', flexShrink: 0 }}
-                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                    />
-                                ) : (
-                                    <div style={{ width: 24, height: 24, borderRadius: 4, background: club.primary_color || '#3f3f46', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff' }}>
-                                        {club.name.substring(0, 2).toUpperCase()}
-                                    </div>
-                                )}
-                                <span style={{ flex: 1, fontSize: 13, color: '#e4e4e7', fontWeight: 500 }}>{club.name}</span>
-                                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#a1a1aa' }}>
-                                    <Users size={12} />
-                                    {club.followers_count}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
         </div>
     );
 }
