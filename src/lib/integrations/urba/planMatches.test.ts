@@ -554,3 +554,12 @@ test('el nombre sale del resolvedor cuando se lo pasa, y de URBA cuando no', () 
   assert.equal(porId.get('san-isidro-club-m17-a'), 'SIC M17 "A"');
   assert.equal(porId.get('hindu-club-m17-a'), 'Hindu A', 'sin nombre en G22 se usa el de URBA');
 });
+
+test('playdateToUtcIso: el horario fijado para el partido gana sobre el default y sólo si URBA no informa hora', () => {
+  // viernes 20:10 hora local = 23:10Z
+  assert.equal(playdateToUtcIso('2026-10-30T00:00:00', 'Superior', '20:10'), '2026-10-30T23:10:00.000Z');
+  // sin horario fijado, sigue el default de la subcategoría
+  assert.equal(playdateToUtcIso('2026-10-30T00:00:00', 'Superior', undefined), '2026-10-30T18:30:00.000Z');
+  // una hora real de URBA nunca se pisa
+  assert.equal(playdateToUtcIso('2026-10-30T11:00:00', 'Superior', '20:10'), '2026-10-30T14:00:00.000Z');
+});

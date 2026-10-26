@@ -200,6 +200,19 @@ export const HORARIO_POR_SUBCATEGORIA: Readonly<Record<string, string>> = Object
   Superior: '15:30',
 });
 
+/**
+ * Horario fijado a mano por partido de URBA (clave: `matches.id` de URBA).
+ * Gana sobre la subcategoría y, como ella, sólo actúa cuando URBA NO informa hora.
+ * Es para un cruce puntual (semifinales a otra hora que el resto del día) que el
+ * default por subcategoría no puede expresar sin mover a las demás categorías.
+ * Hora local `HH:MM`.
+ */
+export const HORARIO_POR_PARTIDO: Readonly<Record<string, string>> = Object.freeze({
+  // Semifinales del Top 14 2026: viernes 30/10 y sábado 31/10.
+  '2023152070': '20:10', // Newman - Alumni
+  '2023152071': '17:10', // CASI - Hindú
+});
+
 /** `HH:MM` por defecto para una subcategoría, o null si no tiene uno definido. */
 export function horarioPorDefectoDe(subcategory: string | null | undefined): string | null {
   const clave = String(subcategory ?? '').trim();
@@ -226,11 +239,12 @@ const SIN_HORA = /^(\d{4}-\d{2}-\d{2})T00:00(?::00(?:\.000)?)?$/;
 export function playdateToUtcIso(
   playdate: string | null | undefined,
   subcategory?: string | null,
+  horarioDelPartido?: string | null,
 ): string | null {
   if (!playdate) return null;
 
   const sinHora = String(playdate).match(SIN_HORA);
-  const porDefecto = sinHora ? horarioPorDefectoDe(subcategory) : null;
+  const porDefecto = sinHora ? (horarioDelPartido ?? horarioPorDefectoDe(subcategory)) : null;
   if (sinHora && porDefecto) {
     return combineLocalDateTimeToUtcIso(sinHora[1], porDefecto);
   }
@@ -434,7 +448,7 @@ export function planTournamentMatches(input: {
         continue;
       }
 
-      const dateTime = playdateToUtcIso(m.playdate, input.subcategory);
+      const dateTime = playdateToUtcIso(m.playdate, input.subcategory, HORARIO_POR_PARTIDO[String(m.id)]);
       if (!dateTime) {
         // matches.date_time es NOT NULL y sin default: sin fecha no hay fila.
         plan.omitidos.push({ urba_match_id: m.id, external_id: externalId, motivo: 'sin_fecha', detalle: `playdate=${JSON.stringify(m.playdate)}` });
