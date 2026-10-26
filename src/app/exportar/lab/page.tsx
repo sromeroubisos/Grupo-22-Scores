@@ -74,7 +74,6 @@ const CHAMPION: ChampionData = {
     club: { name: 'Canterbury', logo: '/clubs/canterbury.png' },
     tournament: 'Torneo M15 "A" · Unión Cordobesa de Rugby',
     season: '2026',
-    tag: 'M15',
 };
 
 // La placa ladder: valor principal + unidad, secundario y flecha por fila.
