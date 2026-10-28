@@ -37,6 +37,7 @@ interface NewsForm {
     summary: string;
     content: string;
     image_url: string;
+    image_credit: string;
     sport: string;
     author_name: string;
     scope: string;
@@ -53,6 +54,7 @@ interface NewsRecord {
     summary?: string | null;
     content?: string | null;
     image_url?: string | null;
+    image_credit?: string | null;
     sport?: string | null;
     author_name?: string | null;
     scope?: string | null;
@@ -63,7 +65,7 @@ type NewsEditorClientProps = {
     newsId?: string;
 };
 
-const EMPTY: NewsForm = { title: '', summary: '', content: '', image_url: '', sport: 'rugby', author_name: '', scope: 'global', tags: [] };
+const EMPTY: NewsForm = { title: '', summary: '', content: '', image_url: '', image_credit: '', sport: 'rugby', author_name: '', scope: 'global', tags: [] };
 
 // Los mismos topes que valida la API.
 const TITLE_MAX = 140;
@@ -78,9 +80,9 @@ const TAGS_MAX = 10;
 const CUSTOM_SPORT = '__custom';
 const NEWS_COLUMNS_MIGRATION = '20260826150000_news_sport_scope_tags.sql';
 /** Las columnas que la base puede no tener todavía, con su nombre para el aviso. */
-const DROPPABLE_FIELDS: Partial<Record<FormField, string>> = { sport: 'el deporte', author_name: 'el autor', scope: 'el alcance', tags: 'las etiquetas' };
+const DROPPABLE_FIELDS: Partial<Record<FormField, string>> = { sport: 'el deporte', author_name: 'el autor', image_credit: 'el autor de la foto', scope: 'el alcance', tags: 'las etiquetas' };
 /** La migración de las columnas que no son de la primera tanda. */
-const FIELD_MIGRATIONS: Partial<Record<FormField, string>> = { author_name: '20261015120000_news_author_name.sql' };
+const FIELD_MIGRATIONS: Partial<Record<FormField, string>> = { author_name: '20261015120000_news_author_name.sql', image_credit: '20261028120000_news_image_credit.sql' };
 
 /** Los ids que entiende la portada (sus carpetas por deporte). */
 const SPORTS = [
@@ -130,6 +132,7 @@ function toForm(record: NewsRecord): NewsForm {
         summary: record.summary ?? '',
         content: record.content ?? '',
         image_url: record.image_url ?? '',
+        image_credit: record.image_credit ?? '',
         sport: record.sport ?? 'rugby',
         author_name: record.author_name ?? '',
         scope: record.scope ?? 'global',
@@ -706,6 +709,7 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                     summary: form.summary.trim(),
                     content: form.content.trim(),
                     image_url: image || null,
+                    image_credit: image ? (form.image_credit.trim() || null) : null,
                     sport: form.sport.trim() || null,
                     author_name: form.author_name.trim() || null,
                     scope: form.scope,
@@ -1136,6 +1140,22 @@ export default function NewsEditorClient({ newsId }: NewsEditorClientProps) {
                             />
                             <p id="news-image-hint" className={`${styles.hint} ${showError('image_url') ? styles.hintError : ''}`}>
                                 {showError('image_url') ?? 'Un link público (https://). Una ruta de tu compu no sirve: nadie más la ve.'}
+                            </p>
+                        </div>
+                        <div className={styles.field}>
+                            <label htmlFor="news-image-credit" className={styles.label}>Autor de la foto</label>
+                            <input
+                                id="news-image-credit"
+                                className={styles.input}
+                                type="text"
+                                maxLength={80}
+                                value={form.image_credit}
+                                placeholder="Nombre y apellido o agencia"
+                                onChange={(event) => update('image_credit', event.target.value)}
+                                aria-describedby="news-image-credit-hint"
+                            />
+                            <p id="news-image-credit-hint" className={styles.hint}>
+                                Sale debajo de la foto. Si lo dejás vacío, no se muestra nada.
                             </p>
                         </div>
                     </section>

@@ -32,6 +32,7 @@ type NewsRequestBody = {
     summary?: unknown;
     content?: unknown;
     image_url?: unknown;
+    image_credit?: unknown;
     status?: unknown;
     sport?: unknown;
     author_name?: unknown;
@@ -51,6 +52,7 @@ const SUMMARY_MAX = 280;
 const CONTENT_MAX = 20000;
 const SPORT_MAX = 40;
 const IMAGE_URL_MAX = 2048;
+const IMAGE_CREDIT_MAX = 80;
 const TAG_MAX = 30;
 const TAGS_MAX = 10;
 const STATUSES = new Set<NewsRow['status']>(['draft', 'published', 'archived']);
@@ -206,6 +208,16 @@ function cleanText(value: unknown, max: number, label: string): string | null | 
 }
 
 /** El autor es opcional: vacío se guarda como null y la nota la firma la redacción. */
+/** Quién sacó la foto: texto corto, una sola línea. */
+function cleanImageCredit(value: unknown): string | null | undefined {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    if (typeof value !== 'string') throw new NewsValidationError('El autor de la foto tiene que ser texto.');
+    const name = value.replace(/\s+/g, ' ').trim();
+    if (name.length > IMAGE_CREDIT_MAX) throw new NewsValidationError(`El autor de la foto no puede pasar los ${IMAGE_CREDIT_MAX} caracteres.`);
+    return name || null;
+}
+
 function cleanAuthor(value: unknown): string | null | undefined {
     if (value === undefined) return undefined;
     if (value === null) return null;
@@ -368,6 +380,7 @@ export async function POST(req: Request) {
             summary: cleanText(body.summary, SUMMARY_MAX, 'El resumen') ?? null,
             content: cleanText(body.content, CONTENT_MAX, 'El contenido') ?? null,
             image_url: cleanImageUrl(body.image_url) ?? null,
+            image_credit: cleanImageCredit(body.image_credit) ?? null,
             status,
             sport: cleanText(body.sport, SPORT_MAX, 'El deporte') ?? null,
             author_name: cleanAuthor(body.author_name) ?? null,
@@ -408,6 +421,8 @@ export async function PUT(req: Request) {
         if (content !== undefined) updateData.content = content;
         const imageUrl = cleanImageUrl(body.image_url);
         if (imageUrl !== undefined) updateData.image_url = imageUrl;
+        const imageCredit = cleanImageCredit(body.image_credit);
+        if (imageCredit !== undefined) updateData.image_credit = imageCredit;
         const sport = cleanText(body.sport, SPORT_MAX, 'El deporte');
         if (sport !== undefined) updateData.sport = sport;
         const authorName = cleanAuthor(body.author_name);
