@@ -5403,3 +5403,323 @@
     outline-offset: 2px;
     border-radius: 4px;
 }
+
+/* =========================================================================
+   ENCABEZADO DEL PARTIDO — marcador grande, color de club, barra compacta
+   ========================================================================= */
+
+/* El color de cada club sale del escudo (useBannerColor) y llega por
+   `--home-tint` / `--away-tint`. Sin escudo legible no hay variable y queda el
+   gris pizarra: el encabezado nunca se pinta de un color inventado. */
+.scoreboardCard.tinted {
+    --home-c: var(--home-tint, #475569);
+    --away-c: var(--away-tint, #475569);
+    --tint-base: #0b0d10;
+    --tint-pct: 52%;
+    background-color: transparent;
+    background-image: linear-gradient(100deg,
+        color-mix(in srgb, var(--home-c) var(--tint-pct), var(--tint-base)) 0%,
+        color-mix(in srgb, var(--home-c) 16%, color-mix(in srgb, var(--away-c) 16%, var(--tint-base))) 50%,
+        color-mix(in srgb, var(--away-c) var(--tint-pct), var(--tint-base)) 100%);
+}
+
+/* En claro el color es un lavado, no un bloque: el texto sigue siendo oscuro. */
+:global([data-theme="light"]) .scoreboardCard.tinted {
+    --tint-base: #ffffff;
+    --tint-pct: 22%;
+}
+
+/* La cifra manda. Tipografia del sistema, tabular (no salta al cambiar un
+   digito) y con tracking negativo: a este tamano las letras separadas se leen
+   sueltas. */
+.scoreboardCard.tinted .scoreNum {
+    font-family: var(--font-main), system-ui, sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    text-shadow: none;
+}
+
+/* --- Telefono: puntaje arriba de cada escudo, reloj en el medio --- */
+@media (max-width: 768px) {
+    .scoreboardCard.tinted {
+        padding: 8px 16px 28px;
+        /* El color se funde con la pagina arriba y abajo: no hay un borde duro
+           entre el encabezado transparente y el marcador. */
+        background-image:
+            linear-gradient(180deg, var(--bg) 0, transparent 56px),
+            linear-gradient(0deg, var(--bg) 0, transparent 72px),
+            linear-gradient(100deg,
+                color-mix(in srgb, var(--home-c) var(--tint-pct), var(--tint-base)) 0%,
+                color-mix(in srgb, var(--home-c) 16%, color-mix(in srgb, var(--away-c) 16%, var(--tint-base))) 50%,
+                color-mix(in srgb, var(--away-c) var(--tint-pct), var(--tint-base)) 100%);
+    }
+
+    .scoreboardCard.tinted .scoreboardGrid {
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        justify-items: center;
+        row-gap: 6px;
+        column-gap: 8px;
+    }
+
+    /* Las tres columnas dejan de ser cajas: sus hijos se acomodan directo en
+       la grilla del marcador (fila 1 puntaje, fila 2 escudo, fila 3 nombre). */
+    .scoreboardCard.tinted .teamCol,
+    .scoreboardCard.tinted .centerCol,
+    .scoreboardCard.tinted .scoreDisplay {
+        display: contents;
+    }
+
+    .scoreboardCard.tinted .scoreDisplay > .scoreValue { grid-row: 1; justify-content: center; }
+    .scoreboardCard.tinted .scoreDisplay > .scoreValue:first-child { grid-column: 1; }
+    .scoreboardCard.tinted .scoreDisplay > .scoreValue:last-child { grid-column: 3; }
+    .scoreboardCard.tinted .scoreSep { display: none; }
+
+    .scoreboardCard.tinted .scoreNum {
+        font-size: clamp(64px, 22vw, 96px);
+        line-height: 0.95;
+    }
+
+    .scoreboardCard.tinted .liveClockBox,
+    .scoreboardCard.tinted .matchTimer {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: center;
+        margin: 0;
+    }
+
+    .scoreboardCard.tinted .crestLink { grid-row: 2; display: block; }
+    .scoreboardCard.tinted .teamCol:not(.visitor) .crestLink { grid-column: 1; }
+    .scoreboardCard.tinted .visitor .crestLink { grid-column: 3; }
+
+    .scoreboardCard.tinted .teamInfo { grid-row: 3; width: 100%; }
+    .scoreboardCard.tinted .teamCol:not(.visitor) .teamInfo { grid-column: 1; }
+    .scoreboardCard.tinted .visitor .teamInfo { grid-column: 3; }
+
+    /* Partido sin jugar: no hay marcador que mostrar. Una raya de 96px se lee
+       como un error; en su lugar manda la hora, que es el dato. */
+    .scoreboardCard.tinted[data-status="scheduled"] .scoreDisplay { display: none; }
+    .scoreboardCard.tinted[data-status="scheduled"] .matchTimer {
+        grid-column: 1 / -1;
+        font-size: 44px;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+        padding: 10px 0 6px;
+    }
+
+    /* En vivo: el reloj en pildora es mas ancho que la columna del medio y
+       empujaba el puntaje visitante fuera de la pantalla. Va entre los
+       escudos, en vertical, y con ancho cero: la columna no crece, el texto
+       se desborda centrado sobre el hueco que dejan los dos escudos. */
+    .scoreboardCard.tinted[data-status="live"] .liveClockBox {
+        grid-row: 2;
+        grid-column: 2;
+        width: 0;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding: 0;
+        border: 0;
+        background: none;
+        white-space: nowrap;
+    }
+    .scoreboardCard.tinted[data-status="live"] .liveClockDot { display: none; }
+    .scoreboardCard.tinted[data-status="live"] .liveClockTime {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+        color: var(--danger);
+    }
+    .scoreboardCard.tinted[data-status="live"] .liveClockPeriod {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+    }
+
+    /* Partido terminado: la hora de inicio no dice nada, el estado si. */
+    .scoreboardCard.tinted[data-status="final"] .matchTimer span:first-child,
+    .scoreboardCard.tinted[data-status="final"] .matchTimer span:nth-child(2) { display: none; }
+    .scoreboardCard.tinted[data-status="final"] .matchTimer span:last-child {
+        display: inline;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+    }
+
+    .scoreboardCard.tinted .crestWrapper { width: 76px; height: 76px; }
+
+    .scoreboardCard.tinted .teamName {
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        max-width: 132px;
+    }
+}
+
+/* --- Tema claro: sin bloque de color ---
+   Un rectangulo teñido sobre el gris de la pagina se lee como una caja con
+   bordes duros. En claro el color del club es un resplandor detras de cada
+   escudo que se desvanece solo: no hay borde que alinear con nada. */
+:global([data-theme="light"]) .scoreboardCard.tinted {
+    background-color: transparent;
+    background-image:
+        radial-gradient(ellipse 62% 70% at 24% 46%, color-mix(in srgb, var(--home-c) 20%, transparent), transparent 72%),
+        radial-gradient(ellipse 62% 70% at 76% 46%, color-mix(in srgb, var(--away-c) 20%, transparent), transparent 72%);
+}
+
+/* --- Barra compacta --- */
+.compactBar {
+    --home-c: var(--home-tint, #475569);
+    --away-c: var(--away-tint, #475569);
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--compact-top, 0px);
+    /* Un escalon por debajo del encabezado del sitio: al ocultarse se mete
+       debajo de el, no cruza la pantalla. */
+    z-index: calc(var(--z-fixed, 1000) - 1);
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid var(--stroke);
+    font: inherit;
+    color: var(--text);
+    cursor: pointer;
+    background-color: color-mix(in srgb, var(--bg) 72%, transparent);
+    background-image: linear-gradient(100deg,
+        color-mix(in srgb, var(--home-c) 30%, transparent) 0%,
+        transparent 38%,
+        transparent 62%,
+        color-mix(in srgb, var(--away-c) 30%, transparent) 100%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        transform 340ms var(--mo-ease-expo, cubic-bezier(0.16, 1, 0.3, 1)),
+        opacity 200ms var(--mo-ease-quart, ease-out),
+        visibility 0s linear 340ms;
+}
+
+.compactBarOn {
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+.compactBar:active .compactInner { transform: scale(0.98); }
+
+.compactInner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    max-width: 720px;
+    height: 52px;
+    margin: 0 auto;
+    padding: 0 16px;
+    transition: transform 120ms var(--mo-ease-quart, ease-out);
+}
+
+.compactCrest {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.compactCrest .crestImage { width: 100%; height: 100%; }
+.compactCrest .crestFlag { font-size: 22px; }
+.compactCrest .crestPlaceholder { width: 20px; height: 20px; }
+
+.compactScore {
+    min-width: 1.2ch;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.compactClock {
+    min-width: 58px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+/* En vivo todo lo que habla del reloj va en rojo: es el codigo del deporte. */
+.compactClockLive { color: var(--danger); font-weight: 700; }
+
+.liveChipText,
+.liveChipText strong { color: var(--danger); }
+
+.scoreboardCard.tinted[data-status="live"] .liveClockTime,
+.scoreboardCard.tinted[data-status="live"] .liveClockPeriod {
+    color: var(--danger);
+    background: color-mix(in srgb, var(--danger) 16%, transparent);
+    border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+}
+
+/* --- Pestanas: titulos firmes y un solo indicador que se desliza --- */
+.tabsNav { position: relative; }
+
+.tabItem {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    padding: 14px 6px;
+}
+
+.tabItem.active { color: var(--text); }
+
+/* El subrayado por pestana se reemplaza por `.tabIndicator`. */
+.tabItem.active::after { display: none; }
+
+.tabIndicator {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: var(--ind-w, 0px);
+    transform: translateX(var(--ind-x, 0px));
+    border-radius: 3px 3px 0 0;
+    background: var(--accent);
+    pointer-events: none;
+}
+
+/* Recien despues de la primera medicion se anima: sin esto el indicador
+   viajaria desde el borde izquierdo al cargar la pagina. */
+.tabsNav[data-ready="true"] .tabIndicator {
+    transition:
+        transform 380ms var(--mo-ease-expo, cubic-bezier(0.16, 1, 0.3, 1)),
+        width 380ms var(--mo-ease-expo, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .compactBar { transform: none; transition: opacity 150ms linear, visibility 0s linear 150ms; }
+    .compactBarOn { transition-delay: 0s; }
+    .tabsNav[data-ready="true"] .tabIndicator { transition: none; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .compactBar {
+        background-color: var(--bg);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+}

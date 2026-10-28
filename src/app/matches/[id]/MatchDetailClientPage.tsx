@@ -12,6 +12,7 @@ import type { RateablePlayer } from '@/components/match/PeopleRatingsPanel';
 import PeopleRatingsDialog from '@/components/match/PeopleRatingsDialog';
 import styles from './page.module.css';
 import { TopStatRow, TopStatSplit } from './TopStatsRows';
+import { FALLBACK_BANNER, useBannerColor } from '@/app/tournaments/[id]/useBannerColor';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import {
     buildLocalPlayerStatsRows,
@@ -1959,6 +1960,73 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         });
     };
 
+    // El indicador de la pestana activa es UN solo elemento que se desliza: se
+    // mide la pestana elegida y se le pasa x/ancho por variables CSS. Asi el
+    // movimiento parte de donde estaba el indicador, no de cero.
+    useEffect(() => {
+        const nav = tabsNavRef.current;
+        if (!nav) return;
+        const place = () => {
+            const active = nav.querySelector<HTMLElement>('[aria-selected="true"]');
+            if (!active) return;
+            nav.style.setProperty('--ind-x', `${active.offsetLeft}px`);
+            nav.style.setProperty('--ind-w', `${active.offsetWidth}px`);
+        };
+        place();
+        const raf = window.requestAnimationFrame(() => { nav.dataset.ready = 'true'; });
+        window.addEventListener('resize', place);
+        return () => {
+            window.cancelAnimationFrame(raf);
+            window.removeEventListener('resize', place);
+        };
+    }, [activeTab, tabsNavRef, visibleTabs, isNarrow, state.kind]);
+
+    // Color de cada club, sacado del escudo (el mismo criterio que el banner
+    // del torneo). Sin escudo legible no se pinta nada: queda el neutro.
+    const tintMatch = state.kind === 'ok' ? state.matchData : null;
+    const homeTint = useBannerColor(null, tintMatch?.home?.logo);
+    const awayTint = useBannerColor(null, tintMatch?.away?.logo);
+    const tintStyle = {
+        ...(homeTint !== FALLBACK_BANNER ? { '--home-tint': homeTint } : null),
+        ...(awayTint !== FALLBACK_BANNER ? { '--away-tint': awayTint } : null),
+    } as React.CSSProperties;
+
+    // Barra compacta: cuando el marcador sale de la pantalla por arriba, el
+    // resultado se queda pegado debajo del encabezado del sitio. El margen del
+    // observador es la altura real de ese encabezado, medida, no supuesta.
+    const scoreboardRef = useRef<HTMLElement>(null);
+    const compactBarRef = useRef<HTMLButtonElement>(null);
+    const [compact, setCompact] = useState(false);
+    useEffect(() => {
+        if (state.kind !== 'ok') return;
+        const el = scoreboardRef.current;
+        if (!el || typeof IntersectionObserver === 'undefined') return;
+        let io: IntersectionObserver | null = null;
+        const mount = () => {
+            let inset = 0;
+            for (const h of Array.from(document.querySelectorAll('header'))) {
+                const position = getComputedStyle(h).position;
+                if (position === 'fixed' || position === 'sticky') {
+                    inset = Math.max(0, Math.round(h.getBoundingClientRect().bottom));
+                    break;
+                }
+            }
+            compactBarRef.current?.style.setProperty('--compact-top', `${inset}px`);
+            io?.disconnect();
+            io = new IntersectionObserver(
+                ([entry]) => setCompact(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+                { rootMargin: `-${inset}px 0px 0px 0px`, threshold: 0 },
+            );
+            io.observe(el);
+        };
+        mount();
+        window.addEventListener('resize', mount);
+        return () => {
+            io?.disconnect();
+            window.removeEventListener('resize', mount);
+        };
+    }, [state.kind]);
+
     if (state.kind === 'loading') return (
         <div className={styles.page}>
             <div className={`${styles.appContainer} ${styles.skLoadingWrap}`}>
@@ -2563,6 +2631,46 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
     return (
         <div className={styles.page}>
+            {/* Barra compacta: aparece cuando el marcador grande ya salio de la
+                pantalla. Es un boton que vuelve arriba; oculta, no entra en el
+                foco ni en el arbol de accesibilidad (visibility: hidden). */}
+            <button
+                ref={compactBarRef}
+                type="button"
+                className={`${styles.compactBar} ${compact ? styles.compactBarOn : ''}`}
+                style={tintStyle}
+                aria-label={`${matchData.home.name} ${matchData.home.score ?? '-'}, ${matchData.away.name} ${matchData.away.score ?? '-'}. Volver al marcador`}
+                tabIndex={compact ? 0 : -1}
+                onClick={() => {
+                    const reduced = typeof window.matchMedia === 'function'
+                        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+                }}
+            >
+                {(() => {
+                    const hv = getScoreboardParticipantVisual(matchData.home, matchData.sportId);
+                    const av = getScoreboardParticipantVisual(matchData.away, matchData.sportId);
+                    return (
+                        <span className={styles.compactInner}>
+                            <span className={styles.compactCrest} aria-hidden="true">
+                                <ScoreboardParticipantAvatar key={`c-home-${hv.image}-${hv.flagEmoji}`} imageSrc={hv.image} flagEmoji={hv.flagEmoji} />
+                            </span>
+                            {matchData.status !== 'scheduled' && (
+                                <span className={styles.compactScore} aria-hidden="true">{matchData.home.score ?? '-'}</span>
+                            )}
+                            <span className={`${styles.compactClock} ${matchData.status === 'live' ? styles.compactClockLive : ''}`} aria-hidden="true">
+                                {matchData.status === 'live' ? liveClockTime : matchData.status === 'final' ? 'FT' : matchTimerText}
+                            </span>
+                            {matchData.status !== 'scheduled' && (
+                                <span className={styles.compactScore} aria-hidden="true">{matchData.away.score ?? '-'}</span>
+                            )}
+                            <span className={styles.compactCrest} aria-hidden="true">
+                                <ScoreboardParticipantAvatar key={`c-away-${av.image}-${av.flagEmoji}`} imageSrc={av.image} flagEmoji={av.flagEmoji} />
+                            </span>
+                        </span>
+                    );
+                })()}
+            </button>
             <div className={styles.appContainer}>
                 {/* Layer 1: Header Context */}
                 <header className={styles.matchHeader}>
@@ -2625,7 +2733,12 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                 </header>
 
                 {/* Layer 2: Scoreboard */}
-                <section className={styles.scoreboardCard}>
+                <section
+                    ref={scoreboardRef}
+                    className={`${styles.scoreboardCard} ${styles.tinted}`}
+                    data-status={matchData.status}
+                    style={tintStyle}
+                >
                     <div className={styles.scoreboardGrid}>
                         {(() => {
                             const homeVisual = getScoreboardParticipantVisual(matchData.home, matchData.sportId);
@@ -2634,7 +2747,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 <>
                         {/* Local */}
                         <div className={styles.teamCol}>
-                            <Link href={buildTeamHref(matchData.home, matchData.sportId)} style={{ textDecoration: 'none' }}>
+                            <Link href={buildTeamHref(matchData.home, matchData.sportId)} className={styles.crestLink} style={{ textDecoration: 'none' }}>
                                 <div className={styles.crestWrapper}>
                                     <ScoreboardParticipantAvatar
                                         key={`home-${matchData.home.id || matchData.home.name}-${homeVisual.image}-${homeVisual.flagEmoji}`}
@@ -2713,7 +2826,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
                         {/* Visitor */}
                         <div className={`${styles.teamCol} ${styles.visitor}`}>
-                            <Link href={buildTeamHref(matchData.away, matchData.sportId)} style={{ textDecoration: 'none' }}>
+                            <Link href={buildTeamHref(matchData.away, matchData.sportId)} className={styles.crestLink} style={{ textDecoration: 'none' }}>
                                 <div className={styles.crestWrapper}>
                                     <ScoreboardParticipantAvatar
                                         key={`away-${matchData.away.id || matchData.away.name}-${awayVisual.image}-${awayVisual.flagEmoji}`}
@@ -2751,7 +2864,11 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                     <div className={styles.infoBar}>
                         <div className={styles.infoChip}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
-                            <span><strong>{new Date(matchData.date).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', timeZone: USER_TZ })}</strong> {matchTimerText}</span>
+                            {matchData.status === 'live' ? (
+                                <span className={styles.liveChipText}><strong>En vivo</strong></span>
+                            ) : (
+                                <span><strong>{new Date(matchData.date).toLocaleDateString('es-AR', { day: 'numeric', month: 'short', timeZone: USER_TZ })}</strong> {matchTimerText}</span>
+                            )}
                         </div>
                         <div className={styles.infoChip}>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
@@ -2801,7 +2918,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 </button>
                             );
                         })}
-
+                        <span className={styles.tabIndicator} aria-hidden="true" />
                     </div>
                     )}
 
