@@ -76,14 +76,20 @@ function Team({ side, mirror }: { side: Side; mirror: boolean }) {
     );
 }
 
-export default function LineupPitch({ home, away, label }: { home: Side; away: Side; label: string }) {
+export default function LineupPitch({ home, away, label, subtitle, mobile = false }: { home: Side; away: Side; label: string; subtitle?: string; mobile?: boolean }) {
     const total = placeablePlayers(home.players).length + placeablePlayers(away.players).length;
     if (total < 8) return null;
     return (
-        <section className={styles.wrap} aria-label={label}>
+        <section className={`${styles.wrap} ${mobile ? "" : styles.desktopOnly}`} aria-label={label}>
+            {subtitle ? (
+                <div className={styles.titleBlock}>
+                    <h3 className={styles.title}>{label}</h3>
+                    <p className={styles.subtitle}>{subtitle}</p>
+                </div>
+            ) : null}
             <header className={styles.head}>
                 <span className={styles.club}><i style={{ background: home.color }} />{home.name}</span>
-                <span className={styles.tag}>{label}</span>
+                <span className={styles.tag}>{subtitle ? '' : label}</span>
                 <span className={styles.club}>{away.name}<i style={{ background: away.color }} /></span>
             </header>
             <div className={styles.pitch}>
@@ -92,6 +98,21 @@ export default function LineupPitch({ home, away, label }: { home: Side; away: S
                 </div>
                 <Team side={home} mirror={false} />
                 <Team side={away} mirror />
+            </div>
+            <div className={styles.mobileList}>
+                {[home, away].map((side, i) => (
+                    <ol key={i} className={styles.mobileCol} style={{ '--team-c': side.color } as React.CSSProperties}>
+                        <li className={styles.mobileTitle}>{side.name}</li>
+                        {placeablePlayers(side.players)
+                            .sort((a, b) => a.n - b.n)
+                            .map((p) => (
+                                <li key={p.n} className={styles.mobileRow}>
+                                    <span className={styles.mobileNum}>{p.n}</span>
+                                    <span className={styles.mobileName}>{String(p.name)}</span>
+                                </li>
+                            ))}
+                    </ol>
+                ))}
             </div>
         </section>
     );

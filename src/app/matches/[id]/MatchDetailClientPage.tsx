@@ -2702,6 +2702,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                 })()}
             </button>
             <div className={styles.appContainer}>
+                {/* En telefono, barra de acciones y marcador comparten un solo bloque
+                    con el color de los clubes; en escritorio el contenedor no pinta nada. */}
+                <div className={styles.heroBlock} style={tintStyle}>
                 {/* Layer 1: Header Context */}
                 <header className={styles.matchHeader}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -2912,6 +2915,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         )}
                     </div>
                 </section>
+                </div>
 
                 {/* Layer 4: Tabs — se dibujan las que este partido puede llenar */}
                 <nav className={styles.tabsNavWrap} aria-label="Secciones del partido">
@@ -3509,7 +3513,9 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     nunca. */}
                                 {!hasAnyLineups && probable && probable.id === String(matchData.id) && (
                                     <LineupPitch
-                                        label={`Alineación más usada · últimos ${Math.max(probable.home.basedOn, probable.away.basedOn)} partidos`}
+                                        mobile
+                                        label="Posible formación"
+                                        subtitle={`Estos son los jugadores que cada club más usó en cada posición del XV, según sus últimos ${Math.max(probable.home.basedOn, probable.away.basedOn)} partidos.`}
                                         home={{ name: matchData.home.name, color: homeTint !== FALLBACK_BANNER ? homeTint : '#2563eb', players: probable.home.players }}
                                         away={{ name: matchData.away.name, color: awayTint !== FALLBACK_BANNER ? awayTint : '#dc2626', players: probable.away.players }}
                                     />

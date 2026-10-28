@@ -1,11 +1,25 @@
-/* Solo escritorio: en el telefono la pestana es la lista de siempre. */
+/* Escritorio: cancha con los dos XV. Telefono: lista por camiseta, lado a lado. */
 .wrap {
-    display: none;
+    display: block;
     grid-column: 1 / -1;
+    margin-bottom: 16px;
 }
 
+.mobileList { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.mobileCol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mobileTitle { font-size: 13px; font-weight: 800; color: var(--text); padding: 0 0 6px; border-bottom: 2px solid var(--team-c); }
+.mobileRow { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); min-width: 0; }
+.mobileNum { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--team-c); color: #fff; font-size: 11px; font-weight: 800; }
+.mobileName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 768px) {
+    .head { display: block; text-align: center; margin-bottom: 12px; }
+    .head .club { display: none; }
+    .pitch { display: none; }
+    .desktopOnly { display: none; }
+}
 @media (min-width: 769px) {
-    .wrap { display: block; }
+    .mobileList { display: none; }
 }
 
 .head {
@@ -111,3 +125,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.titleBlock { text-align: center; margin: 0 0 14px; }
+.title { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.01em; color: var(--text); }
+.subtitle { margin: 4px auto 0; max-width: 46ch; font-size: 13px; line-height: 1.4; color: var(--muted); }
+@media (min-width: 769px) { .title { font-size: 26px; } .subtitle { font-size: 14px; } }

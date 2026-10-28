@@ -6071,3 +6071,28 @@
 }
 .playerStatsShowBlank:hover { background: rgba(var(--color-accent-rgb), 0.05); }
 .playerStatsShowBlank:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* --- Telefono: acciones + marcador en un solo bloque de color --- */
+.heroBlock { display: block; }
+
+@media (max-width: 768px) {
+    .heroBlock {
+        --home-c: var(--home-tint, #475569);
+        --away-c: var(--away-tint, #475569);
+        --tint-base: #0b0d10;
+        --tint-pct: 52%;
+        /* Pegado al header del sitio: sin desvanecido arriba, solo abajo. */
+        background-image:
+            linear-gradient(0deg, var(--bg) 0, transparent 72px),
+            linear-gradient(100deg,
+                color-mix(in srgb, var(--home-c) var(--tint-pct), var(--tint-base)) 0%,
+                color-mix(in srgb, var(--home-c) 16%, color-mix(in srgb, var(--away-c) 16%, var(--tint-base))) 50%,
+                color-mix(in srgb, var(--away-c) var(--tint-pct), var(--tint-base)) 100%);
+    }
+    :global([data-theme="light"]) .heroBlock {
+        --tint-base: #ffffff;
+        --tint-pct: 22%;
+    }
+    /* El color lo pinta el contenedor; el marcador queda transparente encima. */
+    .heroBlock .scoreboardCard.tinted { background-image: none; }
+}
