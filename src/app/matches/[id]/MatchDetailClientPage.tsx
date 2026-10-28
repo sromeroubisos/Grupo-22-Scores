@@ -13,6 +13,7 @@ import PeopleRatingsDialog from '@/components/match/PeopleRatingsDialog';
 import styles from './page.module.css';
 import { TopStatRow, TopStatSplit } from './TopStatsRows';
 import { FALLBACK_BANNER, useBannerColor } from '@/app/tournaments/[id]/useBannerColor';
+import EventAnnouncement from './EventAnnouncement';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import {
     buildLocalPlayerStatsRows,
@@ -2631,6 +2632,15 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
     return (
         <div className={styles.page}>
+            <EventAnnouncement
+                matchId={String(matchData.id ?? id)}
+                ready={state.kind === 'ok'}
+                status={matchData.status}
+                sportId={matchData.sportId}
+                events={state.eventsData}
+                home={{ name: matchData.home.name, logo: matchData.home.logo || null }}
+                away={{ name: matchData.away.name, logo: matchData.away.logo || null }}
+            />
             {/* Barra compacta: aparece cuando el marcador grande ya salio de la
                 pantalla. Es un boton que vuelve arriba; oculta, no entra en el
                 foco ni en el arbol de accesibilidad (visibility: hidden). */}
