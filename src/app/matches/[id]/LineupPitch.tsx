@@ -10,12 +10,16 @@ import React from 'react';
 import styles from './LineupPitch.module.css';
 
 export type PitchPlayer = {
+    id?: string | null;
     name?: string | null;
     number?: number | string | null;
     isCaptain?: boolean | null;
 };
 
 type Side = { name: string; color: string; players: PitchPlayer[] };
+
+/** Se llama al tocar un jugador; sin esto la cancha es solo para mirar. */
+export type PlayerPick = (player: PitchPlayer & { n: number }, team: "home" | "away") => void;
 
 // [x, y] en la mitad propia: x=0 es la linea de try propia y x=1 el medio de la
 // cancha; y=0 es arriba. Los forwards quedan al frente, los backs atras.
@@ -50,7 +54,7 @@ export function placeablePlayers(players: PitchPlayer[]) {
     return out;
 }
 
-function Team({ side, mirror }: { side: Side; mirror: boolean }) {
+function Team({ side, mirror, onPick }: { side: Side; mirror: boolean; onPick?: PlayerPick }) {
     const placed = placeablePlayers(side.players);
     return (
         <>
@@ -59,24 +63,28 @@ function Team({ side, mirror }: { side: Side; mirror: boolean }) {
                 const x = (mirror ? 1 - sx / 2 : sx / 2) * 100;
                 const y = (mirror ? 1 - sy : sy) * 100;
                 return (
-                    <div
+                    <button
+                        type="button"
                         key={`${mirror ? 'a' : 'h'}-${p.n}`}
                         className={styles.player}
                         style={{ left: `${x}%`, top: `${y}%`, '--team-c': side.color } as React.CSSProperties}
+                        disabled={!onPick}
+                        onClick={() => onPick?.(p, mirror ? "away" : "home")}
+                        aria-label={`Ver a ${String(p.name)}`}
                     >
                         <span className={styles.shirt}>
                             {p.n}
                             {p.isCaptain ? <i className={styles.captain} aria-label="Capitán">C</i> : null}
                         </span>
                         <span className={styles.label}>{shortName(String(p.name))}</span>
-                    </div>
+                    </button>
                 );
             })}
         </>
     );
 }
 
-export default function LineupPitch({ home, away, label, subtitle, mobile = false }: { home: Side; away: Side; label: string; subtitle?: string; mobile?: boolean }) {
+export default function LineupPitch({ home, away, label, subtitle, mobile = false, onPlayerClick }: { home: Side; away: Side; label: string; subtitle?: string; mobile?: boolean; onPlayerClick?: PlayerPick }) {
     const total = placeablePlayers(home.players).length + placeablePlayers(away.players).length;
     if (total < 8) return null;
     return (
@@ -96,8 +104,8 @@ export default function LineupPitch({ home, away, label, subtitle, mobile = fals
                 <div className={styles.lines} aria-hidden="true">
                     <span style={{ left: '10%' }} /><span style={{ left: '38%' }} /><span style={{ left: '50%' }} className={styles.half} /><span style={{ left: '62%' }} /><span style={{ left: '90%' }} />
                 </div>
-                <Team side={home} mirror={false} />
-                <Team side={away} mirror />
+                <Team side={home} mirror={false} onPick={onPlayerClick} />
+                <Team side={away} mirror onPick={onPlayerClick} />
             </div>
             <div className={styles.mobileList}>
                 {[home, away].map((side, i) => (
@@ -106,9 +114,16 @@ export default function LineupPitch({ home, away, label, subtitle, mobile = fals
                         {placeablePlayers(side.players)
                             .sort((a, b) => a.n - b.n)
                             .map((p) => (
-                                <li key={p.n} className={styles.mobileRow}>
-                                    <span className={styles.mobileNum}>{p.n}</span>
-                                    <span className={styles.mobileName}>{String(p.name)}</span>
+                                <li key={p.n}>
+                                    <button
+                                        type="button"
+                                        className={styles.mobileRow}
+                                        disabled={!onPlayerClick}
+                                        onClick={() => onPlayerClick?.(p, i === 0 ? "home" : "away")}
+                                    >
+                                        <span className={styles.mobileNum}>{p.n}</span>
+                                        <span className={styles.mobileName}>{String(p.name)}</span>
+                                    </button>
                                 </li>
                             ))}
                     </ol>

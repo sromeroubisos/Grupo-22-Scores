@@ -1996,7 +1996,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
     // Alineacion probable: el XV mas usado de cada club en sus ultimos partidos
     // con planilla. Se pide solo al abrir Alineaciones, y se muestra solo si el
     // partido todavia no tiene la oficial.
-    type ProbableSide = { players: Array<{ name: string; number: number; appearances: number }>; basedOn: number };
+    type ProbableSide = { players: Array<{ id?: string | null; name: string; number: number; appearances: number }>; basedOn: number };
     const [probable, setProbable] = useState<{ id: string; home: ProbableSide; away: ProbableSide } | null>(null);
     const probableMatchId = tintMatch?.id ? String(tintMatch.id) : null;
     useEffect(() => {
@@ -3255,6 +3255,14 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
 
                                         <LineupPitch
                                             label={lineupSectionLabel}
+                                            onPlayerClick={(p, team) => openPlayerSheet({
+                                                playerId: p.id,
+                                                name: String(p.name),
+                                                team,
+                                                teamName: team === 'home' ? matchData.home.name : matchData.away.name,
+                                                number: p.n,
+                                                isCaptain: Boolean(p.isCaptain),
+                                            })}
                                             home={{ name: matchData.home.name, color: homeTint !== FALLBACK_BANNER ? homeTint : '#2563eb', players: homeLineupGroups.starters }}
                                             away={{ name: matchData.away.name, color: awayTint !== FALLBACK_BANNER ? awayTint : '#dc2626', players: awayLineupGroups.starters }}
                                         />
@@ -3514,6 +3522,10 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                 {!hasAnyLineups && probable && probable.id === String(matchData.id) && (
                                     <LineupPitch
                                         mobile
+                                        onPlayerClick={(p) => {
+                                            // Sin partido jugado no hay planilla: se va a la ficha del jugador.
+                                            if (p.id) router.push(`/players/${p.id}`);
+                                        }}
                                         label="Posible formación"
                                         subtitle={`Estos son los jugadores que cada club más usó en cada posición del XV, según sus últimos ${Math.max(probable.home.basedOn, probable.away.basedOn)} partidos.`}
                                         home={{ name: matchData.home.name, color: homeTint !== FALLBACK_BANNER ? homeTint : '#2563eb', players: probable.home.players }}

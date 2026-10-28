@@ -8,7 +8,9 @@
 .mobileList { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .mobileCol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .mobileTitle { font-size: 13px; font-weight: 800; color: var(--text); padding: 0 0 6px; border-bottom: 2px solid var(--team-c); }
-.mobileRow { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); min-width: 0; }
+.mobileRow { display: flex; align-items: center; gap: 8px; width: 100%; padding: 3px 0; border: 0; background: none; font: inherit; font-size: 13px; color: var(--text); min-width: 0; text-align: left; cursor: pointer; }
+.mobileRow:disabled { cursor: default; }
+.mobileRow:not(:disabled):active .mobileName { text-decoration: underline; }
 .mobileNum { flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--team-c); color: #fff; font-size: 11px; font-weight: 800; }
 .mobileName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -75,8 +77,17 @@
     align-items: center;
     gap: 3px;
     width: 12cqw;
-    pointer-events: none;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
 }
+.player:disabled { cursor: default; }
+.player:not(:disabled):hover .shirt { transform: scale(1.1); }
+.player:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 8px; }
+.shirt { transition: transform 120ms ease-out; }
 
 .shirt {
     position: relative;

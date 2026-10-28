@@ -6076,14 +6076,25 @@
 .heroBlock { display: block; }
 
 @media (max-width: 768px) {
+    /* La pagina se corre sobre el aire del contenedor global (arriba y a los
+       costados) y el contenido interno lo recupera: solo el bloque de color
+       queda a sangre. */
+    .page { margin: -0.475rem -0.475rem 0; }
+    .appContainer { padding-inline: 0.475rem; }
     .heroBlock {
         --home-c: var(--home-tint, #475569);
         --away-c: var(--away-tint, #475569);
         --tint-base: #0b0d10;
         --tint-pct: 52%;
-        /* Pegado al header del sitio: sin desvanecido arriba, solo abajo. */
+        /* A sangre: el contenedor global deja 0.475rem de aire a los costados y
+           arriba, y ese borde dejaba ver donde termina el bloque. */
+        margin: 0 -0.475rem -80px;
+        padding-bottom: 80px;
+        /* El color se disuelve en el fondo de la pagina (que tiene su propia
+           grilla): una mascara, no un parche del color de fondo encima. */
+        -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 110px), transparent 100%);
+        mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 110px), transparent 100%);
         background-image:
-            linear-gradient(0deg, var(--bg) 0, transparent 72px),
             linear-gradient(100deg,
                 color-mix(in srgb, var(--home-c) var(--tint-pct), var(--tint-base)) 0%,
                 color-mix(in srgb, var(--home-c) 16%, color-mix(in srgb, var(--away-c) 16%, var(--tint-base))) 50%,
