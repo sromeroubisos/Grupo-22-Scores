@@ -5552,7 +5552,15 @@
         color: var(--muted);
     }
 
-    .scoreboardCard.tinted .crestWrapper { width: 76px; height: 76px; }
+    /* El escudo va suelto: el circulo con overflow hidden le cortaba las esquinas. */
+    .scoreboardCard.tinted .crestWrapper {
+        width: 76px;
+        height: 76px;
+        overflow: visible;
+        border-radius: 0;
+        border: 0;
+        background: none;
+    }
 
     .scoreboardCard.tinted .teamName {
         font-size: 15px;
@@ -5723,3 +5731,343 @@
         backdrop-filter: none;
     }
 }
+
+/* --- Escritorio: escudo arriba, nombre abajo, marcador al medio ---
+   Misma composicion que el telefono pero en tres columnas: cada club es un
+   escudo grande con su nombre completo (sin cortar) y el marcador manda en el
+   centro. El encabezado pierde la altura de tarjeta: lo que importa es el
+   resultado, no el aire. */
+@media (min-width: 769px) {
+    .scoreboardCard.tinted {
+        padding: 28px 40px 18px;
+    }
+
+    .scoreboardCard.tinted .scoreboardGrid {
+        grid-template-columns: minmax(0, 1fr) minmax(240px, auto) minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        align-items: start;
+        justify-items: center;
+        row-gap: 14px;
+        column-gap: 24px;
+    }
+
+    .scoreboardCard.tinted .teamCol,
+    .scoreboardCard.tinted .teamInfo { display: contents; }
+
+    .scoreboardCard.tinted .teamLabel { display: none; }
+
+    .scoreboardCard.tinted .crestLink { grid-row: 1; display: block; }
+    .scoreboardCard.tinted .teamCol:not(.visitor) .crestLink { grid-column: 1; }
+    .scoreboardCard.tinted .visitor .crestLink { grid-column: 3; }
+    .scoreboardCard.tinted .crestWrapper { width: 116px; height: 116px; }
+    .scoreboardCard.tinted .crestImage { width: 84px; height: 84px; }
+
+    .scoreboardCard.tinted .teamNameRow {
+        grid-row: 2;
+        justify-content: center;
+        width: 100%;
+        max-width: 320px;
+    }
+    .scoreboardCard.tinted .teamCol:not(.visitor) .teamNameRow { grid-column: 1; }
+    .scoreboardCard.tinted .visitor .teamNameRow { grid-column: 3; }
+
+    .scoreboardCard.tinted .teamNameLink { text-align: center; }
+    .scoreboardCard.tinted .teamName {
+        font-size: clamp(20px, 1.9vw, 26px);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        max-width: none;
+        -webkit-line-clamp: 3;
+        text-align: center;
+    }
+
+    .scoreboardCard.tinted .centerCol {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        align-self: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .scoreboardCard.tinted .scoreNum {
+        font-size: clamp(88px, 9vw, 128px);
+        line-height: 0.9;
+    }
+
+    .scoreboardCard.tinted .infoBar {
+        justify-content: center;
+        margin-top: 8px;
+        padding-top: 14px;
+    }
+}
+
+@media (min-width: 769px) {
+    /* Terminado: la hora de inicio no dice nada, el estado si. */
+    .scoreboardCard.tinted[data-status="final"] .matchTimer span:first-child,
+    .scoreboardCard.tinted[data-status="final"] .matchTimer span:nth-child(2) { display: none; }
+    .scoreboardCard.tinted[data-status="final"] .matchTimer {
+        background: none;
+        border: 0;
+        padding: 0;
+    }
+    .scoreboardCard.tinted[data-status="final"] .matchTimer span:last-child {
+        display: inline;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+    }
+
+    /* Sin jugar: manda la hora, no un marcador vacio. */
+    .scoreboardCard.tinted[data-status="scheduled"] .scoreDisplay { display: none; }
+    .scoreboardCard.tinted[data-status="scheduled"] .matchTimer {
+        background: none;
+        border: 0;
+        padding: 0;
+        font-size: 56px;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+/* Escritorio: el escudo va suelto, sin circulo ni borde que lo encierre. */
+@media (min-width: 769px) {
+    .scoreboardCard.tinted .crestWrapper {
+        width: 132px;
+        height: 132px;
+        border: 0;
+        border-radius: 0;
+        background: none;
+        overflow: visible;
+    }
+    .scoreboardCard.tinted .crestImage {
+        width: 100%;
+        height: 100%;
+        filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.28));
+    }
+}
+
+@media (min-width: 769px) {
+    /* Sin jugar: la hora sola y grande. "Pendiente" y la barra repiten lo que
+       ya dice la etiqueta PROGRAMADO de arriba. */
+    .scoreboardCard.tinted[data-status="scheduled"] .matchTimer span:nth-child(2),
+    .scoreboardCard.tinted[data-status="scheduled"] .matchTimer span:nth-child(3) { display: none; }
+    .scoreboardCard.tinted[data-status="scheduled"] .matchTimer span:first-child {
+        font-family: var(--font-main), system-ui, sans-serif;
+        font-size: inherit;
+        font-weight: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+        background: none;
+        padding: 0;
+    }
+    .scoreboardCard.tinted[data-status="scheduled"] .centerCol { gap: 14px; }
+}
+
+/* --- Escritorio: estadisticas en una columna, con cada club identificado ---
+   Antes eran dos tarjetas angostas lado a lado con letra de 11px y sin decir
+   cual numero es de quien. Ahora: una columna ancha, el nombre de cada club
+   arriba con su color, y los numeros mas grandes. */
+.statsTeams { display: none; }
+
+@media (min-width: 769px) {
+    .statsTeams {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 6px 0 14px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+    }
+    .statsTeam { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+    .statsTeamAway { text-align: right; }
+    .statsTeamDot { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
+
+    .publicStatsSectionGrid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .publicStatsSection { padding: 18px 20px; }
+    .publicStatsSectionHeader h5 { font-size: 13px; }
+    .publicStatsSectionHeader span { font-size: 12px; }
+    .publicStatsRows { gap: 0; }
+
+    .topStatRow { min-height: 46px; gap: 16px; }
+    .topStatValue { font-size: 16px; }
+    .topStatLabel { font-size: 14px; }
+
+    .topStatSplitTrack { height: 36px; }
+    .topStatSplitLabel { font-size: 14px; }
+    .topStatSplitHome,
+    .topStatSplitAway { font-size: 15px; }
+    .topStatSplitHome { background: var(--home-tint, var(--color-accent)); color: #fff; }
+    .topStatSplitAway { background: var(--away-tint, rgba(var(--color-accent-rgb), 0.22)); color: #fff; }
+}
+
+/* --- Escritorio: la barra compacta es una pildora, no una franja ---
+   De borde a borde el degradado terminaba en dos manchas de color contra los
+   costados de la pagina. Como pildora centrada queda del tamano de lo que dice
+   (escudo, marcador, escudo) y el color vive adentro. */
+@media (min-width: 769px) {
+    .compactBar {
+        left: 50%;
+        right: auto;
+        width: auto;
+        margin-top: 10px;
+        border: 1px solid var(--stroke);
+        border-radius: 999px;
+        overflow: hidden;
+        background-color: color-mix(in srgb, var(--panel-solid, var(--bg)) 86%, transparent);
+        background-image: linear-gradient(100deg,
+            color-mix(in srgb, var(--home-c) 22%, transparent) 0%,
+            transparent 40%,
+            transparent 60%,
+            color-mix(in srgb, var(--away-c) 22%, transparent) 100%);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
+        transform: translate(-50%, -160%);
+    }
+    .compactBarOn { transform: translate(-50%, 0); }
+    .compactInner { height: 48px; padding: 0 28px; gap: 18px; max-width: none; }
+}
+
+/* Acceso directo al torneo, justo debajo del titulo de la tabla. */
+.standingsTournamentLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    margin: -2px 0 14px;
+    padding: 6px 12px 6px 8px;
+    border: 1px solid var(--stroke);
+    border-radius: 999px;
+    background: var(--panel-solid);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.standingsTournamentLink > span:nth-of-type(1) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.standingsTournamentLink:hover { border-color: var(--accent); }
+.standingsTournamentLink:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.standingsTournamentLogo { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; }
+.standingsTournamentHint { color: var(--accent); font-weight: 700; white-space: nowrap; }
+
+/* Vistas rapidas de la tabla de jugadores (Resumen, Anotacion, Disciplina...). */
+.playerViewTabs {
+    display: flex;
+    gap: 6px;
+    margin: 4px 0 12px;
+    padding-bottom: 2px;
+    overflow-x: auto;
+    min-width: 0;
+    scrollbar-width: none;
+}
+.playerViewTabs::-webkit-scrollbar { display: none; }
+
+.playerViewTab {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    border: 1px solid var(--stroke);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.playerViewTab:hover { color: var(--text); border-color: var(--stroke-bright, var(--stroke)); }
+.playerViewTab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.playerViewTabActive,
+.playerViewTabActive:hover {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+}
+
+/* Tema claro: la cabecera de equipo de la lista de jugadores tenia fondo oscuro
+   fijo y texto oscuro, y el nombre del club no se leia. */
+:global([data-theme="light"]) .pGroupHeader {
+    background: rgba(255, 255, 255, 0.94);
+}
+
+/* --- Tabla de jugadores (desde 641px): una sola superficie, sin scroll propio ---
+   Antes la tabla vivia dentro de una caja de 70vh con su propio scroll: la
+   cabecera pegada tapaba la fila de arriba, la columna "Equipo" gastaba el
+   ancho en nombres que se partian en dos lineas y las metricas de la derecha
+   se cortaban. Ahora el club se marca con un punto de su color, el nombre del
+   club va en la segunda linea del jugador, y la pagina scrollea normal. */
+.playerStatsTeamDot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+}
+.playerStatsTeamDotHome { background: var(--home-tint, #2563eb); }
+.playerStatsTeamDotAway { background: var(--away-tint, #dc2626); }
+
+@media (min-width: 641px) {
+    .playerStatsTableWrapEnhanced {
+        max-height: none;
+        overflow-y: visible;
+        border-radius: 14px;
+        background: var(--panel-solid);
+    }
+
+    .playerStatsTableEnhanced { min-width: 0; }
+
+    .playerStatsTableEnhanced thead th {
+        position: static;
+        padding: 12px 16px;
+        background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border-bottom: 1px solid var(--stroke);
+    }
+    .playerStatsTableEnhanced thead th.playerStatsColPlayer { background: transparent; }
+
+    .playerStatsTableEnhanced tbody td {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--stroke);
+    }
+    .playerStatsTableEnhanced tbody tr:hover td { background: rgba(var(--color-accent-rgb), 0.05); }
+
+    .playerStatsColPlayer {
+        position: static;
+        min-width: 0;
+        width: 100%;
+    }
+    .playerStatsColMetric { min-width: 72px; width: 1%; }
+
+    .playerStatsPrimaryEnhanced { flex-wrap: nowrap; font-size: 15px; }
+    .playerStatsSecondaryEnhanced { margin-left: 18px; font-size: 12.5px; opacity: 1; }
+
+    .playerStatsRowZebra td { background: transparent; }
+}
+
+.playerStatsShowBlank {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
+    border: 0;
+    border-top: 1px solid var(--stroke);
+    background: transparent;
+    color: var(--accent);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+}
+.playerStatsShowBlank:hover { background: rgba(var(--color-accent-rgb), 0.05); }
+.playerStatsShowBlank:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }

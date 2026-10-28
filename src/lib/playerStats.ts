@@ -306,6 +306,7 @@ export function buildPlayerStatsTableData(args: {
     setMetric(row, 'points', player.points, 'Puntos');
     setMetric(row, 'tries', player.tries, 'Tries');
     setMetric(row, 'tackles', player.tackles, 'Tackles');
+    if (player.conversions > 0) setMetric(row, 'conversionsMade', player.conversions, 'Conversiones');
     // Solo si hubo. `setMetric` acepta el 0, asi que sin esta guarda una
     // planilla de rugby estrenaba columnas "Goles" y "Verdes" siempre vacias.
     if (player.goals > 0) setMetric(row, 'goals', player.goals, 'Goles');

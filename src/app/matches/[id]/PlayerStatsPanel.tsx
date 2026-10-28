@@ -103,6 +103,8 @@ type Props = {
   awayName: string;
   /** Lo que va pegado al titulo: hoy, el boton del puntaje de la gente. */
   titleAction?: React.ReactNode;
+  /** Variables de color de cada club (`--home-tint` / `--away-tint`). */
+  style?: React.CSSProperties;
   /**
    * Abrir la ficha del jugador dentro del partido. El nombre dejo de ser un
    * enlace al perfil: cliquearlo contesta primero "que hizo hoy", y el perfil
@@ -112,13 +114,23 @@ type Props = {
   onOpenPlayer: (identity: PlayerSheetIdentity) => void;
 };
 
-export default function PlayerStatsPanel({ tableData, localPlayerRows, playerStats, homeName, awayName, titleAction, onOpenPlayer }: Props) {
+export default function PlayerStatsPanel({ tableData, localPlayerRows, playerStats, homeName, awayName, titleAction, style, onOpenPlayer }: Props) {
   const availableMetricIds = tableData.metricIds;
 
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(() => {
     if (availableMetricIds.length === 0) return [];
     const defaults = chooseDefaultPlayerMetrics(availableMetricIds);
     const next: string[] = [];
+    // Primero lo que tiene datos: una columna en cero para todos no se ofrece
+    // de entrada (los tackles de rugby no se registran con eventos).
+    // "Partidos jugados" vale 1 para todos en una planilla de un partido.
+    const withData = (id: string) => id !== 'matchesPlayed' && tableData.rows.some((row) => metricNumber(row, id) !== 0);
+    defaults.filter(withData).forEach((id) => {
+      if (!next.includes(id) && next.length < 3) next.push(id);
+    });
+    availableMetricIds.filter(withData).forEach((id) => {
+      if (!next.includes(id) && next.length < 3) next.push(id);
+    });
     defaults.forEach((id) => {
       if (!next.includes(id) && next.length < 3) next.push(id);
     });
@@ -128,13 +140,14 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
     return next.slice(0, Math.min(3, availableMetricIds.length));
   });
 
-  const [metricOrders, setMetricOrders] = useState<PlayerMetricSortDirection[]>(['desc', 'desc', 'desc']);
+  const [metricOrders, setMetricOrders] = useState<PlayerMetricSortDirection[]>(['desc', 'desc', 'desc', 'desc']);
   const [activeSortSlot, setActiveSortSlot] = useState(0);
   const [showConfig, setShowConfig] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTeam, setFilterTeam] = useState<'all' | 'home' | 'away'>('all');
   const [filterPosition, setFilterPosition] = useState('all');
   const [topN, setTopN] = useState<'all' | 5 | 10 | 20>('all');
+  const [showBlankRows, setShowBlankRows] = useState(false);
 
   // Memoizadas porque abajo son dependencia de otros useMemo: construidas
   // inline cambiaban de identidad en cada render y ninguna memo pegaba.
@@ -175,6 +188,14 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
     if (topN !== 'all') rows = rows.slice(0, topN);
     return rows;
   }, [sortedRows, searchQuery, filterTeam, filterPosition, topN]);
+
+  // La tabla muestra primero a los que tienen marca en alguna columna; los
+  // demas quedan detras de un boton (igual que "sin registro" en el celular).
+  // Con una busqueda activa se muestra todo: buscar a alguien sin marca es
+  // justo el caso.
+  const foldBlank = !showBlankRows && searchQuery.trim() === '';
+  const tableRows = foldBlank ? filteredRows.filter((row) => hasAnyRecord(row, displayedMetrics)) : filteredRows;
+  const hiddenBlankCount = filteredRows.length - tableRows.length;
 
   // La metrica que manda es la que ordena. No hay una metrica "de gol"
   // privilegiada: en hockey manda Goles, en rugby Puntos y en un torneo que
@@ -284,7 +305,40 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
     });
   };
 
-  const slotLabels = ['Métrica principal', 'Métrica secundaria', 'Métrica terciaria'];
+  const slotLabels = ['Métrica principal', 'Métrica secundaria', 'Métrica terciaria', 'Métrica cuaternaria'];
+
+  /**
+   * Vistas rápidas: lo que se mira en un partido de rugby, a un toque. Cada una
+   * es solo un juego de columnas sobre las métricas que el partido SÍ trae; si
+   * una vista queda con menos columnas que su mínimo no se ofrece.
+   */
+  const quickViews = useMemo(() => {
+    // Una columna en cero para todos no informa nada (los tackles de rugby no
+    // se registran con eventos): no entra en ninguna vista.
+    const have = new Set(availableMetricIds.filter((id) => id !== 'matchesPlayed' && tableData.rows.some((row) => metricNumber(row, id) !== 0)));
+    const defs: Array<{ id: string; label: string; ids: string[]; min: number }> = [
+      { id: 'resumen', label: 'Resumen', ids: ['points', 'tries', 'tackles', 'yellowCards'], min: 2 },
+      { id: 'anotacion', label: 'Anotación', ids: ['points', 'tries', 'conversionsMade', 'penalties', 'dropGoals'], min: 3 },
+      { id: 'defensa', label: 'Defensa', ids: ['tackles', 'events'], min: 2 },
+      { id: 'disciplina', label: 'Disciplina', ids: ['yellowCards', 'redCards'], min: 1 },
+    ];
+    const seen = new Set<string>();
+    return defs
+      .map((d) => ({ ...d, ids: d.ids.filter((id) => have.has(id)).slice(0, 4) }))
+      .filter((d) => d.ids.length >= d.min)
+      .filter((d) => {
+        const key = d.ids.join('|');
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }, [availableMetricIds, tableData.rows]);
+
+  const applyQuickView = (ids: string[]) => {
+    setSelectedMetrics(ids);
+    setMetricOrders(['desc', 'desc', 'desc', 'desc']);
+    setActiveSortSlot(0);
+  };
 
   if (tableData.rows.length === 0) {
     if (localPlayerRows.length > 0) {
@@ -402,7 +456,7 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
   }
 
   return (
-    <div className={styles.playersStatsView}>
+    <div className={styles.playersStatsView} style={style}>
       <div className={styles.panelTitle}>
         <span className={styles.playerStatsTitleGroup}>
           Estadísticas de Jugadores
@@ -410,6 +464,26 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
         </span>
       </div>
       <p className={styles.playerStatsSubtitle}>Compara y ordena jugadores por métricas clave</p>
+
+      {quickViews.length > 1 && (
+        <div className={styles.playerViewTabs} role="tablist" aria-label="Vistas de estadísticas por jugador">
+          {quickViews.map((view) => {
+            const active = view.ids.length === displayedMetrics.length && view.ids.every((id, i) => id === displayedMetrics[i]);
+            return (
+              <button
+                key={view.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                className={`${styles.playerViewTab} ${active ? styles.playerViewTabActive : ''}`}
+                onClick={() => applyQuickView(view.ids)}
+              >
+                {view.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Barra de acciones */}
       <div className={styles.playerStatsHeaderBar}>
@@ -462,7 +536,7 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
               className={styles.playerMetricsResetBtn}
               onClick={() => {
                 setSelectedMetrics(chooseDefaultPlayerMetrics(availableMetricIds));
-                setMetricOrders(['desc', 'desc', 'desc']);
+                setMetricOrders(['desc', 'desc', 'desc', 'desc']);
                 setActiveSortSlot(0);
                 setSearchQuery('');
                 setFilterTeam('all');
@@ -589,7 +663,6 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
           <thead>
             <tr>
               <th className={styles.playerStatsColPlayer}>Jugador</th>
-              <th className={styles.playerStatsColTeam}>Equipo</th>
               {displayedMetrics.map((metricId, metricIndex) => {
                 const metricMeta = getPlayerMetricMeta(metricId, tableData.metricLabels[metricId]);
                 const isActiveSort = activeSortSlot === metricIndex;
@@ -617,11 +690,16 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
             </tr>
           </thead>
           <tbody>
-            {filteredRows.map((player, rowIndex) => (
+            {tableRows.map((player, rowIndex) => (
               <tr key={player.key} className={rowIndex % 2 === 1 ? styles.playerStatsRowZebra : undefined}>
                 <td className={styles.playerStatsColPlayer}>
                   <div className={styles.playerStatsNameWrapEnhanced}>
                     <div className={styles.playerStatsPrimaryEnhanced}>
+                      <i
+                        className={`${styles.playerStatsTeamDot} ${player.team === 'away' ? styles.playerStatsTeamDotAway : styles.playerStatsTeamDotHome}`}
+                        title={player.teamName}
+                        aria-hidden="true"
+                      />
                       <button
                         type="button"
                         className={`${styles.playerStatsNameLink} ${styles.pmNameButton}`}
@@ -634,23 +712,11 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
                       {player.isCaptain && <span className={styles.playerStatsBadgeCaptain}>C</span>}
                     </div>
                     <div className={styles.playerStatsSecondaryEnhanced}>
-                      {player.position ? player.position : 'Sin posición'}
+                      {player.teamName}
+                      {player.position ? ` · ${player.position}` : ''}
                       {player.number != null && ` · #${player.number}`}
                     </div>
                   </div>
-                </td>
-                <td className={styles.playerStatsColTeam}>
-                  <span
-                    className={`${styles.playerStatsTeamTagEnhanced} ${
-                      player.team === 'home'
-                        ? styles.teamTagHome
-                        : player.team === 'away'
-                        ? styles.teamTagAway
-                        : ''
-                    }`}
-                  >
-                    {player.teamName}
-                  </span>
                 </td>
                 {displayedMetrics.map((metricId, metricIndex) => {
                   const value = formatPlayerMetricValue(metricId, player.metrics[metricId], tableData.metricLabels[metricId]);
@@ -680,6 +746,11 @@ export default function PlayerStatsPanel({ tableData, localPlayerRows, playerSta
             ))}
           </tbody>
         </table>
+        {hiddenBlankCount > 0 && (
+          <button type="button" className={styles.playerStatsShowBlank} onClick={() => setShowBlankRows(true)}>
+            Ver {hiddenBlankCount} jugadores sin registro
+          </button>
+        )}
       </div>
 
       {/* Vista mobile: lista densa agrupada por equipo */}
