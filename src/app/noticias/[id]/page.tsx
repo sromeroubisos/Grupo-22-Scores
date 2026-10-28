@@ -48,6 +48,7 @@ interface NewsRow {
     summary: string | null;
     content: string | null;
     image_url: string | null;
+    image_credit?: string | null;
     published_at: string | null;
     updated_at?: string | null;
     status: string;
@@ -439,14 +440,19 @@ export default async function NewsPage({ params }: NewsPageProps) {
                         </header>
 
                         {image && (
-                            <div className={styles.imageWrap}>
-                                {/* eslint-disable-next-line @next/next/no-img-element -- imagen remota de la nota; está sobre el pliegue. */}
-                                <img
-                                    src={image}
-                                    alt={news.title}
-                                    className={styles.heroImage}
-                                />
-                            </div>
+                            <figure className={styles.imageFigure}>
+                                <div className={styles.imageWrap}>
+                                    {/* eslint-disable-next-line @next/next/no-img-element -- imagen remota de la nota; está sobre el pliegue. */}
+                                    <img
+                                        src={image}
+                                        alt={news.title}
+                                        className={styles.heroImage}
+                                    />
+                                </div>
+                                {news.image_credit?.trim() && (
+                                    <figcaption className={styles.imageCredit}>Foto: {news.image_credit.trim()}</figcaption>
+                                )}
+                            </figure>
                         )}
                     </article>
 

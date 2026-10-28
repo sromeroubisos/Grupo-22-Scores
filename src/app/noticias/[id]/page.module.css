@@ -224,6 +224,17 @@
     background: var(--raised);
 }
 
+.imageFigure {
+    margin: 0;
+}
+
+.imageCredit {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--ink-muted);
+}
+
 .heroImage {
     display: block;
     width: 100%;
@@ -888,10 +899,17 @@
     }
 
     /* La foto va de borde a borde y arranca arriba de todo. */
-    .imageWrap {
+    .imageFigure {
         order: 1;
         width: calc(100% + 32px);
         margin-inline: -16px;
+    }
+
+    .imageCredit {
+        padding-inline: 16px;
+    }
+
+    .imageWrap {
         border: 0;
         border-radius: 0;
     }
