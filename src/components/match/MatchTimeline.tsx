@@ -716,7 +716,7 @@ function EventCardBase({
   const teamLabel = evt.team === 'home' ? homeName : evt.team === 'away' ? awayName : '';
 
   return (
-    <div className={styles.eventCard}>
+    <div className={`${styles.eventCard} ${isSubstitution ? styles.eventCardSub : ''}`}>
       <div className={styles.eventCardAccent} style={{ background: color }} />
 
       {isSubstitution ? (
@@ -761,6 +761,7 @@ function EventCardBase({
           {detail && <div className={styles.eventDetailText}>{detail}</div>}
           {isScoreEvent && score && (
             <div className={styles.eventScoreBadge}>
+              <span className={styles.eventPoints}>+{score.points}</span>
               Marcador {score.home}–{score.away}
             </div>
           )}

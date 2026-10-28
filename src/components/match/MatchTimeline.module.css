@@ -256,6 +256,29 @@
   text-decoration: underline;
 }
 
+/* El nombre que abre la ficha del jugador. Es un botón y no un enlace porque
+   no navega a ningún lado: despliega lo que hizo en ESTE partido. Se ve igual
+   que el enlace que reemplaza para que la tarjeta no cambie de aspecto. */
+.eventPlayerButton {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+.eventPlayerButton:hover {
+  text-decoration: underline;
+}
+
+.eventPlayerButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .eventTypeRow {
   display: inline-flex;
   align-items: center;
@@ -409,4 +432,68 @@
   .timelineTeamHeader::before {
     display: none;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Escritorio: la linea de tiempo se lee de un vistazo                */
+/*  Mas grande, el cambio dice quien entra y quien sale, y la jugada   */
+/*  que suma puntos lo muestra. El telefono queda como estaba.         */
+/* ------------------------------------------------------------------ */
+.eventPoints { display: none; }
+
+@media (min-width: 769px) {
+  .timelineBody { max-width: 860px; }
+
+  .minuteGroup { grid-template-columns: 1fr 64px 1fr; gap: 16px; padding: 10px 0; }
+
+  .minuteBadge {
+    width: 52px;
+    height: 52px;
+    font-size: 15px;
+    margin-top: 0;
+  }
+  /* "SEGUNDO TIEMPO" a 7px no se leia y se cortaba: el minuto alcanza. */
+  .minuteBadge small { display: none; }
+
+  .eventCard {
+    max-width: 360px;
+    padding: 12px 16px;
+    border-radius: 12px;
+  }
+
+  .eventPlayerName { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .eventTypeRow { font-size: 13.5px; font-weight: 600; gap: 6px; }
+  .eventIconSvg { width: 16px; height: 16px; }
+  .eventDetailText { font-size: 13px; opacity: 0.9; line-height: 1.4; margin-top: 2px; }
+
+  .eventScoreBadge {
+    margin-top: 8px;
+    padding: 4px 10px;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .eventPoints {
+    display: inline-block;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 800;
+  }
+
+  /* Cambio: primero la etiqueta, despues quien entra y quien sale, los dos
+     del mismo tamano. Antes "Entra" era una linea chica pegada al final. */
+  .eventCardSub { display: flex; flex-direction: column; gap: 3px; }
+  .eventCardSub .eventTypeRow { order: -1; margin-bottom: 2px; }
+  .eventCardSub .eventSubDetail {
+    order: 0;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    opacity: 1;
+    color: var(--text);
+  }
+  .eventCardSub .eventPlayerName { order: 1; margin: 0; font-size: 15px; font-weight: 600; }
+  .subIn { font-weight: 700; }
+  .subOut { opacity: 1; }
 }

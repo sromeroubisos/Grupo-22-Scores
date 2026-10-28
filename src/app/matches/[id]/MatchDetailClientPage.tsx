@@ -14,6 +14,7 @@ import styles from './page.module.css';
 import { TopStatRow, TopStatSplit } from './TopStatsRows';
 import { FALLBACK_BANNER, useBannerColor } from '@/app/tournaments/[id]/useBannerColor';
 import EventAnnouncement from './EventAnnouncement';
+import LineupPitch from './LineupPitch';
 import { FAVORITES_ENABLED } from '@/lib/favorites/config';
 import {
     buildLocalPlayerStatsRows,
@@ -1992,6 +1993,25 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
         ...(awayTint !== FALLBACK_BANNER ? { '--away-tint': awayTint } : null),
     } as React.CSSProperties;
 
+    // Alineacion probable: el XV mas usado de cada club en sus ultimos partidos
+    // con planilla. Se pide solo al abrir Alineaciones, y se muestra solo si el
+    // partido todavia no tiene la oficial.
+    type ProbableSide = { players: Array<{ name: string; number: number; appearances: number }>; basedOn: number };
+    const [probable, setProbable] = useState<{ id: string; home: ProbableSide; away: ProbableSide } | null>(null);
+    const probableMatchId = tintMatch?.id ? String(tintMatch.id) : null;
+    useEffect(() => {
+        if (activeTab !== 'lineups' || !probableMatchId || probable?.id === probableMatchId) return;
+        let cancelled = false;
+        fetch(`/api/matches/${encodeURIComponent(probableMatchId)}/probable-lineup`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((body) => {
+                if (cancelled || !body) return;
+                setProbable({ id: probableMatchId, home: body.home, away: body.away });
+            })
+            .catch(() => { /* sin probable: la pestana queda como estaba */ });
+        return () => { cancelled = true; };
+    }, [activeTab, probableMatchId, probable?.id]);
+
     // Barra compacta: cuando el marcador sale de la pantalla por arriba, el
     // resultado se queda pegado debajo del encabezado del sitio. El margen del
     // observador es la altura real de ese encabezado, medida, no supuesta.
@@ -3229,6 +3249,12 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                             />
                                         </div>
 
+                                        <LineupPitch
+                                            label={lineupSectionLabel}
+                                            home={{ name: matchData.home.name, color: homeTint !== FALLBACK_BANNER ? homeTint : '#2563eb', players: homeLineupGroups.starters }}
+                                            away={{ name: matchData.away.name, color: awayTint !== FALLBACK_BANNER ? awayTint : '#dc2626', players: awayLineupGroups.starters }}
+                                        />
+
                                         <div className={styles.lineupTeam}>
                                             <div className={styles.panelTitle}>{matchData.home.name}</div>
                                             <div className={styles.lineupSection}>
@@ -3481,6 +3507,14 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     señal que enciende la formación oficial
                                     (`hasAnyLineups`), así que las dos no conviven
                                     nunca. */}
+                                {!hasAnyLineups && probable && probable.id === String(matchData.id) && (
+                                    <LineupPitch
+                                        label={`Alineación más usada · últimos ${Math.max(probable.home.basedOn, probable.away.basedOn)} partidos`}
+                                        home={{ name: matchData.home.name, color: homeTint !== FALLBACK_BANNER ? homeTint : '#2563eb', players: probable.home.players }}
+                                        away={{ name: matchData.away.name, color: awayTint !== FALLBACK_BANNER ? awayTint : '#dc2626', players: probable.away.players }}
+                                    />
+                                )}
+
                                 {!hasAnyLineups && (
                                     <MyLineupBuilder
                                         sport={String(matchData.sportId || '')}
@@ -3547,7 +3581,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         )}
 
                         {activeTab === 'stats' && !isEspnSoccerSource && !isFihSource && !isUltimateSevensSource && !isWorldRugbySource && (
-                            <div className={styles.publicStatsPanel}>
+                            <div className={styles.publicStatsPanel} style={tintStyle}>
                                 <div className={styles.panelTitle}>Estadísticas completas</div>
                                 {publicCompleteStatTabs.length === 0 ? (
                                     <p className={styles.placeholderText}>No hay métricas para mostrar con los eventos actuales.</p>
@@ -3566,6 +3600,16 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                                     {tab.label}
                                                 </button>
                                             ))}
+                                        </div>
+                                        <div className={styles.statsTeams} aria-hidden="true">
+                                            <span className={styles.statsTeam}>
+                                                <i className={styles.statsTeamDot} style={{ background: homeTint !== FALLBACK_BANNER ? homeTint : '#2563eb' }} />
+                                                {matchData.home.name}
+                                            </span>
+                                            <span className={`${styles.statsTeam} ${styles.statsTeamAway}`}>
+                                                {matchData.away.name}
+                                                <i className={styles.statsTeamDot} style={{ background: awayTint !== FALLBACK_BANNER ? awayTint : '#dc2626' }} />
+                                            </span>
                                         </div>
                                         <div className={styles.publicStatsSectionGrid}>
                                             {(activePublicStatTabContent?.sections ?? []).map((section) => (
@@ -3843,6 +3887,19 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                                     return (
                                         <>
                                             <div className={styles.panelTitle} style={matchData.draw?.length > 0 ? { marginTop: '32px' } : {}}>Tabla de Posiciones</div>
+                                            {matchData.tournament && buildTournamentHref(matchData.tournamentId, matchData.tournamentSeason, matchData.tournament) && (
+                                                <Link
+                                                    href={buildTournamentHref(matchData.tournamentId, matchData.tournamentSeason, matchData.tournament) as string}
+                                                    className={styles.standingsTournamentLink}
+                                                >
+                                                    {matchData.tournamentLogo
+                                                        ? <img src={matchData.tournamentLogo} alt="" loading="lazy" className={styles.standingsTournamentLogo} />
+                                                        : null}
+                                                    <span>{matchData.tournament}</span>
+                                                    <span aria-hidden="true">›</span>
+                                                    <span className={styles.standingsTournamentHint}>Ver torneo</span>
+                                                </Link>
+                                            )}
                                             {groups.map((group, gi) => (
                                                 <div key={`${group.name || 'all'}-${gi}`} style={gi > 0 ? { marginTop: 24 } : {}}>
                                                     {group.name && (
@@ -3907,6 +3964,7 @@ export default function MatchDetailClientPage({ id }: { id: string }) {
                         {activeTab === 'players' && (
                             <>
                                 <PlayerStatsPanel
+                                    style={tintStyle}
                                     tableData={playerStatsTable}
                                     localPlayerRows={state.localPlayerRows}
                                     playerStats={state.playerStats}

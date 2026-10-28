@@ -70,6 +70,8 @@ export type LocalPlayerStatsRow = {
   matchesPlayed: number;
   points: number;
   tries: number;
+  /** Rugby: conversiones acertadas por el jugador. */
+  conversions: number;
   tackles: number;
   /** Hockey / futbol: goles convertidos, incluidos los de penal. */
   goals: number;
@@ -323,6 +325,7 @@ export function buildLocalPlayerStatsRows(args: {
         matchesPlayed: 1,
         points: 0,
         tries: 0,
+        conversions: 0,
         tackles: 0,
         goals: 0,
         penaltyGoals: 0,
@@ -381,6 +384,7 @@ export function buildLocalPlayerStatsRows(args: {
     row.events += 1;
     row.points += getEventPoints(event.type, event.description, definitionMap);
     if (event.type === 'try') row.tries += 1;
+    if (event.type === 'conversion') row.conversions += 1;
     if (event.type === 'tackle') row.tackles += 1;
     // El gol de penal es un gol: entra en las dos cuentas, igual que en las
     // estadisticas de equipo (`penaltyGoals` es un subconjunto de los goles).
