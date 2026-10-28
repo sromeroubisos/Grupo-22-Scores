@@ -1,0 +1,278 @@
+/* Escena de una jugada en vivo: la pantalla se oscurece, el escudo entra al
+   medio, la jugada cae en grande. No hay tarjeta ni caja: solo el contenido
+   sobre el fondo oscurecido. Los colores son fijos (blanco sobre oscuro)
+   porque el fondo SIEMPRE es oscuro, en tema claro tambien. */
+
+.region {
+    position: fixed;
+    inset: 0;
+    /* Tapa hasta el encabezado del sitio (z-fixed) y queda debajo de los
+       dialogos (1000). El contenedor no captura clics: solo la escena. */
+    z-index: calc(var(--z-fixed, 300) + 5);
+    pointer-events: none;
+}
+
+.stage {
+    --ev-color: #22c55e;
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 24px;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: #fff;
+    cursor: pointer;
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.scrim {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 80% 55% at 50% 46%, color-mix(in srgb, var(--ev-color) 26%, transparent), transparent 70%),
+        rgba(4, 6, 9, 0.6);
+    -webkit-backdrop-filter: blur(9px) saturate(120%);
+    backdrop-filter: blur(9px) saturate(120%);
+    animation: ev-scrim-in 280ms ease-out both;
+}
+
+.content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: 100%;
+    text-align: center;
+    /* Con el fondo mas claro el texto necesita su propia sombra para leerse
+       sobre cualquier pantalla (marcador claro, tabla, lo que haya detras). */
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 4px 32px rgba(0, 0, 0, 0.55);
+}
+
+/* ---- escudo ---- */
+.crestWrap {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: clamp(92px, 28vw, 132px);
+    height: clamp(92px, 28vw, 132px);
+}
+
+.crest {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    animation: ev-crest-in 560ms cubic-bezier(0.34, 1.45, 0.64, 1) 40ms both;
+}
+
+.crest img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 28px rgba(0, 0, 0, 0.5));
+}
+
+.initials {
+    display: grid;
+    place-items: center;
+    width: 86%;
+    height: 86%;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--ev-color) 30%, transparent);
+    font-size: 34px;
+    font-weight: 800;
+}
+
+/* Onda de color que se abre detras del escudo y se apaga. */
+.ring {
+    position: absolute;
+    inset: 4%;
+    border-radius: 50%;
+    border: 3px solid var(--ev-color);
+    opacity: 0;
+    animation: ev-ring 1000ms cubic-bezier(0.16, 1, 0.3, 1) 120ms both;
+}
+
+/* ---- la jugada ---- */
+.headline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+}
+
+.title {
+    font-size: clamp(56px, 19vw, 104px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    color: var(--ev-color);
+    animation: ev-title-in 520ms cubic-bezier(0.16, 1, 0.3, 1) 110ms both;
+}
+
+/* Los titulos largos (AMARILLA, CONVERSIÓN) bajan de tamano para entrar
+   en un telefono de 360px sin cortarse. */
+.title[data-len="l"] { font-size: clamp(44px, 14.5vw, 84px); }
+.title[data-len="xl"] { font-size: clamp(34px, 10.5vw, 64px); }
+
+.points {
+    font-size: clamp(34px, 11vw, 56px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+    animation: ev-points-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1) 240ms both;
+}
+
+/* Una tarjeta de arbitro de verdad: el rectangulo, no un icono. */
+.cardGlyph {
+    width: clamp(26px, 8vw, 40px);
+    height: clamp(36px, 11vw, 54px);
+    border-radius: 6px;
+    background: var(--ev-color);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--ev-color) 55%, transparent);
+    transform: rotate(-8deg);
+    animation: ev-card-in 520ms cubic-bezier(0.34, 1.56, 0.64, 1) 80ms both;
+}
+
+/* ---- minuto, jugador, club ---- */
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px 10px;
+    margin-top: 2px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.78);
+    font-variant-numeric: tabular-nums;
+    animation: ev-meta-in 420ms cubic-bezier(0.16, 1, 0.3, 1) 300ms both;
+}
+
+.meta > span + span::before {
+    content: "·";
+    margin-right: 10px;
+    opacity: 0.55;
+}
+
+/* ---- cambio ---- */
+.swap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.25;
+    animation: ev-meta-in 460ms cubic-bezier(0.16, 1, 0.3, 1) 300ms both;
+}
+
+.swap b {
+    display: inline-block;
+    min-width: 3.4em;
+    margin-right: 6px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: right;
+}
+
+.in b { color: #4ade80; }
+.out b { color: #f87171; }
+.out { color: rgba(255, 255, 255, 0.7); }
+
+/* ---- salida: el mismo camino de vuelta, mas corto ---- */
+.leaving .scrim { animation: ev-scrim-out 300ms ease-in both; }
+.leaving .content { animation: ev-content-out 300ms cubic-bezier(0.4, 0, 1, 1) both; }
+
+@keyframes ev-scrim-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ev-scrim-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes ev-content-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(1.06); } }
+
+@keyframes ev-crest-in {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: none; }
+}
+
+@keyframes ev-ring {
+    0%   { opacity: 0.9; transform: scale(0.7); }
+    100% { opacity: 0;   transform: scale(2.1); }
+}
+
+@keyframes ev-title-in {
+    from { opacity: 0; transform: scale(1.7); filter: blur(14px); }
+    to   { opacity: 1; transform: none; filter: blur(0); }
+}
+
+@keyframes ev-points-in {
+    from { opacity: 0; transform: scale(0.3) translateY(8px); }
+    to   { opacity: 1; transform: none; }
+}
+
+@keyframes ev-card-in {
+    from { opacity: 0; transform: rotate(-30deg) translateY(-24px) scale(0.6); }
+    to   { opacity: 1; transform: rotate(-8deg); }
+}
+
+@keyframes ev-meta-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* ---- Tema claro: la escena es clara ----
+   Velo blanco en vez de negro y texto oscuro. El color de la jugada se
+   oscurece un poco: el verde y el amarillo de fondo oscuro no se leen sobre
+   blanco. */
+:global([data-theme="light"]) .scrim {
+    background:
+        radial-gradient(ellipse 80% 55% at 50% 46%, color-mix(in srgb, var(--ev-color) 22%, transparent), transparent 70%),
+        rgba(255, 255, 255, 0.84);
+}
+
+:global([data-theme="light"]) .stage { color: #0f172a; }
+
+:global([data-theme="light"]) .content {
+    text-shadow: 0 2px 6px rgba(255, 255, 255, 0.7), 0 4px 32px rgba(255, 255, 255, 0.8);
+}
+
+:global([data-theme="light"]) .title {
+    color: color-mix(in srgb, var(--ev-color) 74%, #000);
+}
+
+:global([data-theme="light"]) .points { color: #0f172a; }
+
+:global([data-theme="light"]) .meta { color: rgba(15, 23, 42, 0.74); }
+
+:global([data-theme="light"]) .crest img {
+    filter: drop-shadow(0 8px 22px rgba(15, 23, 42, 0.22));
+}
+
+:global([data-theme="light"]) .in b { color: #15803d; }
+:global([data-theme="light"]) .out b { color: #b91c1c; }
+:global([data-theme="light"]) .out { color: rgba(15, 23, 42, 0.7); }
+
+/* Movimiento reducido: sin escala, giros ni ondas; solo aparece y se va. */
+@media (prefers-reduced-motion: reduce) {
+    .crest, .title, .points, .cardGlyph, .meta, .swap { animation: ev-fade 220ms linear both; }
+    .cardGlyph { transform: rotate(-8deg); }
+    .ring { display: none; }
+    .leaving .content { animation: ev-fade-out 200ms linear both; }
+    @keyframes ev-fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes ev-fade-out { from { opacity: 1; } to { opacity: 0; } }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .scrim {
+        background: rgba(4, 6, 9, 0.94);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+}
