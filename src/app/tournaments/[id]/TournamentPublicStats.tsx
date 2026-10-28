@@ -557,6 +557,18 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
         // pocos eventos cargados daria cifras parciales que contradicen al total.
         if (officialLeaders) return buildOfficialPlayerRows(officialLeaders);
         const byId = new Map<string, any>();
+        // Un jugador es su player_id: "Juan Akemeier", "Akemeier Juan" y "Juan Franco
+        // Akemeier" son la misma fila. Sin id se agrupa por nombre sin tildes, y un
+        // evento sin id se pega al id que otro evento del mismo club y nombre si trajo.
+        const nameKey = (name: string) => name.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+        const idByName = new Map<string, string>();
+        finalMatches.forEach((match) => {
+            const clubs = [match.home_club_id || match.home?.id || `home-${match.id}`, match.away_club_id || match.away?.id || `away-${match.id}`];
+            (Array.isArray(match.events) ? match.events : []).map(normalizeEvent).filter(Boolean).forEach((event) => {
+                const club = event!.team === 'home' ? clubs[0] : event!.team === 'away' ? clubs[1] : null;
+                if (club && event!.playerId && event!.playerName) idByName.set(`${club}:${nameKey(event!.playerName)}`, String(event!.playerId));
+            });
+        });
         finalMatches.forEach((match) => {
             const counted = new Set<string>();
             const homeId = match.home_club_id || match.home?.id || `home-${match.id}`;
@@ -569,14 +581,15 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             (Array.isArray(match.events) ? match.events : []).map(normalizeEvent).filter(Boolean).forEach((event) => {
                 const side = event!.team === 'home' ? sides[0] : event!.team === 'away' ? sides[1] : null;
                 if (!side || !event!.playerName) return;
-                const id = `${side.teamId}:${event!.playerName.toLowerCase()}`;
+                const resolvedPlayerId = event!.playerId ? String(event!.playerId) : idByName.get(`${side.teamId}:${nameKey(event!.playerName)}`) || null;
+                const id = resolvedPlayerId ? `${side.teamId}:id:${resolvedPlayerId}` : `${side.teamId}:${nameKey(event!.playerName)}`;
                 if (!byId.has(id)) {
                     byId.set(id, {
                         entityId: id,
                         entityName: event!.playerName,
                         entityLogo: side.teamLogo,
                         teamId: side.teamId,
-                        playerId: event!.playerId,
+                        playerId: resolvedPlayerId,
                         secondary: side.teamName,
                         matches_played: 0,
                         points: 0,
