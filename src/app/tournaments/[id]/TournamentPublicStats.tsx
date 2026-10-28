@@ -17,6 +17,7 @@ import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
 import TeamLogo from '@/components/TeamLogo';
 import TournamentTopStats, { type TarjetaDeTop } from './TournamentTopStats';
 import TournamentPlayerSheet, { type TournamentPlayerSheetSubject } from './TournamentPlayerSheet';
+import { buildOfficialPlayerRows, readOfficialLeaders } from './officialLeaders';
 
 const ExportImage = dynamic(() => import('@/components/ExportImage'), { ssr: false });
 
@@ -50,6 +51,11 @@ interface TournamentPublicStatsProps {
      * no informa, confunde.
      */
     sportId?: string | null;
+    /**
+     * `ruleset` del torneo. Si trae `official_player_leaders`, la pestaña
+     * Jugadores muestra ese ranking oficial aunque no haya eventos por partido.
+     */
+    ruleset?: unknown;
 }
 
 const MOBILE_BREAKPOINT = 640;
@@ -224,6 +230,15 @@ const perMatch = (value: unknown, played: unknown) => {
     return matchesPlayed > 0 ? n(value) / matchesPlayed : 0;
 };
 
+// Estadísticas acumuladas (tries, puntos, tackles…): las únicas que tienen un
+// "por partido" con sentido para desempatar. Los promedios, porcentajes e
+// índices ya son una tasa y el propio PJ no se promedia contra sí mismo.
+const isCountStat = (key: string) =>
+    key !== 'entity'
+    && key !== 'secondary'
+    && key !== 'matches_played'
+    && !/(_per_match|_pct|_index|_idx|percentage)$/.test(key);
+
 const percentage = (value: unknown, total: unknown) => {
     const denominator = n(total);
     return denominator > 0 ? (n(value) / denominator) * 100 : 0;
@@ -271,6 +286,8 @@ function findUnmeasuredMetrics(rows: any[]): Set<string> {
 function formatStatValue(row: any, column: StatColumn, unmeasured?: Set<string>) {
     if (unmeasured?.has(column.id)) return '—';
     const value = row[column.id];
+    // Dato que la fuente no publica (ranking oficial): no es un cero.
+    if (value === undefined || value === null) return '—';
     const numeric = n(value);
     if (column.format === 'percent') return `${fmt(numeric, Number.isInteger(numeric) ? 0 : 1)}%`;
     if (column.format === 'signed') return formatDifference(numeric, Number.isInteger(numeric) ? 0 : 1);
@@ -322,13 +339,14 @@ function useIsMobile() {
     return isMobile;
 }
 
-export default function TournamentPublicStats({ matches, topScorers, tournamentName, tournamentLogo, sportId }: TournamentPublicStatsProps) {
+export default function TournamentPublicStats({ matches, topScorers, tournamentName, tournamentLogo, sportId, ruleset }: TournamentPublicStatsProps) {
+    const officialLeaders = useMemo(() => readOfficialLeaders(ruleset), [ruleset]);
     const isMobile = useIsMobile();
     // Sin deporte declarado se asume rugby: es lo que la pestaña siempre fue.
     const esRugby = !sportId || isRugbySport(sportId);
-    const [activeSubTab, setActiveSubTab] = useState<StatsSubTab>('teams');
+    const [activeSubTab, setActiveSubTab] = useState<StatsSubTab>(esRugby ? 'players' : 'teams');
     const [teamStatsView, setTeamStatsView] = useState<TeamStatsView>('summary');
-    const [sortKey, setSortKey] = useState('points_for');
+    const [sortKey, setSortKey] = useState(esRugby ? 'points' : 'points_for');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedTeamId, setSelectedTeamId] = useState('all');
@@ -337,7 +355,6 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
     const [rowLimit, setRowLimit] = useState<number>(DEFAULT_ROW_LIMIT);
     const [sheetRow, setSheetRow] = useState<any | null>(null);
     // Estadisticas que se suman a la principal en la placa exportada.
-    const [extraStatIds, setExtraStatIds] = useState<string[]>([]);
     const [expandedTeamId, setExpandedTeamId] = useState<string | null>(null);
     const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -525,7 +542,22 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
     }, [finalMatches]);
 
     const playerRows = useMemo(() => {
+        // Con ranking oficial la tabla sale de los totales publicados: sumar los
+        // pocos eventos cargados daría cifras parciales que contradicen al total.
+        if (officialLeaders) return buildOfficialPlayerRows(officialLeaders);
         const byId = new Map<string, any>();
+        // Un jugador es su player_id: "Juan Akemeier", "Akemeier Juan" y "Juan Franco
+        // Akemeier" son la misma fila. Sin id se agrupa por nombre sin tildes, y un
+        // evento sin id se pega al id que otro evento del mismo club y nombre sí trajo.
+        const nameKey = (name: string) => name.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+        const idByName = new Map<string, string>();
+        finalMatches.forEach((match) => {
+            const clubs = [match.home_club_id || match.home?.id || `home-${match.id}`, match.away_club_id || match.away?.id || `away-${match.id}`];
+            (Array.isArray(match.events) ? match.events : []).map(normalizeEvent).filter(Boolean).forEach((event) => {
+                const club = event!.team === 'home' ? clubs[0] : event!.team === 'away' ? clubs[1] : null;
+                if (club && event!.playerId && event!.playerName) idByName.set(`${club}:${nameKey(event!.playerName)}`, String(event!.playerId));
+            });
+        });
         finalMatches.forEach((match) => {
             const counted = new Set<string>();
             const homeId = match.home_club_id || match.home?.id || `home-${match.id}`;
@@ -538,14 +570,15 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             (Array.isArray(match.events) ? match.events : []).map(normalizeEvent).filter(Boolean).forEach((event) => {
                 const side = event!.team === 'home' ? sides[0] : event!.team === 'away' ? sides[1] : null;
                 if (!side || !event!.playerName) return;
-                const id = `${side.teamId}:${event!.playerName.toLowerCase()}`;
+                const resolvedPlayerId = event!.playerId ? String(event!.playerId) : idByName.get(`${side.teamId}:${nameKey(event!.playerName)}`) || null;
+                const id = resolvedPlayerId ? `${side.teamId}:id:${resolvedPlayerId}` : `${side.teamId}:${nameKey(event!.playerName)}`;
                 if (!byId.has(id)) {
                     byId.set(id, {
                         entityId: id,
                         entityName: event!.playerName,
                         entityLogo: side.teamLogo,
                         teamId: side.teamId,
-                        playerId: event!.playerId,
+                        playerId: resolvedPlayerId,
                         secondary: side.teamName,
                         matches_played: 0,
                         points: 0,
@@ -627,7 +660,7 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             });
         });
         return Array.from(byId.values());
-    }, [finalMatches]);
+    }, [finalMatches, officialLeaders]);
 
     const teamColumns = esRugby ? TEAM_COLUMNS[teamStatsView] : GENERIC_TEAM_COLUMNS;
     const playerColumns = PLAYER_COLUMNS;
@@ -692,7 +725,13 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             if (typeof left === 'string' || typeof right === 'string') {
                 return String(left ?? '').localeCompare(String(right ?? ''), 'es') * modifier;
             }
-            return (n(left) - n(right)) * modifier;
+            const diff = (n(left) - n(right)) * modifier;
+            if (diff !== 0 || !isCountStat(sortKey)) return diff;
+            // Empate en el total: gana el mejor promedio por partido de ESA
+            // estadística (4 tries en 3 PJ le gana a 4 tries en 5 PJ).
+            const perGame = (perMatch(b[sortKey], b.matches_played) - perMatch(a[sortKey], a.matches_played)) * modifier * -1;
+            if (perGame !== 0) return perGame;
+            return String(a.entityName ?? '').localeCompare(String(b.entityName ?? ''), 'es');
         });
     }, [filteredRows, sortKey, sortDirection]);
 
@@ -770,11 +809,10 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
         () => exportColumns.filter((column) => column.id !== 'entity' && column.id !== 'secondary' && column.id !== exportMainKey && !unmeasuredMetrics.has(column.id)),
         [exportColumns, exportMainKey, unmeasuredMetrics],
     );
-    const toggleExtraStat = (id: string) => {
-        setExtraStatIds((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
-    };
 
-    const ladderExportData = useMemo<StandingsData>(() => {
+    // Las estadisticas extra se eligen dentro del modal de exportar (ExportImage),
+    // que vuelve a pedir la placa con los ids marcados.
+    const buildLadderExport = React.useCallback((extraStatIds: string[]): StandingsData => {
         const isTeams = activeSubTab === 'teams';
         const columns = exportColumns;
         const fallbackKey = isTeams ? TEAM_DEFAULT_SORT[teamStatsView].key : 'points';
@@ -833,9 +871,15 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             },
             statColumns: multiColumns?.map((column) => ({ label: column.label, active: column.id === mainColumn?.id })),
         };
-    }, [activeSubTab, displayRows, exportColumns, exportMainKey, extraStatIds, extraStatOptions, sortKey, teamStatsView, tournamentLogo, tournamentName, unmeasuredMetrics]);
+    }, [activeSubTab, displayRows, exportColumns, exportMainKey, extraStatOptions, teamStatsView, tournamentLogo, tournamentName, unmeasuredMetrics]);
+    const ladderExportData = useMemo(() => buildLadderExport([]), [buildLadderExport]);
+    const exportStatOptions = useMemo(
+        () => extraStatOptions.map((column) => ({ id: column.id, label: column.label, title: column.title })),
+        [extraStatOptions],
+    );
     const hasEvents = finalMatches.some((m) => Array.isArray(m.events) && m.events.length > 0);
     const showTopScorersFallback = !hasEvents && (topScorers?.length || 0) > 0;
+    const showOfficialCaption = Boolean(officialLeaders) && activeSubTab === 'players';
     const activeSortColumn = currentColumns.find((column) => column.id === sortKey);
 
     const gridTemplate = currentColumns.map((c) => {
@@ -1038,31 +1082,13 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                                 template="standings"
                                 filename={`estadisticas-${activeSubTab === 'teams' ? 'equipos' : 'jugadores'}-${tournamentName || 'torneo'}`}
                                 data={ladderExportData}
+                                statOptions={exportStatOptions}
+                                buildData={buildLadderExport}
                             />
                         )}
                     </div>
                 )}
             </div>
-
-            {!showTopScorersFallback && hasStats && displayRows.length > 0 && extraStatOptions.length > 0 && (
-                <div className={styles.statsModeBar} role="group" aria-label="Estadísticas a incluir en la imagen exportada">
-                    <span className={styles.statsSubtitle}>
-                        Exportar: {(exportColumns.find((column) => column.id === exportMainKey)?.label) || 'estadística'} (subrayada) +
-                    </span>
-                    {extraStatOptions.map((column) => (
-                        <button
-                            key={column.id}
-                            type="button"
-                            className={`${styles.statsModeButton} ${extraStatIds.includes(column.id) ? styles.statsModeButtonActive : ''}`}
-                            onClick={() => toggleExtraStat(column.id)}
-                            aria-pressed={extraStatIds.includes(column.id)}
-                            title={column.title}
-                        >
-                            {column.label}
-                        </button>
-                    ))}
-                </div>
-            )}
 
             {!showTopScorersFallback && esRugby && activeSubTab === 'teams' && (
                 <div className={styles.statsModeBar} aria-label="Vista de estadísticas por equipo">
@@ -1151,6 +1177,13 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                         ))}
                     </select>
                 </div>
+            )}
+
+            {showOfficialCaption && officialLeaders && (
+                <p className={styles.statsCompactCaption}>
+                    Ranking oficial{officialLeaders.source ? ` · ${officialLeaders.source}` : ''}
+                    {officialLeaders.captured_at ? ` · al ${officialLeaders.captured_at.split('-').reverse().join('/')}` : ''}
+                </p>
             )}
 
             {showTopScorersFallback ? (
