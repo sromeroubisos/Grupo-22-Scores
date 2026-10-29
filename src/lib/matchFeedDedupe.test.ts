@@ -194,3 +194,52 @@ test('sin RugbyPass, dos filas del mismo rango siguen sobreviviendo', () => {
     ];
     assert.deepEqual(dedupeCrossSourceMatches(filas).map((m) => m.id), ['ra-1', 'ra-2']);
 });
+
+// ── El Top 14 de la URBA: el propio gana, FlashScore no lo duplica ──────────
+// Caso real 2026-10-29: Newman-Alumni salia dos veces en la portada.
+
+const UUID_TOP14 = '07e867ec-e32e-42ee-9487-c4092fce1948';
+const propioTop14 = {
+    ...partido(UUID_TOP14, '2026-10-30T23:10:00+00:00', 'Club Newman', 'Asoc. Alumni'),
+    tournamentName: 'Top 14 de la URBA',
+};
+const fsTop14Ar = {
+    ...partido('rwhkrXnA', '2026-10-30T23:10:00+00:00', 'Newman', 'Alumni'),
+    tournamentId: 'fs-d8xaqyyq',
+    tournamentName: 'ARGENTINA: Top 14',
+    countryName: 'Argentina',
+};
+const fsTop14Fr = {
+    ...partido('frAbc123', '2026-10-31T20:00:00+00:00', 'Toulouse', 'Racing 92'),
+    tournamentId: 'fs-fascyqn7',
+    tournamentName: 'FRANCE: Top 14',
+    countryName: 'France',
+};
+
+test('el Top 14 de FlashScore se apaga cuando vino el torneo propio', () => {
+    const salida = dedupeCrossSourceMatches([fsTop14Ar, propioTop14]);
+    assert.deepEqual(salida.map((m) => m.id), [UUID_TOP14]);
+});
+
+test('sin el torneo propio en la tanda, el de FlashScore sigue (no se apaga a ciegas)', () => {
+    const salida = dedupeCrossSourceMatches([fsTop14Ar]);
+    assert.equal(salida.length, 1);
+});
+
+test('el Top 14 frances no se toca', () => {
+    const salida = dedupeCrossSourceMatches([fsTop14Fr, fsTop14Ar, propioTop14]);
+    assert.deepEqual(salida.map((m) => m.id).sort(), ['frAbc123', UUID_TOP14].sort());
+});
+
+test('anda con el torneo anidado del enriquecido', () => {
+    const enriquecido = (m: typeof fsTop14Ar) => ({
+        id: m.id, dateTime: m.dateTime, homeTeam: m.homeTeam, awayTeam: m.awayTeam,
+        tournament: { id: m.tournamentId, name: m.tournamentName, country: m.countryName },
+    });
+    const propioEnr = {
+        id: UUID_TOP14, dateTime: propioTop14.dateTime, homeTeam: propioTop14.homeTeam,
+        awayTeam: propioTop14.awayTeam, tournament: { id: 'd29703d0', name: 'Top 14 de la URBA' },
+    };
+    const salida = dedupeCrossSourceMatches([enriquecido(fsTop14Ar), propioEnr]);
+    assert.deepEqual(salida.map((m) => m.id), [UUID_TOP14]);
+});
