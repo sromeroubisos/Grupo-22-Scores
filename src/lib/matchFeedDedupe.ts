@@ -17,7 +17,11 @@
 
 // Relativo y con extension: este modulo tambien corre bajo `node --test`, que
 // no resuelve el alias `@/`.
-import { isSupersededByRugbyPass, rugbyPassCompetitionIdOf } from './services/rugbyPassSupersedes.ts';
+import {
+    isSupersededByRugbyPass,
+    normalizeTournamentKey,
+    rugbyPassCompetitionIdOf,
+} from './services/rugbyPassSupersedes.ts';
 
 export function isArchiveMatchId(value: unknown): boolean {
     return String(value ?? '').toLowerCase().startsWith('ra-');
@@ -106,6 +110,57 @@ export function dropSupersededMatches<T extends FeedMatchLike>(matches: T[]): T[
     return matches.filter((m) => !isSupersededByRugbyPass(m, cubiertas));
 }
 
+/**
+ * EL TOP 14 DE LA URBA YA ES NUESTRO: FLASHSCORE NO LO DUPLICA.
+ *
+ * Medido el 2026-10-29: Newman-Alumni salia dos veces en la portada, una desde el
+ * torneo propio ("Top 14 de la URBA", club "Club Newman" / "Asoc. Alumni") y otra
+ * desde FlashScore ("ARGENTINA: Top 14", "Newman" / "Alumni"). El pliegue por
+ * identidad no los junta —los nombres de club no coinciden— y FlashScore ademas
+ * cambia el id de la ETAPA cada vez que arranca una fase (`fs-ofv2oc3e` hasta la
+ * fecha 17, `fs-d8xaqyyq` desde la siguiente), asi que apagar un id puntual
+ * quedaba corto a la semana. Por eso se reconoce por pais + nombre, no por id.
+ *
+ * Es condicional, como el reemplazo de RugbyPass: la fila de FlashScore solo se
+ * apaga si en esta tanda vino el torneo propio. Sin eso, el dia que el sync de la
+ * URBA se caiga el Top 14 desapareceria de la pantalla.
+ */
+const TORNEO_PROPIO_TOP14 = 'top 14 de la urba';
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function nombresDelTorneo(m: FeedMatchLike): string[] {
+    return [m.tournamentName, m.tournament?.name]
+        .map((v) => normalizeTournamentKey(v))
+        .filter(Boolean);
+}
+
+function esTop14PropioDeLaUrba(m: FeedMatchLike): boolean {
+    if (!UUID.test(String(m.id ?? ''))) return false;
+    return nombresDelTorneo(m).includes(TORNEO_PROPIO_TOP14);
+}
+
+/** El Top 14 argentino TAL COMO LO PUBLICA FlashScore: nunca una fila propia ni de otra fuente. */
+function esTop14ArgentinoDeFlashScore(m: FeedMatchLike): boolean {
+    const id = String(m.id ?? '');
+    if (UUID.test(id) || isArchiveMatchId(id) || isRugbyPassFeedMatchId(id)) return false;
+
+    const rotulo = [m.tournamentName, m.tournament?.name]
+        .flatMap((v) => String(v ?? '').split(':'))
+        .map(normalizeTournamentKey)
+        .filter(Boolean);
+    const pais = normalizeTournamentKey(m.countryName ?? m.tournament?.country);
+    // El pais viene adentro del nombre ("ARGENTINA: Top 14") o en su campo; con el
+    // nombre solo, el Top 14 frances caeria en la misma bolsa.
+    const esArgentina = pais === 'argentina' || rotulo.includes('argentina');
+    return esArgentina && rotulo.includes('top 14');
+}
+
+export function dropFlashScoreTop14DuplicadoPorElPropio<T extends FeedMatchLike>(matches: T[]): T[] {
+    if (!matches.some(esTop14PropioDeLaUrba)) return matches;
+    return matches.filter((m) => !esTop14ArgentinoDeFlashScore(m));
+}
+
 export function dedupeCrossSourceMatches<T extends FeedMatchLike>(matches: T[]): T[] {
     /**
      * Por identidad se guarda el MEJOR rango visto y todas las filas que lo
@@ -126,7 +181,7 @@ export function dedupeCrossSourceMatches<T extends FeedMatchLike>(matches: T[]):
     // Primero se apaga el torneo reemplazado y despues se pliega lo que quedo:
     // al reves, una fila que igual se iba a descartar podria ganarle el lugar a
     // la buena y dejar el partido con los datos del proveedor equivocado.
-    for (const match of dropSupersededMatches(matches)) {
+    for (const match of dropFlashScoreTop14DuplicadoPorElPropio(dropSupersededMatches(matches))) {
         const identidad = buildFeedMatchIdentity(match);
         if (!identidad) {
             salida.push(match);
