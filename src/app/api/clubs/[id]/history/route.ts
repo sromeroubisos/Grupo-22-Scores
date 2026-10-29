@@ -55,6 +55,9 @@ type StandingRow = {
     club_id: string;
     tournament_id: string;
     phase_id: string | null;
+    group_id?: string | null;
+    season_id?: string | null;
+    season?: { season_code: string | null } | Array<{ season_code: string | null }> | null;
     position: number;
     played: number;
     won: number;
@@ -294,7 +297,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             // `limit(1000)` además se llenaría tres veces más rápido y podría
             // recortar temporadas viejas.
             applyStandingsTableType(
-                db.from('tournament_standings').select('club_id, tournament_id, phase_id, position, played, won, drawn, lost, scored, conceded, points').in('club_id', scopeIds).limit(1000),
+                db.from('tournament_standings').select('club_id, tournament_id, phase_id, group_id, season_id, season:tournament_seasons!tournament_standings_season_id_fkey(season_code), position, played, won, drawn, lost, scored, conceded, points').in('club_id', scopeIds).limit(1000),
                 supportsTableType,
             ),
             fetchDeclaredTitles(db, scopeIds).catch(() => [] as DeclaredTitle[]),
@@ -341,36 +344,55 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             return isHome ? row.away_club_id : row.home_club_id;
         }).filter((value): value is string => Boolean(value))));
 
-        // La tabla con más partidos jugados es la principal: un interzonal de una
-        // fecha no puede pisar a la fase regular ni regalar posiciones "de campeón".
-        const standingsByTournament = new Map<string, StandingRow>();
-        for (const standing of (standingsResult.data ?? []) as StandingRow[]) {
-            const current = standingsByTournament.get(standing.tournament_id);
-            if (!current || standing.played > current.played || (standing.played === current.played && standing.position < current.position)) {
-                standingsByTournament.set(standing.tournament_id, standing);
-            }
-        }
-        const standingTournamentIds = Array.from(standingsByTournament.keys());
+        // Las tablas se agrupan por torneo + edición: la posición de 2025 no puede
+        // salir de la tabla de 2019. La tabla con más partidos jugados de cada
+        // edición es la principal: un interzonal de una fecha no puede pisar a la
+        // fase regular ni regalar posiciones "de campeón".
+        const standingRows = (standingsResult.data ?? []) as StandingRow[];
+        const standingPhaseIds = Array.from(new Set(standingRows.map((row) => row.phase_id).filter((value): value is string => Boolean(value))));
+
+        // Filas de las tablas donde el club tiene posición. PostgREST corta en 1000
+        // filas por pedido sin avisar, así que se pagina; las fases van en tandas
+        // para no armar una URL imposible.
+        type TableRow = { phase_id: string; group_id: string | null; club_id: string };
+        const fetchTableRows = async (phaseIds: string[]): Promise<TableRow[]> => {
+            const PAGE = 1000;
+            const CHUNK = 40;
+            const chunks: string[][] = [];
+            for (let i = 0; i < phaseIds.length; i += CHUNK) chunks.push(phaseIds.slice(i, i + CHUNK));
+            const perChunk = await Promise.all(chunks.map(async (ids) => {
+                const rows: TableRow[] = [];
+                for (let from = 0; ; from += PAGE) {
+                    const { data, error } = await applyStandingsTableType(
+                        db.from('tournament_standings').select('phase_id, group_id, club_id').in('phase_id', ids).order('id').range(from, from + PAGE - 1),
+                        supportsTableType,
+                    );
+                    if (error) {
+                        console.error('[club history] table rows query failed', error);
+                        break;
+                    }
+                    const page = (data ?? []) as TableRow[];
+                    rows.push(...page);
+                    if (page.length < PAGE) break;
+                }
+                return rows;
+            }));
+            return perChunk.flat();
+        };
 
         // Todo lo que no depende entre sí viaja junto: contra una base cross-region
         // cada ida y vuelta secuencial son segundos de espera.
         const emptyRows = { data: [], error: null } as { data: unknown[]; error: null };
-        const [seasonsResult, participantsResult, phasesResult, tournamentsResult, clubsResult, aliasesResult, tableRowsResult, decidedResult] = await Promise.all([
+        const [seasonsResult, phasesResult, tournamentsResult, clubsResult, aliasesResult, tableRowsResult, decidedResult] = await Promise.all([
             tournamentIds.length ? db.from('seasons').select('tournament_id, start_date, end_date, season_id').in('tournament_id', tournamentIds).limit(1000) : Promise.resolve(emptyRows),
-            tournamentIds.length ? db.from('tournament_participants').select('tournament_id, club_id').in('tournament_id', tournamentIds).limit(10000) : Promise.resolve(emptyRows),
             tournamentIds.length ? db.from('tournament_phases').select('id, name, tournament_id').in('tournament_id', tournamentIds).limit(2000) : Promise.resolve(emptyRows),
             tournamentIds.length ? db.from('tournaments').select('id, name, display_name, logo_url, category, format, country, region, season_id, sport_id, status').in('id', tournamentIds) : Promise.resolve(emptyRows),
             clubIds.length ? db.from('clubs').select('id, name, logo_url').in('id', clubIds) : Promise.resolve(emptyRows),
             opponentIds.length ? db.from('club_derivatives').select('base_club_id, derived_club_id').in('derived_club_id', opponentIds) : Promise.resolve(emptyRows),
-            // "N.º de M equipos": M es el tamaño de la tabla donde está esa posición,
-            // no la cantidad de inscriptos del torneo entero (un Top 10 con zonas
-            // puede tener 31 participantes y tablas de 10).
-            standingTournamentIds.length
-                ? applyStandingsTableType(
-                    db.from('tournament_standings').select('tournament_id, phase_id, club_id').in('tournament_id', standingTournamentIds).limit(5000),
-                    supportsTableType,
-                )
-                : Promise.resolve(emptyRows),
+            // "N.º de M equipos": M es el tamaño de la tabla donde está esa posición
+            // (fase + zona de ESA edición), no los inscriptos del torneo entero: el
+            // Top 10 acumula 310 participantes en toda su historia y tablas de 10.
+            fetchTableRows(standingPhaseIds),
             // Ediciones con campeón declarado: ahí manda el campeón, no el puesto.
             tournamentIds.length
                 ? db.from('tournament_seasons').select('tournament_id, season_code').in('tournament_id', tournamentIds).not('champion_club_id', 'is', null).limit(5000)
@@ -424,17 +446,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         }
 
         const tableClubs = new Map<string, Set<string>>();
-        for (const row of (tableRowsResult.data ?? []) as Array<{ tournament_id: string; phase_id: string | null; club_id: string }>) {
-            const key = `${row.tournament_id}::${row.phase_id ?? ''}`;
+        for (const row of tableRowsResult) {
+            const key = `${row.phase_id}::${row.group_id ?? ''}`;
             const set = tableClubs.get(key) ?? new Set<string>();
             if (row.club_id) set.add(row.club_id);
             tableClubs.set(key, set);
         }
-        const tableSizeByTournament = new Map<string, number>();
-        for (const standing of standingsByTournament.values()) {
-            const size = tableClubs.get(`${standing.tournament_id}::${standing.phase_id ?? ''}`)?.size ?? 0;
-            if (size >= 2) tableSizeByTournament.set(standing.tournament_id, size);
-        }
+        const tableSizeOf = (standing: StandingRow) => {
+            if (!standing.phase_id) return null;
+            const size = tableClubs.get(`${standing.phase_id}::${standing.group_id ?? ''}`)?.size ?? 0;
+            return size >= 2 ? size : null;
+        };
 
         let normalizedMatches: NormalizedMatch[] = finishedRows.map((row) => {
             const home = one(row.home);
@@ -516,14 +538,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         for (const phase of (phasesResult.data ?? []) as Array<{ id: string; name: string | null }>) {
             if (phase?.id && phase.name) phaseMap.set(phase.id, phase.name);
         }
-        const participantsCount = new Map<string, number>();
-        for (const participant of (participantsResult.data ?? []) as Array<{ tournament_id: string | null }>) {
-            if (participant?.tournament_id) participantsCount.set(participant.tournament_id, (participantsCount.get(participant.tournament_id) ?? 0) + 1);
+        // Tabla principal por torneo + edición. Una fila sin edición enlazada es
+        // de la vigente (así se guardaba antes de `season_id`).
+        const standingsBySeason = new Map<string, StandingRow>();
+        for (const standing of standingRows) {
+            const embedded = one(standing.season);
+            const code = String(embedded?.season_code ?? '').trim() || currentSeasonLabel(standing.tournament_id);
+            const key = `${standing.tournament_id}::${code}`;
+            const current = standingsBySeason.get(key);
+            if (!current || standing.played > current.played || (standing.played === current.played && standing.position < current.position)) {
+                standingsBySeason.set(key, standing);
+            }
         }
 
         // Una participación es torneo + temporada: el mismo torneo jugado en 2024,
-        // 2025 y 2026 son tres filas, y la tabla de posiciones solo aplica a la
-        // edición vigente.
+        // 2025 y 2026 son tres filas, cada una con la tabla de SU edición.
         const participationGroups = new Map<string, { tournamentId: string; season: string; matches: NormalizedMatch[] }>();
         for (const match of normalizedMatches) {
             if (!match.tournamentId) continue;
@@ -532,10 +561,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             group.matches.push(match);
             participationGroups.set(key, group);
         }
-        for (const tournamentId of standingsByTournament.keys()) {
-            const season = currentSeasonLabel(tournamentId);
-            const key = `${tournamentId}::${season}`;
-            if (!participationGroups.has(key)) participationGroups.set(key, { tournamentId, season, matches: [] });
+        for (const [key, standing] of standingsBySeason) {
+            const season = key.slice(key.indexOf('::') + 2);
+            if (!participationGroups.has(key)) participationGroups.set(key, { tournamentId: standing.tournament_id, season, matches: [] });
         }
         // Un título declarado es una participación aunque no haya un solo partido
         // de esa edición cargado: la mitad del palmarés histórico está así.
@@ -554,15 +582,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             const tournament = tournamentMap.get(tournamentId) ?? null;
             const latestMatch = matches[0] ?? null;
             const isCurrentSeason = season === currentSeasonLabel(tournamentId);
-            const standing = isCurrentSeason ? standingsByTournament.get(tournamentId) ?? null : null;
+            const standing = standingsBySeason.get(`${tournamentId}::${season}`) ?? null;
             // Una edición pasada quedó terminada por definición; la vigente depende
             // del estado del torneo.
             const finished = isCurrentSeason ? isTournamentFinished(tournamentId) : true;
             const computed = statsFor(matches);
             const position = standing?.position ?? null;
-            const count = standing
-                ? tableSizeByTournament.get(tournamentId) ?? participantsCount.get(tournamentId) ?? null
-                : participantsCount.get(tournamentId) ?? null;
+            // Sin tabla de esa edición no hay tamaño que decir: los inscriptos del
+            // torneo entero (todas las ediciones) serían un número inventado.
+            const count = standing ? tableSizeOf(standing) : null;
             return {
                 tournamentId,
                 tournamentName: tournament?.display_name || tournament?.name || latestMatch?.tournamentName || 'Torneo',
