@@ -28,6 +28,8 @@ export type TarjetaDeTop = {
     lowerIsBetter?: boolean;
     decimals?: number;
     suffix?: string;
+    /** Muestra mínima para entrar al podio: una tasa sobre 10 minutos no es un récord. */
+    minimum?: { metric: string; value: number };
     /** La diferencia de puntos sin signo miente: +19 y -19 se dibujan igual. */
     signed?: boolean;
 };
@@ -64,12 +66,22 @@ export default function TournamentTopStats({ rows, cards, unmeasured, kind, onPi
     const visibles = cards
         .filter((card) => !unmeasured.has(card.metric))
         .map((card) => {
-            const podio = [...rows]
+            const podio = rows
+                // Sin dato (tasa sin base) o bajo la muestra mínima: no compite.
+                .filter((row) => row[card.metric] !== null && row[card.metric] !== undefined
+                    && (!card.minimum || n(row[card.minimum.metric]) >= card.minimum.value))
                 .sort((a, b) => {
                     const delta = n(a[card.metric]) - n(b[card.metric]);
                     // Desempate estable por nombre: sin esto, dos equipos con los
                     // mismos puntos se turnan el podio entre renders.
                     if (delta !== 0) return card.lowerIsBetter ? delta : -delta;
+                    // Mismo total: el mejor promedio por partido de esa estadística
+                    // (las tarjetas que ya son una tasa no tienen PJ que promediar).
+                    if (!/_per_match$|_pct$|_index$/.test(card.metric)) {
+                        const perGame = (n(b[card.metric]) / Math.max(n(b.matches_played), 1))
+                            - (n(a[card.metric]) / Math.max(n(a.matches_played), 1));
+                        if (perGame !== 0) return card.lowerIsBetter ? -perGame : perGame;
+                    }
                     return String(a.entityName ?? '').localeCompare(String(b.entityName ?? ''), 'es');
                 })
                 .slice(0, 3);
