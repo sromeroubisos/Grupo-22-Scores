@@ -169,8 +169,8 @@ const PLAYER_TOP_CARDS: TarjetaDeTop[] = [
     { metric: 'points', title: 'Máximo anotador' },
     { metric: 'tries', title: 'Más tries' },
     { metric: 'minutes', title: 'Más minutos' },
-    // Con 160' mínimos (dos partidos): un try en 10 minutos no hace un récord.
-    { metric: 'minutes_per_try', title: 'Un try cada menos minutos', lowerIsBetter: true, decimals: 0, minimum: { metric: 'minutes', value: 160 } },
+    // Con 2 PJ mínimos: un try en un solo partido no hace un récord.
+    { metric: 'tries_per_match', title: 'Tries por partido', decimals: 2, minimum: { metric: 'matches_played', value: 2 } },
     { metric: 'points_per_match', title: 'Puntos por partido', decimals: 1, minimum: { metric: 'matches_played', value: 2 } },
     { metric: 'conversions', title: 'Más conversiones' },
     { metric: 'penalty_goals', title: 'Más penales' },
