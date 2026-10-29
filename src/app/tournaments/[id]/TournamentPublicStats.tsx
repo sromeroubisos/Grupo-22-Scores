@@ -14,6 +14,7 @@ import {
 import { formatDifference } from '@/lib/utils/formatDifference';
 import { isRugbySport } from '@/lib/externalProviderPolicy';
 import { buildTeamLogoProxyUrl } from '@/lib/utils/logoUrl';
+import { computeMatchMinutes } from '@/lib/matches/playerMinutes';
 import TeamLogo from '@/components/TeamLogo';
 import TournamentTopStats, { type TarjetaDeTop } from './TournamentTopStats';
 import TournamentPlayerSheet, { type TournamentPlayerSheetSubject } from './TournamentPlayerSheet';
@@ -34,6 +35,8 @@ type StatColumn = {
     accent?: boolean;
     tone?: StatColumnTone;
     format?: StatColumnFormat;
+    /** Gana el que tiene menos (minutos por try): el primer toque ordena ascendente. */
+    lowerIsBetter?: boolean;
 };
 
 interface TournamentPublicStatsProps {
@@ -103,6 +106,7 @@ const TEAM_COLUMNS: Record<TeamStatsView, StatColumn[]> = {
         { id: 'conversion_rate', label: 'CONV%', title: 'Conversiones convertidas sobre intentos', format: 'percent', tone: 'attack' },
         { id: 'penalty_goals', label: 'PEN', title: 'Penales a los palos convertidos', tone: 'attack' },
         { id: 'drop_goals', label: 'DROP', title: 'Drops convertidos', tone: 'attack' },
+        { id: 'minutes_per_try', label: 'MIN/TRY', title: 'Cada cuántos minutos anota un try (80\' por partido)', format: 'decimal', tone: 'attack', lowerIsBetter: true },
         { id: 'entries_22', label: '22M', title: 'Entradas en 22 metros', tone: 'attack' },
         { id: 'kick_meters', label: 'M PAT', title: 'Metros de patada en juego', tone: 'attack' },
     ],
@@ -130,8 +134,13 @@ const PLAYER_COLUMNS: StatColumn[] = [
     { id: 'entity', label: 'Jugador' },
     { id: 'secondary', label: 'Equipo' },
     { id: 'matches_played', label: 'PJ', title: 'Partidos jugados' },
+    { id: 'minutes', label: 'MIN', title: 'Minutos jugados (se calculan con los cambios cargados)' },
     { id: 'points', label: 'PTS', title: 'Puntos', accent: true, tone: 'attack' },
+    { id: 'points_per_match', label: 'PTS/PJ', title: 'Puntos por partido', format: 'decimal', tone: 'attack' },
+    { id: 'points_per_80', label: 'PTS/80', title: 'Puntos cada 80 minutos jugados', format: 'decimal', tone: 'attack' },
     { id: 'tries', label: 'TRIES', title: 'Tries', accent: true, tone: 'attack' },
+    { id: 'tries_per_match', label: 'TR/PJ', title: 'Tries por partido', format: 'decimal', tone: 'attack' },
+    { id: 'minutes_per_try', label: 'MIN/TRY', title: 'Cada cuántos minutos anota un try', format: 'decimal', tone: 'attack', lowerIsBetter: true },
     { id: 'conversions', label: 'CONV', title: 'Conversiones', tone: 'attack' },
     { id: 'penalty_goals', label: 'PEN', title: 'Penales a los palos', tone: 'attack' },
     { id: 'tackles', label: 'TACK', title: 'Tackles', tone: 'defense' },
@@ -159,6 +168,10 @@ const TEAM_TOP_CARDS: TarjetaDeTop[] = [
 const PLAYER_TOP_CARDS: TarjetaDeTop[] = [
     { metric: 'points', title: 'Máximo anotador' },
     { metric: 'tries', title: 'Más tries' },
+    { metric: 'minutes', title: 'Más minutos' },
+    // Con 160' mínimos (dos partidos): un try en 10 minutos no hace un récord.
+    { metric: 'minutes_per_try', title: 'Un try cada menos minutos', lowerIsBetter: true, decimals: 0, minimum: { metric: 'minutes', value: 160 } },
+    { metric: 'points_per_match', title: 'Puntos por partido', decimals: 1, minimum: { metric: 'matches_played', value: 2 } },
     { metric: 'conversions', title: 'Más conversiones' },
     { metric: 'penalty_goals', title: 'Más penales' },
     { metric: 'tackles', title: 'Más tackles' },
@@ -266,7 +279,9 @@ const EVENT_DERIVED_METRICS = new Set([
     // Los tries se cuentan sumando eventos `try`, igual que los tackles: si la
     // liga entera suma 0 tries en 119 partidos, el dato no existe. Estaban
     // afuera del set y por eso seguían mostrando un 0 que no es un cero.
-    'tries_scored', 'tries_conceded', 'tries',
+    'tries_scored', 'tries_conceded', 'tries', 'tries_per_match', 'minutes_per_try',
+    // Los minutos salen de los cambios cargados: sin ninguno en la competición no existen.
+    'minutes', 'points_per_80',
     'tackles_made', 'tackles', 'passes', 'recoveries',
     'turnovers_won', 'turnovers_lost', 'kick_meters', 'entries_22',
     'conversions', 'conversion_attempts', 'conversion_rate',
@@ -543,6 +558,8 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                 points_against_per_match: perMatch(row.points_against, matchesPlayed),
                 tries_scored_per_match: perMatch(row.tries_scored, matchesPlayed),
                 tries_conceded_per_match: perMatch(row.tries_conceded, matchesPlayed),
+                // Un equipo juega los 80' de cada partido: cada cuántos minutos anota.
+                minutes_per_try: n(row.tries_scored) > 0 ? (matchesPlayed * 80) / n(row.tries_scored) : null,
                 conversion_rate: percentage(row.conversions, row.conversion_attempts),
                 penalty_goal_rate: percentage(row.penalty_goals, row.penalty_goal_attempts),
                 set_piece_success_rate: percentage(contestsWon, contestsWon + contestsLost),
@@ -569,8 +586,47 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                 if (club && event!.playerId && event!.playerName) idByName.set(`${club}:${nameKey(event!.playerName)}`, String(event!.playerId));
             });
         });
+        const blankPlayer = (
+            id: string,
+            name: string,
+            side: { teamId: string; teamName: string; teamLogo: string | null },
+            playerId: string | null,
+        ) => ({
+            entityId: id,
+            entityName: name,
+            entityLogo: side.teamLogo,
+            teamId: side.teamId,
+            playerId,
+            secondary: side.teamName,
+            matches_played: 0,
+            // Minutos y lo anotado EN los partidos donde se pudieron calcular:
+            // el "cada 80'" y los minutos por try salen de acá, no del total.
+            minutes: 0,
+            minutes_points: 0,
+            minutes_tries: 0,
+            points: 0,
+            tries: 0,
+            tackles: 0,
+            yellow_cards: 0,
+            red_cards: 0,
+            conversions: 0,
+            conversion_attempts: 0,
+            penalty_goals: 0,
+            penalty_goal_attempts: 0,
+            kick_meters: 0,
+            scrums_won: 0,
+            scrums_lost: 0,
+            lineouts_won: 0,
+            lineouts_lost: 0,
+            rucks_won: 0,
+            rucks_lost: 0,
+            mauls_won: 0,
+            mauls_lost: 0,
+        } as Record<string, any>);
         finalMatches.forEach((match) => {
             const counted = new Set<string>();
+            // Puntos y tries de ESTE partido por jugador, para cruzarlos con sus minutos.
+            const matchTally = new Map<string, { points: number; tries: number }>();
             const homeId = match.home_club_id || match.home?.id || `home-${match.id}`;
             const awayId = match.away_club_id || match.away?.id || `away-${match.id}`;
             const sides = [
@@ -583,35 +639,7 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                 if (!side || !event!.playerName) return;
                 const resolvedPlayerId = event!.playerId ? String(event!.playerId) : idByName.get(`${side.teamId}:${nameKey(event!.playerName)}`) || null;
                 const id = resolvedPlayerId ? `${side.teamId}:id:${resolvedPlayerId}` : `${side.teamId}:${nameKey(event!.playerName)}`;
-                if (!byId.has(id)) {
-                    byId.set(id, {
-                        entityId: id,
-                        entityName: event!.playerName,
-                        entityLogo: side.teamLogo,
-                        teamId: side.teamId,
-                        playerId: resolvedPlayerId,
-                        secondary: side.teamName,
-                        matches_played: 0,
-                        points: 0,
-                        tries: 0,
-                        tackles: 0,
-                        yellow_cards: 0,
-                        red_cards: 0,
-                        conversions: 0,
-                        conversion_attempts: 0,
-                        penalty_goals: 0,
-                        penalty_goal_attempts: 0,
-                        kick_meters: 0,
-                        scrums_won: 0,
-                        scrums_lost: 0,
-                        lineouts_won: 0,
-                        lineouts_lost: 0,
-                        rucks_won: 0,
-                        rucks_lost: 0,
-                        mauls_won: 0,
-                        mauls_lost: 0,
-                    });
-                }
+                if (!byId.has(id)) byId.set(id, blankPlayer(id, event!.playerName, side, resolvedPlayerId));
                 // Un evento sin id no pisa el que otro evento del mismo jugador sí trajo.
                 if (!byId.get(id)!.playerId && event!.playerId) byId.get(id)!.playerId = event!.playerId;
                 if (!counted.has(id)) {
@@ -667,10 +695,44 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
                     else if (event!.type === 'penalty' && isGoalKickAttemptEvent({ type: 'penalty', detail: event!.detail }) && isGoalKickMade('penalty', event!.detail)) pts = 3;
                     else if (event!.type === 'drop_goal' && isGoalKickMade('drop_goal', event!.detail)) pts = 3;
                     if (pts) byId.get(id)!.points = n(byId.get(id)!.points) + pts;
+                    const tally = matchTally.get(id) ?? { points: 0, tries: 0 };
+                    tally.points += pts;
+                    if (event!.type === 'try' || event!.type === 'penalty_try') tally.tries += 1;
+                    matchTally.set(id, tally);
                 }
             });
+
+            // Minutos: salen de la formación y los cambios. Un jugador que sólo
+            // estuvo en cancha (sin ninguna acción) también juega el partido.
+            computeMatchMinutes(match.lineups, match.events).forEach((played) => {
+                const side = played.side === 'home' ? sides[0] : sides[1];
+                const id = `${side.teamId}:id:${played.playerId}`;
+                if (!byId.has(id)) byId.set(id, blankPlayer(id, played.name || 'Jugador', side, played.playerId));
+                const row = byId.get(id)!;
+                if (!counted.has(id)) {
+                    row.matches_played = n(row.matches_played) + 1;
+                    counted.add(id);
+                }
+                const tally = matchTally.get(id);
+                row.minutes = n(row.minutes) + played.minutes;
+                row.minutes_points = n(row.minutes_points) + (tally?.points ?? 0);
+                row.minutes_tries = n(row.minutes_tries) + (tally?.tries ?? 0);
+            });
         });
-        return Array.from(byId.values());
+        // Las tasas se calculan al final, con los totales: promediar promedios miente.
+        return Array.from(byId.values()).map((row) => {
+            const played = n(row.matches_played);
+            const minutes = n(row.minutes);
+            return {
+                ...row,
+                points_per_match: perMatch(row.points, played),
+                tries_per_match: perMatch(row.tries, played),
+                // Sin minutos medidos, o sin tries en esos minutos, no hay tasa: es
+                // un hueco ("—"), no un cero ni un infinito.
+                minutes_per_try: minutes > 0 && n(row.minutes_tries) > 0 ? minutes / n(row.minutes_tries) : null,
+                points_per_80: minutes > 0 ? (n(row.minutes_points) / minutes) * 80 : null,
+            };
+        });
     }, [finalMatches, officialLeaders]);
 
     const teamColumns = esRugby ? TEAM_COLUMNS[teamStatsView] : GENERIC_TEAM_COLUMNS;
@@ -733,6 +795,11 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             const left = sortKey === 'entity' ? a.entityName : a[sortKey];
             const right = sortKey === 'entity' ? b.entityName : b[sortKey];
             const modifier = sortDirection === 'asc' ? 1 : -1;
+            // Sin dato (minutos por try de quien no anotó) va al final en cualquier
+            // sentido: un hueco no es un cero que "gana" el orden ascendente.
+            const leftMissing = left === null || left === undefined;
+            const rightMissing = right === null || right === undefined;
+            if (leftMissing !== rightMissing) return leftMissing ? 1 : -1;
             if (typeof left === 'string' || typeof right === 'string') {
                 return String(left ?? '').localeCompare(String(right ?? ''), 'es') * modifier;
             }
@@ -753,7 +820,8 @@ export default function TournamentPublicStats({ matches, topScorers, tournamentN
             setSortDirection((d) => (d === 'desc' ? 'asc' : 'desc'));
         } else {
             setSortKey(key);
-            setSortDirection('desc');
+            const lowerIsBetter = [...PLAYER_COLUMNS, ...Object.values(TEAM_COLUMNS).flat()].some((column) => column.id === key && column.lowerIsBetter);
+            setSortDirection(lowerIsBetter ? 'asc' : 'desc');
         }
     };
 
