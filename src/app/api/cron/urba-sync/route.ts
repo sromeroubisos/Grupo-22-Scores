@@ -100,6 +100,13 @@ import {
     parseUrbaId,
     subcategoriaDeTorneoUrba,
 } from '@/lib/integrations/urba/externalId';
+import {
+    instanciaDePlayoff,
+    nombreDeRonda,
+    rondaDeInstancia,
+    type InstanciaDePlayoff,
+    type RondaDeFase,
+} from '@/lib/integrations/urba/instanciaDePlayoff';
 import { planTournamentMatches, type ExistenteEnBase } from '@/lib/integrations/urba/planMatches';
 import { construirPatch, parteDelBarrido, PARTES_DEL_BARRIDO, rotarPorReloj } from '@/lib/integrations/urba/syncPlan';
 import { parsearAnioPedido, PRIMER_ANIO_URBA, temporadaEnCurso } from '@/lib/integrations/urba/temporada';
@@ -192,6 +199,54 @@ const diaBA = (iso: string | Date) =>
         year: 'numeric', month: '2-digit', day: '2-digit',
     }).format(new Date(iso));
 
+type AdminClient = ReturnType<typeof createAdminClient>;
+
+/**
+ * Un torneo que llega al playoff sin fase de playoff mandaba la semifinal a la
+ * tabla del regular: no aparecía en el cuadro ni en la pestaña Playoff (pasó con
+ * Primera A/B/C y Tercera). La fase nace con la temporada de la regular.
+ */
+async function crearFasePlayoff(supabase: AdminClient, torneoId: string, faseRegular: string): Promise<string | null> {
+    const { data: regular } = await supabase
+        .from('tournament_phases').select('season_id, order_index').eq('id', faseRegular).maybeSingle();
+    const { data, error } = await supabase.from('tournament_phases').insert([{
+        tournament_id: torneoId,
+        name: 'Playoff',
+        phase_type: 'playoff',
+        order_index: ((regular?.order_index as number | null) ?? 1) + 1,
+        is_active: false,
+        season_id: (regular?.season_id as string | null) ?? null,
+        settings: {},
+    }]).select('id').single();
+    return error ? null : (data as { id: string }).id;
+}
+
+async function leerRondasDeFase(supabase: AdminClient, fase: string): Promise<RondaDeFase[]> {
+    const { data } = await supabase
+        .from('tournament_rounds').select('id, name, order_index').eq('phase_id', fase);
+    return (data ?? []) as RondaDeFase[];
+}
+
+/** La ronda de la instancia; si la fase todavía no la tiene, la crea y la suma a `rondas`. */
+async function rondaParaInstancia(
+    supabase: AdminClient, fase: string, instancia: InstanciaDePlayoff, rondas: RondaDeFase[],
+): Promise<string | null> {
+    const existente = rondaDeInstancia(rondas, instancia);
+    if (existente) return existente.id;
+    const { data: faseRow } = await supabase
+        .from('tournament_phases').select('season_id').eq('id', fase).maybeSingle();
+    const orden = rondas.reduce((max, r) => Math.max(max, r.order_index ?? 0), 0) + 1;
+    const { data, error } = await supabase.from('tournament_rounds').insert([{
+        phase_id: fase,
+        name: nombreDeRonda(instancia),
+        order_index: orden,
+        season_id: (faseRow?.season_id as string | null) ?? null,
+    }]).select('id, name, order_index').single();
+    if (error || !data) return null;
+    rondas.push(data as RondaDeFase);
+    return (data as RondaDeFase).id;
+}
+
 export async function GET(request: NextRequest) {
     if (!(await authorizeCronRequest(request, 'urba-sync'))) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -277,7 +332,10 @@ export async function GET(request: NextRequest) {
      * 2026-08-09: `urba:2025278` tenía 55 partidos en base y 45 distintos en la
      * API, sin un solo id en común.
      */
-    const huerfanos: Array<{ torneo: string; external_id: string; status: string | null; jugado: boolean }> = [];
+    const huerfanos: Array<{ torneo: string; external_id: string; status: string | null; jugado: boolean; editadoAMano?: boolean }> = [];
+    // Torneos donde la cantidad de huérfanos superó el umbral y no se borró
+    // ninguno. Va en la respuesta: es lo que tiene que mirar una persona.
+    const huerfanosFrenados: Array<{ torneo: string; aBorrar: number; enBase: number }> = [];
     // El torneo nuevo NO se crea: se reporta. Pero se reporta con la categoría y
     // la subcategory ya derivadas, para que quien lo dé de alta no las invente:
     // una `subcategory` en null lo deja fuera de la navegación por grados sin
@@ -567,6 +625,29 @@ export async function GET(request: NextRequest) {
                 participantesYaEnBase: new Set(((partsRaw ?? []) as Array<{ club_id: string }>).map((p) => p.club_id)),
             });
 
+            // Un torneo con playoff cargado tiene dos fases, y "la de los hermanos"
+            // ya no alcanza para elegir: la regular es la que no es de playoff. Sólo
+            // se consulta si hay algo que dar de alta.
+            let fasesPlayoff = new Set<string>();
+            if (plan.crear.length > 0 || plan.participantesCrear.length > 0) {
+                const { data: fp } = await supabase
+                    .from('tournament_phases').select('id').eq('tournament_id', t.id).eq('phase_type', 'playoff');
+                fasesPlayoff = new Set(((fp ?? []) as Array<{ id: string }>).map((f) => f.id));
+            }
+            const faseRegular = ya.find((m) => m.phase_id && !fasesPlayoff.has(m.phase_id))?.phase_id ?? faseDelTorneo;
+            // Una sola fase de playoff es una respuesta; con varias no se adivina.
+            let fasePlayoff = fasesPlayoff.size === 1 ? [...fasesPlayoff][0] : null;
+            // Sin ninguna fase de playoff, la primera instancia la crea. Con varias
+            // sigue sin adivinarse, y en seco no se escribe nada.
+            if (!fasePlayoff && fasesPlayoff.size === 0 && faseRegular && !enSeco
+                && plan.crear.some((f) => instanciaDePlayoff(f.round_label))) {
+                fasePlayoff = await crearFasePlayoff(supabase, t.id, faseRegular);
+                if (!fasePlayoff) errors.push(`${t.external_id}: no se pudo crear la fase de playoff`);
+            }
+            // El cuadro cruza partidos y rondas por `round_uuid`: sin ronda, el
+            // partido entra a la fase pero no se dibuja.
+            let rondasPlayoff: RondaDeFase[] | null = null;
+
             // Las fases que este torneo va a tener que recalcular. Se junta acá,
             // sobre los partidos que REALMENTE se escriben, y no al final sobre
             // el torneo entero: recalcular una fase que no se tocó es leer toda
@@ -587,18 +668,42 @@ export async function GET(request: NextRequest) {
                 const { error } = await supabase.from('tournament_participants').insert([p]);
                 if (error) { errors.push(`${t.external_id}: no se pudo inscribir a ${p.club_id} (${error.message})`); continue; }
                 participantesCreados++;
-                if (faseDelTorneo) fasesTocadas.add(faseDelTorneo);
+                if (faseRegular) fasesTocadas.add(faseRegular);
             }
 
             // altas
             for (const fila of plan.crear) {
                 if (enSeco) { written++; detalle.push({ torneo: t.external_id, accion: 'crear', external_id: fila.external_id }); continue; }
+                // Una instancia de playoff va a la fase de playoff del torneo, no a la
+                // tabla del regular. Y la final ya tiene su lugar en el cuadro (M-F,
+                // sin rival ni external_id): se completa, no se duplica.
+                const instancia = fasePlayoff ? instanciaDePlayoff(fila.round_label) : null;
+                if (instancia === 'final' && fasePlayoff) {
+                    const { data: previstas } = await supabase.from('matches').select('id')
+                        .eq('tournament_id', t.id).eq('phase_id', fasePlayoff)
+                        .eq('bracket_match_code', 'M-F').is('external_id', null).limit(1);
+                    const prevista = (previstas ?? [])[0] as { id: string } | undefined;
+                    if (prevista) {
+                        const { error } = await supabase.from('matches')
+                            .update({ ...fila, sport_id: 'rugby', is_visible: visibleEnEsteTorneo }).eq('id', prevista.id);
+                        if (error) { errors.push(`${fila.external_id}: no se pudo completar la final (${error.message})`); continue; }
+                        written++;
+                        continue;
+                    }
+                }
+                const fasePartido = instancia ? fasePlayoff : faseRegular;
+                let rondaDelPartido: string | null = null;
+                if (instancia && fasePlayoff) {
+                    rondasPlayoff ??= await leerRondasDeFase(supabase, fasePlayoff);
+                    rondaDelPartido = await rondaParaInstancia(supabase, fasePlayoff, instancia, rondasPlayoff);
+                }
                 const { error } = await supabase.from('matches').insert([{
-                    ...fila, sport_id: 'rugby', is_visible: visibleEnEsteTorneo, phase_id: faseDelTorneo,
+                    ...fila, sport_id: 'rugby', is_visible: visibleEnEsteTorneo, phase_id: fasePartido,
+                    ...(rondaDelPartido ? { round_uuid: rondaDelPartido } : {}),
                 }]);
                 if (error) { errors.push(`${fila.external_id}: alta falló (${error.message})`); continue; }
                 written++;
-                if (faseDelTorneo) fasesTocadas.add(faseDelTorneo);
+                if (fasePartido && fasePartido === faseRegular) fasesTocadas.add(fasePartido);
             }
 
             // actualizaciones
@@ -645,13 +750,49 @@ export async function GET(request: NextRequest) {
                 errors.push(`${t.external_id}: URBA devolvió el torneo sin un solo partido y en la base hay ${ya.length}. No se marca ningún huérfano.`);
             }
             const sobran = fixtureVacioSospechoso ? [] : ya.filter((m) => !idsDeUrba.has(m.external_id));
+
+            // Una persona tocó el partido: los puntos se cargaron a mano
+            // (`points_autocalculated = false`) o ya tiene marcador aunque no
+            // esté final. La tabla `matches` no tiene `updated_by`, así que esto
+            // es lo que hay en las columnas que ya se leen (sumar una columna al
+            // select que la base no tenga tumbaría la corrida entera: PGRST204).
+            const editadoAMano = (m: (typeof ya)[number]) =>
+                m.points_autocalculated === false
+                || tieneMarcador(m.score);
+            // Un programado de URBA entra con `score: null`; un `{home, away}` con
+            // números en un partido no final lo escribió alguien (o un en vivo).
+            function tieneMarcador(score: unknown): boolean {
+                if (!score || typeof score !== 'object') return false;
+                const { home, away } = score as { home?: unknown; away?: unknown };
+                return Number.isFinite(Number(home ?? NaN)) || Number.isFinite(Number(away ?? NaN));
+            }
+            const esJugado = (m: (typeof ya)[number]) => String(m.status ?? '').toLowerCase() === 'final';
+
+            // La segunda guarda, proporcional. La del fixture vacío solo frena el
+            // caso extremo; una respuesta a medias (URBA devuelve 3 fechas de 10)
+            // la pasaba y borraba el resto. URBA saca de a una fecha, no medio
+            // torneo: si lo que habría que borrar pasa del 20% de lo que hay en la
+            // base o de 15 partidos, no se borra nada y se avisa.
+            const aBorrar = sobran.filter((m) => !esJugado(m) && !editadoAMano(m));
+            const umbralSuperado = aBorrar.length > 15 || aBorrar.length > ya.length * 0.2;
+            const frenarBorrado = borrarHuerfanos && !enSeco && aBorrar.length > 0 && umbralSuperado;
+            if (frenarBorrado) {
+                huerfanosFrenados.push({ torneo: t.external_id, aBorrar: aBorrar.length, enBase: ya.length });
+                const aviso = `${t.external_id}: URBA dejó de listar ${aBorrar.length} de ${ya.length} partidos sin jugar. `
+                    + 'Supera el umbral (20% o 15): no se borra ninguno hasta que lo mire alguien.';
+                console.warn(`[urba-sync] ${aviso}`);
+                errors.push(aviso);
+            }
+
             for (const m of sobran) {
-                const jugado = String(m.status ?? '').toLowerCase() === 'final';
-                huerfanos.push({ torneo: t.external_id, external_id: m.external_id, status: m.status, jugado });
+                const jugado = esJugado(m);
+                const manual = editadoAMano(m);
+                huerfanos.push({ torneo: t.external_id, external_id: m.external_id, status: m.status, jugado, ...(manual ? { editadoAMano: true } : {}) });
                 // Un partido con resultado no se borra ni con el flag: si tiene
                 // marcador, o lo cargó una persona o URBA lo publicó y después lo
-                // movió de torneo. Las dos cosas piden que las mire alguien.
-                if (!borrarHuerfanos || jugado || enSeco) continue;
+                // movió de torneo. Las dos cosas piden que las mire alguien. Lo
+                // mismo uno que alguien editó, aunque no esté final.
+                if (!borrarHuerfanos || jugado || manual || enSeco || frenarBorrado) continue;
                 const { error } = await supabase.from('matches').delete().eq('id', m.id);
                 if (error) { errors.push(`${m.external_id}: no se pudo borrar el huérfano (${error.message})`); continue; }
                 huerfanosBorrados++;
@@ -727,6 +868,8 @@ export async function GET(request: NextRequest) {
             huerfanos: huerfanos.slice(0, 100),
             huerfanosTotal: huerfanos.length,
             huerfanosBorrados,
+            // Torneos donde la guarda proporcional frenó el borrado entero.
+            ...(huerfanosFrenados.length > 0 ? { huerfanosFrenados } : {}),
             // Los que quedaron son los que tienen resultado, y ésos no se borran
             // solos por diseño. Que la respuesta los nombre: es lo único de todo
             // esto que pide que lo mire una persona.
