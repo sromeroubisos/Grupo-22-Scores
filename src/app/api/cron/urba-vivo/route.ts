@@ -6,7 +6,8 @@
  * puntos con autor. URBA no publica marcador en vivo: `urba-sync` trae el
  * resultado oficial cuando lo cargan, y si difiere, manda URBA.
  *
- * Corre cada 2 minutos los fines de semana (ver `vercel.json`), pero lo primero
+ * Corre cada 2 minutos, todos los dias, de 14 a 01 hs de Argentina (ver
+ * `vercel.json`): los playoffs caen en viernes y de noche. Lo primero
  * que hace es mirar la base: si no hay partido del torneo en la ventana
  * [horario - 20 min, horario + 4 h] sin terminar, contesta sin salir a la red.
  *
